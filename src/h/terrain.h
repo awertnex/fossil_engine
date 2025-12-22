@@ -12,15 +12,17 @@
 #define RAND_TAB_LAYER      (RAND_TAB_DIAMETER * RAND_TAB_DIAMETER)
 #define RAND_TAB_VOLUME     (RAND_TAB_DIAMETER * RAND_TAB_DIAMETER * RAND_TAB_DIAMETER)
 
-typedef enum Biome
+enum Biome
 {
     BIOME_HILLS,
     BIOME_SANDSTORM,
-} Biome;
+    BIOME_DECAYING_LANDS,
+    BIOME_COUNT,
+}; /* Biome */
 
 typedef struct Terrain
 {
-    Biome biome;
+    enum Biome biome;
     enum BlockID block_id;
     u32 block_light;
 } Terrain;
@@ -125,6 +127,6 @@ f32 perlin_noise_3d_ex(v3i32 coordinates, f32 intensity, f32 scale,
  */
 Terrain terrain_land(v3i32 coordinates);
 
-Terrain terrain_cave_test(v3i32 coordinates);
+Terrain terrain_decaying_lands(v3i32 coordinates);
 
 #endif /* GAME_TERRAIN_H */

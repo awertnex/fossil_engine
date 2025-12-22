@@ -42,7 +42,7 @@ static struct Uniform uniform = {0};
 static Mesh mesh[MESH_COUNT] = {0};
 static FBO fbo[FBO_COUNT] = {0};
 
-static Player lily =
+static Player player =
 {
     .name = "Lily",
     .size = {0.6f, 0.6f, 1.8f},
@@ -91,8 +91,8 @@ static void callback_framebuffer_size(GLFWwindow* window, int width, int height)
     (void)window;
 
     render.size = (v2i32){width, height};
-    lily.camera.ratio = (f32)width / (f32)height;
-    lily.camera_hud.ratio = (f32)width / (f32)height;
+    player.camera.ratio = (f32)width / (f32)height;
+    player.camera_hud.ratio = (f32)width / (f32)height;
     glViewport(0, 0, render.size.x, render.size.y);
 
     fbo_realloc(&render, &fbo[FBO_SKYBOX], FALSE, 4);
@@ -120,16 +120,16 @@ static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset)
     (void)window;
     (void)xoffset;
 
-    if (lily.flag & FLAG_PLAYER_ZOOMER)
-        lily.camera.zoom =
-            clamp_f64(lily.camera.zoom + yoffset * CAMERA_ZOOM_SPEED, 0.0f, CAMERA_ZOOM_MAX);
+    if (player.flag & FLAG_PLAYER_ZOOMER)
+        player.camera.zoom =
+            clamp_f64(player.camera.zoom + yoffset * CAMERA_ZOOM_SPEED, 0.0f, CAMERA_ZOOM_MAX);
     else
     {
-        lily.hotbar_slot_selected -= (i64)yoffset;
-        if (lily.hotbar_slot_selected >= PLAYER_HOTBAR_SLOTS_MAX)
-            lily.hotbar_slot_selected = 0;
-        else if (lily.hotbar_slot_selected < 0)
-            lily.hotbar_slot_selected = PLAYER_HOTBAR_SLOTS_MAX - 1;
+        player.hotbar_slot_selected -= (i64)yoffset;
+        if (player.hotbar_slot_selected >= PLAYER_HOTBAR_SLOTS_MAX)
+            player.hotbar_slot_selected = 0;
+        else if (player.hotbar_slot_selected < 0)
+            player.hotbar_slot_selected = PLAYER_HOTBAR_SLOTS_MAX - 1;
     }
 }
 
@@ -847,12 +847,12 @@ static void draw_everything(void)
     glUniformMatrix4fv(uniform.voxel.mat_perspective, 1, GL_FALSE,
             (GLfloat*)&projection_world.perspective);
     glUniform3f(uniform.voxel.camera_position,
-            lily.camera.pos.x, lily.camera.pos.y, lily.camera.pos.z);
+            player.camera.pos.x, player.camera.pos.y, player.camera.pos.z);
     glUniform3f(uniform.voxel.flashlight_position,
-            lily.pos.x, lily.pos.y, lily.pos.z + lily.eye_height);
+            player.pos.x, player.pos.y, player.pos.z + player.eye_height);
     glUniform3fv(uniform.voxel.sun_rotation, 1, (GLfloat*)&skybox_data.sun_rotation);
     glUniform3fv(uniform.voxel.sky_color, 1, (GLfloat*)&skybox_data.color);
-    glUniform1f(uniform.voxel.toggle_flashlight, lily.flag & FLAG_PLAYER_FLASHLIGHT ? 1.0f : 0.0f);
+    glUniform1f(uniform.voxel.toggle_flashlight, player.flag & FLAG_PLAYER_FLASHLIGHT ? 1.0f : 0.0f);
     glUniform1i(uniform.voxel.render_distance, settings.render_distance * CHUNK_DIAMETER);
 
     f32 opacity = 1.0f;
@@ -882,17 +882,17 @@ static void draw_everything(void)
 
     /* ---- draw player ----------------------------------------------------- */
 
-    if (lily.camera_mode != PLAYER_CAMERA_MODE_1ST_PERSON)
+    if (player.camera_mode != PLAYER_CAMERA_MODE_1ST_PERSON)
     {
 
         glUseProgram(shader[SHADER_DEFAULT].id);
-        glUniform3fv(uniform.defaults.scale, 1, (GLfloat*)&lily.size);
+        glUniform3fv(uniform.defaults.scale, 1, (GLfloat*)&player.size);
         glUniform3f(uniform.defaults.offset,
-                lily.pos.x, lily.pos.y, lily.pos.z);
+                player.pos.x, player.pos.y, player.pos.z);
         glUniformMatrix4fv(uniform.defaults.mat_rotation, 1, GL_FALSE,
                 (GLfloat*)(f32[]){
-                lily.cos_yaw, lily.sin_yaw, 0.0f, 0.0f,
-                -lily.sin_yaw, lily.cos_yaw, 0.0f, 0.0f,
+                player.cos_yaw, player.sin_yaw, 0.0f, 0.0f,
+                -player.sin_yaw, player.cos_yaw, 0.0f, 0.0f,
                 0.0f, 0.0f, 1.0f, 0.0f,
                 0.0f, 0.0f, 0.0f, 1.0f});
         glUniformMatrix4fv(uniform.defaults.mat_perspective, 1, GL_FALSE,
@@ -915,14 +915,14 @@ static void draw_everything(void)
     if ((flag & FLAG_MAIN_PARSE_TARGET) && (flag & FLAG_MAIN_HUD) &&
             chunk_tab[chunk_tab_index] &&
             chunk_tab[chunk_tab_index]->block
-            [lily.target_snapped.z - chunk_tab[chunk_tab_index]->pos.z * CHUNK_DIAMETER]
-            [lily.target_snapped.y - chunk_tab[chunk_tab_index]->pos.y * CHUNK_DIAMETER]
-            [lily.target_snapped.x - chunk_tab[chunk_tab_index]->pos.x * CHUNK_DIAMETER])
+            [player.target_snapped.z - chunk_tab[chunk_tab_index]->pos.z * CHUNK_DIAMETER]
+            [player.target_snapped.y - chunk_tab[chunk_tab_index]->pos.y * CHUNK_DIAMETER]
+            [player.target_snapped.x - chunk_tab[chunk_tab_index]->pos.x * CHUNK_DIAMETER])
     {
         glUniform3f(uniform.bounding_box.position,
-                (f32)(lily.target_snapped.x),
-                (f32)(lily.target_snapped.y),
-                (f32)(lily.target_snapped.z));
+                (f32)(player.target_snapped.x),
+                (f32)(player.target_snapped.y),
+                (f32)(player.target_snapped.z));
         glUniform3f(uniform.bounding_box.size, 1.0f, 1.0f, 1.0f);
         glUniform4f(uniform.bounding_box.color, 0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -935,9 +935,9 @@ static void draw_everything(void)
     if (debug_mode[DEBUG_MODE_CHUNK_BOUNDS])
     {
         glUniform3f(uniform.bounding_box.position,
-                (f32)(lily.chunk.x * CHUNK_DIAMETER),
-                (f32)(lily.chunk.y * CHUNK_DIAMETER),
-                (f32)(lily.chunk.z * CHUNK_DIAMETER));
+                (f32)(player.chunk.x * CHUNK_DIAMETER),
+                (f32)(player.chunk.y * CHUNK_DIAMETER),
+                (f32)(player.chunk.z * CHUNK_DIAMETER));
         glUniform3f(uniform.bounding_box.size,
                 CHUNK_DIAMETER, CHUNK_DIAMETER, CHUNK_DIAMETER);
         glUniform4f(uniform.bounding_box.color, 0.9f, 0.6f, 0.3f, 1.0f);
@@ -951,9 +951,9 @@ static void draw_everything(void)
     if (debug_mode[DEBUG_MODE_BOUNDING_BOXES])
     {
         glUniform3f(uniform.bounding_box.position,
-                lily.bbox.pos.x, lily.bbox.pos.y, lily.bbox.pos.z);
+                player.bbox.pos.x, player.bbox.pos.y, player.bbox.pos.z);
         glUniform3f(uniform.bounding_box.size,
-                lily.bbox.size.x, lily.bbox.size.y, lily.bbox.size.z);
+                player.bbox.size.x, player.bbox.size.y, player.bbox.size.z);
         glUniform4f(uniform.bounding_box.color, 1.0f, 0.3f, 0.2f, 1.0f);
 
         glBindVertexArray(mesh[MESH_CUBE_OF_HAPPINESS].vao);
@@ -1087,9 +1087,9 @@ static void draw_everything(void)
 
         v3f32 camera_position =
         {
-            -lily.camera.cos_yaw * lily.camera.cos_pitch,
-            lily.camera.sin_yaw * lily.camera.cos_pitch,
-            lily.camera.sin_pitch,
+            -player.camera.cos_yaw * player.camera.cos_pitch,
+            player.camera.sin_yaw * player.camera.cos_pitch,
+            player.camera.sin_pitch,
         };
 
         glUniform3fv(uniform.gizmo_chunk.camera_position, 1, (GLfloat*)&camera_position);
@@ -1212,51 +1212,51 @@ static void draw_everything(void)
                     "ACCELERATION[%5.2f %5.2f %5.2f]\n"
                     "VELOCITY    [%5.2f %5.2f %5.2f]\n"
                     "SPEED       [%5.2f]\n",
-                    lily.pos.x, lily.pos.y, lily.pos.z,
-                    floor(lily.pos.x),
-                    floor(lily.pos.y),
-                    floor(lily.pos.z),
-                    lily.chunk.x, lily.chunk.y, lily.chunk.z,
-                    lily.pitch, lily.yaw,
-                    lily.acceleration.x, lily.acceleration.y, lily.acceleration.z,
-                    lily.velocity.x, lily.velocity.y, lily.velocity.z,
-                    lily.speed),
+                    player.pos.x, player.pos.y, player.pos.z,
+                    floor(player.pos.x),
+                    floor(player.pos.y),
+                    floor(player.pos.z),
+                    player.chunk.x, player.chunk.y, player.chunk.z,
+                    player.pitch, player.yaw,
+                    player.acceleration.x, player.acceleration.y, player.acceleration.z,
+                    player.velocity.x, player.velocity.y, player.velocity.z,
+                    player.speed),
                 (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0);
         text_render(COLOR_TEXT_DEFAULT, TRUE);
 
         text_push(stringf("\n\n\n\n\n\n\n\n\n\n\n"
                     "OVERFLOW    [%s %s %s]\n",
-                    (lily.flag & FLAG_PLAYER_OVERFLOW_X) ?
-                    (lily.flag & FLAG_PLAYER_OVERFLOW_PX) ?
+                    (player.flag & FLAG_PLAYER_OVERFLOW_X) ?
+                    (player.flag & FLAG_PLAYER_OVERFLOW_PX) ?
                     "        " : "        " : "NONE",
-                    (lily.flag & FLAG_PLAYER_OVERFLOW_Y) ?
-                    (lily.flag & FLAG_PLAYER_OVERFLOW_PY) ?
+                    (player.flag & FLAG_PLAYER_OVERFLOW_Y) ?
+                    (player.flag & FLAG_PLAYER_OVERFLOW_PY) ?
                     "        " : "        " : "NONE",
-                    (lily.flag & FLAG_PLAYER_OVERFLOW_Z) ?
-                    (lily.flag & FLAG_PLAYER_OVERFLOW_PZ) ?
+                    (player.flag & FLAG_PLAYER_OVERFLOW_Z) ?
+                    (player.flag & FLAG_PLAYER_OVERFLOW_PZ) ?
                     "        " : "        " : "NONE"),
                 (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0);
         text_render(COLOR_DIAGNOSTIC_NONE, TRUE);
 
         text_push(stringf("\n\n\n\n\n\n\n\n\n\n\n"
                     "             %s %s %s\n",
-                    (lily.flag & FLAG_PLAYER_OVERFLOW_X) &&
-                    (lily.flag & FLAG_PLAYER_OVERFLOW_PX) ? "POSITIVE" : "    ",
-                    (lily.flag & FLAG_PLAYER_OVERFLOW_Y) &&
-                    (lily.flag & FLAG_PLAYER_OVERFLOW_PY) ? "POSITIVE" : "    ",
-                    (lily.flag & FLAG_PLAYER_OVERFLOW_Z) &&
-                    (lily.flag & FLAG_PLAYER_OVERFLOW_PZ) ? "POSITIVE" : "    "),
+                    (player.flag & FLAG_PLAYER_OVERFLOW_X) &&
+                    (player.flag & FLAG_PLAYER_OVERFLOW_PX) ? "POSITIVE" : "    ",
+                    (player.flag & FLAG_PLAYER_OVERFLOW_Y) &&
+                    (player.flag & FLAG_PLAYER_OVERFLOW_PY) ? "POSITIVE" : "    ",
+                    (player.flag & FLAG_PLAYER_OVERFLOW_Z) &&
+                    (player.flag & FLAG_PLAYER_OVERFLOW_PZ) ? "POSITIVE" : "    "),
                 (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0);
         text_render(DIAGNOSTIC_COLOR_SUCCESS, TRUE);
 
         text_push(stringf("\n\n\n\n\n\n\n\n\n\n\n"
                     "             %s %s %s\n",
-                    (lily.flag & FLAG_PLAYER_OVERFLOW_X) &&
-                    !(lily.flag & FLAG_PLAYER_OVERFLOW_PX) ? "NEGATIVE" : "    ",
-                    (lily.flag & FLAG_PLAYER_OVERFLOW_Y) &&
-                    !(lily.flag & FLAG_PLAYER_OVERFLOW_PY) ? "NEGATIVE" : "    ",
-                    (lily.flag & FLAG_PLAYER_OVERFLOW_Z) &&
-                    !(lily.flag & FLAG_PLAYER_OVERFLOW_PZ) ? "NEGATIVE" : "    "),
+                    (player.flag & FLAG_PLAYER_OVERFLOW_X) &&
+                    !(player.flag & FLAG_PLAYER_OVERFLOW_PX) ? "NEGATIVE" : "    ",
+                    (player.flag & FLAG_PLAYER_OVERFLOW_Y) &&
+                    !(player.flag & FLAG_PLAYER_OVERFLOW_PY) ? "NEGATIVE" : "    ",
+                    (player.flag & FLAG_PLAYER_OVERFLOW_Z) &&
+                    !(player.flag & FLAG_PLAYER_OVERFLOW_PZ) ? "NEGATIVE" : "    "),
                 (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0);
         text_render(COLOR_DIAGNOSTIC_ERROR, TRUE);
 
@@ -1456,7 +1456,7 @@ int main(int argc, char **argv)
     init_super_debugger(&render.size);
     */
 
-    lily.camera =
+    player.camera =
         (Camera){
             .fovy = settings.fov,
             .fovy_smooth = 0.0f,
@@ -1465,7 +1465,7 @@ int main(int argc, char **argv)
             .near = CAMERA_CLIP_NEAR_DEFAULT,
         };
 
-    lily.camera_hud =
+    player.camera_hud =
         (Camera){
             .fovy = (f32)SET_FOV_DEFAULT,
             .fovy_smooth = (f32)SET_FOV_DEFAULT,
@@ -1483,7 +1483,7 @@ section_menu_pause:
 section_world_loaded:
 
     if (!(flag & FLAG_MAIN_WORLD_LOADED) &&
-            world_init("Poop Consistency Tester", 0, &lily) != ERR_SUCCESS)
+            world_init("Poop Consistency Tester", 0, &player) != ERR_SUCCESS)
             goto cleanup;
 
     generate_standard_meshes();
@@ -1502,11 +1502,11 @@ section_world_loaded:
 
         glfwPollEvents();
         update_key_states(render);
-        input_update(render, &lily);
+        input_update(render, &player);
 
         update_mouse_movement(&render);
         settings_update();
-        world_update(&lily);
+        world_update(&player);
         draw_everything();
 
         glfwSwapBuffers(render.window);

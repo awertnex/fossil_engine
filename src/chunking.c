@@ -958,26 +958,23 @@ static void chunk_generate(Chunk **chunk, u32 rate, Terrain terrain())
                             chunk_tab_coordinates, x, y, z, terrain_info.block_id);
                     ch->block[z][y][x] |= terrain_info.block_light;
 
-                    if (terrain_info.biome == BIOME_HILLS)
+                    if (z == 0)
                     {
-                        if (z == 0)
+                        if (nz && GET_BLOCK_ID(nz->block[CHUNK_DIAMETER - 1][y][x]) == BLOCK_GRASS)
                         {
-                            if (nz && GET_BLOCK_ID(nz->block[CHUNK_DIAMETER - 1][y][x]) == BLOCK_GRASS)
-                            {
-                                SET_BLOCK_ID(nz->block[CHUNK_DIAMETER - 1][y][x], BLOCK_DIRT);
-                                nz->flag |= FLAG_CHUNK_DIRTY;
-                            }
+                            SET_BLOCK_ID(nz->block[CHUNK_DIAMETER - 1][y][x], BLOCK_DIRT);
+                            nz->flag |= FLAG_CHUNK_DIRTY;
                         }
-                        else if (ch->block[z - 1][y][x] && GET_BLOCK_ID(ch->block[z - 1][y][x]) == BLOCK_GRASS)
-                        {
-                            SET_BLOCK_ID(ch->block[z - 1][y][x], BLOCK_DIRT);
-                            ch->flag |= FLAG_CHUNK_DIRTY;
-                        }
-
-                        if (z == CHUNK_DIAMETER - 1 && GET_BLOCK_ID(ch->block[z][y][x]) == BLOCK_GRASS &&
-                                pz && pz->block[0][y][x])
-                            SET_BLOCK_ID(ch->block[z][y][x], BLOCK_DIRT);
                     }
+                    else if (ch->block[z - 1][y][x] && GET_BLOCK_ID(ch->block[z - 1][y][x]) == BLOCK_GRASS)
+                    {
+                        SET_BLOCK_ID(ch->block[z - 1][y][x], BLOCK_DIRT);
+                        ch->flag |= FLAG_CHUNK_DIRTY;
+                    }
+
+                    if (z == CHUNK_DIAMETER - 1 && GET_BLOCK_ID(ch->block[z][y][x]) == BLOCK_GRASS &&
+                            pz && pz->block[0][y][x])
+                        SET_BLOCK_ID(ch->block[z][y][x], BLOCK_DIRT);
                 }
                 --rate;
             }
@@ -1240,7 +1237,7 @@ generate_and_mesh:
         {
             if ((*q->queue[i])->flag & FLAG_CHUNK_GENERATED)
                 chunk_mesh_update(q->queue[i] - chunk_tab, *q->queue[i]);
-            else chunk_generate(q->queue[i], rate_block, terrain_land);
+            else chunk_generate(q->queue[i], rate_block, terrain_decaying_lands);
             if (!((*q->queue[i])->flag & FLAG_CHUNK_DIRTY))
             {
                 (*q->queue[i])->flag &= ~FLAG_CHUNK_QUEUED;
