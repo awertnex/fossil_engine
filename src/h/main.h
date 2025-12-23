@@ -51,11 +51,6 @@
 #define SET_LERP_SPEED_DEFAULT          25.0f
 #define SET_LERP_SPEED_FOV_MODE         16.0f
 #define SET_COLLISION_CAPSULE_PADDING   1.0f
-#define SET_DRAG_AIR                    0.2f
-#define SET_DRAG_FLY_NATURAL            1.0f
-#define SET_DRAG_FLYING                 4.0f
-#define SET_DRAG_FLYING_V               13.0f
-#define SET_DRAG_GROUND_SOLID           23.0f
 
 #define COLOR_TEXT_DEFAULT      DIAGNOSTIC_COLOR_DEBUG
 #define COLOR_TEXT_BRIGHT       DIAGNOSTIC_COLOR_DEFAULT

@@ -27,9 +27,9 @@ u32 world_init(str *name, u64 seed, Player *p)
     if (chunking_init() != ERR_SUCCESS)
         return *GAME_ERR;
 
-    world.gravity = GRAVITY * 2.0f;
+    world.gravity = GRAVITY * 3.0f;
 
-    set_player_spawn(p, 0, 0, 0);
+    set_player_spawn(p, 0, 0, 10);
     player_spawn(p, TRUE);
     player_chunk_update(p);
 
@@ -176,8 +176,11 @@ u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
 
     /* ---- TODO: load the rest of world metadata --------------------------- */
 
-    world->tick_start = 23900;
+    world->tick_start = 4900;
     world->days = 0;
+    world->drag.x = WORLD_DRAG_AIR;
+    world->drag.y = WORLD_DRAG_AIR;
+    world->drag.z = WORLD_DRAG_AIR;
 
     /* ---- other stuff ----------------------------------------------------- */
 
@@ -189,14 +192,14 @@ u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
 
 void world_update(Player *p)
 {
-    world.tick = world.tick_start + (u64)(render.time * 20.0);
+    world.tick = world.tick_start + (u64)((f64)render.time * NANOSEC2SEC * 20.0);
     world.days = world.tick / SET_DAY_TICKS_MAX;
 
     if (state_menu_depth || (flag & FLAG_MAIN_SUPER_DEBUG))
         show_cursor;
     else disable_cursor;
 
-    player_update(p, render.frame_delta);
+    player_update(p, 1.0f - expf(-render.frame_delta));
     player_target_update(p);
 
     b8 use_mouse = (!state_menu_depth && !(flag & FLAG_MAIN_SUPER_DEBUG));

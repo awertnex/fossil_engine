@@ -10,7 +10,6 @@ uniform mat4 mat_sun_rotation;
 uniform mat4 mat_orientation;
 uniform mat4 mat_projection;
 uniform vec3 sun_rotation;
-out vec3 vs_sun_rotation;
 out vec2 tex_coords;
 
 void main()

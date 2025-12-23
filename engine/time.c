@@ -14,6 +14,15 @@ u64 get_time_logic(void)
     return (u64)(ts.tv_sec + ts.tv_nsec);
 }
 
+u64 get_time_u64(void)
+{
+    static u64 _time = 0;
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    if (!_time) _time = (u64)(ts.tv_sec * 1e9 + ts.tv_nsec);
+    return (u64)(ts.tv_sec * 1e9 + ts.tv_nsec) - _time;
+}
+
 f64 get_time_f64(void)
 {
     static u64 _time = 0;

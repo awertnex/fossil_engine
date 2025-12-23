@@ -1237,7 +1237,7 @@ generate_and_mesh:
         {
             if ((*q->queue[i])->flag & FLAG_CHUNK_GENERATED)
                 chunk_mesh_update(q->queue[i] - chunk_tab, *q->queue[i]);
-            else chunk_generate(q->queue[i], rate_block, terrain_decaying_lands);
+            else chunk_generate(q->queue[i], rate_block, terrain_biome_blend_test);
             if (!((*q->queue[i])->flag & FLAG_CHUNK_DIRTY))
             {
                 (*q->queue[i])->flag &= ~FLAG_CHUNK_QUEUED;

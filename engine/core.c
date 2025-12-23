@@ -10,6 +10,7 @@
 #include "h/math.h"
 #include "h/memory.h"
 #include "h/string.h"
+#include "h/time.h"
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <engine/include/stb_truetype.h>
 #define STB_IMAGE_IMPLEMENTATION
@@ -1055,7 +1056,7 @@ b8 is_key_release(const u32 key)
 
 void update_key_states(Render render)
 {
-    static f64 key_press_start_time[KEYBOARD_KEYS_MAX] = {0};
+    static u64 key_press_start_time[KEYBOARD_KEYS_MAX] = {0};
     b8 key_press = FALSE, key_release = FALSE;
     u32 i;
 
@@ -1074,7 +1075,8 @@ void update_key_states(Render render)
             }
             else if (_is_key_listen_double(i))
             {
-                if (render.time - key_press_start_time[i] <= KEYBOARD_DOUBLE_PRESS_TIME)
+                if (render.time - key_press_start_time[i] <=
+                        (u64)(KEYBOARD_DOUBLE_PRESS_TIME * SEC2NANOSEC))
                     keyboard_key[i] = KEY_PRESS_DOUBLE;
                 else
                 {

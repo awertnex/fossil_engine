@@ -192,10 +192,10 @@ typedef struct Chunk
      */
     u32 cursor;
 
-    u32 block[CHUNK_DIAMETER][CHUNK_DIAMETER][CHUNK_DIAMETER];
     GLuint vao;
     GLuint vbo;
     u64 vbo_len;
+    u32 block[CHUNK_DIAMETER][CHUNK_DIAMETER][CHUNK_DIAMETER];
     u8 flag;
 } Chunk;
 

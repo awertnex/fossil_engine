@@ -145,6 +145,14 @@ void input_update(Render render, Player *p)
             pz - nz,
         };
 
+    f32 input_len = sqrtf(len_v3f32(p->input));
+    if (input_len > EPSILON)
+    {
+        p->input.x /= input_len;
+        p->input.y /= input_len;
+        p->input.z /= input_len;
+    }
+
     /* ---- gameplay -------------------------------------------------------- */
 
     if (

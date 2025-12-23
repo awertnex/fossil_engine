@@ -27,7 +27,7 @@ u32 *const GAME_ERR = (u32*)&engine_err;
 Render render =
 {
     .title = GAME_NAME": "GAME_VERSION,
-    .size = {1280, 720},
+    .size = {1280, 1054},
 };
 
 struct Settings settings = {0};
@@ -1199,7 +1199,7 @@ static void draw_everything(void)
                     "TIME        [%.2lf]\n"
                     "TICKS       [%"PRIu64"]\n"
                     "DAYS        [%"PRIu64"]\n",
-                    render.time,
+                    (f64)render.time * NANOSEC2SEC,
                     world.tick % SET_DAY_TICKS_MAX, world.days),
                 (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0);
         text_render(COLOR_TEXT_MOSS, TRUE);
@@ -1352,8 +1352,6 @@ static void draw_everything(void)
 
 int main(int argc, char **argv)
 {
-    get_time_f64(); /* initialize start time */
-
     if (engine_init(argc, argv, &render, FALSE, GAME_RELEASE_BUILD) != ERR_SUCCESS)
         goto cleanup;
 
@@ -1378,10 +1376,8 @@ int main(int argc, char **argv)
             settings_init() != ERR_SUCCESS)
         goto cleanup;
 
-    /*temp*/ glfwSetWindowPos(render.window,
-            (1920 - render.size.x) / 2,
-            (1080 - render.size.y) / 2);
-    /*temp*/ glfwSetWindowSizeLimits(render.window, 512, 288, 3840, 2160);
+    glfwSetWindowPos(render.window, (1920 - render.size.x), 24);
+    glfwSetWindowSizeLimits(render.window, 512, 288, 3840, 2160);
 
     flag = FLAG_MAIN_ACTIVE | FLAG_MAIN_PARSE_CURSOR;
 
@@ -1490,7 +1486,7 @@ section_world_loaded:
 
     while (!glfwWindowShouldClose(render.window) && (flag & FLAG_MAIN_ACTIVE))
     {
-        render.time = get_time_f64();
+        render.time = get_time_u64();
         render.frame_delta = get_time_delta_f64();
 
         /* cursor mode change jitter prevention */

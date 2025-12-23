@@ -10,10 +10,10 @@
 #define PLAYER_INVENTORY_SLOTS_MAX  (PLAYER_HOTBAR_SLOTS_MAX * 4)
 
 #define PLAYER_EYE_HEIGHT           1.55f
-#define PLAYER_JUMP_HEIGHT          1.3f
-#define PLAYER_ACCELERATION_SNEAK   1.5f
-#define PLAYER_ACCELERATION_WALK    3.0f
-#define PLAYER_ACCELERATION_SPRINT  5.0f
+#define PLAYER_JUMP_HEIGHT          1.5f
+#define PLAYER_ACCELERATION_SNEAK   2.5f
+#define PLAYER_ACCELERATION_WALK    4.0f
+#define PLAYER_ACCELERATION_SPRINT  6.0f
 #define PLAYER_ACCELERATION_FLY     9.0f
 #define PLAYER_ACCELERATION_FLY_FAST 20.0f
 #define PLAYER_ACCELERATION_MAX     100.0f
@@ -24,24 +24,23 @@ enum PlayerFlag
     FLAG_PLAYER_SNEAKING =          0x00000002,
     FLAG_PLAYER_SPRINTING =         0x00000004,
     FLAG_PLAYER_FLYING =            0x00000008,
-    FLAG_PLAYER_MID_AIR =           0x00000010,
-    FLAG_PLAYER_SWIMMING =          0x00000020,
-    FLAG_PLAYER_HUNGRY =            0x00000040,
-    FLAG_PLAYER_DEAD =              0x00000080,
-    FLAG_PLAYER_ZOOMER =            0x00000100,
-    FLAG_PLAYER_CINEMATIC_MOTION =  0x00000200,
-    FLAG_PLAYER_FLASHLIGHT =        0x00000400,
+    FLAG_PLAYER_SWIMMING =          0x00000010,
+    FLAG_PLAYER_HUNGRY =            0x00000020,
+    FLAG_PLAYER_DEAD =              0x00000040,
+    FLAG_PLAYER_ZOOMER =            0x00000080,
+    FLAG_PLAYER_CINEMATIC_MOTION =  0x00000100,
+    FLAG_PLAYER_FLASHLIGHT =        0x00000200,
 
-    FLAG_PLAYER_OVERFLOW_X =        0x00000800,
-    FLAG_PLAYER_OVERFLOW_Y =        0x00001000,
-    FLAG_PLAYER_OVERFLOW_Z =        0x00002000,
+    FLAG_PLAYER_OVERFLOW_X =        0x00000400,
+    FLAG_PLAYER_OVERFLOW_Y =        0x00000800,
+    FLAG_PLAYER_OVERFLOW_Z =        0x00001000,
 
     /*! @brief positive overflow direction flags,
      *  @remark default is 0 for negative overflow (underflow).
      */
-    FLAG_PLAYER_OVERFLOW_PX =       0x00004000,
-    FLAG_PLAYER_OVERFLOW_PY =       0x00008000,
-    FLAG_PLAYER_OVERFLOW_PZ =       0x00010000,
+    FLAG_PLAYER_OVERFLOW_PX =       0x00002000,
+    FLAG_PLAYER_OVERFLOW_PY =       0x00004000,
+    FLAG_PLAYER_OVERFLOW_PZ =       0x00008000,
 }; /* PlayerFlag */
 
 enum PlayerCameraMode
@@ -81,11 +80,11 @@ typedef struct Player
 
     v3f32 input;                    /* raw user input */
     v3f32 acceleration;
-    f32 acceleration_rate;          /* scalar for 'acceleration' */
     v3f32 velocity;
-    f32 speed;                      /* derived from 'velocity' */
     v3f32 friction;
     f32 weight;
+    f32 acceleration_rate;          /* scalar for 'acceleration' */
+    f32 speed;                      /* derived from 'velocity' */
 
     Camera camera;
     Camera camera_hud;              /* for hud 3d elements */

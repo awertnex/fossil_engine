@@ -3,6 +3,9 @@
 
 #include "types.h"
 
+#define SEC2NANOSEC 1e9
+#define NANOSEC2SEC 1e-9
+
 /*! @brief get time for logic purposes, like for random number generators
  *  that require a seed.
  *
@@ -12,6 +15,10 @@
  *  @remark not accurate to actual time.
  */
 u64 get_time_logic(void);
+
+/*! @brief get elapsed nanoseconds since this function's first call in the process.
+ */
+u64 get_time_u64(void);
 
 /*! @brief get elapsed time since this function's first call in the process,
  *  in seconds and fractional milliseconds.

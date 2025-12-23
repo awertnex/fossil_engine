@@ -128,5 +128,6 @@ f32 perlin_noise_3d_ex(v3i32 coordinates, f32 intensity, f32 scale,
 Terrain terrain_land(v3i32 coordinates);
 
 Terrain terrain_decaying_lands(v3i32 coordinates);
+Terrain terrain_biome_blend_test(v3i32 coordinates);
 
 #endif /* GAME_TERRAIN_H */

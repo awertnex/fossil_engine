@@ -15,36 +15,34 @@ static void player_wrap_coordinates(Player *p);
 
 void player_update(Player *p, f64 dt)
 {
-    v3f32 control = {0}, drag = {0}, gravity = {0};
+    v3f32 gravity = {0};
 
     p->acceleration = (v3f32){0};
     p->acceleration_rate = PLAYER_ACCELERATION_WALK;
-    world.drag = (v3f32){
-        SET_DRAG_AIR,
-        SET_DRAG_AIR,
-        SET_DRAG_AIR,
-    };
     p->camera.fovy = settings.fov;
+    world.drag = (v3f32){
+        WORLD_DRAG_AIR,
+        WORLD_DRAG_AIR,
+        WORLD_DRAG_AIR,
+    };
+
     /* ---- player flags ---------------------------------------------------- */
 
     if (p->flag & FLAG_PLAYER_FLYING)
     {
-        p->flag &= ~(FLAG_PLAYER_CAN_JUMP | FLAG_PLAYER_MID_AIR);
-
         p->acceleration_rate = PLAYER_ACCELERATION_FLY;
 
         if (p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
         {
-            world.drag.x = SET_DRAG_FLY_NATURAL;
-            world.drag.y = SET_DRAG_FLY_NATURAL;
-            world.drag.z = SET_DRAG_FLY_NATURAL;
-            p->friction = (v3f32){0};
+            world.drag.x = WORLD_DRAG_FLY_NATURAL;
+            world.drag.y = WORLD_DRAG_FLY_NATURAL;
+            world.drag.z = WORLD_DRAG_FLY_NATURAL;
         }
         else
         {
-            world.drag.x = SET_DRAG_FLYING;
-            world.drag.y = SET_DRAG_FLYING;
-            world.drag.z = SET_DRAG_FLYING_V;
+            world.drag.x = WORLD_DRAG_FLYING;
+            world.drag.y = WORLD_DRAG_FLYING;
+            world.drag.z = WORLD_DRAG_FLYING_V;
         }
 
         p->camera.fovy += 10.0f;
@@ -58,12 +56,9 @@ void player_update(Player *p, f64 dt)
     else
     {
         gravity.z -= world.gravity;
-        world.drag.x = map_range_f32(p->friction.x, 0.0f, 1.0f, SET_DRAG_AIR, SET_DRAG_GROUND_SOLID);
-        world.drag.y = map_range_f32(p->friction.y, 0.0f, 1.0f, SET_DRAG_AIR, SET_DRAG_GROUND_SOLID);
-        world.drag.z = map_range_f32(p->friction.z, 0.0f, 1.0f, SET_DRAG_AIR, SET_DRAG_GROUND_SOLID);
-
-        if (!(p->flag &FLAG_PLAYER_CAN_JUMP))
-            p->flag |= FLAG_PLAYER_MID_AIR;
+        world.drag.x = map_range_f32(p->friction.x, 0.0f, 1.0f, WORLD_DRAG_AIR, WORLD_DRAG_GROUND_SOLID);
+        world.drag.y = map_range_f32(p->friction.y, 0.0f, 1.0f, WORLD_DRAG_AIR, WORLD_DRAG_GROUND_SOLID);
+        world.drag.z = map_range_f32(p->friction.z, 0.0f, 1.0f, WORLD_DRAG_AIR, WORLD_DRAG_GROUND_SOLID);
 
         if (p->flag & FLAG_PLAYER_SNEAKING)
             p->acceleration_rate = PLAYER_ACCELERATION_SNEAK;
@@ -79,23 +74,14 @@ void player_update(Player *p, f64 dt)
 
     /* ---- apply parameters ------------------------------------------------ */
 
-    control = (v3f32){
-        p->input.x * p->acceleration_rate * world.drag.x,
-        p->input.y * p->acceleration_rate * world.drag.y,
-        p->input.z * p->acceleration_rate * world.drag.z,
-    };
+    p->acceleration.x = p->input.x * p->acceleration_rate * world.drag.x -
+            world.drag.x * p->velocity.x + gravity.x;
 
-    drag = (v3f32){
-        world.drag.x * p->velocity.x,
-        world.drag.y * p->velocity.y,
-        world.drag.z * p->velocity.z,
-    };
+    p->acceleration.y = p->input.y * p->acceleration_rate * world.drag.y -
+            world.drag.y * p->velocity.y + gravity.y;
 
-    p->acceleration = (v3f32){
-        control.x - drag.x + gravity.x,
-        control.y - drag.y + gravity.y,
-        control.z - drag.z + gravity.z,
-    };
+    p->acceleration.z = p->input.z * p->acceleration_rate * world.drag.z -
+            world.drag.z * p->velocity.z + gravity.z;
 
     p->velocity.x += p->acceleration.x * dt;
     p->velocity.y += p->acceleration.y * dt;
@@ -105,12 +91,16 @@ void player_update(Player *p, f64 dt)
     p->pos.y += p->velocity.y * dt;
     p->pos.z += p->velocity.z * dt;
 
+    p->flag &= ~FLAG_PLAYER_CAN_JUMP;
+    p->friction.x = 0.0f;
+    p->friction.y = 0.0f;
+
     p->speed = sqrtf(len_v3f32(p->velocity));
     if (p->speed > EPSILON)
         p->camera.fovy += p->speed * 0.03f;
     p->camera.fovy = clamp_f32(p->camera.fovy, 1.0f, SET_FOV_MAX);
-    p->camera.fovy_smooth = lerp_f32(p->camera.fovy_smooth, p->camera.fovy,
-                dt, SET_LERP_SPEED_FOV_MODE);
+    p->camera.fovy_smooth = lerp_exp_f32(p->camera.fovy_smooth, p->camera.fovy,
+                SET_LERP_SPEED_FOV_MODE, dt);
 
     player_bounding_box_update(p);
     player_collision_update(p, dt);
@@ -171,17 +161,11 @@ void player_collision_update(Player *p, f64 dt)
         INCREMENT.z = -1;
     }
 
-    p->flag &= ~FLAG_PLAYER_CAN_JUMP;
-    p->friction.x = 0.0f;
-    p->friction.y = 0.0f;
-
     for (i = 0; i < 2 && resolved; ++i)
     {
         resolved = FALSE;
         for (z = START.z; z >= MIN.z && z < MAX.z; z += INCREMENT.z)
-        {
             for (y = START.y; y >= MIN.y && y < MAX.y; y += INCREMENT.y)
-            {
                 for (x = START.x; x >= MIN.x && x < MAX.x; x += INCREMENT.x)
                 {
                     ch = get_chunk_resolved(settings.chunk_tab_center, x, y, z);
@@ -217,24 +201,19 @@ void player_collision_update(Player *p, f64 dt)
                         p->pos.y -= p->velocity.y * time;
                         p->pos.z -= p->velocity.z * time;
 
-                        player_bounding_box_update(p);
-
-                        /* ---- flags --------------------------------------- */
-
                         if (normal.z > 0.0f)
                         {
                             if (!(p->flag & FLAG_PLAYER_CINEMATIC_MOTION))
                                 p->flag &= ~FLAG_PLAYER_FLYING;
                             p->flag |= FLAG_PLAYER_CAN_JUMP;
-                            p->friction.x = 0.7f;
-                            p->friction.y = 0.7f;
+                            p->friction.x = 1.0f;
+                            p->friction.y = 1.0f;
                         }
 
+                        player_bounding_box_update(p);
                         resolved = TRUE;
                     }
                 }
-            }
-        }
     }
 }
 
