@@ -3,7 +3,7 @@
 
 #include "player.h"
 
-#define WORLD_TICK_SPEED        200.0
+#define WORLD_TICK_SPEED        20.0
 
 #define WORLD_DRAG_AIR          0.2f
 #define WORLD_DRAG_FLY_NATURAL  1.0f

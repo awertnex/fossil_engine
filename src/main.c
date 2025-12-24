@@ -706,6 +706,7 @@ static void draw_everything(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     skybox_data.time = fmodf((f32)world.tick / SET_DAY_TICKS_MAX, 1.0f);
+    skybox_data.time = fmodf(skybox_data.time - 0.25f, 2.0f);
     skybox_data.sun_rotation =
         (v3f32){
             cos(skybox_data.time * PI * 2.0f),
@@ -713,9 +714,9 @@ static void draw_everything(void)
             sin(skybox_data.time * PI * 2.0f),
         };
 
-    f32 skybox_time = clamp_f32(skybox_data.time * 2.0f, 0.0f, 1.0f);
+    f32 skybox_time =   clamp_f32(skybox_data.time * 2.0f, 0.0f, 1.0f);
 
-    f32 mid_day =       fabsf(sinf(1.5f * sinf(skybox_time * PI)));
+    f32 mid_day =       sinf(1.6f * sinf(skybox_time * PI));
 
     f32 pre_burn =      fabsf(sinf(powf(sinf(
                         (skybox_time + 0.33f) * PI * 1.2f), 16.0f)));
@@ -736,8 +737,8 @@ static void draw_everything(void)
     };
 
     skybox_data.horizon_color = (v3f32){
-        (mid_day * 171.0f + burn * 120.0f + mid_night * 1.0f + pre_burn * 92.0f + burn_boost * 190.0f) / 0xff,
-        (mid_day * 229.0f + burn * 80.0f + mid_night * 4.0f + pre_burn * 33.0f + burn_boost * 30.0f) / 0xff,
+        (mid_day * 227.0f + burn * 120.0f + mid_night * 1.0f + pre_burn * 92.0f + burn_boost * 190.0f) / 0xff,
+        (mid_day * 251.0f + burn * 80.0f + mid_night * 4.0f + pre_burn * 33.0f + burn_boost * 30.0f) / 0xff,
         (mid_day * 255.0f + burn * 7.0f + mid_night * 35.0f + pre_burn * 2.0f) / 0xff,
     };
 
