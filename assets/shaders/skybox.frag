@@ -3,21 +3,34 @@
 uniform sampler2D texture_sky;
 uniform sampler2D texture_horizon;
 uniform sampler2D texture_stars;
-uniform vec3 sky_color;
+uniform sampler2D texture_sun;
+uniform int render_layer;
 in vec2 tex_coords;
 out vec4 color;
 
+#define USE_TONE_MAPPING
+#include "h/defaults.glsl"
+
 void main()
 {
-    vec4 sky = texture(texture_sky, tex_coords);
-    vec4 horizon = texture(texture_horizon, tex_coords);
-    vec4 stars = texture(texture_stars, tex_coords);
-    float alpha = (horizon.r + horizon.g + horizon.b) / 3.0;
+    switch (render_layer)
+    {
+        case 0:
+            float sky_val = texture(texture_sky, tex_coords).r;
+            float horizon_val = texture(texture_horizon, tex_coords).r;
+            vec4 stars = texture(texture_stars, tex_coords);
+            float sky_brightness = (sky_color.r + sky_color.g + sky_color.b +
+                    horizon_color.r + horizon_color.g + horizon_color.b) / 6.0;
 
-    horizon.g *= 0.5;
-    horizon.b *= 0.3;
+            color = vec4(sky_color * (1.0 - horizon_val), 1.0) +
+                vec4(horizon_color * horizon_val, 1.0);
+            color.rgb *= sky_val;
+            color += stars * (1.0 - clamp(sky_val * sky_brightness, 0.0, 1.0));
+            break;
 
-    color = vec4(sky_color, 1.0) * (sky + horizon) + stars * (1.0 - clamp(sky + horizon, 0.0, 1.0));
-    color.rgb *= sky.a;
-    color.a = sky.a;
+        case 1:
+            vec4 sun = texture(texture_sun, tex_coords);
+            color = vec4(sun.rgb * sun.a, sun.a);
+            break;
+    }
 }

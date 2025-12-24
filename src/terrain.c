@@ -172,7 +172,7 @@ f32 perlin_noise_2d_ex(v2i32 coordinates, f32 intensity, f32 scale,
     {
         land_final += perlin_noise_2d(coordinates, intensity, scale, dispx, dispy);
         intensity *= intensity_persistence;
-        scale *= scale_persistence * scale_persistence;
+        scale *= scale_persistence;
     }
 
     return land_final;
@@ -225,7 +225,7 @@ f32 perlin_noise_3d_ex(v3i32 coordinates, f32 intensity, f32 scale,
     {
         land_final += perlin_noise_3d(coordinates, intensity, scale, dispx, dispy, dispz);
         intensity *= intensity_persistence;
-        scale *= scale_persistence * scale_persistence;
+        scale *= scale_persistence;
     }
 
     return land_final;
@@ -253,7 +253,7 @@ Terrain terrain_land(v3i32 coordinates)
         cave_entrances,
         cave_level,
         biome_blend = perlin_noise_2d(coordinates_2d, 15.0f, 1000.0f, 15, 374),
-        crush = fabsf((((f32)coordinates.z - (WORLD_RADIUS_VERTICAL / 2)) / WORLD_CRUSH_FACTOR) + 0.4f) * 0.8f,
+        crush = fabsf(((f32)(coordinates.z + TERRAIN_CAVE_LEVEL) / WORLD_DIAMETER_VERTICAL) + 0.4f) * 0.8f,
         land_final = 0.0f,
         cave_final = 0.0f;
 
@@ -339,7 +339,7 @@ Terrain terrain_decaying_lands(v3i32 coordinates)
         cave_features_big,
         cave_features_small,
         cave_level,
-        crush = fabsf((((f32)coordinates.z - (WORLD_RADIUS_VERTICAL / 2)) / WORLD_CRUSH_FACTOR) + 0.4f) * 0.8f,
+        crush = fabsf((((f32)coordinates.z - (WORLD_RADIUS_VERTICAL / 2)) / WORLD_RADIUS_VERTICAL) + 0.4f) * 0.8f,
         land_final = 0.0f,
         cave_final = 0.0f;
 
@@ -379,21 +379,28 @@ Terrain terrain_biome_blend_test(v3i32 coordinates)
 {
     Terrain terrain = {0};
     v2i32 coordinates_2d = {coordinates.x, coordinates.y};
+    v3i32 coordinates_shifted = coordinates;
+    coordinates_shifted.z *= 1.5f;
 
-    f32 biome_hills_mountains = perlin_noise_2d_ex(coordinates_2d, 200.0f, 255.0f, 3, 0.8f, 0.8f, 72, 853);
+    f32 crush = fabsf((f32)(coordinates.z + TERRAIN_CAVE_LEVEL) / WORLD_DIAMETER_VERTICAL);
+    f32 squish = (f32)coordinates.z * TERRAIN_SQUISH_MAGNITUDE;
+
+    f32 biome_hills_mountains = perlin_noise_2d_ex(coordinates_2d, 200.0f, 255.0f, 3, 0.6f, 0.4f, 72, 853);
+    f32 biome_sandstorm_mountains = perlin_noise_2d_ex(coordinates_2d, 20.0f, 60.0f, 3, 0.9f, 0.8f, 123, 7673);
     f32 biome_decaying_lands_mountains = perlin_noise_2d_ex(coordinates_2d, 20.0f, 33.0f, 3, 0.9f, 0.7f, 3647, -248);
     f32 biome_rocks_mountains = perlin_noise_2d_ex(coordinates_2d, 20.0f, 33.0f, 3, 0.9f, 0.7f, 3647, -248);
-    f32 biome_sandstorm_mountains = perlin_noise_2d_ex(coordinates_2d, 20.0f, 60.0f, 3, 0.9f, 0.8f, 123, 7673);
 
     f32 biome_hills = perlin_noise_2d(coordinates_2d, 1.0f, 20.0f, 72, 853);
     f32 biome_sandstorm = perlin_noise_2d(coordinates_2d, 1.0f, 20.0f, 123, 7673);
-    f32 biome_decaying_lands = perlin_noise_3d(coordinates, 1.0f, 24.0f, 3647, -248, 37824);
+    f32 biome_decaying_lands = perlin_noise_3d_ex(coordinates_shifted, 1.0f, 47.3f, 3, 0.5f, 0.38f, 35074, -2854, 82849);
+    biome_decaying_lands += perlin_noise_3d(coordinates, 1.0f, 60.0f, 35074, -2854, 82849);
+    biome_decaying_lands += squish;
     f32 biome_rocks = perlin_noise_2d(coordinates_2d, 0.3f, 20.0f, 3274, 39420);
 
     f32 biome_blend = biome_hills + biome_sandstorm + biome_decaying_lands + biome_rocks;
 
-    biome_blend = smoothstep_f32(0.0f, 1.0f, biome_blend);
-    f32 land_final = lerp_f32(biome_hills_mountains, biome_sandstorm_mountains, biome_blend);
+    biome_blend = lerp_f32(0.0f, 1.0f, biome_blend);
+    f32 land_final = (biome_hills_mountains + biome_sandstorm_mountains + biome_decaying_lands) * biome_blend;
 
     terrain.biome = BIOME_HILLS;
     terrain.block_id = BLOCK_GRASS;
@@ -417,7 +424,7 @@ Terrain terrain_biome_blend_test(v3i32 coordinates)
 
     terrain.block_light = 63 << SHIFT_BLOCK_LIGHT;
 
-    if (biome_decaying_lands > 0.0f)
+    if (biome_decaying_lands > crush)
         terrain.block_id = 0;
 
     return terrain;

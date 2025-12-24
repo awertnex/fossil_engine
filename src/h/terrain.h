@@ -5,6 +5,11 @@
 
 #include "main.h"
 #include "assets.h"
+#include "chunking.h"
+
+#define TERRAIN_SEA_LEVEL           0
+#define TERRAIN_CAVE_LEVEL          (WORLD_RADIUS_VERTICAL / 2)
+#define TERRAIN_SQUISH_MAGNITUDE    0.02f
 
 #define TERRAIN_SEED_DEFAULT 0
 
@@ -12,17 +17,24 @@
 #define RAND_TAB_LAYER      (RAND_TAB_DIAMETER * RAND_TAB_DIAMETER)
 #define RAND_TAB_VOLUME     (RAND_TAB_DIAMETER * RAND_TAB_DIAMETER * RAND_TAB_DIAMETER)
 
-enum Biome
+enum BiomeIndex
 {
     BIOME_HILLS,
     BIOME_SANDSTORM,
     BIOME_DECAYING_LANDS,
     BIOME_COUNT,
+}; /* BiomeIndex */
+
+struct Biome
+{
+    f32 temperature;
+    f32 humidity;
+    f32 life;
 }; /* Biome */
 
 typedef struct Terrain
 {
-    enum Biome biome;
+    enum BiomeIndex biome;
     enum BlockID block_id;
     u32 block_light;
 } Terrain;

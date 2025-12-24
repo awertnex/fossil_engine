@@ -1,6 +1,6 @@
 #version 430 core
 
-#include "h/post_processing.frag.h"
+#include "h/post_processing.glsl"
 
 uniform sampler2D texture_screen;
 uniform uint time;

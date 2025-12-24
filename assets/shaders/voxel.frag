@@ -19,10 +19,11 @@ in flat uint face_index;
 in float block_light;
 out vec4 color;
 
-#include "h/defaults.frag.h"
-
-float square_length(const vec3 v);
-float fog_linear(const float distance, float min, float max);
+#define USE_SUN_DIRECTION
+#define USE_MATH
+#define USE_FOG
+#define USE_TONE_MAPPING
+#include "h/defaults.glsl"
 
 void main()
 {
@@ -38,7 +39,7 @@ void main()
     vec3 color_sun_influence = texture_base.rgb * sun_direction *
         SUN_INFLUENCE * sky_brightness;
     vec3 color_block_light = block_light * color_sun_influence;
-    vec3 color_ambient_light = texture_base.rgb * AMBIENT_LIGHT_INTENSITY;
+    vec3 color_ambient_light = texture_base.rgb * GLOBAL_ILLUMINATION;
     vec3 color_flashlight = FLASHLIGHT_COLOR * texture_base.rgb * flashlight_intensity;
 
     vec3 color_composite = 
@@ -52,21 +53,7 @@ void main()
                 render_distance - render_distance * FOG_SOFTNESS,
                 render_distance + render_distance * FOG_SOFTNESS));
 
+    color_final = reinhard_tone_mapping(color_final, 30.0);
 
-    /* reinhard tone mapping */
-    float W = 20.0;
-    color_final = (color_final * (1.0 + color_final / (W * W))) / (1.0 + color_final);
-
-    color_final = pow(color_final, vec3(2.0));
     color = vec4(color_final, 1.0) * texture_base.a * opacity;
-}
-
-float square_length(const vec3 v)
-{
-    return v.x * v.x + v.y * v.y + v.z * v.z;
-}
-
-float fog_linear(const float distance, float min, float max)
-{
-    return 1.0 - clamp((max - distance) / (max - min), 0.0, 1.0);
 }

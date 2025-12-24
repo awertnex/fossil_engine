@@ -4,7 +4,8 @@ in vec4 position;
 in vec3 normal;
 out vec4 color;
 
-#include "h/defaults.frag.h"
+#define USE_SUN_DIRECTION
+#include "h/defaults.glsl"
 
 vec3 base_color = vec3(0.35, 0.58, 1.41);
 

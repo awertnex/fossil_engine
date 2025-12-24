@@ -180,8 +180,11 @@ struct Uniform
         GLint texture_sky;
         GLint texture_horizon;
         GLint texture_stars;
+        GLint texture_sun;
         GLint sun_rotation;
         GLint sky_color;
+        GLint horizon_color;
+        GLint render_layer;
     } skybox;
 
     struct /* gizmo */

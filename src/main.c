@@ -66,7 +66,8 @@ static struct /* skybox_data */
 {
     f32 time;
     v3f32 sun_rotation;
-    v3f32 color;
+    v3f32 sky_color;
+    v3f32 horizon_color;
 } skybox_data;
 
 static void callback_framebuffer_size(GLFWwindow* window, int width, int height);
@@ -412,10 +413,16 @@ static void bind_shader_uniforms(void)
         glGetUniformLocation(shader[SHADER_SKYBOX].id, "texture_horizon");
     uniform.skybox.texture_stars =
         glGetUniformLocation(shader[SHADER_SKYBOX].id, "texture_stars");
+    uniform.skybox.texture_sun =
+        glGetUniformLocation(shader[SHADER_SKYBOX].id, "texture_sun");
     uniform.skybox.sun_rotation =
         glGetUniformLocation(shader[SHADER_SKYBOX].id, "sun_rotation");
     uniform.skybox.sky_color =
         glGetUniformLocation(shader[SHADER_SKYBOX].id, "sky_color");
+    uniform.skybox.horizon_color =
+        glGetUniformLocation(shader[SHADER_SKYBOX].id, "horizon_color");
+    uniform.skybox.render_layer =
+        glGetUniformLocation(shader[SHADER_SKYBOX].id, "render_layer");
 
     uniform.gizmo.ndc_scale =
         glGetUniformLocation(shader[SHADER_GIZMO].id, "ndc_scale");
@@ -708,7 +715,6 @@ static void draw_everything(void)
 
     f32 skybox_time = clamp_f32(skybox_data.time * 2.0f, 0.0f, 1.0f);
 
-    f32 intensity =     0.0039f;
     f32 mid_day =       fabsf(sinf(1.5f * sinf(skybox_time * PI)));
 
     f32 pre_burn =      fabsf(sinf(powf(sinf(
@@ -723,24 +729,17 @@ static void draw_everything(void)
     f32 mid_night =     fabsf(sinf(powf(2.0f * cosf(
                         skybox_time * PI), 3.0f)));
 
-    skybox_data.color =
-        (v3f32){
-            (mid_day * 171.0f) + (burn * 85.0f) + (mid_night * 1.0f) +
-                (pre_burn * 13.0f) + (burn_boost * 76.0f),
+    skybox_data.sky_color = (v3f32){
+        (mid_day * 171.0f + burn * 75.0f + mid_night * 1.0f) / 0xff,
+        (mid_day * 229.0f + burn * 42.0f + mid_night * 4.0f + pre_burn * 7.0f) / 0xff,
+        (mid_day * 255.0f + burn * 19.0f + mid_night * 14.0f + pre_burn * 20.0f) / 0xff,
+    };
 
-            (mid_day * 229.0f) + (burn * 42.0f) + (mid_night * 4.0f) +
-                (pre_burn * 7.0f) + (burn_boost * 34.0f),
-
-            (mid_day * 255.0f) + (burn * 19.0f) + (mid_night * 14.0f) +
-                (pre_burn * 20.0f),
-        };
-
-    skybox_data.color =
-        (v3f32){
-            clamp_f32(skybox_data.color.x * intensity, 0.0f, 1.0f),
-            clamp_f32(skybox_data.color.y * intensity, 0.0f, 1.0f),
-            clamp_f32(skybox_data.color.z * intensity, 0.0f, 1.0f),
-        };
+    skybox_data.horizon_color = (v3f32){
+        (mid_day * 171.0f + burn * 120.0f + mid_night * 1.0f + pre_burn * 92.0f + burn_boost * 190.0f) / 0xff,
+        (mid_day * 229.0f + burn * 80.0f + mid_night * 4.0f + pre_burn * 33.0f + burn_boost * 30.0f) / 0xff,
+        (mid_day * 255.0f + burn * 7.0f + mid_night * 35.0f + pre_burn * 2.0f) / 0xff,
+    };
 
     m4f32 translation =
     {
@@ -761,20 +760,18 @@ static void draw_everything(void)
     glUseProgram(shader[SHADER_SKYBOX].id);
 
     glUniform1f(uniform.skybox.texture_scale, 0.25f);
-    glUniformMatrix4fv(uniform.skybox.mat_translation, 1, GL_FALSE,
-            (GLfloat*)&translation);
+    glUniformMatrix4fv(uniform.skybox.mat_translation, 1, GL_FALSE, (GLfloat*)&translation);
     glUniformMatrix4fv(uniform.skybox.mat_rotation, 1, GL_FALSE,
             (GLfloat*)&projection_world.rotation);
-    glUniformMatrix4fv(uniform.skybox.mat_sun_rotation, 1, GL_FALSE,
-            (GLfloat*)&rotation);
+    glUniformMatrix4fv(uniform.skybox.mat_sun_rotation, 1, GL_FALSE, (GLfloat*)&rotation);
     glUniformMatrix4fv(uniform.skybox.mat_orientation, 1, GL_FALSE,
             (GLfloat*)&projection_world.orientation);
     glUniformMatrix4fv(uniform.skybox.mat_projection, 1, GL_FALSE,
             (GLfloat*)&projection_world.projection);
-    glUniform3fv(uniform.skybox.sun_rotation, 1,
-            (GLfloat*)&skybox_data.sun_rotation);
-    glUniform3fv(uniform.skybox.sky_color, 1,
-            (GLfloat*)&skybox_data.color);
+    glUniform3fv(uniform.skybox.sun_rotation, 1, (GLfloat*)&skybox_data.sun_rotation);
+    glUniform3fv(uniform.skybox.sky_color, 1, (GLfloat*)&skybox_data.sky_color);
+    glUniform3fv(uniform.skybox.horizon_color, 1, (GLfloat*)&skybox_data.horizon_color);
+    glUniform1i(uniform.skybox.render_layer, 0);
 
     glUniform1i(uniform.skybox.texture_sky, 0);
     glUniform1i(uniform.skybox.texture_horizon, 1);
@@ -787,13 +784,6 @@ static void draw_everything(void)
     glBindTexture(GL_TEXTURE_2D, texture[TEXTURE_SKYBOX_STARS].id);
     glBindVertexArray(mesh[MESH_SKYBOX].vao);
     glDrawElements(GL_TRIANGLES, mesh[MESH_SKYBOX].ebo_len, GL_UNSIGNED_INT, 0);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE0);
 
     /* ---- draw sun -------------------------------------------------------- */
 
@@ -830,9 +820,22 @@ static void draw_everything(void)
             (GLfloat*)&translation);
     glUniformMatrix4fv(uniform.skybox.mat_sun_rotation, 1, GL_FALSE,
             (GLfloat*)&rotation);
+    glUniform1i(uniform.skybox.render_layer, 1);
+
+    glUniform1i(uniform.skybox.texture_sun, 3);
+    glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, texture[TEXTURE_SUN].id);
     glBindVertexArray(mesh[MESH_UNIT].vao);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0);
 
     /* ---- draw world ------------------------------------------------------ */
 
@@ -851,7 +854,7 @@ static void draw_everything(void)
     glUniform3f(uniform.voxel.flashlight_position,
             player.pos.x, player.pos.y, player.pos.z + player.eye_height);
     glUniform3fv(uniform.voxel.sun_rotation, 1, (GLfloat*)&skybox_data.sun_rotation);
-    glUniform3fv(uniform.voxel.sky_color, 1, (GLfloat*)&skybox_data.color);
+    glUniform3fv(uniform.voxel.sky_color, 1, (GLfloat*)&skybox_data.sky_color);
     glUniform1f(uniform.voxel.toggle_flashlight, player.flag & FLAG_PLAYER_FLASHLIGHT ? 1.0f : 0.0f);
     glUniform1i(uniform.voxel.render_distance, settings.render_distance * CHUNK_DIAMETER);
 
@@ -900,7 +903,7 @@ static void draw_everything(void)
         glUniform3fv(uniform.defaults.sun_rotation, 1,
                 (GLfloat*)&skybox_data.sun_rotation);
         glUniform3fv(uniform.defaults.sky_color, 1,
-                (GLfloat*)&skybox_data.color);
+                (GLfloat*)&skybox_data.sky_color);
 
         glBindVertexArray(mesh[MESH_PLAYER].vao);
         glDrawArrays(GL_TRIANGLES, 0, mesh[MESH_PLAYER].vbo_len);
@@ -1267,9 +1270,9 @@ static void draw_everything(void)
                     "SUN ANGLE   [%.2f %.2f %.2f]\n",
                     (f32)render.size.x / render.size.y,
                     skybox_data.time,
-                    skybox_data.color.x,
-                    skybox_data.color.y,
-                    skybox_data.color.z,
+                    skybox_data.sky_color.x,
+                    skybox_data.sky_color.y,
+                    skybox_data.sky_color.z,
                     skybox_data.sun_rotation.x,
                     skybox_data.sun_rotation.y,
                     skybox_data.sun_rotation.z),

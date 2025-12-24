@@ -63,12 +63,12 @@ u32 gui_init(void)
                     "sdb_inactive.png")) != ERR_SUCCESS ||
 
             texture_init(&texture[TEXTURE_SKYBOX_VAL], (v2i32){512, 512},
-                GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
+                GL_RED, GL_RED, GL_NEAREST, 1, FALSE,
                 stringf("%s%s", DIR_ROOT[DIR_ENV],
                     "skybox_val.png")) != ERR_SUCCESS ||
 
             texture_init(&texture[TEXTURE_SKYBOX_HORIZON], (v2i32){512, 512},
-                GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
+                GL_RED, GL_RED, GL_NEAREST, 1, FALSE,
                 stringf("%s%s", DIR_ROOT[DIR_ENV],
                     "skybox_horizon.png")) != ERR_SUCCESS ||
 
