@@ -28,17 +28,19 @@ out vec4 color;
 void main()
 {
     float distance = square_length(vertex_position - flashlight_position);
-    float flashlight_intensity = (1.0 / distance * FLASHLIGHT_DISTANCE) *
-        FLASHLIGHT_INTENSITY * toggle_flashlight;
-    float sky_brightness = clamp(sun_rotation.z, 0.0, 1.0) *
-        ((sky_color.r + sky_color.g + sky_color.b) / 3.0);
+    float flashlight_intensity = toggle_flashlight *
+        (FLASHLIGHT_INTENSITY / (distance * FLASHLIGHT_DISTANCE));
+    float sky_brightness = (sky_light.r + sky_light.g + sky_light.b) / 3.0;
+    float moon_brightness = (moon_light.r + moon_light.g + moon_light.b) / 3.0;
 
     vec4 texture_base = texture(textures[face_index], tex_coords);
-    vec3 color_sky_influence = texture_base.rgb * sky_color *
-        SKY_INFLUENCE * block_light * sky_brightness;
+    vec3 color_sky_influence = texture_base.rgb * sky_light *
+        SKY_INFLUENCE * block_light * (sky_brightness + moon_brightness);
     vec3 color_sun_influence = texture_base.rgb * sun_direction *
         SUN_INFLUENCE * sky_brightness;
-    vec3 color_block_light = block_light * color_sun_influence;
+    vec3 color_moon_influence = texture_base.rgb * moon_direction *
+        MOON_INFLUENCE * moon_brightness;
+    vec3 color_block_light = block_light * (color_sun_influence + color_moon_influence);
     vec3 color_ambient_light = texture_base.rgb * GLOBAL_ILLUMINATION;
     vec3 color_flashlight = FLASHLIGHT_COLOR * texture_base.rgb * flashlight_intensity;
 
@@ -48,7 +50,7 @@ void main()
         color_ambient_light +
         color_flashlight;
 
-    vec3 color_final = mix(color_composite, sky_color,
+    vec3 color_final = mix(color_composite, sky_light,
             fog_linear(distance / float(render_distance * (1.0 - FOG_SOFTNESS / 1.5)),
                 render_distance - render_distance * FOG_SOFTNESS,
                 render_distance + render_distance * FOG_SOFTNESS));

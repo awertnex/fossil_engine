@@ -80,7 +80,12 @@ u32 gui_init(void)
             texture_init(&texture[TEXTURE_SUN], (v2i32){128, 128},
                 GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
                 stringf("%s%s", DIR_ROOT[DIR_ENV],
-                    "sun.png")) != ERR_SUCCESS)
+                    "sun.png")) != ERR_SUCCESS ||
+
+            texture_init(&texture[TEXTURE_MOON], (v2i32){128, 128},
+                GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
+                stringf("%s%s", DIR_ROOT[DIR_ENV],
+                    "moon.png")) != ERR_SUCCESS)
         goto cleanup;
 
     for (i = 0; i < TEXTURE_COUNT; ++i)

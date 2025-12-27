@@ -17,6 +17,7 @@
 #define PLAYER_ACCELERATION_FLY     9.0f
 #define PLAYER_ACCELERATION_FLY_FAST 20.0f
 #define PLAYER_ACCELERATION_MAX     100.0f
+#define PLAYER_COLLISION_DAMAGE_THRESHOLD 15.0f
 
 enum PlayerFlag
 {
@@ -85,6 +86,7 @@ typedef struct Player
     f32 weight;
     f32 acceleration_rate;          /* scalar for 'acceleration' */
     f32 speed;                      /* derived from 'velocity' */
+    f32 health;
 
     Camera camera;
     Camera camera_hud;              /* for hud 3d elements */

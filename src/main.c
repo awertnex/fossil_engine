@@ -68,6 +68,8 @@ static struct /* skybox_data */
     v3f32 sun_rotation;
     v3f32 sky_color;
     v3f32 horizon_color;
+    v3f32 sky_light;
+    v3f32 moon_light;
 } skybox_data;
 
 static void callback_framebuffer_size(GLFWwindow* window, int width, int height);
@@ -465,8 +467,10 @@ static void bind_shader_uniforms(void)
         glGetUniformLocation(shader[SHADER_VOXEL].id, "camera_position");
     uniform.voxel.sun_rotation =
         glGetUniformLocation(shader[SHADER_VOXEL].id, "sun_rotation");
-    uniform.voxel.sky_color =
-        glGetUniformLocation(shader[SHADER_VOXEL].id, "sky_color");
+    uniform.voxel.sky_light =
+        glGetUniformLocation(shader[SHADER_VOXEL].id, "sky_light");
+    uniform.voxel.moon_light =
+        glGetUniformLocation(shader[SHADER_VOXEL].id, "moon_light");
     uniform.voxel.chunk_position =
         glGetUniformLocation(shader[SHADER_VOXEL].id, "chunk_position");
     uniform.voxel.color =
@@ -706,41 +710,48 @@ static void draw_everything(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     skybox_data.time = fmodf((f32)world.tick / SET_DAY_TICKS_MAX, 1.0f);
-    skybox_data.time = fmodf(skybox_data.time - 0.25f, 2.0f);
+    skybox_data.time = fmodf(skybox_data.time * 2.0f - 0.5f, 2.0f);
     skybox_data.sun_rotation =
         (v3f32){
-            cos(skybox_data.time * PI * 2.0f),
-            cos(skybox_data.time * PI * 2.0f) * 0.3f,
-            sin(skybox_data.time * PI * 2.0f),
+            cos(skybox_data.time * PI),
+            cos(skybox_data.time * PI) * 0.3f,
+            sin(skybox_data.time * PI),
         };
 
-    f32 skybox_time =   clamp_f32(skybox_data.time * 2.0f, 0.0f, 1.0f);
+    f32 sun_time = skybox_data.time;
 
-    f32 mid_day =       sinf(1.6f * sinf(skybox_time * PI));
+    f64 mid_day =       (sin((PI / 2.0) * sin(sun_time * PI)) + 1.0) / 2.0;
 
-    f32 pre_burn =      fabsf(sinf(powf(sinf(
-                        (skybox_time + 0.33f) * PI * 1.2f), 16.0f)));
+    f64 burn_cold =     pow((sin((PI / 2.0) * sin(sun_time * PI + (PI / 2.0))) + 1.0) / 2.0, 24.0);
+    burn_cold +=        pow((sin((PI / 2.0) * sin(sun_time * PI - (PI / 2.0))) + 1.0) / 2.0, 24.0);
 
-    f32 burn =          fabsf(sinf(1.5f * powf(sinf(
-                        (skybox_time + 0.124f) * PI * 1.6f), 32.0f)));
+    f64 burn =          pow((sin(sun_time * PI + (PI / 2.0)) + 1.0) / 2.0, 64.0);
+    burn +=             pow((sin(sun_time * PI - (PI / 2.0)) + 1.0) / 2.0, 64.0);
 
-    f32 burn_boost =    fabsf(powf(sinf(
-                        (skybox_time + 0.212f) * PI * 1.4f), 64.0f));
+    f64 burn_boost =    pow(sin(sun_time * PI + (PI / 2.0)), 128.0);
+    burn_boost +=       pow(sin(sun_time * PI - (PI / 2.0)), 128.0);
 
-    f32 mid_night =     fabsf(sinf(powf(2.0f * cosf(
-                        skybox_time * PI), 3.0f)));
+    f64 mid_night =     pow((sin((PI / 2.0) * sin(sun_time * PI + PI)) + 1.0) / 2.0, 4.0);
 
     skybox_data.sky_color = (v3f32){
-        (mid_day * 171.0f + burn * 75.0f + mid_night * 1.0f) / 0xff,
-        (mid_day * 229.0f + burn * 42.0f + mid_night * 4.0f + pre_burn * 7.0f) / 0xff,
-        (mid_day * 255.0f + burn * 19.0f + mid_night * 14.0f + pre_burn * 20.0f) / 0xff,
+        (mid_day * 171.0f + mid_night * 1.0f + burn_cold * 8.0f) / 0xff,
+        (mid_day * 229.0f + mid_night * 4.0f + burn_cold * 4.0f) / 0xff,
+        (mid_day * 255.0f + mid_night * 14.0f + burn_cold * 18.0f) / 0xff,
     };
 
     skybox_data.horizon_color = (v3f32){
-        (mid_day * 227.0f + burn * 120.0f + mid_night * 1.0f + pre_burn * 92.0f + burn_boost * 190.0f) / 0xff,
-        (mid_day * 251.0f + burn * 80.0f + mid_night * 4.0f + pre_burn * 33.0f + burn_boost * 30.0f) / 0xff,
-        (mid_day * 255.0f + burn * 7.0f + mid_night * 35.0f + pre_burn * 2.0f) / 0xff,
+        (mid_day * 224.0f + mid_night * 1.0f + burn_cold * 8.0f + burn * 92.0f + burn_boost * 116.0f) / 0xff,
+        (mid_day * 244.0f + mid_night * 4.0f + burn_cold * 4.0f + burn * 5.0f + burn_boost * 77.0f) / 0xff,
+        (mid_day * 255.0f + mid_night * 14.0f + burn_cold * 18.0f) / 0xff,
     };
+
+    skybox_data.sky_light = (v3f32){
+        skybox_data.sky_color.x + skybox_data.horizon_color.x,
+        skybox_data.sky_color.y + skybox_data.horizon_color.y,
+        skybox_data.sky_color.z + skybox_data.horizon_color.z,
+    };
+
+    skybox_data.moon_light = (v3f32){mid_night, mid_night, mid_night};
 
     m4f32 translation =
     {
@@ -800,10 +811,10 @@ static void draw_everything(void)
         1.0f,
     };
 
-    f32 angle = skybox_data.time * PI * 2.0f + 90.0f * DEG2RAD;
+    f32 angle = skybox_data.time * PI + 90.0f * DEG2RAD;
     rotation = (m4f32){
-        cosf(PI / 2.0f), sinf(PI / 2.0f), 0.0f, 0.0f,
-        -sinf(PI / 2.0f), cosf(PI / 2.0f), 0.0f, 0.0f,
+        cosf(PI / 2.0f), -sinf(PI / 2.0f), 0.0f, 0.0f,
+        sinf(PI / 2.0f), cosf(PI / 2.0f), 0.0f, 0.0f,
         0.0f, 1.0f, 0.0f, 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f,
     };
@@ -828,6 +839,42 @@ static void draw_everything(void)
     glBindTexture(GL_TEXTURE_2D, texture[TEXTURE_SUN].id);
     glBindVertexArray(mesh[MESH_UNIT].vao);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+    translation = (m4f32){
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        -skybox_data.sun_rotation.x * 2.0f,
+        -skybox_data.sun_rotation.y * 2.0f,
+        -skybox_data.sun_rotation.z * 2.0f,
+        1.0f,
+    };
+
+    angle = skybox_data.time * PI - 90.0f * DEG2RAD;
+    rotation = (m4f32){
+        cosf(PI / 2.0f), -sinf(PI / 2.0f), 0.0f, 0.0f,
+        sinf(PI / 2.0f), cosf(PI / 2.0f), 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f,
+    };
+
+    rotation = matrix_multiply(rotation,
+            (m4f32){
+            cosf(angle), 0.0f, sinf(angle), 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            -sinf(angle), 0.0f, cosf(angle), 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f,
+            });
+
+    glUniformMatrix4fv(uniform.skybox.mat_translation, 1, GL_FALSE,
+            (GLfloat*)&translation);
+    glUniformMatrix4fv(uniform.skybox.mat_sun_rotation, 1, GL_FALSE,
+            (GLfloat*)&rotation);
+    glUniform1i(uniform.skybox.render_layer, 2);
+
+    glBindTexture(GL_TEXTURE_2D, texture[TEXTURE_MOON].id);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
     glActiveTexture(GL_TEXTURE1);
@@ -855,7 +902,8 @@ static void draw_everything(void)
     glUniform3f(uniform.voxel.flashlight_position,
             player.pos.x, player.pos.y, player.pos.z + player.eye_height);
     glUniform3fv(uniform.voxel.sun_rotation, 1, (GLfloat*)&skybox_data.sun_rotation);
-    glUniform3fv(uniform.voxel.sky_color, 1, (GLfloat*)&skybox_data.sky_color);
+    glUniform3fv(uniform.voxel.sky_light, 1, (GLfloat*)&skybox_data.sky_light);
+    glUniform3fv(uniform.voxel.moon_light, 1, (GLfloat*)&skybox_data.moon_light);
     glUniform1f(uniform.voxel.toggle_flashlight, player.flag & FLAG_PLAYER_FLASHLIGHT ? 1.0f : 0.0f);
     glUniform1i(uniform.voxel.render_distance, settings.render_distance * CHUNK_DIAMETER);
 
@@ -1201,10 +1249,12 @@ static void draw_everything(void)
 
         text_push(stringf("\n"
                     "TIME        [%.2lf]\n"
-                    "TICKS       [%"PRIu64"]\n"
+                    "CLOCK       [%"PRIu64":%"PRIu64"]\n"
                     "DAYS        [%"PRIu64"]\n",
                     (f64)render.time * NANOSEC2SEC,
-                    world.tick % SET_DAY_TICKS_MAX, world.days),
+                    (world.tick % SET_DAY_TICKS_MAX) / 1000,
+                    (world.tick / 60) % 60,
+                    world.days),
                 (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0);
         text_render(COLOR_TEXT_MOSS, TRUE);
 

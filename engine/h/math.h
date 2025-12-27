@@ -54,7 +54,7 @@ m4f32 matrix_multiply(m4f32 a, m4f32 b);
 v4f32 matrix_multiply_vector(m4f32 a, v4f32 b);
 f32 lerp_f32(f32 a, f32 b, f64 t);
 f32 lerp_exp_f32(f32 a, f32 b, f64 k, f32 t);
-f32 lerp_cubic_f32(f32 a, f32 b, f64 t);
+f32 lerp_cubic_f32(f32 a, f32 b, f32 t);
 v3f64 lerp_v3f64(v3f64 a, v3f64 b, f32 t);
 f32 easein_f32(f32 a, f32 b, f32 t);
 f32 easeout_f32(f32 a, f32 b, f32 t);

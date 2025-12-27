@@ -220,7 +220,8 @@ struct Uniform
         GLint mat_perspective;
         GLint camera_position;
         GLint sun_rotation;
-        GLint sky_color;
+        GLint sky_light;
+        GLint moon_light;
         GLint chunk_position;
         GLint color;
         GLint opacity;
@@ -289,6 +290,7 @@ enum TextureIndices
     TEXTURE_SKYBOX_HORIZON,
     TEXTURE_SKYBOX_STARS,
     TEXTURE_SUN,
+    TEXTURE_MOON,
     TEXTURE_COUNT,
 }; /* TextureIndices */
 

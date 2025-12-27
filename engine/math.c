@@ -287,9 +287,9 @@ f32 lerp_exp_f32(f32 a, f32 b, f64 k, f32 t)
     return a + (b - a) * (1.0f - expf(-k * t));
 }
 
-f32 lerp_cubic_f32(f32 a, f32 b, f64 t)
+f32 lerp_cubic_f32(f32 a, f32 b, f32 t)
 {
-    return (b - a) * (3.0f - t * 2.0f) * t * t + a;
+    return a + (b - a) * (3.0f - t * 2.0f) * t * t;
 }
 
 v3f64 lerp_v3f64(v3f64 a, v3f64 b, f32 t)

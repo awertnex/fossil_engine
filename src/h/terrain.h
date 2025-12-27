@@ -63,36 +63,28 @@ v3f32 random_3d(i32 x, i32 y, i32 z, u64 seed);
 /*! @brief get a gradient value between two 2d points.
  *
  *  get a random number from global array 'RAND_TAB' for each axis,
- *  index for each is seeded by the trunc of 'ax', 'ay',
- *  some magic constants, plus 'dispx' and 'dispy'.
+ *  index for each is seeded by 'seed', 'x', 'y' and some magic constants.
  *
- *  @param dispx, dispy = index displacement into 'RAND_TAB'.
- *
- *  @return the dot product between 'v - a' and the sampled random numbers vector.
+ *  @return the dot product of 'v - a' and the sampled random vector.
  */
-f32 gradient_2d(f32 vx, f32 vy, f32 ax, f32 ay, i32 dispx, i32 dispy);
+f32 gradient_2d(f32 vx, f32 vy, i32 x, i32 y, u64 seed);
 
 /*! @brief get a gradient value between two 3d points.
  *
  *  get a random number from global array 'RAND_TAB' for each axis,
- *  index for each is seeded by the trunc of 'ax', 'ay', 'az',
- *  some magic constants, plus 'dispx', 'dispy' and 'dispz'.
+ *  index for each is seeded by 'seed', 'x', 'y', 'z' and some magic constants.
  *
- *  @param dispx, dispy, dispz = index displacement into 'RAND_TAB'.
- *
- *  @return the dot product of the distance between 'v' and 'a' and the sampled
- *  random numbers.
+ *  @return the dot product of 'v - a' and the sampled random vector.
  */
-f32 gradient_3d(f32 vx, f32 vy, f32 vz, f32 ax, f32 ay, f32 az, i32 dispx, i32 dispy, i32 dispz);
+f32 gradient_3d(f32 vx, f32 vy, f32 vz, i32 x, i32 y, i32 z, u64 seed);
 
 /*! @param coordinates = current block to sample.
  *  @param intensity = height, or contrast of the noise.
  *  @param scale = frequency of the noise.
- *  @param dispx, dispy = displacement of random number selection index, on each axis.
  *
- *  @return a value between [frequency / 2, -frequency / 2].
+ *  @return a value between [intensity / 2, -intensity / 2].
  */
-f32 perlin_noise_2d(v2i32 coordinates, f32 intensity, f32 scale, i32 dispx, i32 dispy);
+f32 perlin_noise_2d(v2i32 coordinates, f32 intensity, f32 scale, u64 seed);
 
 /*! @brief calls 'perlin_noise_2d()' for as many 'octaves'.
  *
@@ -100,23 +92,21 @@ f32 perlin_noise_2d(v2i32 coordinates, f32 intensity, f32 scale, i32 dispx, i32 
  *  @param intensity = height, or contrast of the noise.
  *  @param scale = frequency of the noise.
  *  @param octaves = number of noise iterations.
- *  @param persistence = scaling factor per iteration for 'intensity'.
- *  @param gathering = scaling factor per iteration for 'scale'.
- *  @param dispx, dispy = displacement of random number selection index, on each axis.
+ *  @param intensity_persistence = scaling factor per iteration for 'intensity'.
+ *  @param scale_persistance = scaling factor per iteration for 'scale'.
  *
- *  @return a value between [frequency / 2, -frequency / 2].
+ *  @return a value between [intensity / 2, -intensity / 2].
  */
 f32 perlin_noise_2d_ex(v2i32 coordinates, f32 intensity, f32 scale,
-        u32 octaves, f32 persistence, f32 gathering, i32 dispx, i32 dispy);
+        u32 octaves, f32 intensity_persistence, f32 scale_persistence, u64 seed);
 
 /*! @param coordinates = current block to sample.
  *  @param intensity = height, or contrast of the noise.
  *  @param scale = frequency of the noise.
- *  @param dispx, dispy, dispz = displacement of random number selection index, on each axis.
  *
- *  @return a value between [frequency / 2, -frequency / 2].
+ *  @return a value between [intensity / 2, -intensity / 2].
  */
-f32 perlin_noise_3d(v3i32 coordinates, f32 intensity, f32 scale, i32 dispx, i32 dispy, i32 dispz);
+f32 perlin_noise_3d(v3i32 coordinates, f32 intensity, f32 scale, u64 seed);
 
 /*! @brief calls 'perlin_noise_3d()' for as many 'octaves'.
  *
@@ -124,14 +114,13 @@ f32 perlin_noise_3d(v3i32 coordinates, f32 intensity, f32 scale, i32 dispx, i32 
  *  @param intensity = height, or contrast of the noise.
  *  @param scale = frequency of the noise.
  *  @param octaves = number of noise iterations.
- *  @param persistence = scaling factor per iteration for 'intensity'.
- *  @param gathering = scaling factor per iteration for 'scale'.
- *  @param dispx, dispy, dispz = displacement of random number selection index, on each axis.
+ *  @param intensity_persistence = scaling factor per iteration for 'intensity'.
+ *  @param scale_persistance = scaling factor per iteration for 'scale'.
  *
- *  @return a value between [frequency / 2, -frequency / 2].
+ *  @return a value between [intensity / 2, -intensity / 2].
  */
 f32 perlin_noise_3d_ex(v3i32 coordinates, f32 intensity, f32 scale,
-        u32 octaves, f32 persistence, f32 gathering, i32 dispx, i32 dispy, i32 dispz);
+        u32 octaves, f32 intensity_persistence, f32 scale_persistence, u64 seed);
 
 /*! @brief default terrain of mountains valleys, caves and biomes.
  *

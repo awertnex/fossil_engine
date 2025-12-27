@@ -1,7 +1,8 @@
 #define SKY_INFLUENCE 1.0
 #define SUN_INFLUENCE 3.0
+#define MOON_INFLUENCE 0.4
 #define GLOBAL_ILLUMINATION 0.15
-#define FLASHLIGHT_INTENSITY 5.0
+#define FLASHLIGHT_INTENSITY 50.0
 #define FLASHLIGHT_DISTANCE 3.0
 #define FLASHLIGHT_COLOR vec3(1.0, 0.9, 0.7)
 #define FOG_SOFTNESS 1.0
@@ -10,12 +11,13 @@
 #define EPSILON 1e-3
 
 uniform vec3 sun_rotation;
-uniform vec3 sky_color;
-uniform vec3 horizon_color;
+uniform vec3 sky_light;
+uniform vec3 moon_light;
 
 #ifdef USE_SUN_DIRECTION
 
-float sun_direction = clamp(dot(normal, sun_rotation), 0.0, SUN_INFLUENCE);
+float sun_direction = clamp(dot(normal, sun_rotation), 0.0, 1.0);
+float moon_direction = clamp(dot(-normal, sun_rotation), 0.0, 1.0);
 
 #endif /* USE_SUN_DIRECTION */
 

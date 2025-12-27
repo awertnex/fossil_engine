@@ -106,6 +106,8 @@ void player_update(Player *p, f64 dt)
     player_collision_update(p, dt);
     player_wrap_coordinates(p);
     player_chunk_update(p);
+
+    if (p->health <= 0.0f && !(p->flag & FLAG_PLAYER_DEAD)) player_kill(p);
 }
 
 void player_collision_update(Player *p, f64 dt)
@@ -114,6 +116,7 @@ void player_collision_update(Player *p, f64 dt)
 
     Chunk *ch = NULL;
     u32 *block = NULL;
+    f32 speed;
     v3f32 displacement =
     {
         p->velocity.x * dt,
@@ -211,6 +214,13 @@ void player_collision_update(Player *p, f64 dt)
                         }
 
                         player_bounding_box_update(p);
+
+                        speed = p->speed;
+                        p->speed = sqrtf(len_v3f32(p->velocity));
+
+                        if (speed - p->speed > PLAYER_COLLISION_DAMAGE_THRESHOLD)
+                            p->health -= (speed - p->speed);
+
                         resolved = TRUE;
                     }
                 }
@@ -562,6 +572,7 @@ void player_spawn(Player *p, b8 hard)
             p->spawn.x + 0.5f,
             p->spawn.y + 0.5f,
             p->spawn.z + 0.5f);
+    p->health = 100.0f;
     if (!hard) return;
     p->flag &= ~(FLAG_PLAYER_FLYING | FLAG_PLAYER_HUNGRY | FLAG_PLAYER_DEAD);
 }
@@ -569,5 +580,6 @@ void player_spawn(Player *p, b8 hard)
 void player_kill(Player *p)
 {
     p->velocity = (v3f32){0};
+    p->health = 0.0f;
     p->flag |= FLAG_PLAYER_DEAD;
 }
