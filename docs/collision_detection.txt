@@ -2,39 +2,61 @@ Collision Detection Documentation
 
 ---- Entity vs Static Voxel ----------------------------------------------------
 
-Using the AABB (Axis-Aligned Bounding Box) algorithm:
-    Collision Check Region:
-        A box around the entity is created the size of its base bounding box
-        plus one unit (voxel) in each direction,
-        collision checking happens only within this region.
+Collision Check Region:
 
-        The box is "shrink-wrapped" encapsulating the entity's current position
-        and its previous position,
-        plus the size of its bounding box at both positions.
+    - A box around the entity is created the size of its base bounding box
+      plus one unit (voxel) in each direction,
+      collision checking happens only within this region.
 
-        The box is then floored and ceiled to snap to integer intervals.
+    - The box expands on each axis individually based on the entity's velocity
+      in that direction.
 
-    Voxel indexing:
-        The start and end points of the collision check region are mapped to
-        chunk coordinates relative to the entity's current chunk.
+    - The box's position and size are then floored and ceiled to snap to integer intervals.
 
-        Voxels inside the region are queried one by one in a loop,
-        x, y, z iterators walk the span of the range normally
-        (note that the starting index can be negative, meaning it can start in
-        the neighboring chunk before the current chunk).
+Voxel Indexing:
 
-        dx, dy, dz (delta coordinates) iterators walk with x, y, z,
-        but are restricted to range [0, CHUNK_DIAMETER - 1] and are used to
-        index the voxels of a given chunk.
+    - The start and end points of the collision check region are mapped to
+      chunk coordinates relative to the entity's current chunk.
 
-        dcx, dcy, dcz (delta chunk) iterators walk with x, y, z
-        divided by CHUNK_DIAMETER to turn them into chunk delta-index.
+    - Voxels inside the region are checked one by one in a loop:
+      'x', 'y' and 'z' iterators can iterate in ascending or descending order
+      based on whether the entity's x, y or z velocity is positive or negative,
+      this eliminates correcting the further collisions first (this bug
+      becomes apparent when an entity slides along a surface in a negative
+      direction, if we process blocks in linear order, then the block ahead is
+      processed first and might return TRUE for a collision, resulting in stuttering).
 
-    Collision Processing:
-        Basic AABB collision
-        ('https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection'
-        is a great resource) is performed on all six faces of both the entity's
-        bounding box and a given voxel's bounding box.
+    - x, y, z iterators walk the span of the range normally
+      (note that the starting or ending index can be negative,
+      meaning it can start in the neighboring chunk before the current chunk).
 
-        Once the intersection is corrected, the entity's bounding box position
-        is also updated so the next voxels don't process outdated data.
+    - dx, dy, dz (delta coordinates) iterators walk with x, y, z,
+      but are restricted to range [0, CHUNK_DIAMETER - 1] and are used to
+      index the voxels of a given chunk.
+
+    - dcx, dcy, dcz (delta chunk) iterators walk with x, y, z
+      divided by CHUNK_DIAMETER to turn them into chunk delta-index.
+
+Collision Resolution:
+
+    - Using the 'Swept AABB' method ('https://www.gamedev.net/tutorials/programming/general-and-gameplay-programming/swept-aabb-collision-detection-and-response-r3084/'
+      is a great resource, tho it covers 2d collision only, it still works the same way),
+      each non-air block is checked using the player's velocity,
+      then the algorithm returns 'entry time' (float) and the block's collision normal (vec3).
+
+    - Using a basic AABB intersection check
+      ('https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection'
+      is a great resource), we resolve the collision using the entry time and
+      the block's normal vector using the 'Slide' method, pseudo-code:
+
+        entity.position += entity.velocity * time;
+        entity.position += block.normal * 1e-3; /* tiny push so we don't explode */
+
+        dot = dot(entity.velocity, block.normal);
+        if (dot < 0)
+            entity.velocity -= dot * block.normal;
+
+        entity.pos -= entity.velocity * time;
+
+    - Once the collision has been resolved, the entity's bounding box position
+      is also updated so the next voxels don't process outdated data.
