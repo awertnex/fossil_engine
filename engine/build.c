@@ -195,6 +195,7 @@ u32 engine_build(const str *engine_dir, const str *out_dir)
     cmd_push(stringf("%scollision.c", engine_dir_processed));
     cmd_push(stringf("%score.c", engine_dir_processed));
     cmd_push(stringf("%sdir.c", engine_dir_processed));
+    cmd_push(stringf("%sinput.c", engine_dir_processed));
     cmd_push(stringf("%slogger.c", engine_dir_processed));
     cmd_push(stringf("%smath.c", engine_dir_processed));
     cmd_push(stringf("%smemory.c", engine_dir_processed));

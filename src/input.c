@@ -1,3 +1,4 @@
+#include <engine/h/input.h>
 #include <engine/h/math.h>
 
 #include "h/assets.h"
