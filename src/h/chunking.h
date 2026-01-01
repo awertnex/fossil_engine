@@ -299,8 +299,9 @@ void chunking_update(v3i32 player_chunk, v3i32 *player_chunk_delta);
 void chunking_free(void);
 
 /*! @param index = index into global array 'chunk_tab'.
+ *  @param normal = face direction to place block onto.
  */
-void block_place(u32 index, i32 x, i32 y, i32 z, enum BlockID block_id);
+void block_place(u32 index, i32 x, i32 y, i32 z, v3f64 normal, enum BlockID block_id);
 
 /*! @param index = index into global array 'chunk_tab'.
  */

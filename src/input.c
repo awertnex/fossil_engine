@@ -173,7 +173,7 @@ void input_update(Render render, Player *p)
                     (i64)p->target.x - chunk_tab[chunk_tab_index]->pos.x * CHUNK_DIAMETER,
                     (i64)p->target.y - chunk_tab[chunk_tab_index]->pos.y * CHUNK_DIAMETER,
                     (i64)p->target.z - chunk_tab[chunk_tab_index]->pos.z * CHUNK_DIAMETER,
-                    p->hotbar_slots[p->hotbar_slot_selected]);
+                    p->target_normal, p->hotbar_slots[p->hotbar_slot_selected]);
         }
 
         if (is_key_press(bind_sample_block)) {}

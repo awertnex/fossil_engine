@@ -671,8 +671,18 @@ void chunking_free(void)
             "chunking_free().chunk_gizmo_render");
 }
 
-void block_place(u32 index, i32 x, i32 y, i32 z, enum BlockID block_id)
+void block_place(u32 index, i32 x, i32 y, i32 z, v3f64 normal, enum BlockID block_id)
 {
+    if (!(normal.x != 0.0f || normal.y != 0.0f || normal.z != 0.0f)) return;
+
+    x += (i32)normal.x;
+    y += (i32)normal.y;
+    z += (i32)normal.z;
+    index += (i32)floorf((f32)x / CHUNK_DIAMETER);
+    index += (i32)floorf((f32)y / CHUNK_DIAMETER) * settings.chunk_buf_diameter;
+    index += (i32)floorf((f32)z / CHUNK_DIAMETER) * settings.chunk_buf_layer;
+    if (index >= settings.chunk_buf_volume) return;
+
     v3u32 chunk_tab_coordinates =
     {
         index % settings.chunk_buf_diameter,
@@ -680,12 +690,25 @@ void block_place(u32 index, i32 x, i32 y, i32 z, enum BlockID block_id)
         index / settings.chunk_buf_layer,
     };
     Chunk **chunk = &chunk_tab[index];
-    Chunk *px = *(chunk + 1);
-    Chunk *nx = *(chunk - 1);
-    Chunk *py = *(chunk + settings.chunk_buf_diameter);
-    Chunk *ny = *(chunk - settings.chunk_buf_diameter);
-    Chunk *pz = *(chunk + settings.chunk_buf_layer);
-    Chunk *nz = *(chunk - settings.chunk_buf_layer);
+    Chunk *px = NULL;
+    Chunk *nx = NULL;
+    Chunk *py = NULL;
+    Chunk *ny = NULL;
+    Chunk *pz = NULL;
+    Chunk *nz = NULL;
+
+    if (chunk_tab_coordinates.x < settings.chunk_buf_diameter - 1)
+        px = *(chunk + 1);
+    if (chunk_tab_coordinates.x > 0)
+        nx = *(chunk - 1);
+    if (chunk_tab_coordinates.y < settings.chunk_buf_diameter - 1)
+        py = *(chunk + settings.chunk_buf_diameter);
+    if (chunk_tab_coordinates.y > 0)
+        ny = *(chunk - settings.chunk_buf_diameter);
+    if (chunk_tab_coordinates.z < settings.chunk_buf_diameter - 1)
+        pz = *(chunk + settings.chunk_buf_layer);
+    if (chunk_tab_coordinates.z > 0)
+        nz = *(chunk - settings.chunk_buf_layer);
 
     if ((*chunk)->block[z][y][x] || !block_id) return;
 
@@ -799,12 +822,26 @@ void block_break(u32 index, i32 x, i32 y, i32 z)
         index / settings.chunk_buf_layer,
     };
     Chunk **chunk = &chunk_tab[index];
-    Chunk *px = *(chunk + 1);
-    Chunk *nx = *(chunk - 1);
-    Chunk *py = *(chunk + settings.chunk_buf_diameter);
-    Chunk *ny = *(chunk - settings.chunk_buf_diameter);
-    Chunk *pz = *(chunk + settings.chunk_buf_layer);
-    Chunk *nz = *(chunk - settings.chunk_buf_layer);
+    Chunk *px = NULL;
+    Chunk *nx = NULL;
+    Chunk *py = NULL;
+    Chunk *ny = NULL;
+    Chunk *pz = NULL;
+    Chunk *nz = NULL;
+
+    if (chunk_tab_coordinates.x < settings.chunk_buf_diameter - 1)
+        px = *(chunk + 1);
+    if (chunk_tab_coordinates.x > 0)
+        nx = *(chunk - 1);
+    if (chunk_tab_coordinates.y < settings.chunk_buf_diameter - 1)
+        py = *(chunk + settings.chunk_buf_diameter);
+    if (chunk_tab_coordinates.y > 0)
+        ny = *(chunk - settings.chunk_buf_diameter);
+    if (chunk_tab_coordinates.z < settings.chunk_buf_diameter - 1)
+        pz = *(chunk + settings.chunk_buf_layer);
+    if (chunk_tab_coordinates.z > 0)
+        nz = *(chunk - settings.chunk_buf_layer);
+
 
     if (!(*chunk)->block[z][y][x]) return;
 

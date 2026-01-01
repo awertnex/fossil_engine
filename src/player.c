@@ -528,13 +528,12 @@ void player_target_update(Player *p)
        direction.z == 0.0 ? INFINITY : fabs(1.0 / direction.z),
     };
     v3f64 distance = {0};
+    v3f64 normal = {0};
     v3i32 step = {1, 1, 1};
+    b8 hit = FALSE;
     Chunk *ch = NULL;
     u32 *block = NULL;
     i32 x, y, z;
-
-    flag &= ~FLAG_MAIN_PARSE_TARGET;
-    p->target_normal = (v3f32){0};
 
     if (direction.x < 0.0f)
     {
@@ -564,19 +563,19 @@ void player_target_update(Player *p)
             case 1:
                 block_pos.x += step.x;
                 distance.x += delta.x;
-                p->target_normal = (v3f64){-step.x, 0.0, 0.0};
+                normal = (v3f64){-step.x, 0.0, 0.0};
                 break;
 
             case 2:
                 block_pos.y += step.y;
                 distance.y += delta.y;
-                p->target_normal = (v3f64){0.0, -step.y, 0.0};
+                normal = (v3f64){0.0, -step.y, 0.0};
                 break;
 
             case 3:
                 block_pos.z += step.z;
                 distance.z += delta.z;
-                p->target_normal = (v3f64){0.0, 0.0, -step.z};
+                normal = (v3f64){0.0, 0.0, -step.z};
                 break;
         }
 
@@ -587,13 +586,26 @@ void player_target_update(Player *p)
         if (!ch || !(ch->flag & FLAG_CHUNK_GENERATED)) continue;
         block = get_block_resolved(ch, x, y, z);
         if (!block || !*block) continue;
-        flag |= FLAG_MAIN_PARSE_TARGET;
+        hit = TRUE;
         break;
     }
 
-    p->target.x = (f64)block_pos.x;
-    p->target.y = (f64)block_pos.y;
-    p->target.z = (f64)block_pos.z;
+    if (hit && is_in_volume_i64((v3i64){(i64)p->target.x, (i64)p->target.y, (i64)p->target.z},
+                (v3i64){-WORLD_DIAMETER, -WORLD_DIAMETER, -WORLD_DIAMETER_VERTICAL},
+                (v3i64){WORLD_DIAMETER, WORLD_DIAMETER, WORLD_DIAMETER_VERTICAL}))
+    {
+        flag |= FLAG_MAIN_PARSE_TARGET;
+        p->target.x = (f64)block_pos.x;
+        p->target.y = (f64)block_pos.y;
+        p->target.z = (f64)block_pos.z;
+        p->target_normal = normal;
+    }
+    else
+    {
+        flag &= ~FLAG_MAIN_PARSE_TARGET;
+        p->target_normal = (v3f64){0};
+    }
+
 }
 
 void set_player_pos(Player *p, f64 x, f64 y, f64 z)

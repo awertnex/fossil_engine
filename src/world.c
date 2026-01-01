@@ -209,12 +209,4 @@ void world_update(Player *p)
 
     update_projection_perspective(p->camera, &projection_world, FALSE);
     update_projection_perspective(p->camera_hud, &projection_hud, FALSE);
-
-    /* ---- player targeting ------------------------------------------------ */
-
-    if (is_in_volume_i64((v3i64){(i64)p->target.x, (i64)p->target.y, (i64)p->target.z},
-                (v3i64){-WORLD_DIAMETER, -WORLD_DIAMETER, -WORLD_DIAMETER_VERTICAL},
-                (v3i64){WORLD_DIAMETER, WORLD_DIAMETER, WORLD_DIAMETER_VERTICAL}))
-        flag |= FLAG_MAIN_PARSE_TARGET;
-    else flag &= ~FLAG_MAIN_PARSE_TARGET;
 }
