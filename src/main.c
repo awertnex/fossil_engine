@@ -31,7 +31,7 @@ Render render =
 };
 
 struct Settings settings = {0};
-u64 flag = 0;
+u64 flag = FLAG_MAIN_ACTIVE;
 u8 debug_mode[DEBUG_MODE_COUNT] = {0};
 static ShaderProgram shader[SHADER_COUNT] = {0};
 Texture texture[TEXTURE_COUNT] = {0};
@@ -174,7 +174,7 @@ static u32 settings_init(void)
 
     settings.lerp_speed = SET_LERP_SPEED_DEFAULT;
 
-    settings.render_distance = 16;
+    settings.render_distance = 1;
     settings.chunk_buf_radius = settings.render_distance;
     settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
 
@@ -967,14 +967,14 @@ static void draw_everything(void)
     if ((flag & FLAG_MAIN_PARSE_TARGET) && (flag & FLAG_MAIN_HUD) &&
             chunk_tab[chunk_tab_index] &&
             chunk_tab[chunk_tab_index]->block
-            [player.target_snapped.z - chunk_tab[chunk_tab_index]->pos.z * CHUNK_DIAMETER]
-            [player.target_snapped.y - chunk_tab[chunk_tab_index]->pos.y * CHUNK_DIAMETER]
-            [player.target_snapped.x - chunk_tab[chunk_tab_index]->pos.x * CHUNK_DIAMETER])
+            [(i64)player.target.z - chunk_tab[chunk_tab_index]->pos.z * CHUNK_DIAMETER]
+            [(i64)player.target.y - chunk_tab[chunk_tab_index]->pos.y * CHUNK_DIAMETER]
+            [(i64)player.target.x - chunk_tab[chunk_tab_index]->pos.x * CHUNK_DIAMETER])
     {
         glUniform3f(uniform.bounding_box.position,
-                (f32)(player.target_snapped.x),
-                (f32)(player.target_snapped.y),
-                (f32)(player.target_snapped.z));
+                (f32)(player.target.x),
+                (f32)(player.target.y),
+                (f32)(player.target.z));
         glUniform3f(uniform.bounding_box.size, 1.0f, 1.0f, 1.0f);
         glUniform4f(uniform.bounding_box.color, 0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -1433,8 +1433,6 @@ int main(int argc, char **argv)
     glfwSetWindowPos(render.window, (1920 - render.size.x), 24);
     glfwSetWindowSizeLimits(render.window, 512, 288, 3840, 2160);
 
-    flag = FLAG_MAIN_ACTIVE | FLAG_MAIN_PARSE_CURSOR;
-
     /* ---- set mouse input ------------------------------------------------- */
 
     glfwSetInputMode(render.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -1542,13 +1540,6 @@ section_world_loaded:
     {
         render.time = get_time_u64();
         render.frame_delta = get_time_delta_f64();
-
-        /* cursor mode change jitter prevention */
-        if (!(flag & FLAG_MAIN_PARSE_CURSOR))
-        {
-            flag |= FLAG_MAIN_PARSE_CURSOR;
-            render.mouse_delta = (v2f64){0.0f, 0.0f};
-        }
 
         glfwPollEvents();
         update_key_states(render);

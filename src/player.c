@@ -17,6 +17,7 @@ void player_update(Player *p, f64 dt)
 {
     v3f32 gravity = {0};
 
+    p->flag &= ~FLAG_PLAYER_CAN_JUMP;
     p->acceleration = (v3f32){0};
     p->acceleration_rate = PLAYER_ACCELERATION_WALK;
     p->camera.fovy = settings.fov;
@@ -91,7 +92,6 @@ void player_update(Player *p, f64 dt)
     p->pos.y += p->velocity.y * dt;
     p->pos.z += p->velocity.z * dt;
 
-    p->flag &= ~FLAG_PLAYER_CAN_JUMP;
     p->friction.x = 0.0f;
     p->friction.y = 0.0f;
 
@@ -107,7 +107,8 @@ void player_update(Player *p, f64 dt)
     player_wrap_coordinates(p);
     player_chunk_update(p);
 
-    if (p->health <= 0.0f && !(p->flag & FLAG_PLAYER_DEAD)) player_kill(p);
+    if (p->health <= 0.0f && !(p->flag & FLAG_PLAYER_DEAD))
+        player_kill(p);
 }
 
 void player_collision_update(Player *p, f64 dt)
@@ -140,29 +141,26 @@ void player_collision_update(Player *p, f64 dt)
     MAX.y = (i32)(collision_capsule.pos.y + collision_capsule.size.y);
     MAX.z = (i32)(collision_capsule.pos.z + collision_capsule.size.z);
 
-    if (p->velocity.x >= 0.0f)
-        START.x = MIN.x;
-    else
+    if (p->velocity.x < 0.0f)
     {
         START.x = MAX.x - 1;
         INCREMENT.x = -1;
     }
+    else START.x = MIN.x;
 
-    if (p->velocity.y >= 0.0f)
-        START.y = MIN.y;
-    else
+    if (p->velocity.y < 0.0f)
     {
         START.y = MAX.y - 1;
         INCREMENT.y = -1;
     }
+    else START.y = MIN.y;
 
-    if (p->velocity.z >= 0.0f)
-        START.z = MIN.z;
-    else
+    if (p->velocity.z < 0.0f)
     {
         START.z = MAX.z - 1;
         INCREMENT.z = -1;
     }
+    else START.z = MIN.z;
 
     for (i = 0; i < 2 && resolved; ++i)
     {
@@ -303,7 +301,6 @@ BoundingBox make_collision_capsule(BoundingBox b, v3i32 chunk, v3f32 velocity)
             floor(pos.y) - chunk.y * CHUNK_DIAMETER,
             floor(pos.z) - chunk.z * CHUNK_DIAMETER,
         },
-
         .size = (v3f64){
             ceil(size.x),
             ceil(size.y),
@@ -500,50 +497,103 @@ void player_camera_movement_update(Player *p, v2f64 mouse_delta, b8 use_mouse)
     p->camera_hud.cos_yaw = p->camera.cos_yaw;
 }
 
-f64 ray_cast(v3f64 pos, v3f64 target)
-{
-    f64 c = distance_v3f64(pos, target);
-    v3f64 delta;
-    delta = (v3f64){
-       fabs(1.0 / target.x),
-       fabs(1.0 / target.y),
-       fabs(1.0 / target.z),
-    };
-    //printf("%f %f %f\n", delta.x, delta.y, delta.z);
-
-    return 1.0;
-}
-
 void player_target_update(Player *p)
 {
     f64 SPCH = p->sin_pitch;
     f64 CPCH = p->cos_pitch;
     f64 SYAW = p->sin_yaw;
     f64 CYAW = p->cos_yaw;
-    f64 ray_len;
     v3f64 eye_pos =
     {
         p->pos.x,
         p->pos.y,
         p->pos.z + p->eye_height,
     };
-    v3f64 target =
+    v3i64 block_pos =
     {
-        eye_pos.x + CYAW * CPCH * settings.reach_distance,
-        eye_pos.y - SYAW * CPCH * settings.reach_distance,
-        eye_pos.z - SPCH * settings.reach_distance,
+        (i64)floor(eye_pos.x),
+        (i64)floor(eye_pos.y),
+        (i64)floor(eye_pos.z),
     };
+    v3f64 direction =
+    {
+        CYAW * CPCH,
+        -SYAW * CPCH,
+        -SPCH,
+    };
+    v3f64 delta =
+    {
+       direction.x == 0.0 ? INFINITY : fabs(1.0 / direction.x),
+       direction.y == 0.0 ? INFINITY : fabs(1.0 / direction.y),
+       direction.z == 0.0 ? INFINITY : fabs(1.0 / direction.z),
+    };
+    v3f64 distance = {0};
+    v3i32 step = {1, 1, 1};
+    Chunk *ch = NULL;
+    u32 *block = NULL;
+    i32 x, y, z;
 
-    ray_len = ray_cast(eye_pos, target);
+    flag &= ~FLAG_MAIN_PARSE_TARGET;
+    p->target_normal = (v3f32){0};
 
-    p->target.x = target.x * ray_len;
-    p->target.y = target.y * ray_len;
-    p->target.z = target.z * ray_len;
+    if (direction.x < 0.0f)
+    {
+        distance.x = (eye_pos.x - block_pos.x) * delta.x;
+        step.x = -1;
+    }
+    else distance.x = (block_pos.x + 1.0 - eye_pos.x) * delta.x;
 
-    p->target_snapped.x = (i64)floor(p->target.x);
-    p->target_snapped.y = (i64)floor(p->target.y);
-    p->target_snapped.z = (i64)floor(p->target.z);
+    if (direction.y < 0.0f)
+    {
+        distance.y = (eye_pos.y - block_pos.y) * delta.y;
+        step.y = -1;
+    }
+    else distance.y = (block_pos.y + 1.0 - eye_pos.y) * delta.y;
 
+    if (direction.z < 0.0f)
+    {
+        distance.z = (eye_pos.z - block_pos.z) * delta.z;
+        step.z = -1;
+    }
+    else distance.z = (block_pos.z + 1.0 - eye_pos.z) * delta.z;
+
+    while (min_v3f32((v3f32){distance.x, distance.y, distance.z}) < settings.reach_distance)
+    {
+        switch (min_axis_v3f32((v3f32){distance.x, distance.y, distance.z}))
+        {
+            case 1:
+                block_pos.x += step.x;
+                distance.x += delta.x;
+                p->target_normal = (v3f64){-step.x, 0.0, 0.0};
+                break;
+
+            case 2:
+                block_pos.y += step.y;
+                distance.y += delta.y;
+                p->target_normal = (v3f64){0.0, -step.y, 0.0};
+                break;
+
+            case 3:
+                block_pos.z += step.z;
+                distance.z += delta.z;
+                p->target_normal = (v3f64){0.0, 0.0, -step.z};
+                break;
+        }
+
+        x = block_pos.x - p->chunk.x * CHUNK_DIAMETER;
+        y = block_pos.y - p->chunk.y * CHUNK_DIAMETER;
+        z = block_pos.z - p->chunk.z * CHUNK_DIAMETER;
+        ch = get_chunk_resolved(settings.chunk_tab_center, x, y, z);
+        if (!ch || !(ch->flag & FLAG_CHUNK_GENERATED)) continue;
+        block = get_block_resolved(ch, x, y, z);
+        if (!block || !*block) continue;
+        flag |= FLAG_MAIN_PARSE_TARGET;
+        break;
+    }
+
+    p->target.x = (f64)block_pos.x;
+    p->target.y = (f64)block_pos.y;
+    p->target.z = (f64)block_pos.z;
 }
 
 void set_player_pos(Player *p, f64 x, f64 y, f64 z)

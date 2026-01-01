@@ -29,7 +29,7 @@ u32 world_init(str *name, u64 seed, Player *p)
 
     world.gravity = GRAVITY * 3.0f;
 
-    set_player_spawn(p, 0, 0, 0);
+    set_player_spawn(p, 0, 0, 30);
     player_spawn(p, TRUE);
     player_chunk_update(p);
 
@@ -199,20 +199,20 @@ void world_update(Player *p)
         show_cursor;
     else disable_cursor;
 
-    player_update(p, 1.0f - expf(-render.frame_delta));
-    player_target_update(p);
-
-    b8 use_mouse = (!state_menu_depth && !(flag & FLAG_MAIN_SUPER_DEBUG));
+    player_update(p, 1.0f - expf(-1.0f * render.frame_delta));
+    b8 use_mouse = !state_menu_depth && !(flag & FLAG_MAIN_SUPER_DEBUG) && !(p->flag & FLAG_PLAYER_DEAD);
     player_camera_movement_update(p, render.mouse_delta, use_mouse);
-    update_projection_perspective(p->camera, &projection_world, FALSE);
-    update_projection_perspective(p->camera_hud, &projection_hud, FALSE);
+    player_target_update(p);
 
     chunking_update(p->chunk, &p->chunk_delta);
     chunk_tab_index = get_chunk_index(p->chunk, p->target);
 
+    update_projection_perspective(p->camera, &projection_world, FALSE);
+    update_projection_perspective(p->camera_hud, &projection_hud, FALSE);
+
     /* ---- player targeting ------------------------------------------------ */
 
-    if (is_in_volume_i64(p->target_snapped,
+    if (is_in_volume_i64((v3i64){(i64)p->target.x, (i64)p->target.y, (i64)p->target.z},
                 (v3i64){-WORLD_DIAMETER, -WORLD_DIAMETER, -WORLD_DIAMETER_VERTICAL},
                 (v3i64){WORLD_DIAMETER, WORLD_DIAMETER, WORLD_DIAMETER_VERTICAL}))
         flag |= FLAG_MAIN_PARSE_TARGET;

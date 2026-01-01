@@ -72,7 +72,7 @@ typedef struct Player
     v3f64 pos_last;                 /* coordinates in world of previous frame */
     v3f32 size;                     /* size (for collision detection) */
     v3f64 target;                   /* arm */
-    v3i64 target_snapped;           /* floor of 'target' */
+    v3f64 target_normal;
 
     f64 roll, pitch, yaw;
     f32 sin_roll, sin_pitch, sin_yaw;

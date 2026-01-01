@@ -82,7 +82,7 @@ f64 len_v3f64(v3f64 v)
 
 v3f32 normalize_v3f32(v3f32 v)
 {
-    f32 len = len_v3f32(v);
+    f32 len = sqrtf(len_v3f32(v));
     if (len < EPSILON)
         return (v3f32){0};
 
@@ -91,7 +91,7 @@ v3f32 normalize_v3f32(v3f32 v)
 
 v3f64 normalize_v3f64(v3f64 v)
 {
-    f64 len = len_v3f64(v);
+    f64 len = sqrt(len_v3f64(v));
     if (len < EPSILON)
         return (v3f64){0};
 

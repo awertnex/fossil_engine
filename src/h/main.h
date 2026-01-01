@@ -67,16 +67,15 @@ enum MainFlag
 {
     FLAG_MAIN_ACTIVE =          0x00000001,
     FLAG_MAIN_PAUSED =          0x00000002,
-    FLAG_MAIN_PARSE_CURSOR =    0x00000004,
-    FLAG_MAIN_HUD =             0x00000008,
-    FLAG_MAIN_DEBUG =           0x00000010,
-    FLAG_MAIN_SUPER_DEBUG =     0x00000020,
-    FLAG_MAIN_FULLSCREEN =      0x00000040,
-    FLAG_MAIN_MENU_OPEN =       0x00000080,
-    FLAG_MAIN_DOUBLE_PRESS =    0x00000100,
-    FLAG_MAIN_PARSE_TARGET =    0x00000200,
-    FLAG_MAIN_WORLD_LOADED =    0x00000400,
-    FLAG_MAIN_CHUNK_BUF_DIRTY = 0x00000800,
+    FLAG_MAIN_HUD =             0x00000004,
+    FLAG_MAIN_DEBUG =           0x00000008,
+    FLAG_MAIN_SUPER_DEBUG =     0x00000010,
+    FLAG_MAIN_FULLSCREEN =      0x00000020,
+    FLAG_MAIN_MENU_OPEN =       0x00000040,
+    FLAG_MAIN_DOUBLE_PRESS =    0x00000080,
+    FLAG_MAIN_PARSE_TARGET =    0x00000100,
+    FLAG_MAIN_WORLD_LOADED =    0x00000200,
+    FLAG_MAIN_CHUNK_BUF_DIRTY = 0x00000400,
 }; /* MainFlag */
 
 enum DebugMode
@@ -107,7 +106,7 @@ struct Settings
     u32 chunk_buf_volume;
     u32 chunk_tab_center;
 
-    u8 reach_distance;  /* player reach (arm length) */
+    f64 reach_distance; /* player reach (arm length) */
 
     /* ---- controls -------------------------------------------------------- */
 
