@@ -161,14 +161,14 @@ void input_update(Render render, Player *p)
             (flag & FLAG_MAIN_PARSE_TARGET) &&
             chunk_tab[chunk_tab_index])
     {
-        if (glfwGetMouseButton(render.window, bind_attack_or_destroy) == GLFW_PRESS)
+        if (is_mouse_hold(bind_attack_or_destroy))
         {
             block_break(chunk_tab_index,
                     (i64)p->target.x - chunk_tab[chunk_tab_index]->pos.x * CHUNK_DIAMETER,
                     (i64)p->target.y - chunk_tab[chunk_tab_index]->pos.y * CHUNK_DIAMETER,
                     (i64)p->target.z - chunk_tab[chunk_tab_index]->pos.z * CHUNK_DIAMETER);
         }
-        if (glfwGetMouseButton(render.window, bind_build_or_use) == GLFW_PRESS)
+        if (is_mouse_press(bind_build_or_use))
         {
             block_place(chunk_tab_index,
                     (i64)p->target.x - chunk_tab[chunk_tab_index]->pos.x * CHUNK_DIAMETER,

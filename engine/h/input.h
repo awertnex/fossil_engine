@@ -4,6 +4,7 @@
 #include "core.h"
 #include "types.h"
 
+#define MOUSE_BUTTONS_MAX 8
 #define KEYBOARD_KEYS_MAX 120
 #define KEYBOARD_DOUBLE_PRESS_TIME 0.5f
 
@@ -146,12 +147,15 @@ enum KeyboardKeys
 
 void update_mouse_movement(Render *render);
 
+b8 is_mouse_press(const u32 button);
+b8 is_mouse_hold(const u32 button);
+b8 is_mouse_release(const u32 button);
 b8 is_key_press(const u32 key);
 b8 is_key_press_double(const u32 key);
 b8 is_key_hold(const u32 key);
 b8 is_key_release(const u32 key);
 
-/*! @brief update internal key states: press, double-press, hold, release,
+/*! @brief update internal mouse and key states: press, double-press, hold and release.
  */
 void update_key_states(Render render);
 

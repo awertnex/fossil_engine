@@ -1,6 +1,7 @@
 #include "h/input.h"
 #include "h/time.h"
 
+static u32 mouse_button[MOUSE_BUTTONS_MAX] = {0};
 static u32 keyboard_key[KEYBOARD_KEYS_MAX] = {0};
 static u32 keyboard_tab[KEYBOARD_KEYS_MAX] =
 {
@@ -137,6 +138,21 @@ void update_mouse_movement(Render *render)
     render->mouse_last = render->mouse_position;
 }
 
+b8 is_mouse_press(const u32 button)
+{
+    return mouse_button[button] == KEY_PRESS;
+}
+
+b8 is_mouse_hold(const u32 button)
+{
+    return mouse_button[button] == KEY_HOLD;
+}
+
+b8 is_mouse_release(const u32 button)
+{
+    return mouse_button[button] == KEY_RELEASE;
+}
+
 b8 is_key_press(const u32 key)
 {
     return keyboard_key[key] == KEY_PRESS ||
@@ -163,8 +179,31 @@ b8 is_key_release(const u32 key)
 void update_key_states(Render render)
 {
     static u64 key_press_start_time[KEYBOARD_KEYS_MAX] = {0};
-    b8 key_press = FALSE, key_release = FALSE;
+    b8 key_press = FALSE, key_release = FALSE,
+       mouse_press = FALSE, mouse_release = FALSE;
     u32 i;
+
+    for (i = 0; i < MOUSE_BUTTONS_MAX; ++i)
+    {
+        mouse_press = glfwGetMouseButton(render.window, i) == GLFW_PRESS;
+        mouse_release = glfwGetMouseButton(render.window, i) == GLFW_RELEASE;
+
+        if (mouse_press &&
+                (mouse_button[i] == KEY_IDLE))
+        {
+            mouse_button[i] = KEY_PRESS;
+            continue;
+        }
+        else if (mouse_release &&
+                (mouse_button[i] == KEY_PRESS || mouse_button[i] == KEY_HOLD))
+        {
+            mouse_button[i] = KEY_RELEASE;
+            continue;
+        }
+
+        if (mouse_button[i] == KEY_PRESS)           mouse_button[i] = KEY_HOLD;
+        else if (mouse_button[i] == KEY_RELEASE)    mouse_button[i] = KEY_IDLE;
+    }
 
     for (i = 0; i < KEYBOARD_KEYS_MAX; ++i)
     {
