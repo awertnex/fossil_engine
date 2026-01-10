@@ -15,17 +15,14 @@ static void player_wrap_coordinates(Player *p);
 
 void player_update(Player *p, f64 dt)
 {
-    v3f32 gravity = {0};
+    v3f32 gravity = {0}, drag = {0},
+          damping = {0}, air_control = {0},
+          velocity_normalized = normalize_v3f32(p->velocity);
 
     p->flag &= ~FLAG_PLAYER_CAN_JUMP;
     p->acceleration = (v3f32){0};
     p->acceleration_rate = PLAYER_ACCELERATION_WALK;
     p->camera.fovy = settings.fov;
-    world.drag = (v3f32){
-        WORLD_DRAG_AIR,
-        WORLD_DRAG_AIR,
-        WORLD_DRAG_AIR,
-    };
 
     /* ---- player flags ---------------------------------------------------- */
 
@@ -35,15 +32,15 @@ void player_update(Player *p, f64 dt)
 
         if (p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
         {
-            world.drag.x = WORLD_DRAG_FLY_NATURAL;
-            world.drag.y = WORLD_DRAG_FLY_NATURAL;
-            world.drag.z = WORLD_DRAG_FLY_NATURAL;
+            drag.x = PLAYER_FRICTION_FLY_NATURAL;
+            drag.y = PLAYER_FRICTION_FLY_NATURAL;
+            drag.z = PLAYER_FRICTION_FLY_NATURAL;
         }
         else
         {
-            world.drag.x = WORLD_DRAG_FLYING;
-            world.drag.y = WORLD_DRAG_FLYING;
-            world.drag.z = WORLD_DRAG_FLYING_V;
+            drag.x = PLAYER_FRICTION_FLYING;
+            drag.y = PLAYER_FRICTION_FLYING;
+            drag.z = PLAYER_FRICTION_FLYING_V;
         }
 
         p->camera.fovy += 10.0f;
@@ -57,9 +54,12 @@ void player_update(Player *p, f64 dt)
     else
     {
         gravity.z -= world.gravity;
-        world.drag.x = map_range_f32(p->friction.x, 0.0f, 1.0f, WORLD_DRAG_AIR, WORLD_DRAG_GROUND_SOLID);
-        world.drag.y = map_range_f32(p->friction.y, 0.0f, 1.0f, WORLD_DRAG_AIR, WORLD_DRAG_GROUND_SOLID);
-        world.drag.z = map_range_f32(p->friction.z, 0.0f, 1.0f, WORLD_DRAG_AIR, WORLD_DRAG_GROUND_SOLID);
+        drag.x = PLAYER_FRICTION_DEFAULT;
+        drag.y = PLAYER_FRICTION_DEFAULT;
+        drag.z = PLAYER_FRICTION_DEFAULT;
+
+        air_control.x = p->input.x * p->acceleration_rate * drag.x * (1.0f - p->friction.x);
+        air_control.y = p->input.y * p->acceleration_rate * drag.y * (1.0f - p->friction.y);
 
         if (p->flag & FLAG_PLAYER_SNEAKING)
             p->acceleration_rate = PLAYER_ACCELERATION_SNEAK;
@@ -75,18 +75,17 @@ void player_update(Player *p, f64 dt)
 
     /* ---- apply parameters ------------------------------------------------ */
 
-    p->acceleration.x = p->input.x * p->acceleration_rate * world.drag.x -
-            world.drag.x * p->velocity.x + gravity.x;
+    damping.x = -(world.drag.x) * p->velocity.x;
+    damping.y = -(world.drag.y) * p->velocity.y;
+    damping.z = -(world.drag.z) * p->velocity.z;
 
-    p->acceleration.y = p->input.y * p->acceleration_rate * world.drag.y -
-            world.drag.y * p->velocity.y + gravity.y;
+    p->acceleration.x = p->input.x * p->acceleration_rate * drag.x;
+    p->acceleration.y = p->input.y * p->acceleration_rate * drag.y;
+    p->acceleration.z = p->input.z * p->acceleration_rate * drag.z;
 
-    p->acceleration.z = p->input.z * p->acceleration_rate * world.drag.z -
-            world.drag.z * p->velocity.z + gravity.z;
-
-    p->velocity.x += p->acceleration.x * dt;
-    p->velocity.y += p->acceleration.y * dt;
-    p->velocity.z += p->acceleration.z * dt;
+    p->velocity.x += (p->acceleration.x + damping.x + gravity.x) * dt;
+    p->velocity.y += (p->acceleration.y + damping.y + gravity.y) * dt;
+    p->velocity.z += (p->acceleration.z + damping.z + gravity.z) * dt;
 
     p->pos.x += p->velocity.x * dt;
     p->pos.y += p->velocity.y * dt;
@@ -126,7 +125,9 @@ void player_collision_update(Player *p, f64 dt)
     };
     f32 time = 0.0f;
     v3f32 normal = {0};
+    v3f32 velocity_normalized = {0};
     f32 dot = 0.0f;
+    f32 friction = 0.0f;
     BoundingBox block_box = {0};
     BoundingBox collision_capsule;
     i32 i, x, y, z;
@@ -207,8 +208,11 @@ void player_collision_update(Player *p, f64 dt)
                             if (!(p->flag & FLAG_PLAYER_CINEMATIC_MOTION))
                                 p->flag &= ~FLAG_PLAYER_FLYING;
                             p->flag |= FLAG_PLAYER_CAN_JUMP;
-                            p->friction.x = 1.0f;
-                            p->friction.y = 1.0f;
+
+                            velocity_normalized = normalize_v3f32(p->velocity);
+                            friction = blocks[*block & MASK_BLOCK_ID].friction;
+                            p->friction.x = friction;
+                            p->friction.y = friction;
                         }
 
                         player_bounding_box_update(p);

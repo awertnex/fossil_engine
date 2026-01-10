@@ -6,15 +6,9 @@
 #define SEC2NANOSEC 1e9
 #define NANOSEC2SEC 1e-9
 
-/*! @brief get time for logic purposes, like for random number generators
- *  that require a seed.
- *
- *  get an unsigned 64-bit integer value based on unix time,
- *  but added nanoseconds of unix time.
- *
- *  @remark not accurate to actual time.
+/*! @brief get elapsed nanoseconds since the unix epoch, 1970-01-01 00:00:00 UTC.
  */
-u64 get_time_logic(void);
+u64 get_time_raw_u64(void);
 
 /*! @brief get elapsed nanoseconds since this function's first call in the process.
  */
@@ -29,10 +23,20 @@ u64 get_time_u64(void);
 f64 get_time_f64(void);
 
 /*! @brief get elapsed time since this function's last call in the process,
- *  in seconds and fractional milliseconds.
+ *  in nanoseconds.
+ *
+ *  @remark the macro NANOSEC2SEC can be used to convert from nanoseconds to
+ *  fractional seconds when multiplied by output.
  */
-f64 get_time_delta_f64(void);
+u64 get_time_delta_u64(void);
 
 b8 get_timer(f64 *time_start, f32 interval);
+
+/*! @brief sleep for specified nanoseconds.
+ *
+ *  @remark the macros SEC2NANOSEC, NANOSEC2SEC can be used to convert from
+ *  seconds to nanoseconds and vice-versa when multiplied by specified value.
+ */
+void sleep_nsec(u64 nsec);
 
 #endif /* ENGINE_TIME_H */

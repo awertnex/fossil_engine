@@ -5,6 +5,10 @@
 #include <engine/h/limits.h>
 #include "dir.h"
 
+#define FRICTION_BLOCK_SLIPPERY 0.02f
+#define FRICTION_BLOCK_WET      0.1f
+#define FRICTION_BLOCK_HARD     0.6f
+
 enum TextureBlockIndex
 {
     TEXTURE_BLOCK_GRASS_SIDE,
@@ -56,6 +60,7 @@ typedef struct Block
     str name[NAME_MAX];
     enum BlockState state;
     u32 texture_index[6]; /* px, nx, py, ny, pz, nz */
+    f32 friction;
 } Block;
 
 extern Block *blocks;

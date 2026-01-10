@@ -41,7 +41,7 @@
 #define SET_MOUSE_SENSITIVITY_MAX       200
 #define SET_TARGET_FPS_DEFAULT          60
 #define SET_TARGET_FPS_MIN              1
-#define SET_TARGET_FPS_MAX              241     /* 240 max, 241 = unlimited */
+#define SET_TARGET_FPS_MAX              240
 #define SET_GUI_SCALE_DEFAULT           2
 #define SET_GUI_SCALE_0                 0 /* TODO: auto gui scale */
 #define SET_GUI_SCALE_1                 1
@@ -72,10 +72,11 @@ enum MainFlag
     FLAG_MAIN_SUPER_DEBUG =     0x00000010,
     FLAG_MAIN_FULLSCREEN =      0x00000020,
     FLAG_MAIN_MENU_OPEN =       0x00000040,
-    FLAG_MAIN_DOUBLE_PRESS =    0x00000080,
-    FLAG_MAIN_PARSE_TARGET =    0x00000100,
-    FLAG_MAIN_WORLD_LOADED =    0x00000200,
-    FLAG_MAIN_CHUNK_BUF_DIRTY = 0x00000400,
+    FLAG_MAIN_FPS_CAP =         0x00000080,
+    FLAG_MAIN_DOUBLE_PRESS =    0x00000100,
+    FLAG_MAIN_PARSE_TARGET =    0x00000200,
+    FLAG_MAIN_WORLD_LOADED =    0x00000400,
+    FLAG_MAIN_CHUNK_BUF_DIRTY = 0x00000800,
 }; /* MainFlag */
 
 enum DebugMode
@@ -116,7 +117,7 @@ struct Settings
 
     u32 gui_scale;
     f32 font_size;
-    u32 target_fps;
+    u64 target_fps; /* in nanoseconds */
 
     /* ---- graphics -------------------------------------------------------- */
 

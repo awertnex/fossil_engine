@@ -164,7 +164,7 @@ u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
     else
     {
         if (!seed)
-            seed = rand_u64(get_time_logic());
+            seed = rand_u64(get_time_raw_u64());
 
         convert_u64_to_str(string[1], NAME_MAX, seed);
         if (write_file(string[0], 1, strlen(string[1]),
@@ -176,7 +176,7 @@ u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
 
     /* ---- TODO: load the rest of world metadata --------------------------- */
 
-    world->tick_start = 17000;
+    world->tick_start = 0;
     world->days = 0;
     world->drag.x = WORLD_DRAG_AIR;
     world->drag.y = WORLD_DRAG_AIR;
@@ -199,7 +199,7 @@ void world_update(Player *p)
         show_cursor;
     else disable_cursor;
 
-    player_update(p, 1.0f - expf(-1.0f * render.frame_delta));
+    player_update(p, 1.0 - exp(-1.0 * (f64)render.time_delta * NANOSEC2SEC));
     b8 use_mouse = !state_menu_depth && !(flag & FLAG_MAIN_SUPER_DEBUG) && !(p->flag & FLAG_PLAYER_DEAD);
     player_camera_movement_update(p, render.mouse_delta, use_mouse);
     player_target_update(p);

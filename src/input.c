@@ -74,154 +74,158 @@ void input_update(Render render, Player *p)
     u32 i;
     f32 px = 0.0f, nx = 0.0f,
         py = 0.0f, ny = 0.0f,
-        pz = 0.0f, nz = 0.0f;
+        pz = 0.0f, nz = 0.0f,
+        spch = sin(p->pitch * DEG2RAD),
+        cpch = cos(p->pitch * DEG2RAD),
+        syaw = sin(p->yaw * DEG2RAD),
+        cyaw = cos(p->yaw * DEG2RAD);
 
     p->input = (v3f32){0};
 
-    /* ---- movement -------------------------------------------------------- */
-
-    px += (f32)is_key_hold(bind_walk_forward);
-    nx += (f32)is_key_hold(bind_walk_backward);
-    py += (f32)is_key_hold(bind_strafe_left);
-    ny += (f32)is_key_hold(bind_strafe_right);
-
-    if (is_key_press_double(bind_walk_forward))
-        p->flag |= FLAG_PLAYER_SPRINTING;
-
-    /* ---- jumping --------------------------------------------------------- */
-
-    if (is_key_hold(bind_jump))
+    if (!(p->flag & FLAG_PLAYER_DEAD))
     {
-        if (p->flag & FLAG_PLAYER_FLYING)
-            pz += 1.0f;
-        else if (p->flag & FLAG_PLAYER_CAN_JUMP)
+        /* ---- movement ---------------------------------------------------- */
+
+        px += (f32)is_key_hold(bind_walk_forward);
+        nx += (f32)is_key_hold(bind_walk_backward);
+        py += (f32)is_key_hold(bind_strafe_left);
+        ny += (f32)is_key_hold(bind_strafe_right);
+
+        if (is_key_press_double(bind_walk_forward))
+            p->flag |= FLAG_PLAYER_SPRINTING;
+
+        /* ---- jumping ----------------------------------------------------- */
+
+        if (is_key_hold(bind_jump))
         {
-            p->velocity.z += sqrtf(2.0f * world.gravity * PLAYER_JUMP_HEIGHT);
-            p->flag &= ~FLAG_PLAYER_CAN_JUMP;
-        }
-    }
-
-    if (is_key_press_double(bind_jump))
-        p->flag ^= FLAG_PLAYER_FLYING;
-
-    /* ---- sprinting ------------------------------------------------------- */
-
-    if (is_key_hold(bind_sprint) && is_key_hold(bind_walk_forward))
-        p->flag |= FLAG_PLAYER_SPRINTING;
-    else if (is_key_release(bind_walk_forward))
-        p->flag &= ~FLAG_PLAYER_SPRINTING;
-
-    /* ---- sneaking -------------------------------------------------------- */
-
-    if (is_key_hold(bind_sneak))
-    {
-        if (p->flag & FLAG_PLAYER_FLYING)
-            nz += 1.0f;
-        else p->flag |= FLAG_PLAYER_SNEAKING;
-    }
-    else p->flag &= ~FLAG_PLAYER_SNEAKING;
-
-    /* ---- apply movement input -------------------------------------------- */
-
-    if (p->flag & FLAG_PLAYER_DEAD)
-    {}
-    else if (p->flag & FLAG_PLAYER_FLYING && p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
-    {
-        p->input.x =
-            (px - nx) * cos(p->yaw * DEG2RAD) * cos(p->pitch * DEG2RAD) +
-            (py - ny) * -cos(p->yaw * DEG2RAD + PI * 0.5) +
-            (pz - nz) * cos(p->yaw * DEG2RAD) * sin(p->pitch * DEG2RAD);
-        p->input.y =
-            (px - nx) * -sin(p->yaw * DEG2RAD) * cos(p->pitch * DEG2RAD) +
-            (py - ny) * sin(p->yaw * DEG2RAD + PI * 0.5) +
-            (pz - nz) * -sin(p->yaw * DEG2RAD) * sin(p->pitch * DEG2RAD);
-        p->input.z =
-            (px - nx) * -sin(p->pitch * DEG2RAD) +
-            (pz - nz) * cos(p->pitch * DEG2RAD);
-    }
-    else
-        p->input = (v3f32){
-            (px - nx) * cos(p->yaw * DEG2RAD) + (py - ny) * -cos(p->yaw * DEG2RAD + PI * 0.5),
-            (px - nx) * -sin(p->yaw * DEG2RAD) + (py - ny) * sin(p->yaw * DEG2RAD + PI * 0.5),
-            pz - nz,
-        };
-
-    f32 input_len = sqrtf(len_v3f32(p->input));
-    if (input_len > EPSILON)
-    {
-        p->input.x /= input_len;
-        p->input.y /= input_len;
-        p->input.z /= input_len;
-    }
-
-    /* ---- gameplay -------------------------------------------------------- */
-
-    if (
-            !(flag & FLAG_MAIN_CHUNK_BUF_DIRTY) &&
-            (flag & FLAG_MAIN_PARSE_TARGET) &&
-            chunk_tab[chunk_tab_index])
-    {
-        if (is_mouse_hold(bind_attack_or_destroy))
-        {
-            block_break(chunk_tab_index,
-                    (i64)p->target.x - chunk_tab[chunk_tab_index]->pos.x * CHUNK_DIAMETER,
-                    (i64)p->target.y - chunk_tab[chunk_tab_index]->pos.y * CHUNK_DIAMETER,
-                    (i64)p->target.z - chunk_tab[chunk_tab_index]->pos.z * CHUNK_DIAMETER);
-        }
-        if (is_mouse_press(bind_build_or_use))
-        {
-            block_place(chunk_tab_index,
-                    (i64)p->target.x - chunk_tab[chunk_tab_index]->pos.x * CHUNK_DIAMETER,
-                    (i64)p->target.y - chunk_tab[chunk_tab_index]->pos.y * CHUNK_DIAMETER,
-                    (i64)p->target.z - chunk_tab[chunk_tab_index]->pos.z * CHUNK_DIAMETER,
-                    p->target_normal, p->hotbar_slots[p->hotbar_slot_selected]);
+            if (p->flag & FLAG_PLAYER_FLYING)
+                pz += 1.0f;
+            else if (p->flag & FLAG_PLAYER_CAN_JUMP)
+            {
+                p->velocity.z += sqrtf(2.0f * world.gravity * PLAYER_JUMP_HEIGHT);
+                p->flag &= ~FLAG_PLAYER_CAN_JUMP;
+            }
         }
 
-        if (is_key_press(bind_sample_block)) {}
-    }
+        if (is_key_press_double(bind_jump))
+            p->flag ^= FLAG_PLAYER_FLYING;
 
-    /* ---- inventory ------------------------------------------------------- */
+        /* ---- sprinting --------------------------------------------------- */
 
-    for (i = 0; i < PLAYER_HOTBAR_SLOTS_MAX; ++i)
-        if (is_key_press(bind_hotbar[0][i]) || is_key_press(bind_hotbar[1][i]))
-            p->hotbar_slot_selected = i;
+        if (is_key_hold(bind_sprint) && is_key_hold(bind_walk_forward))
+            p->flag |= FLAG_PLAYER_SPRINTING;
+        else if (is_key_release(bind_walk_forward))
+            p->flag &= ~FLAG_PLAYER_SPRINTING;
 
-    if (is_key_press(bind_inventory))
-    {
-        if ((p->container_state & STATE_PLAYER_MENU_INVENTORY_SURVIVAL) && state_menu_depth)
+        /* ---- sneaking ---------------------------------------------------- */
+
+        if (is_key_hold(bind_sneak))
         {
-            state_menu_depth = 0;
-            p->container_state &= ~STATE_PLAYER_MENU_INVENTORY_SURVIVAL;
+            if (p->flag & FLAG_PLAYER_FLYING)
+                nz += 1.0f;
+            else p->flag |= FLAG_PLAYER_SNEAKING;
         }
-        else if (!(p->container_state & STATE_PLAYER_MENU_INVENTORY_SURVIVAL) && !state_menu_depth)
+        else p->flag &= ~FLAG_PLAYER_SNEAKING;
+
+        /* ---- apply input ------------------------------------------------- */
+
+        if (p->flag & FLAG_PLAYER_FLYING && p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
         {
-            state_menu_depth = 1;
-            p->container_state |= STATE_PLAYER_MENU_INVENTORY_SURVIVAL;
+            p->input.x =
+                (px - nx) * cyaw * cpch +
+                (py - ny) * -cos(p->yaw * DEG2RAD + PI / 2.0) +
+                (pz - nz) * cyaw * spch;
+            p->input.y =
+                (px - nx) * -syaw * cpch +
+                (py - ny) * sin(p->yaw * DEG2RAD + PI / 2.0) +
+                (pz - nz) * -syaw * spch;
+            p->input.z =
+                (px - nx) * -spch +
+                (pz - nz) * cpch;
+        }
+        else
+        {
+            p->input.x =
+                (px - nx) * cyaw +
+                (py - ny) * -cos(p->yaw * DEG2RAD + PI / 2.0);
+            p->input.y =
+                (px - nx) * -syaw +
+                (py - ny) * sin(p->yaw * DEG2RAD + PI / 2.0);
+            p->input.z =
+                pz - nz;
         }
 
-        if (!(p->container_state & STATE_PLAYER_MENU_INVENTORY_SURVIVAL) && state_menu_depth)
-            --state_menu_depth;
+        p->input = normalize_v3f32(p->input);
+
+        /* ---- gameplay ---------------------------------------------------- */
+
+        if (
+                !(flag & FLAG_MAIN_CHUNK_BUF_DIRTY) &&
+                (flag & FLAG_MAIN_PARSE_TARGET) &&
+                chunk_tab[chunk_tab_index])
+        {
+            if (is_mouse_hold(bind_attack_or_destroy))
+            {
+                block_break(chunk_tab_index,
+                        (i64)p->target.x - chunk_tab[chunk_tab_index]->pos.x * CHUNK_DIAMETER,
+                        (i64)p->target.y - chunk_tab[chunk_tab_index]->pos.y * CHUNK_DIAMETER,
+                        (i64)p->target.z - chunk_tab[chunk_tab_index]->pos.z * CHUNK_DIAMETER);
+            }
+            if (is_mouse_press(bind_build_or_use))
+            {
+                block_place(chunk_tab_index,
+                        (i64)p->target.x - chunk_tab[chunk_tab_index]->pos.x * CHUNK_DIAMETER,
+                        (i64)p->target.y - chunk_tab[chunk_tab_index]->pos.y * CHUNK_DIAMETER,
+                        (i64)p->target.z - chunk_tab[chunk_tab_index]->pos.z * CHUNK_DIAMETER,
+                        p->target_normal, p->hotbar_slots[p->hotbar_slot_selected]);
+            }
+
+            if (is_key_press(bind_sample_block)) {}
+        }
+
+        /* ---- inventory --------------------------------------------------- */
+
+        for (i = 0; i < PLAYER_HOTBAR_SLOTS_MAX; ++i)
+            if (is_key_press(bind_hotbar[0][i]) || is_key_press(bind_hotbar[1][i]))
+                p->hotbar_slot_selected = i;
+
+        if (is_key_press(bind_inventory))
+        {
+            if ((p->container_state & STATE_PLAYER_MENU_INVENTORY_SURVIVAL) && state_menu_depth)
+            {
+                state_menu_depth = 0;
+                p->container_state &= ~STATE_PLAYER_MENU_INVENTORY_SURVIVAL;
+            }
+            else if (!(p->container_state & STATE_PLAYER_MENU_INVENTORY_SURVIVAL) && !state_menu_depth)
+            {
+                state_menu_depth = 1;
+                p->container_state |= STATE_PLAYER_MENU_INVENTORY_SURVIVAL;
+            }
+
+            if (!(p->container_state & STATE_PLAYER_MENU_INVENTORY_SURVIVAL) && state_menu_depth)
+                --state_menu_depth;
+        }
+
+        /* ---- miscellaneous ----------------------------------------------- */
+
+        if (is_key_press(bind_toggle_hud))
+            flag ^= FLAG_MAIN_HUD;
+
+        if (is_key_press(bind_toggle_debug))
+            flag ^= FLAG_MAIN_DEBUG;
+
+        if (is_key_press(bind_toggle_perspective))
+            p->camera_mode = (p->camera_mode + 1) % PLAYER_CAMERA_MODE_COUNT;
+
+        if (is_key_press(bind_toggle_zoom))
+            p->flag ^= FLAG_PLAYER_ZOOMER;
+
+        if (is_key_press(bind_toggle_flashlight))
+            p->flag ^= FLAG_PLAYER_FLASHLIGHT;
+
+        if (is_key_press(bind_toggle_cinematic_motion))
+            p->flag ^= FLAG_PLAYER_CINEMATIC_MOTION;
     }
-
-    /* ---- miscellaneous --------------------------------------------------- */
-
-    if (is_key_press(bind_toggle_hud))
-        flag ^= FLAG_MAIN_HUD;
-
-    if (is_key_press(bind_toggle_debug))
-        flag ^= FLAG_MAIN_DEBUG;
-
-    if (is_key_press(bind_toggle_perspective))
-        p->camera_mode = (p->camera_mode + 1) % PLAYER_CAMERA_MODE_COUNT;
-
-    if (is_key_press(bind_toggle_zoom))
-        p->flag ^= FLAG_PLAYER_ZOOMER;
-
-    if (is_key_press(bind_toggle_flashlight))
-        p->flag ^= FLAG_PLAYER_FLASHLIGHT;
-
-    if (is_key_press(bind_toggle_cinematic_motion))
-        p->flag ^= FLAG_PLAYER_CINEMATIC_MOTION;
 
     /* ---- debug ----------------------------------------------------------- */
 

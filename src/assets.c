@@ -179,6 +179,7 @@ void blocks_init(void)
     blocks[BLOCK_BLOOD].texture_index[3] = TEXTURE_BLOCK_BLOOD;
     blocks[BLOCK_BLOOD].texture_index[4] = TEXTURE_BLOCK_BLOOD;
     blocks[BLOCK_BLOOD].texture_index[5] = TEXTURE_BLOCK_BLOOD;
+    blocks[BLOCK_BLOOD].friction = FRICTION_BLOCK_WET;
 
     snprintf(blocks[BLOCK_GRASS].name, NAME_MAX, "%s", "block_grass");
     blocks[BLOCK_GRASS].state = BLOCK_STATE_SOLID;
@@ -188,6 +189,7 @@ void blocks_init(void)
     blocks[BLOCK_GRASS].texture_index[3] = TEXTURE_BLOCK_GRASS_SIDE;
     blocks[BLOCK_GRASS].texture_index[4] = TEXTURE_BLOCK_GRASS_TOP;
     blocks[BLOCK_GRASS].texture_index[5] = TEXTURE_BLOCK_DIRT;
+    blocks[BLOCK_GRASS].friction = FRICTION_BLOCK_HARD;
 
     snprintf(blocks[BLOCK_DIRT].name, NAME_MAX, "%s", "block_dirt");
     blocks[BLOCK_DIRT].state = BLOCK_STATE_SOLID;
@@ -197,6 +199,7 @@ void blocks_init(void)
     blocks[BLOCK_DIRT].texture_index[3] = TEXTURE_BLOCK_DIRT;
     blocks[BLOCK_DIRT].texture_index[4] = TEXTURE_BLOCK_DIRT;
     blocks[BLOCK_DIRT].texture_index[5] = TEXTURE_BLOCK_DIRT;
+    blocks[BLOCK_DIRT].friction = FRICTION_BLOCK_HARD;
 
     snprintf(blocks[BLOCK_DIRTUP].name, NAME_MAX, "%s", "block_dirtup");
     blocks[BLOCK_DIRTUP].state = BLOCK_STATE_SOLID;
@@ -206,6 +209,7 @@ void blocks_init(void)
     blocks[BLOCK_DIRTUP].texture_index[3] = TEXTURE_BLOCK_DIRTUP;
     blocks[BLOCK_DIRTUP].texture_index[4] = TEXTURE_BLOCK_DIRTUP;
     blocks[BLOCK_DIRTUP].texture_index[5] = TEXTURE_BLOCK_DIRTUP;
+    blocks[BLOCK_DIRTUP].friction = FRICTION_BLOCK_HARD;
 
     snprintf(blocks[BLOCK_STONE].name, NAME_MAX, "%s", "block_stone");
     blocks[BLOCK_STONE].state = BLOCK_STATE_SOLID;
@@ -215,6 +219,7 @@ void blocks_init(void)
     blocks[BLOCK_STONE].texture_index[3] = TEXTURE_BLOCK_STONE;
     blocks[BLOCK_STONE].texture_index[4] = TEXTURE_BLOCK_STONE;
     blocks[BLOCK_STONE].texture_index[5] = TEXTURE_BLOCK_STONE;
+    blocks[BLOCK_STONE].friction = FRICTION_BLOCK_HARD;
 
     snprintf(blocks[BLOCK_SAND].name, NAME_MAX, "%s", "block_sand");
     blocks[BLOCK_SAND].state = BLOCK_STATE_SOLID;
@@ -224,6 +229,7 @@ void blocks_init(void)
     blocks[BLOCK_SAND].texture_index[3] = TEXTURE_BLOCK_SAND;
     blocks[BLOCK_SAND].texture_index[4] = TEXTURE_BLOCK_SAND;
     blocks[BLOCK_SAND].texture_index[5] = TEXTURE_BLOCK_SAND;
+    blocks[BLOCK_SAND].friction = FRICTION_BLOCK_HARD;
 
     snprintf(blocks[BLOCK_GLASS].name, NAME_MAX, "%s", "block_glass");
     blocks[BLOCK_GLASS].state = BLOCK_STATE_SOLID;
@@ -233,6 +239,7 @@ void blocks_init(void)
     blocks[BLOCK_GLASS].texture_index[3] = TEXTURE_BLOCK_GLASS;
     blocks[BLOCK_GLASS].texture_index[4] = TEXTURE_BLOCK_GLASS;
     blocks[BLOCK_GLASS].texture_index[5] = TEXTURE_BLOCK_GLASS;
+    blocks[BLOCK_GLASS].friction = FRICTION_BLOCK_HARD;
 
     snprintf(blocks[BLOCK_WOOD_BIRCH_LOG].name, NAME_MAX, "%s", "block_wood_birch_log");
     blocks[BLOCK_WOOD_BIRCH_LOG].state = BLOCK_STATE_SOLID;
@@ -242,6 +249,7 @@ void blocks_init(void)
     blocks[BLOCK_WOOD_BIRCH_LOG].texture_index[3] = TEXTURE_BLOCK_WOOD_BIRCH_LOG_SIDE;
     blocks[BLOCK_WOOD_BIRCH_LOG].texture_index[4] = TEXTURE_BLOCK_WOOD_BIRCH_LOG_TOP;
     blocks[BLOCK_WOOD_BIRCH_LOG].texture_index[5] = TEXTURE_BLOCK_WOOD_BIRCH_LOG_TOP;
+    blocks[BLOCK_WOOD_BIRCH_LOG].friction = FRICTION_BLOCK_HARD;
 
     snprintf(blocks[BLOCK_WOOD_BIRCH_PLANKS].name, NAME_MAX, "%s", "block_wood_birch_planks");
     blocks[BLOCK_WOOD_BIRCH_PLANKS].state = BLOCK_STATE_SOLID;
@@ -251,6 +259,7 @@ void blocks_init(void)
     blocks[BLOCK_WOOD_BIRCH_PLANKS].texture_index[3] = TEXTURE_BLOCK_WOOD_BIRCH_PLANKS;
     blocks[BLOCK_WOOD_BIRCH_PLANKS].texture_index[4] = TEXTURE_BLOCK_WOOD_BIRCH_PLANKS;
     blocks[BLOCK_WOOD_BIRCH_PLANKS].texture_index[5] = TEXTURE_BLOCK_WOOD_BIRCH_PLANKS;
+    blocks[BLOCK_WOOD_BIRCH_PLANKS].friction = FRICTION_BLOCK_HARD;
 
     snprintf(blocks[BLOCK_WOOD_CHERRY_LOG].name, NAME_MAX, "%s", "block_wood_cherry_log");
     blocks[BLOCK_WOOD_CHERRY_LOG].state = BLOCK_STATE_SOLID;
@@ -260,6 +269,7 @@ void blocks_init(void)
     blocks[BLOCK_WOOD_CHERRY_LOG].texture_index[3] = TEXTURE_BLOCK_WOOD_CHERRY_LOG_SIDE;
     blocks[BLOCK_WOOD_CHERRY_LOG].texture_index[4] = TEXTURE_BLOCK_WOOD_CHERRY_LOG_TOP;
     blocks[BLOCK_WOOD_CHERRY_LOG].texture_index[5] = TEXTURE_BLOCK_WOOD_CHERRY_LOG_TOP;
+    blocks[BLOCK_WOOD_CHERRY_LOG].friction = FRICTION_BLOCK_HARD;
 
     snprintf(blocks[BLOCK_WOOD_CHERRY_PLANKS].name, NAME_MAX, "%s", "block_wood_cherry_planks");
     blocks[BLOCK_WOOD_CHERRY_PLANKS].state = BLOCK_STATE_SOLID;
@@ -269,6 +279,7 @@ void blocks_init(void)
     blocks[BLOCK_WOOD_CHERRY_PLANKS].texture_index[3] = TEXTURE_BLOCK_WOOD_CHERRY_PLANKS;
     blocks[BLOCK_WOOD_CHERRY_PLANKS].texture_index[4] = TEXTURE_BLOCK_WOOD_CHERRY_PLANKS;
     blocks[BLOCK_WOOD_CHERRY_PLANKS].texture_index[5] = TEXTURE_BLOCK_WOOD_CHERRY_PLANKS;
+    blocks[BLOCK_WOOD_CHERRY_PLANKS].friction = FRICTION_BLOCK_HARD;
 
     snprintf(blocks[BLOCK_WOOD_OAK_LOG].name, NAME_MAX, "%s", "block_wood_oak_log");
     blocks[BLOCK_WOOD_OAK_LOG].state = BLOCK_STATE_SOLID;
@@ -278,6 +289,7 @@ void blocks_init(void)
     blocks[BLOCK_WOOD_OAK_LOG].texture_index[3] = TEXTURE_BLOCK_WOOD_OAK_LOG_SIDE;
     blocks[BLOCK_WOOD_OAK_LOG].texture_index[4] = TEXTURE_BLOCK_WOOD_OAK_LOG_TOP;
     blocks[BLOCK_WOOD_OAK_LOG].texture_index[5] = TEXTURE_BLOCK_WOOD_OAK_LOG_TOP;
+    blocks[BLOCK_WOOD_OAK_LOG].friction = FRICTION_BLOCK_HARD;
 
     snprintf(blocks[BLOCK_WOOD_OAK_PLANKS].name, NAME_MAX, "%s", "block_wood_oak_planks");
     blocks[BLOCK_WOOD_OAK_PLANKS].state = BLOCK_STATE_SOLID;
@@ -287,6 +299,7 @@ void blocks_init(void)
     blocks[BLOCK_WOOD_OAK_PLANKS].texture_index[3] = TEXTURE_BLOCK_WOOD_OAK_PLANKS;
     blocks[BLOCK_WOOD_OAK_PLANKS].texture_index[4] = TEXTURE_BLOCK_WOOD_OAK_PLANKS;
     blocks[BLOCK_WOOD_OAK_PLANKS].texture_index[5] = TEXTURE_BLOCK_WOOD_OAK_PLANKS;
+    blocks[BLOCK_WOOD_OAK_PLANKS].friction = FRICTION_BLOCK_HARD;
 }
 
 /* ---- special_blocks ------------------------------------------------------ */

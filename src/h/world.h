@@ -6,11 +6,7 @@
 #define WORLD_TICK_SPEED        20.0
 
 #define WORLD_DRAG_AIR          0.2f
-#define WORLD_DRAG_FLY_NATURAL  1.0f
-#define WORLD_DRAG_FLYING       4.0f
-#define WORLD_DRAG_FLYING_V     13.0f
 #define WORLD_DRAG_WATER        2.0f
-#define WORLD_DRAG_GROUND_SOLID 15.0f
 
 typedef struct WorldInfo
 {

@@ -51,7 +51,7 @@ typedef struct Render
     v2f64 mouse_last;
     v2f64 mouse_delta;
     u64 time;
-    f64 frame_delta;
+    u64 time_delta;
 } Render;
 
 typedef struct Mesh

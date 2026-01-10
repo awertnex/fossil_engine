@@ -48,7 +48,6 @@ static Player player =
     .name = "Lily",
     .size = {0.6f, 0.6f, 1.8f},
     .eye_height = PLAYER_EYE_HEIGHT,
-    .weight = 2.0f,
     .camera_mode = PLAYER_CAMERA_MODE_1ST_PERSON,
     .camera_distance = SET_CAMERA_DISTANCE_MAX,
 
@@ -88,6 +87,14 @@ static void generate_standard_meshes(void);
 static u32 settings_init(void);
 
 void settings_update(void);
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ * @brief update 'render.time', 'render.delta' and cap framerate to
+ * 'settings.target_fps' if 'FLAG_MAIN_FPS_CAP' is set in 'flag'.
+ */
+void time_update(void);
+
 static void draw_everything(void);
 
 static void callback_framebuffer_size(GLFWwindow* window, int width, int height)
@@ -175,7 +182,7 @@ static u32 settings_init(void)
 
     settings.lerp_speed = SET_LERP_SPEED_DEFAULT;
 
-    settings.render_distance = 16;
+    settings.render_distance = 1;
     settings.chunk_buf_radius = settings.render_distance;
     settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
 
@@ -196,7 +203,7 @@ static u32 settings_init(void)
     settings.mouse_sensitivity = SET_MOUSE_SENSITIVITY_DEFAULT * 0.004f;
     settings.gui_scale = SET_GUI_SCALE_DEFAULT;
     settings.font_size = 20.0f;
-    settings.target_fps = SET_TARGET_FPS_DEFAULT;
+    settings.target_fps = 10;
     settings.fov = SET_FOV_DEFAULT;
     settings.anti_aliasing = TRUE;
 
@@ -215,7 +222,23 @@ cleanup:
 void settings_update(void)
 {
     settings.ndc_scale = (v2f32){2.0f / render.size.x, 2.0f / render.size.y};
-    settings.fps = 1 / render.frame_delta;
+    settings.fps = 1 / ((f64)render.time_delta * NANOSEC2SEC);
+}
+
+void time_update(void)
+{
+    static u64 time_next = 0;
+    time_next += SEC2NANOSEC / settings.target_fps;
+
+    if (is_key_press(KEY_X))
+        flag ^= FLAG_MAIN_FPS_CAP;
+
+    render.time = get_time_u64();
+    if (flag & FLAG_MAIN_FPS_CAP && render.time < time_next)
+        sleep_nsec(time_next - render.time);
+    else time_next = render.time;
+
+    render.time_delta = get_time_delta_u64();
 }
 
 static void shaders_init(void)
@@ -710,8 +733,9 @@ static void draw_everything(void)
     glBindFramebuffer(GL_FRAMEBUFFER, fbo[FBO_SKYBOX].fbo);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    f32 delay_in_hours = 6.0f / 12.0f;
     skybox_data.time = fmodf((f32)world.tick / SET_DAY_TICKS_MAX, 1.0f);
-    skybox_data.time = fmodf(skybox_data.time * 2.0f - 0.5f, 2.0f);
+    skybox_data.time = fmodf(skybox_data.time * 2.0f - delay_in_hours, 2.0f);
     skybox_data.sun_rotation =
         (v3f32){
             cos(skybox_data.time * PI),
@@ -719,20 +743,22 @@ static void draw_everything(void)
             sin(skybox_data.time * PI),
         };
 
-    f32 sun_time = skybox_data.time;
+    f32 sun_time = skybox_data.time * PI;
 
-    f64 mid_day =       (sin((PI / 2.0) * sin(sun_time * PI)) + 1.0) / 2.0;
+    f64 mid_day =       (sin(sun_time) + 1.0) / 2.0;
+    mid_day =           pow(sin((PI / 2.0) * mid_day), 2.0);
+    mid_day =           pow(sin((PI / 2.0) * mid_day), 2.0);
 
-    f64 burn_cold =     pow((sin((PI / 2.0) * sin(sun_time * PI + (PI / 2.0))) + 1.0) / 2.0, 24.0);
-    burn_cold +=        pow((sin((PI / 2.0) * sin(sun_time * PI - (PI / 2.0))) + 1.0) / 2.0, 24.0);
+    f64 burn_cold =     pow((sin((PI / 2.0) * sin(sun_time + (PI / 2.0))) + 1.0) / 2.0, 24.0);
+    burn_cold +=        pow((sin((PI / 2.0) * sin(sun_time - (PI / 2.0))) + 1.0) / 2.0, 24.0);
 
-    f64 burn =          pow((sin(sun_time * PI + (PI / 2.0)) + 1.0) / 2.0, 64.0);
-    burn +=             pow((sin(sun_time * PI - (PI / 2.0)) + 1.0) / 2.0, 64.0);
+    f64 burn =          pow((sin(sun_time + (PI / 2.0)) + 1.0) / 2.0, 64.0);
+    burn +=             pow((sin(sun_time - (PI / 2.0)) + 1.0) / 2.0, 64.0);
 
-    f64 burn_boost =    pow(sin(sun_time * PI + (PI / 2.0)), 128.0);
-    burn_boost +=       pow(sin(sun_time * PI - (PI / 2.0)), 128.0);
+    f64 burn_boost =    pow(sin(sun_time + (PI / 2.0)), 128.0);
+    burn_boost +=       pow(sin(sun_time - (PI / 2.0)), 128.0);
 
-    f64 mid_night =     pow((sin((PI / 2.0) * sin(sun_time * PI + PI)) + 1.0) / 2.0, 4.0);
+    f64 mid_night =     pow((sin((PI / 2.0) * sin(sun_time + PI)) + 1.0) / 2.0, 4.0);
 
     skybox_data.sky_color = (v3f32){
         (mid_day * 171.0f + mid_night * 1.0f + burn_cold * 8.0f) / 0xff,
@@ -1250,11 +1276,11 @@ static void draw_everything(void)
 
         text_push(stringf("\n"
                     "TIME        [%.2lf]\n"
-                    "CLOCK       [%"PRIu64":%"PRIu64"]\n"
+                    "CLOCK       [%02"PRIu64":%02"PRIu64"]\n"
                     "DAYS        [%"PRIu64"]\n",
                     (f64)render.time * NANOSEC2SEC,
                     (world.tick % SET_DAY_TICKS_MAX) / 1000,
-                    (world.tick / 60) % 60,
+                    ((world.tick * 60) / 1000) % 60,
                     world.days),
                 (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0);
         text_render(COLOR_TEXT_MOSS, TRUE);
@@ -1396,8 +1422,7 @@ static void draw_everything(void)
     glUseProgram(shader[SHADER_POST_PROCESSING].id);
     glClear(GL_COLOR_BUFFER_BIT);
     glBindVertexArray(mesh[MESH_UNIT].vao);
-    glUniform1ui(uniform.post_processing.time,
-            ((u32)(render.time * settings.target_fps) & 511) + 1);
+    glUniform1ui(uniform.post_processing.time, ((u32)(render.time) & 0x1ff) + 1);
     glBindTexture(GL_TEXTURE_2D, fbo[FBO_POST_PROCESSING].color_buf);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
@@ -1539,9 +1564,6 @@ section_world_loaded:
 
     while (!glfwWindowShouldClose(render.window) && (flag & FLAG_MAIN_ACTIVE))
     {
-        render.time = get_time_u64();
-        render.frame_delta = get_time_delta_f64();
-
         glfwPollEvents();
         update_key_states(render);
         input_update(render, &player);
@@ -1552,6 +1574,7 @@ section_world_loaded:
         draw_everything();
 
         glfwSwapBuffers(render.window);
+        time_update();
 
         if (!(flag & FLAG_MAIN_WORLD_LOADED))
             goto section_menu_title;
