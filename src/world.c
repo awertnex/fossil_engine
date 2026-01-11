@@ -33,7 +33,9 @@ u32 world_init(str *name, u64 seed, Player *p)
     player_spawn(p, TRUE);
     player_chunk_update(p);
 
-    flag |= FLAG_MAIN_CHUNK_BUF_DIRTY | FLAG_MAIN_HUD | FLAG_MAIN_WORLD_LOADED;
+    core.flag.hud = 1;
+    core.flag.world_loaded = 1;
+    core.flag.chunk_buf_dirty = 1;
     disable_cursor;
     center_cursor;
 
@@ -195,12 +197,12 @@ void world_update(Player *p)
     world.tick = world.tick_start + (u64)((f64)render.time * NANOSEC2SEC * WORLD_TICK_SPEED);
     world.days = world.tick / SET_DAY_TICKS_MAX;
 
-    if (state_menu_depth || (flag & FLAG_MAIN_SUPER_DEBUG))
+    if (state_menu_depth || core.flag.super_debug)
         show_cursor;
     else disable_cursor;
 
     player_update(p, 1.0 - exp(-1.0 * (f64)render.time_delta * NANOSEC2SEC));
-    b8 use_mouse = !state_menu_depth && !(flag & FLAG_MAIN_SUPER_DEBUG) && !(p->flag & FLAG_PLAYER_DEAD);
+    b8 use_mouse = !state_menu_depth && !core.flag.super_debug && !(p->flag & FLAG_PLAYER_DEAD);
     player_camera_movement_update(p, render.mouse_delta, use_mouse);
     player_target_update(p);
 

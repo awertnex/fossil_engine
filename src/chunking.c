@@ -389,7 +389,7 @@ void chunking_update(v3i32 player_chunk, v3i32 *player_chunk_delta)
             _chunk_queue_update(&CHUNK_QUEUE[2]);
     }
 
-    if (!(flag & FLAG_MAIN_CHUNK_BUF_DIRTY))
+    if (!core.flag.chunk_buf_dirty)
         return;
 
 chunk_tab_shift:
@@ -611,12 +611,12 @@ chunk_tab_shift:
         }
     }
 
-    if (flag & FLAG_MAIN_CHUNK_BUF_DIRTY)
+    if (core.flag.chunk_buf_dirty)
     {
         if (DELTA.x || DELTA.y || DELTA.z)
             goto chunk_tab_shift;
         else
-            flag &= ~FLAG_MAIN_CHUNK_BUF_DIRTY;
+            core.flag.chunk_buf_dirty = 0;
     }
 
 chunk_buf_push:
@@ -628,7 +628,7 @@ chunk_buf_push:
         if (!*p) _chunk_buf_push(index, *player_chunk_delta);
     }
 
-    flag &= ~FLAG_MAIN_CHUNK_BUF_DIRTY;
+    core.flag.chunk_buf_dirty = 0;
 }
 
 void chunking_free(void)

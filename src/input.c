@@ -160,8 +160,8 @@ void input_update(Render render, Player *p)
         /* ---- gameplay ---------------------------------------------------- */
 
         if (
-                !(flag & FLAG_MAIN_CHUNK_BUF_DIRTY) &&
-                (flag & FLAG_MAIN_PARSE_TARGET) &&
+                !core.flag.chunk_buf_dirty &&
+                core.flag.parse_target &&
                 chunk_tab[chunk_tab_index])
         {
             if (is_mouse_hold(bind_attack_or_destroy))
@@ -209,10 +209,10 @@ void input_update(Render render, Player *p)
         /* ---- miscellaneous ----------------------------------------------- */
 
         if (is_key_press(bind_toggle_hud))
-            flag ^= FLAG_MAIN_HUD;
+            core.flag.hud ^= 1;
 
         if (is_key_press(bind_toggle_debug))
-            flag ^= FLAG_MAIN_DEBUG;
+            core.flag.debug ^= 1;
 
         if (is_key_press(bind_toggle_perspective))
             p->camera_mode = (p->camera_mode + 1) % PLAYER_CAMERA_MODE_COUNT;
@@ -231,7 +231,7 @@ void input_update(Render render, Player *p)
 
 #if !GAME_RELEASE_BUILD
     if (is_key_press(bind_toggle_super_debug))
-        flag ^= FLAG_MAIN_SUPER_DEBUG;
+        core.flag.super_debug ^= 1;
 #endif /* GAME_RELEASE_BUILD */
 
     if (is_key_hold(bind_debug_mod))

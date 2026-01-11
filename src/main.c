@@ -31,8 +31,8 @@ Render render =
     .size = {1280, 1054},
 };
 
+struct Core core = {0};
 struct Settings settings = {0};
-u64 flag = FLAG_MAIN_ACTIVE;
 u8 debug_mode[DEBUG_MODE_COUNT] = {0};
 static ShaderProgram shader[SHADER_COUNT] = {0};
 Texture texture[TEXTURE_COUNT] = {0};
@@ -91,7 +91,7 @@ void settings_update(void);
 /*! -- INTERNAL USE ONLY --;
  *
  * @brief update 'render.time', 'render.delta' and cap framerate to
- * 'settings.target_fps' if 'FLAG_MAIN_FPS_CAP' is set in 'flag'.
+ * 'settings.target_fps' if 'core.flag.fps_cap' is set.
  */
 void time_update(void);
 
@@ -182,7 +182,7 @@ static u32 settings_init(void)
 
     settings.lerp_speed = SET_LERP_SPEED_DEFAULT;
 
-    settings.render_distance = 1;
+    settings.render_distance = 2;
     settings.chunk_buf_radius = settings.render_distance;
     settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
 
@@ -231,10 +231,10 @@ void time_update(void)
     time_next += SEC2NANOSEC / settings.target_fps;
 
     if (is_key_press(KEY_X))
-        flag ^= FLAG_MAIN_FPS_CAP;
+        core.flag.fps_cap ^= 1;
 
     render.time = get_time_u64();
-    if (flag & FLAG_MAIN_FPS_CAP && render.time < time_next)
+    if (core.flag.fps_cap && render.time < time_next)
         sleep_nsec(time_next - render.time);
     else time_next = render.time;
 
@@ -991,7 +991,7 @@ static void draw_everything(void)
     glUniformMatrix4fv(uniform.bounding_box.mat_perspective, 1, GL_FALSE,
             (GLfloat*)&projection_world.perspective);
 
-    if ((flag & FLAG_MAIN_PARSE_TARGET) && (flag & FLAG_MAIN_HUD) &&
+    if (core.flag.parse_target && core.flag.hud &&
             chunk_tab[chunk_tab_index] &&
             chunk_tab[chunk_tab_index]->block
             [(i64)player.target.z - chunk_tab[chunk_tab_index]->pos.z * CHUNK_DIAMETER]
@@ -1118,7 +1118,7 @@ static void draw_everything(void)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if (flag & FLAG_MAIN_HUD && flag & FLAG_MAIN_DEBUG)
+    if (core.flag.hud && core.flag.debug)
     {
         glUseProgram(shader[SHADER_GIZMO].id);
 
@@ -1143,7 +1143,7 @@ static void draw_everything(void)
 
     /* ---- draw hud chunk gizmo -------------------------------------------- */
 
-    if (debug_mode[DEBUG_MODE_CHUNK_GIZMO] && flag & FLAG_MAIN_HUD)
+    if (debug_mode[DEBUG_MODE_CHUNK_GIZMO] && core.flag.hud)
     {
         glClear(GL_DEPTH_BUFFER_BIT);
         glUseProgram(shader[SHADER_GIZMO_CHUNK].id);
@@ -1197,7 +1197,7 @@ static void draw_everything(void)
     glBindFramebuffer(GL_FRAMEBUFFER, fbo[FBO_UI].fbo);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if (flag & FLAG_MAIN_HUD)
+    if (core.flag.hud)
     {
         glUseProgram(shader[SHADER_UI].id);
         glBindVertexArray(mesh[MESH_UNIT].vao);
@@ -1205,7 +1205,7 @@ static void draw_everything(void)
 
         /* ---- crosshair --------------------------------------------------- */
 
-        if (!(flag & FLAG_MAIN_DEBUG))
+        if (!core.flag.debug)
         {
             glUniform2i(uniform.ui.position,
                     render.size.x / 2, render.size.y / 2);
@@ -1237,7 +1237,7 @@ static void draw_everything(void)
 
     /* ---- draw super debug ------------------------------------------------ */
 
-    if (flag & FLAG_MAIN_SUPER_DEBUG)
+    if (core.flag.super_debug)
     {
         glUseProgram(shader[SHADER_UI_9_SLICE].id);
         glBindVertexArray(mesh[MESH_UNIT].vao);
@@ -1266,7 +1266,7 @@ static void draw_everything(void)
 
     /* ---- draw debug info ------------------------------------------------- */
 
-    if (flag & FLAG_MAIN_DEBUG && flag & FLAG_MAIN_HUD)
+    if (core.flag.hud && core.flag.debug)
     {
         text_start(0, settings.font_size, &font[FONT_MONO_BOLD], &render,
                 &shader[SHADER_TEXT], &fbo[FBO_TEXT], TRUE);
@@ -1435,6 +1435,8 @@ int main(int argc, char **argv)
     if (engine_init(argc, argv, &render, FALSE, GAME_RELEASE_BUILD) != ERR_SUCCESS)
         goto cleanup;
 
+    core.flag.active = 1;
+
     if (!GAME_RELEASE_BUILD)
         LOGDEBUG(FALSE, "%s\n", "DEVELOPMENT BUILD");
 
@@ -1556,13 +1558,13 @@ section_menu_pause:
 
 section_world_loaded:
 
-    if (!(flag & FLAG_MAIN_WORLD_LOADED) &&
+    if (!core.flag.world_loaded &&
             world_init("Poop Consistency Tester", 0, &player) != ERR_SUCCESS)
             goto cleanup;
 
     generate_standard_meshes();
 
-    while (!glfwWindowShouldClose(render.window) && (flag & FLAG_MAIN_ACTIVE))
+    while (!glfwWindowShouldClose(render.window) && core.flag.active)
     {
         glfwPollEvents();
         update_key_states(render);
@@ -1576,10 +1578,10 @@ section_world_loaded:
         glfwSwapBuffers(render.window);
         time_update();
 
-        if (!(flag & FLAG_MAIN_WORLD_LOADED))
+        if (!core.flag.world_loaded)
             goto section_menu_title;
 
-        if (flag & FLAG_MAIN_PAUSED)
+        if (core.flag.paused)
             goto section_menu_pause;
     }
 

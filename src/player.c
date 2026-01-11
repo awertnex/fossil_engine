@@ -75,13 +75,13 @@ void player_update(Player *p, f64 dt)
 
     /* ---- apply parameters ------------------------------------------------ */
 
-    damping.x = -(world.drag.x) * p->velocity.x;
-    damping.y = -(world.drag.y) * p->velocity.y;
-    damping.z = -(world.drag.z) * p->velocity.z;
+    damping.x = -world.drag.x * p->velocity.x - ((drag.x * p->velocity.x) / (1.0f + p->speed));
+    damping.y = -world.drag.y * p->velocity.y - ((drag.y * p->velocity.y) / (1.0f + p->speed));
+    damping.z = -world.drag.z * p->velocity.z - ((drag.z * p->velocity.z) / (1.0f + p->speed));
 
-    p->acceleration.x = p->input.x * p->acceleration_rate * drag.x;
-    p->acceleration.y = p->input.y * p->acceleration_rate * drag.y;
-    p->acceleration.z = p->input.z * p->acceleration_rate * drag.z;
+    p->acceleration.x = (p->input.x * p->acceleration_rate * drag.x) / (1.0f + p->speed);
+    p->acceleration.y = (p->input.y * p->acceleration_rate * drag.y) / (1.0f + p->speed);
+    p->acceleration.z = (p->input.z * p->acceleration_rate * drag.z) / (1.0f + p->speed);
 
     p->velocity.x += (p->acceleration.x + damping.x + gravity.x) * dt;
     p->velocity.y += (p->acceleration.y + damping.y + gravity.y) * dt;
@@ -323,7 +323,7 @@ void player_chunk_update(Player *p)
             p->chunk_delta.x - p->chunk.x ||
             p->chunk_delta.y - p->chunk.y ||
             p->chunk_delta.z - p->chunk.z)
-        flag |= FLAG_MAIN_CHUNK_BUF_DIRTY;
+        core.flag.chunk_buf_dirty = 1;
 }
 
 static void player_wrap_coordinates(Player *p)
@@ -598,7 +598,7 @@ void player_target_update(Player *p)
                 (v3i64){-WORLD_DIAMETER, -WORLD_DIAMETER, -WORLD_DIAMETER_VERTICAL},
                 (v3i64){WORLD_DIAMETER, WORLD_DIAMETER, WORLD_DIAMETER_VERTICAL}))
     {
-        flag |= FLAG_MAIN_PARSE_TARGET;
+        core.flag.parse_target = 1;
         p->target.x = (f64)block_pos.x;
         p->target.y = (f64)block_pos.y;
         p->target.z = (f64)block_pos.z;
@@ -606,7 +606,7 @@ void player_target_update(Player *p)
     }
     else
     {
-        flag &= ~FLAG_MAIN_PARSE_TARGET;
+        core.flag.parse_target = 0;
         p->target_normal = (v3f64){0};
     }
 

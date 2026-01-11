@@ -63,22 +63,6 @@
 #define FILE_NAME_SETTINGS      "settings.txt"
 #define FILE_NAME_WORLD_SEED    "seed.txt"
 
-enum MainFlag
-{
-    FLAG_MAIN_ACTIVE =          0x00000001,
-    FLAG_MAIN_PAUSED =          0x00000002,
-    FLAG_MAIN_HUD =             0x00000004,
-    FLAG_MAIN_DEBUG =           0x00000008,
-    FLAG_MAIN_SUPER_DEBUG =     0x00000010,
-    FLAG_MAIN_FULLSCREEN =      0x00000020,
-    FLAG_MAIN_MENU_OPEN =       0x00000040,
-    FLAG_MAIN_FPS_CAP =         0x00000080,
-    FLAG_MAIN_DOUBLE_PRESS =    0x00000100,
-    FLAG_MAIN_PARSE_TARGET =    0x00000200,
-    FLAG_MAIN_WORLD_LOADED =    0x00000400,
-    FLAG_MAIN_CHUNK_BUF_DIRTY = 0x00000800,
-}; /* MainFlag */
-
 enum DebugMode
 {
     DEBUG_MODE_TRANS_BLOCKS,
@@ -88,6 +72,24 @@ enum DebugMode
     DEBUG_MODE_CHUNK_QUEUE_VISUALIZER,
     DEBUG_MODE_COUNT,
 }; /* DebugMode */
+
+struct Core
+{
+    struct /* flag */
+    {
+        u64 active: 1;
+        u64 paused: 1;
+        u64 hud: 1;
+        u64 debug: 1;
+        u64 super_debug: 1;
+        u64 fullscreen: 1;
+        u64 menu_open: 1;
+        u64 fps_cap: 1;
+        u64 parse_target: 1;
+        u64 world_loaded: 1;
+        u64 chunk_buf_dirty: 1;
+    } flag;
+}; /* Core */
 
 struct Settings
 {
@@ -308,10 +310,11 @@ enum FontIndices
  *  @remark must be initialized globally, tho the pointed to variable itself can be modified.
  */
 extern u32 *const GAME_ERR;
+
+extern struct Core core;
 extern struct Settings settings;
 extern Texture texture[TEXTURE_COUNT];
 extern Font font[FONT_COUNT];
-extern u64 flag;
 extern u8 debug_mode[DEBUG_MODE_COUNT];
 extern Render render;
 extern Projection projection_world;
