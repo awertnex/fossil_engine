@@ -16,15 +16,16 @@ str str_out_dir[CMD_SIZE] = {0}; /* bundle directory name */
 int main(int argc, char **argv)
 {
     build_init(argc, argv, "build.c", "build"EXE);
+
+    snprintf(str_out_dir, CMD_SIZE, "%s"DIR_ROOT, str_build_root);
+
     if (find_token("engine", argc, argv))
         engine_build(
                 stringf("%sengine/", str_build_root),
-                stringf("%sengine/lib/"PLATFORM, str_build_root));
+                stringf("%s"DIR_ROOT, str_build_root));
 
     if (is_dir_exists(DIR_SRC, TRUE) != ERR_SUCCESS)
         return engine_err;
-
-    snprintf(str_out_dir, CMD_SIZE, "%s"DIR_ROOT, str_build_root);
 
     u32 i = 0;
     str temp[CMD_SIZE] = {0};

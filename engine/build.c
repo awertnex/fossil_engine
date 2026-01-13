@@ -226,7 +226,19 @@ u32 engine_build(const str *engine_dir, const str *out_dir)
     if (flag & FLAG_CMD_SHOW) cmd_show();
     if (flag & FLAG_CMD_RAW) cmd_raw();
 
+    make_dir(stringf("%sengine", out_dir_processed));
+    if (engine_err != ERR_SUCCESS && engine_err != ERR_DIR_EXISTS)
+        cmd_fail();
+
+    make_dir(stringf("%sengine/shaders", out_dir_processed));
+
     if (exec(&cmd, "engine_build()") != ERR_SUCCESS)
+        cmd_fail();
+
+    if (copy_file(
+                stringf("%s"ENGINE_NAME_LIB, out_dir_processed),
+                stringf("%sengine/lib/"PLATFORM"/"ENGINE_NAME_LIB, str_build_root),
+                "rb", "wb") != ERR_SUCCESS)
         cmd_fail();
 
     cmd_free();

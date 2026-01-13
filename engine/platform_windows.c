@@ -12,11 +12,25 @@
 #include "h/memory.h"
 #include "h/platform.h"
 
-int make_dir(const str *path)
+u32 make_dir(const str *path)
 {
-    int exit_code = mkdir(path);
-    if (exit_code == 0)
+    if (mkdir(path) == 0)
+    {
         LOGINFO(FALSE, "Directory Created '%s'\n", path);
+        engine_err = ERR_SUCCESS;
+        return engine_err;
+    }
+
+    switch (errno)
+    {
+        case EEXIST:
+            engine_err = ERR_DIR_EXISTS;
+            break;
+
+        default:
+            LOGERROR(TRUE, ERR_DIR_CREATE_FAIL, "Failed to Create Directory '%s'\n", path);
+    }
+
     return exit_code;
 }
 

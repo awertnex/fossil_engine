@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <inttypes.h>
@@ -9,12 +10,26 @@
 #include "h/limits.h"
 #include "h/logger.h"
 
-int make_dir(const str *path)
+u32 make_dir(const str *path)
 {
-    int exit_code = mkdir(path, 0755);
-    if (exit_code == 0)
+    if (mkdir(path, 0755) == 0)
+    {
         LOGTRACE(FALSE, "Directory Created '%s'\n", path);
-    return exit_code;
+        engine_err = ERR_SUCCESS;
+        return engine_err;
+    }
+
+    switch (errno)
+    {
+        case EEXIST:
+            engine_err = ERR_DIR_EXISTS;
+            break;
+
+        default:
+            LOGERROR(TRUE, ERR_DIR_CREATE_FAIL, "Failed to Create Directory '%s'\n", path);
+    }
+
+    return engine_err;
 }
 
 int change_dir(const str *path)
