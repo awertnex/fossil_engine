@@ -31,8 +31,8 @@ quirks:
       framebuffers) (10 Sep 2025)
 - [ ] bake skybox into a look-up table, or HDR (retain old code, just because
       it was fun to write)
-- [ ] limit framerate
-- [ ] add camera look-at
+- [x] limit framerate (10 Jan 2026)
+- [x] add camera look-at (19 Dec 2025)
 - [ ] fix double press for windows
 - [x] fix chunk queue sort (13 Oct 2025)
 - [x] make the chunk generation count per frame (09 Oct 2025)
