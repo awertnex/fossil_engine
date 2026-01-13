@@ -225,6 +225,7 @@ enum TextAlignment
  *  @param argc, argv = used for logger log level if args provided.
  *  @param release_build = if TRUE, TRACE and DEBUG logs will be disabled.
  *
+ *  @remark argc and argv can be NULL.
  *  @remark release_build can be overridden with these args in 'argv':
  *      LOGLEVEL FATAL = log only fatal errors.
  *      LOGLEVEL ERROR = log errors and above.
@@ -243,19 +244,25 @@ u32 engine_init(int argc, char **argv, Render *render, b8 multisample, b8 releas
  *
  *  free logger, destroy window (if not NULL) and terminate glfw.
  */
-void engine_close(GLFWwindow *window);
+void engine_close(Render *render);
 
 /*! @param multisample = turn on multisampling.
+ *
+ *  @remark called automatically from 'engine_init()'.
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
 u32 glfw_init(b8 multisample);
 
-/*! @return non-zero on failure and 'engine_err' is set accordingly.
+/*! @remark called automatically from 'engine_init()'.
+ *
+ *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
 u32 window_init(Render *render);
 
-/*! @return non-zero on failure and 'engine_err' is set accordingly.
+/*! @remark called automatically from 'engine_init()'.
+ *
+ *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
 u32 glad_init(void);
 

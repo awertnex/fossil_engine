@@ -1430,6 +1430,17 @@ static void draw_everything(void)
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+int main2(int argc, char **argv)
+{
+    if (engine_init(0, NULL, &render, FALSE, 0) != ERR_SUCCESS)
+        goto cleanup;
+
+cleanup:
+
+    engine_close(&render);
+    return *GAME_ERR;
+}
+
 int main(int argc, char **argv)
 {
     if (engine_init(argc, argv, &render, FALSE, GAME_RELEASE_BUILD) != ERR_SUCCESS)
@@ -1599,6 +1610,6 @@ cleanup:
         shader_program_free(&shader[i]);
     text_free();
     rand_free();
-    engine_close(render.window);
+    engine_close(&render);
     return *GAME_ERR;
 }

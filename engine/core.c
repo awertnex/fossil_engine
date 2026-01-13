@@ -74,16 +74,16 @@ u32 engine_init(int argc, char **argv, Render *render, b8 multisample, b8 releas
             glfw_init(multisample) != ERR_SUCCESS ||
             window_init(render) != ERR_SUCCESS ||
             glad_init() != ERR_SUCCESS)
-        engine_close(render->window);
+        engine_close(render);
 
     return engine_err;
 }
 
-void engine_close(GLFWwindow *window)
+void engine_close(Render *render)
 {
     logger_close();
-    if (window)
-        glfwDestroyWindow(window);
+    if (render->window)
+        glfwDestroyWindow(render->window);
     if (engine_flag & FLAG_ENGINE_GLFW_INITIALIZED)
     {
         glfwTerminate();

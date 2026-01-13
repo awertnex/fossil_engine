@@ -90,6 +90,9 @@ enum LogLevel
  *
  *  @param argc, argv = used for logger log level if args provided.
  *
+ *  @remark called automatically from 'core.h/engine_init()'.
+ *
+ *  @remark argc and argv can be NULL.
  *  @remark args:
  *      LOGLEVEL FATAL = log only fatal errors.
  *      LOGLEVEL ERROR = log errors and above.
