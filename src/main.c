@@ -182,7 +182,7 @@ static u32 settings_init(void)
 
     settings.lerp_speed = SET_LERP_SPEED_DEFAULT;
 
-    settings.render_distance = 2;
+    settings.render_distance = 8;
     settings.chunk_buf_radius = settings.render_distance;
     settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
 
@@ -203,7 +203,7 @@ static u32 settings_init(void)
     settings.mouse_sensitivity = SET_MOUSE_SENSITIVITY_DEFAULT * 0.004f;
     settings.gui_scale = SET_GUI_SCALE_DEFAULT;
     settings.font_size = 20.0f;
-    settings.target_fps = 10;
+    settings.target_fps = 3;
     settings.fov = SET_FOV_DEFAULT;
     settings.anti_aliasing = TRUE;
 

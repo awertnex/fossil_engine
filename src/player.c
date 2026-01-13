@@ -75,13 +75,13 @@ void player_update(Player *p, f64 dt)
 
     /* ---- apply parameters ------------------------------------------------ */
 
-    damping.x = -world.drag.x * p->velocity.x - ((drag.x * p->velocity.x) / (1.0f + p->speed));
-    damping.y = -world.drag.y * p->velocity.y - ((drag.y * p->velocity.y) / (1.0f + p->speed));
-    damping.z = -world.drag.z * p->velocity.z - ((drag.z * p->velocity.z) / (1.0f + p->speed));
+    damping.x = -(world.drag.x + drag.x) * p->velocity.x;
+    damping.y = -(world.drag.y + drag.y) * p->velocity.y;
+    damping.z = -(world.drag.z + drag.z) * p->velocity.z;
 
-    p->acceleration.x = (p->input.x * p->acceleration_rate * drag.x) / (1.0f + p->speed);
-    p->acceleration.y = (p->input.y * p->acceleration_rate * drag.y) / (1.0f + p->speed);
-    p->acceleration.z = (p->input.z * p->acceleration_rate * drag.z) / (1.0f + p->speed);
+    p->acceleration.x = p->input.x * p->acceleration_rate * drag.x;
+    p->acceleration.y = p->input.y * p->acceleration_rate * drag.y;
+    p->acceleration.z = p->input.z * p->acceleration_rate * drag.z;
 
     p->velocity.x += (p->acceleration.x + damping.x + gravity.x) * dt;
     p->velocity.y += (p->acceleration.y + damping.y + gravity.y) * dt;
@@ -182,26 +182,32 @@ void player_collision_update(Player *p, f64 dt)
                     block_box.size.y = 1.0;
                     block_box.size.z = 1.0;
 
-                    time = get_swept_aabb(p->bbox, block_box, p->velocity, &normal);
-                    if (is_intersect_aabb(p->bbox, block_box))
+                    time = get_swept_aabb(p->bbox, block_box, displacement, &normal);
+
+                    if (is_in_range_f32(time, 0.0f, 1.0f) ||
+                            is_intersect_aabb(p->bbox, block_box))
                     {
                         /* ---- resolution ---------------------------------- */
 
-                        p->pos.x += p->velocity.x * time + normal.x * COLLISION_EPSILON;
-                        p->pos.y += p->velocity.y * time + normal.y * COLLISION_EPSILON;
-                        p->pos.z += p->velocity.z * time + normal.z * COLLISION_EPSILON;
+                        p->pos.x += displacement.x * time + normal.x * COLLISION_EPSILON;
+                        p->pos.y += displacement.y * time + normal.y * COLLISION_EPSILON;
+                        p->pos.z += displacement.z * time + normal.z * COLLISION_EPSILON;
 
-                        dot = dot_v3f32(p->velocity, normal);
+                        dot = dot_v3f32(displacement, normal);
                         if (dot < 0.0f)
                         {
-                            p->velocity.x -= dot * normal.x;
-                            p->velocity.y -= dot * normal.y;
-                            p->velocity.z -= dot * normal.z;
+                            displacement.x -= dot * normal.x;
+                            displacement.y -= dot * normal.y;
+                            displacement.z -= dot * normal.z;
                         }
 
-                        p->pos.x -= p->velocity.x * time;
-                        p->pos.y -= p->velocity.y * time;
-                        p->pos.z -= p->velocity.z * time;
+                        p->pos.x -= displacement.x * time;
+                        p->pos.y -= displacement.y * time;
+                        p->pos.z -= displacement.z * time;
+
+                        p->velocity.x = displacement.x / dt;
+                        p->velocity.y = displacement.y / dt;
+                        p->velocity.z = displacement.z / dt;
 
                         if (normal.z > 0.0f)
                         {

@@ -9,14 +9,14 @@ b8 is_intersect_aabb(BoundingBox a, BoundingBox b)
             a.pos.z >= b.pos.z + b.size.z || b.pos.z >= a.pos.z + a.size.z);
 }
 
-f32 get_swept_aabb(BoundingBox a, BoundingBox b, v3f32 velocity, v3f32 *normal)
+f32 get_swept_aabb(BoundingBox a, BoundingBox b, v3f32 displacement, v3f32 *normal)
 {
     v3f32 entry, exit, entry_distance, exit_distance;
     f32 entry_time, exit_time;
 
     /* ---- entry and exit distance ----------------------------------------- */
 
-    if (velocity.x > 0.0f)
+    if (displacement.x > 0.0f)
     {
         entry_distance.x = b.pos.x - (a.pos.x + a.size.x);
         exit_distance.x = (b.pos.x + b.size.x) - a.pos.x;
@@ -27,7 +27,7 @@ f32 get_swept_aabb(BoundingBox a, BoundingBox b, v3f32 velocity, v3f32 *normal)
         exit_distance.x = b.pos.x - (a.pos.x + a.size.x);
     }
 
-    if (velocity.y > 0.0f)
+    if (displacement.y > 0.0f)
     {
         entry_distance.y = b.pos.y - (a.pos.y + a.size.y);
         exit_distance.y = (b.pos.y + b.size.y) - a.pos.y;
@@ -38,7 +38,7 @@ f32 get_swept_aabb(BoundingBox a, BoundingBox b, v3f32 velocity, v3f32 *normal)
         exit_distance.y = b.pos.y - (a.pos.y + a.size.y);
     }
 
-    if (velocity.z > 0.0f)
+    if (displacement.z > 0.0f)
     {
         entry_distance.z = b.pos.z - (a.pos.z + a.size.z);
         exit_distance.z = (b.pos.z + b.size.z) - a.pos.z;
@@ -51,37 +51,37 @@ f32 get_swept_aabb(BoundingBox a, BoundingBox b, v3f32 velocity, v3f32 *normal)
 
     /* ---- entry and exit -------------------------------------------------- */
 
-    if (velocity.x == 0.0f)
+    if (displacement.x == 0.0f)
     {
         entry.x = -INFINITY;
         exit.x = INFINITY;
     }
     else
     {
-        entry.x = entry_distance.x / velocity.x;
-        exit.x = exit_distance.x / velocity.x;
+        entry.x = entry_distance.x / displacement.x;
+        exit.x = exit_distance.x / displacement.x;
     }
 
-    if (velocity.y == 0.0f)
+    if (displacement.y == 0.0f)
     {
         entry.y = -INFINITY;
         exit.y = INFINITY;
     }
     else
     {
-        entry.y = entry_distance.y / velocity.y;
-        exit.y = exit_distance.y / velocity.y;
+        entry.y = entry_distance.y / displacement.y;
+        exit.y = exit_distance.y / displacement.y;
     }
 
-    if (velocity.z == 0.0f)
+    if (displacement.z == 0.0f)
     {
         entry.z = -INFINITY;
         exit.z = INFINITY;
     }
     else
     {
-        entry.z = entry_distance.z / velocity.z;
-        exit.z = exit_distance.z / velocity.z;
+        entry.z = entry_distance.z / displacement.z;
+        exit.z = exit_distance.z / displacement.z;
     }
 
     entry_time = max_v3f32(entry);
@@ -97,15 +97,15 @@ f32 get_swept_aabb(BoundingBox a, BoundingBox b, v3f32 velocity, v3f32 *normal)
     switch (max_axis_v3f32(entry))
     {
         case 1:
-            normal->x = velocity.x > 0.0f ? -1.0f : 1.0f;
+            normal->x = displacement.x > 0.0f ? -1.0f : 1.0f;
             break;
 
         case 2:
-            normal->y = velocity.y > 0.0f ? -1.0f : 1.0f;
+            normal->y = displacement.y > 0.0f ? -1.0f : 1.0f;
             break;
 
         case 3:
-            normal->z = velocity.z > 0.0f ? -1.0f : 1.0f;
+            normal->z = displacement.z > 0.0f ? -1.0f : 1.0f;
             break;
     }
 
