@@ -47,8 +47,7 @@ typedef struct Render
     char title[128];
     v2i32 size;
     GLFWimage icon;
-    v2f64 mouse_position;
-    v2f64 mouse_last;
+    v2f64 mouse_pos;
     v2f64 mouse_delta;
     u64 time;
     u64 time_delta;

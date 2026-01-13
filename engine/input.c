@@ -130,12 +130,13 @@ static u32 keyboard_tab[KEYBOARD_KEYS_MAX] =
 
 void update_mouse_movement(Render *render)
 {
-    glfwGetCursorPos(render->window, &render->mouse_position.x, &render->mouse_position.y);
+    static v2f64 mouse_last = {0};
+    glfwGetCursorPos(render->window, &render->mouse_pos.x, &render->mouse_pos.y);
     render->mouse_delta = (v2f64){
-        render->mouse_position.x - render->mouse_last.x,
-        render->mouse_position.y - render->mouse_last.y,
+        render->mouse_pos.x - mouse_last.x,
+        render->mouse_pos.y - mouse_last.y,
     };
-    render->mouse_last = render->mouse_position;
+    mouse_last = render->mouse_pos;
 }
 
 b8 is_mouse_press(const u32 button)

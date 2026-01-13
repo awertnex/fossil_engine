@@ -25,7 +25,7 @@
     #define SLASH_NON_NATIVE '/'
 #endif /* PLATFORM */
 
-int make_dir(const str *path);
+u32 make_dir(const str *path);
 
 /*! @brief change current working directory.
  */

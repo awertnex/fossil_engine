@@ -230,7 +230,16 @@ u32 engine_build(const str *engine_dir, const str *out_dir)
     if (engine_err != ERR_SUCCESS && engine_err != ERR_DIR_EXISTS)
         cmd_fail();
 
-    make_dir(stringf("%sengine/shaders", out_dir_processed));
+    if (
+            copy_dir(
+                stringf("%sengine/shaders", str_build_root),
+                stringf("%sengine/shaders", out_dir_processed), TRUE,
+                "rb", "wb") != ERR_SUCCESS ||
+            copy_dir(
+                stringf("%sengine/assets", str_build_root),
+                stringf("%sengine/assets", out_dir_processed), TRUE,
+                "rb", "wb") != ERR_SUCCESS)
+        cmd_fail();
 
     if (exec(&cmd, "engine_build()") != ERR_SUCCESS)
         cmd_fail();
