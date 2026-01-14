@@ -11,6 +11,7 @@
 #define GAME_AUTHOR         "Author: Lily Awertnex"
 #define GAME_NAME           "Heaven-Hell Continuum"
 #define GAME_VERSION        "0.4.0"GAME_VERSION_DEV
+#define GAME_TITLE          GAME_NAME": "GAME_VERSION
 
 #include <engine/h/core.h>
 #include <engine/h/diagnostics.h>
@@ -211,7 +212,7 @@ struct Uniform
 
 }; /* Uniform */
 
-enum ShaderIndices
+enum ShaderIndex
 {
     SHADER_DEFAULT,
     SHADER_SKYBOX,
@@ -221,19 +222,18 @@ enum ShaderIndices
     SHADER_VOXEL,
     SHADER_BOUNDING_BOX,
     SHADER_COUNT,
-}; /* ShaderIndices */
+}; /* ShaderIndex */
 
-enum MeshIndices
+enum MeshIndex
 {
-    MESH_UNIT,
     MESH_SKYBOX,
     MESH_CUBE_OF_HAPPINESS,
     MESH_PLAYER,
     MESH_GIZMO,
     MESH_COUNT,
-}; /* MeshIndices */
+}; /* MeshIndex */
 
-enum FBOIndices
+enum FBOIndex
 {
     FBO_SKYBOX,
     FBO_WORLD,
@@ -242,9 +242,9 @@ enum FBOIndices
     FBO_HUD_MSAA,
     FBO_POST_PROCESSING,
     FBO_COUNT,
-}; /* FBOIndices */
+}; /* FBOIndex */
 
-enum TextureIndices
+enum TextureIndex
 {
     TEXTURE_CROSSHAIR,
     TEXTURE_ITEM_BAR,
@@ -254,16 +254,16 @@ enum TextureIndices
     TEXTURE_SUN,
     TEXTURE_MOON,
     TEXTURE_COUNT,
-}; /* TextureIndices */
+}; /* TextureIndex */
 
-enum FontIndices
+enum FontIndex
 {
     FONT_REG,
     FONT_REG_BOLD,
     FONT_MONO,
     FONT_MONO_BOLD,
     FONT_COUNT,
-}; /* FontIndices */
+}; /* FontIndex */
 
 /*! @brief global pointer to variable for game/engine-specific error codes.
  *

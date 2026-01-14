@@ -34,15 +34,13 @@ extern u32 bind_inventory;
 
 /* ---- misc ---------------------------------------------------------------- */
 
-/* extern u32 bind_take_screenshot; */
 extern u32 bind_toggle_hud;
+/* extern u32 bind_take_screenshot; */
 extern u32 bind_toggle_debug;
-extern u32 bind_toggle_super_debug;
-/* extern u32 bind_toggle_cinematic_camera; */
-/* extern u32 bind_toggle_fullscreen; */
-extern u32 bind_toggle_perspective;
 extern u32 bind_toggle_cinematic_motion;
-extern u32 bind_toggle_zoom;
+extern u32 bind_toggle_perspective;
+/* extern u32 bind_toggle_fullscreen; */
+extern u32 bind_zoom;
 extern u32 bind_toggle_flashlight;
 /* extern u32 bind_pause; */
 /* extern u32 bind_chat_or_command; */
@@ -55,6 +53,7 @@ extern u32 bind_toggle_flashlight;
 /* extern u32 bind_down; */
 /* extern u32 bind_up; */
 extern u32 bind_debug_mod;
+extern u32 bind_toggle_super_debug;
 extern u32 bind_toggle_trans_blocks;
 extern u32 bind_toggle_chunk_bounds;
 extern u32 bind_toggle_bounding_boxes;

@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include "h/limits.h"
 #include "h/time.h"
 
 u64 get_time_raw_u64(void)
@@ -47,12 +48,20 @@ u64 get_time_delta_u64(void)
     return _delta;
 }
 
+void get_time_str(str *buf, const str *format)
+{
+    u64 _time_ns = get_time_raw_u64();
+    time_t _time = _time_ns * NANOSEC2SEC;
+    struct tm *_tm = localtime(&_time);
+    strftime(buf, TIME_STRING_MAX, format, _tm);
+}
+
 b8 get_timer(f64 *time_start, f32 interval)
 {
-    f64 time_current = get_time_f64();
-    if (!*time_start || time_current - *time_start >= interval)
+    f64 _cur = get_time_f64();
+    if (!*time_start || _cur - *time_start >= interval)
     {
-        *time_start = time_current;
+        *time_start = _cur;
         return TRUE;
     }
     return FALSE;

@@ -206,7 +206,7 @@ u32 chunking_init(void)
                     i, SET_RENDER_DISTANCE_MAX);
 
             if (write_file(CHUNK_ORDER_lookup_file_name, sizeof(u32),
-                        chunk_buf_volume, index, "wb", TRUE, FALSE) != ERR_SUCCESS)
+                        chunk_buf_volume, index, TRUE, FALSE) != ERR_SUCCESS)
                 goto cleanup;
         }
     }
@@ -217,7 +217,7 @@ u32 chunking_init(void)
 
     file_len = get_file_contents(CHUNK_ORDER_lookup_file_name,
             (void*)&CHUNK_ORDER_lookup_file_contents,
-            sizeof(u32), "rb", FALSE);
+            sizeof(u32), FALSE);
     if (*GAME_ERR != ERR_SUCCESS ||
             CHUNK_ORDER_lookup_file_contents == NULL)
         goto cleanup;
@@ -265,12 +265,12 @@ u32 chunking_init(void)
 
         if (write_file(CHUNKS_MAX_lookup_file_name,
                 sizeof(u64), SET_RENDER_DISTANCE_MAX + 1,
-                &CHUNKS_MAX, "wb", TRUE, FALSE) != ERR_SUCCESS)
+                &CHUNKS_MAX, TRUE, FALSE) != ERR_SUCCESS)
             goto cleanup;
     }
 
     file_len = get_file_contents(CHUNKS_MAX_lookup_file_name,
-            (void*)&CHUNKS_MAX_lookup_file_contents, sizeof(u64), "rb", FALSE);
+            (void*)&CHUNKS_MAX_lookup_file_contents, sizeof(u64), FALSE);
     if (*GAME_ERR != ERR_SUCCESS ||
             CHUNKS_MAX_lookup_file_contents == NULL)
         goto cleanup;

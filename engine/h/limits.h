@@ -32,6 +32,7 @@
 #define STRINGF_BUFFERS_MAX         4
 #define IN_STRING_MAX               STRING_MAX
 #define OUT_STRING_MAX              (STRING_MAX * 2)
+#define TIME_STRING_MAX             128
 #define GLYPH_MAX                   256
 #define INCLUDE_RECURSION_LIMIT_MAX 512
 

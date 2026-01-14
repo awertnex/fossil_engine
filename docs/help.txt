@@ -34,7 +34,7 @@ Toggle Cinematic Camera:        F4
 Toggle Perspective:             F5
 Toggle Cinematic Motion:        F6
 Toggle Fullscreen:              F11
-Toggle Zoom:                    Z
+Zoom:                           Z
 Toggle Flashlight:              F
 Pause:                          Escape
 Chat/Command:                   Slash

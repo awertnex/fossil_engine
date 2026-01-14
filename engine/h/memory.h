@@ -7,43 +7,43 @@
 #define arr_len(arr) ((u64)sizeof(arr) / sizeof(arr[0]))
 
 #define mem_alloc(x, size, name) \
-    _mem_alloc(x, size, name, __FILE__, __LINE__)
+    _mem_alloc(x, size, name, __BASE_FILE__, __LINE__)
 
 #define mem_alloc_memb(x, memb, size, name) \
-    _mem_alloc_memb(x, memb, size, name, __FILE__, __LINE__)
+    _mem_alloc_memb(x, memb, size, name, __BASE_FILE__, __LINE__)
 
 #define mem_alloc_buf(x, memb, size, name) \
-    _mem_alloc_buf(x, memb, size, name, __FILE__, __LINE__)
+    _mem_alloc_buf(x, memb, size, name, __BASE_FILE__, __LINE__)
 
 #define mem_alloc_key_val(x, memb, size_key, size_val, name) \
-    _mem_alloc_key_val(x, memb, size_key, size_val, name, __FILE__, __LINE__)
+    _mem_alloc_key_val(x, memb, size_key, size_val, name, __BASE_FILE__, __LINE__)
 
 #define mem_realloc(x, size, name) \
-    _mem_realloc(x, size, name, __FILE__, __LINE__)
+    _mem_realloc(x, size, name, __BASE_FILE__, __LINE__)
 
 #define mem_realloc_memb(x, memb, size, name) \
-    _mem_realloc_memb(x, memb, size, name, __FILE__, __LINE__)
+    _mem_realloc_memb(x, memb, size, name, __BASE_FILE__, __LINE__)
 
 #define mem_free(x, size, name) \
-    _mem_free(x, size, name, __FILE__, __LINE__)
+    _mem_free(x, size, name, __BASE_FILE__, __LINE__)
 
 #define mem_free_buf(x, name) \
-    _mem_free_buf(x, name, __FILE__, __LINE__)
+    _mem_free_buf(x, name, __BASE_FILE__, __LINE__)
 
 #define mem_free_key_val(x, name) \
-    _mem_free_key_val(x, name, __FILE__, __LINE__)
+    _mem_free_key_val(x, name, __BASE_FILE__, __LINE__)
 
 #define mem_clear(x, size, name) \
-    _mem_clear(x, size, name, __FILE__, __LINE__)
+    _mem_clear(x, size, name, __BASE_FILE__, __LINE__)
 
 #define mem_map(x, size, name) \
-    _mem_map(x, size, name, __FILE__, __LINE__)
+    _mem_map(x, size, name, __BASE_FILE__, __LINE__)
 
 #define mem_commit(x, offset, size, name) \
-    _mem_commit(x, offset, size, name, __FILE__, __LINE__)
+    _mem_commit(x, offset, size, name, __BASE_FILE__, __LINE__)
 
 #define mem_unmap(x, size, name) \
-    _mem_unmap(x, size, name, __FILE__, __LINE__)
+    _mem_unmap(x, size, name, __BASE_FILE__, __LINE__)
 
 /*! -- INTERNAL USE ONLY --;
  *

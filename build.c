@@ -38,6 +38,7 @@ int main(int argc, char **argv)
     cmd_push("-Ofast");
     cmd_push("-Wall");
     cmd_push("-Wextra");
+    cmd_push("-Wformat-truncation=0");
     cmd_push(stringf("-ffile-prefix-map=%s=", str_build_root));
     cmd_push("-ggdb");
     cmd_push("-Wl,-rpath="RUNTIME_PATH);
@@ -60,8 +61,8 @@ int main(int argc, char **argv)
         normalize_slash(str_from[i]);
         normalize_slash(str_to[i]);
         if (is_file(str_from[i]) == ERR_SUCCESS)
-            copy_file(str_from[i], str_to[i], "rb", "wb");
-        else copy_dir(str_from[i], str_to[i], TRUE, "rb", "wb");
+            copy_file(str_from[i], str_to[i]);
+        else copy_dir(str_from[i], str_to[i], TRUE);
 
         if (engine_err != ERR_SUCCESS)
             goto cleanup;

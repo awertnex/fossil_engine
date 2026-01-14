@@ -162,12 +162,12 @@ static u32 settings_init(void)
     {
         write_file(stringf("%s"FILE_NAME_SETTINGS, DIR_ROOT[DIR_CONFIG]),
                 1, strlen(settings_file_contents),
-                settings_file_contents, "wb", TRUE, TRUE);
+                settings_file_contents, TRUE, TRUE);
     }
 
     settings_file_contents = NULL;
     get_file_contents(stringf("%s"FILE_NAME_SETTINGS, DIR_ROOT[DIR_CONFIG]),
-            (void*)&settings_file_contents, 1, "rb", TRUE);
+            (void*)&settings_file_contents, 1, TRUE);
     if (*GAME_ERR != ERR_SUCCESS)
         return *GAME_ERR;
 
@@ -753,7 +753,7 @@ static void draw_everything(void)
     glUniform1i(uniform.skybox.texture_sun, 3);
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, texture[TEXTURE_SUN].id);
-    glBindVertexArray(mesh[MESH_UNIT].vao);
+    glBindVertexArray(engine_mesh_unit.vao);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
     translation = (m4f32){
@@ -1096,57 +1096,13 @@ static void draw_everything(void)
         ui_stop();
     }
 
-    struct
-    {
-        GLint ndc_scale;
-        GLint position;
-        GLint size;
-        GLint texture_size;
-        GLint offset;
-        GLint alignment;
-        GLint tint;
-    } unifor = {0};
-
-    static b8 aquired = FALSE;
-    if (!aquired)
-    {
-        unifor.ndc_scale =
-            glGetUniformLocation(engine_shader[ENGINE_SHADER_UI].id, "ndc_scale");
-        unifor.position =
-            glGetUniformLocation(engine_shader[ENGINE_SHADER_UI].id, "position");
-        unifor.size =
-            glGetUniformLocation(engine_shader[ENGINE_SHADER_UI].id, "size");
-        unifor.texture_size =
-            glGetUniformLocation(engine_shader[ENGINE_SHADER_UI].id, "texture_size");
-        unifor.offset =
-            glGetUniformLocation(engine_shader[ENGINE_SHADER_UI].id, "offset");
-        unifor.alignment =
-            glGetUniformLocation(engine_shader[ENGINE_SHADER_UI].id, "alignment");
-        unifor.tint =
-            glGetUniformLocation(engine_shader[ENGINE_SHADER_UI].id, "tint");
-        aquired = TRUE;
-    }
-
-    glUseProgram(engine_shader[ENGINE_SHADER_UI].id);
-    glBindVertexArray(mesh[MESH_UNIT].vao);
-    glUniform2fv(unifor.ndc_scale, 1, (GLfloat*)&settings.ndc_scale);
-    glUniform2i(unifor.position, render->size.x / 2, render->size.y);
-    glUniform2iv(unifor.size, 1, (GLint*)&texture[TEXTURE_ITEM_BAR].size);
-    glUniform2iv(unifor.texture_size, 1, (GLint*)&texture[TEXTURE_ITEM_BAR].size);
-    glUniform2f(unifor.offset, 84.5f, 18.0f);
-    glUniform2i(unifor.alignment, 1, 1);
-    glUniform4f(unifor.tint, 1.0f, 1.0f, 1.0f, 1.0f);
-
-    glBindTexture(GL_TEXTURE_2D, texture[TEXTURE_ITEM_BAR].id);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
     /* ---- draw engine ui -------------------------------------------------- */
 
     if (core.flag.super_debug)
     {
         /*
         glUseProgram(shader_game[SHADER_UI_9_SLICE].id);
-        glBindVertexArray(mesh[MESH_UNIT].vao);
+        glBindVertexArray(engine_mesh_unit.vao);
 
         glUniform2fv(uniform.ui_9_slice.ndc_scale, 1,
                 (GLfloat*)&settings.ndc_scale);
@@ -1311,7 +1267,7 @@ static void draw_everything(void)
     glDisable(GL_DEPTH_TEST);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo[FBO_POST_PROCESSING].fbo);
     glUseProgram(engine_shader[ENGINE_SHADER_UNIT_QUAD].id);
-    glBindVertexArray(mesh[MESH_UNIT].vao);
+    glBindVertexArray(engine_mesh_unit.vao);
     glBindTexture(GL_TEXTURE_2D, fbo[FBO_SKYBOX].color_buf);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     glBindTexture(GL_TEXTURE_2D, fbo[FBO_WORLD].color_buf);
@@ -1326,7 +1282,7 @@ static void draw_everything(void)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(shader_game[SHADER_POST_PROCESSING].id);
     glClear(GL_COLOR_BUFFER_BIT);
-    glBindVertexArray(mesh[MESH_UNIT].vao);
+    glBindVertexArray(engine_mesh_unit.vao);
     glUniform1ui(uniform.post_processing.time, ((u32)(render->time) & 0x1ff) + 1);
     glBindTexture(GL_TEXTURE_2D, fbo[FBO_POST_PROCESSING].color_buf);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
@@ -1335,12 +1291,45 @@ static void draw_everything(void)
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+#include <stdio.h>
+#include <string.h>
+#include <stdarg.h>
+str *textf(const str *format, ...)
+{
+    static str str_buf[3][OUT_STRING_MAX] = {0};
+    static u64 index = 0, required_bytes;
+    str *string = str_buf[index];
+    va_list args;
+    str *trunc_buf = NULL;
+
+    va_start(args, format);
+    required_bytes = vsnprintf(string, OUT_STRING_MAX, format, args);
+    va_end(args);
+
+    if (required_bytes >= OUT_STRING_MAX - 1)
+    {
+        trunc_buf = string + OUT_STRING_MAX - 4;
+        snprintf(trunc_buf, 4, "...");
+    }
+
+    index = (index + 1) % 3;
+    return string;
+}
+
+void do_something(const str *fuck)
+{
+    printf("%s\n", textf("font_init().%s", fuck));
+    printf("%s\n", textf("font_init().%s", fuck));
+    printf("%s\n", textf("font_init().%s", fuck));
+    printf("%s\n", textf("font_init().%s", fuck));
+    printf("%s\n", textf("font_init().%s", fuck));
+    printf("%s\n", textf("font_init().%s", fuck));
+}
+
 int main(int argc, char **argv)
 {
-    snprintf(render->title, NAME_MAX, "%s", GAME_NAME": "GAME_VERSION);
-    render->size = (v2i32){1280, 1054};
-
-    if (engine_init(argc, argv, NULL, TRUE, FALSE, GAME_RELEASE_BUILD) != ERR_SUCCESS)
+    if (engine_init(argc, argv, GAME_TITLE, 1280, 1054,
+                NULL, TRUE, FALSE, GAME_RELEASE_BUILD) != ERR_SUCCESS)
         goto cleanup;
 
     core.flag.active = 1;
@@ -1406,7 +1395,7 @@ int main(int argc, char **argv)
         goto cleanup;
 
     if (
-            fbo_init(&fbo[FBO_SKYBOX],      &mesh[MESH_UNIT], FALSE, 4) != ERR_SUCCESS ||
+            fbo_init(&fbo[FBO_SKYBOX],      &engine_mesh_unit, FALSE, 4) != ERR_SUCCESS ||
             fbo_init(&fbo[FBO_WORLD],       NULL, FALSE, 4) != ERR_SUCCESS ||
             fbo_init(&fbo[FBO_WORLD_MSAA],  NULL, TRUE, 4) != ERR_SUCCESS ||
             fbo_init(&fbo[FBO_HUD],         NULL, FALSE, 4) != ERR_SUCCESS ||

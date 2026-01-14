@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "h/diagnostics.h"
 #include "h/dir.h"
@@ -31,13 +32,13 @@ str *swap_string_char(str *string, char c1, char c2)
     return string;
 }
 
-str *stringf(const str* format, ...)
+str *stringf(const str *format, ...)
 {
     static str str_buf[STRINGF_BUFFERS_MAX][OUT_STRING_MAX] = {0};
     static u64 index = 0, required_bytes;
     str *string = str_buf[index];
     __builtin_va_list args;
-    char *trunc_buf = NULL;
+    str *trunc_buf = NULL;
 
     __builtin_va_start(args, format);
     required_bytes = vsnprintf(string, OUT_STRING_MAX, format, args);
@@ -45,7 +46,7 @@ str *stringf(const str* format, ...)
 
     if (required_bytes >= OUT_STRING_MAX - 1)
     {
-        trunc_buf = str_buf[index] + OUT_STRING_MAX - 4;
+        trunc_buf = string + OUT_STRING_MAX - 4;
         snprintf(trunc_buf, 4, "...");
     }
 

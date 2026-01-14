@@ -30,6 +30,10 @@ f64 get_time_f64(void);
  */
 u64 get_time_delta_u64(void);
 
+/*! @brief get time string with max length of 'limits.h/TIME_STRING_MAX' as per 'format'.
+ */
+void get_time_str(str *buf, const str *format);
+
 b8 get_timer(f64 *time_start, f32 interval);
 
 /*! @brief sleep for specified nanoseconds.

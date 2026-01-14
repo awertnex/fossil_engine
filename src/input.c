@@ -49,7 +49,7 @@ u32 bind_toggle_cinematic_camera =  KEY_F4;
 u32 bind_toggle_perspective =       KEY_F5;
 u32 bind_toggle_cinematic_motion =  KEY_F6;
 u32 bind_toggle_fullscreen =        KEY_F11;
-u32 bind_toggle_zoom =              KEY_Z;
+u32 bind_zoom =                     KEY_Z;
 u32 bind_toggle_flashlight =        KEY_F;
 u32 bind_pause =                    KEY_ESCAPE;
 u32 bind_chat_or_command =          KEY_SLASH;
@@ -217,9 +217,9 @@ void input_update(Player *p)
         if (is_key_press(bind_toggle_perspective))
             p->camera_mode = (p->camera_mode + 1) % PLAYER_CAMERA_MODE_COUNT;
 
-        if (is_key_hold(bind_toggle_zoom))
+        if (is_key_hold(bind_zoom))
             p->flag |= FLAG_PLAYER_ZOOMER;
-        if (is_key_release(bind_toggle_zoom))
+        if (is_key_release(bind_zoom))
             p->flag &= ~FLAG_PLAYER_ZOOMER;
 
         if (is_key_press(bind_toggle_flashlight))

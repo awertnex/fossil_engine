@@ -25,7 +25,7 @@ u32 rand_init(void)
     if (is_file_exists(file_name, FALSE) == ERR_SUCCESS)
     {
         file_len = get_file_contents(file_name,
-                (void*)&file_contents, sizeof(f32), "rb", FALSE);
+                (void*)&file_contents, sizeof(f32), FALSE);
         if (*GAME_ERR != ERR_SUCCESS || file_contents == NULL)
             goto cleanup;
 
@@ -42,7 +42,7 @@ u32 rand_init(void)
             RAND_TAB[i] = rand_f32(i);
 
         if (write_file(file_name, sizeof(i32), RAND_TAB_VOLUME,
-                    RAND_TAB, "wb", TRUE, FALSE) != ERR_SUCCESS)
+                    RAND_TAB, TRUE, FALSE) != ERR_SUCCESS)
             goto cleanup;
     }
 

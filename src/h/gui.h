@@ -12,12 +12,6 @@
 #define COL_TEXT_DEFAULT    0xbcbcbcff
 #define COL_TEXT_HOVER      0xa4ed74ff
 
-extern u16 menu_index;
-extern u16 menu_layer[5];
-extern u8 state_menu_depth;
-extern b8 is_menu_ready;
-extern u8 buttons[BTN_COUNT];
-
 enum MenuNames
 {
     MENU_TITLE = 1,
@@ -85,6 +79,12 @@ enum ButtonNames
     BTN_SDB_ADD,
     BTN_SDB_SUB,
 }; /* ButtonNames */
+
+extern u16 menu_index;
+extern u16 menu_layer[5];
+extern u8 state_menu_depth;
+extern b8 is_menu_ready;
+extern u8 buttons[BTN_COUNT];
 
 /*! @return non-zero on failure and '*GAME_ERR' is set accordingly.
  */

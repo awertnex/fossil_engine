@@ -113,8 +113,7 @@ u32 is_dir_exists(const str *name, b8 log)
     return engine_err;
 }
 
-u64 get_file_contents(const str *name, void **destination,
-        u64 size, const str *read_format, b8 terminate)
+u64 get_file_contents(const str *name, void **destination, u64 size, b8 terminate)
 {
     FILE *file = NULL;
     u64 cursor;
@@ -122,9 +121,9 @@ u64 get_file_contents(const str *name, void **destination,
     if (is_file_exists(name, TRUE) != ERR_SUCCESS)
             return 0;
 
-    if ((file = fopen(name, read_format)) == NULL)
+    if ((file = fopen(name, "rb")) == NULL)
     {
-        LOGERROR(TRUE, ERR_FILE_OPEN_FAIL, "File Opening '%s' Failed\n", name);
+        LOGERROR(TRUE, ERR_FILE_OPEN_FAIL, "Failed to Open File '%s'\n", name);
         return 0;
     }
 
@@ -258,12 +257,11 @@ u64 get_dir_entry_count(const str *name)
     return count;
 }
 
-u32 copy_file(const str *source, const str *destination,
-        const str *read_format, const str *write_format)
+u32 copy_file(const str *source, const str *destination)
 {
     str destination_string[PATH_MAX] = {0};
-    FILE *in_file = NULL;
-    str *out_file = NULL;
+    str *in_file = NULL;
+    FILE *out_file = NULL;
     u64 len = 0;
 
     if (is_file_exists(source, TRUE) != ERR_SUCCESS)
@@ -274,22 +272,22 @@ u32 copy_file(const str *source, const str *destination,
     if (is_dir(destination) == ERR_SUCCESS)
         strncat(destination_string, strrchr(source, SLASH_NATIVE), PATH_MAX - 1);
 
-    if ((in_file = fopen(destination_string, write_format)) == NULL)
+    if ((out_file = fopen(destination_string, "wb")) == NULL)
     {
-        LOGERROR(FALSE, ERR_FILE_OPEN_FAIL, "File Copying '%s' -> '%s' Failed\n",
+        LOGERROR(FALSE, ERR_FILE_OPEN_FAIL, "Failed to Copy File '%s' -> '%s'\n",
                 source, destination_string);
         return engine_err;
     }
 
-    len = get_file_contents(source, (void*)&out_file, 1, read_format, FALSE);
-    if (!out_file)
+    len = get_file_contents(source, (void*)&in_file, 1, FALSE);
+    if (engine_err != ERR_SUCCESS || !in_file)
     {
-        fclose(in_file);
+        fclose(out_file);
         return engine_err;
     }
 
-    fwrite(out_file, 1, len, in_file);
-    fclose(in_file);
+    fwrite(in_file, 1, len, out_file);
+    fclose(out_file);
 
     LOGTRACE(FALSE, "File Copied '%s' -> '%s'\n", source, destination_string);
 
@@ -297,8 +295,7 @@ u32 copy_file(const str *source, const str *destination,
     return engine_err;
 }
 
-u32 copy_dir(const str *source, const str *destination, b8 overwrite,
-        const str *read_format, const str *write_format)
+u32 copy_dir(const str *source, const str *destination, b8 overwrite)
 {
     Buf dir_contents = {0};
     str source_string[PATH_MAX] = {0};
@@ -333,10 +330,10 @@ u32 copy_dir(const str *source, const str *destination, b8 overwrite,
 
         if (is_dir(in_dir) == ERR_SUCCESS)
         {
-            copy_dir(in_dir, out_dir, 1, read_format, write_format);
+            copy_dir(in_dir, out_dir, 1);
             continue;
         }
-        copy_file(in_dir, out_dir, read_format, write_format);
+        copy_file(in_dir, out_dir);
     }
 
     LOGTRACE(FALSE, "Directory Copied '%s' -> '%s'\n", source, destination_string);
@@ -345,11 +342,18 @@ u32 copy_dir(const str *source, const str *destination, b8 overwrite,
     return engine_err;
 }
 
-u32 write_file(const str *name, u64 size, u64 length, void *buf,
-        const str *write_format, b8 log, b8 text)
+u32 write_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text)
+{
+    if (_write_file(name, size, length, buf, log, text) == ERR_SUCCESS)
+        LOGTRACE(FALSE, "File Written '%s'\n", name);
+
+    return engine_err;
+}
+
+u32 _write_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text)
 {
     FILE *file = NULL;
-    if ((file = fopen(name, write_format)) == NULL)
+    if ((file = fopen(name, "wb")) == NULL)
     {
         if (log)
         {
@@ -363,7 +367,34 @@ u32 write_file(const str *name, u64 size, u64 length, void *buf,
     if (text) fprintf(file, "%c", '\n');
     fclose(file);
 
-    LOGTRACE(FALSE, "File Written '%s'\n", name);
+    engine_err = ERR_SUCCESS;
+    return engine_err;
+}
+
+u32 append_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text)
+{
+    if (_append_file(name, size, length, buf, log, text) == ERR_SUCCESS)
+        LOGTRACE(FALSE, "File Appended '%s'\n", name);
+
+    return engine_err;
+}
+
+u32 _append_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text)
+{
+    FILE *file = NULL;
+    if ((file = fopen(name, "ab")) == NULL)
+    {
+        if (log)
+        {
+            LOGERROR(TRUE, ERR_FILE_OPEN_FAIL, "Failed to Open File '%s'\n", name);
+        }
+        else engine_err = ERR_FILE_OPEN_FAIL;
+        return engine_err;
+    }
+
+    fwrite(buf, size, length, file);
+    if (text) fprintf(file, "%c", '\n');
+    fclose(file);
 
     engine_err = ERR_SUCCESS;
     return engine_err;

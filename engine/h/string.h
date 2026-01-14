@@ -24,7 +24,7 @@ str *swap_string_char(str *string, char c1, char c2);
  *
  *  @return static formatted string.
  */
-str *stringf(const str* format, ...);
+str *stringf(const str *format, ...);
 
 /*! @brief compare 'arg' to any of 'argv' entries.
  *

@@ -5,6 +5,7 @@
 #include "dir.c"
 #include "logger.c"
 #include "string.c"
+#include "time.c"
 
 #if PLATFORM_LINUX
     #include "platform_linux.c"
@@ -67,7 +68,7 @@ void build_init(int argc, char **argv,
     if (find_token("show", argc, argv)) flag |= FLAG_CMD_SHOW;
     if (find_token("raw", argc, argv)) flag |= FLAG_CMD_RAW;
 
-    logger_init(TRUE, argc, argv);
+    logger_init(TRUE, argc, argv, NULL);
 
     if (find_token("LOGFATAL", argc, argv)) log_level_max = LOGLEVEL_FATAL;
     if (find_token("LOGERROR", argc, argv)) log_level_max = LOGLEVEL_ERROR;
@@ -144,12 +145,13 @@ static void self_rebuild(char **argv)
 
     cmd_push(COMPILER);
     cmd_push(str_build_src);
-    cmd_push("-ggdb");
+#if PLATFORM_LINUX
+    cmd_push("-D_GNU_SOURCE");
+#endif /* PLATFORM_LINUX */
     cmd_push("-std=c99");
     cmd_push("-Wall");
     cmd_push("-Wextra");
-    cmd_push("-fno-builtin");
-    cmd_push("-Wno-implicit-function-declaration");
+    cmd_push("-Wformat-truncation=0");
     cmd_push("-o");
     cmd_push(str_build_bin_new);
     cmd_ready();
@@ -195,15 +197,16 @@ u32 engine_build(const str *out_dir)
     cmd_push("engine/ui.c");
     cmd_push("engine/include/glad/glad.c");
     cmd_push("-I.");
-    cmd_push("-shared");
-    cmd_push("-std=c99");
 #if PLATFORM_LINUX
     cmd_push("-D_GNU_SOURCE");
 #endif /* PLATFORM_LINUX */
+    cmd_push("-shared");
+    cmd_push("-std=c99");
     cmd_push("-fPIC");
     cmd_push("-Ofast");
     cmd_push("-Wall");
     cmd_push("-Wextra");
+    cmd_push("-Wformat-truncation=0");
     cmd_push(stringf("-ffile-prefix-map=%s=", str_build_root));
     _engine_link_libs();
     cmd_push("-o");
@@ -220,20 +223,17 @@ u32 engine_build(const str *out_dir)
     if (
             copy_dir(
                 stringf("%sengine/shaders", str_build_root),
-                stringf("%sengine/shaders", out_dir), TRUE,
-                "rb", "wb") != ERR_SUCCESS ||
+                stringf("%sengine/shaders", out_dir), TRUE) != ERR_SUCCESS ||
             copy_dir(
                 stringf("%sengine/assets", str_build_root),
-                stringf("%sengine/assets", out_dir), TRUE,
-                "rb", "wb") != ERR_SUCCESS)
+                stringf("%sengine/assets", out_dir), TRUE) != ERR_SUCCESS)
         cmd_fail();
 
     if (exec(&cmd, "engine_build()") != ERR_SUCCESS)
         cmd_fail();
 
     if (copy_file(stringf("%s"ENGINE_NAME_LIB, out_dir),
-                "engine/lib/"PLATFORM"/"ENGINE_NAME_LIB,
-                "rb", "wb") != ERR_SUCCESS)
+                "engine/lib/"PLATFORM"/"ENGINE_NAME_LIB) != ERR_SUCCESS)
         cmd_fail();
 
     cmd_free();

@@ -9,6 +9,7 @@
 #define ENGINE_AUTHOR           "Lily Awertnex"
 #define ENGINE_NAME             "Fossil Engine"
 #define ENGINE_VERSION          "0.1.3"ENGINE_VERSION_STABLE
+#define ENGINE_TITLE            ENGINE_NAME": "ENGINE_VERSION
 
 #include <engine/include/glad/glad.h>
 #define GLFW_INCLUDE_NONE
@@ -206,6 +207,11 @@ enum TextAlignment
  *  @param shaders = initialize default shaders (like 'text' and 'ui').
  *  @param release_build = if TRUE, TRACE and DEBUG logs will be disabled.
  *
+ *  @param title = window/application title, if NULL, default title is used
+ *  ('window_init()' parameter).
+ *  @param size_x, size_y = window size, if either is 0, default size is used
+ *  ('window_init()' parameter).
+ *
  *  @remark argc and argv can be NULL.
  *  @remark release_build can be overridden with these args in 'argv':
  *      LOGLEVEL FATAL = log only fatal errors.
@@ -219,7 +225,8 @@ enum TextAlignment
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 engine_init(int argc, char **argv, Render *_render, b8 shaders, b8 multisample, b8 release_build);
+u32 engine_init(int argc, char **argv, const str *title, i32 size_x, i32 size_y,
+        Render *_render, b8 shaders, b8 multisample, b8 release_build);
 
 /*! @brief free engine resources.
  *
@@ -237,9 +244,12 @@ u32 glfw_init(b8 multisample);
 
 /*! @remark called automatically from 'engine_init()'.
  *
+ *  @param title = window/application title, if NULL, default title is used.
+ *  @param size_x, size_y = window size, if either is 0, default size is used.
+ *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 window_init();
+u32 window_init(const str *title, i32 size_x, i32 size_y);
 
 /*! @remark called automatically from 'engine_init()'.
  *
@@ -357,12 +367,12 @@ void get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f64 *y
  *  2. allocate memory for 'font.bitmap' and render glyphs onto it.
  *  3. generate square texture of diameter (size * 16) and bake bitmap onto it.
  *
- *  @param size = font size & character bitmap diameter.
- *  @param font_path = font path.
+ *  @param resolution = font size (font atlas cell diameter).
+ *  @param file_name = font path.
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 font_init(Font *font, u32 size, const str *font_path);
+u32 font_init(Font *font, u32 resolution, const str *file_name);
 
 void font_free(Font *font);
 
@@ -454,5 +464,7 @@ extern ShaderProgram engine_shader[ENGINE_SHADER_COUNT];
  *  @remark declared internally.
  */
 extern Texture engine_texture[ENGINE_TEXTURE_COUNT];
+
+extern Mesh engine_mesh_unit;
 
 #endif /* ENGINE_CORE_H */

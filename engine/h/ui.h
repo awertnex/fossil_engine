@@ -36,8 +36,8 @@ void ui_render(void);
 
 void ui_draw(Texture texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
         f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint);
-/*!
- *  @remark enables 'GL_DEPTH_TEST'.
+
+/*! @remark enables 'GL_DEPTH_TEST'.
  */
 void ui_stop(void);
 

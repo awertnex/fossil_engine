@@ -157,7 +157,7 @@ u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
     snprintf(string[0], PATH_MAX, "%s%s/"FILE_NAME_WORLD_SEED, DIR_ROOT[DIR_WORLDS], world_name);
     if (is_file_exists(string[0], FALSE) == ERR_SUCCESS)
     {
-        file_len = get_file_contents(string[0], (void*)&file_contents, 1, "rb", TRUE);
+        file_len = get_file_contents(string[0], (void*)&file_contents, 1, TRUE);
         if (*GAME_ERR != ERR_SUCCESS || !file_contents)
             return *GAME_ERR;
         seed = (u64)strtoul(file_contents, NULL, 10);
@@ -170,7 +170,7 @@ u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
 
         convert_u64_to_str(string[1], NAME_MAX, seed);
         if (write_file(string[0], 1, strlen(string[1]),
-                    &string[1], "wb", TRUE, TRUE) != ERR_SUCCESS)
+                    &string[1], TRUE, TRUE) != ERR_SUCCESS)
             return *GAME_ERR;
     }
 

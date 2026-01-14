@@ -24,7 +24,7 @@ u32 engine_err = ERR_SUCCESS;
 
 static Render render_internal =
 {
-    .title = ENGINE_NAME": "ENGINE_VERSION,
+    .title = ENGINE_TITLE,
     .size = (v2i32){RENDER_WIDTH_DEFAULT, RENDER_HEIGHT_DEFAULT},
 };
 
@@ -74,6 +74,7 @@ ShaderProgram engine_shader[ENGINE_SHADER_COUNT] =
 };
 
 Texture engine_texture[ENGINE_TEXTURE_COUNT] = {0};
+Mesh engine_mesh_unit = {0};
 
 /* ---- section: signatures ------------------------------------------------- */
 
@@ -116,7 +117,8 @@ static u32 _texture_generate(GLuint *id, const GLint format_internal,  const GLi
 
 /* ---- section: init ------------------------------------------------------- */
 
-u32 engine_init(int argc, char **argv, Render *_render, b8 shaders, b8 multisample, b8 release_build)
+u32 engine_init(int argc, char **argv, const str *title, i32 size_x, i32 size_y,
+        Render *_render, b8 shaders, b8 multisample, b8 release_build)
 {
     u32 i = 0;
     str *path = NULL;
@@ -144,9 +146,9 @@ u32 engine_init(int argc, char **argv, Render *_render, b8 shaders, b8 multisamp
         change_render(_render);
 
     if (
-            logger_init(release_build, argc, argv) != ERR_SUCCESS ||
+            logger_init(release_build, argc, argv, "engine/logs") != ERR_SUCCESS ||
             glfw_init(multisample) != ERR_SUCCESS ||
-            window_init() != ERR_SUCCESS ||
+            window_init(title, size_x, size_y) != ERR_SUCCESS ||
             glad_init() != ERR_SUCCESS)
         goto cleanup;
 
@@ -170,6 +172,7 @@ void engine_close(void)
     u32 i = 0;
     for (i = 0; i < ENGINE_TEXTURE_COUNT; ++i)
         texture_free(&engine_texture[i]);
+    mesh_free(&engine_mesh_unit);
     text_free();
     ui_free();
     logger_close();
@@ -206,8 +209,12 @@ u32 glfw_init(b8 multisample)
     return engine_err;
 }
 
-u32 window_init(void)
+u32 window_init(const str *title, i32 size_x, i32 size_y)
 {
+    if (title) snprintf(render->title, NAME_MAX, "%s", title);
+    if (size_x) render->size.x = clamp_i32(size_x, RENDER_WIDTH_MIN, RENDER_WIDTH_MAX);
+    if (size_y) render->size.y = clamp_i32(size_y, RENDER_HEIGHT_MIN, RENDER_HEIGHT_MAX);
+
     render->window = glfwCreateWindow(render->size.x, render->size.y, render->title, NULL, NULL);
 
     if (!render->window)
@@ -339,7 +346,7 @@ static str *_shader_pre_process(const str *path, u64 *file_len, u64 recursion_li
     str *buf = NULL;
     str *buf_include = NULL;
     str *buf_resolved = NULL;
-    u64 buf_len = get_file_contents(path, (void*)&buf, 1, "rb", TRUE);
+    u64 buf_len = get_file_contents(path, (void*)&buf, 1, TRUE);
     u64 buf_include_len = 0;
     u64 buf_resolved_len = 0;
     if (engine_err != ERR_SUCCESS)
@@ -1000,7 +1007,7 @@ u32 font_init(Font *font, u32 resolution, const str *file_name)
     if (is_file_exists(file_name, TRUE) != ERR_SUCCESS)
         return engine_err;
 
-    font->buf_len = get_file_contents(file_name, (void*)&font->buf, 1, "rb", TRUE);
+    font->buf_len = get_file_contents(file_name, (void*)&font->buf, 1, TRUE);
     if (!font->buf)
         return engine_err;
 
@@ -1011,16 +1018,15 @@ u32 font_init(Font *font, u32 resolution, const str *file_name)
         goto cleanup;
     }
 
-    printf("fucking file name 1: %s\n", file_name);
+    printf("fucking file name 0: %s\n", file_name);
     if (mem_alloc((void*)&font->bitmap, GLYPH_MAX * resolution * resolution,
                 stringf("font_init().%s", file_name)) != ERR_SUCCESS)
         goto cleanup;
 
-    printf("fucking file name 2: %s\n", file_name);
+    printf("fucking file name 1: %s\n", file_name);
     if (mem_alloc((void*)&canvas, resolution * resolution,
                 "font_init().font_glyph_canvas") != ERR_SUCCESS)
         goto cleanup;
-
     snprintf(font->path, PATH_MAX, "%s", file_name);
     stbtt_GetFontVMetrics(&font->info, &font->ascent, &font->descent, &font->line_gap);
     font->resolution = resolution;

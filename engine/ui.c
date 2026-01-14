@@ -36,7 +36,6 @@ static struct /* ui_core */
 
     } uniform;
 
-    Mesh mesh_unit;
     FBO fbo;
 } ui_core;
 
@@ -52,7 +51,7 @@ u32 ui_init(b8 multisample)
                 "engine/assets/textures/panel_inactive.png") != ERR_SUCCESS)
         goto cleanup;
 
-    if (fbo_init(&ui_core.fbo, &ui_core.mesh_unit, multisample, 4) != ERR_SUCCESS)
+    if (fbo_init(&ui_core.fbo, &engine_mesh_unit, multisample, 4) != ERR_SUCCESS)
         goto cleanup;
 
     ui_core.multisample = multisample;
@@ -121,7 +120,7 @@ void ui_start(FBO *fbo, b8 nine_slice, b8 clear)
         glUseProgram(engine_shader[ENGINE_SHADER_UI_9_SLICE].id);
     else
         glUseProgram(engine_shader[ENGINE_SHADER_UI].id);
-    glBindVertexArray(ui_core.mesh_unit.vao);
+    glBindVertexArray(engine_mesh_unit.vao);
     glDisable(GL_DEPTH_TEST);
     if (clear)
         glClear(GL_COLOR_BUFFER_BIT);
@@ -167,7 +166,7 @@ void ui_stop(void)
 void ui_fbo_blit(GLuint fbo)
 {
     glUseProgram(engine_shader[ENGINE_SHADER_UNIT_QUAD].id);
-    glBindVertexArray(ui_core.mesh_unit.vao);
+    glBindVertexArray(engine_mesh_unit.vao);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glBindTexture(GL_TEXTURE_2D, ui_core.fbo.color_buf);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
@@ -176,5 +175,4 @@ void ui_fbo_blit(GLuint fbo)
 void ui_free(void)
 {
     fbo_free(&ui_core.fbo);
-    mesh_free(&ui_core.mesh_unit);
 }

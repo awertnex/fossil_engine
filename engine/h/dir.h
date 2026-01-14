@@ -38,8 +38,7 @@ u32 is_dir_exists(const str *name, b8 log);
  *  @return file size in bytes.
  *  @return 0 on failure and 'engine_err' is set accordingly.
  */
-u64 get_file_contents(const str *name, void **destination,
-        u64 size, const str *format, b8 terminate);
+u64 get_file_contents(const str *name, void **destination, u64 size, b8 terminate);
 
 /*! @brief get directory entries of 'name'.
  *
@@ -55,18 +54,11 @@ u64 get_dir_entry_count(const str *name);
 
 /*! @brief copy 'source' into 'destination'.
  *
- *  @param read_format = read file 'name' using 'read_format'
- *  ('fopen()' parameter).
- *
- *  @param write_format = write new file 'destination' using 'write_format'
- *  ('fopen()' parameter).
- *
  *  @remark can overwrite files.
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 copy_file(const str *source, const str *destination,
-        const str *read_format, const str *write_format);
+u32 copy_file(const str *source, const str *destination);
 
 /*! @brief copy 'source' into 'destination'.
  *
@@ -75,26 +67,51 @@ u32 copy_file(const str *source, const str *destination,
  *      FALSE: copy directory at 'source' and place inside 'destination' if
  *      'destination' exists.
  *
- *  @param read_format = read entries at 'source' using 'read_format'
- *  ('fopen()' parameter).
- *
- *  @param write_format = write entries into 'destination' using 'write_format'
- *  ('fopen()' parameter).
- *
  *  @remark can overwrite directories and files, unless 'overwrite' is FALSE.
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 copy_dir(const str *source, const str *destination, b8 overwrite,
-        const str *read_format, const str *write_format);
+u32 copy_dir(const str *source, const str *destination, b8 overwrite);
 
 /*! @param log = enable/disable logging.
  *  @param text = TRUE will newline-terminate file.
  *
+ *  @remark write and append functions are deliberately separate, to better avoid human error.
+ *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 write_file(const str *name, u64 size, u64 length, void *buf,
-        const str *write_format, b8 log, b8 text);
+u32 write_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text);
+
+/*! @brief like 'write_file()', but without logging on success.
+ *
+ *  @param log = enable/disable logging.
+ *  @param text = TRUE will newline-terminate file.
+ *
+ *  @remark write and append functions are deliberately separate, to better avoid human error.
+ *
+ *  @return non-zero on failure and 'engine_err' is set accordingly.
+ */
+u32 _write_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text);
+
+/*! @param log = enable/disable logging.
+ *  @param text = TRUE will newline-terminate file.
+ *
+ *  @remark write and append functions are deliberately separate, to better avoid human error.
+ *
+ *  @return non-zero on failure and 'engine_err' is set accordingly.
+ */
+u32 append_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text);
+
+/*! @brief like 'append_file()', but without logging on success.
+ *
+ *  @param log = enable/disable logging.
+ *  @param text = TRUE will newline-terminate file.
+ *
+ *  @remark write and append functions are deliberately separate, to better avoid human error.
+ *
+ *  @return non-zero on failure and 'engine_err' is set accordingly.
+ */
+u32 _append_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text);
 
 /*! @brief get calloc'd string of resolved 'name'.
  *

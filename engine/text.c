@@ -31,7 +31,6 @@ static struct /* text_core */
         GLint offset;
     } uniform;
 
-    Mesh mesh_unit;
     FBO fbo;
 } text_core;
 
@@ -44,7 +43,7 @@ u32 text_init(b8 multisample)
     mesh_text.vbo_len = STRING_MAX * 4;
     mesh_text.ebo_len = STRING_MAX;
 
-    if (fbo_init(&text_core.fbo, &text_core.mesh_unit, multisample, 4) != ERR_SUCCESS)
+    if (fbo_init(&text_core.fbo, &engine_mesh_unit, multisample, 4) != ERR_SUCCESS)
         return engine_err;
 
     if (!mesh_text.vao)
@@ -295,7 +294,7 @@ void text_stop(void)
 void text_fbo_blit(GLuint fbo)
 {
     glUseProgram(engine_shader[ENGINE_SHADER_UNIT_QUAD].id);
-    glBindVertexArray(text_core.mesh_unit.vao);
+    glBindVertexArray(engine_mesh_unit.vao);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glBindTexture(GL_TEXTURE_2D, text_core.fbo.color_buf);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
