@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdarg.h>
 #include <inttypes.h>
 
@@ -37,6 +38,20 @@ static str out_message[OUT_STRING_MAX] = {0};
 
 u32 logger_init(b8 release_build, int argc, char **argv)
 {
+    if (release_build)
+        log_level_max = LOGLEVEL_INFO;
+
+    if (argc && argv &&
+            argc > 2 && !strncmp(argv[1], "LOGLEVEL", 8ul))
+        {
+            if (!strncmp(argv[2], "FATAL", 5ul))        log_level_max = LOGLEVEL_FATAL;
+            else if (!strncmp(argv[2], "ERROR", 5ul))   log_level_max = LOGLEVEL_ERROR;
+            else if (!strncmp(argv[2], "WARN", 4ul))    log_level_max = LOGLEVEL_WARNING;
+            else if (!strncmp(argv[2], "INFO", 4ul))    log_level_max = LOGLEVEL_INFO;
+            else if (!strncmp(argv[2], "DEBUG", 5ul))   log_level_max = LOGLEVEL_DEBUG;
+            else if (!strncmp(argv[2], "TRACE", 5ul))   log_level_max = LOGLEVEL_TRACE;
+        }
+
     if (mem_map((void*)&logger_buf, LOGGER_LINES_MAX * STRING_MAX,
                 "logger_init().logger_buf") != ERR_SUCCESS)
     {
@@ -44,20 +59,6 @@ u32 logger_init(b8 release_build, int argc, char **argv)
                 "%s\n", "Failed to Initialize Logger, Process Aborted");
         return engine_err;
     }
-
-    if (release_build)
-        log_level_max = LOGLEVEL_INFO;
-
-    if (argc && argv &&
-            argc > 2 && !strncmp(argv[1], "LOGLEVEL", 8))
-        {
-            if (!strncmp(argv[2], "FATAL", 5))      log_level_max = LOGLEVEL_FATAL;
-            else if (!strncmp(argv[2], "ERROR", 5)) log_level_max = LOGLEVEL_ERROR;
-            else if (!strncmp(argv[2], "WARN", 4))  log_level_max = LOGLEVEL_WARNING;
-            else if (!strncmp(argv[2], "INFO", 4))  log_level_max = LOGLEVEL_INFO;
-            else if (!strncmp(argv[2], "DEBUG", 5)) log_level_max = LOGLEVEL_DEBUG;
-            else if (!strncmp(argv[2], "TRACE", 5)) log_level_max = LOGLEVEL_TRACE;
-        }
 
     engine_err = ERR_SUCCESS;
     return engine_err;

@@ -78,7 +78,7 @@ u32 world_dir_init(const str *world_name)
     check_slash(string);
     normalize_slash(string);
 
-    if (is_dir_exists(world.path, FALSE) == ERR_SUCCESS)
+    if (is_dir_exists(string, FALSE) == ERR_SUCCESS)
     {
         snprintf(world.path, PATH_MAX, "%s", string);
         return *GAME_ERR;
@@ -194,16 +194,16 @@ u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
 
 void world_update(Player *p)
 {
-    world.tick = world.tick_start + (u64)((f64)render.time * NANOSEC2SEC * WORLD_TICK_SPEED);
+    world.tick = world.tick_start + (u64)((f64)render->time * NANOSEC2SEC * WORLD_TICK_SPEED);
     world.days = world.tick / SET_DAY_TICKS_MAX;
 
     if (state_menu_depth || core.flag.super_debug)
         show_cursor;
     else disable_cursor;
 
-    player_update(p, 1.0 - exp(-1.0 * (f64)render.time_delta * NANOSEC2SEC));
+    player_update(p, 1.0 - exp(-1.0 * (f64)render->time_delta * NANOSEC2SEC));
     b8 use_mouse = !state_menu_depth && !core.flag.super_debug && !(p->flag & FLAG_PLAYER_DEAD);
-    player_camera_movement_update(p, render.mouse_delta, use_mouse);
+    player_camera_movement_update(p, render->mouse_delta, use_mouse);
     player_target_update(p);
 
     chunking_update(p->chunk, &p->chunk_delta);

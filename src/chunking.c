@@ -621,7 +621,7 @@ chunk_tab_shift:
 
 chunk_buf_push:
 
-    for (i = 0; i < CHUNKS_MAX[settings.render_distance]; ++i)
+    for (i = 0; i < (i64)CHUNKS_MAX[settings.render_distance]; ++i)
     {
         Chunk **p = CHUNK_ORDER[i];
         u32 index = p - chunk_tab;
@@ -1175,9 +1175,9 @@ static void _chunk_buf_push(u32 index, v3i32 player_chunk_delta)
             ch->pos.z = player_chunk_delta.z + chunk_tab_coordinates.z - settings.chunk_buf_radius;
 
             ch->id =
-                (ch->pos.x & 0xffff) << 0x00 |
-                (ch->pos.y & 0xffff) << 0x10 |
-                (ch->pos.z & 0xffff) << 0x20;
+                (u64)(ch->pos.x & 0xffff) << 0x00 |
+                (u64)(ch->pos.y & 0xffff) << 0x10 |
+                (u64)(ch->pos.z & 0xffff) << 0x20;
 
             ch->color = CHUNK_COLOR_LOADED;
 

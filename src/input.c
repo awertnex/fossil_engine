@@ -69,7 +69,7 @@ u32 bind_toggle_bounding_boxes =    KEY_B;
 u32 bind_toggle_chunk_gizmo =       KEY_G;
 u32 bind_toggle_chunk_queue_visualizer = KEY_V;
 
-void input_update(Render render, Player *p)
+void input_update(Player *p)
 {
     u32 i;
     f32 px = 0.0f, nx = 0.0f,
@@ -217,8 +217,10 @@ void input_update(Render render, Player *p)
         if (is_key_press(bind_toggle_perspective))
             p->camera_mode = (p->camera_mode + 1) % PLAYER_CAMERA_MODE_COUNT;
 
-        if (is_key_press(bind_toggle_zoom))
-            p->flag ^= FLAG_PLAYER_ZOOMER;
+        if (is_key_hold(bind_toggle_zoom))
+            p->flag |= FLAG_PLAYER_ZOOMER;
+        if (is_key_release(bind_toggle_zoom))
+            p->flag &= ~FLAG_PLAYER_ZOOMER;
 
         if (is_key_press(bind_toggle_flashlight))
             p->flag ^= FLAG_PLAYER_FLASHLIGHT;

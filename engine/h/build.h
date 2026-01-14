@@ -47,14 +47,14 @@ void build_init(int argc, char **argv,
 
 /*! @brief build the engine itself into a dynamic/shared library.
  *
- *  @param engine_dir = the directory of engine source code,
  *  @param out_dir = destination directory of the compiled library.
  *
+ *  @remark the engine source directory 'engine' must be next to the build tool.
  *  @remark can force-terminate process.
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 engine_build(const str *engine_dir, const str *out_dir);
+u32 engine_build(const str *out_dir);
 
 /*! @brief link engine's dependencies with the including software.
  */

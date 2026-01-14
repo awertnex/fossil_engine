@@ -7,10 +7,10 @@
 layout (points) in;
 layout (triangle_strip, max_vertices = MAX_VERTICES) out;
 
+uniform ivec2 size;
 uniform ivec2 texture_size;
 uniform float slice_size;
 uniform ivec2 sprite_size;
-uniform ivec2 size;
 in vec2 vs_ndc_scale[];
 out vec2 gs_tex_coords;
 

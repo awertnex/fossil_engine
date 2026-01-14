@@ -68,6 +68,6 @@ extern u32 bind_toggle_chunk_queue_visualizer;
  *  @remark only updates player flags, no parameters are updated except for
  *  'p->input'.
  */
-void input_update(Render render, Player *p);
+void input_update(Player *p);
 
 #endif /* GAME_INPUT_H */

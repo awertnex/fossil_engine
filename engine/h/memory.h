@@ -4,7 +4,7 @@
 #include "types.h"
 #include "limits.h"
 
-#define arr_len(arr)    ((u64)sizeof(arr) / sizeof(arr[0]))
+#define arr_len(arr) ((u64)sizeof(arr) / sizeof(arr[0]))
 
 #define mem_alloc(x, size, name) \
     _mem_alloc(x, size, name, __FILE__, __LINE__)

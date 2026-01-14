@@ -16,30 +16,15 @@
 #include <engine/include/stb_truetype.h>
 #include <engine/include/stb_image.h>
 
-#include "types.h"
-#include "platform.h"
+#include "defaults.h"
 #include "limits.h"
+#include "platform.h"
+#include "types.h"
 
 enum EngineFlag
 {
     FLAG_ENGINE_GLFW_INITIALIZED,
 }; /* EngineFlag */
-
-#define CAMERA_CLIP_FAR_DEFAULT GL_CLIP_DISTANCE0
-#define CAMERA_CLIP_FAR_OPTIMAL 2048.0f
-#define CAMERA_CLIP_FAR_UI 256.0f
-#define CAMERA_CLIP_NEAR_DEFAULT 0.03f
-#define CAMERA_ANGLE_MAX 90.0
-#define CAMERA_RANGE_MAX 360.0
-#define CAMERA_ZOOM_MAX 69.0f
-#define CAMERA_ZOOM_SPEED 10.0
-#define CAMERA_ZOOM_SENSITIVITY 6.0
-#define FONT_ATLAS_CELL_RESOLUTION 16
-#define FONT_RESOLUTION_DEFAULT 64
-#define FONT_SIZE_DEFAULT 22.0f
-#define TEXT_TAB_SIZE 4
-#define TEXT_COLOR_SHADOW 0x00000060
-#define TEXT_OFFSET_SHADOW 2.0f
 
 typedef struct Render
 {
@@ -195,14 +180,6 @@ typedef struct Font
 
     GLuint id;              /* used by opengl's glGenTextures() */
     Glyph glyph[GLYPH_MAX];
-
-    struct /* uniform */
-    {
-        GLint char_size;
-        GLint font_size;
-        GLint text_color;
-    } uniform;
-
 } Font;
 
 enum TextAlignment
@@ -222,6 +199,11 @@ enum TextAlignment
  *  calls 'glfw_init()', 'window_init()' and 'glad_init()'.
  *
  *  @param argc, argv = used for logger log level if args provided.
+ *
+ *  @param _render = render to use for engine,
+ *  if NULL, the global variable 'render' is defined as default and declared internally.
+ *
+ *  @param shaders = initialize default shaders (like 'text' and 'ui').
  *  @param release_build = if TRUE, TRACE and DEBUG logs will be disabled.
  *
  *  @remark argc and argv can be NULL.
@@ -237,13 +219,13 @@ enum TextAlignment
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 engine_init(int argc, char **argv, Render *render, b8 multisample, b8 release_build);
+u32 engine_init(int argc, char **argv, Render *_render, b8 shaders, b8 multisample, b8 release_build);
 
 /*! @brief free engine resources.
  *
  *  free logger, destroy window (if not NULL) and terminate glfw.
  */
-void engine_close(Render *render);
+void engine_close(void);
 
 /*! @param multisample = turn on multisampling.
  *
@@ -257,13 +239,17 @@ u32 glfw_init(b8 multisample);
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 window_init(Render *render);
+u32 window_init();
 
 /*! @remark called automatically from 'engine_init()'.
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
 u32 glad_init(void);
+
+/*! @remark switch engine's current bound render to '_render'.
+ */
+u32 change_render(Render *_render);
 
 /*! @brief initialize single shader.
  *
@@ -302,12 +288,11 @@ void attrib_vec3_vec4(void);
 
 /*! @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 fbo_init(Render *render, FBO *fbo, Mesh *mesh_fbo,
-        b8 multisample, u32 samples);
+u32 fbo_init(FBO *fbo, Mesh *mesh_fbo, b8 multisample, u32 samples);
 
 /*! @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 fbo_realloc(Render *render, FBO *fbo, b8 multisample, u32 samples);
+u32 fbo_realloc(FBO *fbo, b8 multisample, u32 samples);
 
 void fbo_free(FBO *fbo);
 
@@ -385,21 +370,28 @@ void font_free(Font *font);
  *
  *  @brief init text rendering settings.
  *
+ *  @param multisample = turn on multisampling.
+ *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 text_init(ShaderProgram *program);
+u32 text_init(b8 multisample);
 
 /*! -- IMPLEMENTATION: text.c --;
  *
  *  @brief start text rendering batch.
  *
- *  @param length = pre-allocate buffer for string (if 0, STRING_MAX is allocated).
  *  @param size = font height in pixels.
- *  @param color = hex format: 0xrrggbbaa.
+ *
+ *  @param fbo = fbo to draw text to, if NULL, internal fbo is used
+ *  (must then call 'text_fbo_blit()' to blit result onto desired fbo).
+ *
+ *  @param length = pre-allocate buffer for string (if 0, STRING_MAX is allocated).
  *  @param clear = clear the framebuffer before rendering.
+ *
+ *  @remark disables 'GL_DEPTH_TEST', 'text_stop()' re-enables it.
+ *  @remark can re-allocate 'fbo' with 'multisample' setting used in 'text_init()'.
  */
-void text_start(u64 length, f32 size, Font *font,
-        Render *render, ShaderProgram *program, FBO *fbo, b8 clear);
+void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear);
 
 /*! -- IMPLEMENTATION: text.c --;
  *
@@ -418,6 +410,8 @@ void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y);
 /*! -- IMPLEMENTATION: text.c --;
  *  @brief render text to framebuffer.
  *
+ *  @param color = hex format: 0xrrggbbaa.
+ *
  *  @remark can be called multiple times within a text rendering batch,
  *  chained with 'text_push()'.
  */
@@ -425,13 +419,40 @@ void text_render(u32 color, b8 shadow);
 
 /*! -- IMPLEMENTATION: text.c --;
  *
- *  @brief cleanup for text rendering.
+ *  @brief stop text rendering batch.
  *
- *  unbind text framebuffer, enable depth test.
+ *  @remark enables 'GL_DEPTH_TEST'.
  */
 void text_stop(void);
 
-/*! -- IMPLEMENTATION: text.c --; */
+/*! -- IMPLEMENTATION: text.c --;
+ *
+ *  @brief blit rendered text onto 'fbo'.
+ */
+void text_fbo_blit(GLuint fbo);
+
+/*! -- IMPLEMENTATION: text.c --;
+ */
 void text_free(void);
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief default render.
+ *
+ *  @remark declared internally.
+ */
+extern Render *render;
+
+/*! @brief default shaders.
+ *
+ *  @remark declared internally.
+ */
+extern ShaderProgram engine_shader[ENGINE_SHADER_COUNT];
+
+/*! @brief default textures.
+ *
+ *  @remark declared internally.
+ */
+extern Texture engine_texture[ENGINE_TEXTURE_COUNT];
 
 #endif /* ENGINE_CORE_H */

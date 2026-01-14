@@ -1,4 +1,7 @@
+#include <string.h>
+
 #include "h/core.h"
+#include "h/defaults.h"
 #include "h/diagnostics.h"
 #include "h/logger.h"
 #include "h/memory.h"
@@ -7,6 +10,8 @@ static Mesh mesh_text = {0};
 
 static struct /* text_core */
 {
+    b8 multisample;
+
     Font *font;
     Glyphf glyph[GLYPH_MAX];
     f32 font_size;
@@ -19,13 +24,18 @@ static struct /* text_core */
 
     struct /* uniform */
     {
-        GLint offset;
         GLint ndc_scale;
+        GLint char_size;
+        GLint font_size;
+        GLint text_color;
+        GLint offset;
     } uniform;
 
+    Mesh mesh_unit;
+    FBO fbo;
 } text_core;
 
-u32 text_init(ShaderProgram *program)
+u32 text_init(b8 multisample)
 {
     if (mem_alloc((void*)&mesh_text.vbo_data, STRING_MAX * sizeof(GLfloat) * 4,
                 "text_init().mesh_text.vbo_data") != ERR_SUCCESS)
@@ -33,6 +43,9 @@ u32 text_init(ShaderProgram *program)
 
     mesh_text.vbo_len = STRING_MAX * 4;
     mesh_text.ebo_len = STRING_MAX;
+
+    if (fbo_init(&text_core.fbo, &text_core.mesh_unit, multisample, 4) != ERR_SUCCESS)
+        return engine_err;
 
     if (!mesh_text.vao)
     {
@@ -54,8 +67,13 @@ u32 text_init(ShaderProgram *program)
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    text_core.uniform.offset = glGetUniformLocation(program->id, "offset");
-    text_core.uniform.ndc_scale = glGetUniformLocation(program->id, "ndc_scale");
+    text_core.multisample = multisample;
+
+    text_core.uniform.ndc_scale = glGetUniformLocation(engine_shader[ENGINE_SHADER_TEXT].id, "ndc_scale");
+    text_core.uniform.char_size = glGetUniformLocation(engine_shader[ENGINE_SHADER_TEXT].id, "char_size");
+    text_core.uniform.font_size = glGetUniformLocation(engine_shader[ENGINE_SHADER_TEXT].id, "font_size");
+    text_core.uniform.text_color = glGetUniformLocation(engine_shader[ENGINE_SHADER_TEXT].id, "text_color");
+    text_core.uniform.offset = glGetUniformLocation(engine_shader[ENGINE_SHADER_TEXT].id, "offset");
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -67,9 +85,23 @@ cleanup:
     return engine_err;
 }
 
-void text_start(u64 length, f32 size, Font *font,
-        Render *render, ShaderProgram *program, FBO *fbo, b8 clear)
+void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear)
 {
+    static v2i32 render_size = {0};
+
+    if (!fbo)
+    {
+        if (render_size.x != render->size.x || render_size.y != render->size.y)
+            fbo_realloc(&text_core.fbo, text_core.multisample, 4);
+        glBindFramebuffer(GL_FRAMEBUFFER, text_core.fbo.fbo);
+    }
+    else
+    {
+        if (render_size.x != render->size.x || render_size.y != render->size.y)
+            fbo_realloc(fbo, text_core.multisample, 4);
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
+    }
+
     if (!length)
         length = STRING_MAX;
     else if (length > mesh_text.ebo_len)
@@ -88,12 +120,18 @@ void text_start(u64 length, f32 size, Font *font,
     text_core.ndc_scale.y = 2.0f / render->size.y;
     text_core.cursor = 0;
 
-    glUseProgram(program->id);
+    glUniform2fv(text_core.uniform.ndc_scale, 1, (GLfloat*)&text_core.ndc_scale);
+    glUniform1f(text_core.uniform.char_size, text_core.font->char_size);
+    glUniform2f(text_core.uniform.font_size,
+            text_core.font_size * text_core.ndc_scale.x,
+            text_core.font_size * text_core.ndc_scale.y);
+
+    glUseProgram(engine_shader[ENGINE_SHADER_TEXT].id);
     glBindTexture(GL_TEXTURE_2D, text_core.font->id);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
     glDisable(GL_DEPTH_TEST);
     if (clear)
         glClear(GL_COLOR_BUFFER_BIT);
+
     return;
 
 cleanup:
@@ -222,15 +260,9 @@ void text_render(u32 color, b8 shadow)
     glBufferData(GL_ARRAY_BUFFER, mesh_text.vbo_len * sizeof(GLfloat),
             mesh_text.vbo_data, GL_DYNAMIC_DRAW);
 
-    glUniform1f(text_core.font->uniform.char_size, text_core.font->char_size);
-    glUniform2f(text_core.font->uniform.font_size,
-            text_core.font_size * text_core.ndc_scale.x,
-            text_core.font_size * text_core.ndc_scale.y);
-    glUniform2fv(text_core.uniform.ndc_scale, 1, (GLfloat*)&text_core.ndc_scale);
-
     if (shadow)
     {
-        glUniform4f(text_core.font->uniform.text_color,
+        glUniform4f(text_core.uniform.text_color,
                 (f32)((TEXT_COLOR_SHADOW >> 0x18) & 0xff) / 0xff,
                 (f32)((TEXT_COLOR_SHADOW >> 0x10) & 0xff) / 0xff,
                 (f32)((TEXT_COLOR_SHADOW >> 0x08) & 0xff) / 0xff,
@@ -239,7 +271,7 @@ void text_render(u32 color, b8 shadow)
         glDrawArrays(GL_POINTS, 0, (text_core.cursor / 4));
     }
 
-    glUniform4f(text_core.font->uniform.text_color,
+    glUniform4f(text_core.uniform.text_color,
             (f32)((color >> 0x18) & 0xff) / 0xff,
             (f32)((color >> 0x10) & 0xff) / 0xff,
             (f32)((color >> 0x08) & 0xff) / 0xff,
@@ -260,7 +292,17 @@ void text_stop(void)
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void text_fbo_blit(GLuint fbo)
+{
+    glUseProgram(engine_shader[ENGINE_SHADER_UNIT_QUAD].id);
+    glBindVertexArray(text_core.mesh_unit.vao);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glBindTexture(GL_TEXTURE_2D, text_core.fbo.color_buf);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+}
+
 void text_free(void)
 {
+    fbo_free(&text_core.fbo);
     mesh_free(&mesh_text);
 }

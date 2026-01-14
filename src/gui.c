@@ -36,8 +36,7 @@ u32 gui_init(void)
     for (i = 0; i < FONT_COUNT; ++i)
     {
         normalize_slash(font_path[i]);
-        if (font_init(&font[i], FONT_RESOLUTION_DEFAULT,
-                    font_path[i]) != ERR_SUCCESS)
+        if (font_init(&font[i], FONT_RESOLUTION_DEFAULT, font_path[i]) != ERR_SUCCESS)
             goto cleanup;
     }
 
@@ -51,16 +50,6 @@ u32 gui_init(void)
                 GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
                 stringf("%s%s", DIR_ROOT[DIR_GUI],
                     "item_bar.png")) != ERR_SUCCESS ||
-
-            texture_init(&texture[TEXTURE_SDB_ACTIVE], (v2i32){32, 32},
-                GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
-                stringf("%s%s", DIR_ROOT[DIR_GUI],
-                    "sdb_active.png")) != ERR_SUCCESS ||
-
-            texture_init(&texture[TEXTURE_SDB_INACTIVE], (v2i32){32, 32},
-                GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
-                stringf("%s%s", DIR_ROOT[DIR_GUI],
-                    "sdb_inactive.png")) != ERR_SUCCESS ||
 
             texture_init(&texture[TEXTURE_SKYBOX_VAL], (v2i32){512, 512},
                 GL_RED, GL_RED, GL_NEAREST, 1, FALSE,
@@ -98,6 +87,7 @@ u32 gui_init(void)
     return *GAME_ERR;
 
 cleanup:
+
     gui_free();
     return *GAME_ERR;
 }

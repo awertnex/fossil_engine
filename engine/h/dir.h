@@ -9,26 +9,22 @@
  */
 u64 get_file_type(const str *name);
 
-/*! @return 0 on success.
- *  @return non-zero on failure and 'engine_err' is set accordingly.
+/*! @return non-zero on failure and 'engine_err' is set accordingly.
  */
 u32 is_file(const str *name);
 
 /*! @param log = enable/disable logging.
  *
- *  @return 0 on success.
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
 u32 is_file_exists(const str *name, b8 log);
 
-/*! @return 0 on success.
- *  @return non-zero on failure and 'engine_err' is set accordingly.
+/*! @return non-zero on failure and 'engine_err' is set accordingly.
  */
 u32 is_dir(const str *name);
 
 /*! @param log = enable/disable logging.
  *
- *  @return 0 on success.
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
 u32 is_dir_exists(const str *name, b8 log);

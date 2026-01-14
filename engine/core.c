@@ -4,6 +4,7 @@
 #include <inttypes.h>
 
 #include "h/core.h"
+#include "h/defaults.h"
 #include "h/diagnostics.h"
 #include "h/dir.h"
 #include "h/logger.h"
@@ -11,6 +12,7 @@
 #include "h/memory.h"
 #include "h/string.h"
 #include "h/time.h"
+#include "h/ui.h"
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <engine/include/stb_truetype.h>
 #define STB_IMAGE_IMPLEMENTATION
@@ -19,6 +21,59 @@
 
 static u64 engine_flag = 0; /* enum: EngineFlag */
 u32 engine_err = ERR_SUCCESS;
+
+static Render render_internal =
+{
+    .title = ENGINE_NAME": "ENGINE_VERSION,
+    .size = (v2i32){RENDER_WIDTH_DEFAULT, RENDER_HEIGHT_DEFAULT},
+};
+
+Render *render = &render_internal;
+
+ShaderProgram engine_shader[ENGINE_SHADER_COUNT] =
+{
+    [ENGINE_SHADER_UNIT_QUAD] =
+    {
+        .name = "unit_quad",
+        .vertex.file_name = "unit_quad.vert",
+        .vertex.type = GL_VERTEX_SHADER,
+        .fragment.file_name = "unit_quad.frag",
+        .fragment.type = GL_FRAGMENT_SHADER,
+    },
+
+    [ENGINE_SHADER_TEXT] =
+    {
+        .name = "text",
+        .vertex.file_name = "text.vert",
+        .vertex.type = GL_VERTEX_SHADER,
+        .geometry.file_name = "text.geom",
+        .geometry.type = GL_GEOMETRY_SHADER,
+        .fragment.file_name = "text.frag",
+        .fragment.type = GL_FRAGMENT_SHADER,
+    },
+
+    [ENGINE_SHADER_UI] =
+    {
+        .name = "ui",
+        .vertex.file_name = "ui.vert",
+        .vertex.type = GL_VERTEX_SHADER,
+        .fragment.file_name = "ui.frag",
+        .fragment.type = GL_FRAGMENT_SHADER,
+    },
+
+    [ENGINE_SHADER_UI_9_SLICE] =
+    {
+        .name = "ui_9_slice",
+        .vertex.file_name = "ui_9_slice.vert",
+        .vertex.type = GL_VERTEX_SHADER,
+        .geometry.file_name = "ui_9_slice.geom",
+        .geometry.type = GL_GEOMETRY_SHADER,
+        .fragment.file_name = "ui_9_slice.frag",
+        .fragment.type = GL_FRAGMENT_SHADER,
+    },
+};
+
+Texture engine_texture[ENGINE_TEXTURE_COUNT] = {0};
 
 /* ---- section: signatures ------------------------------------------------- */
 
@@ -61,26 +116,62 @@ static u32 _texture_generate(GLuint *id, const GLint format_internal,  const GLi
 
 /* ---- section: init ------------------------------------------------------- */
 
-u32 engine_init(int argc, char **argv, Render *render, b8 multisample, b8 release_build)
+u32 engine_init(int argc, char **argv, Render *_render, b8 shaders, b8 multisample, b8 release_build)
 {
-    str *path = get_path_bin_root();
+    u32 i = 0;
+    str *path = NULL;
+    if (release_build)
+        log_level_max = LOGLEVEL_INFO;
+
+    if (argc && argv &&
+            argc > 2 && !strncmp(argv[1], "LOGLEVEL", 8))
+        {
+            if (!strncmp(argv[2], "FATAL", 5))      log_level_max = LOGLEVEL_FATAL;
+            else if (!strncmp(argv[2], "ERROR", 5)) log_level_max = LOGLEVEL_ERROR;
+            else if (!strncmp(argv[2], "WARN", 4))  log_level_max = LOGLEVEL_WARNING;
+            else if (!strncmp(argv[2], "INFO", 4))  log_level_max = LOGLEVEL_INFO;
+            else if (!strncmp(argv[2], "DEBUG", 5)) log_level_max = LOGLEVEL_DEBUG;
+            else if (!strncmp(argv[2], "TRACE", 5)) log_level_max = LOGLEVEL_TRACE;
+        }
+
+    path = get_path_bin_root();
+    change_dir(path);
 
     get_time_f64(); /* initialize start time */
     glfwSetErrorCallback(glfw_callback_error);
-    change_dir(path);
+
+    if (_render)
+        change_render(_render);
 
     if (
             logger_init(release_build, argc, argv) != ERR_SUCCESS ||
             glfw_init(multisample) != ERR_SUCCESS ||
-            window_init(render) != ERR_SUCCESS ||
+            window_init() != ERR_SUCCESS ||
             glad_init() != ERR_SUCCESS)
-        engine_close(render);
+        goto cleanup;
 
+    if (shaders)
+    {
+        for (i = 0; i < ENGINE_SHADER_COUNT; ++i)
+            if (shader_program_init("engine/shaders", &engine_shader[i]) != ERR_SUCCESS)
+                goto cleanup;
+    }
+
+    return engine_err;
+
+cleanup:
+
+    engine_close();
     return engine_err;
 }
 
-void engine_close(Render *render)
+void engine_close(void)
 {
+    u32 i = 0;
+    for (i = 0; i < ENGINE_TEXTURE_COUNT; ++i)
+        texture_free(&engine_texture[i]);
+    text_free();
+    ui_free();
     logger_close();
     if (render->window)
         glfwDestroyWindow(render->window);
@@ -89,6 +180,9 @@ void engine_close(Render *render)
         glfwTerminate();
         engine_flag &= ~FLAG_ENGINE_GLFW_INITIALIZED;
     }
+
+    for (i = 0; i < ENGINE_SHADER_COUNT; ++i)
+        shader_program_free(&engine_shader[i]);
 }
 
 u32 glfw_init(b8 multisample)
@@ -112,7 +206,7 @@ u32 glfw_init(b8 multisample)
     return engine_err;
 }
 
-u32 window_init(Render *render)
+u32 window_init(void)
 {
     render->window = glfwCreateWindow(render->size.x, render->size.y, render->title, NULL, NULL);
 
@@ -124,6 +218,9 @@ u32 window_init(Render *render)
     }
 
     glfwMakeContextCurrent(render->window);
+    glfwSetWindowSizeLimits(render->window,
+            RENDER_WIDTH_MIN, RENDER_HEIGHT_MIN,
+            RENDER_WIDTH_MAX, RENDER_HEIGHT_MAX);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -155,6 +252,28 @@ u32 glad_init(void)
     return engine_err;
 }
 
+u32 change_render(Render *_render)
+{
+    if (_render == NULL)
+    {
+        LOGERROR(TRUE, ERR_POINTER_NULL, "%s\n", "Failed to Change Render, Pointer NULL");
+        return engine_err;
+    }
+
+    render = _render;
+
+    if (render->window)
+        glfwMakeContextCurrent(render->window);
+    else
+    {
+        LOGWARNING(TRUE, ERR_WINDOW_NOT_FOUND, "%s\n", "No Window Found for Currently Bound Render");
+        return engine_err;
+    }
+    
+    engine_err = ERR_SUCCESS;
+    return engine_err;
+}
+
 /* ---- section: shaders ---------------------------------------------------- */
 
 u32 shader_init(const str *shaders_dir, Shader *shader)
@@ -163,7 +282,10 @@ u32 shader_init(const str *shaders_dir, Shader *shader)
         return ERR_SUCCESS;
 
     str str_reg[PATH_MAX] = {0};
-    snprintf(str_reg, PATH_MAX, "%s%s", shaders_dir, shader->file_name);
+    snprintf(str_reg, PATH_MAX, "%s", shaders_dir);
+    check_slash(str_reg);
+    posix_slash(str_reg);
+    strncat(str_reg, shader->file_name, PATH_MAX - strlen(str_reg));
 
     shader->source = shader_pre_process(str_reg, NULL);
     if (!shader->source)
@@ -384,8 +506,7 @@ void attrib_vec3_vec4(void)
     glEnableVertexAttribArray(1);
 }
 
-u32 fbo_init(Render *render, FBO *fbo, Mesh *mesh_fbo,
-        b8 multisample, u32 samples)
+u32 fbo_init(FBO *fbo, Mesh *mesh_fbo, b8 multisample, u32 samples)
 {
     fbo_free(fbo);
 
@@ -507,7 +628,7 @@ cleanup:
     return engine_err;
 }
 
-u32 fbo_realloc(Render *render, FBO *fbo, b8 multisample, u32 samples)
+u32 fbo_realloc(FBO *fbo, b8 multisample, u32 samples)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
 
@@ -890,10 +1011,12 @@ u32 font_init(Font *font, u32 resolution, const str *file_name)
         goto cleanup;
     }
 
+    printf("fucking file name 1: %s\n", file_name);
     if (mem_alloc((void*)&font->bitmap, GLYPH_MAX * resolution * resolution,
                 stringf("font_init().%s", file_name)) != ERR_SUCCESS)
         goto cleanup;
 
+    printf("fucking file name 2: %s\n", file_name);
     if (mem_alloc((void*)&canvas, resolution * resolution,
                 "font_init().font_glyph_canvas") != ERR_SUCCESS)
         goto cleanup;
@@ -941,7 +1064,7 @@ u32 font_init(Font *font, u32 resolution, const str *file_name)
                             y * resolution * FONT_ATLAS_CELL_RESOLUTION,
                             canvas + x + y * resolution, 1);
 
-            mem_clear((void*)&canvas, resolution * resolution, "font_init().font_glyph_canvas");
+            memset(canvas, 0, resolution * resolution);
         }
 
         g->texture_sample.x = col * font->char_size;

@@ -82,13 +82,14 @@ void build_init(int argc, char **argv,
 
     check_slash(str_build_root);
     normalize_slash(str_build_root);
+    change_dir(str_build_root);
 
-    snprintf(str_build_src, CMD_SIZE, "%s%s", str_build_root, build_src_name);
+    snprintf(str_build_src, CMD_SIZE, "%s", build_src_name);
     normalize_slash(str_build_src);
 
-    snprintf(str_build_bin, CMD_SIZE, "%s%s", str_build_root, build_bin_name);
-    snprintf(str_build_bin_new, CMD_SIZE, "%s%s_new", str_build_root, build_bin_name);
-    snprintf(str_build_bin_old, CMD_SIZE, "%s%s_old", str_build_root, build_bin_name);
+    snprintf(str_build_bin, CMD_SIZE, "%s", build_bin_name);
+    snprintf(str_build_bin_new, CMD_SIZE, "%s_new", build_bin_name);
+    snprintf(str_build_bin_old, CMD_SIZE, "%s_old", build_bin_name);
 
     if (STD != 199901)
     {
@@ -172,41 +173,28 @@ static void self_rebuild(char **argv)
     cmd_fail();
 }
 
-u32 engine_build(const str *engine_dir, const str *out_dir)
+u32 engine_build(const str *out_dir)
 {
-    str engine_dir_processed[CMD_SIZE] = {0};
-    str out_dir_processed[CMD_SIZE] = {0};
-    str temp[CMD_SIZE] = {0};
-
     if (
-            is_dir_exists(engine_dir, TRUE) != ERR_SUCCESS ||
+            is_dir_exists("engine", TRUE) != ERR_SUCCESS ||
             is_dir_exists(out_dir, TRUE) != ERR_SUCCESS)
         return engine_err;
 
-    memcpy(engine_dir_processed, engine_dir, CMD_SIZE);
-    check_slash(engine_dir_processed);
-    normalize_slash(engine_dir_processed);
-
-    memcpy(out_dir_processed, out_dir, CMD_SIZE);
-    check_slash(out_dir_processed);
-    normalize_slash(out_dir_processed);
-
     cmd_push(COMPILER);
-    cmd_push(stringf("%scollision.c", engine_dir_processed));
-    cmd_push(stringf("%score.c", engine_dir_processed));
-    cmd_push(stringf("%sdir.c", engine_dir_processed));
-    cmd_push(stringf("%sinput.c", engine_dir_processed));
-    cmd_push(stringf("%slogger.c", engine_dir_processed));
-    cmd_push(stringf("%smath.c", engine_dir_processed));
-    cmd_push(stringf("%smemory.c", engine_dir_processed));
-    cmd_push(stringf("%splatform_"_PLATFORM".c", engine_dir_processed));
-    cmd_push(stringf("%sstring.c", engine_dir_processed));
-    cmd_push(stringf("%stext.c", engine_dir_processed));
-    cmd_push(stringf("%stime.c", engine_dir_processed));
-    snprintf(temp, CMD_SIZE, "%sinclude/glad/glad.c", engine_dir_processed);
-    normalize_slash(temp);
-    cmd_push(temp);
-    cmd_push(stringf("-I%s..", engine_dir_processed));
+    cmd_push("engine/collision.c");
+    cmd_push("engine/core.c");
+    cmd_push("engine/dir.c");
+    cmd_push("engine/input.c");
+    cmd_push("engine/logger.c");
+    cmd_push("engine/math.c");
+    cmd_push("engine/memory.c");
+    cmd_push("engine/platform_"_PLATFORM".c");
+    cmd_push("engine/string.c");
+    cmd_push("engine/text.c");
+    cmd_push("engine/time.c");
+    cmd_push("engine/ui.c");
+    cmd_push("engine/include/glad/glad.c");
+    cmd_push("-I.");
     cmd_push("-shared");
     cmd_push("-std=c99");
 #if PLATFORM_LINUX
@@ -216,37 +204,35 @@ u32 engine_build(const str *engine_dir, const str *out_dir)
     cmd_push("-Ofast");
     cmd_push("-Wall");
     cmd_push("-Wextra");
-    cmd_push("-Wno-implicit-function-declaration");
-    cmd_push("-fno-builtin");
+    cmd_push(stringf("-ffile-prefix-map=%s=", str_build_root));
     _engine_link_libs();
     cmd_push("-o");
-    cmd_push(stringf("%s"ENGINE_NAME_LIB, out_dir_processed));
+    cmd_push(stringf("%s"ENGINE_NAME_LIB, out_dir));
     cmd_ready();
 
     if (flag & FLAG_CMD_SHOW) cmd_show();
     if (flag & FLAG_CMD_RAW) cmd_raw();
 
-    make_dir(stringf("%sengine", out_dir_processed));
+    make_dir(stringf("%sengine", out_dir));
     if (engine_err != ERR_SUCCESS && engine_err != ERR_DIR_EXISTS)
         cmd_fail();
 
     if (
             copy_dir(
                 stringf("%sengine/shaders", str_build_root),
-                stringf("%sengine/shaders", out_dir_processed), TRUE,
+                stringf("%sengine/shaders", out_dir), TRUE,
                 "rb", "wb") != ERR_SUCCESS ||
             copy_dir(
                 stringf("%sengine/assets", str_build_root),
-                stringf("%sengine/assets", out_dir_processed), TRUE,
+                stringf("%sengine/assets", out_dir), TRUE,
                 "rb", "wb") != ERR_SUCCESS)
         cmd_fail();
 
     if (exec(&cmd, "engine_build()") != ERR_SUCCESS)
         cmd_fail();
 
-    if (copy_file(
-                stringf("%s"ENGINE_NAME_LIB, out_dir_processed),
-                stringf("%sengine/lib/"PLATFORM"/"ENGINE_NAME_LIB, str_build_root),
+    if (copy_file(stringf("%s"ENGINE_NAME_LIB, out_dir),
+                "engine/lib/"PLATFORM"/"ENGINE_NAME_LIB,
                 "rb", "wb") != ERR_SUCCESS)
         cmd_fail();
 

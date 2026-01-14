@@ -63,10 +63,11 @@
 #define ERR_DLL_LOAD_FAIL               4142
 #define ERR_SIZE_TOO_SMALL              4143
 #define ERR_DIR_CREATE_FAIL             4144
+#define ERR_WINDOW_NOT_FOUND            4145
 
 /*! @brief global variable for engine-specific error codes.
  *
- *  @remark must be declared by the user if not including 'engine/core.c'.
+ *  @remark must be declared by the user if not including 'core.c'.
  */
 extern u32 engine_err;
 

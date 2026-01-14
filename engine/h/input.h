@@ -145,7 +145,7 @@ enum KeyboardKeys
     KEY_MENU,
 }; /* KeyboardKeys */
 
-void update_mouse_movement(Render *render);
+void update_mouse_movement(void);
 
 b8 is_mouse_press(const u32 button);
 b8 is_mouse_hold(const u32 button);
@@ -157,6 +157,6 @@ b8 is_key_release(const u32 key);
 
 /*! @brief update internal mouse and key states: press, double-press, hold and release.
  */
-void update_key_states(Render render);
+void update_key_states(void);
 
 #endif /* ENGINE_INPUT_H */

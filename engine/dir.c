@@ -387,7 +387,7 @@ str *get_path_absolute(const str *name)
     if (_get_path_absolute(name, path_absolute) != ERR_SUCCESS)
         return NULL;
 
-    len = strlen(path_absolute);
+    len = strlen(path_absolute) + 1;
 
     if (mem_alloc((void*)&result, sizeof(str*) * (len + 1),
                 "get_path_absolute().path_absolute") != ERR_SUCCESS)
@@ -410,7 +410,7 @@ str *get_path_bin_root(void)
     if (_get_path_bin_root(path_bin_root) != ERR_SUCCESS)
         return NULL;
 
-    len = strlen(path_bin_root);
+    len = strlen(path_bin_root) + 1;
     if (len >= PATH_MAX - 1)
     {
         LOGFATAL(TRUE, ERR_PATH_TOO_LONG,

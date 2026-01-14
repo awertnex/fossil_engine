@@ -128,7 +128,7 @@ static u32 keyboard_tab[KEYBOARD_KEYS_MAX] =
     GLFW_KEY_MENU,
 }; /* keyboard_tab */
 
-void update_mouse_movement(Render *render)
+void update_mouse_movement(void)
 {
     static v2f64 mouse_last = {0};
     glfwGetCursorPos(render->window, &render->mouse_pos.x, &render->mouse_pos.y);
@@ -177,8 +177,10 @@ b8 is_key_release(const u32 key)
         keyboard_key[key] == KEY_RELEASE_DOUBLE;
 }
 
-void update_key_states(Render render)
+void update_key_states(void)
 {
+    GLFWwindow *_window = render->window;
+    u64 _time = render->time;
     static u64 key_press_start_time[KEYBOARD_KEYS_MAX] = {0};
     b8 key_press = FALSE, key_release = FALSE,
        mouse_press = FALSE, mouse_release = FALSE;
@@ -186,8 +188,8 @@ void update_key_states(Render render)
 
     for (i = 0; i < MOUSE_BUTTONS_MAX; ++i)
     {
-        mouse_press = glfwGetMouseButton(render.window, i) == GLFW_PRESS;
-        mouse_release = glfwGetMouseButton(render.window, i) == GLFW_RELEASE;
+        mouse_press = glfwGetMouseButton(_window, i) == GLFW_PRESS;
+        mouse_release = glfwGetMouseButton(_window, i) == GLFW_RELEASE;
 
         if (mouse_press &&
                 (mouse_button[i] == KEY_IDLE))
@@ -208,26 +210,26 @@ void update_key_states(Render render)
 
     for (i = 0; i < KEYBOARD_KEYS_MAX; ++i)
     {
-        key_press = glfwGetKey(render.window, keyboard_tab[i]) == GLFW_PRESS;
-        key_release = glfwGetKey(render.window, keyboard_tab[i]) == GLFW_RELEASE;
+        key_press = glfwGetKey(_window, keyboard_tab[i]) == GLFW_PRESS;
+        key_release = glfwGetKey(_window, keyboard_tab[i]) == GLFW_RELEASE;
 
         if (key_press)
         {
             if (keyboard_key[i] == KEY_IDLE)
             {
                 keyboard_key[i] = KEY_PRESS;
-                key_press_start_time[i] = render.time;
+                key_press_start_time[i] = _time;
                 continue;
             }
             else if (keyboard_key[i] == KEY_LISTEN_DOUBLE)
             {
-                if (render.time - key_press_start_time[i] <=
+                if (_time - key_press_start_time[i] <=
                         (u64)(KEYBOARD_DOUBLE_PRESS_TIME * SEC2NANOSEC))
                     keyboard_key[i] = KEY_PRESS_DOUBLE;
                 else
                 {
                     keyboard_key[i] = KEY_PRESS;
-                    key_press_start_time[i] = render.time;
+                    key_press_start_time[i] = _time;
                 }
                 continue;
             }

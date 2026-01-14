@@ -125,7 +125,6 @@ void player_collision_update(Player *p, f64 dt)
     };
     f32 time = 0.0f;
     v3f32 normal = {0};
-    v3f32 velocity_normalized = {0};
     f32 dot = 0.0f;
     f32 friction = 0.0f;
     BoundingBox block_box = {0};
@@ -215,7 +214,6 @@ void player_collision_update(Player *p, f64 dt)
                                 p->flag &= ~FLAG_PLAYER_FLYING;
                             p->flag |= FLAG_PLAYER_CAN_JUMP;
 
-                            velocity_normalized = normalize_v3f32(p->velocity);
                             friction = blocks[*block & MASK_BLOCK_ID].friction;
                             p->friction.x = friction;
                             p->friction.y = friction;
@@ -225,7 +223,6 @@ void player_collision_update(Player *p, f64 dt)
 
                         speed = p->speed;
                         p->speed = sqrtf(len_v3f32(p->velocity));
-
                         if (speed - p->speed > PLAYER_COLLISION_DAMAGE_THRESHOLD)
                             p->health -= (speed - p->speed);
 

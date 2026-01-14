@@ -140,37 +140,6 @@ struct Uniform
         GLint sky_color;
     } defaults;
 
-    struct /* ui */
-    {
-        GLint ndc_scale;
-        GLint position;
-        GLint offset;
-        GLint texture_size;
-        GLint size;
-        GLint alignment;
-        GLint tint;
-    } ui;
-
-    struct /* ui_9_slice */
-    {
-        GLint ndc_scale;
-        GLint position;
-        GLint size;
-        GLint alignment;
-        GLint tint;
-        GLint slice;
-        GLint slice_size;
-        GLint texture_size;
-        GLint sprite_size;
-    } ui_9_slice;
-
-    struct /* font */
-    {
-        GLint char_size;
-        GLint font_size;
-        GLint text_color;
-    } font;
-
     struct /* skybox */
     {
         GLint texture_scale;
@@ -244,11 +213,7 @@ struct Uniform
 
 enum ShaderIndices
 {
-    SHADER_FBO,
     SHADER_DEFAULT,
-    SHADER_UI,
-    SHADER_UI_9_SLICE,
-    SHADER_TEXT,
     SHADER_SKYBOX,
     SHADER_GIZMO,
     SHADER_GIZMO_CHUNK,
@@ -275,9 +240,6 @@ enum FBOIndices
     FBO_WORLD_MSAA,
     FBO_HUD,
     FBO_HUD_MSAA,
-    FBO_UI,
-    FBO_TEXT,
-    FBO_TEXT_MSAA,
     FBO_POST_PROCESSING,
     FBO_COUNT,
 }; /* FBOIndices */
@@ -286,8 +248,6 @@ enum TextureIndices
 {
     TEXTURE_CROSSHAIR,
     TEXTURE_ITEM_BAR,
-    TEXTURE_SDB_ACTIVE,
-    TEXTURE_SDB_INACTIVE,
     TEXTURE_SKYBOX_VAL,
     TEXTURE_SKYBOX_HORIZON,
     TEXTURE_SKYBOX_STARS,
@@ -316,7 +276,6 @@ extern struct Settings settings;
 extern Texture texture[TEXTURE_COUNT];
 extern Font font[FONT_COUNT];
 extern u8 debug_mode[DEBUG_MODE_COUNT];
-extern Render render;
 extern Projection projection_world;
 extern Projection projection_hud;
 

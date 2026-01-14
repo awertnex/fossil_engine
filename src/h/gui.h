@@ -3,9 +3,9 @@
 
 #include "main.h"
 
-#define show_cursor     glfwSetInputMode(render.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL)
-#define disable_cursor  glfwSetInputMode(render.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
-#define center_cursor   glfwSetCursorPos(render.window, render.size.x / 2.0f, render.size.y / 2.0f)
+#define show_cursor     glfwSetInputMode(render->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL)
+#define disable_cursor  glfwSetInputMode(render->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
+#define center_cursor   glfwSetCursorPos(render->window, render->size.x / 2.0f, render->size.y / 2.0f)
 
 #define BTN_COUNT 110
 

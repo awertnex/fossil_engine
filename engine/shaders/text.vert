@@ -3,8 +3,8 @@
 layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec2 a_tex_coords;
 
-uniform vec2 ndc_scale;
 uniform vec2 offset;
+uniform vec2 ndc_scale;
 out vec2 vs_tex_coords;
 
 void main()
