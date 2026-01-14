@@ -3,8 +3,8 @@
 #include <sys/stat.h>
 #include <inttypes.h>
 
+#include "h/common.h"
 #include "h/core.h"
-#include "h/defaults.h"
 #include "h/diagnostics.h"
 #include "h/dir.h"
 #include "h/logger.h"
@@ -13,12 +13,14 @@
 #include "h/string.h"
 #include "h/time.h"
 #include "h/ui.h"
+
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <engine/include/stb_truetype.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <engine/include/stb_image.h>
 
 
+u64 init_time = 0;
 static u64 engine_flag = 0; /* enum: EngineFlag */
 u32 engine_err = ERR_SUCCESS;
 
@@ -83,7 +85,7 @@ Mesh engine_mesh_unit = {0};
 static void glfw_callback_error(int error, const char* message)
 {
     (void)error;
-    LOGERROR(TRUE, ERR_GLFW, "GLFW: %s\n", message);
+    _LOGERROR(TRUE, ERR_GLFW, "GLFW: %s\n", message);
 }
 
 /*! -- INTERNAL USE ONLY --;
@@ -117,11 +119,16 @@ static u32 _texture_generate(GLuint *id, const GLint format_internal,  const GLi
 
 /* ---- section: init ------------------------------------------------------- */
 
-u32 engine_init(int argc, char **argv, const str *title, i32 size_x, i32 size_y,
-        Render *_render, b8 shaders, b8 multisample, b8 release_build)
+u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
+        i32 size_x, i32 size_y, Render *_render, b8 shaders, b8 multisample, b8 release_build)
 {
     u32 i = 0;
     str *path = NULL;
+
+    init_time = get_time_raw_usec();
+    get_time_nsec(); /* initialize start time */
+    get_time_nsecf(); /* initialize start time */
+
     if (release_build)
         log_level_max = LOGLEVEL_INFO;
 
@@ -139,14 +146,13 @@ u32 engine_init(int argc, char **argv, const str *title, i32 size_x, i32 size_y,
     path = get_path_bin_root();
     change_dir(path);
 
-    get_time_f64(); /* initialize start time */
     glfwSetErrorCallback(glfw_callback_error);
 
     if (_render)
         change_render(_render);
 
     if (
-            logger_init(release_build, argc, argv, "engine/logs") != ERR_SUCCESS ||
+            logger_init(release_build, argc, argv, _log_dir) != ERR_SUCCESS ||
             glfw_init(multisample) != ERR_SUCCESS ||
             window_init(title, size_x, size_y) != ERR_SUCCESS ||
             glad_init() != ERR_SUCCESS)
@@ -192,7 +198,7 @@ u32 glfw_init(b8 multisample)
 {
     if (!glfwInit())
     {
-        LOGFATAL(FALSE, ERR_GLFW_INIT_FAIL,
+        _LOGFATAL(FALSE, ERR_GLFW_INIT_FAIL,
                 "%s\n", "Failed to Initialize GLFW, Process Aborted");
         return engine_err;
     }
@@ -219,7 +225,7 @@ u32 window_init(const str *title, i32 size_x, i32 size_y)
 
     if (!render->window)
     {
-        LOGFATAL(FALSE, ERR_WINDOW_INIT_FAIL,
+        _LOGFATAL(FALSE, ERR_WINDOW_INIT_FAIL,
                 "%s\n", "Failed to Initialize Window or OpenGL Context, Process Aborted");
         return engine_err;
     }
@@ -237,23 +243,23 @@ u32 glad_init(void)
 {
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        LOGFATAL(FALSE, ERR_GLAD_INIT_FAIL,
+        _LOGFATAL(FALSE, ERR_GLAD_INIT_FAIL,
                 "%s\n", "Failed to Initialize GLAD, Process Aborted");
         return engine_err;
     }
 
     if (GLVersion.major < 4 || (GLVersion.major == 4 && GLVersion.minor < 3))
     {
-        LOGFATAL(FALSE, ERR_GL_VERSION_NOT_SUPPORT,
+        _LOGFATAL(FALSE, ERR_GL_VERSION_NOT_SUPPORT,
                 "OpenGL 4.3+ Required, Current Version '%d.%d', Process Aborted\n",
                 GLVersion.major, GLVersion.minor);
         return engine_err;
     }
 
-    LOGINFO(FALSE, "OpenGL:    %s\n", glGetString(GL_VERSION));
-    LOGINFO(FALSE, "GLSL:      %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-    LOGINFO(FALSE, "Vendor:    %s\n", glGetString(GL_VENDOR));
-    LOGINFO(FALSE, "Renderer:  %s\n", glGetString(GL_RENDERER));
+    _LOGINFO(FALSE, "OpenGL:    %s\n", glGetString(GL_VERSION));
+    _LOGINFO(FALSE, "GLSL:      %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+    _LOGINFO(FALSE, "Vendor:    %s\n", glGetString(GL_VENDOR));
+    _LOGINFO(FALSE, "Renderer:  %s\n", glGetString(GL_RENDERER));
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -263,7 +269,7 @@ u32 change_render(Render *_render)
 {
     if (_render == NULL)
     {
-        LOGERROR(TRUE, ERR_POINTER_NULL, "%s\n", "Failed to Change Render, Pointer NULL");
+        _LOGERROR(TRUE, ERR_POINTER_NULL, "%s\n", "Failed to Change Render, Pointer NULL");
         return engine_err;
     }
 
@@ -273,7 +279,7 @@ u32 change_render(Render *_render)
         glfwMakeContextCurrent(render->window);
     else
     {
-        LOGWARNING(TRUE, ERR_WINDOW_NOT_FOUND, "%s\n", "No Window Found for Currently Bound Render");
+        _LOGWARNING(TRUE, ERR_WINDOW_NOT_FOUND, "%s\n", "No Window Found for Currently Bound Render");
         return engine_err;
     }
     
@@ -297,7 +303,7 @@ u32 shader_init(const str *shaders_dir, Shader *shader)
     shader->source = shader_pre_process(str_reg, NULL);
     if (!shader->source)
     {
-        LOGERROR(FALSE, ERR_POINTER_NULL, "Shader Source '%s' NULL\n", shader->file_name);
+        _LOGERROR(FALSE, ERR_POINTER_NULL, "Shader Source '%s' NULL\n", shader->file_name);
         return engine_err;
     }
     (shader->id) ? glDeleteShader(shader->id) : 0;
@@ -313,10 +319,10 @@ u32 shader_init(const str *shaders_dir, Shader *shader)
     {
         char log[STRING_MAX];
         glGetShaderInfoLog(shader->id, STRING_MAX, NULL, log);
-        LOGERROR(FALSE, ERR_SHADER_COMPILE_FAIL, "Shader '%s':\n%s\n", shader->file_name, log);
+        _LOGERROR(FALSE, ERR_SHADER_COMPILE_FAIL, "Shader '%s':\n%s\n", shader->file_name, log);
         return engine_err;
     }
-    else LOGINFO(FALSE, "Shader %d '%s' Loaded\n", shader->id, shader->file_name);
+    else _LOGINFO(FALSE, "Shader %d '%s' Loaded\n", shader->id, shader->file_name);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -331,7 +337,7 @@ static str *_shader_pre_process(const str *path, u64 *file_len, u64 recursion_li
 {
     if (!recursion_limit)
     {
-        LOGFATAL(FALSE, ERR_INCLUDE_RECURSION_LIMIT,
+        _LOGFATAL(FALSE, ERR_INCLUDE_RECURSION_LIMIT,
                 "Include Recursion Limit Exceeded '%s', Process Aborted\n", path);
         return NULL;
     }
@@ -379,7 +385,7 @@ static str *_shader_pre_process(const str *path, u64 *file_len, u64 recursion_li
 
             if (!strncmp(string, path, strlen(string)))
             {
-                LOGFATAL(FALSE, ERR_SELF_INCLUDE,
+                _LOGFATAL(FALSE, ERR_SELF_INCLUDE,
                         "Self Include Detected '%s', Process Aborted\n", path);
                 goto cleanup;
             }
@@ -442,11 +448,11 @@ u32 shader_program_init(const str *shaders_dir, ShaderProgram *program)
     {
         char log[STRING_MAX];
         glGetProgramInfoLog(program->id, STRING_MAX, NULL, log);
-        LOGERROR(FALSE, ERR_SHADER_PROGRAM_LINK_FAIL,
+        _LOGERROR(FALSE, ERR_SHADER_PROGRAM_LINK_FAIL,
                 "Shader Program '%s':\n%s\n", program->name, log);
         return engine_err;
     }
-    else LOGINFO(FALSE,
+    else _LOGINFO(FALSE,
             "Shader Program %d '%s' Loaded\n", program->id, program->name);
 
     if (program->vertex.loaded)
@@ -579,7 +585,7 @@ u32 fbo_init(FBO *fbo, Mesh *mesh_fbo, b8 multisample, u32 samples)
     GLuint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE)
     {
-        LOGFATAL(FALSE, ERR_FBO_INIT_FAIL, "FBO '%d': Status '%d' Not Complete, Process Aborted\n",
+        _LOGFATAL(FALSE, ERR_FBO_INIT_FAIL, "FBO '%d': Status '%d' Not Complete, Process Aborted\n",
                 fbo->fbo, status);
         return engine_err;
     }
@@ -674,7 +680,7 @@ u32 fbo_realloc(FBO *fbo, b8 multisample, u32 samples)
     GLuint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE)
     {
-        LOGFATAL(FALSE, ERR_FBO_REALLOC_FAIL,
+        _LOGFATAL(FALSE, ERR_FBO_REALLOC_FAIL,
                 "FBO '%d': Status '%d' Not Complete, Process Aborted\n", fbo->fbo, status);
 
         fbo_free(fbo);
@@ -701,14 +707,14 @@ u32 texture_init(Texture *texture, v2i32 size, const GLint format_internal, cons
 {
     if (!size.x || !size.y)
     {
-        LOGERROR(FALSE, ERR_IMAGE_SIZE_TOO_SMALL,
+        _LOGERROR(FALSE, ERR_IMAGE_SIZE_TOO_SMALL,
                 "Failed to Initialize Texture '%s', Image Size Too Small\n", file_name);
         return engine_err;
     }
 
     if (strlen(file_name) >= PATH_MAX)
     {
-        LOGERROR(FALSE, ERR_PATH_TOO_LONG,
+        _LOGERROR(FALSE, ERR_PATH_TOO_LONG,
                 "Failed to Initialize Texture '%s', File Path Too Long\n", file_name);
         return engine_err;
     }
@@ -720,7 +726,7 @@ u32 texture_init(Texture *texture, v2i32 size, const GLint format_internal, cons
             &texture->size.x, &texture->size.y, &texture->channels, channels);
     if (!texture->buf)
     {
-        LOGERROR(FALSE, ERR_IMAGE_LOAD_FAIL,
+        _LOGERROR(FALSE, ERR_IMAGE_LOAD_FAIL,
                 "Failed to Initialize Texture '%s', 'stbi_load()' Failed\n", file_name);
         return engine_err;
     }
@@ -744,7 +750,7 @@ u32 texture_generate(Texture *texture, b8 bindless)
     {
         texture->handle = glGetTextureHandleARB(texture->id);
         glMakeTextureHandleResidentARB(texture->handle);
-        LOGTRACE(FALSE, "Handle[%"PRIu64"] for Texture[%d] Created\n", texture->handle, texture->id);
+        _LOGTRACE(FALSE, "Handle[%"PRIu64"] for Texture[%d] Created\n", texture->handle, texture->id);
     }
 
     (texture->buf) ? stbi_image_free(texture->buf) : 0;
@@ -756,7 +762,7 @@ static u32 _texture_generate(GLuint *id, const GLint format_internal,  const GLi
 {
     if (!width || !height)
     {
-        LOGERROR(FALSE, ERR_IMAGE_SIZE_TOO_SMALL,
+        _LOGERROR(FALSE, ERR_IMAGE_SIZE_TOO_SMALL,
                 "Failed to Generate Texture [%d], Size Too Small\n", *id);
         return engine_err;
     }
@@ -785,14 +791,14 @@ void texture_free(Texture *texture)
     if (texture->handle)
     {
         glMakeTextureHandleNonResidentARB(texture->handle);
-        LOGTRACE(FALSE, "Handle[%"PRIu64"] for Texture[%d] Destroyed\n",
+        _LOGTRACE(FALSE, "Handle[%"PRIu64"] for Texture[%d] Destroyed\n",
                 texture->handle, texture->id);
     }
 
     if (texture->id)
     {
         glDeleteTextures(1, &texture->id);
-        LOGTRACE(FALSE, "Texture[%d] Unloaded\n", texture->id);
+        _LOGTRACE(FALSE, "Texture[%d] Unloaded\n", texture->id);
     }
 
     *texture = (Texture){0};
@@ -992,14 +998,14 @@ u32 font_init(Font *font, u32 resolution, const str *file_name)
 
     if (resolution <= 2)
     {
-        LOGERROR(FALSE, ERR_IMAGE_SIZE_TOO_SMALL,
+        _LOGERROR(FALSE, ERR_IMAGE_SIZE_TOO_SMALL,
                 "Failed to Initialize Font '%s', Font Size Too Small\n", file_name);
         return engine_err;
     }
 
     if (strlen(file_name) >= PATH_MAX)
     {
-        LOGERROR(FALSE, ERR_PATH_TOO_LONG,
+        _LOGERROR(FALSE, ERR_PATH_TOO_LONG,
                 "Failed to Initialize Font '%s', File Path Too Long\n", file_name);
         return engine_err;
     }
@@ -1013,7 +1019,7 @@ u32 font_init(Font *font, u32 resolution, const str *file_name)
 
     if (!stbtt_InitFont(&font->info, (const unsigned char*)font->buf, 0))
     {
-        LOGERROR(FALSE, ERR_FONT_INIT_FAIL,
+        _LOGERROR(FALSE, ERR_FONT_INIT_FAIL,
                 "Failed to Initialize Font '%s', 'stbtt_InitFont()' Failed\n", file_name);
         goto cleanup;
     }

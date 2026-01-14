@@ -40,9 +40,6 @@
 #define SET_MOUSE_SENSITIVITY_DEFAULT   100
 #define SET_MOUSE_SENSITIVITY_MIN       10
 #define SET_MOUSE_SENSITIVITY_MAX       200
-#define SET_TARGET_FPS_DEFAULT          60
-#define SET_TARGET_FPS_MIN              1
-#define SET_TARGET_FPS_MAX              240
 #define SET_GUI_SCALE_DEFAULT           2
 #define SET_GUI_SCALE_0                 0 /* TODO: auto gui scale */
 #define SET_GUI_SCALE_1                 1

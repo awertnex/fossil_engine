@@ -87,7 +87,7 @@ void settings_update(void);
  *  @brief update 'render.time', 'render.delta' of currently bound render
  *  and cap framerate to 'settings.target_fps' if 'core.flag.fps_cap' is set.
  */
-void time_update(void);
+void time_update(b8 fps_cap, u64 fps_target);
 
 static void draw_everything(void);
 
@@ -152,7 +152,7 @@ static u32 settings_init(void)
             tokens[0], SET_MOUSE_SENSITIVITY_DEFAULT,
             tokens[1], SET_FOV_DEFAULT,
             tokens[2], SET_RENDER_DISTANCE_DEFAULT,
-            tokens[3], SET_TARGET_FPS_DEFAULT);
+            tokens[3], TARGET_FPS_DEFAULT);
 
     if (is_dir_exists(DIR_ROOT[DIR_CONFIG], TRUE) != ERR_SUCCESS)
         return *GAME_ERR;
@@ -208,23 +208,20 @@ static u32 settings_init(void)
 void settings_update(void)
 {
     settings.ndc_scale = (v2f32){2.0f / render->size.x, 2.0f / render->size.y};
-    settings.fps = 1 / ((f64)render->time_delta * NANOSEC2SEC);
+    settings.fps = 1 / ((f64)render->time_delta * NSEC2SEC);
 }
 
-void time_update(void)
+void time_update(b8 fps_cap, u64 fps_target)
 {
     static u64 time_next = 0;
-    time_next += SEC2NANOSEC / settings.target_fps;
+    time_next += SEC2NSEC / clamp_u64(fps_target, TARGET_FPS_MIN, TARGET_FPS_MAX);
 
-    if (is_key_press(KEY_X))
-        core.flag.fps_cap ^= 1;
-
-    render->time = get_time_u64();
-    if (core.flag.fps_cap && render->time < time_next)
+    render->time = get_time_nsec();
+    if (fps_cap && render->time < time_next)
         sleep_nsec(time_next - render->time);
     else time_next = render->time;
 
-    render->time_delta = get_time_delta_u64();
+    render->time_delta = get_time_delta_nsec();
 }
 
 static void shaders_init(void)
@@ -1144,7 +1141,7 @@ static void draw_everything(void)
                     "TIME        [%.2lf]\n"
                     "CLOCK       [%02"PRIu64":%02"PRIu64"]\n"
                     "DAYS        [%"PRIu64"]\n",
-                    (f64)render->time * NANOSEC2SEC,
+                    (f64)render->time * NSEC2SEC,
                     (world.tick % SET_DAY_TICKS_MAX) / 1000,
                     ((world.tick * 60) / 1000) % 60,
                     world.days),
@@ -1328,7 +1325,7 @@ void do_something(const str *fuck)
 
 int main(int argc, char **argv)
 {
-    if (engine_init(argc, argv, GAME_TITLE, 1280, 1054,
+    if (engine_init(argc, argv, DIR_ROOT[DIR_LOGS], GAME_TITLE, 1280, 1054,
                 NULL, TRUE, FALSE, GAME_RELEASE_BUILD) != ERR_SUCCESS)
         goto cleanup;
 
@@ -1467,7 +1464,7 @@ section_world_loaded:
         draw_everything();
 
         glfwSwapBuffers(render->window);
-        time_update();
+        time_update(core.flag.fps_cap, settings.target_fps);
 
         if (!core.flag.world_loaded)
             goto section_menu_title;

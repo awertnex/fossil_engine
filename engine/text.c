@@ -1,7 +1,7 @@
 #include <string.h>
 
+#include "h/common.h"
 #include "h/core.h"
-#include "h/defaults.h"
 #include "h/diagnostics.h"
 #include "h/logger.h"
 #include "h/memory.h"
@@ -80,7 +80,7 @@ u32 text_init(b8 multisample)
 cleanup:
 
     mesh_free(&mesh_text);
-    LOGFATAL(FALSE, ERR_TEXT_INIT_FAIL, "%s\n", "Failed to Initialize Text, Process Aborted");
+    _LOGFATAL(FALSE, ERR_TEXT_INIT_FAIL, "%s\n", "Failed to Initialize Text, Process Aborted");
     return engine_err;
 }
 
@@ -136,7 +136,7 @@ void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear)
 cleanup:
 
     mesh_free(&mesh_text);
-    LOGERROR(FALSE, engine_err, "%s\n", "Failed to Start Text");
+    _LOGERROR(FALSE, engine_err, "%s\n", "Failed to Start Text");
 }
 
 void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y)
@@ -149,14 +149,14 @@ void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y)
 
     if (!mesh_text.vbo_data)
     {
-        LOGERROR(FALSE, ERR_BUFFER_EMPTY, "%s\n", "Failed to Push Text, 'mesh_text.vbo_data' Null");
+        _LOGERROR(FALSE, ERR_BUFFER_EMPTY, "%s\n", "Failed to Push Text, 'mesh_text.vbo_data' Null");
         return;
     }
 
     len = strlen(text);
     if (len >= STRING_MAX)
     {
-        LOGERROR(FALSE, ERR_STRING_TOO_LONG, "%s\n", "Failed to Push Text, Text Too Long");
+        _LOGERROR(FALSE, ERR_STRING_TOO_LONG, "%s\n", "Failed to Push Text, Text Too Long");
         return;
     }
 
@@ -167,7 +167,7 @@ void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y)
                     "text_push().mesh_text.vbo_data") != ERR_SUCCESS)
         {
             mesh_free(&mesh_text);
-            LOGERROR(FALSE, engine_err, "%s\n", "Failed to Push Text");
+            _LOGERROR(FALSE, engine_err, "%s\n", "Failed to Push Text");
             return;
         }
         mesh_text.vbo_len += STRING_MAX * 4;
@@ -249,7 +249,7 @@ void text_render(u32 color, b8 shadow)
 {
     if (!mesh_text.vbo_data)
     {
-        LOGERROR(FALSE, ERR_BUFFER_EMPTY,
+        _LOGERROR(FALSE, ERR_BUFFER_EMPTY,
                 "%s\n", "Failed to Render Text, 'mesh_text.vbo_data' Null");
         return;
     }

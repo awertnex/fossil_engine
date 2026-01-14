@@ -1,6 +1,7 @@
 #include <unistd.h>
 
 #include "h/build.h"
+#include "h/common.h"
 #include "memory.c"
 #include "dir.c"
 #include "logger.c"
@@ -37,6 +38,7 @@
     #define STD 0
 #endif /* STD */
 
+u64 init_time = 0;
 u32 engine_err = ERR_SUCCESS;
 static u32 flag = 0;
 str *str_build_root = NULL;
@@ -217,6 +219,7 @@ u32 engine_build(const str *out_dir)
     if (flag & FLAG_CMD_RAW) cmd_raw();
 
     make_dir(stringf("%sengine", out_dir));
+    make_dir(stringf("%sengine/logs", out_dir));
     if (engine_err != ERR_SUCCESS && engine_err != ERR_DIR_EXISTS)
         cmd_fail();
 

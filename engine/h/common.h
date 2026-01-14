@@ -1,5 +1,7 @@
-#ifndef ENGINE_DEFAULTS_H
-#define ENGINE_DEFAULTS_H
+#ifndef ENGINE_COMMON_H
+#define ENGINE_COMMON_H
+
+#include "types.h"
 
 #define RENDER_WIDTH_DEFAULT 1280
 #define RENDER_WIDTH_MIN 512
@@ -22,6 +24,9 @@
 #define TEXT_TAB_SIZE 4
 #define TEXT_COLOR_SHADOW 0x00000060
 #define TEXT_OFFSET_SHADOW 2.0f
+#define TARGET_FPS_DEFAULT 60
+#define TARGET_FPS_MIN 1
+#define TARGET_FPS_MAX 256
 
 enum /* ShaderIndices */
 {
@@ -39,4 +44,10 @@ enum /* TextureIndices */
     ENGINE_TEXTURE_COUNT,
 }; /* TextureIndices */
 
-#endif /* ENGINE_DEFAULTS_H */
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief POSIX timestamp of the main process' start in milliseconds.
+ */
+extern u64 init_time;
+
+#endif /* ENGINE_COMMON_H */

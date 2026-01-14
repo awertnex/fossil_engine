@@ -1,5 +1,5 @@
+#include "h/common.h"
 #include "h/core.h"
-#include "h/defaults.h"
 #include "h/diagnostics.h"
 #include "h/ui.h"
 

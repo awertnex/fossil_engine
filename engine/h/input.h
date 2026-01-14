@@ -6,7 +6,7 @@
 
 #define MOUSE_BUTTONS_MAX 8
 #define KEYBOARD_KEYS_MAX 120
-#define KEYBOARD_DOUBLE_PRESS_TIME 0.5f
+#define DOUBLE_PRESS_TIME_INTERVAL 0.5f
 
 enum KeyboardKeyState
 {

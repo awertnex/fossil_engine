@@ -21,11 +21,11 @@ u32 _mem_alloc(void **x, u64 size, const str *name, const str *file, u64 line)
     *x = calloc(1, size);
     if (!*x)
     {
-        LOGFATALEX(TRUE, file, line, ERR_MEM_ALLOC_FAIL,
+        _LOGFATALEX(TRUE, file, line, ERR_MEM_ALLOC_FAIL,
                 "%s[%p] Memory Allocation Failed, Process Aborted\n", name, NULL);
         return engine_err;
     }
-    LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Allocated [%lldB]\n", name, *x, size);
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Allocated [%lldB]\n", name, *x, size);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -39,11 +39,11 @@ u32 _mem_alloc_memb(void **x, u64 memb, u64 size, const str *name, const str *fi
     *x = calloc(memb, size);
     if (!*x)
     {
-        LOGFATALEX(TRUE, file, line, ERR_MEM_ALLOC_FAIL,
+        _LOGFATALEX(TRUE, file, line, ERR_MEM_ALLOC_FAIL,
                 "%s[%p] Memory Allocation Failed, Process Aborted\n", name, NULL);
         return engine_err;
     }
-    LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Allocated [%lldB]\n", name, *x, memb * size);
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Allocated [%lldB]\n", name, *x, memb * size);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -57,7 +57,7 @@ u32 _mem_alloc_buf(Buf *x, u64 memb, u64 size, const str *name, const str *file,
 
     if (!x)
     {
-        LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
+        _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
                 "%s[%p] Memory Allocation Failed, Pointer NULL\n", name, NULL);
         return engine_err;
     }
@@ -96,7 +96,7 @@ u32 _mem_alloc_key_val(KeyValue *x, u64 memb, u64 size_key, u64 size_val,
 
     if (!x)
     {
-        LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
+        _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
                 "%s[%p] Memory Allocation Failed, Pointer NULL\n", name, NULL);
         return engine_err;
     }
@@ -141,7 +141,7 @@ u32 _mem_realloc(void **x, u64 size, const str *name, const str *file, u64 line)
 
     if (!*x)
     {
-        LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
+        _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
                 "%s[%p] Memory Reallocation Failed, Pointer NULL\n", name, NULL);
         return engine_err;
     }
@@ -149,13 +149,13 @@ u32 _mem_realloc(void **x, u64 size, const str *name, const str *file, u64 line)
     temp = realloc(*x, size);
     if (!temp)
     {
-        LOGFATALEX(TRUE, file, line, ERR_MEM_REALLOC_FAIL,
+        _LOGFATALEX(TRUE, file, line, ERR_MEM_REALLOC_FAIL,
                 "%s[%p] Memory Reallocation Failed, Process Aborted\n", name, *x);
         return engine_err;
     }
 
     *x = temp;
-    LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Reallocated [%lldB]\n", name, *x, size);
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Reallocated [%lldB]\n", name, *x, size);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -168,7 +168,7 @@ u32 _mem_realloc_memb(void **x, u64 memb, u64 size,
 
     if (!*x)
     {
-        LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
+        _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
                 "%s[%p] Memory Reallocation Failed, Pointer NULL\n", name, NULL);
         return engine_err;
     }
@@ -176,13 +176,13 @@ u32 _mem_realloc_memb(void **x, u64 memb, u64 size,
     temp = realloc(*x, memb * size);
     if (!temp)
     {
-        LOGFATALEX(TRUE, file, line, ERR_MEM_REALLOC_FAIL,
+        _LOGFATALEX(TRUE, file, line, ERR_MEM_REALLOC_FAIL,
                 "%s[%p] Memory Reallocation Failed, Process Aborted\n", name, *x);
         return engine_err;
     }
 
     *x = temp;
-    LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Reallocated [%lldB]\n", name, *x, memb * size);
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Reallocated [%lldB]\n", name, *x, memb * size);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -198,7 +198,7 @@ void _mem_free(void **x, u64 size, const str *name, const str *file, u64 line)
     mem_clear(x, size, name);
     free(*x);
     *x = NULL;
-    LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name, temp);
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name, temp);
 }
 
 void _mem_free_buf(Buf *x, const str *name, const str *file, u64 line)
@@ -217,7 +217,7 @@ void _mem_free_buf(Buf *x, const str *name, const str *file, u64 line)
         temp = x->i;
         mem_clear((void*)&x->i, x->memb * sizeof(str*), name_i);
         free(x->i);
-        LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name_i, temp);
+        _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name_i, temp);
     }
 
     if (x->buf)
@@ -225,7 +225,7 @@ void _mem_free_buf(Buf *x, const str *name, const str *file, u64 line)
         temp = x->buf;
         mem_clear((void*)&x->buf, x->memb * x->size, name_buf);
         free(x->buf);
-        LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name_buf, temp);
+        _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name_buf, temp);
     }
 
     *x = (Buf){0};
@@ -251,7 +251,7 @@ void _mem_free_key_val(KeyValue *x, const str *name, const str *file, u64 line)
         temp = x->key;
         mem_clear((void*)&x->key, x->memb * sizeof(str*), name_key);
         free(x->key);
-        LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name_key, temp);
+        _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name_key, temp);
     }
 
     if (x->val)
@@ -259,7 +259,7 @@ void _mem_free_key_val(KeyValue *x, const str *name, const str *file, u64 line)
         temp = x->val;
         mem_clear((void*)&x->val, x->memb * sizeof(str*), name_val);
         free(x->val);
-        LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name_val, temp);
+        _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name_val, temp);
     }
 
     if (x->buf_key)
@@ -267,7 +267,7 @@ void _mem_free_key_val(KeyValue *x, const str *name, const str *file, u64 line)
         temp = x->buf_key;
         mem_clear((void*)&x->buf_key, x->memb * x->size_key, name_buf_key);
         free(x->buf_key);
-        LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name_buf_key, temp);
+        _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name_buf_key, temp);
     }
 
     if (x->buf_val)
@@ -275,7 +275,7 @@ void _mem_free_key_val(KeyValue *x, const str *name, const str *file, u64 line)
         temp = x->buf_val;
         mem_clear((void*)&x->buf_val, x->memb * x->size_val, name_buf_val);
         free(x->buf_val);
-        LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name_buf_val, temp);
+        _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name_buf_val, temp);
     }
 
     *x = (KeyValue){0};
@@ -290,7 +290,7 @@ u32 _mem_clear(void **x, u64 size, const str *name, const str *file, u64 line)
     }
 
     memset(*x, 0, size);
-    LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Cleared [%lldB]\n", name, *x, size);
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Cleared [%lldB]\n", name, *x, size);
 
     engine_err = ERR_SUCCESS;
     return engine_err;

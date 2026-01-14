@@ -16,7 +16,7 @@ u32 make_dir(const str *path)
 {
     if (mkdir(path) == 0)
     {
-        LOGINFO(FALSE, "Directory Created '%s'\n", path);
+        _LOGINFO(FALSE, "Directory Created '%s'\n", path);
         engine_err = ERR_SUCCESS;
         return engine_err;
     }
@@ -28,7 +28,7 @@ u32 make_dir(const str *path)
             break;
 
         default:
-            LOGERROR(TRUE, ERR_DIR_CREATE_FAIL, "Failed to Create Directory '%s'\n", path);
+            _LOGERROR(TRUE, ERR_DIR_CREATE_FAIL, "Failed to Create Directory '%s'\n", path);
     }
 
     return exit_code;
@@ -57,7 +57,7 @@ u32 _get_path_bin_root(str *path)
 {
     if (strlen(_pgmptr) + 1 >= PATH_MAX)
     {
-        LOGFATAL(FALSE, ERR_GET_PATH_BIN_ROOT_FAIL,
+        _LOGFATAL(FALSE, ERR_GET_PATH_BIN_ROOT_FAIL,
                 "%s\n", "'get_path_bin_root()' Failed, Process Aborted");
         return engine_err;
     }
@@ -82,7 +82,7 @@ u32 exec(Buf *cmd, str *cmd_name)
 
     if (!cmd->loaded || !cmd->buf)
     {
-        LOGERROR(TRUE, ERR_BUFFER_EMPTY,
+        _LOGERROR(TRUE, ERR_BUFFER_EMPTY,
                 "exec '%s' Failed, cmd Empty\n", cmd_name);
         return engine_err;
     }
@@ -97,7 +97,7 @@ u32 exec(Buf *cmd, str *cmd_name)
     if(!CreateProcessA(NULL, cmd_cat, NULL, NULL, FALSE, 0, NULL, NULL,
                 &startup_info, &process_info))
     {
-        LOGFATAL(TRUE, ERR_EXEC_FAIL,
+        _LOGFATAL(TRUE, ERR_EXEC_FAIL,
                 "'%s' Fork Failed, Process Aborted\n", cmd_name);
         goto cleanup;
     }
@@ -110,11 +110,11 @@ u32 exec(Buf *cmd, str *cmd_name)
     CloseHandle(process_info.hThread);
 
     if (exit_code == 0)
-        LOGINFO(FALSE, "'%s' Success, Exit Code: %d\n", cmd_name, exit_code);
+        _LOGINFO(FALSE, "'%s' Success, Exit Code: %d\n", cmd_name, exit_code);
     else
     {
         engine_err = ERR_EXEC_PROCESS_NON_ZERO;
-        LOGINFO(TRUE, "'%s' Exit Code: %d\n", cmd_name, exit_code);
+        _LOGINFO(TRUE, "'%s' Exit Code: %d\n", cmd_name, exit_code);
         goto cleanup;
     }
 
@@ -140,11 +140,11 @@ u32 _mem_map(void **x, u64 size, const str *name, const str *file, u64 line)
     *x = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     if (!*x)
     {
-        LOGFATALEX(TRUE, file, line, ERR_MEM_MAP_FAIL,
+        _LOGFATALEX(TRUE, file, line, ERR_MEM_MAP_FAIL,
                 "%s[%p] Memory Map Failed, Process Aborted\n", name, NULL);
         return engine_err;
     }
-    LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Mapped [%"PRIu64"B]\n", name, *x, size);
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Mapped [%"PRIu64"B]\n", name, *x, size);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -154,7 +154,7 @@ u32 _mem_commit(void **x, void *offset, u64 size, const str *name, const str *fi
 {
     if (!x)
     {
-        LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
+        _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
                 "%s[%p][%p] Memory Commit [%"PRIu64"B] Failed, Pointer NULL\n",
                 name, x, offset, size);
         return engine_err;
@@ -162,12 +162,12 @@ u32 _mem_commit(void **x, void *offset, u64 size, const str *name, const str *fi
 
     if (!VirtualAlloc((*(u8*)x + (u8*)offset), size, MEM_COMMIT, PAGE_READWRITE))
     {
-        LOGFATALEX(TRUE, file, line, ERR_MEM_COMMIT_FAIL,
+        _LOGFATALEX(TRUE, file, line, ERR_MEM_COMMIT_FAIL,
                 "%s[%p][%p] Memory Commit [%"PRIu64"B] Failed, Process Aborted\n",
                 name, *x, offset, size);
         return engine_err;
     }
-    LOGTRACEEX(TRUE, file, line, "%s[%p][%p] Memory Committed [%"PRIu64"B]\n",
+    _LOGTRACEEX(TRUE, file, line, "%s[%p][%p] Memory Committed [%"PRIu64"B]\n",
             name, x, offset, size);
 
     engine_err = ERR_SUCCESS;
@@ -178,6 +178,6 @@ void _mem_unmap(void **x, u64 size, const str *name, const str *file, u64 line)
 {
     if (!*x) return;
     VirtualFree(x, 0, MEM_RELEASE);
-    LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unmapped [%"PRIu64"B]\n", name, *x, size);
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unmapped [%"PRIu64"B]\n", name, *x, size);
     *x = NULL;
 }

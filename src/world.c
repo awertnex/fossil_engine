@@ -166,7 +166,7 @@ u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
     else
     {
         if (!seed)
-            seed = rand_u64(get_time_raw_u64());
+            seed = rand_u64(get_time_raw_nsec());
 
         convert_u64_to_str(string[1], NAME_MAX, seed);
         if (write_file(string[0], 1, strlen(string[1]),
@@ -194,14 +194,14 @@ u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
 
 void world_update(Player *p)
 {
-    world.tick = world.tick_start + (u64)((f64)render->time * NANOSEC2SEC * WORLD_TICK_SPEED);
+    world.tick = world.tick_start + (u64)((f64)render->time * NSEC2SEC * WORLD_TICK_SPEED);
     world.days = world.tick / SET_DAY_TICKS_MAX;
 
     if (state_menu_depth || core.flag.super_debug)
         show_cursor;
     else disable_cursor;
 
-    player_update(p, 1.0 - exp(-1.0 * (f64)render->time_delta * NANOSEC2SEC));
+    player_update(p, 1.0 - exp(-1.0 * (f64)render->time_delta * NSEC2SEC));
     b8 use_mouse = !state_menu_depth && !core.flag.super_debug && !(p->flag & FLAG_PLAYER_DEAD);
     player_camera_movement_update(p, render->mouse_delta, use_mouse);
     player_target_update(p);

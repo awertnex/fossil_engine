@@ -37,12 +37,12 @@ str *stringf(const str *format, ...)
     static str str_buf[STRINGF_BUFFERS_MAX][OUT_STRING_MAX] = {0};
     static u64 index = 0, required_bytes;
     str *string = str_buf[index];
-    __builtin_va_list args;
+    va_list args;
     str *trunc_buf = NULL;
 
-    __builtin_va_start(args, format);
+    va_start(args, format);
     required_bytes = vsnprintf(string, OUT_STRING_MAX, format, args);
-    __builtin_va_end(args);
+    va_end(args);
 
     if (required_bytes >= OUT_STRING_MAX - 1)
     {
@@ -69,7 +69,7 @@ u32 convert_i32_to_str(str *dest, i32 size, i32 n)
 
     if (size <= 0)
     {
-        LOGERROR(FALSE, ERR_SIZE_TOO_SMALL,
+        _LOGERROR(FALSE, ERR_SIZE_TOO_SMALL,
                 "%s\n", "Failed to Convert i32 to str, 'size' Too Small");
         return engine_err;
     }
@@ -111,7 +111,7 @@ u32 convert_u64_to_str(str *dest, u64 size, u64 n)
 
     if (size == 0)
     {
-        LOGERROR(FALSE, ERR_SIZE_TOO_SMALL,
+        _LOGERROR(FALSE, ERR_SIZE_TOO_SMALL,
                 "%s\n", "Failed to Convert u64 to str, 'size' Too Small");
         return engine_err;
     }

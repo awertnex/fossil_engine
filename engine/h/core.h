@@ -17,7 +17,7 @@
 #include <engine/include/stb_truetype.h>
 #include <engine/include/stb_image.h>
 
-#include "defaults.h"
+#include "common.h"
 #include "limits.h"
 #include "platform.h"
 #include "types.h"
@@ -192,6 +192,28 @@ enum TextAlignment
     TEXT_ALIGN_BOTTOM = 2,
 }; /* TextAlignment */
 
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief default render.
+ *
+ *  @remark declared internally.
+ */
+extern Render *render;
+
+/*! @brief default shaders.
+ *
+ *  @remark declared internally.
+ */
+extern ShaderProgram engine_shader[ENGINE_SHADER_COUNT];
+
+/*! @brief default textures.
+ *
+ *  @remark declared internally.
+ */
+extern Texture engine_texture[ENGINE_TEXTURE_COUNT];
+
+extern Mesh engine_mesh_unit;
+
 /*! @brief initialize engine stuff.
  *
  *  set GLFW error callback.
@@ -200,6 +222,8 @@ enum TextAlignment
  *  calls 'glfw_init()', 'window_init()' and 'glad_init()'.
  *
  *  @param argc, argv = used for logger log level if args provided.
+ *  @param _log_dir = directory to write log files into for the lifetime of the process,
+ *  if NULL, logs won't be written to disk.
  *
  *  @param _render = render to use for engine,
  *  if NULL, the global variable 'render' is defined as default and declared internally.
@@ -209,10 +233,10 @@ enum TextAlignment
  *
  *  @param title = window/application title, if NULL, default title is used
  *  ('window_init()' parameter).
+ *
  *  @param size_x, size_y = window size, if either is 0, default size is used
  *  ('window_init()' parameter).
  *
- *  @remark argc and argv can be NULL.
  *  @remark release_build can be overridden with these args in 'argv':
  *      LOGLEVEL FATAL = log only fatal errors.
  *      LOGLEVEL ERROR = log errors and above.
@@ -225,8 +249,8 @@ enum TextAlignment
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 engine_init(int argc, char **argv, const str *title, i32 size_x, i32 size_y,
-        Render *_render, b8 shaders, b8 multisample, b8 release_build);
+u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
+        i32 size_x, i32 size_y, Render *_render, b8 shaders, b8 multisample, b8 release_build);
 
 /*! @brief free engine resources.
  *
@@ -444,27 +468,5 @@ void text_fbo_blit(GLuint fbo);
 /*! -- IMPLEMENTATION: text.c --;
  */
 void text_free(void);
-
-/*! -- INTERNAL USE ONLY --;
- *
- *  @brief default render.
- *
- *  @remark declared internally.
- */
-extern Render *render;
-
-/*! @brief default shaders.
- *
- *  @remark declared internally.
- */
-extern ShaderProgram engine_shader[ENGINE_SHADER_COUNT];
-
-/*! @brief default textures.
- *
- *  @remark declared internally.
- */
-extern Texture engine_texture[ENGINE_TEXTURE_COUNT];
-
-extern Mesh engine_mesh_unit;
 
 #endif /* ENGINE_CORE_H */

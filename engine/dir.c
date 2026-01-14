@@ -19,7 +19,7 @@ u64 get_file_type(const str *name)
     if (stat(name, &stats) == 0)
         return S_ISREG(stats.st_mode) | (S_ISDIR(stats.st_mode) * 2);
 
-    LOGERROR(TRUE, ERR_FILE_NOT_FOUND, "File '%s' Not Found\n", name);
+    _LOGERROR(TRUE, ERR_FILE_NOT_FOUND, "File '%s' Not Found\n", name);
     return 0;
 }
 
@@ -53,7 +53,7 @@ u32 is_file_exists(const str *name, b8 log)
         {
             if (log)
             {
-                LOGERROR(TRUE, ERR_IS_NOT_FILE, "'%s' is Not a Regular File\n", name);
+                _LOGERROR(TRUE, ERR_IS_NOT_FILE, "'%s' is Not a Regular File\n", name);
             }
             else engine_err = ERR_IS_NOT_FILE;
             return engine_err;
@@ -62,7 +62,7 @@ u32 is_file_exists(const str *name, b8 log)
 
     if (log)
     {
-        LOGERROR(TRUE, ERR_FILE_NOT_FOUND, "File '%s' Not Found\n", name);
+        _LOGERROR(TRUE, ERR_FILE_NOT_FOUND, "File '%s' Not Found\n", name);
     }
     else engine_err = ERR_FILE_NOT_FOUND;
     return engine_err;
@@ -98,7 +98,7 @@ u32 is_dir_exists(const str *name, b8 log)
         {
             if (log)
             {
-                LOGERROR(TRUE, ERR_IS_NOT_DIR, "'%s' is Not a Directory\n", name);
+                _LOGERROR(TRUE, ERR_IS_NOT_DIR, "'%s' is Not a Directory\n", name);
             }
             else engine_err = ERR_IS_NOT_DIR;
             return engine_err;
@@ -107,7 +107,7 @@ u32 is_dir_exists(const str *name, b8 log)
 
     if (log)
     {
-        LOGERROR(TRUE, ERR_DIR_NOT_FOUND, "Directory '%s' Not Found\n", name);
+        _LOGERROR(TRUE, ERR_DIR_NOT_FOUND, "Directory '%s' Not Found\n", name);
     }
     else engine_err = ERR_DIR_NOT_FOUND;
     return engine_err;
@@ -123,7 +123,7 @@ u64 get_file_contents(const str *name, void **destination, u64 size, b8 terminat
 
     if ((file = fopen(name, "rb")) == NULL)
     {
-        LOGERROR(TRUE, ERR_FILE_OPEN_FAIL, "Failed to Open File '%s'\n", name);
+        _LOGERROR(TRUE, ERR_FILE_OPEN_FAIL, "Failed to Open File '%s'\n", name);
         return 0;
     }
 
@@ -274,7 +274,7 @@ u32 copy_file(const str *source, const str *destination)
 
     if ((out_file = fopen(destination_string, "wb")) == NULL)
     {
-        LOGERROR(FALSE, ERR_FILE_OPEN_FAIL, "Failed to Copy File '%s' -> '%s'\n",
+        _LOGERROR(FALSE, ERR_FILE_OPEN_FAIL, "Failed to Copy File '%s' -> '%s'\n",
                 source, destination_string);
         return engine_err;
     }
@@ -289,7 +289,7 @@ u32 copy_file(const str *source, const str *destination)
     fwrite(in_file, 1, len, out_file);
     fclose(out_file);
 
-    LOGTRACE(FALSE, "File Copied '%s' -> '%s'\n", source, destination_string);
+    _LOGTRACE(FALSE, "File Copied '%s' -> '%s'\n", source, destination_string);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -336,7 +336,7 @@ u32 copy_dir(const str *source, const str *destination, b8 overwrite)
         copy_file(in_dir, out_dir);
     }
 
-    LOGTRACE(FALSE, "Directory Copied '%s' -> '%s'\n", source, destination_string);
+    _LOGTRACE(FALSE, "Directory Copied '%s' -> '%s'\n", source, destination_string);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -345,7 +345,7 @@ u32 copy_dir(const str *source, const str *destination, b8 overwrite)
 u32 write_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text)
 {
     if (_write_file(name, size, length, buf, log, text) == ERR_SUCCESS)
-        LOGTRACE(FALSE, "File Written '%s'\n", name);
+        _LOGTRACE(FALSE, "File Written '%s'\n", name);
 
     return engine_err;
 }
@@ -357,7 +357,7 @@ u32 _write_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 tex
     {
         if (log)
         {
-            LOGERROR(TRUE, ERR_FILE_OPEN_FAIL, "Failed to Open File '%s'\n", name);
+            _LOGERROR(TRUE, ERR_FILE_OPEN_FAIL, "Failed to Open File '%s'\n", name);
         }
         else engine_err = ERR_FILE_OPEN_FAIL;
         return engine_err;
@@ -374,7 +374,7 @@ u32 _write_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 tex
 u32 append_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text)
 {
     if (_append_file(name, size, length, buf, log, text) == ERR_SUCCESS)
-        LOGTRACE(FALSE, "File Appended '%s'\n", name);
+        _LOGTRACE(FALSE, "File Appended '%s'\n", name);
 
     return engine_err;
 }
@@ -386,7 +386,7 @@ u32 _append_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 te
     {
         if (log)
         {
-            LOGERROR(TRUE, ERR_FILE_OPEN_FAIL, "Failed to Open File '%s'\n", name);
+            _LOGERROR(TRUE, ERR_FILE_OPEN_FAIL, "Failed to Open File '%s'\n", name);
         }
         else engine_err = ERR_FILE_OPEN_FAIL;
         return engine_err;
@@ -408,7 +408,7 @@ str *get_path_absolute(const str *name)
 
     if (strlen(name) >= PATH_MAX - 1)
     {
-        LOGERROR(TRUE, ERR_GET_PATH_ABSOLUTE_FAIL, "%s\n", "Path Too Long");
+        _LOGERROR(TRUE, ERR_GET_PATH_ABSOLUTE_FAIL, "%s\n", "Path Too Long");
         return NULL;
     }
 
@@ -444,7 +444,7 @@ str *get_path_bin_root(void)
     len = strlen(path_bin_root) + 1;
     if (len >= PATH_MAX - 1)
     {
-        LOGFATAL(TRUE, ERR_PATH_TOO_LONG,
+        _LOGFATAL(TRUE, ERR_PATH_TOO_LONG,
                 "Path Too Long '%s', Process Aborted\n", path_bin_root);
         return NULL;
     }

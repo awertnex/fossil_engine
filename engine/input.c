@@ -181,6 +181,7 @@ void update_key_states(void)
 {
     GLFWwindow *_window = render->window;
     u64 _time = render->time;
+    static u64 double_press_time_interval = (u64)(DOUBLE_PRESS_TIME_INTERVAL * SEC2NSEC);
     static u64 key_press_start_time[KEYBOARD_KEYS_MAX] = {0};
     b8 key_press = FALSE, key_release = FALSE,
        mouse_press = FALSE, mouse_release = FALSE;
@@ -223,8 +224,7 @@ void update_key_states(void)
             }
             else if (keyboard_key[i] == KEY_LISTEN_DOUBLE)
             {
-                if (_time - key_press_start_time[i] <=
-                        (u64)(KEYBOARD_DOUBLE_PRESS_TIME * SEC2NANOSEC))
+                if (_time - key_press_start_time[i] <= double_press_time_interval)
                     keyboard_key[i] = KEY_PRESS_DOUBLE;
                 else
                 {
