@@ -19,7 +19,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <engine/include/stb_image.h>
 
-
 u64 init_time = 0;
 static u64 engine_flag = 0; /* enum: EngineFlag */
 u32 engine_err = ERR_SUCCESS;
@@ -1024,12 +1023,10 @@ u32 font_init(Font *font, u32 resolution, const str *file_name)
         goto cleanup;
     }
 
-    printf("fucking file name 0: %s\n", file_name);
     if (mem_alloc((void*)&font->bitmap, GLYPH_MAX * resolution * resolution,
                 stringf("font_init().%s", file_name)) != ERR_SUCCESS)
         goto cleanup;
 
-    printf("fucking file name 1: %s\n", file_name);
     if (mem_alloc((void*)&canvas, resolution * resolution,
                 "font_init().font_glyph_canvas") != ERR_SUCCESS)
         goto cleanup;

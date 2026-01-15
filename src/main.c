@@ -30,7 +30,15 @@ struct Settings settings = {0};
 u8 debug_mode[DEBUG_MODE_COUNT] = {0};
 static ShaderProgram shader_game[SHADER_COUNT] = {0};
 Texture texture[TEXTURE_COUNT] = {0};
-Font font[FONT_COUNT];
+
+Font *font[FONT_COUNT] =
+{
+    [FONT_REG] =        &engine_font[ENGINE_FONT_DEJAVU_SANS],
+    [FONT_REG_BOLD] =   &engine_font[ENGINE_FONT_DEJAVU_SANS_BOLD],
+    [FONT_MONO] =       &engine_font[ENGINE_FONT_DEJAVU_SANS_MONO],
+    [FONT_MONO_BOLD] =  &engine_font[ENGINE_FONT_DEJAVU_SANS_MONO_BOLD],
+};
+
 Projection projection_world = {0};
 Projection projection_hud = {0};
 static struct Uniform uniform = {0};
@@ -1132,7 +1140,7 @@ static void draw_everything(void)
 
     if (core.flag.hud && core.flag.debug)
     {
-        text_start(&font[FONT_MONO_BOLD], settings.font_size, 0, NULL, TRUE);
+        text_start(font[FONT_MONO_BOLD], settings.font_size, 0, NULL, TRUE);
         text_push(stringf("FPS         [%u]\n", settings.fps),
                 (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0);
         text_render(settings.fps > 60 ? COLOR_TEXT_MOSS : COLOR_DIAGNOSTIC_ERROR, TRUE);
@@ -1233,7 +1241,7 @@ static void draw_everything(void)
                 TEXT_ALIGN_RIGHT, 0);
         text_render(COLOR_TEXT_DEFAULT, TRUE);
 
-        text_start(&font[FONT_MONO], FONT_SIZE_DEFAULT, 0, NULL, FALSE);
+        text_start(font[FONT_MONO], FONT_SIZE_DEFAULT, 0, NULL, FALSE);
         text_push(stringf(
                     "Game:     %s v%s\n"
                     "Engine:   %s v%s\n"
@@ -1255,7 +1263,7 @@ static void draw_everything(void)
     }
     else /* ---- clear text buffer ------------------------------------------ */
     {
-        text_start(&font[FONT_MONO_BOLD], settings.font_size, 0, NULL, TRUE);
+        text_start(font[FONT_MONO_BOLD], settings.font_size, 0, NULL, TRUE);
         text_stop();
     }
 

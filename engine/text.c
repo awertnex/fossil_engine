@@ -7,6 +7,20 @@
 #include "h/memory.h"
 
 static Mesh mesh_text = {0};
+Font engine_font[ENGINE_FONT_COUNT] =
+{
+    [ENGINE_FONT_DEJAVU_SANS].path =
+        ENGINE_FONTS_DIR"dejavu-fonts-ttf-2.37/dejavu_sans_ansi.ttf",
+
+    [ENGINE_FONT_DEJAVU_SANS_BOLD].path =
+        ENGINE_FONTS_DIR"dejavu-fonts-ttf-2.37/dejavu_sans_mono_ansi.ttf",
+
+    [ENGINE_FONT_DEJAVU_SANS_MONO].path =
+        ENGINE_FONTS_DIR"dejavu-fonts-ttf-2.37/dejavu_sans_bold_ansi.ttf",
+
+    [ENGINE_FONT_DEJAVU_SANS_MONO_BOLD].path =
+        ENGINE_FONTS_DIR"dejavu-fonts-ttf-2.37/dejavu_sans_mono_bold_ansi.ttf",
+};
 
 static struct /* text_core */
 {
@@ -36,6 +50,11 @@ static struct /* text_core */
 
 u32 text_init(b8 multisample)
 {
+    u32 i = 0;
+    for (i = 0; i < ENGINE_FONT_COUNT; ++i)
+        if (font_init(&engine_font[i], FONT_RESOLUTION_DEFAULT, engine_font[i].path) != ERR_SUCCESS)
+            goto cleanup;
+
     if (mem_alloc((void*)&mesh_text.vbo_data, STRING_MAX * sizeof(GLfloat) * 4,
                 "text_init().mesh_text.vbo_data") != ERR_SUCCESS)
         goto cleanup;
@@ -79,7 +98,7 @@ u32 text_init(b8 multisample)
 
 cleanup:
 
-    mesh_free(&mesh_text);
+    text_free();
     _LOGFATAL(FALSE, ERR_TEXT_INIT_FAIL, "%s\n", "Failed to Initialize Text, Process Aborted");
     return engine_err;
 }
@@ -302,6 +321,9 @@ void text_fbo_blit(GLuint fbo)
 
 void text_free(void)
 {
+    u32 i = 0;
+    for (i = 0; i < ENGINE_FONT_COUNT; ++i)
+        font_free(&engine_font[i]);
     fbo_free(&text_core.fbo);
     mesh_free(&mesh_text);
 }

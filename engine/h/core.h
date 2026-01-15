@@ -146,7 +146,7 @@ typedef struct Font
 {
     /*! @brief font file name,
      *
-     *  initialized internally in 'load_font()'.
+     *  initialized in 'font_init()'.
      */
     str path[PATH_MAX];
 
@@ -213,6 +213,7 @@ extern ShaderProgram engine_shader[ENGINE_SHADER_COUNT];
 extern Texture engine_texture[ENGINE_TEXTURE_COUNT];
 
 extern Mesh engine_mesh_unit;
+extern Font engine_font[ENGINE_FONT_COUNT];
 
 /*! @brief initialize engine stuff.
  *
@@ -392,7 +393,7 @@ void get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f64 *y
  *  3. generate square texture of diameter (size * 16) and bake bitmap onto it.
  *
  *  @param resolution = font size (font atlas cell diameter).
- *  @param file_name = font path.
+ *  @param file_name = font file name.
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */

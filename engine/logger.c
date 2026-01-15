@@ -119,6 +119,7 @@ static void _get_log_str(const str *str_in, str *str_out, u32 flags, b8 verbose,
 {
     str str_time[TIME_STRING_MAX] = {0};
     str str_timestamp[TIME_STRING_MAX] = {0};
+    str str_time_full[TIME_STRING_MAX] = {0};
     str str_tag[32] = {0};
     str str_file[STRING_MAX] = {0};
     str *str_nocolor = esc_code_none;
@@ -126,20 +127,16 @@ static void _get_log_str(const str *str_in, str *str_out, u32 flags, b8 verbose,
 
     if (flags & FLAG_LOG_FULL_TIME)
     {
-        snprintf(str_timestamp, 2, "%s", "[");
-
         if ((flags & FLAG_LOG_DATE_TIME) == FLAG_LOG_DATE_TIME)
-            get_time_str(str_time, "%F %T");
+            get_time_str(str_time, "[%F %T]");
         else if (flags & FLAG_LOG_DATE)
-            get_time_str(str_time, "%F");
+            get_time_str(str_time, "[%F]");
         else if (flags & FLAG_LOG_TIME)
-            get_time_str(str_time, "%T");
-
+            get_time_str(str_time, "[%T]");
         if (flags & FLAG_LOG_TIMESTAMP)
-            snprintf(str_timestamp + 1, TIME_STRING_MAX - 1, "%"PRIu64"%s%s] ",
-                    init_time, flags & FLAG_LOG_DATE_TIME ? " " : "", str_time);
-        else
-            snprintf(str_timestamp + 1, TIME_STRING_MAX - 1, "%s] ", str_time);
+            snprintf(str_timestamp, TIME_STRING_MAX, "[%"PRIu64"]", init_time);
+
+        snprintf(str_time_full, TIME_STRING_MAX, "%s%s ", str_timestamp, str_time);
     }
 
     if (flags & FLAG_LOG_COLOR)
@@ -157,5 +154,5 @@ static void _get_log_str(const str *str_in, str *str_out, u32 flags, b8 verbose,
         snprintf(str_file, STRING_MAX, "[%s:%"PRIu64"] ", file, line);
 
     snprintf(str_out, OUT_STRING_MAX, "%s%s%s%s%s%s",
-            str_color, str_timestamp, str_tag, str_file, str_in, str_nocolor);
+            str_color, str_time_full, str_tag, str_file, str_in, str_nocolor);
 }

@@ -1,12 +1,12 @@
 #ifndef ENGINE_LOGGER_H
 #define ENGINE_LOGGER_H
 
+#include "common.h"
 #include "diagnostics.h"
 #include "limits.h"
 #include "memory.h"
 #include "types.h"
 
-#define ENGINE_LOG_DIR      "engine/logs/"
 #define LOGFILE_NAME_ERROR  "log_error.log"
 #define LOGFILE_NAME_INFO   "log_info.log"
 #define LOGFILE_NAME_EXTRA  "log_verbose.log"

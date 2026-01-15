@@ -271,7 +271,7 @@ extern u32 *const GAME_ERR;
 extern struct Core core;
 extern struct Settings settings;
 extern Texture texture[TEXTURE_COUNT];
-extern Font font[FONT_COUNT];
+extern Font *font[FONT_COUNT];
 extern u8 debug_mode[DEBUG_MODE_COUNT];
 extern Projection projection_world;
 extern Projection projection_hud;

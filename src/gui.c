@@ -20,25 +20,7 @@ u8 buttons[BTN_COUNT];
 
 u32 gui_init(void)
 {
-    str *font_path[FONT_COUNT] =
-    {
-        stringf("%s%s", DIR_ROOT[DIR_FONTS],
-                "dejavu-fonts-ttf-2.37/dejavu_sans_ansi.ttf"),
-        stringf("%s%s", DIR_ROOT[DIR_FONTS],
-                "dejavu-fonts-ttf-2.37/dejavu_sans_bold_ansi.ttf"),
-        stringf("%s%s", DIR_ROOT[DIR_FONTS],
-                "dejavu-fonts-ttf-2.37/dejavu_sans_mono_ansi.ttf"),
-        stringf("%s%s", DIR_ROOT[DIR_FONTS],
-                "dejavu-fonts-ttf-2.37/dejavu_sans_mono_bold_ansi.ttf"),
-    };
-
     u32 i = 0;
-    for (i = 0; i < FONT_COUNT; ++i)
-    {
-        normalize_slash(font_path[i]);
-        if (font_init(&font[i], FONT_RESOLUTION_DEFAULT, font_path[i]) != ERR_SUCCESS)
-            goto cleanup;
-    }
 
     if (
             texture_init(&texture[TEXTURE_CROSSHAIR], (v2i32){16, 16},
@@ -95,8 +77,6 @@ cleanup:
 void gui_free(void)
 {
     u32 i = 0;
-    for (i = 0; i < FONT_COUNT; ++i)
-        font_free(&font[i]);
     for (i = 0; i < TEXTURE_COUNT; ++i)
         texture_free(&texture[i]);
 }

@@ -3,6 +3,9 @@
 
 #include "types.h"
 
+#define ENGINE_FONTS_DIR    "engine/assets/fonts/"
+#define ENGINE_LOG_DIR      "engine/logs/"
+
 #define RENDER_WIDTH_DEFAULT 1280
 #define RENDER_WIDTH_MIN 512
 #define RENDER_WIDTH_MAX 3840
@@ -28,21 +31,30 @@
 #define TARGET_FPS_MIN 1
 #define TARGET_FPS_MAX 256
 
-enum /* ShaderIndices */
+enum /* ShaderIndex */
 {
     ENGINE_SHADER_UNIT_QUAD,
     ENGINE_SHADER_TEXT,
     ENGINE_SHADER_UI,
     ENGINE_SHADER_UI_9_SLICE,
     ENGINE_SHADER_COUNT,
-}; /* ShaderIndices */
+}; /* ShaderIndex */
 
-enum /* TextureIndices */
+enum /* FontIndex */
+{
+    ENGINE_FONT_DEJAVU_SANS,
+    ENGINE_FONT_DEJAVU_SANS_BOLD,
+    ENGINE_FONT_DEJAVU_SANS_MONO,
+    ENGINE_FONT_DEJAVU_SANS_MONO_BOLD,
+    ENGINE_FONT_COUNT,
+}; /* FontIndex */
+
+enum /* TextureIndex */
 {
     ENGINE_TEXTURE_PANEL_ACTIVE,
     ENGINE_TEXTURE_PANEL_INACTIVE,
     ENGINE_TEXTURE_COUNT,
-}; /* TextureIndices */
+}; /* TextureIndex */
 
 /*! -- INTERNAL USE ONLY --;
  *
