@@ -20,6 +20,7 @@
 #include <engine/include/stb_image.h>
 
 u64 init_time = 0;
+str *DIR_PROC_ROOT = NULL;
 static u64 engine_flag = 0; /* enum: EngineFlag */
 u32 engine_err = ERR_SUCCESS;
 
@@ -122,28 +123,9 @@ u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
         i32 size_x, i32 size_y, Render *_render, b8 shaders, b8 multisample, b8 release_build)
 {
     u32 i = 0;
-    str *path = NULL;
 
-    init_time = get_time_raw_usec();
-    get_time_nsec(); /* initialize start time */
-    get_time_nsecf(); /* initialize start time */
-
-    if (release_build)
-        log_level_max = LOGLEVEL_INFO;
-
-    if (argc && argv &&
-            argc > 2 && !strncmp(argv[1], "LOGLEVEL", 8))
-        {
-            if (!strncmp(argv[2], "FATAL", 5))      log_level_max = LOGLEVEL_FATAL;
-            else if (!strncmp(argv[2], "ERROR", 5)) log_level_max = LOGLEVEL_ERROR;
-            else if (!strncmp(argv[2], "WARN", 4))  log_level_max = LOGLEVEL_WARNING;
-            else if (!strncmp(argv[2], "INFO", 4))  log_level_max = LOGLEVEL_INFO;
-            else if (!strncmp(argv[2], "DEBUG", 5)) log_level_max = LOGLEVEL_DEBUG;
-            else if (!strncmp(argv[2], "TRACE", 5)) log_level_max = LOGLEVEL_TRACE;
-        }
-
-    path = get_path_bin_root();
-    change_dir(path);
+    if (logger_init(argc, argv, release_build, _log_dir) != ERR_SUCCESS)
+        goto cleanup;
 
     glfwSetErrorCallback(glfw_callback_error);
 
@@ -151,7 +133,6 @@ u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
         change_render(_render);
 
     if (
-            logger_init(release_build, argc, argv, _log_dir) != ERR_SUCCESS ||
             glfw_init(multisample) != ERR_SUCCESS ||
             window_init(title, size_x, size_y) != ERR_SUCCESS ||
             glad_init() != ERR_SUCCESS)
@@ -193,6 +174,8 @@ void engine_close(void)
 
     for (i = 0; i < ENGINE_SHADER_COUNT; ++i)
         shader_program_free(&engine_shader[i]);
+
+    mem_free((void*)&DIR_PROC_ROOT, strlen(DIR_PROC_ROOT), "engine_close().DIR_PROC_ROOT");
 }
 
 u32 glfw_init(b8 multisample)
@@ -334,7 +317,7 @@ u32 shader_init(const str *shaders_dir, Shader *shader)
 
 static str *shader_pre_process(const str *path, u64 *file_len)
 {
-    return _shader_pre_process(path, file_len, INCLUDE_RECURSION_LIMIT_MAX);
+    return _shader_pre_process(path, file_len, INCLUDE_RECURSION_MAX);
 }
 
 static str *_shader_pre_process(const str *path, u64 *file_len, u64 recursion_limit)

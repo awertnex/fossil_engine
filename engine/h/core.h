@@ -183,15 +183,6 @@ typedef struct Font
     Glyph glyph[GLYPH_MAX];
 } Font;
 
-enum TextAlignment
-{
-    TEXT_ALIGN_LEFT = 0,
-    TEXT_ALIGN_CENTER = 1,
-    TEXT_ALIGN_RIGHT = 2,
-    TEXT_ALIGN_TOP = 0,
-    TEXT_ALIGN_BOTTOM = 2,
-}; /* TextAlignment */
-
 /*! -- INTERNAL USE ONLY --;
  *
  *  @brief default render.
@@ -217,10 +208,9 @@ extern Font engine_font[ENGINE_FONT_COUNT];
 
 /*! @brief initialize engine stuff.
  *
- *  set GLFW error callback.
- *  initialize logger.
- *  call 'change_dir()' to change working directory to the running applications'.
- *  calls 'glfw_init()', 'window_init()' and 'glad_init()'.
+ *  - set GLFW error callback.
+ *  - call 'change_dir()' to change working directory to the running applications'.
+ *  - call 'logger_init()', 'glfw_init()', 'window_init()' and 'glad_init()'.
  *
  *  @param argc, argv = used for logger log level if args provided.
  *  @param _log_dir = directory to write log files into for the lifetime of the process,

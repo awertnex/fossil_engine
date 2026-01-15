@@ -55,6 +55,15 @@ enum /* FontIndex */
     ENGINE_FONT_COUNT,
 }; /* FontIndex */
 
+enum /* TextAlignment */
+{
+    TEXT_ALIGN_LEFT = 0,
+    TEXT_ALIGN_CENTER = 1,
+    TEXT_ALIGN_RIGHT = 2,
+    TEXT_ALIGN_TOP = 0,
+    TEXT_ALIGN_BOTTOM = 2,
+}; /* TextAlignment */
+
 enum /* TextureIndex */
 {
     ENGINE_TEXTURE_PANEL_ACTIVE,
@@ -67,5 +76,12 @@ enum /* TextureIndex */
  *  @brief POSIX timestamp of the main process' start in milliseconds.
  */
 extern u64 init_time;
+
+/*! @brief project root directory (used in 'engine_init()' and 'logger_init()'
+ *  to change current working dirctory.
+ *
+ *  @remark declared internally.
+ */
+extern str *DIR_PROC_ROOT;
 
 #endif /* ENGINE_COMMON_H */

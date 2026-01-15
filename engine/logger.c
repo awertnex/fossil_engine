@@ -13,8 +13,19 @@
 #include "h/types.h"
 
 u32 log_level_max = LOGLEVEL_TRACE;
+static u64 log_flag = 0;
 str log_dir[PATH_MAX] = {0};
+
+/*! @brief logger ring buffer.
+ */
 static str *logger_buf = NULL;
+
+str **logger_tab = NULL;
+
+/*! @brief current position in 'logger_tab'.
+ */
+static u32 logger_tab_index = 0;
+
 static const str LOG_FILE_NAME[LOGLEVEL_COUNT][NAME_MAX] =
 {
     [LOGLEVEL_FATAL] = ENGINE_FILE_NAME_LOG_ERROR,
@@ -53,26 +64,47 @@ static str *esc_code_color[LOGLEVEL_COUNT] =
 static void _get_log_str(const str *str_in, str *str_out, u32 flags, b8 verbose,
         u8 level, u32 error_code, const str *file, u64 line);
 
-u32 logger_init(b8 release_build, int argc, char **argv, const str *_log_dir)
+u32 logger_init(int argc, char **argv, b8 release_build, const str *_log_dir)
 {
-    if (!init_time) init_time = get_time_raw_usec();
-    if (release_build) log_level_max = LOGLEVEL_INFO;
+    u32 i = 0;
 
-    if (argc && argv &&
-            argc > 2 && !strncmp(argv[1], "LOGLEVEL", 8ul))
+    if (release_build)
+        log_level_max = LOGLEVEL_INFO;
+
+    if (argc && argv && argc > 2 &&
+            strncmp(argv[1], "LOGLEVEL", 8ul) == 0)
         {
-            if (!strncmp(argv[2], "FATAL", 5ul))        log_level_max = LOGLEVEL_FATAL;
-            else if (!strncmp(argv[2], "ERROR", 5ul))   log_level_max = LOGLEVEL_ERROR;
-            else if (!strncmp(argv[2], "WARN", 4ul))    log_level_max = LOGLEVEL_WARNING;
-            else if (!strncmp(argv[2], "INFO", 4ul))    log_level_max = LOGLEVEL_INFO;
-            else if (!strncmp(argv[2], "DEBUG", 5ul))   log_level_max = LOGLEVEL_DEBUG;
-            else if (!strncmp(argv[2], "TRACE", 5ul))   log_level_max = LOGLEVEL_TRACE;
+            if (strncmp(argv[2], "FATAL", 5ul) == 0)        log_level_max = LOGLEVEL_FATAL;
+            else if (strncmp(argv[2], "ERROR", 5ul) == 0)   log_level_max = LOGLEVEL_ERROR;
+            else if (strncmp(argv[2], "WARN", 4ul) == 0)    log_level_max = LOGLEVEL_WARNING;
+            else if (strncmp(argv[2], "INFO", 4ul) == 0)    log_level_max = LOGLEVEL_INFO;
+            else if (strncmp(argv[2], "DEBUG", 5ul) == 0)   log_level_max = LOGLEVEL_DEBUG;
+            else if (strncmp(argv[2], "TRACE", 5ul) == 0)   log_level_max = LOGLEVEL_TRACE;
         }
+
+    if (!init_time)
+    {
+        init_time = get_time_raw_usec();
+        get_time_nsec(); /* initialize start time */
+        get_time_nsecf(); /* initialize start time */
+    }
+
+    if (!DIR_PROC_ROOT)
+    {
+        DIR_PROC_ROOT = get_path_bin_root();
+        if (!DIR_PROC_ROOT)
+            return engine_err;
+        change_dir(DIR_PROC_ROOT);
+    }
 
     if (_log_dir && is_dir_exists(_log_dir, TRUE) == ERR_SUCCESS)
         snprintf(log_dir, PATH_MAX, "%s", _log_dir);
 
-    if (mem_map((void*)&logger_buf, LOGGER_LINES_MAX * STRING_MAX,
+    if (
+            mem_alloc((void*)&logger_tab, LOGGER_HISTORY_MAX * sizeof(str*),
+                "logger_init().logger_tab") != ERR_SUCCESS ||
+
+            mem_alloc((void*)&logger_buf, LOGGER_HISTORY_MAX * LOGGER_STRING_MAX,
                 "logger_init().logger_buf") != ERR_SUCCESS)
     {
         _LOGFATAL(FALSE, ERR_LOGGER_INIT_FAIL,
@@ -80,35 +112,49 @@ u32 logger_init(b8 release_build, int argc, char **argv, const str *_log_dir)
         return engine_err;
     }
 
+    for (i = 0; i < LOGGER_HISTORY_MAX; ++i)
+        logger_tab[i] = logger_buf + i * LOGGER_STRING_MAX;
+
+    log_flag |= FLAG_LOG_OPEN;
+
     engine_err = ERR_SUCCESS;
     return engine_err;
 }
 
 void logger_close(void)
 {
-    mem_unmap((void*)&logger_buf, LOGGER_LINES_MAX * STRING_MAX, "logger_close().logger_buf");
+    log_flag &= ~FLAG_LOG_OPEN;
+    mem_free((void*)&logger_buf, LOGGER_HISTORY_MAX * LOGGER_STRING_MAX, "logger_close().logger_buf");
+    mem_free((void*)&logger_tab, LOGGER_HISTORY_MAX * sizeof(str*), "logger_close().logger_tab");
 }
 
 void _log_output(b8 verbose, const str *_log_dir, const str *file, u64 line,
         u8 level, u32 error_code, const str *format, ...)
 {
     va_list args;
-    str str_in[IN_STRING_MAX] = {0};
-    str str_out[OUT_STRING_MAX] = {0};
+    str str_in[STRING_MAX] = {0};
+    str str_out[LOGGER_STRING_MAX] = {0};
     str temp[PATH_MAX] = {0};
 
     if (level > log_level_max) return;
 
     va_start(args, format);
-    vsnprintf(str_in, IN_STRING_MAX, format, args);
+    vsnprintf(str_in, STRING_MAX, format, args);
     va_end(args);
 
     _get_log_str(str_in, str_out, FLAG_LOG_COLOR, verbose, level, error_code, file, line);
     fprintf(stderr, "%s", str_out);
 
+    _get_log_str(str_in, str_out, FLAG_LOG_FULL_TIME, verbose, level, error_code, file, line);
+
+    if (log_flag & FLAG_LOG_OPEN)
+    {
+        snprintf(logger_tab[logger_tab_index++], strnlen(str_out, LOGGER_STRING_MAX), "%s", str_out);
+        logger_tab_index %= LOGGER_HISTORY_MAX;
+    }
+
     if (_log_dir)
     {
-        _get_log_str(str_in, str_out, FLAG_LOG_FULL_TIME, verbose, level, error_code, file, line);
         snprintf(temp, PATH_MAX, "%s%s", _log_dir, LOG_FILE_NAME[level]);
         _append_file(temp, 1, strlen(str_out), str_out, FALSE, FALSE);
     }
@@ -124,6 +170,8 @@ static void _get_log_str(const str *str_in, str *str_out, u32 flags, b8 verbose,
     str str_file[STRING_MAX] = {0};
     str *str_nocolor = esc_code_none;
     str *str_color = esc_code_none;
+    str *trunc = NULL;
+    int cursor = 0;
 
     if (flags & FLAG_LOG_FULL_TIME)
     {
@@ -153,6 +201,12 @@ static void _get_log_str(const str *str_in, str *str_out, u32 flags, b8 verbose,
     if (verbose)
         snprintf(str_file, STRING_MAX, "[%s:%"PRIu64"] ", file, line);
 
-    snprintf(str_out, OUT_STRING_MAX, "%s%s%s%s%s%s",
+    cursor = snprintf(str_out, LOGGER_STRING_MAX, "%s%s%s%s%s%s",
             str_color, str_time_full, str_tag, str_file, str_in, str_nocolor);
+
+    if (cursor >= LOGGER_STRING_MAX - 1)
+    {
+        trunc = str_out + LOGGER_STRING_MAX - 4;
+        snprintf(trunc, 4, "...");
+    }
 }

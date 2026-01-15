@@ -8,6 +8,77 @@
 #include "h/dir.h"
 #include "h/main.h"
 
+ShaderProgram shader[SHADER_COUNT] =
+{
+    [SHADER_DEFAULT] =
+    {
+        .name = "default",
+        .vertex.file_name = "default.vert",
+        .vertex.type = GL_VERTEX_SHADER,
+        .fragment.file_name = "default.frag",
+        .fragment.type = GL_FRAGMENT_SHADER,
+    },
+
+    [SHADER_SKYBOX] =
+    {
+        .name = "skybox",
+        .vertex.file_name = "skybox.vert",
+        .vertex.type = GL_VERTEX_SHADER,
+        .fragment.file_name = "skybox.frag",
+        .fragment.type = GL_FRAGMENT_SHADER,
+    },
+
+    [SHADER_GIZMO] =
+    {
+        .name = "gizmo",
+        .vertex.file_name = "gizmo.vert",
+        .vertex.type = GL_VERTEX_SHADER,
+        .fragment.file_name = "gizmo.frag",
+        .fragment.type = GL_FRAGMENT_SHADER,
+    },
+
+    [SHADER_GIZMO_CHUNK] =
+    {
+        .name = "gizmo_chunk",
+        .vertex.file_name = "gizmo_chunk.vert",
+        .vertex.type = GL_VERTEX_SHADER,
+        .geometry.file_name = "gizmo_chunk.geom",
+        .geometry.type = GL_GEOMETRY_SHADER,
+        .fragment.file_name = "gizmo_chunk.frag",
+        .fragment.type = GL_FRAGMENT_SHADER,
+    },
+
+    [SHADER_POST_PROCESSING] =
+    {
+        .name = "post_processing",
+        .vertex.file_name = "post_processing.vert",
+        .vertex.type = GL_VERTEX_SHADER,
+        .fragment.file_name = "post_processing.frag",
+        .fragment.type = GL_FRAGMENT_SHADER,
+    },
+
+    [SHADER_VOXEL] =
+    {
+        .name = "voxel",
+        .vertex.file_name = "voxel.vert",
+        .vertex.type = GL_VERTEX_SHADER,
+        .geometry.file_name = "voxel.geom",
+        .geometry.type = GL_GEOMETRY_SHADER,
+        .fragment.file_name = "voxel.frag",
+        .fragment.type = GL_FRAGMENT_SHADER,
+    },
+
+    [SHADER_BOUNDING_BOX] =
+    {
+        .name = "bounding_box",
+        .vertex.file_name = "bounding_box.vert",
+        .vertex.type = GL_VERTEX_SHADER,
+        .fragment.file_name = "bounding_box.frag",
+        .fragment.type = GL_FRAGMENT_SHADER,
+    },
+};
+
+Texture texture[TEXTURE_COUNT] = {0};
 Block *blocks = NULL;
 static Texture *block_textures = NULL;
 static GLuint ssbo_texture_indices_id = 0;
@@ -17,7 +88,7 @@ static u64 ssbo_texture_handles[TEXTURE_BLOCK_COUNT] = {0};
 
 u32 assets_init(void)
 {
-    u32 i;
+    u32 i = 0;
 
     if (
             mem_map((void*)&block_textures, TEXTURE_BLOCK_COUNT * sizeof(Texture),
@@ -26,7 +97,56 @@ u32 assets_init(void)
                 "assets_init().blocks") != ERR_SUCCESS)
         goto cleanup;
 
+    /* ---- shaders --------------------------------------------------------- */
+
+    if (
+            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_DEFAULT]) != ERR_SUCCESS ||
+            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_GIZMO]) != ERR_SUCCESS ||
+            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_GIZMO_CHUNK]) != ERR_SUCCESS ||
+            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_SKYBOX]) != ERR_SUCCESS ||
+            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_POST_PROCESSING]) != ERR_SUCCESS ||
+            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_VOXEL]) != ERR_SUCCESS ||
+            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_BOUNDING_BOX]) != ERR_SUCCESS)
+        goto cleanup;
+
+
     /* ---- textures -------------------------------------------------------- */
+
+    if (
+            texture_init(&texture[TEXTURE_CROSSHAIR], (v2i32){16, 16},
+                GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
+                GAME_DIR_NAME_GUI"crosshair.png") != ERR_SUCCESS ||
+
+            texture_init(&texture[TEXTURE_ITEM_BAR], (v2i32){256, 256},
+                GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
+                GAME_DIR_NAME_GUI"item_bar.png") != ERR_SUCCESS ||
+
+            texture_init(&texture[TEXTURE_SKYBOX_VAL], (v2i32){512, 512},
+                GL_RED, GL_RED, GL_NEAREST, 1, FALSE,
+                GAME_DIR_NAME_ENV"skybox_val.png") != ERR_SUCCESS ||
+
+            texture_init(&texture[TEXTURE_SKYBOX_HORIZON], (v2i32){512, 512},
+                GL_RED, GL_RED, GL_NEAREST, 1, FALSE,
+                GAME_DIR_NAME_ENV"skybox_horizon.png") != ERR_SUCCESS ||
+
+            texture_init(&texture[TEXTURE_SKYBOX_STARS], (v2i32){512, 512},
+                GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
+                GAME_DIR_NAME_ENV"skybox_stars.png") != ERR_SUCCESS ||
+
+            texture_init(&texture[TEXTURE_SUN], (v2i32){128, 128},
+                    GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
+                    GAME_DIR_NAME_ENV"sun.png") != ERR_SUCCESS ||
+
+            texture_init(&texture[TEXTURE_MOON], (v2i32){128, 128},
+                    GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
+                    GAME_DIR_NAME_ENV"moon.png") != ERR_SUCCESS)
+        goto cleanup;
+
+    for (i = 0; i < TEXTURE_COUNT; ++i)
+        if (texture_generate(&texture[i], FALSE) != ERR_SUCCESS)
+            goto cleanup;
+
+    /* ---- block textures -------------------------------------------------- */
 
     if (
             block_texture_init(TEXTURE_BLOCK_GRASS_SIDE, (v2i32){16, 16},
@@ -121,7 +241,7 @@ cleanup:
 
 void assets_free(void)
 {
-    u32 i;
+    u32 i = 0;
     for (i = 0; i < TEXTURE_BLOCK_COUNT; ++i)
         texture_free(&block_textures[i]);
 
@@ -130,6 +250,9 @@ void assets_free(void)
 
     mem_unmap((void*)&blocks, BLOCK_COUNT * sizeof(Block),
             "assets_free().blocks");
+
+    for (i = 0; i < TEXTURE_COUNT; ++i)
+        texture_free(&texture[i]);
 
     if (ssbo_texture_indices_id)
         glDeleteBuffers(1, &ssbo_texture_indices_id);

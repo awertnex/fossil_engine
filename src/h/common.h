@@ -1,6 +1,8 @@
 #ifndef GAME_COMMON_H
 #define GAME_COMMON_H
 
+#include <engine/h/types.h>
+
 #include "diagnostics.h"
 
 #define GAME_RELEASE_BUILD  0
@@ -23,6 +25,40 @@
 #define MODE_INTERNAL_COLLIDE       1
 
 #define color_hex_u32(r, g, b, a) ((r << 24) | (g << 16) | (b << 8) | (a))
+
+/* ---- defaults ------------------------------------------------------------ */
+
+#define SET_MARGIN                      10
+#define SET_CAMERA_DISTANCE_MAX         4.0f
+#define SET_DAY_TICKS_MAX               24000
+#define SET_RENDER_DISTANCE_DEFAULT     6
+#define SET_RENDER_DISTANCE_MIN         2
+#define SET_RENDER_DISTANCE_MAX         32
+#define SET_FOV_DEFAULT                 70
+#define SET_FOV_MIN                     30
+#define SET_FOV_MAX                     160
+#define SET_MOUSE_SENSITIVITY_DEFAULT   100
+#define SET_MOUSE_SENSITIVITY_MIN       10
+#define SET_MOUSE_SENSITIVITY_MAX       200
+#define SET_GUI_SCALE_DEFAULT           2
+#define SET_GUI_SCALE_0                 0 /* TODO: auto gui scale */
+#define SET_GUI_SCALE_1                 1
+#define SET_GUI_SCALE_2                 2
+#define SET_GUI_SCALE_3                 3
+#define SET_GUI_SCALE_4                 4
+#define SET_LERP_SPEED_DEFAULT          25.0f
+#define SET_LERP_SPEED_FOV_MODE         16.0f
+#define SET_COLLISION_CAPSULE_PADDING   1.0f
+
+#define DEATH_STRING_MAX        128
+
+#define COLOR_TEXT_DEFAULT      DIAGNOSTIC_COLOR_DEBUG
+#define COLOR_TEXT_BRIGHT       DIAGNOSTIC_COLOR_DEFAULT
+#define COLOR_TEXT_MOSS         0x6f9f3fff
+#define COLOR_TEXT_RADIOACTIVE  0x3f9f3fff
+#define COLOR_DIAGNOSTIC_NONE   0x995429ff
+#define COLOR_DIAGNOSTIC_ERROR  0xec6051ff
+#define COLOR_DIAGNOSTIC_INFO   0x3f6f9fff
 
 /* ---- strings ------------------------------------------------------------- */
 
@@ -52,49 +88,22 @@
 #define GAME_FILE_NAME_SETTINGS     "settings.txt"
 #define GAME_FILE_NAME_WORLD_SEED   "seed.txt"
 
-/* ---- defaults ------------------------------------------------------------ */
+/* ---- strings: death ------------------------------------------------------ */
 
-#define SET_MARGIN                      10
-#define SET_CAMERA_DISTANCE_MAX         4.0f
-#define SET_DAY_TICKS_MAX               24000
-#define SET_RENDER_DISTANCE_DEFAULT     6
-#define SET_RENDER_DISTANCE_MIN         2
-#define SET_RENDER_DISTANCE_MAX         32
-#define SET_FOV_DEFAULT                 70
-#define SET_FOV_MIN                     30
-#define SET_FOV_MAX                     160
-#define SET_MOUSE_SENSITIVITY_DEFAULT   100
-#define SET_MOUSE_SENSITIVITY_MIN       10
-#define SET_MOUSE_SENSITIVITY_MAX       200
-#define SET_GUI_SCALE_DEFAULT           2
-#define SET_GUI_SCALE_0                 0 /* TODO: auto gui scale */
-#define SET_GUI_SCALE_1                 1
-#define SET_GUI_SCALE_2                 2
-#define SET_GUI_SCALE_3                 3
-#define SET_GUI_SCALE_4                 4
-#define SET_LERP_SPEED_DEFAULT          25.0f
-#define SET_LERP_SPEED_FOV_MODE         16.0f
-#define SET_COLLISION_CAPSULE_PADDING   1.0f
+#define DEATH_STRING_COLLISION_WALL_0           "died by headbutting a wall"
+#define DEATH_STRING_COLLISION_WALL_1           "rammed a wall at high speed"
+#define DEATH_STRING_COLLISION_WALL_2           "splat on a wall"
+#define DEATH_STRING_COLLISION_WALL_COUNT       3
 
-#define COLOR_TEXT_DEFAULT      DIAGNOSTIC_COLOR_DEBUG
-#define COLOR_TEXT_BRIGHT       DIAGNOSTIC_COLOR_DEFAULT
-#define COLOR_TEXT_MOSS         0x6f9f3fff
-#define COLOR_TEXT_RADIOACTIVE  0x3f9f3fff
-#define COLOR_DIAGNOSTIC_NONE   0x995429ff
-#define COLOR_DIAGNOSTIC_ERROR  0xec6051ff
-#define COLOR_DIAGNOSTIC_INFO   0x3f6f9fff
+#define DEATH_STRING_COLLISION_FLOOR_0          "jumped off a cliff"
+#define DEATH_STRING_COLLISION_FLOOR_1          "fell to their death"
+#define DEATH_STRING_COLLISION_FLOOR_2          "splat on the ground"
+#define DEATH_STRING_COLLISION_FLOOR_COUNT      3
 
-enum /* ShaderIndex */
-{
-    SHADER_DEFAULT,
-    SHADER_SKYBOX,
-    SHADER_GIZMO,
-    SHADER_GIZMO_CHUNK,
-    SHADER_POST_PROCESSING,
-    SHADER_VOXEL,
-    SHADER_BOUNDING_BOX,
-    SHADER_COUNT,
-}; /* ShaderIndex */
+#define DEATH_STRING_COLLISION_CEILING_0        "cracked their skull at a ceiling"
+#define DEATH_STRING_COLLISION_CEILING_1        "flew into a ceiling"
+#define DEATH_STRING_COLLISION_CEILING_2        "splat on a ceiling"
+#define DEATH_STRING_COLLISION_CEILING_COUNT    3
 
 enum /* MeshIndex */
 {
@@ -116,18 +125,6 @@ enum /* FBOIndex */
     FBO_COUNT,
 }; /* FBOIndex */
 
-enum /* TextureIndex */
-{
-    TEXTURE_CROSSHAIR,
-    TEXTURE_ITEM_BAR,
-    TEXTURE_SKYBOX_VAL,
-    TEXTURE_SKYBOX_HORIZON,
-    TEXTURE_SKYBOX_STARS,
-    TEXTURE_SUN,
-    TEXTURE_MOON,
-    TEXTURE_COUNT,
-}; /* TextureIndex */
-
 enum /* FontIndex */
 {
     FONT_REG,
@@ -146,5 +143,23 @@ enum /* DebugMode */
     DEBUG_MODE_CHUNK_QUEUE_VISUALIZER,
     DEBUG_MODE_COUNT,
 }; /* DebugMode */
+
+enum PlayerDeath
+{
+    PLAYER_DEATH_COLLISION_WALL = 1,
+    PLAYER_DEATH_COLLISION_FLOOR,
+    PLAYER_DEATH_COLLISION_CEILING,
+    PLAYER_DEATH_COUNT,
+}; /* PlayerDeath */
+
+/*! @brief look-up table for 'str_death_' buffer sizes.
+ *
+ *  @remark read-only, initialized internally in 'src/common.c'.
+ */
+extern u32 DEATH_STRINGS_MAX[PLAYER_DEATH_COUNT];
+
+extern str str_death_collision_wall[DEATH_STRING_COLLISION_WALL_COUNT][DEATH_STRING_MAX];
+extern str str_death_collision_floor[DEATH_STRING_COLLISION_FLOOR_COUNT][DEATH_STRING_MAX];
+extern str str_death_collision_ceiling[DEATH_STRING_COLLISION_CEILING_COUNT][DEATH_STRING_MAX];
 
 #endif /* GAME_COMMON_H */

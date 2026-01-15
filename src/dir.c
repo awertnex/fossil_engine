@@ -16,7 +16,6 @@
 #include "h/dir.h"
 #include "h/main.h"
 
-str PATH_ROOT[PATH_MAX] = {0};
 str DIR_ROOT[DIR_ROOT_COUNT][NAME_MAX] =
 {
     [DIR_ASSETS] =      GAME_DIR_NAME_ASSETS,
@@ -46,33 +45,31 @@ str DIR_WORLD[DIR_WORLD_COUNT][NAME_MAX] =
     [DIR_WORLD_PLAYER] =    GAME_DIR_WORLD_NAME_PLAYER,
 };
 
-u32 paths_init(void)
+u32 game_init(void)
 {
-    str *path_bin_root = NULL;
-    u32 i;
+    u32 i = 0;
 
-    path_bin_root = get_path_bin_root();
-    if (*GAME_ERR != ERR_SUCCESS)
-        return *GAME_ERR;
-
-    change_dir(path_bin_root);
-    snprintf(PATH_ROOT, PATH_MAX, "%s", path_bin_root);
-    mem_free((void*)&path_bin_root, strlen(path_bin_root),
-            "paths_init().path_bin_root");
-
-    LOGINFO(TRUE, "Creating Main Directories '%s'..\n", PATH_ROOT);
+    LOGINFO(TRUE, "Creating Main Directories '%s'..\n", DIR_PROC_ROOT);
 
     for (i = 0; i < DIR_ROOT_COUNT; ++i)
         if (is_dir_exists(DIR_ROOT[i], FALSE) != ERR_SUCCESS)
+        {
             make_dir(DIR_ROOT[i]);
+            if (*GAME_ERR != ERR_SUCCESS && *GAME_ERR != ERR_DIR_EXISTS)
+                return *GAME_ERR;
+        }
 
-    LOGINFO(TRUE, "%s\n", "Checking Main Directories..");
+    LOGINFO(TRUE, "Main Directory Created '%s'\n", DIR_PROC_ROOT);
 
-    for (i = 0; i < DIR_ROOT_COUNT; ++i)
-        if (!is_dir_exists(DIR_ROOT[i], TRUE) != ERR_SUCCESS)
-            return *GAME_ERR;
+    glfwSwapInterval(MODE_INTERNAL_VSYNC);
+    glfwWindowHint(GLFW_DEPTH_BITS, 24);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+    glFrontFace(GL_CCW);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_MULTISAMPLE);
 
-    LOGINFO(TRUE, "Main Directory Created '%s'\n", PATH_ROOT);
     *GAME_ERR = ERR_SUCCESS;
     return *GAME_ERR;
 }

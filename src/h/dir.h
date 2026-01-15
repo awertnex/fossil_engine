@@ -38,19 +38,15 @@ enum Directories
     DIR_WORLD_COUNT,
 }; /* Directories */
 
-extern str PATH_ROOT[PATH_MAX];
 extern str DIR_ROOT[DIR_ROOT_COUNT][NAME_MAX];
 extern str DIR_WORLD[DIR_WORLD_COUNT][NAME_MAX];
 
-/*! @brief initialize all paths related to the game.
+/*! @brief initialize game stuff.
  *
- *  1. load the binary's root path into the global array 'PATH_ROOT'.
- *  2. add it to the global arrays 'DIR_ROOT' and 'DIR_WORLD' entries.
- *
- *  @remark will create all the directories if not found next to the binary.
+ *  @remark will create directories if not found next to the binary.
  *
  *  @return non-zero on failure and '*GAME_ERR' is set accordingly.
  */
-u32 paths_init(void);
+u32 game_init(void);
 
 #endif /* GAME_DIR_H */

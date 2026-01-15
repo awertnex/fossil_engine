@@ -34,20 +34,21 @@ str *swap_string_char(str *string, char c1, char c2)
 
 str *stringf(const str *format, ...)
 {
-    static str str_buf[STRINGF_BUFFERS_MAX][OUT_STRING_MAX] = {0};
-    static u64 index = 0, required_bytes;
-    str *string = str_buf[index];
+    static str buf[STRINGF_BUFFERS_MAX][OUT_STRING_MAX] = {0};
+    static u64 index = 0;
+    str *string = buf[index];
+    str *trunc = NULL;
+    int cursor = 0;
     va_list args;
-    str *trunc_buf = NULL;
 
     va_start(args, format);
-    required_bytes = vsnprintf(string, OUT_STRING_MAX, format, args);
+    cursor = vsnprintf(string, OUT_STRING_MAX, format, args);
     va_end(args);
 
-    if (required_bytes >= OUT_STRING_MAX - 1)
+    if (cursor >= OUT_STRING_MAX - 1)
     {
-        trunc_buf = string + OUT_STRING_MAX - 4;
-        snprintf(trunc_buf, 4, "...");
+        trunc = string + OUT_STRING_MAX - 4;
+        snprintf(trunc, 4, "...");
     }
 
     index = (index + 1) % STRINGF_BUFFERS_MAX;

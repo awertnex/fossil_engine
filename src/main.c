@@ -29,11 +29,9 @@ u32 *const GAME_ERR = (u32*)&engine_err;
 struct Core core = {0};
 struct Settings settings = {0};
 static struct Uniform uniform = {0};
-static ShaderProgram shader[SHADER_COUNT] = {0};
 u8 debug_mode[DEBUG_MODE_COUNT] = {0};
 static Mesh mesh[MESH_COUNT] = {0};
 static FBO fbo[FBO_COUNT] = {0};
-Texture texture[TEXTURE_COUNT] = {0};
 Projection projection_world = {0};
 Projection projection_hud = {0};
 
@@ -78,7 +76,6 @@ static void callback_framebuffer_size(GLFWwindow* window, int width, int height)
 static void callback_key(GLFWwindow *window, int key, int scancode, int action, int mods);
 static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset);
 
-static void shaders_init(void);
 static void bind_shader_uniforms(void);
 static void generate_standard_meshes(void);
 
@@ -162,11 +159,10 @@ static u32 settings_init(void)
             tokens[2], SET_RENDER_DISTANCE_DEFAULT,
             tokens[3], TARGET_FPS_DEFAULT);
 
-    if (is_dir_exists(DIR_ROOT[DIR_CONFIG], TRUE) != ERR_SUCCESS)
+    if (is_dir_exists(GAME_DIR_NAME_CONFIG, TRUE) != ERR_SUCCESS)
         return *GAME_ERR;
 
-    if (is_file_exists(GAME_DIR_NAME_CONFIG GAME_FILE_NAME_SETTINGS,
-                FALSE) != ERR_SUCCESS)
+    if (is_file_exists(GAME_DIR_NAME_CONFIG GAME_FILE_NAME_SETTINGS, FALSE) != ERR_SUCCESS)
     {
         write_file(GAME_DIR_NAME_CONFIG GAME_FILE_NAME_SETTINGS,
                 1, strlen(settings_file_contents),
@@ -230,69 +226,6 @@ void time_update(b8 fps_cap, u64 fps_target)
     else time_next = render->time;
 
     render->time_delta = get_time_delta_nsec();
-}
-
-static void shaders_init(void)
-{
-    shader[SHADER_DEFAULT] = (ShaderProgram){
-        .name = "default",
-        .vertex.file_name = "default.vert",
-        .vertex.type = GL_VERTEX_SHADER,
-        .fragment.file_name = "default.frag",
-        .fragment.type = GL_FRAGMENT_SHADER,
-    };
-
-    shader[SHADER_SKYBOX] = (ShaderProgram){
-        .name = "skybox",
-        .vertex.file_name = "skybox.vert",
-        .vertex.type = GL_VERTEX_SHADER,
-        .fragment.file_name = "skybox.frag",
-        .fragment.type = GL_FRAGMENT_SHADER,
-    };
-
-    shader[SHADER_GIZMO] = (ShaderProgram){
-        .name = "gizmo",
-        .vertex.file_name = "gizmo.vert",
-        .vertex.type = GL_VERTEX_SHADER,
-        .fragment.file_name = "gizmo.frag",
-        .fragment.type = GL_FRAGMENT_SHADER,
-    };
-
-    shader[SHADER_GIZMO_CHUNK] = (ShaderProgram){
-        .name = "gizmo_chunk",
-        .vertex.file_name = "gizmo_chunk.vert",
-        .vertex.type = GL_VERTEX_SHADER,
-        .geometry.file_name = "gizmo_chunk.geom",
-        .geometry.type = GL_GEOMETRY_SHADER,
-        .fragment.file_name = "gizmo_chunk.frag",
-        .fragment.type = GL_FRAGMENT_SHADER,
-    };
-
-    shader[SHADER_POST_PROCESSING] = (ShaderProgram){
-        .name = "post_processing",
-        .vertex.file_name = "post_processing.vert",
-        .vertex.type = GL_VERTEX_SHADER,
-        .fragment.file_name = "post_processing.frag",
-        .fragment.type = GL_FRAGMENT_SHADER,
-    };
-
-    shader[SHADER_VOXEL] = (ShaderProgram){
-        .name = "voxel",
-        .vertex.file_name = "voxel.vert",
-        .vertex.type = GL_VERTEX_SHADER,
-        .geometry.file_name = "voxel.geom",
-        .geometry.type = GL_GEOMETRY_SHADER,
-        .fragment.file_name = "voxel.frag",
-        .fragment.type = GL_FRAGMENT_SHADER,
-    };
-
-    shader[SHADER_BOUNDING_BOX] = (ShaderProgram){
-        .name = "bounding_box",
-        .vertex.file_name = "bounding_box.vert",
-        .vertex.type = GL_VERTEX_SHADER,
-        .fragment.file_name = "bounding_box.frag",
-        .fragment.type = GL_FRAGMENT_SHADER,
-    };
 }
 
 static void bind_shader_uniforms(void)
@@ -1276,45 +1209,11 @@ static void draw_everything(void)
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-str *textf(const str *format, ...)
-{
-    static str str_buf[3][OUT_STRING_MAX] = {0};
-    static u64 index = 0, required_bytes;
-    str *string = str_buf[index];
-    va_list args;
-    str *trunc_buf = NULL;
-
-    va_start(args, format);
-    required_bytes = vsnprintf(string, OUT_STRING_MAX, format, args);
-    va_end(args);
-
-    if (required_bytes >= OUT_STRING_MAX - 1)
-    {
-        trunc_buf = string + OUT_STRING_MAX - 4;
-        snprintf(trunc_buf, 4, "...");
-    }
-
-    index = (index + 1) % 3;
-    return string;
-}
-
-void do_something(const str *fuck)
-{
-    printf("%s\n", textf("font_init().%s", fuck));
-    printf("%s\n", textf("font_init().%s", fuck));
-    printf("%s\n", textf("font_init().%s", fuck));
-    printf("%s\n", textf("font_init().%s", fuck));
-    printf("%s\n", textf("font_init().%s", fuck));
-    printf("%s\n", textf("font_init().%s", fuck));
-}
-
 int main(int argc, char **argv)
 {
     if (engine_init(argc, argv, GAME_DIR_NAME_LOGS, GAME_TITLE, 1280, 1054,
-                NULL, TRUE, FALSE, GAME_RELEASE_BUILD) != ERR_SUCCESS)
+                NULL, TRUE, FALSE, GAME_RELEASE_BUILD) != ERR_SUCCESS ||
+            game_init() != ERR_SUCCESS)
         goto cleanup;
 
     core.flag.active = 1;
@@ -1335,8 +1234,7 @@ int main(int argc, char **argv)
                 "%s\n", "'MODE_INTERNAL_COLLIDE' Disabled");
     }
 
-    if (paths_init() != ERR_SUCCESS ||
-            rand_init() != ERR_SUCCESS ||
+    if (rand_init() != ERR_SUCCESS ||
             settings_init() != ERR_SUCCESS)
         goto cleanup;
 
@@ -1367,18 +1265,6 @@ int main(int argc, char **argv)
 
     /* ---- set graphics ---------------------------------------------------- */
 
-    shaders_init();
-
-    if (
-            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_DEFAULT]) != ERR_SUCCESS ||
-            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_GIZMO]) != ERR_SUCCESS ||
-            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_GIZMO_CHUNK]) != ERR_SUCCESS ||
-            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_SKYBOX]) != ERR_SUCCESS ||
-            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_POST_PROCESSING]) != ERR_SUCCESS ||
-            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_VOXEL]) != ERR_SUCCESS ||
-            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_BOUNDING_BOX]) != ERR_SUCCESS)
-        goto cleanup;
-
     if (
             fbo_init(&fbo[FBO_SKYBOX],      &engine_mesh_unit, FALSE, 4) != ERR_SUCCESS ||
             fbo_init(&fbo[FBO_WORLD],       NULL, FALSE, 4) != ERR_SUCCESS ||
@@ -1388,17 +1274,7 @@ int main(int argc, char **argv)
             fbo_init(&fbo[FBO_POST_PROCESSING], NULL, FALSE, 4) != ERR_SUCCESS)
         goto cleanup;
 
-    glfwSwapInterval(MODE_INTERNAL_VSYNC);
-    glfwWindowHint(GLFW_DEPTH_BITS, 24);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_FRONT);
-    glFrontFace(GL_CCW);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_MULTISAMPLE);
-
     if (
-            gui_init() != ERR_SUCCESS ||
             assets_init() != ERR_SUCCESS ||
             ui_init(FALSE) != ERR_SUCCESS ||
             text_init(FALSE) != ERR_SUCCESS)
@@ -1464,7 +1340,6 @@ section_world_loaded:
 cleanup:
 
     assets_free();
-    gui_free();
     chunking_free();
     u32 i = 0;
     for (i = 0; i < MESH_COUNT; ++i)

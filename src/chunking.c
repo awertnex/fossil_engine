@@ -10,10 +10,10 @@
 #include <engine/h/logger.h>
 #include <engine/h/platform.h>
 
-#include "h/main.h"
 #include "h/assets.h"
 #include "h/chunking.h"
 #include "h/dir.h"
+#include "h/main.h"
 #include "h/terrain.h"
 
 u64 CHUNKS_MAX[SET_RENDER_DISTANCE_MAX + 1] = {0};
@@ -22,7 +22,7 @@ u64 CHUNKS_MAX[SET_RENDER_DISTANCE_MAX + 1] = {0};
  */
 static Chunk *chunk_buf = NULL;
 
-/*! @brief position of first empty slot in 'chunk_buf'
+/*! @brief position of first empty slot in 'chunk_buf'.
  *
  *  @remark updated internally.
  */

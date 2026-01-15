@@ -1,15 +1,42 @@
 #ifndef GAME_ASSETS_H
 #define GAME_ASSETS_H
 
+#include <engine/h/core.h>
 #include <engine/h/types.h>
 #include <engine/h/limits.h>
+
+#include "common.h"
 #include "dir.h"
 
 #define FRICTION_BLOCK_SLIPPERY 0.02f
 #define FRICTION_BLOCK_WET      0.1f
 #define FRICTION_BLOCK_HARD     0.6f
 
-enum TextureBlockIndex
+enum /* ShaderIndex */
+{
+    SHADER_DEFAULT,
+    SHADER_SKYBOX,
+    SHADER_GIZMO,
+    SHADER_GIZMO_CHUNK,
+    SHADER_POST_PROCESSING,
+    SHADER_VOXEL,
+    SHADER_BOUNDING_BOX,
+    SHADER_COUNT,
+}; /* ShaderIndex */
+
+enum /* TextureIndex */
+{
+    TEXTURE_CROSSHAIR,
+    TEXTURE_ITEM_BAR,
+    TEXTURE_SKYBOX_VAL,
+    TEXTURE_SKYBOX_HORIZON,
+    TEXTURE_SKYBOX_STARS,
+    TEXTURE_SUN,
+    TEXTURE_MOON,
+    TEXTURE_COUNT,
+}; /* TextureIndex */
+
+enum /* TextureBlockIndex */
 {
     TEXTURE_BLOCK_GRASS_SIDE,
     TEXTURE_BLOCK_GRASS_TOP,
@@ -62,6 +89,9 @@ typedef struct Block
     u32 texture_index[6]; /* px, nx, py, ny, pz, nz */
     f32 friction;
 } Block;
+
+extern ShaderProgram shader[SHADER_COUNT];
+extern Texture texture[TEXTURE_COUNT];
 
 extern Block *blocks;
 

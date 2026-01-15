@@ -3,6 +3,7 @@
 
 #include <engine/h/collision.h>
 
+#include "common.h"
 #include "main.h"
 
 #define PLAYER_REACH_DISTANCE_MAX   5.0f
@@ -116,6 +117,7 @@ typedef struct Player
     u32 inventory_slots[PLAYER_INVENTORY_SLOTS_MAX];
 
     BoundingBox bbox;
+    enum PlayerDeath death;
 } Player;
 
 /*! @brief update everything related to a player.
@@ -174,5 +176,11 @@ void set_player_spawn(Player *p, i64 x, i64 y, i64 z);
 void player_spawn(Player *p, b8 hard);
 
 void player_kill(Player *p);
+
+/*! @brief get random string from string buffers in 'src/common.c' for player death reason.
+ *
+ *  @return NULL on failure.
+ */
+str *get_death_str(Player *p);
 
 #endif /* GAME_PLAYER_H */

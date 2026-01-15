@@ -86,12 +86,6 @@ extern u8 state_menu_depth;
 extern b8 is_menu_ready;
 extern u8 buttons[BTN_COUNT];
 
-/*! @return non-zero on failure and '*GAME_ERR' is set accordingly.
- */
-u32 gui_init(void);
-
-void gui_free(void);
-
 #if 0 /* TODO: undef */
 void update_menus(v2f32 render_size);
 void draw_hud();

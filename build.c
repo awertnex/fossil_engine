@@ -27,6 +27,7 @@ int main(int argc, char **argv)
     cmd_push(DIR_SRC"main.c");
     cmd_push(DIR_SRC"assets.c");
     cmd_push(DIR_SRC"chunking.c");
+    cmd_push(DIR_SRC"common.c");
     cmd_push(DIR_SRC"dir.c");
     cmd_push(DIR_SRC"gui.c");
     cmd_push(DIR_SRC"input.c");
@@ -35,7 +36,6 @@ int main(int argc, char **argv)
     cmd_push(DIR_SRC"world.c");
     cmd_push("-I.");
     cmd_push("-std=c99");
-    cmd_push(stringf("-ffile-prefix-map=%s=", str_build_root));
     cmd_push("-Ofast");
     cmd_push("-Wall");
     cmd_push("-Wextra");
@@ -49,8 +49,8 @@ int main(int argc, char **argv)
 
     str str_from[ASSET_COUNT][CMD_SIZE] = {0};
     str str_to[ASSET_COUNT][CMD_SIZE] = {0};
-    snprintf(str_from[0],   CMD_SIZE, "%sLICENSE", str_build_root);
-    snprintf(str_from[1],   CMD_SIZE, "%sassets/", str_build_root);
+    snprintf(str_from[0],   CMD_SIZE, "%sLICENSE", DIR_PROC_ROOT);
+    snprintf(str_from[1],   CMD_SIZE, "%sassets/", DIR_PROC_ROOT);
     snprintf(str_to[0],     CMD_SIZE, "%sLICENSE", DIR_OUT);
     snprintf(str_to[1],     CMD_SIZE, "%sassets/", DIR_OUT);
 

@@ -218,25 +218,25 @@ typedef struct ChunkQueue
  *  is useful for iteration from 'CHUNK_ORDER[0]' to 'CHUNK_ORDER[CHUNKS_MAX[render_distance]]'.
  *
  *  @remark index 0 of this array is always 0 since render distance of 0 is not
- *  possible (it's possible but goofy)
+ *  possible (it's possible, but goofy).
  *
  *  @remark read-only, initialized internally in 'chunking_init()'.
  */
 extern u64 CHUNKS_MAX[CHUNK_BUF_RADIUS_MAX + 1];
 
-/*! @brief chunk pointer look-up table that points to chunk_buf addresses.
+/*! @brief chunk pointer look-up table that points to 'chunk_buf' addresses.
  *
  *  'chunk_buf' addresses ordered by their positions in 3d space relative to player position.
  */
 extern Chunk **chunk_tab;
 
-/*! @brief player relative chunk tab access.
+/*! @brief player relative 'chunk_tab' access.
  *
  *  @remark declared by the user.
  */
 extern u32 chunk_tab_index;
 
-/*! @brief chunk pointer pointer look-up table that points to chunk_tab addresses.
+/*! @brief chunk pointer pointer look-up table that points to 'chunk_tab' addresses.
  *
  *  'chunk_tab' addresses ordered by distance from 'chunk_tab' center in ascending order.
  *

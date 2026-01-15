@@ -1,7 +1,10 @@
 #include <engine/h/collision.h>
+#include <engine/h/logger.h>
 #include <engine/h/math.h>
+#include <engine/h/time.h>
 
 #include "h/chunking.h"
+#include "h/common.h"
 #include "h/player.h"
 #include "h/world.h"
 
@@ -75,9 +78,9 @@ void player_update(Player *p, f64 dt)
 
     /* ---- apply parameters ------------------------------------------------ */
 
-    damping.x = -(world.drag.x + drag.x) * p->velocity.x;
-    damping.y = -(world.drag.y + drag.y) * p->velocity.y;
-    damping.z = -(world.drag.z + drag.z) * p->velocity.z;
+    damping.x = -(world.drag.x) * p->velocity.x;
+    damping.y = -(world.drag.y) * p->velocity.y;
+    damping.z = -(world.drag.z) * p->velocity.z;
 
     p->acceleration.x = p->input.x * p->acceleration_rate * drag.x;
     p->acceleration.y = p->input.y * p->acceleration_rate * drag.y;
@@ -105,9 +108,6 @@ void player_update(Player *p, f64 dt)
     player_collision_update(p, dt);
     player_wrap_coordinates(p);
     player_chunk_update(p);
-
-    if (p->health <= 0.0f && !(p->flag & FLAG_PLAYER_DEAD))
-        player_kill(p);
 }
 
 void player_collision_update(Player *p, f64 dt)
@@ -132,6 +132,7 @@ void player_collision_update(Player *p, f64 dt)
     i32 i, x, y, z;
     v3i32 MIN, MAX, START = {0}, INCREMENT = {1, 1, 1};
     b8 resolved = TRUE;
+    u32 max_axis = 0;
 
     collision_capsule = make_collision_capsule(p->bbox, p->chunk, displacement);
     MIN.x = (i32)collision_capsule.pos.x;
@@ -224,7 +225,25 @@ void player_collision_update(Player *p, f64 dt)
                         speed = p->speed;
                         p->speed = sqrtf(len_v3f32(p->velocity));
                         if (speed - p->speed > PLAYER_COLLISION_DAMAGE_THRESHOLD)
+                        {
                             p->health -= (speed - p->speed);
+
+                            if (p->health <= 0.0f && !(p->flag & FLAG_PLAYER_DEAD))
+                            {
+                                max_axis = max_axis_v3f32(normal);
+                                if (max_axis == 1 || max_axis == 2)
+                                    p->death = PLAYER_DEATH_COLLISION_WALL;
+                                else if (max_axis == 3)
+                                {
+                                    if (normal.z > 0.0f)
+                                        p->death = PLAYER_DEATH_COLLISION_FLOOR;
+                                    else
+                                        p->death = PLAYER_DEATH_COLLISION_CEILING;
+                                }
+
+                                player_kill(p);
+                            }
+                        }
 
                         resolved = TRUE;
                     }
@@ -651,4 +670,28 @@ void player_kill(Player *p)
     p->velocity = (v3f32){0};
     p->health = 0.0f;
     p->flag |= FLAG_PLAYER_DEAD;
+
+    LOGINFO(FALSE, "%s %s\n", p->name, get_death_str(p));
+}
+
+str *get_death_str(Player *p)
+{
+    u64 index = rand_u64(get_time_raw_usec()) % DEATH_STRINGS_MAX[p->death];
+
+    switch (p->death)
+    {
+        case PLAYER_DEATH_COLLISION_WALL:
+            return str_death_collision_wall[index];
+            break;
+
+        case PLAYER_DEATH_COLLISION_FLOOR:
+            return str_death_collision_floor[index];
+            break;
+
+        case PLAYER_DEATH_COLLISION_CEILING:
+            return str_death_collision_ceiling[index];
+            break;
+    }
+
+    return NULL;
 }

@@ -1,4 +1,5 @@
 #include <engine/h/input.h>
+#include <engine/h/logger.h>
 #include <engine/h/math.h>
 
 #include "h/assets.h"
@@ -217,10 +218,15 @@ void input_update(Player *p)
         if (is_key_press(bind_toggle_perspective))
             p->camera_mode = (p->camera_mode + 1) % PLAYER_CAMERA_MODE_COUNT;
 
+        if (is_key_press(bind_zoom))
+            LOGDEBUG(FALSE, "%s\n", "Zoom Toggled On");
         if (is_key_hold(bind_zoom))
             p->flag |= FLAG_PLAYER_ZOOMER;
         if (is_key_release(bind_zoom))
+        {
             p->flag &= ~FLAG_PLAYER_ZOOMER;
+            LOGDEBUG(FALSE, "%s\n", "Zoom Toggled Off");
+        }
 
         if (is_key_press(bind_toggle_flashlight))
             p->flag ^= FLAG_PLAYER_FLASHLIGHT;

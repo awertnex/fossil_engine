@@ -7,7 +7,12 @@
 #include "memory.h"
 #include "types.h"
 
-enum LogFlag
+enum /* LogFlag */
+{
+    FLAG_LOG_OPEN = 0x0001,
+}; /* LogFlag */
+
+enum /* LogMessageFlag */
 {
     FLAG_LOG_TIMESTAMP =    0x0001,
     FLAG_LOG_DATE =         0x0002,
@@ -15,9 +20,9 @@ enum LogFlag
     FLAG_LOG_DATE_TIME =    0x0006,
     FLAG_LOG_FULL_TIME =    0x0007,
     FLAG_LOG_COLOR =        0x0008,
-}; /* LogFlag */
+}; /* LogMessageFlag */
 
-enum LogLevel
+enum /* LogLevel */
 {
     LOGLEVEL_FATAL,
     LOGLEVEL_ERROR,
@@ -28,7 +33,7 @@ enum LogLevel
     LOGLEVEL_COUNT,
 }; /* LogLevel */
 
-enum LogFile
+enum /* LogFile */
 {
     LOGFILE_FATAL = 0,
     LOGFILE_ERROR = 0,
@@ -162,6 +167,12 @@ enum LogFile
 extern u32 log_level_max;
 extern str log_dir[PATH_MAX];
 
+/*! @brief logger pointer look-up table that points to 'logger_buf' addresses.
+ *
+ *  @remark read-only, initialized internally in 'logger_init()'.
+ */
+extern str **logger_tab;
+
 /*! @brief initialize logger.
  *
  *  @param argc, argv = used for logger log level if args provided.
@@ -180,7 +191,7 @@ extern str log_dir[PATH_MAX];
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 logger_init(b8 release_build, int argc, char **argv, const str *_log_dir);
+u32 logger_init(int argc, char **argv, b8 release_build, const str *_log_dir);
 
 void logger_close(void);
 

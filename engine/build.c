@@ -2,9 +2,9 @@
 
 #include "h/build.h"
 #include "h/common.h"
-#include "memory.c"
 #include "dir.c"
 #include "logger.c"
+#include "memory.c"
 #include "string.c"
 #include "time.c"
 
@@ -39,9 +39,9 @@
 #endif /* STD */
 
 u64 init_time = 0;
+str *DIR_PROC_ROOT = NULL;
 u32 engine_err = ERR_SUCCESS;
 static u32 flag = 0;
-str *str_build_root = NULL;
 static str str_build_src[CMD_SIZE] = {0};
 static str str_build_bin[CMD_SIZE] = {0};
 static str str_build_bin_new[CMD_SIZE] = {0};
@@ -63,14 +63,14 @@ static void cmd_show(void);
 static void cmd_raw(void);
 static void help(void);
 
-void build_init(int argc, char **argv,
-        const str *build_src_name, const str *build_bin_name)
+void build_init(int argc, char **argv, const str *build_src_name, const str *build_bin_name)
 {
     if (find_token("help", argc, argv)) help();
     if (find_token("show", argc, argv)) flag |= FLAG_CMD_SHOW;
     if (find_token("raw", argc, argv)) flag |= FLAG_CMD_RAW;
 
-    logger_init(TRUE, argc, argv, NULL);
+    if (logger_init(argc, argv, TRUE, NULL) != ERR_SUCCESS)
+        cmd_fail();
 
     if (find_token("LOGFATAL", argc, argv)) log_level_max = LOGLEVEL_FATAL;
     if (find_token("LOGERROR", argc, argv)) log_level_max = LOGLEVEL_ERROR;
@@ -78,14 +78,6 @@ void build_init(int argc, char **argv,
     if (find_token("LOGINFO", argc, argv)) log_level_max = LOGLEVEL_INFO;
     if (find_token("LOGDEBUG", argc, argv)) log_level_max = LOGLEVEL_DEBUG;
     if (find_token("LOGTRACE", argc, argv)) log_level_max = LOGLEVEL_TRACE;
-
-    str_build_root = get_path_bin_root();
-    if (engine_err != ERR_SUCCESS)
-        cmd_fail();
-
-    check_slash(str_build_root);
-    normalize_slash(str_build_root);
-    change_dir(str_build_root);
 
     snprintf(str_build_src, CMD_SIZE, "%s", build_src_name);
     normalize_slash(str_build_src);
@@ -151,7 +143,7 @@ static void self_rebuild(char **argv)
     cmd_push("-D_GNU_SOURCE");
 #endif /* PLATFORM_LINUX */
     cmd_push("-std=c99");
-    cmd_push(stringf("-ffile-prefix-map=%s=", str_build_root));
+    cmd_push(stringf("-ffile-prefix-map=%s=", DIR_PROC_ROOT));
     cmd_push("-Wall");
     cmd_push("-Wextra");
     cmd_push("-Wformat-truncation=0");
@@ -206,7 +198,7 @@ u32 engine_build(const str *out_dir)
     cmd_push("-shared");
     cmd_push("-std=c99");
     cmd_push("-fPIC");
-    cmd_push(stringf("-ffile-prefix-map=%s=", str_build_root));
+    cmd_push(stringf("-ffile-prefix-map=%s=", DIR_PROC_ROOT));
     cmd_push("-Ofast");
     cmd_push("-Wall");
     cmd_push("-Wextra");
@@ -225,7 +217,7 @@ u32 engine_build(const str *out_dir)
         cmd_fail();
 
     if (copy_dir(
-                stringf("%sengine/assets", str_build_root),
+                stringf("%sengine/assets", DIR_PROC_ROOT),
                 stringf("%sengine/assets", out_dir), TRUE) != ERR_SUCCESS)
         cmd_fail();
 
@@ -318,7 +310,7 @@ void cmd_ready(void)
 void cmd_free(void)
 {
     logger_close();
-    mem_free((void*)&str_build_root, CMD_SIZE, "cmd_free().str_build_root");
+    mem_free((void*)&DIR_PROC_ROOT, CMD_SIZE, "cmd_free().DIR_PROC_ROOT");
     mem_free_buf(&cmd, "cmd_free().cmd");
     cmd_pos = 0;
 }
