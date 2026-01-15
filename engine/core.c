@@ -160,7 +160,7 @@ u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
     if (shaders)
     {
         for (i = 0; i < ENGINE_SHADER_COUNT; ++i)
-            if (shader_program_init("engine/shaders", &engine_shader[i]) != ERR_SUCCESS)
+            if (shader_program_init(ENGINE_DIR_NAME_SHADERS, &engine_shader[i]) != ERR_SUCCESS)
                 goto cleanup;
     }
 
@@ -175,6 +175,8 @@ cleanup:
 void engine_close(void)
 {
     u32 i = 0;
+    for (i = 0; i < ENGINE_FONT_COUNT; ++i)
+        font_free(&engine_font[i]);
     for (i = 0; i < ENGINE_TEXTURE_COUNT; ++i)
         texture_free(&engine_texture[i]);
     mesh_free(&engine_mesh_unit);
@@ -291,7 +293,10 @@ u32 change_render(Render *_render)
 u32 shader_init(const str *shaders_dir, Shader *shader)
 {
     if (!shader->type)
-        return ERR_SUCCESS;
+    {
+        engine_err = ERR_SHADER_TYPE_NULL;
+        return engine_err;
+    }
 
     str str_reg[PATH_MAX] = {0};
     snprintf(str_reg, PATH_MAX, "%s", shaders_dir);
@@ -425,12 +430,16 @@ cleanup:
 
 u32 shader_program_init(const str *shaders_dir, ShaderProgram *program)
 {
-    if (shader_init(shaders_dir, &program->vertex) != 0)
+    shader_init(shaders_dir, &program->vertex);
+    if (engine_err != ERR_SUCCESS && engine_err != ERR_SHADER_TYPE_NULL)
         return engine_err;
-    if (shader_init(shaders_dir, &program->geometry) != 0)
+    shader_init(shaders_dir, &program->geometry);
+    if (engine_err != ERR_SUCCESS && engine_err != ERR_SHADER_TYPE_NULL)
         return engine_err;
-    if (shader_init(shaders_dir, &program->fragment) != 0)
+    shader_init(shaders_dir, &program->fragment);
+    if (engine_err != ERR_SUCCESS && engine_err != ERR_SHADER_TYPE_NULL)
         return engine_err;
+
     (program->id) ? glDeleteProgram(program->id) : 0;
 
     program->id = glCreateProgram();
@@ -721,8 +730,8 @@ u32 texture_init(Texture *texture, v2i32 size, const GLint format_internal, cons
     if (is_file_exists(file_name, TRUE) != ERR_SUCCESS)
         return engine_err;
 
-    texture->buf = (u8*)stbi_load(file_name,
-            &texture->size.x, &texture->size.y, &texture->channels, channels);
+    texture->buf = (u8*)stbi_load(file_name, &texture->size.x, &texture->size.y,
+            &texture->channels, channels);
     if (!texture->buf)
     {
         _LOGERROR(FALSE, ERR_IMAGE_LOAD_FAIL,

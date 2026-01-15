@@ -10,22 +10,21 @@ static Mesh mesh_text = {0};
 Font engine_font[ENGINE_FONT_COUNT] =
 {
     [ENGINE_FONT_DEJAVU_SANS].path =
-        ENGINE_FONTS_DIR"dejavu-fonts-ttf-2.37/dejavu_sans_ansi.ttf",
+        ENGINE_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_ansi.ttf",
 
     [ENGINE_FONT_DEJAVU_SANS_BOLD].path =
-        ENGINE_FONTS_DIR"dejavu-fonts-ttf-2.37/dejavu_sans_mono_ansi.ttf",
+        ENGINE_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_bold_ansi.ttf",
 
     [ENGINE_FONT_DEJAVU_SANS_MONO].path =
-        ENGINE_FONTS_DIR"dejavu-fonts-ttf-2.37/dejavu_sans_bold_ansi.ttf",
+        ENGINE_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_mono_ansi.ttf",
 
     [ENGINE_FONT_DEJAVU_SANS_MONO_BOLD].path =
-        ENGINE_FONTS_DIR"dejavu-fonts-ttf-2.37/dejavu_sans_mono_bold_ansi.ttf",
+        ENGINE_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_mono_bold_ansi.ttf",
 };
 
 static struct /* text_core */
 {
     b8 multisample;
-
     Font *font;
     Glyphf glyph[GLYPH_MAX];
     f32 font_size;
@@ -63,7 +62,7 @@ u32 text_init(b8 multisample)
     mesh_text.ebo_len = STRING_MAX;
 
     if (fbo_init(&text_core.fbo, &engine_mesh_unit, multisample, 4) != ERR_SUCCESS)
-        return engine_err;
+        goto cleanup;
 
     if (!mesh_text.vao)
     {
@@ -106,19 +105,13 @@ cleanup:
 void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear)
 {
     static v2i32 render_size = {0};
+    FBO *_fbo = &text_core.fbo;
 
-    if (!fbo)
-    {
-        if (render_size.x != render->size.x || render_size.y != render->size.y)
-            fbo_realloc(&text_core.fbo, text_core.multisample, 4);
-        glBindFramebuffer(GL_FRAMEBUFFER, text_core.fbo.fbo);
-    }
-    else
-    {
-        if (render_size.x != render->size.x || render_size.y != render->size.y)
-            fbo_realloc(fbo, text_core.multisample, 4);
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
-    }
+    if (fbo) _fbo = fbo;
+    if (render_size.x != render->size.x || render_size.y != render->size.y)
+        fbo_realloc(_fbo, text_core.multisample, 4);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo->fbo);
 
     if (!length)
         length = STRING_MAX;
@@ -154,7 +147,6 @@ void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear)
 
 cleanup:
 
-    mesh_free(&mesh_text);
     _LOGERROR(FALSE, engine_err, "%s\n", "Failed to Start Text");
 }
 
@@ -321,9 +313,6 @@ void text_fbo_blit(GLuint fbo)
 
 void text_free(void)
 {
-    u32 i = 0;
-    for (i = 0; i < ENGINE_FONT_COUNT; ++i)
-        font_free(&engine_font[i]);
     fbo_free(&text_core.fbo);
     mesh_free(&mesh_text);
 }

@@ -10,7 +10,6 @@ enum Directories
 {
     /* ---- root directories ------------------------------------------------ */
 
-    DIR_LOGS,
     DIR_ASSETS,
     DIR_AUDIO,
     DIR_FONTS,
@@ -20,11 +19,12 @@ enum Directories
     DIR_TEXTURES,
     DIR_BLOCKS,
     DIR_ENTITIES,
+    DIR_ENV,
     DIR_GUI,
     DIR_ITEMS,
     DIR_LOGO,
-    DIR_ENV,
     DIR_CONFIG,
+    DIR_LOGS,
     DIR_SCREENSHOTS,
     DIR_TEXT,
     DIR_WORLDS,
@@ -34,7 +34,6 @@ enum Directories
 
     DIR_WORLD_CHUNKS = 0,
     DIR_WORLD_ENTITIES,
-    DIR_WORLD_LOGS,
     DIR_WORLD_PLAYER,
     DIR_WORLD_COUNT,
 }; /* Directories */

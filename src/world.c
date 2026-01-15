@@ -6,6 +6,7 @@
 #include <engine/h/time.h>
 
 #include "h/chunking.h"
+#include "h/common.h"
 #include "h/diagnostics.h"
 #include "h/dir.h"
 #include "h/gui.h"
@@ -67,14 +68,14 @@ u32 world_dir_init(const str *world_name)
         return *GAME_ERR;
     }
 
-    if (is_dir_exists(DIR_ROOT[DIR_WORLDS], TRUE) != ERR_SUCCESS)
+    if (is_dir_exists(GAME_DIR_NAME_WORLDS, TRUE) != ERR_SUCCESS)
     {
         LOGERROR(FALSE, ERR_WORLD_CREATION_FAIL,
                 "Failed to Create World '%s', World Directory Not Found\n", world_name);
         return *GAME_ERR;
     }
 
-    snprintf(string, PATH_MAX, "%s%s", DIR_ROOT[DIR_WORLDS], world_name);
+    snprintf(string, PATH_MAX, GAME_DIR_NAME_WORLDS"%s", world_name);
     check_slash(string);
     normalize_slash(string);
 
@@ -99,7 +100,7 @@ u32 world_dir_init(const str *world_name)
         make_dir(string);
     }
 
-    LOGINFO(FALSE, "Checking World Directories '%s'..\n", world.path);
+    LOGINFO(FALSE, "%s\n", "Checking World Directories..");
 
     for (i = 0; i < DIR_WORLD_COUNT; ++i)
         if (is_dir_exists(DIR_WORLD[i], TRUE) != ERR_SUCCESS)
@@ -129,14 +130,14 @@ u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
         return *GAME_ERR;
     }
 
-    if (is_dir_exists(DIR_ROOT[DIR_WORLDS], TRUE) != ERR_SUCCESS)
+    if (is_dir_exists(GAME_DIR_NAME_WORLDS, TRUE) != ERR_SUCCESS)
     {
         LOGERROR(FALSE, ERR_WORLD_CREATION_FAIL,
                 "Failed to Load World '%s', 'worlds/' Directory Not Found\n", world_name);
         return *GAME_ERR;
     }
 
-    snprintf(string[0], PATH_MAX, "%s%s", DIR_ROOT[DIR_WORLDS], world_name);
+    snprintf(string[0], PATH_MAX, GAME_DIR_NAME_WORLDS"%s", world_name);
     if (is_dir_exists(string[0], TRUE) != ERR_SUCCESS)
     {
         LOGERROR(FALSE, ERR_WORLD_CREATION_FAIL,
@@ -154,7 +155,7 @@ u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
 
     /* ---- world seed ------------------------------------------------------ */
 
-    snprintf(string[0], PATH_MAX, "%s%s/"FILE_NAME_WORLD_SEED, DIR_ROOT[DIR_WORLDS], world_name);
+    snprintf(string[0], PATH_MAX, GAME_DIR_NAME_WORLDS"%s/"GAME_FILE_NAME_WORLD_SEED, world_name);
     if (is_file_exists(string[0], FALSE) == ERR_SUCCESS)
     {
         file_len = get_file_contents(string[0], (void*)&file_contents, 1, TRUE);

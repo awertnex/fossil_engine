@@ -64,6 +64,8 @@
 #define ERR_SIZE_TOO_SMALL              4143
 #define ERR_DIR_CREATE_FAIL             4144
 #define ERR_WINDOW_NOT_FOUND            4145
+#define ERR_UI_INIT_FAIL                4146
+#define ERR_SHADER_TYPE_NULL            4147
 
 /*! @brief global variable for engine-specific error codes.
  *

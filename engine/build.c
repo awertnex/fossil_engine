@@ -151,6 +151,7 @@ static void self_rebuild(char **argv)
     cmd_push("-D_GNU_SOURCE");
 #endif /* PLATFORM_LINUX */
     cmd_push("-std=c99");
+    cmd_push(stringf("-ffile-prefix-map=%s=", str_build_root));
     cmd_push("-Wall");
     cmd_push("-Wextra");
     cmd_push("-Wformat-truncation=0");
@@ -205,11 +206,11 @@ u32 engine_build(const str *out_dir)
     cmd_push("-shared");
     cmd_push("-std=c99");
     cmd_push("-fPIC");
+    cmd_push(stringf("-ffile-prefix-map=%s=", str_build_root));
     cmd_push("-Ofast");
     cmd_push("-Wall");
     cmd_push("-Wextra");
     cmd_push("-Wformat-truncation=0");
-    cmd_push(stringf("-ffile-prefix-map=%s=", str_build_root));
     _engine_link_libs();
     cmd_push("-o");
     cmd_push(stringf("%s"ENGINE_NAME_LIB, out_dir));
@@ -223,11 +224,7 @@ u32 engine_build(const str *out_dir)
     if (engine_err != ERR_SUCCESS && engine_err != ERR_DIR_EXISTS)
         cmd_fail();
 
-    if (
-            copy_dir(
-                stringf("%sengine/shaders", str_build_root),
-                stringf("%sengine/shaders", out_dir), TRUE) != ERR_SUCCESS ||
-            copy_dir(
+    if (copy_dir(
                 stringf("%sengine/assets", str_build_root),
                 stringf("%sengine/assets", out_dir), TRUE) != ERR_SUCCESS)
         cmd_fail();
@@ -255,7 +252,7 @@ static void _engine_link_libs(void)
 {
     u32 i = 0;
     str temp[CMD_SIZE] = {0};
-    snprintf(temp, CMD_SIZE, "-L%sengine/lib/"PLATFORM, str_build_root);
+    snprintf(temp, CMD_SIZE, "%s", "-Lengine/lib/"PLATFORM);
     normalize_slash(temp);
     cmd_push(temp);
     for (;i < arr_len(str_libs); ++i)
@@ -299,7 +296,8 @@ void cmd_push(const str *string)
 
     if (strlen(string) >= CMD_SIZE - 1)
     {
-        LOGERROR(FALSE, ERR_STRING_TOO_LONG, "string '%s' Too Long\n", string);
+        LOGERROR(FALSE, ERR_STRING_TOO_LONG,
+                "Failed to Push String '%s' to cmd.i[%"PRIu64"], String Too Long\n", string, cmd_pos);
         return;
     }
 

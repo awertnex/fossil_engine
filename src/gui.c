@@ -8,6 +8,7 @@
 #include <engine/h/memory.h>
 #include <engine/h/string.h>
 
+#include "h/common.h"
 #include "h/main.h"
 #include "h/gui.h"
 #include "h/dir.h"
@@ -25,38 +26,31 @@ u32 gui_init(void)
     if (
             texture_init(&texture[TEXTURE_CROSSHAIR], (v2i32){16, 16},
                 GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
-                stringf("%s%s", DIR_ROOT[DIR_GUI],
-                    "crosshair.png")) != ERR_SUCCESS ||
+                GAME_DIR_NAME_GUI"crosshair.png") != ERR_SUCCESS ||
 
             texture_init(&texture[TEXTURE_ITEM_BAR], (v2i32){256, 256},
                 GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
-                stringf("%s%s", DIR_ROOT[DIR_GUI],
-                    "item_bar.png")) != ERR_SUCCESS ||
+                GAME_DIR_NAME_GUI"item_bar.png") != ERR_SUCCESS ||
 
             texture_init(&texture[TEXTURE_SKYBOX_VAL], (v2i32){512, 512},
                 GL_RED, GL_RED, GL_NEAREST, 1, FALSE,
-                stringf("%s%s", DIR_ROOT[DIR_ENV],
-                    "skybox_val.png")) != ERR_SUCCESS ||
+                GAME_DIR_NAME_ENV"skybox_val.png") != ERR_SUCCESS ||
 
             texture_init(&texture[TEXTURE_SKYBOX_HORIZON], (v2i32){512, 512},
                 GL_RED, GL_RED, GL_NEAREST, 1, FALSE,
-                stringf("%s%s", DIR_ROOT[DIR_ENV],
-                    "skybox_horizon.png")) != ERR_SUCCESS ||
+                GAME_DIR_NAME_ENV"skybox_horizon.png") != ERR_SUCCESS ||
 
             texture_init(&texture[TEXTURE_SKYBOX_STARS], (v2i32){512, 512},
                 GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
-                stringf("%s%s", DIR_ROOT[DIR_ENV],
-                    "skybox_stars.png")) != ERR_SUCCESS ||
+                GAME_DIR_NAME_ENV"skybox_stars.png") != ERR_SUCCESS ||
 
             texture_init(&texture[TEXTURE_SUN], (v2i32){128, 128},
-                GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
-                stringf("%s%s", DIR_ROOT[DIR_ENV],
-                    "sun.png")) != ERR_SUCCESS ||
+                    GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
+                    GAME_DIR_NAME_ENV"sun.png") != ERR_SUCCESS ||
 
             texture_init(&texture[TEXTURE_MOON], (v2i32){128, 128},
-                GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
-                stringf("%s%s", DIR_ROOT[DIR_ENV],
-                    "moon.png")) != ERR_SUCCESS)
+                    GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
+                    GAME_DIR_NAME_ENV"moon.png") != ERR_SUCCESS)
         goto cleanup;
 
     for (i = 0; i < TEXTURE_COUNT; ++i)

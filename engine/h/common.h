@@ -3,8 +3,14 @@
 
 #include "types.h"
 
-#define ENGINE_FONTS_DIR    "engine/assets/fonts/"
-#define ENGINE_LOG_DIR      "engine/logs/"
+#define ENGINE_DIR_NAME_FONTS       "engine/assets/fonts/"
+#define ENGINE_DIR_NAME_TEXTURES    "engine/assets/textures/"
+#define ENGINE_DIR_NAME_SHADERS     "engine/assets/shaders/"
+#define ENGINE_DIR_NAME_LOGS        "engine/logs/"
+
+#define ENGINE_FILE_NAME_LOG_ERROR  "log_error.log"
+#define ENGINE_FILE_NAME_LOG_INFO   "log_info.log"
+#define ENGINE_FILE_NAME_LOG_EXTRA  "log_verbose.log"
 
 #define RENDER_WIDTH_DEFAULT 1280
 #define RENDER_WIDTH_MIN 512

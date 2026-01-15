@@ -60,7 +60,7 @@ typedef struct Shader
 
 typedef struct ShaderProgram
 {
-    str *name;          /* for stress-free debugging */
+    str *name;          /* for debugging */
     GLuint id;          /* used by 'lCreateProgram()' */
     GLint loaded;       /* used by 'glGetProgramiv()' */
     Shader vertex;
@@ -296,6 +296,9 @@ u32 change_render(Render *_render);
 u32 shader_init(const str *shaders_dir, Shader *shader);
 
 /*! @brief initialize shader program.
+ *
+ *  @param shaders_dir = path to shader files of 'program',
+ *  shader file names must be pre-defined in 'program.shader.file_name'.
  *
  *  calls 'shader_init()' on all shaders in 'program' if 'shader->type' is set.
  *

@@ -1,6 +1,7 @@
 #include "h/common.h"
 #include "h/core.h"
 #include "h/diagnostics.h"
+#include "h/logger.h"
 #include "h/ui.h"
 
 static struct /* ui_core */
@@ -27,11 +28,11 @@ static struct /* ui_core */
             GLint position;
             GLint size;
             GLint texture_size;
+            GLint sprite_size;
             GLint alignment;
             GLint tint;
-            GLint slice;
+            GLint use_nine_slice;
             GLint slice_size;
-            GLint sprite_size;
         } nine_slice;
 
     } uniform;
@@ -41,15 +42,21 @@ static struct /* ui_core */
 
 u32 ui_init(b8 multisample)
 {
+    u32 i = 0;
+
     if (
             texture_init(&engine_texture[ENGINE_TEXTURE_PANEL_ACTIVE], (v2i32){32, 32},
                 GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
-                "engine/assets/textures/panel_active.png") != ERR_SUCCESS ||
+                ENGINE_DIR_NAME_TEXTURES"panel_active.png") != ERR_SUCCESS ||
 
             texture_init(&engine_texture[ENGINE_TEXTURE_PANEL_INACTIVE], (v2i32){32, 32},
                 GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
-                "engine/assets/textures/panel_inactive.png") != ERR_SUCCESS)
+                ENGINE_DIR_NAME_TEXTURES"panel_inactive.png") != ERR_SUCCESS)
         goto cleanup;
+
+    for (i = 0; i < ENGINE_TEXTURE_COUNT; ++i)
+        if (texture_generate(&engine_texture[i], FALSE) != ERR_SUCCESS)
+            goto cleanup;
 
     if (fbo_init(&ui_core.fbo, &engine_mesh_unit, multisample, 4) != ERR_SUCCESS)
         goto cleanup;
@@ -83,8 +90,8 @@ u32 ui_init(b8 multisample)
         glGetUniformLocation(engine_shader[ENGINE_SHADER_UI_9_SLICE].id, "alignment");
     ui_core.uniform.nine_slice.tint =
         glGetUniformLocation(engine_shader[ENGINE_SHADER_UI_9_SLICE].id, "tint");
-    ui_core.uniform.nine_slice.slice =
-        glGetUniformLocation(engine_shader[ENGINE_SHADER_UI_9_SLICE].id, "slice");
+    ui_core.uniform.nine_slice.use_nine_slice =
+        glGetUniformLocation(engine_shader[ENGINE_SHADER_UI_9_SLICE].id, "use_nine_slice");
     ui_core.uniform.nine_slice.slice_size =
         glGetUniformLocation(engine_shader[ENGINE_SHADER_UI_9_SLICE].id, "slice_size");
     ui_core.uniform.nine_slice.sprite_size =
@@ -96,6 +103,7 @@ u32 ui_init(b8 multisample)
 cleanup:
 
     ui_free();
+    _LOGFATAL(FALSE, ERR_UI_INIT_FAIL, "%s\n", "Failed to Initialize UI, Process Aborted");
     return engine_err;
 }
 
@@ -150,6 +158,17 @@ void ui_draw(Texture texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
             (f32)((tint >> 0x08) & 0xff) / 0xff,
             (f32)((tint >> 0x00) & 0xff) / 0xff);
 
+    glUniform2i(ui_core.uniform.nine_slice.position, 10, 10);
+    glUniform2i(ui_core.uniform.nine_slice.size, 400, render->size.y - 20);
+    glUniform2i(ui_core.uniform.nine_slice.alignment, -1, -1);
+    glUniform4f(ui_core.uniform.nine_slice.tint, 1.0f, 1.0f, 1.0f, 0.7f);
+    glUniform2iv(ui_core.uniform.nine_slice.texture_size, 1, (GLint*)&engine_texture[ENGINE_TEXTURE_PANEL_ACTIVE].size);
+    glUniform2i(ui_core.uniform.nine_slice.sprite_size,
+            engine_texture[ENGINE_TEXTURE_PANEL_ACTIVE].size.x / 2,
+            engine_texture[ENGINE_TEXTURE_PANEL_ACTIVE].size.y / 2);
+    glUniform1i(ui_core.uniform.nine_slice.use_nine_slice, TRUE);
+    glUniform1f(ui_core.uniform.nine_slice.slice_size, 8.0f);
+
     glBindTexture(GL_TEXTURE_2D, texture.id);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
@@ -157,7 +176,6 @@ void ui_draw(Texture texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
 void ui_stop(void)
 {
     glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glEnable(GL_DEPTH_TEST);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindTexture(GL_TEXTURE_2D, 0);

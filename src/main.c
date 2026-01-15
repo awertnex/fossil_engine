@@ -16,6 +16,7 @@
 
 #include "h/assets.h"
 #include "h/chunking.h"
+#include "h/common.h"
 #include "h/diagnostics.h"
 #include "h/dir.h"
 #include "h/gui.h"
@@ -27,9 +28,14 @@
 u32 *const GAME_ERR = (u32*)&engine_err;
 struct Core core = {0};
 struct Settings settings = {0};
+static struct Uniform uniform = {0};
+static ShaderProgram shader[SHADER_COUNT] = {0};
 u8 debug_mode[DEBUG_MODE_COUNT] = {0};
-static ShaderProgram shader_game[SHADER_COUNT] = {0};
+static Mesh mesh[MESH_COUNT] = {0};
+static FBO fbo[FBO_COUNT] = {0};
 Texture texture[TEXTURE_COUNT] = {0};
+Projection projection_world = {0};
+Projection projection_hud = {0};
 
 Font *font[FONT_COUNT] =
 {
@@ -38,12 +44,6 @@ Font *font[FONT_COUNT] =
     [FONT_MONO] =       &engine_font[ENGINE_FONT_DEJAVU_SANS_MONO],
     [FONT_MONO_BOLD] =  &engine_font[ENGINE_FONT_DEJAVU_SANS_MONO_BOLD],
 };
-
-Projection projection_world = {0};
-Projection projection_hud = {0};
-static struct Uniform uniform = {0};
-static Mesh mesh[MESH_COUNT] = {0};
-static FBO fbo[FBO_COUNT] = {0};
 
 static Player player =
 {
@@ -165,16 +165,16 @@ static u32 settings_init(void)
     if (is_dir_exists(DIR_ROOT[DIR_CONFIG], TRUE) != ERR_SUCCESS)
         return *GAME_ERR;
 
-    if (is_file_exists(stringf("%s"FILE_NAME_SETTINGS, DIR_ROOT[DIR_CONFIG]),
+    if (is_file_exists(GAME_DIR_NAME_CONFIG GAME_FILE_NAME_SETTINGS,
                 FALSE) != ERR_SUCCESS)
     {
-        write_file(stringf("%s"FILE_NAME_SETTINGS, DIR_ROOT[DIR_CONFIG]),
+        write_file(GAME_DIR_NAME_CONFIG GAME_FILE_NAME_SETTINGS,
                 1, strlen(settings_file_contents),
                 settings_file_contents, TRUE, TRUE);
     }
 
     settings_file_contents = NULL;
-    get_file_contents(stringf("%s"FILE_NAME_SETTINGS, DIR_ROOT[DIR_CONFIG]),
+    get_file_contents(GAME_DIR_NAME_CONFIG GAME_FILE_NAME_SETTINGS,
             (void*)&settings_file_contents, 1, TRUE);
     if (*GAME_ERR != ERR_SUCCESS)
         return *GAME_ERR;
@@ -234,7 +234,7 @@ void time_update(b8 fps_cap, u64 fps_target)
 
 static void shaders_init(void)
 {
-    shader_game[SHADER_DEFAULT] = (ShaderProgram){
+    shader[SHADER_DEFAULT] = (ShaderProgram){
         .name = "default",
         .vertex.file_name = "default.vert",
         .vertex.type = GL_VERTEX_SHADER,
@@ -242,7 +242,7 @@ static void shaders_init(void)
         .fragment.type = GL_FRAGMENT_SHADER,
     };
 
-    shader_game[SHADER_SKYBOX] = (ShaderProgram){
+    shader[SHADER_SKYBOX] = (ShaderProgram){
         .name = "skybox",
         .vertex.file_name = "skybox.vert",
         .vertex.type = GL_VERTEX_SHADER,
@@ -250,7 +250,7 @@ static void shaders_init(void)
         .fragment.type = GL_FRAGMENT_SHADER,
     };
 
-    shader_game[SHADER_GIZMO] = (ShaderProgram){
+    shader[SHADER_GIZMO] = (ShaderProgram){
         .name = "gizmo",
         .vertex.file_name = "gizmo.vert",
         .vertex.type = GL_VERTEX_SHADER,
@@ -258,7 +258,7 @@ static void shaders_init(void)
         .fragment.type = GL_FRAGMENT_SHADER,
     };
 
-    shader_game[SHADER_GIZMO_CHUNK] = (ShaderProgram){
+    shader[SHADER_GIZMO_CHUNK] = (ShaderProgram){
         .name = "gizmo_chunk",
         .vertex.file_name = "gizmo_chunk.vert",
         .vertex.type = GL_VERTEX_SHADER,
@@ -268,7 +268,7 @@ static void shaders_init(void)
         .fragment.type = GL_FRAGMENT_SHADER,
     };
 
-    shader_game[SHADER_POST_PROCESSING] = (ShaderProgram){
+    shader[SHADER_POST_PROCESSING] = (ShaderProgram){
         .name = "post_processing",
         .vertex.file_name = "post_processing.vert",
         .vertex.type = GL_VERTEX_SHADER,
@@ -276,7 +276,7 @@ static void shaders_init(void)
         .fragment.type = GL_FRAGMENT_SHADER,
     };
 
-    shader_game[SHADER_VOXEL] = (ShaderProgram){
+    shader[SHADER_VOXEL] = (ShaderProgram){
         .name = "voxel",
         .vertex.file_name = "voxel.vert",
         .vertex.type = GL_VERTEX_SHADER,
@@ -286,7 +286,7 @@ static void shaders_init(void)
         .fragment.type = GL_FRAGMENT_SHADER,
     };
 
-    shader_game[SHADER_BOUNDING_BOX] = (ShaderProgram){
+    shader[SHADER_BOUNDING_BOX] = (ShaderProgram){
         .name = "bounding_box",
         .vertex.file_name = "bounding_box.vert",
         .vertex.type = GL_VERTEX_SHADER,
@@ -298,113 +298,113 @@ static void shaders_init(void)
 static void bind_shader_uniforms(void)
 {
     uniform.defaults.offset =
-        glGetUniformLocation(shader_game[SHADER_DEFAULT].id, "offset");
+        glGetUniformLocation(shader[SHADER_DEFAULT].id, "offset");
     uniform.defaults.scale =
-        glGetUniformLocation(shader_game[SHADER_DEFAULT].id, "scale");
+        glGetUniformLocation(shader[SHADER_DEFAULT].id, "scale");
     uniform.defaults.mat_rotation =
-        glGetUniformLocation(shader_game[SHADER_DEFAULT].id, "mat_rotation");
+        glGetUniformLocation(shader[SHADER_DEFAULT].id, "mat_rotation");
     uniform.defaults.mat_perspective =
-        glGetUniformLocation(shader_game[SHADER_DEFAULT].id, "mat_perspective");
+        glGetUniformLocation(shader[SHADER_DEFAULT].id, "mat_perspective");
     uniform.defaults.sun_rotation =
-        glGetUniformLocation(shader_game[SHADER_DEFAULT].id, "sun_rotation");
+        glGetUniformLocation(shader[SHADER_DEFAULT].id, "sun_rotation");
     uniform.defaults.sky_color =
-        glGetUniformLocation(shader_game[SHADER_DEFAULT].id, "sky_color");
+        glGetUniformLocation(shader[SHADER_DEFAULT].id, "sky_color");
 
     uniform.skybox.texture_scale =
-        glGetUniformLocation(shader_game[SHADER_SKYBOX].id, "texture_scale");
+        glGetUniformLocation(shader[SHADER_SKYBOX].id, "texture_scale");
     uniform.skybox.mat_translation =
-        glGetUniformLocation(shader_game[SHADER_SKYBOX].id, "mat_translation");
+        glGetUniformLocation(shader[SHADER_SKYBOX].id, "mat_translation");
     uniform.skybox.mat_rotation =
-        glGetUniformLocation(shader_game[SHADER_SKYBOX].id, "mat_rotation");
+        glGetUniformLocation(shader[SHADER_SKYBOX].id, "mat_rotation");
     uniform.skybox.mat_sun_rotation =
-        glGetUniformLocation(shader_game[SHADER_SKYBOX].id, "mat_sun_rotation");
+        glGetUniformLocation(shader[SHADER_SKYBOX].id, "mat_sun_rotation");
     uniform.skybox.mat_orientation =
-        glGetUniformLocation(shader_game[SHADER_SKYBOX].id, "mat_orientation");
+        glGetUniformLocation(shader[SHADER_SKYBOX].id, "mat_orientation");
     uniform.skybox.mat_projection =
-        glGetUniformLocation(shader_game[SHADER_SKYBOX].id, "mat_projection");
+        glGetUniformLocation(shader[SHADER_SKYBOX].id, "mat_projection");
     uniform.skybox.texture_sky =
-        glGetUniformLocation(shader_game[SHADER_SKYBOX].id, "texture_sky");
+        glGetUniformLocation(shader[SHADER_SKYBOX].id, "texture_sky");
     uniform.skybox.texture_horizon =
-        glGetUniformLocation(shader_game[SHADER_SKYBOX].id, "texture_horizon");
+        glGetUniformLocation(shader[SHADER_SKYBOX].id, "texture_horizon");
     uniform.skybox.texture_stars =
-        glGetUniformLocation(shader_game[SHADER_SKYBOX].id, "texture_stars");
+        glGetUniformLocation(shader[SHADER_SKYBOX].id, "texture_stars");
     uniform.skybox.texture_sun =
-        glGetUniformLocation(shader_game[SHADER_SKYBOX].id, "texture_sun");
+        glGetUniformLocation(shader[SHADER_SKYBOX].id, "texture_sun");
     uniform.skybox.sun_rotation =
-        glGetUniformLocation(shader_game[SHADER_SKYBOX].id, "sun_rotation");
+        glGetUniformLocation(shader[SHADER_SKYBOX].id, "sun_rotation");
     uniform.skybox.sky_color =
-        glGetUniformLocation(shader_game[SHADER_SKYBOX].id, "sky_color");
+        glGetUniformLocation(shader[SHADER_SKYBOX].id, "sky_color");
     uniform.skybox.horizon_color =
-        glGetUniformLocation(shader_game[SHADER_SKYBOX].id, "horizon_color");
+        glGetUniformLocation(shader[SHADER_SKYBOX].id, "horizon_color");
     uniform.skybox.render_layer =
-        glGetUniformLocation(shader_game[SHADER_SKYBOX].id, "render_layer");
+        glGetUniformLocation(shader[SHADER_SKYBOX].id, "render_layer");
 
     uniform.gizmo.ndc_scale =
-        glGetUniformLocation(shader_game[SHADER_GIZMO].id, "ndc_scale");
+        glGetUniformLocation(shader[SHADER_GIZMO].id, "ndc_scale");
     uniform.gizmo.mat_translation =
-        glGetUniformLocation(shader_game[SHADER_GIZMO].id, "mat_translation");
+        glGetUniformLocation(shader[SHADER_GIZMO].id, "mat_translation");
     uniform.gizmo.mat_rotation =
-        glGetUniformLocation(shader_game[SHADER_GIZMO].id, "mat_rotation");
+        glGetUniformLocation(shader[SHADER_GIZMO].id, "mat_rotation");
     uniform.gizmo.mat_orientation =
-        glGetUniformLocation(shader_game[SHADER_GIZMO].id, "mat_orientation");
+        glGetUniformLocation(shader[SHADER_GIZMO].id, "mat_orientation");
     uniform.gizmo.mat_projection =
-        glGetUniformLocation(shader_game[SHADER_GIZMO].id, "mat_projection");
+        glGetUniformLocation(shader[SHADER_GIZMO].id, "mat_projection");
     uniform.gizmo.color =
-        glGetUniformLocation(shader_game[SHADER_GIZMO].id, "gizmo_color");
+        glGetUniformLocation(shader[SHADER_GIZMO].id, "gizmo_color");
 
     uniform.gizmo_chunk.gizmo_offset =
-        glGetUniformLocation(shader_game[SHADER_GIZMO_CHUNK].id, "gizmo_offset");
+        glGetUniformLocation(shader[SHADER_GIZMO_CHUNK].id, "gizmo_offset");
     uniform.gizmo_chunk.render_size =
-        glGetUniformLocation(shader_game[SHADER_GIZMO_CHUNK].id, "render_size");
+        glGetUniformLocation(shader[SHADER_GIZMO_CHUNK].id, "render_size");
     uniform.gizmo_chunk.chunk_buf_diameter =
-        glGetUniformLocation(shader_game[SHADER_GIZMO_CHUNK].id, "chunk_buf_diameter");
+        glGetUniformLocation(shader[SHADER_GIZMO_CHUNK].id, "chunk_buf_diameter");
     uniform.gizmo_chunk.mat_translation =
-        glGetUniformLocation(shader_game[SHADER_GIZMO_CHUNK].id, "mat_translation");
+        glGetUniformLocation(shader[SHADER_GIZMO_CHUNK].id, "mat_translation");
     uniform.gizmo_chunk.mat_rotation =
-        glGetUniformLocation(shader_game[SHADER_GIZMO_CHUNK].id, "mat_rotation");
+        glGetUniformLocation(shader[SHADER_GIZMO_CHUNK].id, "mat_rotation");
     uniform.gizmo_chunk.mat_orientation =
-        glGetUniformLocation(shader_game[SHADER_GIZMO_CHUNK].id, "mat_orientation");
+        glGetUniformLocation(shader[SHADER_GIZMO_CHUNK].id, "mat_orientation");
     uniform.gizmo_chunk.mat_projection =
-        glGetUniformLocation(shader_game[SHADER_GIZMO_CHUNK].id, "mat_projection");
+        glGetUniformLocation(shader[SHADER_GIZMO_CHUNK].id, "mat_projection");
     uniform.gizmo_chunk.camera_position =
-        glGetUniformLocation(shader_game[SHADER_GIZMO_CHUNK].id, "camera_position");
+        glGetUniformLocation(shader[SHADER_GIZMO_CHUNK].id, "camera_position");
     uniform.gizmo_chunk.time =
-        glGetUniformLocation(shader_game[SHADER_GIZMO_CHUNK].id, "time");
+        glGetUniformLocation(shader[SHADER_GIZMO_CHUNK].id, "time");
 
     uniform.post_processing.time =
-        glGetUniformLocation(shader_game[SHADER_POST_PROCESSING].id, "time");
+        glGetUniformLocation(shader[SHADER_POST_PROCESSING].id, "time");
 
     uniform.voxel.mat_perspective =
-        glGetUniformLocation(shader_game[SHADER_VOXEL].id, "mat_perspective");
+        glGetUniformLocation(shader[SHADER_VOXEL].id, "mat_perspective");
     uniform.voxel.camera_position =
-        glGetUniformLocation(shader_game[SHADER_VOXEL].id, "camera_position");
+        glGetUniformLocation(shader[SHADER_VOXEL].id, "camera_position");
     uniform.voxel.sun_rotation =
-        glGetUniformLocation(shader_game[SHADER_VOXEL].id, "sun_rotation");
+        glGetUniformLocation(shader[SHADER_VOXEL].id, "sun_rotation");
     uniform.voxel.sky_light =
-        glGetUniformLocation(shader_game[SHADER_VOXEL].id, "sky_light");
+        glGetUniformLocation(shader[SHADER_VOXEL].id, "sky_light");
     uniform.voxel.moon_light =
-        glGetUniformLocation(shader_game[SHADER_VOXEL].id, "moon_light");
+        glGetUniformLocation(shader[SHADER_VOXEL].id, "moon_light");
     uniform.voxel.chunk_position =
-        glGetUniformLocation(shader_game[SHADER_VOXEL].id, "chunk_position");
+        glGetUniformLocation(shader[SHADER_VOXEL].id, "chunk_position");
     uniform.voxel.color =
-        glGetUniformLocation(shader_game[SHADER_VOXEL].id, "voxel_color");
+        glGetUniformLocation(shader[SHADER_VOXEL].id, "voxel_color");
     uniform.voxel.opacity =
-        glGetUniformLocation(shader_game[SHADER_VOXEL].id, "opacity");
+        glGetUniformLocation(shader[SHADER_VOXEL].id, "opacity");
     uniform.voxel.flashlight_position =
-        glGetUniformLocation(shader_game[SHADER_VOXEL].id, "flashlight_position");
+        glGetUniformLocation(shader[SHADER_VOXEL].id, "flashlight_position");
     uniform.voxel.toggle_flashlight =
-        glGetUniformLocation(shader_game[SHADER_VOXEL].id, "toggle_flashlight");
+        glGetUniformLocation(shader[SHADER_VOXEL].id, "toggle_flashlight");
     uniform.voxel.render_distance =
-        glGetUniformLocation(shader_game[SHADER_VOXEL].id, "render_distance");
+        glGetUniformLocation(shader[SHADER_VOXEL].id, "render_distance");
 
     uniform.bounding_box.mat_perspective =
-        glGetUniformLocation(shader_game[SHADER_BOUNDING_BOX].id, "mat_perspective");
+        glGetUniformLocation(shader[SHADER_BOUNDING_BOX].id, "mat_perspective");
     uniform.bounding_box.position =
-        glGetUniformLocation(shader_game[SHADER_BOUNDING_BOX].id, "position");
+        glGetUniformLocation(shader[SHADER_BOUNDING_BOX].id, "position");
     uniform.bounding_box.size =
-        glGetUniformLocation(shader_game[SHADER_BOUNDING_BOX].id, "size");
+        glGetUniformLocation(shader[SHADER_BOUNDING_BOX].id, "size");
     uniform.bounding_box.color =
-        glGetUniformLocation(shader_game[SHADER_BOUNDING_BOX].id, "box_color");
+        glGetUniformLocation(shader[SHADER_BOUNDING_BOX].id, "box_color");
 }
 
 static void generate_standard_meshes(void)
@@ -685,7 +685,7 @@ static void draw_everything(void)
         0.0f, 0.0f, 0.0f, 1.0f,
     };
 
-    glUseProgram(shader_game[SHADER_SKYBOX].id);
+    glUseProgram(shader[SHADER_SKYBOX].id);
 
     glUniform1f(uniform.skybox.texture_scale, 0.25f);
     glUniformMatrix4fv(uniform.skybox.mat_translation, 1, GL_FALSE, (GLfloat*)&translation);
@@ -810,7 +810,7 @@ static void draw_everything(void)
 
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    glUseProgram(shader_game[SHADER_VOXEL].id);
+    glUseProgram(shader[SHADER_VOXEL].id);
     glUniformMatrix4fv(uniform.voxel.mat_perspective, 1, GL_FALSE,
             (GLfloat*)&projection_world.perspective);
     glUniform3f(uniform.voxel.camera_position,
@@ -853,7 +853,7 @@ static void draw_everything(void)
     if (player.camera_mode != PLAYER_CAMERA_MODE_1ST_PERSON)
     {
 
-        glUseProgram(shader_game[SHADER_DEFAULT].id);
+        glUseProgram(shader[SHADER_DEFAULT].id);
         glUniform3fv(uniform.defaults.scale, 1, (GLfloat*)&player.size);
         glUniform3f(uniform.defaults.offset,
                 player.pos.x, player.pos.y, player.pos.z);
@@ -876,7 +876,7 @@ static void draw_everything(void)
 
     /* ---- draw player target bounding box --------------------------------- */
 
-    glUseProgram(shader_game[SHADER_BOUNDING_BOX].id);
+    glUseProgram(shader[SHADER_BOUNDING_BOX].id);
     glUniformMatrix4fv(uniform.bounding_box.mat_perspective, 1, GL_FALSE,
             (GLfloat*)&projection_world.perspective);
 
@@ -1009,7 +1009,7 @@ static void draw_everything(void)
 
     if (core.flag.hud && core.flag.debug)
     {
-        glUseProgram(shader_game[SHADER_GIZMO].id);
+        glUseProgram(shader[SHADER_GIZMO].id);
 
         glUniform2fv(uniform.gizmo.ndc_scale, 1, (GLfloat*)&settings.ndc_scale);
         glUniformMatrix4fv(uniform.gizmo.mat_translation, 1, GL_FALSE,
@@ -1035,7 +1035,7 @@ static void draw_everything(void)
     if (debug_mode[DEBUG_MODE_CHUNK_GIZMO] && core.flag.hud)
     {
         glClear(GL_DEPTH_BUFFER_BIT);
-        glUseProgram(shader_game[SHADER_GIZMO_CHUNK].id);
+        glUseProgram(shader[SHADER_GIZMO_CHUNK].id);
 
         glUniform1f(uniform.gizmo_chunk.gizmo_offset, (f32)settings.chunk_buf_radius + 0.5f);
         glUniform2iv(uniform.gizmo_chunk.render_size, 1, (GLint*)&render->size);
@@ -1105,29 +1105,9 @@ static void draw_everything(void)
 
     if (core.flag.super_debug)
     {
-        /*
-        glUseProgram(shader_game[SHADER_UI_9_SLICE].id);
-        glBindVertexArray(engine_mesh_unit.vao);
-
-        glUniform2fv(uniform.ui_9_slice.ndc_scale, 1,
-                (GLfloat*)&settings.ndc_scale);
-
-        glUniform2i(uniform.ui_9_slice.position, SET_MARGIN, SET_MARGIN);
-        glUniform2i(uniform.ui_9_slice.size,
-                400, render->size.y - (SET_MARGIN * 2));
-        glUniform2i(uniform.ui_9_slice.alignment, -1, -1);
-        glUniform4f(uniform.ui_9_slice.tint, 1.0f, 1.0f, 1.0f, 0.7f);
-        glUniform1i(uniform.ui_9_slice.slice, TRUE);
-        glUniform1f(uniform.ui_9_slice.slice_size, 8.0f);
-        glUniform2iv(uniform.ui_9_slice.texture_size, 1,
-                (GLint*)&texture[TEXTURE_SDB_ACTIVE].size);
-        glUniform2i(uniform.ui_9_slice.sprite_size,
-                texture[TEXTURE_SDB_ACTIVE].size.x / 2,
-                texture[TEXTURE_SDB_ACTIVE].size.y / 2);
-
-        */
+        //ui_render();
         ui_start(NULL, TRUE, TRUE);
-        ui_render();
+        ui_draw(engine_texture[ENGINE_TEXTURE_PANEL_ACTIVE], 0, 0, 0, 0, 0, 0, 0, 0, 0);
         ui_stop();
     }
     else /* ---- clear ui buffer -------------------------------------------- */
@@ -1285,7 +1265,7 @@ static void draw_everything(void)
     /* ---- final ----------------------------------------------------------- */
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glUseProgram(shader_game[SHADER_POST_PROCESSING].id);
+    glUseProgram(shader[SHADER_POST_PROCESSING].id);
     glClear(GL_COLOR_BUFFER_BIT);
     glBindVertexArray(engine_mesh_unit.vao);
     glUniform1ui(uniform.post_processing.time, ((u32)(render->time) & 0x1ff) + 1);
@@ -1333,7 +1313,7 @@ void do_something(const str *fuck)
 
 int main(int argc, char **argv)
 {
-    if (engine_init(argc, argv, DIR_ROOT[DIR_LOGS], GAME_TITLE, 1280, 1054,
+    if (engine_init(argc, argv, GAME_DIR_NAME_LOGS, GAME_TITLE, 1280, 1054,
                 NULL, TRUE, FALSE, GAME_RELEASE_BUILD) != ERR_SUCCESS)
         goto cleanup;
 
@@ -1390,13 +1370,13 @@ int main(int argc, char **argv)
     shaders_init();
 
     if (
-            shader_program_init(DIR_ROOT[DIR_SHADERS], &shader_game[SHADER_DEFAULT]) != ERR_SUCCESS ||
-            shader_program_init(DIR_ROOT[DIR_SHADERS], &shader_game[SHADER_GIZMO]) != ERR_SUCCESS ||
-            shader_program_init(DIR_ROOT[DIR_SHADERS], &shader_game[SHADER_GIZMO_CHUNK]) != ERR_SUCCESS ||
-            shader_program_init(DIR_ROOT[DIR_SHADERS], &shader_game[SHADER_SKYBOX]) != ERR_SUCCESS ||
-            shader_program_init(DIR_ROOT[DIR_SHADERS], &shader_game[SHADER_POST_PROCESSING]) != ERR_SUCCESS ||
-            shader_program_init(DIR_ROOT[DIR_SHADERS], &shader_game[SHADER_VOXEL]) != ERR_SUCCESS ||
-            shader_program_init(DIR_ROOT[DIR_SHADERS], &shader_game[SHADER_BOUNDING_BOX]) != ERR_SUCCESS)
+            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_DEFAULT]) != ERR_SUCCESS ||
+            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_GIZMO]) != ERR_SUCCESS ||
+            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_GIZMO_CHUNK]) != ERR_SUCCESS ||
+            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_SKYBOX]) != ERR_SUCCESS ||
+            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_POST_PROCESSING]) != ERR_SUCCESS ||
+            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_VOXEL]) != ERR_SUCCESS ||
+            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_BOUNDING_BOX]) != ERR_SUCCESS)
         goto cleanup;
 
     if (
@@ -1492,7 +1472,7 @@ cleanup:
     for (i = 0; i < FBO_COUNT; ++i)
         fbo_free(&fbo[i]);
     for (i = 0; i < SHADER_COUNT; ++i)
-        shader_program_free(&shader_game[i]);
+        shader_program_free(&shader[i]);
     rand_free();
     engine_close();
     return *GAME_ERR;
