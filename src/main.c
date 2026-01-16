@@ -212,8 +212,12 @@ static u32 settings_init(void)
 
 void settings_update(void)
 {
-    settings.ndc_scale = (v2f32){2.0f / render->size.x, 2.0f / render->size.y};
-    settings.fps = 1 / ((f64)render->time_delta * NSEC2SEC);
+    static u64 time_next = 0;
+    if (time_next < render->time)
+    {
+        time_next += SEC2NSEC / SET_TEXT_REFRESH_INTERVAL;
+        settings.fps = 1 / ((f64)render->time_delta * NSEC2SEC);
+    }
 }
 
 void time_update(b8 fps_cap, u64 fps_target)
@@ -945,7 +949,7 @@ static void draw_everything(void)
     {
         glUseProgram(shader[SHADER_GIZMO].id);
 
-        glUniform2fv(uniform.gizmo.ndc_scale, 1, (GLfloat*)&settings.ndc_scale);
+        glUniform2fv(uniform.gizmo.ndc_scale, 1, (GLfloat*)&render->ndc_scale);
         glUniformMatrix4fv(uniform.gizmo.mat_translation, 1, GL_FALSE,
                 (GLfloat*)&projection_hud.target);
         glUniformMatrix4fv(uniform.gizmo.mat_rotation, 1, GL_FALSE,
@@ -1037,33 +1041,35 @@ static void draw_everything(void)
 
     /* ---- draw engine ui -------------------------------------------------- */
 
-    //if (core.flag.super_debug)
-    //{
-    //    //ui_render();
-    //    ui_start(NULL, TRUE, TRUE);
-    //    ui_draw_nine_slice(engine_texture[ENGINE_TEXTURE_PANEL_ACTIVE],
-    //            10, 10, 8.0f, 400, render->size.y - 20, 0, 0, -1, -1, 0xffffffef);
-    //    ui_stop();
-    //}
-    //else /* ---- clear ui buffer -------------------------------------------- */
-    //{
-    //    ui_start(NULL, TRUE, TRUE);
-    //    ui_stop();
-    //}
+    if (core.flag.super_debug)
+    {
+        //ui_render();
+        ui_start(NULL, TRUE, TRUE);
+        ui_draw_nine_slice(engine_texture[ENGINE_TEXTURE_PANEL_ACTIVE],
+                10, 10, 8.0f, 400, render->size.y - 20, 0, 0, -1, -1, 0xffffffef);
+        ui_stop();
+    }
+    else /* ---- clear ui buffer -------------------------------------------- */
+    {
+        ui_start(NULL, TRUE, TRUE);
+        ui_stop();
+    }
 
     /* ---- draw debug info ------------------------------------------------- */
 
+    text_start(font[FONT_MONO_BOLD], settings.font_size, 0, NULL, TRUE);
+
+    text_push(stringf("FPS         [%u]\n", settings.fps),
+            (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0,
+            settings.fps > 60 ?
+            color_hex_to_v4(COLOR_TEXT_MOSS) :
+            color_hex_to_v4(COLOR_DIAGNOSTIC_ERROR));
+
+    text_render(TRUE, color_hex_to_v4(TEXT_COLOR_SHADOW));
+
     if (core.flag.hud && core.flag.debug)
     {
-        text_start(font[FONT_MONO_BOLD], settings.font_size, 0, NULL, TRUE);
-
-        text_push(stringf("FPS         [%u]\n", settings.fps),
-                (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0,
-                settings.fps > 60 ?
-                color_hex_to_v4(COLOR_TEXT_MOSS) :
-                color_hex_to_v4(COLOR_DIAGNOSTIC_ERROR));
-
-        text_push(stringf(
+        text_push(stringf("\n"
                     "TIME        [%.2lf]\n"
                     "CLOCK       [%02"PRIu64":%02"PRIu64"]\n"
                     "DAYS        [%"PRIu64"]\n",
@@ -1183,13 +1189,9 @@ static void draw_everything(void)
                 color_hex_to_v4(DIAGNOSTIC_COLOR_TRACE));
 
         text_render(TRUE, color_hex_to_v4(TEXT_COLOR_SHADOW));
-        text_stop();
     }
-    else /* ---- clear text buffer ------------------------------------------ */
-    {
-        text_start(font[FONT_MONO_BOLD], settings.font_size, 0, NULL, TRUE);
-        text_stop();
-    }
+
+    text_stop();
 
     /* ---- draw logger strings --------------------------------------------- */
 
@@ -1339,7 +1341,7 @@ section_world_loaded:
 
     generate_standard_meshes();
 
-    while (!glfwWindowShouldClose(render->window) && core.flag.active)
+    while (engine_update() && core.flag.active)
     {
         glfwPollEvents();
         update_key_states();

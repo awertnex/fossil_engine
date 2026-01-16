@@ -21,8 +21,13 @@
 
 u64 init_time = 0;
 str *DIR_PROC_ROOT = NULL;
-static u64 engine_flag = 0; /* enum: EngineFlag */
 u32 engine_err = ERR_SUCCESS;
+
+static struct /* flag */
+{
+    u32 active: 1;
+    u32 glfw_initialized: 1;
+} flag;
 
 static Render render_internal =
 {
@@ -31,6 +36,11 @@ static Render render_internal =
 };
 
 Render *render = &render_internal;
+
+static struct /* ubo */
+{
+    UBO ndc_scale;
+} ubo;
 
 ShaderProgram engine_shader[ENGINE_SHADER_COUNT] =
 {
@@ -143,8 +153,21 @@ u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
         for (i = 0; i < ENGINE_SHADER_COUNT; ++i)
             if (shader_program_init(ENGINE_DIR_NAME_SHADERS, &engine_shader[i]) != ERR_SUCCESS)
                 goto cleanup;
+
+        glGenBuffers(1, &ubo.ndc_scale.buf);
+        glBindBuffer(GL_UNIFORM_BUFFER, ubo.ndc_scale.buf);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(v2f32), NULL, GL_STATIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        ubo.ndc_scale.index =
+            glGetUniformBlockIndex(engine_shader[ENGINE_SHADER_TEXT].id, "u_ndc_scale");
+
+        glUniformBlockBinding(engine_shader[ENGINE_SHADER_TEXT].id, ubo.ndc_scale.index, 0);
+        glUniformBlockBinding(engine_shader[ENGINE_SHADER_UI].id, ubo.ndc_scale.index, 0);
+        glUniformBlockBinding(engine_shader[ENGINE_SHADER_UI_9_SLICE].id, ubo.ndc_scale.index, 0);
     }
 
+    flag.active = 1;
     return engine_err;
 
 cleanup:
@@ -153,27 +176,45 @@ cleanup:
     return engine_err;
 }
 
+b8 engine_update(void)
+{
+    if (glfwWindowShouldClose(render->window) || !flag.active)
+        return FALSE;
+
+    render->ndc_scale.x = 2.0f / render->size.x;
+    render->ndc_scale.y = 2.0f / render->size.y;
+
+    glBindBuffer(GL_UNIFORM_BUFFER, ubo.ndc_scale.buf);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(v2f32), &render->ndc_scale);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    return TRUE;
+}
+
 void engine_close(void)
 {
     u32 i = 0;
+
     for (i = 0; i < ENGINE_FONT_COUNT; ++i)
         font_free(&engine_font[i]);
     for (i = 0; i < ENGINE_TEXTURE_COUNT; ++i)
         texture_free(&engine_texture[i]);
+    for (i = 0; i < ENGINE_SHADER_COUNT; ++i)
+        shader_program_free(&engine_shader[i]);
+
     mesh_free(&engine_mesh_unit);
     text_free();
     ui_free();
     logger_close();
+
     if (render->window)
         glfwDestroyWindow(render->window);
-    if (engine_flag & FLAG_ENGINE_GLFW_INITIALIZED)
-    {
-        glfwTerminate();
-        engine_flag &= ~FLAG_ENGINE_GLFW_INITIALIZED;
-    }
 
-    for (i = 0; i < ENGINE_SHADER_COUNT; ++i)
-        shader_program_free(&engine_shader[i]);
+    if (flag.glfw_initialized)
+    {
+        flag.glfw_initialized = 0;
+        glfwTerminate();
+    }
 
     mem_free((void*)&DIR_PROC_ROOT, strlen(DIR_PROC_ROOT), "engine_close().DIR_PROC_ROOT");
 }
@@ -187,7 +228,7 @@ u32 glfw_init(b8 multisample)
         return engine_err;
     }
 
-    engine_flag |= FLAG_ENGINE_GLFW_INITIALIZED;
+    flag.glfw_initialized = 1;
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);

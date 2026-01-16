@@ -8,13 +8,11 @@ static struct /* ui_core */
 {
     b8 multisample;
     b8 use_nine_slice;
-    v2f32 ndc_scale;
 
     struct /* uniform */
     {
         struct /* ui */
         {
-            GLint ndc_scale;
             GLint position;
             GLint size;
             GLint texture_size;
@@ -25,7 +23,6 @@ static struct /* ui_core */
 
         struct /* nine_slice */
         {
-            GLint ndc_scale;
             GLint position;
             GLint size;
             GLint texture_size;
@@ -64,8 +61,6 @@ u32 ui_init(b8 multisample)
 
     ui_core.multisample = multisample;
 
-    ui_core.uniform.ui.ndc_scale =
-        glGetUniformLocation(engine_shader[ENGINE_SHADER_UI].id, "ndc_scale");
     ui_core.uniform.ui.position =
         glGetUniformLocation(engine_shader[ENGINE_SHADER_UI].id, "position");
     ui_core.uniform.ui.size =
@@ -79,8 +74,6 @@ u32 ui_init(b8 multisample)
     ui_core.uniform.ui.tint =
         glGetUniformLocation(engine_shader[ENGINE_SHADER_UI].id, "tint");
 
-    ui_core.uniform.nine_slice.ndc_scale =
-        glGetUniformLocation(engine_shader[ENGINE_SHADER_UI_9_SLICE].id, "ndc_scale");
     ui_core.uniform.nine_slice.position =
         glGetUniformLocation(engine_shader[ENGINE_SHADER_UI_9_SLICE].id, "position");
     ui_core.uniform.nine_slice.size =
@@ -119,9 +112,6 @@ void ui_start(FBO *fbo, b8 nine_slice, b8 clear)
 
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo->fbo);
 
-    ui_core.ndc_scale.x = 2.0f / render->size.x;
-    ui_core.ndc_scale.y = 2.0f / render->size.y;
-
     if (nine_slice)
     {
         ui_core.use_nine_slice = TRUE;
@@ -151,7 +141,6 @@ void ui_render(void)
 void ui_draw(Texture texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
         f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint)
 {
-    glUniform2fv(ui_core.uniform.ui.ndc_scale, 1, (GLfloat*)&ui_core.ndc_scale);
     glUniform2i(ui_core.uniform.ui.position, pos_x, pos_y);
     glUniform2i(ui_core.uniform.ui.size, size_x, size_y);
     glUniform2i(ui_core.uniform.ui.texture_size, texture.size.x, texture.size.y);
@@ -170,7 +159,6 @@ void ui_draw(Texture texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
 void ui_draw_nine_slice(Texture texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
         f32 slice_size, f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint)
 {
-    glUniform2fv(ui_core.uniform.nine_slice.ndc_scale, 1, (GLfloat*)&ui_core.ndc_scale);
     glUniform2i(ui_core.uniform.nine_slice.position, pos_x, pos_y);
     glUniform2i(ui_core.uniform.nine_slice.size, size_x, size_y);
     glUniform2i(ui_core.uniform.nine_slice.alignment, align_x, align_y);

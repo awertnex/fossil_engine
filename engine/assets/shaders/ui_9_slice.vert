@@ -1,6 +1,10 @@
 #version 430 core
 
-uniform vec2 ndc_scale;
+layout (std140) uniform u_ndc_scale
+{
+    vec2 ndc_scale;
+};
+
 uniform ivec2 position;
 uniform ivec2 alignment;
 out vec2 vs_ndc_scale;

@@ -47,6 +47,7 @@
 #define SET_LERP_SPEED_DEFAULT          25.0f
 #define SET_LERP_SPEED_FOV_MODE         16.0f
 #define SET_COLLISION_CAPSULE_PADDING   1.0f
+#define SET_TEXT_REFRESH_INTERVAL       10 /* unit: fps */
 
 #define DEATH_STRING_MAX        128
 

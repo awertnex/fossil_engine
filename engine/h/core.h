@@ -22,16 +22,18 @@
 #include "platform.h"
 #include "types.h"
 
-enum EngineFlag
-{
-    FLAG_ENGINE_GLFW_INITIALIZED,
-}; /* EngineFlag */
-
 typedef struct Render
 {
     GLFWwindow *window;
     char title[128];
     v2i32 size;
+
+    /*! @brief conversion from world-space to screen-space.
+     *
+     *  @remark read-only, updated internally in 'engine_update()'.
+     */
+    v2f32 ndc_scale;
+
     GLFWimage icon;
     v2f64 mouse_pos;
     v2f64 mouse_delta;
@@ -74,6 +76,12 @@ typedef struct FBO
     GLuint color_buf;
     GLuint rbo;
 } FBO;
+
+typedef struct UBO
+{
+    GLuint index;
+    GLuint buf;
+} UBO;
 
 typedef struct Texture
 {
@@ -242,6 +250,14 @@ extern Font engine_font[ENGINE_FONT_COUNT];
  */
 u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
         i32 size_x, i32 size_y, Render *_render, b8 shaders, b8 multisample, b8 release_build);
+
+/*! @brief engine main loop check.
+ *
+ *  - update uniform 'ndc_scale' of engine shaders.
+ *
+ *  @return TRUE unless 'glfw/glfwWindowShouldClose()' returns FALSE or engine inactive.
+ */
+b8 engine_update(void);
 
 /*! @brief free engine resources.
  *

@@ -29,12 +29,6 @@ struct Settings
 {
     /* ---- internal -------------------------------------------------------- */
 
-    /*! @brief conversion from world-space to screen-space.
-     *
-     *  @remark read-only, updated internally in 'main.c/settings_update()'.
-     */
-    v2f32 ndc_scale;
-
     u32 fps;
     f32 lerp_speed;
     u32 chunk_buf_radius;

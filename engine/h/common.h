@@ -51,10 +51,10 @@
  *  @remark color range [0.0f, 1.0f].
  */
 #define color_hex_to_v4(n) (v4f32){ \
-    ((f32)(((n) >> 0x18) & 0xff) / 0xff), \
-    ((f32)(((n) >> 0x10) & 0xff) / 0xff), \
-    ((f32)(((n) >> 0x08) & 0xff) / 0xff), \
-    ((f32)(((n) >> 0x00) & 0xff) / 0xff)}
+    (f32)(((n) >> 0x18) & 0xff) / 0xff, \
+    (f32)(((n) >> 0x10) & 0xff) / 0xff, \
+    (f32)(((n) >> 0x08) & 0xff) / 0xff, \
+    (f32)(((n) >> 0x00) & 0xff) / 0xff}
 
 enum /* ShaderIndex */
 {

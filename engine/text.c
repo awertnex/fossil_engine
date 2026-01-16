@@ -32,7 +32,6 @@ static struct /* text_core */
     Glyphf glyph[GLYPH_MAX];
     f32 font_size;
     f32 line;
-    v2f32 ndc_scale;
     v2f32 text_scale;
 
     /*! @brief number of characters in internal buffer 'mesh_text_buf',
@@ -47,12 +46,11 @@ static struct /* text_core */
 
     struct /* uniform */
     {
-        GLint ndc_scale;
         GLint char_size;
         GLint font_size;
-        GLint offset;
         GLint draw_shadow;
         GLint shadow_color;
+        GLint shadow_offset;
     } uniform;
 
     FBO fbo;
@@ -106,12 +104,11 @@ u32 text_init(u32 resolution, b8 multisample)
 
     text_core.multisample = multisample;
 
-    text_core.uniform.ndc_scale = glGetUniformLocation(engine_shader[ENGINE_SHADER_TEXT].id, "ndc_scale");
     text_core.uniform.char_size = glGetUniformLocation(engine_shader[ENGINE_SHADER_TEXT].id, "char_size");
     text_core.uniform.font_size = glGetUniformLocation(engine_shader[ENGINE_SHADER_TEXT].id, "font_size");
-    text_core.uniform.offset = glGetUniformLocation(engine_shader[ENGINE_SHADER_TEXT].id, "offset");
     text_core.uniform.draw_shadow = glGetUniformLocation(engine_shader[ENGINE_SHADER_TEXT].id, "draw_shadow");
     text_core.uniform.shadow_color = glGetUniformLocation(engine_shader[ENGINE_SHADER_TEXT].id, "shadow_color");
+    text_core.uniform.shadow_offset = glGetUniformLocation(engine_shader[ENGINE_SHADER_TEXT].id, "shadow_offset");
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -151,14 +148,12 @@ void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear)
     text_core.font = font;
     text_core.font_size = size;
     text_core.line = 0.0f;
-    text_core.ndc_scale.x = 2.0f / render->size.x;
-    text_core.ndc_scale.y = 2.0f / render->size.y;
     text_core.char_count = 0;
     text_core.cursor = 0;
 
     scale = stbtt_ScaleForPixelHeight(&font->info, size);
-    text_core.text_scale.x = scale * text_core.ndc_scale.x;
-    text_core.text_scale.y = scale * text_core.ndc_scale.y;
+    text_core.text_scale.x = scale * render->ndc_scale.x;
+    text_core.text_scale.y = scale * render->ndc_scale.y;
 
     for (i = 0; i < GLYPH_MAX; ++i)
     {
@@ -174,14 +169,12 @@ void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear)
         g->loaded = TRUE;
     }
 
-
-    glUniform2fv(text_core.uniform.ndc_scale, 1, (GLfloat*)&text_core.ndc_scale);
+    glUseProgram(engine_shader[ENGINE_SHADER_TEXT].id);
     glUniform1f(text_core.uniform.char_size, text_core.font->char_size);
     glUniform2f(text_core.uniform.font_size,
-            text_core.font_size * text_core.ndc_scale.x,
-            text_core.font_size * text_core.ndc_scale.y);
+            text_core.font_size * render->ndc_scale.x,
+            text_core.font_size * render->ndc_scale.y);
 
-    glUseProgram(engine_shader[ENGINE_SHADER_TEXT].id);
     glBindTexture(GL_TEXTURE_2D, text_core.font->id);
     glDisable(GL_DEPTH_TEST);
     if (clear)
@@ -228,8 +221,8 @@ void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, v4f32 color)
         mesh_text_buf.ebo_len += STRING_MAX;
     }
 
-    pos.x *= text_core.ndc_scale.x;
-    pos.y *= text_core.ndc_scale.y;
+    pos.x *= render->ndc_scale.x;
+    pos.y *= render->ndc_scale.y;
     pos.y += text_core.font->scale.y * text_core.text_scale.y;
 
     advance = 0.0f;
@@ -291,22 +284,21 @@ void text_render(b8 shadow, v4f32 shadow_color)
         return;
     }
 
-    if (shadow)
-    {
-        glUniform1i(text_core.uniform.draw_shadow, TRUE);
-        glUniform4f(text_core.uniform.shadow_color,
-                shadow_color.x, shadow_color.y, shadow_color.z, shadow_color.w);
-        glUniform2f(text_core.uniform.offset, TEXT_OFFSET_SHADOW, TEXT_OFFSET_SHADOW);
-        glDrawArrays(GL_POINTS, 0, text_core.char_count);
-    }
-
     glBindVertexArray(mesh_text_buf.vao);
     glBindBuffer(GL_ARRAY_BUFFER, mesh_text_buf.vbo);
     glBufferData(GL_ARRAY_BUFFER, mesh_text_buf.vbo_len * sizeof(GLfloat),
             mesh_text_buf.vbo_data, GL_DYNAMIC_DRAW);
 
+    if (shadow)
+    {
+        glUniform1i(text_core.uniform.draw_shadow, TRUE);
+        glUniform4f(text_core.uniform.shadow_color,
+                shadow_color.x, shadow_color.y, shadow_color.z, shadow_color.w);
+        glUniform2f(text_core.uniform.shadow_offset, TEXT_OFFSET_SHADOW, TEXT_OFFSET_SHADOW);
+        glDrawArrays(GL_POINTS, 0, text_core.char_count);
+    }
+
     glUniform1i(text_core.uniform.draw_shadow, FALSE);
-    glUniform2f(text_core.uniform.offset, 0.0f, 0.0f);
     glDrawArrays(GL_POINTS, 0, text_core.char_count);
 
     text_core.char_count = 0;
