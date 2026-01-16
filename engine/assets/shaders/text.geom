@@ -8,10 +8,14 @@ layout (triangle_strip, max_vertices = MAX_VERTICES) out;
 uniform float char_size;
 uniform vec2 font_size;
 in vec2 vs_tex_coords[];
+in vec4 vs_color[];
 out vec2 tex_coords;
+out vec4 gs_color;
 
 void main()
 {
+    gs_color = vs_color[0];
+
     vec4 vbo_quad[MAX_VERTICES] =
         vec4[](
                 /* vertex_pos, tex_coords */

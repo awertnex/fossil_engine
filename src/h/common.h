@@ -24,8 +24,6 @@
 #define MODE_INTERNAL_LOAD_CHUNKS   1
 #define MODE_INTERNAL_COLLIDE       1
 
-#define color_hex_u32(r, g, b, a) ((r << 24) | (g << 16) | (b << 8) | (a))
-
 /* ---- defaults ------------------------------------------------------------ */
 
 #define SET_MARGIN                      10

@@ -47,7 +47,7 @@ b8 get_timer(f64 *time_start, f32 interval);
 
 /*! @brief sleep for specified nanoseconds.
  *
- *  @remark the macros SEC2NANOSEC, NANOSEC2SEC can be used to convert from
+ *  @remark the macros 'SEC2NSEC', 'NSEC2SEC' can be used to convert from
  *  seconds to nanoseconds and vice-versa when multiplied by specified value.
  */
 void sleep_nsec(u64 nsec);

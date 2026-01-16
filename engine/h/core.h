@@ -402,7 +402,7 @@ void font_free(Font *font);
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 text_init(b8 multisample);
+u32 text_init(u32 resolution, b8 multisample);
 
 /*! -- IMPLEMENTATION: text.c --;
  *
@@ -433,17 +433,20 @@ void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear);
  *
  *  @remark default alignment top left (0, 0), enum: TextAlignment.
  */
-void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y);
+void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, v4f32 color);
 
 /*! -- IMPLEMENTATION: text.c --;
  *  @brief render text to framebuffer.
  *
- *  @param color = hex format: 0xrrggbbaa.
+ *  @param shadow_color = shadow color if 'shadow' is TRUE, can be empty.
+ *
+ *  @remark the macros 'common.h/color_hex_to_v4', 'common.h/color_v4_to_hex' can be
+ *  used to convert from u32 hex color to v4f32 color and vice-versa.
  *
  *  @remark can be called multiple times within a text rendering batch,
  *  chained with 'text_push()'.
  */
-void text_render(u32 color, b8 shadow);
+void text_render(b8 shadow, v4f32 shadow_color);
 
 /*! -- IMPLEMENTATION: text.c --;
  *

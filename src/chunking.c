@@ -1308,7 +1308,10 @@ static void _chunk_gizmo_write(u32 index, Chunk *ch)
         chunk_gizmo_render[index].x =
             (chunk_pos.x << 0x18) | (chunk_pos.y << 0x10) | (chunk_pos.z << 0x08);
         chunk_gizmo_render[index].y =
-            color_hex_u32(chunk_color.x, chunk_color.y, chunk_color.z, chunk_color.w);
+            (chunk_color.x << 0x18) |
+            (chunk_color.y << 0x10) |
+            (chunk_color.z << 0x08) |
+            (chunk_color.w << 0x00);
         chunk_gizmo_loaded[index].y = 0;
     }
     else if (ch->flag & FLAG_CHUNK_LOADED)
@@ -1316,7 +1319,10 @@ static void _chunk_gizmo_write(u32 index, Chunk *ch)
         chunk_gizmo_loaded[index].x =
             (chunk_pos.x << 0x18) | (chunk_pos.y << 0x10) | (chunk_pos.z << 0x08);
         chunk_gizmo_loaded[index].y =
-            color_hex_u32(chunk_color.x, chunk_color.y, chunk_color.z, chunk_color.w);
+            (chunk_color.x << 0x18) |
+            (chunk_color.y << 0x10) |
+            (chunk_color.z << 0x08) |
+            (chunk_color.w << 0x00);
         chunk_gizmo_render[index].y = 0;
     }
     else

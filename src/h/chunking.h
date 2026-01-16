@@ -1,6 +1,7 @@
 #ifndef GAME_CHUNKING_H
 #define GAME_CHUNKING_H
 
+#include <engine/h/common.h>
 #include <engine/h/types.h>
 
 #include "assets.h"
@@ -45,8 +46,8 @@
 /* number of blocks to process per chunk per frame */
 #define BLOCK_PARSE_RATE                    512
 
-#define CHUNK_COLOR_LOADED  color_hex_u32(18, 3, 7, 100)
-#define CHUNK_COLOR_RENDER  color_hex_u32(62, 122, 8, 255)
+#define CHUNK_COLOR_LOADED  color_v4_to_hex(0.70f, 0.01f, 0.02f, 0.39f)
+#define CHUNK_COLOR_RENDER  color_v4_to_hex(0.24f, 0.47f, 0.3f, 1.0f)
 #define CHUNK_COLOR_FACTOR_INFLUENCE 0.1
 
 enum BlockFlag
