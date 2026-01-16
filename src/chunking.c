@@ -321,10 +321,10 @@ u32 chunking_init(void)
         goto cleanup;
 
     mem_unmap((void*)&distance, CHUNK_BUF_VOLUME_MAX * sizeof(u32),
-            "chunking_free().distance");
+            "chunking_init().distance");
 
     mem_unmap((void*)&index, CHUNK_BUF_VOLUME_MAX * sizeof(u32),
-            "chunking_free().index");
+            "chunking_init().index");
 
     /* ---- intialize chunk gizmo ------------------------------------------- */
 
