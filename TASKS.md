@@ -1,4 +1,4 @@
-TASKS:
+TASKS: [x] = done, [!] = cancelled
 
 - [x] display Chunk coordinates
 - [x] detect targeted block
@@ -29,8 +29,11 @@ quirks:
       framebuffer, more visible when aspect ratio isn't 1:1) (27 Sep 2025)
 - [x] fix weird framebuffer scaling on window scaling (possibly reallocate
       framebuffers) (10 Sep 2025)
-- [ ] bake skybox into a look-up table, or HDR (retain old code, just because
+
+- [!] bake skybox into a look-up table, or HDR (retain old code, just because
       it was fun to write)
+    - reason for cancellation: I got the code right, it looks good (16 Jan 2026)
+
 - [x] limit framerate (10 Jan 2026)
 - [x] add camera look-at (19 Dec 2025)
 - [ ] fix double press for windows
