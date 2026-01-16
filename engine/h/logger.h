@@ -188,8 +188,11 @@ extern i32 logger_tab_index;
 /*! @brief initialize logger.
  *
  *  @param argc, argv = used for logger log level if args provided.
+ *
  *  @param _log_dir = directory to write log files into for the lifetime of the process,
  *  if NULL, logs won't be written to disk.
+ *
+ *  @param flags = enum 'common.h/EngineFlag'.
  *
  *  @remark called automatically from 'core.h/engine_init()'.
  *
@@ -203,7 +206,7 @@ extern i32 logger_tab_index;
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 logger_init(int argc, char **argv, b8 release_build, const str *_log_dir);
+u32 logger_init(int argc, char **argv, u64 flags, const str *_log_dir);
 
 void logger_close(void);
 

@@ -6,7 +6,7 @@
 layout(points) in;
 layout(triangle_strip, max_vertices = VERTICES_MAX) out;
 
-layout(binding = 0, std430) readonly buffer ssbo_texture_indices
+layout(std430, binding = 1) readonly buffer ssbo_texture_indices
 {
     uint texture_indices[];
 };
@@ -21,6 +21,7 @@ layout(binding = 0, std430) readonly buffer ssbo_texture_indices
 #define POSITIVE_Z      0x00100000
 #define NEGATIVE_Z      0x00200000
 
+uniform mat4 mat_perspective;
 in uint vs_data[];
 in vec3 vs_position[];
 out vec3 vertex_position;
@@ -28,12 +29,11 @@ out vec2 tex_coords;
 out vec3 normal;
 out flat uint face_index;
 out float block_light;
-uniform mat4 mat_perspective;
 
 void main()
 {
     uint block_id = vs_data[0] & BLOCK_ID;
-    block_light = ((vs_data[0] >> 24) & BLOCK_LIGHT) / float(BLOCK_LIGHT);
+    block_light = ((vs_data[0] >> 0x18) & BLOCK_LIGHT) / float(BLOCK_LIGHT);
 
     vec3 vbo[8] =
         vec3[](

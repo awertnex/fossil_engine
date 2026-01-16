@@ -336,8 +336,8 @@ u32 chunking_init(void)
     glBufferData(GL_ARRAY_BUFFER, settings.chunk_buf_volume * sizeof(v2u32),
             chunk_gizmo_loaded, GL_STATIC_DRAW);
 
-    glVertexAttribIPointer(0, 2, GL_UNSIGNED_INT, sizeof(v2u32), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribIPointer(0, 2, GL_UNSIGNED_INT, sizeof(v2u32), (void*)0);
 
     glGenVertexArrays(1, &chunk_gizmo_render_vao);
     glGenBuffers(1, &chunk_gizmo_render_vbo);
@@ -347,8 +347,8 @@ u32 chunking_init(void)
     glBufferData(GL_ARRAY_BUFFER, settings.chunk_buf_volume * sizeof(v2u32),
             chunk_gizmo_render, GL_STATIC_DRAW);
 
-    glVertexAttribIPointer(0, 2, GL_UNSIGNED_INT, sizeof(v2u32), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribIPointer(0, 2, GL_UNSIGNED_INT, sizeof(v2u32), (void*)0);
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1063,11 +1063,11 @@ static void chunk_mesh_init(u32 index, Chunk *ch)
     glBindBuffer(GL_ARRAY_BUFFER, ch->vbo);
     glBufferData(GL_ARRAY_BUFFER, len * sizeof(u64), buf, GL_DYNAMIC_DRAW);
 
-    glVertexAttribIPointer(0, 1, GL_UNSIGNED_INT, sizeof(u64), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribIPointer(0, 1, GL_UNSIGNED_INT, sizeof(u64), (void*)0);
 
-    glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, sizeof(u64), (void*)sizeof(u32));
     glEnableVertexAttribArray(1);
+    glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, sizeof(u64), (void*)sizeof(u32));
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1272,7 +1272,7 @@ generate_and_mesh:
         {
             if ((*q->queue[i])->flag & FLAG_CHUNK_GENERATED)
                 chunk_mesh_update(q->queue[i] - chunk_tab, *q->queue[i]);
-            else chunk_generate(q->queue[i], rate_block, terrain_biome_blend_test);
+            else chunk_generate(q->queue[i], rate_block, terrain_decaying_lands);
             if (!((*q->queue[i])->flag & FLAG_CHUNK_DIRTY))
             {
                 (*q->queue[i])->flag &= ~FLAG_CHUNK_QUEUED;

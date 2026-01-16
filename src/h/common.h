@@ -59,6 +59,11 @@
 #define COLOR_DIAGNOSTIC_ERROR  0xec6051ff
 #define COLOR_DIAGNOSTIC_INFO   0x3f6f9fff
 
+/* ---- shader bindings ----------------------------------------------------- */
+
+#define SHADER_BUFFER_BINDING_SSBO_TEXTURE_INDICES (0 + ENGINE_SHADER_BUFFER_BINDING_COUNT)
+#define SHADER_BUFFER_BINDING_SSBO_TEXTURE_HANDLES (1 + ENGINE_SHADER_BUFFER_BINDING_COUNT)
+
 /* ---- strings ------------------------------------------------------------- */
 
 #define GAME_DIR_NAME_ASSETS        "assets/"

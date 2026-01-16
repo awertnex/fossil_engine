@@ -1061,11 +1061,9 @@ static void draw_everything(void)
 
     text_push(stringf("FPS         [%u]\n", settings.fps),
             (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0,
-            settings.fps > 60 ?
-            color_hex_to_v4(COLOR_TEXT_MOSS) :
-            color_hex_to_v4(COLOR_DIAGNOSTIC_ERROR));
+            settings.fps > 60 ? COLOR_TEXT_MOSS : COLOR_DIAGNOSTIC_ERROR);
 
-    text_render(TRUE, color_hex_to_v4(TEXT_COLOR_SHADOW));
+    text_render(TRUE, TEXT_COLOR_SHADOW);
 
     if (core.flag.hud && core.flag.debug)
     {
@@ -1078,7 +1076,7 @@ static void draw_everything(void)
                     ((world.tick * 60) / 1000) % 60,
                     world.days),
                 (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0,
-                color_hex_to_v4(COLOR_TEXT_MOSS));
+                COLOR_TEXT_MOSS);
 
         text_push(stringf(
                     "XYZ         [%5.2lf %5.2lf %5.2lf]\n"
@@ -1098,7 +1096,7 @@ static void draw_everything(void)
                     player.velocity.x, player.velocity.y, player.velocity.z,
                     player.speed),
                 (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0,
-                color_hex_to_v4(COLOR_TEXT_DEFAULT));
+                COLOR_TEXT_DEFAULT);
 
         text_push(stringf(
                     "OVERFLOW    [%s %s %s]",
@@ -1112,7 +1110,7 @@ static void draw_everything(void)
                     (player.flag & FLAG_PLAYER_OVERFLOW_PZ) ?
                     "        " : "        " : "NONE"),
                 (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0,
-                color_hex_to_v4(COLOR_DIAGNOSTIC_NONE));
+                COLOR_DIAGNOSTIC_NONE);
 
         text_push(stringf(
                     "             %s %s %s",
@@ -1123,7 +1121,7 @@ static void draw_everything(void)
                     (player.flag & FLAG_PLAYER_OVERFLOW_Z) &&
                     (player.flag & FLAG_PLAYER_OVERFLOW_PZ) ? "POSITIVE" : "    "),
                 (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0,
-                color_hex_to_v4(DIAGNOSTIC_COLOR_SUCCESS));
+                DIAGNOSTIC_COLOR_SUCCESS);
 
         text_push(stringf(
                     "             %s %s %s\n",
@@ -1134,7 +1132,7 @@ static void draw_everything(void)
                     (player.flag & FLAG_PLAYER_OVERFLOW_Z) &&
                     !(player.flag & FLAG_PLAYER_OVERFLOW_PZ) ? "NEGATIVE" : "    "),
                 (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0,
-                color_hex_to_v4(DIAGNOSTIC_COLOR_ERROR));
+                DIAGNOSTIC_COLOR_ERROR);
 
         text_push(stringf(
                     "RATIO       [%.2f]\n"
@@ -1150,9 +1148,9 @@ static void draw_everything(void)
                     skybox_data.sun_rotation.y,
                     skybox_data.sun_rotation.z),
                 (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0,
-                color_hex_to_v4(DIAGNOSTIC_COLOR_INFO));
+                DIAGNOSTIC_COLOR_INFO);
 
-        text_render(TRUE, color_hex_to_v4(TEXT_COLOR_SHADOW));
+        text_render(TRUE, TEXT_COLOR_SHADOW);
 
         text_push(stringf(
                     "CHUNK QUEUE 0 [%d/%"PRIu64"]\n"
@@ -1165,9 +1163,9 @@ static void draw_everything(void)
                     CHUNKS_MAX[settings.render_distance]),
                 (v2f32){render->size.x - SET_MARGIN, SET_MARGIN},
                 TEXT_ALIGN_RIGHT, 0,
-                color_hex_to_v4(COLOR_TEXT_DEFAULT));
+                COLOR_TEXT_DEFAULT);
 
-        text_render(TRUE, color_hex_to_v4(TEXT_COLOR_SHADOW));
+        text_render(TRUE, TEXT_COLOR_SHADOW);
         text_start(font[FONT_MONO], FONT_SIZE_DEFAULT, 0, NULL, FALSE);
 
         text_push(stringf(
@@ -1186,9 +1184,9 @@ static void draw_everything(void)
                     glGetString(GL_RENDERER)),
                 (v2f32){render->size.x - SET_MARGIN, render->size.y - SET_MARGIN},
                 TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM,
-                color_hex_to_v4(DIAGNOSTIC_COLOR_TRACE));
+                DIAGNOSTIC_COLOR_TRACE);
 
-        text_render(TRUE, color_hex_to_v4(TEXT_COLOR_SHADOW));
+        text_render(TRUE, TEXT_COLOR_SHADOW);
     }
 
     text_stop();
@@ -1201,8 +1199,8 @@ static void draw_everything(void)
         text_push(stringf("%s",
                     logger_tab[mod(logger_tab_index - i, LOGGER_HISTORY_MAX)]),
                 (v2f32){SET_MARGIN, render->size.y - SET_MARGIN - settings.font_size * i},
-                0, TEXT_ALIGN_BOTTOM, color_hex_to_v4(logger_color[logger_tab_index - i]));
-    text_render(TRUE, color_hex_to_v4(TEXT_COLOR_SHADOW));
+                0, TEXT_ALIGN_BOTTOM, logger_color[logger_tab_index - i]);
+    text_render(TRUE, TEXT_COLOR_SHADOW);
     text_stop();
 
     /* ---- post processing ------------------------------------------------- */
@@ -1236,8 +1234,8 @@ static void draw_everything(void)
 
 int main(int argc, char **argv)
 {
-    if (engine_init(argc, argv, GAME_DIR_NAME_LOGS, GAME_TITLE, 1280, 1054,
-                NULL, TRUE, FALSE, GAME_RELEASE_BUILD) != ERR_SUCCESS ||
+    if (engine_init(argc, argv, GAME_DIR_NAME_LOGS, GAME_TITLE, 1280, 1054, NULL,
+                GAME_RELEASE_BUILD | FLAG_ENGINE_LOAD_DEFAULT_SHADERS) != ERR_SUCCESS ||
             game_init() != ERR_SUCCESS)
         goto cleanup;
 

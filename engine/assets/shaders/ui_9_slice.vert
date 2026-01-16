@@ -1,6 +1,6 @@
 #version 430 core
 
-layout (std140) uniform u_ndc_scale
+layout (std140, binding = 0) uniform ubo_ndc_scale
 {
     vec2 ndc_scale;
 };

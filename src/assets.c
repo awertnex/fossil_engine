@@ -88,7 +88,7 @@ static u64 ssbo_texture_handles[TEXTURE_BLOCK_COUNT] = {0};
 
 u32 assets_init(void)
 {
-    u32 i = 0;
+    u32 i = 0, j = 0;
 
     if (
             mem_map((void*)&block_textures, TEXTURE_BLOCK_COUNT * sizeof(Texture),
@@ -108,7 +108,6 @@ u32 assets_init(void)
             shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_VOXEL]) != ERR_SUCCESS ||
             shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_BOUNDING_BOX]) != ERR_SUCCESS)
         goto cleanup;
-
 
     /* ---- textures -------------------------------------------------------- */
 
@@ -206,27 +205,29 @@ u32 assets_init(void)
 
     blocks_init();
 
-    for (i = 0; i < BLOCK_COUNT; ++i)
+    for (i = 0, j = 0; i < BLOCK_COUNT; ++i)
     {
-        ssbo_texture_indices[(i * 6) + 0] = blocks[i].texture_index[0];
-        ssbo_texture_indices[(i * 6) + 1] = blocks[i].texture_index[1];
-        ssbo_texture_indices[(i * 6) + 2] = blocks[i].texture_index[2];
-        ssbo_texture_indices[(i * 6) + 3] = blocks[i].texture_index[3];
-        ssbo_texture_indices[(i * 6) + 4] = blocks[i].texture_index[4];
-        ssbo_texture_indices[(i * 6) + 5] = blocks[i].texture_index[5];
+        ssbo_texture_indices[j++] = blocks[i].texture_index[0];
+        ssbo_texture_indices[j++] = blocks[i].texture_index[1];
+        ssbo_texture_indices[j++] = blocks[i].texture_index[2];
+        ssbo_texture_indices[j++] = blocks[i].texture_index[3];
+        ssbo_texture_indices[j++] = blocks[i].texture_index[4];
+        ssbo_texture_indices[j++] = blocks[i].texture_index[5];
     }
 
     glGenBuffers(1, &ssbo_texture_indices_id);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_texture_indices_id);
     glBufferData(GL_SHADER_STORAGE_BUFFER, BLOCK_COUNT * sizeof(u32) * 6,
                 &ssbo_texture_indices, GL_STATIC_DRAW);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_texture_indices_id);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, SHADER_BUFFER_BINDING_SSBO_TEXTURE_INDICES,
+            ssbo_texture_indices_id);
 
     glGenBuffers(1, &ssbo_texture_handles_id);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_texture_handles_id);
     glBufferData(GL_SHADER_STORAGE_BUFFER, TEXTURE_BLOCK_COUNT * sizeof(u64),
                 &ssbo_texture_handles, GL_STATIC_DRAW);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo_texture_handles_id);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, SHADER_BUFFER_BINDING_SSBO_TEXTURE_HANDLES,
+            ssbo_texture_handles_id);
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 

@@ -6,9 +6,12 @@
 #include "h/logger.h"
 #include "h/memory.h"
 
-/*! @brief text buffer, raw text data.
- */
-static Mesh mesh_text_buf = {0};
+typedef struct TextData
+{
+    v2f32 pos;
+    v2f32 tex_coords;
+    u32 color;
+} TextData;
 
 Font engine_font[ENGINE_FONT_COUNT] =
 {
@@ -31,18 +34,21 @@ static struct /* text_core */
     Font *font;
     Glyphf glyph[GLYPH_MAX];
     f32 font_size;
-    f32 line;
+    f32 line_height_total;
     v2f32 text_scale;
 
-    /*! @brief number of characters in internal buffer 'mesh_text_buf',
-     *  resets at 'text_start()' and 'text_render()'.
-    */
-    GLuint char_count;
-
-    /*! @brief iterator for internal buffer 'mesh_text_buf',
+    /*! @brief iterator for 'buf',
      *  resets at 'text_start()' and 'text_render()'.
      */
     GLuint cursor;
+
+    /*! @brief text buffer, raw text data.
+    */
+    TextData *buf;
+
+    u64 buf_len;
+    GLuint vao, vbo;
+    FBO fbo;
 
     struct /* uniform */
     {
@@ -53,7 +59,6 @@ static struct /* text_core */
         GLint shadow_offset;
     } uniform;
 
-    FBO fbo;
 } text_core;
 
 u32 text_init(u32 resolution, b8 multisample)
@@ -68,35 +73,35 @@ u32 text_init(u32 resolution, b8 multisample)
                     engine_font[i].path) != ERR_SUCCESS)
             goto cleanup;
 
-    if (mem_alloc((void*)&mesh_text_buf.vbo_data, STRING_MAX * sizeof(GLfloat) * TEXT_CHAR_STRIDE,
-                "text_init().mesh_text_buf.vbo_data") != ERR_SUCCESS)
+    if (
+            mem_alloc((void*)&text_core.buf, STRING_MAX * sizeof(TextData),
+                "text_init().text_core.buf") != ERR_SUCCESS)
         goto cleanup;
 
-    mesh_text_buf.vbo_len = STRING_MAX * TEXT_CHAR_STRIDE;
-    mesh_text_buf.ebo_len = STRING_MAX;
+    text_core.buf_len = STRING_MAX;
 
     if (fbo_init(&text_core.fbo, &engine_mesh_unit, multisample, 4) != ERR_SUCCESS)
         goto cleanup;
 
-    if (!mesh_text_buf.vao)
+    if (!text_core.vao)
     {
-        glGenVertexArrays(1, &mesh_text_buf.vao);
-        glGenBuffers(1, &mesh_text_buf.vbo);
+        glGenVertexArrays(1, &text_core.vao);
+        glGenBuffers(1, &text_core.vbo);
 
-        glBindVertexArray(mesh_text_buf.vao);
-        glBindBuffer(GL_ARRAY_BUFFER, mesh_text_buf.vbo);
+        glBindVertexArray(text_core.vao);
+        glBindBuffer(GL_ARRAY_BUFFER, text_core.vbo);
 
+        glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
                 TEXT_CHAR_STRIDE * sizeof(GLfloat), (void*)0);
-        glEnableVertexAttribArray(0);
 
+        glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
                 TEXT_CHAR_STRIDE * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
-        glEnableVertexAttribArray(1);
 
-        glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE,
-                TEXT_CHAR_STRIDE * sizeof(GLfloat), (void*)(4 * sizeof(GLfloat)));
         glEnableVertexAttribArray(2);
+        glVertexAttribIPointer(2, 1, GL_UNSIGNED_INT,
+                TEXT_CHAR_STRIDE * sizeof(GLuint), (void*)(4 * sizeof(GLfloat)));
 
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -136,19 +141,20 @@ void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear)
 
     if (!length)
         length = STRING_MAX;
-    else if (length > mesh_text_buf.ebo_len)
+    else if (length > text_core.buf_len)
     {
-        if (mem_realloc((void*)&mesh_text_buf.vbo_data, length * sizeof(GLfloat) * TEXT_CHAR_STRIDE,
-                    "text_start().mesh_text_buf.vbo_data") != ERR_SUCCESS)
+        if (
+                mem_realloc((void*)&text_core.buf,
+                    length * sizeof(TextData),
+                    "text_start().text_core.buf") != ERR_SUCCESS)
             goto cleanup;
-        mesh_text_buf.vbo_len = length * TEXT_CHAR_STRIDE;
-        mesh_text_buf.ebo_len = length;
+
+        text_core.buf_len = length;
     }
 
     text_core.font = font;
     text_core.font_size = size;
-    text_core.line = 0.0f;
-    text_core.char_count = 0;
+    text_core.line_height_total = 0.0f;
     text_core.cursor = 0;
 
     scale = stbtt_ScaleForPixelHeight(&font->info, size);
@@ -187,16 +193,16 @@ cleanup:
     _LOGERROR(FALSE, engine_err, "%s\n", "Failed to Start Text");
 }
 
-void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, v4f32 color)
+void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, u32 color)
 {
     u64 len = 0, i = 0;
     i64 j = 0;
     f32 advance = 0.0f, descent = 0.0f, line_height = 0.0f;
     Glyphf *g = NULL;
 
-    if (!mesh_text_buf.vbo_data)
+    if (!text_core.buf)
     {
-        _LOGERROR(FALSE, ERR_BUFFER_EMPTY, "%s\n", "Failed to Push Text, 'mesh_text_buf.vbo_data' Null");
+        _LOGERROR(FALSE, ERR_BUFFER_EMPTY, "%s\n", "Failed to Push Text, 'text_core.buf' Null");
         return;
     }
 
@@ -207,18 +213,18 @@ void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, v4f32 color)
         return;
     }
 
-    if (text_core.cursor + len >= mesh_text_buf.ebo_len)
+    if (text_core.cursor + len >= text_core.buf_len)
     {
-        if (mem_realloc((void*)&mesh_text_buf.vbo_data,
-                    (mesh_text_buf.vbo_len + STRING_MAX) * sizeof(GLfloat) * TEXT_CHAR_STRIDE,
-                    "text_push().mesh_text_buf.vbo_data") != ERR_SUCCESS)
+        if (
+                mem_realloc((void*)&text_core.buf,
+                    (text_core.buf_len + STRING_MAX) * sizeof(TextData),
+                    "text_push().text_core.buf_len") != ERR_SUCCESS)
         {
-            mesh_free(&mesh_text_buf);
             _LOGERROR(FALSE, engine_err, "%s\n", "Failed to Push Text");
             return;
         }
-        mesh_text_buf.vbo_len += STRING_MAX * TEXT_CHAR_STRIDE;
-        mesh_text_buf.ebo_len += STRING_MAX;
+
+        text_core.buf_len += STRING_MAX;
     }
 
     pos.x *= render->ndc_scale.x;
@@ -236,16 +242,16 @@ void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, v4f32 color)
             if (align_x == TEXT_ALIGN_CENTER)
             {
                 for (j = 1; (i64)i - j >= 0 && text[i - j] != '\n'; ++j)
-                    mesh_text_buf.vbo_data[text_core.cursor - j * TEXT_CHAR_STRIDE] -= advance * 0.5f;
+                    text_core.buf[text_core.cursor - j].pos.x -= advance * 0.5f;
             }
             else if (align_x == TEXT_ALIGN_RIGHT)
             {
                 for (j = 1; (i64)i - j >= 0 && text[i - j] != '\n'; ++j)
-                    mesh_text_buf.vbo_data[text_core.cursor - j * TEXT_CHAR_STRIDE] -= advance;
+                    text_core.buf[text_core.cursor - j].pos.x -= advance;
             }
 
             advance = 0.0f;
-            text_core.line += line_height * text_core.text_scale.y;
+            text_core.line_height_total += line_height * text_core.text_scale.y;
             continue;
         }
         if (text[i] == '\t')
@@ -254,56 +260,55 @@ void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, v4f32 color)
             continue;
         }
 
-        ++text_core.char_count;
-        mesh_text_buf.vbo_data[text_core.cursor++] = pos.x + advance + g->bearing.x;
-        mesh_text_buf.vbo_data[text_core.cursor++] = -pos.y - descent - text_core.line - g->bearing.y;
-        mesh_text_buf.vbo_data[text_core.cursor++] = g->texture_sample.x;
-        mesh_text_buf.vbo_data[text_core.cursor++] = g->texture_sample.y;
-        mesh_text_buf.vbo_data[text_core.cursor++] = color.x;
-        mesh_text_buf.vbo_data[text_core.cursor++] = color.y;
-        mesh_text_buf.vbo_data[text_core.cursor++] = color.z;
-        mesh_text_buf.vbo_data[text_core.cursor++] = color.w;
+        text_core.buf[text_core.cursor].pos.x = pos.x + advance + g->bearing.x;
+        text_core.buf[text_core.cursor].pos.y = -pos.y - descent - text_core.line_height_total - g->bearing.y;
+        text_core.buf[text_core.cursor].tex_coords.x = g->texture_sample.x;
+        text_core.buf[text_core.cursor].tex_coords.y = g->texture_sample.y;
+        text_core.buf[text_core.cursor].color = color;
+        ++text_core.cursor;
 
         advance += g->advance;
     }
 
     if (align_y == TEXT_ALIGN_CENTER)
-        for (i = 0; i < text_core.cursor; i += 4)
-            mesh_text_buf.vbo_data[i + 1] += text_core.line * 0.5f;
+        for (i = 0; i < text_core.cursor; ++i)
+            text_core.buf[i].pos.y += text_core.line_height_total * 0.5f;
     else if (align_y == TEXT_ALIGN_BOTTOM)
-        for (i = 0; i < text_core.cursor; i += 4)
-            mesh_text_buf.vbo_data[i + 1] += text_core.line;
+        for (i = 0; i < text_core.cursor; ++i)
+            text_core.buf[i].pos.y += text_core.line_height_total;
 }
 
-void text_render(b8 shadow, v4f32 shadow_color)
+void text_render(b8 shadow, u32 shadow_color)
 {
-    if (!mesh_text_buf.vbo_data)
+    if (!text_core.buf)
     {
         _LOGERROR(FALSE, ERR_BUFFER_EMPTY,
-                "%s\n", "Failed to Render Text, 'mesh_text_buf.vbo_data' Null");
+                "%s\n", "Failed to Render Text, 'text_core.buf' Null");
         return;
     }
 
-    glBindVertexArray(mesh_text_buf.vao);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh_text_buf.vbo);
-    glBufferData(GL_ARRAY_BUFFER, mesh_text_buf.vbo_len * sizeof(GLfloat),
-            mesh_text_buf.vbo_data, GL_DYNAMIC_DRAW);
+    glBindVertexArray(text_core.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, text_core.vbo);
+    glBufferData(GL_ARRAY_BUFFER, text_core.cursor * sizeof(GLfloat) * TEXT_CHAR_STRIDE,
+            text_core.buf, GL_DYNAMIC_DRAW);
 
     if (shadow)
     {
         glUniform1i(text_core.uniform.draw_shadow, TRUE);
         glUniform4f(text_core.uniform.shadow_color,
-                shadow_color.x, shadow_color.y, shadow_color.z, shadow_color.w);
+                (f32)((shadow_color >> 0x18) & 0xff) / 0xff,
+                (f32)((shadow_color >> 0x10) & 0xff) / 0xff,
+                (f32)((shadow_color >> 0x08) & 0xff) / 0xff,
+                (f32)((shadow_color >> 0x00) & 0xff) / 0xff);
         glUniform2f(text_core.uniform.shadow_offset, TEXT_OFFSET_SHADOW, TEXT_OFFSET_SHADOW);
-        glDrawArrays(GL_POINTS, 0, text_core.char_count);
+        glDrawArrays(GL_POINTS, 0, text_core.cursor);
     }
 
     glUniform1i(text_core.uniform.draw_shadow, FALSE);
-    glDrawArrays(GL_POINTS, 0, text_core.char_count);
+    glDrawArrays(GL_POINTS, 0, text_core.cursor);
 
-    text_core.char_count = 0;
     text_core.cursor = 0;
-    text_core.line = 0;
+    text_core.line_height_total = 0;
 }
 
 void text_stop(void)
@@ -327,5 +332,5 @@ void text_fbo_blit(GLuint fbo)
 void text_free(void)
 {
     fbo_free(&text_core.fbo);
-    mesh_free(&mesh_text_buf);
+    mem_free((void*)&text_core.buf, text_core.buf_len * sizeof(TextData), "text_free().text_core.buf");
 }

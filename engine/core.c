@@ -130,11 +130,11 @@ static u32 _texture_generate(GLuint *id, const GLint format_internal,  const GLi
 /* ---- section: init ------------------------------------------------------- */
 
 u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
-        i32 size_x, i32 size_y, Render *_render, b8 shaders, b8 multisample, b8 release_build)
+        i32 size_x, i32 size_y, Render *_render, u64 flags)
 {
     u32 i = 0;
 
-    if (logger_init(argc, argv, release_build, _log_dir) != ERR_SUCCESS)
+    if (logger_init(argc, argv, flags & FLAG_ENGINE_RELEASE_BUILD, _log_dir) != ERR_SUCCESS)
         goto cleanup;
 
     glfwSetErrorCallback(glfw_callback_error);
@@ -143,12 +143,12 @@ u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
         change_render(_render);
 
     if (
-            glfw_init(multisample) != ERR_SUCCESS ||
+            glfw_init(flags & FLAG_ENGINE_MULTISAMPLE) != ERR_SUCCESS ||
             window_init(title, size_x, size_y) != ERR_SUCCESS ||
             glad_init() != ERR_SUCCESS)
         goto cleanup;
 
-    if (shaders)
+    if (flags & FLAG_ENGINE_LOAD_DEFAULT_SHADERS)
     {
         for (i = 0; i < ENGINE_SHADER_COUNT; ++i)
             if (shader_program_init(ENGINE_DIR_NAME_SHADERS, &engine_shader[i]) != ERR_SUCCESS)
@@ -159,12 +159,8 @@ u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
         glBufferData(GL_UNIFORM_BUFFER, sizeof(v2f32), NULL, GL_STATIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        ubo.ndc_scale.index =
-            glGetUniformBlockIndex(engine_shader[ENGINE_SHADER_TEXT].id, "u_ndc_scale");
-
-        glUniformBlockBinding(engine_shader[ENGINE_SHADER_TEXT].id, ubo.ndc_scale.index, 0);
-        glUniformBlockBinding(engine_shader[ENGINE_SHADER_UI].id, ubo.ndc_scale.index, 0);
-        glUniformBlockBinding(engine_shader[ENGINE_SHADER_UI_9_SLICE].id, ubo.ndc_scale.index, 0);
+        glBindBufferBase(GL_UNIFORM_BUFFER, ENGINE_SHADER_BUFFER_BINDING_UBO_NDC_SCALE,
+                ubo.ndc_scale.buf);
     }
 
     flag.active = 1;
@@ -185,7 +181,7 @@ b8 engine_update(void)
     render->ndc_scale.y = 2.0f / render->size.y;
 
     glBindBuffer(GL_UNIFORM_BUFFER, ubo.ndc_scale.buf);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(v2f32), &render->ndc_scale);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(v2f32), &render->ndc_scale, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     return TRUE;
@@ -520,35 +516,35 @@ void shader_program_free(ShaderProgram *program)
 
 void attrib_vec3(void)
 {
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
 }
 
 void attrib_vec3_vec2(void)
 {
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
 
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 }
 
 void attrib_vec3_vec3(void)
 {
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 }
 
 void attrib_vec3_vec4(void)
 {
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void*)0);
 
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 }
 
 u32 fbo_init(FBO *fbo, Mesh *mesh_fbo, b8 multisample, u32 samples)
@@ -653,11 +649,11 @@ u32 fbo_init(FBO *fbo, Mesh *mesh_fbo, b8 multisample, u32 samples)
     glBufferData(GL_ARRAY_BUFFER, mesh_fbo->vbo_len * sizeof(GLfloat),
             mesh_fbo->vbo_data, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)0);
 
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
 
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

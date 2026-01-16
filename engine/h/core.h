@@ -227,8 +227,7 @@ extern Font engine_font[ENGINE_FONT_COUNT];
  *  @param _render = render to use for engine,
  *  if NULL, the global variable 'render' is defined as default and declared internally.
  *
- *  @param shaders = initialize default shaders (like 'text' and 'ui').
- *  @param release_build = if TRUE, TRACE and DEBUG logs will be disabled.
+ *  @param flags = enum 'common.h/EngineFlag'.
  *
  *  @param title = window/application title, if NULL, default title is used
  *  ('window_init()' parameter).
@@ -249,7 +248,7 @@ extern Font engine_font[ENGINE_FONT_COUNT];
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
 u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
-        i32 size_x, i32 size_y, Render *_render, b8 shaders, b8 multisample, b8 release_build);
+        i32 size_x, i32 size_y, Render *_render, u64 flags);
 
 /*! @brief engine main loop check.
  *
@@ -444,17 +443,20 @@ void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear);
  *  @param align_x = TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, TEXT_ALIGN_LEFT.
  *  @param align_y = TEXT_ALIGN_TOP, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM.
  *
+ *  @param color = text color, format: 0xrrggbbaa.
+ *
  *  @remark can be called multiple times within a text rendering batch,
  *  chained with 'text_render()'.
  *
  *  @remark default alignment top left (0, 0), enum: TextAlignment.
  */
-void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, v4f32 color);
+void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, u32 color);
 
 /*! -- IMPLEMENTATION: text.c --;
  *  @brief render text to framebuffer.
  *
- *  @param shadow_color = shadow color if 'shadow' is TRUE, can be empty.
+ *  @param shadow_color = shadow color if 'shadow' is TRUE, can be empty,
+ *  format: 0xrrggbbaa.
  *
  *  @remark the macros 'common.h/color_hex_to_v4', 'common.h/color_v4_to_hex' can be
  *  used to convert from u32 hex color to v4f32 color and vice-versa.
@@ -462,7 +464,7 @@ void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, v4f32 color);
  *  @remark can be called multiple times within a text rendering batch,
  *  chained with 'text_push()'.
  */
-void text_render(b8 shadow, v4f32 shadow_color);
+void text_render(b8 shadow, u32 shadow_color);
 
 /*! -- IMPLEMENTATION: text.c --;
  *

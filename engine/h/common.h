@@ -31,7 +31,7 @@
 #define FONT_RESOLUTION_DEFAULT 64
 #define FONT_SIZE_DEFAULT 22.0f
 #define TEXT_TAB_SIZE 4
-#define TEXT_CHAR_STRIDE 8
+#define TEXT_CHAR_STRIDE 5
 #define TEXT_COLOR_SHADOW 0x00000060
 #define TEXT_OFFSET_SHADOW 2.0f
 #define TARGET_FPS_DEFAULT 60
@@ -56,7 +56,19 @@
     (f32)(((n) >> 0x08) & 0xff) / 0xff, \
     (f32)(((n) >> 0x00) & 0xff) / 0xff}
 
-enum /* ShaderIndex */
+/* ---- shader bindings ----------------------------------------------------- */
+
+#define ENGINE_SHADER_BUFFER_BINDING_UBO_NDC_SCALE 0
+#define ENGINE_SHADER_BUFFER_BINDING_COUNT 1
+
+enum EngineFlag
+{
+    FLAG_ENGINE_RELEASE_BUILD =         0x0001, /* turn off TRACE and DEBUG logs */
+    FLAG_ENGINE_LOAD_DEFAULT_SHADERS =  0x0002, /* initialize default shaders (like 'text' and 'ui') */
+    FLAG_ENGINE_MULTISAMPLE =           0x0004, /* turn on 'glfw' multisampling */
+}; /* EngineFlag */
+
+enum ShaderIndex
 {
     ENGINE_SHADER_UNIT_QUAD,
     ENGINE_SHADER_TEXT,
@@ -65,7 +77,7 @@ enum /* ShaderIndex */
     ENGINE_SHADER_COUNT,
 }; /* ShaderIndex */
 
-enum /* FontIndex */
+enum FontIndex
 {
     ENGINE_FONT_DEJAVU_SANS,
     ENGINE_FONT_DEJAVU_SANS_BOLD,
@@ -74,7 +86,7 @@ enum /* FontIndex */
     ENGINE_FONT_COUNT,
 }; /* FontIndex */
 
-enum /* TextAlignment */
+enum TextAlignment
 {
     TEXT_ALIGN_LEFT = 0,
     TEXT_ALIGN_CENTER = 1,
@@ -83,7 +95,7 @@ enum /* TextAlignment */
     TEXT_ALIGN_BOTTOM = 2,
 }; /* TextAlignment */
 
-enum /* TextureIndex */
+enum TextureIndex
 {
     ENGINE_TEXTURE_PANEL_ACTIVE,
     ENGINE_TEXTURE_PANEL_INACTIVE,

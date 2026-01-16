@@ -74,11 +74,11 @@ static str *esc_code_color[LOGLEVEL_COUNT] =
 static void _get_log_str(const str *str_in, str *str_out, u32 flags, b8 verbose,
         u8 level, u32 error_code, const str *file, u64 line);
 
-u32 logger_init(int argc, char **argv, b8 release_build, const str *_log_dir)
+u32 logger_init(int argc, char **argv, u64 flags, const str *_log_dir)
 {
     u32 i = 0;
 
-    if (release_build)
+    if (flags & FLAG_ENGINE_RELEASE_BUILD)
         log_level_max = LOGLEVEL_INFO;
 
     if (argc && argv && argc > 2 &&
