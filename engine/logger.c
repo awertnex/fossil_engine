@@ -8,6 +8,7 @@
 #include "h/dir.h"
 #include "h/limits.h"
 #include "h/logger.h"
+#include "h/math.h"
 #include "h/string.h"
 #include "h/time.h"
 #include "h/types.h"
@@ -21,10 +22,8 @@ str log_dir[PATH_MAX] = {0};
 static str *logger_buf = NULL;
 
 str **logger_tab = NULL;
-
-/*! @brief current position in 'logger_tab'.
- */
-static u32 logger_tab_index = 0;
+i32 logger_tab_index = 0;
+u32 *logger_color = NULL;
 
 static const str LOG_FILE_NAME[LOGLEVEL_COUNT][NAME_MAX] =
 {
@@ -34,6 +33,17 @@ static const str LOG_FILE_NAME[LOGLEVEL_COUNT][NAME_MAX] =
     [LOGLEVEL_INFO] = ENGINE_FILE_NAME_LOG_INFO,
     [LOGLEVEL_DEBUG] = ENGINE_FILE_NAME_LOG_EXTRA,
     [LOGLEVEL_TRACE] = ENGINE_FILE_NAME_LOG_EXTRA,
+};
+
+static u32 logger_color_tab[LOGLEVEL_COUNT + 1] =
+{
+    DIAGNOSTIC_COLOR_FATAL,
+    DIAGNOSTIC_COLOR_ERROR,
+    DIAGNOSTIC_COLOR_WARNING,
+    DIAGNOSTIC_COLOR_INFO,
+    DIAGNOSTIC_COLOR_DEBUG,
+    DIAGNOSTIC_COLOR_TRACE,
+    DIAGNOSTIC_COLOR_SUCCESS,
 };
 
 static str log_tag[][16] =
@@ -101,11 +111,14 @@ u32 logger_init(int argc, char **argv, b8 release_build, const str *_log_dir)
         snprintf(log_dir, PATH_MAX, "%s", _log_dir);
 
     if (
-            mem_alloc((void*)&logger_tab, LOGGER_HISTORY_MAX * sizeof(str*),
+            mem_map((void*)&logger_tab, LOGGER_HISTORY_MAX * sizeof(str*),
                 "logger_init().logger_tab") != ERR_SUCCESS ||
 
-            mem_alloc((void*)&logger_buf, LOGGER_HISTORY_MAX * LOGGER_STRING_MAX,
-                "logger_init().logger_buf") != ERR_SUCCESS)
+            mem_map((void*)&logger_buf, LOGGER_HISTORY_MAX * LOGGER_STRING_MAX,
+                "logger_init().logger_buf") != ERR_SUCCESS ||
+
+            mem_map((void*)&logger_color, LOGGER_HISTORY_MAX * sizeof(u32),
+                "logger_init().logger_color") != ERR_SUCCESS)
     {
         _LOGFATAL(FALSE, ERR_LOGGER_INIT_FAIL,
                 "%s\n", "Failed to Initialize Logger, Process Aborted");
@@ -123,9 +136,12 @@ u32 logger_init(int argc, char **argv, b8 release_build, const str *_log_dir)
 
 void logger_close(void)
 {
+    _LOGTRACE(TRUE, "%s\n", "Closing Logger..");
+
     log_flag &= ~FLAG_LOG_OPEN;
-    mem_free((void*)&logger_buf, LOGGER_HISTORY_MAX * LOGGER_STRING_MAX, "logger_close().logger_buf");
-    mem_free((void*)&logger_tab, LOGGER_HISTORY_MAX * sizeof(str*), "logger_close().logger_tab");
+    mem_unmap((void*)&logger_color, LOGGER_HISTORY_MAX * sizeof(u32), "logger_init().logger_color");
+    mem_unmap((void*)&logger_buf, LOGGER_HISTORY_MAX * LOGGER_STRING_MAX, "logger_close().logger_buf");
+    mem_unmap((void*)&logger_tab, LOGGER_HISTORY_MAX * sizeof(str*), "logger_close().logger_tab");
 }
 
 void _log_output(b8 verbose, const str *_log_dir, const str *file, u64 line,
@@ -145,16 +161,17 @@ void _log_output(b8 verbose, const str *_log_dir, const str *file, u64 line,
     _get_log_str(str_in, str_out, FLAG_LOG_COLOR, verbose, level, error_code, file, line);
     fprintf(stderr, "%s", str_out);
 
-    _get_log_str(str_in, str_out, FLAG_LOG_FULL_TIME, verbose, level, error_code, file, line);
-
     if (log_flag & FLAG_LOG_OPEN)
     {
-        snprintf(logger_tab[logger_tab_index++], strnlen(str_out, LOGGER_STRING_MAX), "%s", str_out);
-        logger_tab_index %= LOGGER_HISTORY_MAX;
+        _get_log_str(str_in, str_out, FLAG_LOG_DATE_TIME, verbose, level, error_code, file, line);
+        snprintf(logger_tab[logger_tab_index], strnlen(str_out, LOGGER_STRING_MAX), "%s", str_out);
+        logger_color[logger_tab_index] = logger_color_tab[level];
+        logger_tab_index = (logger_tab_index + 1) % LOGGER_HISTORY_MAX;
     }
 
     if (_log_dir)
     {
+        _get_log_str(str_in, str_out, FLAG_LOG_FULL_TIME, verbose, level, error_code, file, line);
         snprintf(temp, PATH_MAX, "%s%s", _log_dir, LOG_FILE_NAME[level]);
         _append_file(temp, 1, strlen(str_out), str_out, FALSE, FALSE);
     }

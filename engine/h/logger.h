@@ -173,6 +173,18 @@ extern str log_dir[PATH_MAX];
  */
 extern str **logger_tab;
 
+/*! @brief logger color look-up table for 'logger_tab' entries.
+ *
+ *  @remark read-only, initialized internally in 'logger_init()'.
+ */
+extern u32 *logger_color;
+
+/*! @brief current position in 'logger_tab'.
+ *
+ *  @remark read-only, updated internally in '_log_output()'.
+ */
+extern i32 logger_tab_index;
+
 /*! @brief initialize logger.
  *
  *  @param argc, argv = used for logger log level if args provided.

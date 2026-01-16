@@ -177,7 +177,7 @@ static u32 settings_init(void)
 
     settings.lerp_speed = SET_LERP_SPEED_DEFAULT;
 
-    settings.render_distance = 8;
+    settings.render_distance = 2;
     settings.chunk_buf_radius = settings.render_distance;
     settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
 
@@ -1021,11 +1021,11 @@ static void draw_everything(void)
 
         if (!core.flag.debug)
             ui_draw(texture[TEXTURE_CROSSHAIR], render->size.x / 2, render->size.y / 2,
-                    8, 8, 0.0f, 0.0f, 0, 0, 0xfffffff);
+                    8, 8, 0.0f, 0.0f, 0, 0, 0xffffffff);
 
         ui_draw(texture[TEXTURE_ITEM_BAR], render->size.x / 2, render->size.y,
                 texture[TEXTURE_ITEM_BAR].size.x, texture[TEXTURE_ITEM_BAR].size.y,
-                84.5f, 18.0f, 1, 1, 0xfffffff);
+                84.5f, 18.0f, 1, 1, 0xffffffff);
         ui_stop();
     }
     else
@@ -1036,18 +1036,19 @@ static void draw_everything(void)
 
     /* ---- draw engine ui -------------------------------------------------- */
 
-    if (core.flag.super_debug)
-    {
-        //ui_render();
-        ui_start(NULL, TRUE, TRUE);
-        ui_draw(engine_texture[ENGINE_TEXTURE_PANEL_ACTIVE], 0, 0, 0, 0, 0, 0, 0, 0, 0);
-        ui_stop();
-    }
-    else /* ---- clear ui buffer -------------------------------------------- */
-    {
-        ui_start(NULL, TRUE, TRUE);
-        ui_stop();
-    }
+    //if (core.flag.super_debug)
+    //{
+    //    //ui_render();
+    //    ui_start(NULL, TRUE, TRUE);
+    //    ui_draw_nine_slice(engine_texture[ENGINE_TEXTURE_PANEL_ACTIVE],
+    //            10, 10, 8.0f, 400, render->size.y - 20, 0, 0, -1, -1, 0xffffffef);
+    //    ui_stop();
+    //}
+    //else /* ---- clear ui buffer -------------------------------------------- */
+    //{
+    //    ui_start(NULL, TRUE, TRUE);
+    //    ui_stop();
+    //}
 
     /* ---- draw debug info ------------------------------------------------- */
 
@@ -1169,8 +1170,8 @@ static void draw_everything(void)
                     glGetString(GL_SHADING_LANGUAGE_VERSION),
                     glGetString(GL_VENDOR),
                     glGetString(GL_RENDERER)),
-                (v2f32){SET_MARGIN, render->size.y - SET_MARGIN},
-                0, TEXT_ALIGN_BOTTOM);
+                (v2f32){render->size.x - SET_MARGIN, render->size.y - SET_MARGIN},
+                TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM);
         text_render(DIAGNOSTIC_COLOR_TRACE, TRUE);
         text_stop();
     }
@@ -1179,6 +1180,20 @@ static void draw_everything(void)
         text_start(font[FONT_MONO_BOLD], settings.font_size, 0, NULL, TRUE);
         text_stop();
     }
+
+    /* ---- draw logger strings --------------------------------------------- */
+    text_start(font[FONT_MONO_BOLD], settings.font_size, 0, NULL, FALSE);
+    i32 i = 0;
+    for (i = 24; i >= 0; --i)
+    {
+        text_push(stringf("%s",
+                    logger_tab[mod(logger_tab_index - i, LOGGER_HISTORY_MAX)]),
+                (v2f32){SET_MARGIN, render->size.y - SET_MARGIN - settings.font_size * (i + 1)},
+                0, TEXT_ALIGN_BOTTOM);
+
+        text_render(logger_color[logger_tab_index - i], TRUE);
+    }
+    text_stop();
 
     /* ---- post processing ------------------------------------------------- */
 
@@ -1266,7 +1281,7 @@ int main(int argc, char **argv)
     /* ---- set graphics ---------------------------------------------------- */
 
     if (
-            fbo_init(&fbo[FBO_SKYBOX],      &engine_mesh_unit, FALSE, 4) != ERR_SUCCESS ||
+            fbo_init(&fbo[FBO_SKYBOX],      NULL, FALSE, 4) != ERR_SUCCESS ||
             fbo_init(&fbo[FBO_WORLD],       NULL, FALSE, 4) != ERR_SUCCESS ||
             fbo_init(&fbo[FBO_WORLD_MSAA],  NULL, TRUE, 4) != ERR_SUCCESS ||
             fbo_init(&fbo[FBO_HUD],         NULL, FALSE, 4) != ERR_SUCCESS ||

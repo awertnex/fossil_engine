@@ -33,9 +33,10 @@ u32 ui_init(b8 multisample);
 void ui_start(FBO *fbo, b8 nine_slice, b8 clear);
 
 void ui_render(void);
-
 void ui_draw(Texture texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
         f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint);
+void ui_draw_nine_slice(Texture texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
+        f32 slice_size, f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint);
 
 /*! @remark enables 'GL_DEPTH_TEST'.
  */
