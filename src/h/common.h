@@ -14,7 +14,7 @@
 
 #define GAME_AUTHOR         "Author: Lily Awertnex"
 #define GAME_NAME           "Heaven-Hell Continuum"
-#define GAME_VERSION        "0.4.0"GAME_VERSION_DEV
+#define GAME_VERSION        "0.4.0"GAME_VERSION_BETA
 #define GAME_TITLE          GAME_NAME": "GAME_VERSION
 
 /* ---- settings ------------------------------------------------------------ */
