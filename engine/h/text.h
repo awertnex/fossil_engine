@@ -1,0 +1,156 @@
+#ifndef ENGINE_TEXT_H
+#define ENGINE_TEXT_H
+
+#include <engine/include/stb_truetype.h>
+
+#include "core.h"
+#include "types.h"
+
+typedef struct Glyph
+{
+    v2i32 scale;
+    v2i32 bearing;
+    i32 advance;
+    i32 x0, y0, x1, y1;
+    v2f32 texture_sample;
+    b8 loaded;
+} Glyph;
+
+typedef struct Glyphf
+{
+    v2f32 scale;
+    v2f32 bearing;
+    f32 advance;
+    f32 x0, y0, x1, y1;
+    v2f32 texture_sample;
+    b8 loaded;
+} Glyphf;
+
+typedef struct Font
+{
+    /*! @brief font name, initialized in 'font_init()' if empty.
+     */
+    str name[NAME_MAX];
+
+    /*! @brief font file name, initialized in 'font_init()' if NULL.
+     */
+    str *path;
+
+    u32 resolution;         /* glyph bitmap diameter in bytes */
+    f32 char_size;          /* for font atlas sampling */
+
+    /*! @brief glyphs highest points' deviation from baseline.
+     */
+    i32 ascent;
+
+    /*! @brief glyphs lowest points' deviation from baseline.
+     */
+    i32 descent;
+
+    i32 line_gap;
+    i32 line_height;
+    f32 size;               /* global font size for text uniformity */
+    v2i32 scale;            /* biggest glyph bounding box in pixels */
+
+    /*! @brief used by 'stbtt_InitFont()'.
+     */
+    stbtt_fontinfo info;
+
+    /*! @brief font file contents.
+     *
+     *  used by 'stbtt_InitFont()'.
+     */
+    u8 *buf;
+
+    u64 buf_len;            /* 'buf' size in bytes */
+    u8 *bitmap;             /* memory block for all font glyph bitmaps */
+
+    GLuint id;              /* used by opengl's glGenTextures() */
+    Glyph glyph[GLYPH_MAX];
+} Font;
+
+/*! @brief default fonts.
+ *
+ *  @remark declared internally in 'text_init()'.
+ */
+extern Font engine_font[ENGINE_FONT_COUNT];
+
+/*! @brief load font from file at 'file_name' or at 'font.path'.
+ *
+ *  1. allocate memory for 'font.buf' and load file contents into it in binary format.
+ *  2. allocate memory for 'font.bitmap' and render glyphs onto it.
+ *  3. generate square texture of diameter (size * 16) and bake bitmap onto it.
+ *
+ *  @param resolution = font size (font atlas cell diameter).
+ *  @param name = font name.
+ *  @param file_name = font file name.
+ *
+ *  @return non-zero on failure and 'engine_err' is set accordingly.
+ */
+u32 font_init(Font *font, u32 resolution, const str *name, const str *file_name);
+
+void font_free(Font *font);
+
+/*! @brief init text rendering settings.
+ *
+ *  @param multisample = turn on multisampling.
+ *
+ *  @return non-zero on failure and 'engine_err' is set accordingly.
+ */
+u32 text_init(u32 resolution, b8 multisample);
+
+/*! @brief start text rendering batch.
+ *
+ *  @param size = font height in pixels.
+ *
+ *  @param fbo = fbo to draw text to, if NULL, internal fbo is used
+ *  (must then call 'text_fbo_blit()' to blit result onto desired fbo).
+ *
+ *  @param length = pre-allocate buffer for string (if 0, STRING_MAX is allocated).
+ *  @param clear = clear the framebuffer before rendering.
+ *
+ *  @remark disables 'GL_DEPTH_TEST', 'text_stop()' re-enables it.
+ *  @remark can re-allocate 'fbo' with 'multisample' setting used in 'text_init()'.
+ */
+void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear);
+
+/*! @brief push string's glyph metrics, position and alignment to render buffer.
+ *
+ *  @param align_x = TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, TEXT_ALIGN_LEFT.
+ *  @param align_y = TEXT_ALIGN_TOP, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM.
+ *
+ *  @param color = text color, format: 0xrrggbbaa.
+ *
+ *  @remark can be called multiple times within a text rendering batch,
+ *  chained with 'text_render()'.
+ *
+ *  @remark default alignment top left (0, 0), enum: TextAlignment.
+ */
+void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, u32 color);
+
+/*! @brief render text to framebuffer.
+ *
+ *  @param shadow_color = shadow color if 'shadow' is TRUE, can be empty,
+ *  format: 0xrrggbbaa.
+ *
+ *  @remark the macros 'common.h/color_hex_to_v4', 'common.h/color_v4_to_hex' can be
+ *  used to convert from u32 hex color to v4f32 color and vice-versa.
+ *
+ *  @remark can be called multiple times within a text rendering batch,
+ *  chained with 'text_push()'.
+ */
+void text_render(b8 shadow, u32 shadow_color);
+
+/*! @brief stop text rendering batch.
+ *
+ *  @remark enables 'GL_DEPTH_TEST'.
+ */
+void text_stop(void);
+
+/*! @brief blit rendered text onto 'fbo'.
+ */
+void text_fbo_blit(GLuint fbo);
+
+void text_free(void);
+
+#endif /* ENGINE_TEXT_H */

@@ -32,7 +32,7 @@ typedef struct UBO
 
 /*! @brief default shaders.
  *
- *  @remark declared internally.
+ *  @remark declared internally in 'core.h/engine_init()'.
  */
 extern ShaderProgram engine_shader[ENGINE_SHADER_COUNT];
 

@@ -3,30 +3,48 @@
 #include "h/common.h"
 #include "h/core.h"
 #include "h/diagnostics.h"
+#include "h/dir.h"
 #include "h/logger.h"
 #include "h/memory.h"
+#include "h/string.h"
 #include "h/shaders.h"
+#include "h/text.h"
 
-typedef struct TextData
+#define STB_TRUETYPE_IMPLEMENTATION
+#include <engine/include/stb_truetype.h>
+
+struct TextData
 {
     v2f32 pos;
     v2f32 tex_coords;
     u32 color;
-} TextData;
+}; /* TextData */
 
 Font engine_font[ENGINE_FONT_COUNT] =
 {
-    [ENGINE_FONT_DEJAVU_SANS].path =
-        ENGINE_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_ansi.ttf",
+    [ENGINE_FONT_DEJAVU_SANS] =
+    {
+        .name = "DejaVu Sans (ANSI)",
+        .path = ENGINE_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_ansi.ttf",
+    },
 
-    [ENGINE_FONT_DEJAVU_SANS_BOLD].path =
-        ENGINE_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_bold_ansi.ttf",
+    [ENGINE_FONT_DEJAVU_SANS_BOLD]
+    {
+        .name = "DejaVu Sans Bold (ANSI)",
+        .path = ENGINE_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_bold_ansi.ttf",
+    },
 
-    [ENGINE_FONT_DEJAVU_SANS_MONO].path =
-        ENGINE_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_mono_ansi.ttf",
+    [ENGINE_FONT_DEJAVU_SANS_MONO]
+    {
+        .name = "DejaVu Sans Mono (ANSI)",
+        .path = ENGINE_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_mono_ansi.ttf",
+    },
 
-    [ENGINE_FONT_DEJAVU_SANS_MONO_BOLD].path =
-        ENGINE_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_mono_bold_ansi.ttf",
+    [ENGINE_FONT_DEJAVU_SANS_MONO_BOLD]
+    {
+        .name = "DejaVu Sans Mono Bold (ANSI)",
+        .path = ENGINE_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_mono_bold_ansi.ttf",
+    },
 };
 
 static struct /* text_core */
@@ -45,7 +63,7 @@ static struct /* text_core */
 
     /*! @brief text buffer, raw text data.
     */
-    TextData *buf;
+    struct TextData *buf;
 
     u64 buf_len;
     GLuint vao, vbo;
@@ -62,6 +80,132 @@ static struct /* text_core */
 
 } text_core;
 
+/* ---- section: font ------------------------------------------------------- */
+
+u32 font_init(Font *font, u32 resolution, const str *name, const str *file_name)
+{
+    f32 scale;
+    u32 i, x, y, col, row;
+    u8 *canvas = NULL;
+    Glyph *g = NULL;
+
+    if (resolution <= 2)
+    {
+        _LOGERROR(FALSE, ERR_IMAGE_SIZE_TOO_SMALL,
+                "Failed to Initialize Font '%s', Font Size Too Small\n", file_name);
+        return engine_err;
+    }
+
+    if (strlen(file_name) >= PATH_MAX)
+    {
+        _LOGERROR(FALSE, ERR_PATH_TOO_LONG,
+                "Failed to Initialize Font '%s', File Path Too Long\n", file_name);
+        return engine_err;
+    }
+
+    if (is_file_exists(file_name, TRUE) != ERR_SUCCESS)
+        return engine_err;
+
+    font->buf_len = get_file_contents(file_name, (void*)&font->buf, 1, TRUE);
+    if (!font->buf)
+        return engine_err;
+
+    if (!stbtt_InitFont(&font->info, (const unsigned char*)font->buf, 0))
+    {
+        _LOGERROR(FALSE, ERR_FONT_INIT_FAIL,
+                "Failed to Initialize Font '%s', 'stbtt_InitFont()' Failed\n", file_name);
+        goto cleanup;
+    }
+
+    if (mem_alloc((void*)&font->bitmap, GLYPH_MAX * resolution * resolution,
+                stringf("font_init().%s", file_name)) != ERR_SUCCESS)
+        goto cleanup;
+
+    if (mem_alloc((void*)&canvas, resolution * resolution,
+                "font_init().font_glyph_canvas") != ERR_SUCCESS)
+        goto cleanup;
+
+    if (name && !font->name[0])
+        snprintf(font->name, NAME_MAX, "%s", name);
+
+    stbtt_GetFontVMetrics(&font->info, &font->ascent, &font->descent, &font->line_gap);
+    font->resolution = resolution;
+    font->char_size = 1.0f / FONT_ATLAS_CELL_RESOLUTION;
+    font->line_height = font->ascent - font->descent + font->line_gap;
+    font->size = resolution;
+    scale = stbtt_ScaleForPixelHeight(&font->info, resolution);
+
+    for (i = 0; i < GLYPH_MAX; ++i)
+    {
+        int glyph_index = stbtt_FindGlyphIndex(&font->info, i);
+        if (!glyph_index) continue;
+
+        g = &font->glyph[i];
+
+        stbtt_GetGlyphHMetrics(&font->info, glyph_index, &g->advance, &g->bearing.x);
+        stbtt_GetGlyphBitmapBoxSubpixel(&font->info, glyph_index,
+                1.0f, 1.0f, 0.0f, 0.0f, &g->x0, &g->y0, &g->x1, &g->y1);
+
+        g->bearing.y = g->y0;
+        g->scale.x = g->x1 - g->x0;
+        g->scale.y = g->y1 - g->y0;
+        g->scale.x > font->scale.x ? font->scale.x = g->scale.x : 0;
+        g->scale.y > font->scale.y ? font->scale.y = g->scale.y : 0;
+
+        col = i % FONT_ATLAS_CELL_RESOLUTION;
+        row = i / FONT_ATLAS_CELL_RESOLUTION;
+        if (!stbtt_IsGlyphEmpty(&font->info, glyph_index))
+        {
+            stbtt_MakeGlyphBitmapSubpixel(&font->info, canvas,
+                    resolution, resolution, resolution, scale, scale, 0.0f, 0.0f, glyph_index);
+
+            void *bitmap_offset = font->bitmap +
+                col * resolution +
+                row * resolution * resolution * FONT_ATLAS_CELL_RESOLUTION +
+                1 + resolution * FONT_ATLAS_CELL_RESOLUTION;
+
+            for (y = 0; y < resolution - 1; ++y)
+                for (x = 0; x < resolution - 1; ++x)
+                    memcpy(bitmap_offset + x +
+                            y * resolution * FONT_ATLAS_CELL_RESOLUTION,
+                            canvas + x + y * resolution, 1);
+
+            memset(canvas, 0, resolution * resolution);
+        }
+
+        g->texture_sample.x = col * font->char_size;
+        g->texture_sample.y = row * font->char_size;
+        font->glyph[i].loaded = TRUE;
+    }
+
+    if (_texture_generate(&font->id, GL_RED, GL_RED, GL_LINEAR,
+                FONT_ATLAS_CELL_RESOLUTION * resolution,
+                FONT_ATLAS_CELL_RESOLUTION * resolution,
+                font->bitmap, TRUE) != ERR_SUCCESS)
+        goto cleanup;
+
+    mem_free((void*)&canvas, resolution * resolution, "font_init().font_glyph_canvas");
+
+    engine_err = ERR_SUCCESS;
+    return engine_err;
+
+cleanup:
+
+    mem_free((void*)&canvas, resolution * resolution, "font_init().font_glyph_canvas");
+    font_free(font);
+    return engine_err;
+}
+
+void font_free(Font *font)
+{
+    if (!font) return;
+    mem_free((void*)&font->buf, font->buf_len, "font_free().file_contents");
+    mem_free((void*)&font->bitmap, GLYPH_MAX * font->resolution * font->resolution, font->name);
+    *font = (Font){0};
+}
+
+/* ---- section: text ------------------------------------------------------- */
+
 u32 text_init(u32 resolution, b8 multisample)
 {
     u32 i = 0;
@@ -71,11 +215,11 @@ u32 text_init(u32 resolution, b8 multisample)
     for (i = 0; i < ENGINE_FONT_COUNT; ++i)
         if (font_init(&engine_font[i],
                     resolution ? resolution : FONT_RESOLUTION_DEFAULT,
-                    engine_font[i].path) != ERR_SUCCESS)
+                    NULL, engine_font[i].path) != ERR_SUCCESS)
             goto cleanup;
 
     if (
-            mem_alloc((void*)&text_core.buf, STRING_MAX * sizeof(TextData),
+            mem_alloc((void*)&text_core.buf, STRING_MAX * sizeof(struct TextData),
                 "text_init().text_core.buf") != ERR_SUCCESS)
         goto cleanup;
 
@@ -146,7 +290,7 @@ void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear)
     {
         if (
                 mem_realloc((void*)&text_core.buf,
-                    length * sizeof(TextData),
+                    length * sizeof(struct TextData),
                     "text_start().text_core.buf") != ERR_SUCCESS)
             goto cleanup;
 
@@ -218,7 +362,7 @@ void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, u32 color)
     {
         if (
                 mem_realloc((void*)&text_core.buf,
-                    (text_core.buf_len + STRING_MAX) * sizeof(TextData),
+                    (text_core.buf_len + STRING_MAX) * sizeof(struct TextData),
                     "text_push().text_core.buf_len") != ERR_SUCCESS)
         {
             _LOGERROR(FALSE, engine_err, "%s\n", "Failed to Push Text");
@@ -333,5 +477,6 @@ void text_fbo_blit(GLuint fbo)
 void text_free(void)
 {
     fbo_free(&text_core.fbo);
-    mem_free((void*)&text_core.buf, text_core.buf_len * sizeof(TextData), "text_free().text_core.buf");
+    mem_free((void*)&text_core.buf, text_core.buf_len * sizeof(struct TextData),
+            "text_free().text_core.buf");
 }

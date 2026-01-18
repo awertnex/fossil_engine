@@ -3,6 +3,7 @@
 
 #include <engine/h/core.h>
 #include <engine/h/diagnostics.h>
+#include <engine/h/text.h>
 #include <engine/h/types.h>
 
 #include "common.h"

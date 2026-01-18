@@ -11,17 +11,16 @@
 #define ENGINE_VERSION          "0.1.3"ENGINE_VERSION_STABLE
 #define ENGINE_TITLE            ENGINE_NAME": "ENGINE_VERSION
 
-#include <engine/include/glad/glad.h>
-#define GLFW_INCLUDE_NONE
-#include <engine/include/glfw3.h>
-#include <engine/include/stb_truetype.h>
-#include <engine/include/stb_image.h>
-#include <engine/include/stb_image_write.h>
-
 #include "common.h"
 #include "limits.h"
 #include "platform.h"
 #include "types.h"
+
+#include <engine/include/glad/glad.h>
+#define GLFW_INCLUDE_NONE
+#include <engine/include/glfw3.h>
+#include <engine/include/stb_image.h>
+#include <engine/include/stb_image_write.h>
 
 typedef struct Render
 {
@@ -110,67 +109,6 @@ typedef struct Projection
     m4f32 perspective;
 } Projection;
 
-typedef struct Glyph
-{
-    v2i32 scale;
-    v2i32 bearing;
-    i32 advance;
-    i32 x0, y0, x1, y1;
-    v2f32 texture_sample;
-    b8 loaded;
-} Glyph;
-
-typedef struct Glyphf
-{
-    v2f32 scale;
-    v2f32 bearing;
-    f32 advance;
-    f32 x0, y0, x1, y1;
-    v2f32 texture_sample;
-    b8 loaded;
-} Glyphf;
-
-typedef struct Font
-{
-    /*! @brief font file name,
-     *
-     *  initialized in 'font_init()'.
-     */
-    str path[PATH_MAX];
-
-    u32 resolution;         /* glyph bitmap diameter in bytes */
-    f32 char_size;          /* for font atlas sampling */
-
-    /*! @brief glyphs highest points' deviation from baseline.
-     */
-    i32 ascent;
-
-    /*! @brief glyphs lowest points' deviation from baseline.
-     */
-    i32 descent;
-
-    i32 line_gap;
-    i32 line_height;
-    f32 size;               /* global font size for text uniformity */
-    v2i32 scale;            /* biggest glyph bounding box in pixels */
-
-    /*! @brief used by 'stbtt_InitFont()'.
-     */
-    stbtt_fontinfo info;
-
-    /*! @brief font file contents.
-     *
-     *  used by 'stbtt_InitFont()'.
-     */
-    u8 *buf;
-
-    u64 buf_len;            /* 'buf' size in bytes */
-    u8 *bitmap;             /* memory block for all font glyph bitmaps */
-
-    GLuint id;              /* used by opengl's glGenTextures() */
-    Glyph glyph[GLYPH_MAX];
-} Font;
-
 /*! -- INTERNAL USE ONLY --;
  *
  *  @brief default render.
@@ -186,13 +124,13 @@ extern Render *render;
 extern Texture engine_texture[ENGINE_TEXTURE_COUNT];
 
 extern Mesh engine_mesh_unit;
-extern Font engine_font[ENGINE_FONT_COUNT];
 
 /*! @brief initialize engine stuff.
  *
  *  - set GLFW error callback.
  *  - call 'change_dir()' to change working directory to the running applications'.
  *  - call 'logger_init()', 'glfw_init()', 'window_init()' and 'glad_init()'.
+ *  - initialize default shaders if requested.
  *
  *  @param argc, argv = used for logger log level if args provided.
  *  @param _log_dir = directory to write log files into for the lifetime of the process,
@@ -340,11 +278,22 @@ u32 texture_init(Texture *texture, v2i32 size, const GLint format_internal, cons
 
 /*! @brief generate texture for opengl from image loaded by 'texture_init()'.
  *
- *  @param bindless = use opengl extension 'GL_ARB_bindless_texture'.
+ *  @param bindless = use opengl extension 'GL_ARB_bindless_texture'
+ *  (handle is in 'texture.handle'.
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
 u32 texture_generate(Texture *texture, b8 bindless);
+
+/*! @brief generate texture for opengl from 'buf'.
+ *
+ *  @brief automatically called from 'texture_generate()' if texture data is already
+ *  loaded into a texture by calling 'texture_init()'.
+ *
+ *  @return non-zero on failure and 'engine_err' is set accordingly.
+ */
+u32 _texture_generate(GLuint *id, const GLint format_internal,  const GLint format,
+        GLint filter, u32 width, u32 height, void *buf, b8 grayscale);
 
 void texture_free(Texture *texture);
 
@@ -385,95 +334,5 @@ void update_projection_perspective(Camera camera, Projection *projection, b8 rol
  *  assign vertical angle to 'pitch' and horizontal angle to 'yaw'.
  */
 void get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f64 *yaw);
-
-/*! @brief load font from file at font_path.
- *
- *  1. allocate memory for 'font.buf' and load file contents into it in binary format.
- *  2. allocate memory for 'font.bitmap' and render glyphs onto it.
- *  3. generate square texture of diameter (size * 16) and bake bitmap onto it.
- *
- *  @param resolution = font size (font atlas cell diameter).
- *  @param file_name = font file name.
- *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
- */
-u32 font_init(Font *font, u32 resolution, const str *file_name);
-
-void font_free(Font *font);
-
-/*! -- IMPLEMENTATION: text.c --;
- *
- *  @brief init text rendering settings.
- *
- *  @param multisample = turn on multisampling.
- *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
- */
-u32 text_init(u32 resolution, b8 multisample);
-
-/*! -- IMPLEMENTATION: text.c --;
- *
- *  @brief start text rendering batch.
- *
- *  @param size = font height in pixels.
- *
- *  @param fbo = fbo to draw text to, if NULL, internal fbo is used
- *  (must then call 'text_fbo_blit()' to blit result onto desired fbo).
- *
- *  @param length = pre-allocate buffer for string (if 0, STRING_MAX is allocated).
- *  @param clear = clear the framebuffer before rendering.
- *
- *  @remark disables 'GL_DEPTH_TEST', 'text_stop()' re-enables it.
- *  @remark can re-allocate 'fbo' with 'multisample' setting used in 'text_init()'.
- */
-void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear);
-
-/*! -- IMPLEMENTATION: text.c --;
- *
- *  @brief push string's glyph metrics, position and alignment to render buffer.
- *
- *  @param align_x = TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, TEXT_ALIGN_LEFT.
- *  @param align_y = TEXT_ALIGN_TOP, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM.
- *
- *  @param color = text color, format: 0xrrggbbaa.
- *
- *  @remark can be called multiple times within a text rendering batch,
- *  chained with 'text_render()'.
- *
- *  @remark default alignment top left (0, 0), enum: TextAlignment.
- */
-void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, u32 color);
-
-/*! -- IMPLEMENTATION: text.c --;
- *  @brief render text to framebuffer.
- *
- *  @param shadow_color = shadow color if 'shadow' is TRUE, can be empty,
- *  format: 0xrrggbbaa.
- *
- *  @remark the macros 'common.h/color_hex_to_v4', 'common.h/color_v4_to_hex' can be
- *  used to convert from u32 hex color to v4f32 color and vice-versa.
- *
- *  @remark can be called multiple times within a text rendering batch,
- *  chained with 'text_push()'.
- */
-void text_render(b8 shadow, u32 shadow_color);
-
-/*! -- IMPLEMENTATION: text.c --;
- *
- *  @brief stop text rendering batch.
- *
- *  @remark enables 'GL_DEPTH_TEST'.
- */
-void text_stop(void);
-
-/*! -- IMPLEMENTATION: text.c --;
- *
- *  @brief blit rendered text onto 'fbo'.
- */
-void text_fbo_blit(GLuint fbo);
-
-/*! -- IMPLEMENTATION: text.c --;
- */
-void text_free(void);
 
 #endif /* ENGINE_CORE_H */

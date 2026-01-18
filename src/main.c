@@ -11,6 +11,7 @@
 #include <engine/h/platform.h>
 #include <engine/h/shaders.h>
 #include <engine/h/string.h>
+#include <engine/h/text.h>
 #include <engine/h/time.h>
 #include <engine/h/ui.h>
 

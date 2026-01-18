@@ -29,8 +29,8 @@ u32 is_dir(const str *name);
  */
 u32 is_dir_exists(const str *name, b8 log);
 
-/*! @param destination = pointer to NULL buffer to store file contents.
- *  @remark 'destination' is allocated file size, + 1 if 'terminate' is TRUE.
+/*! @param dst = pointer to NULL buffer to store file contents.
+ *  @remark 'dst' is allocated file size, + 1 if 'terminate' is TRUE.
  *
  *  @param format = read file 'name' using 'format' ('fopen()' parameter).
  *  @param terminate = TRUE will NULL terminate buffer.
@@ -38,7 +38,7 @@ u32 is_dir_exists(const str *name, b8 log);
  *  @return file size in bytes.
  *  @return 0 on failure and 'engine_err' is set accordingly.
  */
-u64 get_file_contents(const str *name, void **destination, u64 size, b8 terminate);
+u64 get_file_contents(const str *name, void **dst, u64 size, b8 terminate);
 
 /*! @brief get directory entries of 'name'.
  *
@@ -52,25 +52,25 @@ Buf get_dir_contents(const str *name);
  */
 u64 get_dir_entry_count(const str *name);
 
-/*! @brief copy 'source' into 'destination'.
+/*! @brief copy 'src' into 'dst'.
  *
  *  @remark can overwrite files.
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 copy_file(const str *source, const str *destination);
+u32 copy_file(const str *src, const str *dst);
 
-/*! @brief copy 'source' into 'destination'.
+/*! @brief copy 'src' into 'dst'.
  *
  *  @param contents_only =
- *      TRUE: copy directory contents of 'source' and place inside 'destination'.
- *      FALSE: copy directory 'source' and place inside 'destination'.
+ *      TRUE: copy directory contents of 'src' and place inside 'dst'.
+ *      FALSE: copy directory 'src' and place inside 'dst'.
  *
  *  @remark can overwrite directories and files, unless 'overwrite' is FALSE.
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 copy_dir(const str *source, const str *destination, b8 contents_only);
+u32 copy_dir(const str *src, const str *dst, b8 contents_only);
 
 /*! @param log = enable/disable logging.
  *  @param text = TRUE will newline-terminate file.

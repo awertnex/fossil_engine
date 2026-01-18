@@ -13,10 +13,9 @@
 #include "h/shaders.h"
 #include "h/string.h"
 #include "h/time.h"
+#include "h/text.h"
 #include "h/ui.h"
 
-#define STB_TRUETYPE_IMPLEMENTATION
-#include <engine/include/stb_truetype.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <engine/include/stb_image.h>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -55,15 +54,6 @@ static void glfw_callback_error(int error, const char* message)
     (void)error;
     _LOGERROR(TRUE, ERR_GLFW, "GLFW: %s\n", message);
 }
-
-/*! -- INTERNAL USE ONLY --;
- *
- *  @brief generate texture for opengl from 'buf'.
- *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
- */
-static u32 _texture_generate(GLuint *id, const GLint format_internal,  const GLint format,
-        GLint filter, u32 width, u32 height, void *buf, b8 grayscale);
 
 /* ---- section: init ------------------------------------------------------- */
 
@@ -607,7 +597,7 @@ u32 texture_generate(Texture *texture, b8 bindless)
     return engine_err;
 }
 
-static u32 _texture_generate(GLuint *id, const GLint format_internal,  const GLint format,
+u32 _texture_generate(GLuint *id, const GLint format_internal,  const GLint format,
         GLint filter, u32 width, u32 height, void *buf, b8 grayscale)
 {
     if (!width || !height)
@@ -835,125 +825,4 @@ void get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f64 *y
             });
     *pitch = atan2(direction.z, sqrt(direction.x * direction.x + direction.y * direction.y));
     *yaw = atan2(-direction.y, direction.x);
-}
-
-/* ---- section: font ------------------------------------------------------- */
-
-u32 font_init(Font *font, u32 resolution, const str *file_name)
-{
-    f32 scale;
-    u32 i, x, y, col, row;
-    u8 *canvas = NULL;
-    Glyph *g = NULL;
-
-    if (resolution <= 2)
-    {
-        _LOGERROR(FALSE, ERR_IMAGE_SIZE_TOO_SMALL,
-                "Failed to Initialize Font '%s', Font Size Too Small\n", file_name);
-        return engine_err;
-    }
-
-    if (strlen(file_name) >= PATH_MAX)
-    {
-        _LOGERROR(FALSE, ERR_PATH_TOO_LONG,
-                "Failed to Initialize Font '%s', File Path Too Long\n", file_name);
-        return engine_err;
-    }
-
-    if (is_file_exists(file_name, TRUE) != ERR_SUCCESS)
-        return engine_err;
-
-    font->buf_len = get_file_contents(file_name, (void*)&font->buf, 1, TRUE);
-    if (!font->buf)
-        return engine_err;
-
-    if (!stbtt_InitFont(&font->info, (const unsigned char*)font->buf, 0))
-    {
-        _LOGERROR(FALSE, ERR_FONT_INIT_FAIL,
-                "Failed to Initialize Font '%s', 'stbtt_InitFont()' Failed\n", file_name);
-        goto cleanup;
-    }
-
-    if (mem_alloc((void*)&font->bitmap, GLYPH_MAX * resolution * resolution,
-                stringf("font_init().%s", file_name)) != ERR_SUCCESS)
-        goto cleanup;
-
-    if (mem_alloc((void*)&canvas, resolution * resolution,
-                "font_init().font_glyph_canvas") != ERR_SUCCESS)
-        goto cleanup;
-    snprintf(font->path, PATH_MAX, "%s", file_name);
-    stbtt_GetFontVMetrics(&font->info, &font->ascent, &font->descent, &font->line_gap);
-    font->resolution = resolution;
-    font->char_size = 1.0f / FONT_ATLAS_CELL_RESOLUTION;
-    font->line_height = font->ascent - font->descent + font->line_gap;
-    font->size = resolution;
-    scale = stbtt_ScaleForPixelHeight(&font->info, resolution);
-
-    for (i = 0; i < GLYPH_MAX; ++i)
-    {
-        int glyph_index = stbtt_FindGlyphIndex(&font->info, i);
-        if (!glyph_index) continue;
-
-        g = &font->glyph[i];
-
-        stbtt_GetGlyphHMetrics(&font->info, glyph_index, &g->advance, &g->bearing.x);
-        stbtt_GetGlyphBitmapBoxSubpixel(&font->info, glyph_index,
-                1.0f, 1.0f, 0.0f, 0.0f, &g->x0, &g->y0, &g->x1, &g->y1);
-
-        g->bearing.y = g->y0;
-        g->scale.x = g->x1 - g->x0;
-        g->scale.y = g->y1 - g->y0;
-        g->scale.x > font->scale.x ? font->scale.x = g->scale.x : 0;
-        g->scale.y > font->scale.y ? font->scale.y = g->scale.y : 0;
-
-        col = i % FONT_ATLAS_CELL_RESOLUTION;
-        row = i / FONT_ATLAS_CELL_RESOLUTION;
-        if (!stbtt_IsGlyphEmpty(&font->info, glyph_index))
-        {
-            stbtt_MakeGlyphBitmapSubpixel(&font->info, canvas,
-                    resolution, resolution, resolution, scale, scale, 0.0f, 0.0f, glyph_index);
-
-            void *bitmap_offset = font->bitmap +
-                col * resolution +
-                row * resolution * resolution * FONT_ATLAS_CELL_RESOLUTION +
-                1 + resolution * FONT_ATLAS_CELL_RESOLUTION;
-
-            for (y = 0; y < resolution - 1; ++y)
-                for (x = 0; x < resolution - 1; ++x)
-                    memcpy(bitmap_offset + x +
-                            y * resolution * FONT_ATLAS_CELL_RESOLUTION,
-                            canvas + x + y * resolution, 1);
-
-            memset(canvas, 0, resolution * resolution);
-        }
-
-        g->texture_sample.x = col * font->char_size;
-        g->texture_sample.y = row * font->char_size;
-        font->glyph[i].loaded = TRUE;
-    }
-
-    if (_texture_generate(&font->id, GL_RED, GL_RED, GL_LINEAR,
-                FONT_ATLAS_CELL_RESOLUTION * resolution,
-                FONT_ATLAS_CELL_RESOLUTION * resolution,
-                font->bitmap, TRUE) != ERR_SUCCESS)
-        goto cleanup;
-
-    mem_free((void*)&canvas, resolution * resolution, "font_init().font_glyph_canvas");
-
-    engine_err = ERR_SUCCESS;
-    return engine_err;
-
-cleanup:
-
-    mem_free((void*)&canvas, resolution * resolution, "font_init().font_glyph_canvas");
-    font_free(font);
-    return engine_err;
-}
-
-void font_free(Font *font)
-{
-    if (!font) return;
-    mem_free((void*)&font->buf, font->buf_len, "font_free().file_contents");
-    mem_free((void*)&font->bitmap, GLYPH_MAX * font->resolution * font->resolution, font->path);
-    *font = (Font){0};
 }
