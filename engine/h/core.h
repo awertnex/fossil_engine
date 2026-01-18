@@ -287,7 +287,7 @@ u32 texture_generate(Texture *texture, b8 bindless);
 
 /*! @brief generate texture for opengl from 'buf'.
  *
- *  @brief automatically called from 'texture_generate()' if texture data is already
+ *  automatically called from 'texture_generate()' if texture data is already
  *  loaded into a texture by calling 'texture_init()'.
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
@@ -299,6 +299,7 @@ void texture_free(Texture *texture);
 
 /*! @param attrib = pointer to a function to set attribute arrays for 'mesh->vao'
  *  (e.g. &attrib_vec3, set a single vec3 attribute array),
+ *
  *  @param usage = 'GL_<x>_DRAW'.
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.

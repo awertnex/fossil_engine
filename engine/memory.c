@@ -289,7 +289,7 @@ u32 _mem_clear(void **x, u64 size, const str *name, const str *file, u64 line)
         return engine_err;
     }
 
-    memset(*x, 0, size);
+    bzero(*x, size);
     _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Cleared [%lldB]\n", name, *x, size);
 
     engine_err = ERR_SUCCESS;
