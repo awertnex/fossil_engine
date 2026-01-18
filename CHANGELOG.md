@@ -1,5 +1,10 @@
 # changelog
 
+## v0.4.0-dev
+
+#### changes
+- fixed engine build tool not copying required libraries to deployment directory
+
 ## v0.4.0-beta (18 Jan 2026)
 
 #### changes

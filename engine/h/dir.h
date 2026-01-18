@@ -62,16 +62,15 @@ u32 copy_file(const str *source, const str *destination);
 
 /*! @brief copy 'source' into 'destination'.
  *
- *  @param overwrite =
- *      TRUE: copy contents at 'source' into directory at 'destination'.
- *      FALSE: copy directory at 'source' and place inside 'destination' if
- *      'destination' exists.
+ *  @param contents_only =
+ *      TRUE: copy directory contents of 'source' and place inside 'destination'.
+ *      FALSE: copy directory 'source' and place inside 'destination'.
  *
  *  @remark can overwrite directories and files, unless 'overwrite' is FALSE.
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 copy_dir(const str *source, const str *destination, b8 overwrite);
+u32 copy_dir(const str *source, const str *destination, b8 contents_only);
 
 /*! @param log = enable/disable logging.
  *  @param text = TRUE will newline-terminate file.

@@ -70,7 +70,7 @@ void build_init(int argc, char **argv, const str *build_src_name, const str *bui
     if (find_token("show", argc, argv)) flag |= FLAG_CMD_SHOW;
     if (find_token("raw", argc, argv)) flag |= FLAG_CMD_RAW;
 
-    if (logger_init(argc, argv, TRUE, NULL) != ERR_SUCCESS)
+    if (logger_init(argc, argv, TRUE, NULL, FALSE) != ERR_SUCCESS)
         cmd_fail();
 
     if (find_token("LOGFATAL", argc, argv)) log_level_max = LOGLEVEL_FATAL;
@@ -208,7 +208,7 @@ u32 engine_build(const str *out_dir)
     cmd_push("-Wformat-truncation=0");
     _engine_link_libs();
     cmd_push("-o");
-    cmd_push(stringf("%s"ENGINE_NAME_LIB, out_dir));
+    cmd_push("engine/lib/"PLATFORM"/"ENGINE_NAME_LIB);
     cmd_ready();
 
     if (flag & FLAG_CMD_SHOW) cmd_show();
@@ -227,8 +227,7 @@ u32 engine_build(const str *out_dir)
     if (exec(&cmd, "engine_build()") != ERR_SUCCESS)
         cmd_fail();
 
-    if (copy_file(stringf("%s"ENGINE_NAME_LIB, out_dir),
-                "engine/lib/"PLATFORM"/"ENGINE_NAME_LIB) != ERR_SUCCESS)
+    if (copy_dir("engine/lib/"PLATFORM, out_dir, TRUE) != ERR_SUCCESS)
         cmd_fail();
 
     cmd_free();

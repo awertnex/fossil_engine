@@ -259,7 +259,7 @@ u64 get_dir_entry_count(const str *name)
 
 u32 copy_file(const str *source, const str *destination)
 {
-    str destination_string[PATH_MAX] = {0};
+    str str_dst[PATH_MAX] = {0};
     str *in_file = NULL;
     FILE *out_file = NULL;
     u64 len = 0;
@@ -267,15 +267,15 @@ u32 copy_file(const str *source, const str *destination)
     if (is_file_exists(source, TRUE) != ERR_SUCCESS)
             return engine_err;
 
-    snprintf(destination_string, PATH_MAX, "%s", destination);
+    snprintf(str_dst, PATH_MAX, "%s", destination);
 
     if (is_dir(destination) == ERR_SUCCESS)
-        strncat(destination_string, strrchr(source, SLASH_NATIVE), PATH_MAX - 1);
+        strncat(str_dst, strrchr(source, SLASH_NATIVE), PATH_MAX - 1);
 
-    if ((out_file = fopen(destination_string, "wb")) == NULL)
+    if ((out_file = fopen(str_dst, "wb")) == NULL)
     {
         _LOGERROR(FALSE, ERR_FILE_OPEN_FAIL, "Failed to Copy File '%s' -> '%s'\n",
-                source, destination_string);
+                source, str_dst);
         return engine_err;
     }
 
@@ -289,17 +289,17 @@ u32 copy_file(const str *source, const str *destination)
     fwrite(in_file, 1, len, out_file);
     fclose(out_file);
 
-    _LOGTRACE(FALSE, "File Copied '%s' -> '%s'\n", source, destination_string);
+    _LOGTRACE(FALSE, "File Copied '%s' -> '%s'\n", source, str_dst);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
 }
 
-u32 copy_dir(const str *source, const str *destination, b8 overwrite)
+u32 copy_dir(const str *source, const str *destination, b8 contents_only)
 {
     Buf dir_contents = {0};
-    str source_string[PATH_MAX] = {0};
-    str destination_string[PATH_MAX] = {0};
+    str str_src[PATH_MAX] = {0};
+    str str_dst[PATH_MAX] = {0};
     str in_dir[PATH_MAX] = {0};
     str out_dir[PATH_MAX] = {0};
     u64 i;
@@ -311,32 +311,36 @@ u32 copy_dir(const str *source, const str *destination, b8 overwrite)
     if (!dir_contents.loaded)
         return engine_err;
 
-    snprintf(source_string, PATH_MAX, "%s", source);
-    snprintf(destination_string, PATH_MAX, "%s", destination);
-    check_slash(source_string);
-    check_slash(destination_string);
+    snprintf(str_src, PATH_MAX, "%s", source);
+    check_slash(str_src);
+    normalize_slash(str_src);
 
-    if (is_dir_exists(destination_string, FALSE) == ERR_SUCCESS && !overwrite)
+    snprintf(str_dst, PATH_MAX, "%s", destination);
+    check_slash(str_dst);
+    normalize_slash(str_dst);
+
+
+    if (is_dir_exists(str_dst, FALSE) == ERR_SUCCESS && !contents_only)
     {
-        strncat(destination_string, strrchr(source_string, SLASH_NATIVE), PATH_MAX - 1);
-        check_slash(destination_string);
+        strncat(str_dst, strrchr(str_src, SLASH_NATIVE), PATH_MAX - 1);
+        check_slash(str_dst);
     }
-    else make_dir(destination_string);
+    else make_dir(str_dst);
 
     for (i = 0; i < dir_contents.memb; ++i)
     {
-        snprintf(in_dir, PATH_MAX - 1, "%s%s", source_string, (str*)dir_contents.i[i]);
-        snprintf(out_dir, PATH_MAX - 1, "%s%s", destination_string, (str*)dir_contents.i[i]);
+        snprintf(in_dir, PATH_MAX - 1, "%s%s", str_src, (str*)dir_contents.i[i]);
+        snprintf(out_dir, PATH_MAX - 1, "%s%s", str_dst, (str*)dir_contents.i[i]);
 
         if (is_dir(in_dir) == ERR_SUCCESS)
         {
-            copy_dir(in_dir, out_dir, 1);
+            copy_dir(in_dir, out_dir, TRUE);
             continue;
         }
         copy_file(in_dir, out_dir);
     }
 
-    _LOGTRACE(FALSE, "Directory Copied '%s' -> '%s'\n", source, destination_string);
+    _LOGTRACE(FALSE, "Directory Copied '%s' -> '%s'\n", source, str_dst);
 
     engine_err = ERR_SUCCESS;
     return engine_err;

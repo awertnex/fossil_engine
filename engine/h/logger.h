@@ -7,10 +7,10 @@
 #include "memory.h"
 #include "types.h"
 
-enum /* LogFlag */
+enum /* LoggerFlag */
 {
-    FLAG_GUI_LOGGER_OPEN = 0x0001,
-}; /* LogFlag */
+    FLAG_LOGGER_GUI_OPEN = 0x0001,
+}; /* LoggerFlag */
 
 enum /* LogMessageFlag */
 {
@@ -20,7 +20,7 @@ enum /* LogMessageFlag */
     FLAG_LOG_DATE_TIME =    0x0006,
     FLAG_LOG_FULL_TIME =    0x0007,
     FLAG_LOG_TAG =          0x0008,
-    FLAG_LOG_COLOR =        0x0010,
+    FLAG_LOG_TERM_COLOR =   0x0010,
 }; /* LogMessageFlag */
 
 enum /* LogLevel */
@@ -190,10 +190,13 @@ extern i32 logger_tab_index;
  *
  *  @param argc, argv = used for logger log level if args provided.
  *
+ *  @param flags = enum 'common.h/EngineFlag'.
+ *
  *  @param _log_dir = directory to write log files into for the lifetime of the process,
  *  if NULL, logs won't be written to disk.
  *
- *  @param flags = enum 'common.h/EngineFlag'.
+ *  @param log_dir_not_found = if TRUE, will log ERR_DIR_NOT_FOUND if '_log_dir()' not found
+ *  ('is_dir_exists()' parameter).
  *
  *  @remark called automatically from 'core.h/engine_init()'.
  *
@@ -207,7 +210,7 @@ extern i32 logger_tab_index;
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 logger_init(int argc, char **argv, u64 flags, const str *_log_dir);
+u32 logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 log_dir_not_found);
 
 void logger_close(void);
 

@@ -72,7 +72,8 @@ u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
 {
     u32 i = 0;
 
-    if (logger_init(argc, argv, flags & FLAG_ENGINE_RELEASE_BUILD, _log_dir) != ERR_SUCCESS)
+    if (logger_init(argc, argv, flags & FLAG_ENGINE_RELEASE_BUILD, _log_dir,
+                TRUE) != ERR_SUCCESS)
         goto cleanup;
 
     glfwSetErrorCallback(glfw_callback_error);

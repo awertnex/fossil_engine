@@ -74,7 +74,7 @@ static str *esc_code_color[LOGLEVEL_COUNT] =
 static void _get_log_str(const str *str_in, str *str_out, u32 flags, b8 verbose,
         u8 level, u32 error_code, const str *file, u64 line);
 
-u32 logger_init(int argc, char **argv, u64 flags, const str *_log_dir)
+u32 logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 log_dir_not_found)
 {
     u32 i = 0;
 
@@ -107,7 +107,7 @@ u32 logger_init(int argc, char **argv, u64 flags, const str *_log_dir)
         change_dir(DIR_PROC_ROOT);
     }
 
-    if (_log_dir && is_dir_exists(_log_dir, TRUE) == ERR_SUCCESS)
+    if (is_dir_exists(_log_dir, log_dir_not_found) == ERR_SUCCESS)
         snprintf(log_dir, PATH_MAX, "%s", _log_dir);
 
     if (
@@ -128,7 +128,7 @@ u32 logger_init(int argc, char **argv, u64 flags, const str *_log_dir)
     for (i = 0; i < LOGGER_HISTORY_MAX; ++i)
         logger_tab[i] = logger_buf + i * LOGGER_STRING_MAX;
 
-    log_flag |= FLAG_GUI_LOGGER_OPEN;
+    log_flag |= FLAG_LOGGER_GUI_OPEN;
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -138,7 +138,7 @@ void logger_close(void)
 {
     _LOGTRACE(TRUE, "%s\n", "Closing Logger..");
 
-    log_flag &= ~FLAG_GUI_LOGGER_OPEN;
+    log_flag &= ~FLAG_LOGGER_GUI_OPEN;
     mem_unmap((void*)&logger_color, LOGGER_HISTORY_MAX * sizeof(u32), "logger_init().logger_color");
     mem_unmap((void*)&logger_buf, LOGGER_HISTORY_MAX * LOGGER_STRING_MAX, "logger_close().logger_buf");
     mem_unmap((void*)&logger_tab, LOGGER_HISTORY_MAX * sizeof(str*), "logger_close().logger_tab");
@@ -158,11 +158,11 @@ void _log_output(b8 verbose, b8 cmd, const str *_log_dir, const str *file, u64 l
     vsnprintf(str_in, STRING_MAX, format, args);
     va_end(args);
 
-    _get_log_str(str_in, str_out, FLAG_LOG_TAG | FLAG_LOG_COLOR,
+    _get_log_str(str_in, str_out, FLAG_LOG_TAG | FLAG_LOG_TERM_COLOR,
             verbose, level, error_code, file, line);
     fprintf(stderr, "%s", str_out);
 
-    if (log_flag & FLAG_GUI_LOGGER_OPEN)
+    if (log_flag & FLAG_LOGGER_GUI_OPEN)
     {
         if (cmd)
             _get_log_str(str_in, str_out, 0, FALSE, level, 0, file, line);
@@ -175,7 +175,7 @@ void _log_output(b8 verbose, b8 cmd, const str *_log_dir, const str *file, u64 l
         logger_tab_index = (logger_tab_index + 1) % LOGGER_HISTORY_MAX;
     }
 
-    if (_log_dir)
+    if (is_dir_exists(_log_dir, FALSE) == ERR_SUCCESS)
     {
         _get_log_str(str_in, str_out, FLAG_LOG_TAG | FLAG_LOG_FULL_TIME,
                 verbose, level, error_code, file, line);
@@ -211,7 +211,7 @@ static void _get_log_str(const str *str_in, str *str_out, u32 flags, b8 verbose,
         snprintf(str_time_full, TIME_STRING_MAX, "%s%s ", str_timestamp, str_time);
     }
 
-    if (flags & FLAG_LOG_COLOR)
+    if (flags & FLAG_LOG_TERM_COLOR)
     {
         str_color = esc_code_color[level];
         str_nocolor = esc_code_nocolor;
