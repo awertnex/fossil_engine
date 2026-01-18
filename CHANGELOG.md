@@ -1,6 +1,6 @@
 # changelog
 
-## v<version> (DD MMM YYYY)
+## v0.4.0-beta (18 Jan 2026)
 
 #### changes
 - added player air control while not flying
@@ -11,7 +11,7 @@
     - velocity: vector that accumulates 'Player.acceleration'
     - 'Player.pos' accumulates 'Player.velocity'
     - Player.drag: air drag
-- added working collision even at high speeds
+- added working collision even at high speeds (see 'bugs and fixes')
 - fixed double click infinite loop when a release state is recorded between
   a key press and a key hold (when pressing and releasing too quick)
 - added nice color variation to chunk gizmo (Alt + G)
@@ -26,9 +26,20 @@
       hard-coded max anchor distance
     - mouse movement and keyboard controls still control the player,
       not the camera
+- added screenshot support
+- added logger buffer, now it draws logs on screen
+- added logger saving to files on disk (see 'bugs and flaws')
+- added command logging (prints only the text to logger buffer, unless error, then prints tag and error code)
+- added player death and some death messages
+- optimized text rendering
+- added coloring per string for text rendering
+- added ui drawing module for engine (see 'bugs and flaws')
 
 #### bugs and flaws
-- extremely high speeds (e.g. 3000 m/s) breaks collision detection
+- extremely high speeds (e.g. 3000 m/s) break collision detection
+- high speeds now segfault
+- if logger can't find log directory, it saves logs to engine log directory, if not found, it saves to current working directory (it should not save at all if so)
+- 'draw_ui_9_slice()' function doesn't work yet
 
 - - -
 ## v0.3.0-beta (10 Dec 2025)

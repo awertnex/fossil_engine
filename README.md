@@ -34,6 +34,9 @@ zip | [v0.3.0-beta-linux-x86_64.zip](https://github.com/awertnex/heaven-hell_con
 - [w64devkit v2.4.0](https://github.com/skeeto/w64devkit): not necessary for runtime, just for building from source
 
 
+## Note About Versioning
+**Before v0.4.0-beta, v0.4.0-dev used to be "development of v0.4.0-beta", after that v0.4.0-dev is "development after v0.4.0-beta".**
+
 ## Build From Source
 
 >**NOTES:**
