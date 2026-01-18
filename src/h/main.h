@@ -139,12 +139,6 @@ struct Uniform
 
 }; /* Uniform */
 
-/*! @brief global pointer to variable for game/engine-specific error codes.
- *
- *  @remark must be initialized globally, tho the pointed to variable itself can be modified.
- */
-extern u32 *const GAME_ERR;
-
 extern struct Core core;
 extern struct Settings settings;
 extern u8 debug_mode[DEBUG_MODE_COUNT];

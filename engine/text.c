@@ -5,6 +5,7 @@
 #include "h/diagnostics.h"
 #include "h/logger.h"
 #include "h/memory.h"
+#include "h/shaders.h"
 
 typedef struct TextData
 {

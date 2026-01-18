@@ -1,6 +1,7 @@
 #include <engine/h/input.h>
 #include <engine/h/logger.h>
 #include <engine/h/math.h>
+#include <engine/h/time.h>
 
 #include "h/assets.h"
 #include "h/chunking.h"
@@ -72,6 +73,7 @@ u32 bind_toggle_chunk_queue_visualizer = KEY_V;
 
 void input_update(Player *p)
 {
+    str time_string[TIME_STRING_MAX] = {0};
     u32 i;
     f32 px = 0.0f, nx = 0.0f,
         py = 0.0f, ny = 0.0f,
@@ -211,6 +213,8 @@ void input_update(Player *p)
 
         if (is_key_press(bind_toggle_hud))
             core.flag.hud ^= 1;
+        if (is_key_press(bind_take_screenshot))
+            request_screenshot();
 
         if (is_key_press(bind_toggle_debug))
             core.flag.debug ^= 1;
@@ -219,20 +223,26 @@ void input_update(Player *p)
             p->camera_mode = (p->camera_mode + 1) % PLAYER_CAMERA_MODE_COUNT;
 
         if (is_key_press(bind_zoom))
-            LOGDEBUG(FALSE, "%s\n", "Zoom Toggled On");
+            LOGDEBUG(FALSE, TRUE, "%s\n", "Zoom Toggled On");
         if (is_key_hold(bind_zoom))
             p->flag |= FLAG_PLAYER_ZOOMER;
         if (is_key_release(bind_zoom))
         {
+            LOGDEBUG(FALSE, TRUE, "%s\n", "Zoom Toggled Off");
             p->flag &= ~FLAG_PLAYER_ZOOMER;
-            LOGDEBUG(FALSE, "%s\n", "Zoom Toggled Off");
         }
 
         if (is_key_press(bind_toggle_flashlight))
+        {
+            LOGDEBUG(FALSE, TRUE, "%s\n", "Flashlight Toggled On");
             p->flag ^= FLAG_PLAYER_FLASHLIGHT;
+        }
 
         if (is_key_press(bind_toggle_cinematic_motion))
+        {
+            LOGDEBUG(FALSE, TRUE, "%s\n", "Flashlight Toggled Off");
             p->flag ^= FLAG_PLAYER_CINEMATIC_MOTION;
+        }
     }
 
     /* ---- debug ----------------------------------------------------------- */

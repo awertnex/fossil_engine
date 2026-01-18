@@ -16,6 +16,7 @@
 #include <engine/include/glfw3.h>
 #include <engine/include/stb_truetype.h>
 #include <engine/include/stb_image.h>
+#include <engine/include/stb_image_write.h>
 
 #include "common.h"
 #include "limits.h"
@@ -39,6 +40,10 @@ typedef struct Render
     v2f64 mouse_delta;
     u64 time;
     u64 time_delta;
+
+    /*! @brief for reading screen pixels back to RAM.
+     */
+    u8 *screen_buf;
 } Render;
 
 typedef struct Mesh
@@ -51,37 +56,12 @@ typedef struct Mesh
     GLfloat *ebo_data;
 } Mesh;
 
-typedef struct Shader
-{
-    str *file_name;
-    GLuint id;          /* used by 'glCreateShader()' */
-    GLuint type;        /* 'GL_<x>_SHADER' */
-    GLchar *source;     /* shader file source code */
-    GLint loaded;       /* used by 'glGetShaderiv()' */
-} Shader;
-
-typedef struct ShaderProgram
-{
-    str *name;          /* for debugging */
-    GLuint id;          /* used by 'lCreateProgram()' */
-    GLint loaded;       /* used by 'glGetProgramiv()' */
-    Shader vertex;
-    Shader geometry;
-    Shader fragment;
-} ShaderProgram;
-
 typedef struct FBO
 {
     GLuint fbo;
     GLuint color_buf;
     GLuint rbo;
 } FBO;
-
-typedef struct UBO
-{
-    GLuint index;
-    GLuint buf;
-} UBO;
 
 typedef struct Texture
 {
@@ -199,12 +179,6 @@ typedef struct Font
  */
 extern Render *render;
 
-/*! @brief default shaders.
- *
- *  @remark declared internally.
- */
-extern ShaderProgram engine_shader[ENGINE_SHADER_COUNT];
-
 /*! @brief default textures.
  *
  *  @remark declared internally.
@@ -250,14 +224,6 @@ extern Font engine_font[ENGINE_FONT_COUNT];
 u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
         i32 size_x, i32 size_y, Render *_render, u64 flags);
 
-/*! @brief engine main loop check.
- *
- *  - update uniform 'ndc_scale' of engine shaders.
- *
- *  @return TRUE unless 'glfw/glfwWindowShouldClose()' returns FALSE or engine inactive.
- */
-b8 engine_update(void);
-
 /*! @brief free engine resources.
  *
  *  free logger, destroy window (if not NULL) and terminate glfw.
@@ -272,10 +238,10 @@ void engine_close(void);
  */
 u32 glfw_init(b8 multisample);
 
-/*! @remark called automatically from 'engine_init()'.
- *
- *  @param title = window/application title, if NULL, default title is used.
+/*! @param title = window/application title, if NULL, default title is used.
  *  @param size_x, size_y = window size, if either is 0, default size is used.
+ *
+ *  @remark called automatically from 'engine_init()'.
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
@@ -287,31 +253,57 @@ u32 window_init(const str *title, i32 size_x, i32 size_y);
  */
 u32 glad_init(void);
 
-/*! @remark switch engine's current bound render to '_render'.
+/*! @brief engine main loop check.
+ *
+ *  @return TRUE unless 'glfw/glfwWindowShouldClose()' returns FALSE or engine inactive.
+ */
+b8 engine_update(void);
+
+/*! @brief update render settings like frame size, used mainly in
+ *  'glfw/glfwSetFramebufferSizeCallback()'.
+ *
+ *  - update uniform 'ndc_scale' of engine shaders.
+ *
+ *  @return non-zero on failure and 'engine_err' is set accordingly.
+ */
+u32 engine_update_render_settings(i32 size_x, i32 size_y);
+
+/*! @brief switch engine's current bound render to '_render'.
  */
 u32 change_render(Render *_render);
 
-/*! @brief initialize single shader.
+/*! @remark send screenshot request.
  *
- *  calls 'shader_pre_process()' on 'shader->file_name' before compiling
- *  shader, then compiles shader.
+ *  can be called from anywhere, then 'process_screenshot_request()' can be called
+ *  after the render loop has finished to take the screenshot.
+ */
+void request_screenshot(void);
+
+/*! @remark take screenshot if requested by 'request_screenshot()' and save into dir at '_screenshot_dir'.
+ *  
+ *  the code for taking a screenshot is separated into its own function to reduce
+ *  function call overhead since this function is meant to be called in a render loop
+ *  and the code allocates a sizable block of memory every call.
+ *
+ *  @param special_text = string appended to file name before extension.
+ *
+ *  @remark if directory not found, screenshot is still saved at 'render->screen_buf'.
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 shader_init(const str *shaders_dir, Shader *shader);
+u32 process_screenshot_request(const str *_screenshot_dir, const str *special_text);
 
-/*! @brief initialize shader program.
+/*! @remark take screenshot and save into dir at '_screenshot_dir'.
+ *  
+ *  save pixel data as 'RGB' into 'render->screen_buf'.
  *
- *  @param shaders_dir = path to shader files of 'program',
- *  shader file names must be pre-defined in 'program.shader.file_name'.
+ *  @param special_text = string appended to file name before extension.
  *
- *  calls 'shader_init()' on all shaders in 'program' if 'shader->type' is set.
+ *  @remark if directory not found, screenshot is still saved at 'render->screen_buf'.
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 shader_program_init(const str *shaders_dir, ShaderProgram *program);
-
-void shader_program_free(ShaderProgram *program);
+u32 take_screenshot(const str *_screenshot_dir, const str *special_text);
 
 /*! @brief set a vec3 attribute array for a vao.
  */

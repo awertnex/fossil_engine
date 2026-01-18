@@ -24,6 +24,7 @@ u32 gui_init(void)
     //game_menu_pos = setting.render_size.y / 3; /* TODO: figure this out */
     //menu_index = MENU_TITLE;
     //memset(buttons, 0, BTN_COUNT);
+    return ERR_SUCCESS;
 }
 
 #ifdef FUCK /* TODO: undef FUCK */

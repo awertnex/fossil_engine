@@ -9,6 +9,7 @@
 #include <engine/h/logger.h>
 #include <engine/h/math.h>
 #include <engine/h/platform.h>
+#include <engine/h/shaders.h>
 #include <engine/h/string.h>
 #include <engine/h/time.h>
 #include <engine/h/ui.h>
@@ -101,10 +102,10 @@ static void callback_framebuffer_size(GLFWwindow* window, int width, int height)
 {
     (void)window;
 
-    render->size = (v2i32){width, height};
+    engine_update_render_settings((i32)width, (i32)height);
+
     player.camera.ratio = (f32)width / (f32)height;
     player.camera_hud.ratio = (f32)width / (f32)height;
-    glViewport(0, 0, render->size.x, render->size.y);
 
     fbo_realloc(&fbo[FBO_SKYBOX], FALSE, 4);
     fbo_realloc(&fbo[FBO_WORLD], FALSE, 4);
@@ -178,7 +179,7 @@ static u32 settings_init(void)
 
     settings.lerp_speed = SET_LERP_SPEED_DEFAULT;
 
-    settings.render_distance = 2;
+    settings.render_distance = 16;
     settings.chunk_buf_radius = settings.render_distance;
     settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
 
@@ -513,36 +514,36 @@ static void generate_standard_meshes(void)
                 VBO_LEN_SKYBOX, EBO_LEN_SKYBOX,
                 vbo_data_skybox, ebo_data_skybox) != ERR_SUCCESS)
     {
-        LOG_MESH_GENERATE(ERR_MESH_GENERATION_FAIL, "Skybox");
+        LOG_MESH_GENERATE(ERR_MESH_GENERATION_FAIL, TRUE, "Skybox");
         goto cleanup;
     }
-    LOG_MESH_GENERATE(ERR_SUCCESS, "Skybox");
+    LOG_MESH_GENERATE(ERR_SUCCESS, TRUE, "Skybox");
 
     if (mesh_generate(&mesh[MESH_CUBE_OF_HAPPINESS], &attrib_vec3, GL_STATIC_DRAW,
                 VBO_LEN_COH, EBO_LEN_COH,
                 vbo_data_coh, ebo_data_coh) != ERR_SUCCESS)
     {
-        LOG_MESH_GENERATE(ERR_MESH_GENERATION_FAIL, "Cube of Happiness");
+        LOG_MESH_GENERATE(ERR_MESH_GENERATION_FAIL, TRUE, "Cube of Happiness");
         goto cleanup;
     }
-    LOG_MESH_GENERATE(ERR_SUCCESS, "Cube of Happiness");
+    LOG_MESH_GENERATE(ERR_SUCCESS, TRUE, "Cube of Happiness");
 
     if (mesh_generate(&mesh[MESH_PLAYER], &attrib_vec3_vec3, GL_STATIC_DRAW,
                 VBO_LEN_PLAYER, 0, vbo_data_player, NULL) != ERR_SUCCESS)
     {
-        LOG_MESH_GENERATE(ERR_MESH_GENERATION_FAIL, "Player");
+        LOG_MESH_GENERATE(ERR_MESH_GENERATION_FAIL, TRUE, "Player");
         goto cleanup;
     }
-    LOG_MESH_GENERATE(ERR_SUCCESS, "Player");
+    LOG_MESH_GENERATE(ERR_SUCCESS, TRUE, "Player");
 
     if (mesh_generate(&mesh[MESH_GIZMO], &attrib_vec3, GL_STATIC_DRAW,
                 VBO_LEN_GIZMO, EBO_LEN_GIZMO,
                 vbo_data_gizmo, ebo_data_gizmo) != ERR_SUCCESS)
     {
-        LOG_MESH_GENERATE(ERR_MESH_GENERATION_FAIL, "Gizmo");
+        LOG_MESH_GENERATE(ERR_MESH_GENERATION_FAIL, TRUE, "Gizmo");
         goto cleanup;
     }
-    LOG_MESH_GENERATE(ERR_SUCCESS, "Gizmo");
+    LOG_MESH_GENERATE(ERR_SUCCESS, TRUE, "Gizmo");
 
     *GAME_ERR = ERR_SUCCESS;
     return;
@@ -560,9 +561,9 @@ static void draw_everything(void)
     glBindFramebuffer(GL_FRAMEBUFFER, fbo[FBO_SKYBOX].fbo);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    f32 delay_in_hours = 6.0f / 12.0f;
+    f32 delay_in_hours = 6.0f;
     skybox_data.time = fmodf((f32)world.tick / SET_DAY_TICKS_MAX, 1.0f);
-    skybox_data.time = fmodf(skybox_data.time * 2.0f - delay_in_hours, 2.0f);
+    skybox_data.time = fmodf(skybox_data.time * 2.0f - delay_in_hours / 12.0f, 2.0f);
     skybox_data.sun_rotation =
         (v3f32){
             cos(skybox_data.time * PI),
@@ -1148,7 +1149,7 @@ static void draw_everything(void)
                     skybox_data.sun_rotation.y,
                     skybox_data.sun_rotation.z),
                 (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0,
-                DIAGNOSTIC_COLOR_INFO);
+                COLOR_DIAGNOSTIC_INFO);
 
         text_render(TRUE, TEXT_COLOR_SHADOW);
 
@@ -1242,18 +1243,18 @@ int main(int argc, char **argv)
     core.flag.active = 1;
 
     if (!GAME_RELEASE_BUILD)
-        LOGDEBUG(FALSE, "%s\n", "DEVELOPMENT BUILD");
+        LOGDEBUG(FALSE, TRUE, "%s\n", "DEVELOPMENT BUILD");
 
     if (!MODE_INTERNAL_DEBUG)
     {
-        LOGWARNING(FALSE, ERR_MODE_INTERNAL_DEBUG_DISABLE,
+        LOGWARNING(FALSE, TRUE, ERR_MODE_INTERNAL_DEBUG_DISABLE,
                 "%s\n", "'MODE_INTERNAL_DEBUG' Disabled");
     }
-    else LOGDEBUG(FALSE, "%s\n", "Debugging Enabled");
+    else LOGDEBUG(FALSE, TRUE, "%s\n", "Debugging Enabled");
 
     if (!MODE_INTERNAL_COLLIDE)
     {
-        LOGWARNING(FALSE, ERR_MODE_INTERNAL_COLLIDE_DISABLE,
+        LOGWARNING(FALSE, TRUE, ERR_MODE_INTERNAL_COLLIDE_DISABLE,
                 "%s\n", "'MODE_INTERNAL_COLLIDE' Disabled");
     }
 
@@ -1271,9 +1272,9 @@ int main(int argc, char **argv)
     if (glfwRawMouseMotionSupported())
     {
         glfwSetInputMode(render->window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-        LOGINFO(FALSE, "%s\n", "GLFW: Raw Mouse Motion Enabled");
+        LOGINFO(FALSE, TRUE, "%s\n", "GLFW: Raw Mouse Motion Enabled");
     }
-    else LOGERROR(FALSE, ERR_GLFW, "%s\n", "GLFW: Raw Mouse Motion Not Supported");
+    else LOGERROR(FALSE, TRUE, ERR_GLFW, "%s\n", "GLFW: Raw Mouse Motion Not Supported");
 
     /* ---- set callbacks --------------------------------------------------- */
 
@@ -1352,6 +1353,8 @@ section_world_loaded:
 
         glfwSwapBuffers(render->window);
         time_update(core.flag.fps_cap, settings.target_fps);
+
+        process_screenshot_request(GAME_DIR_NAME_SCREENSHOTS, world.name);
 
         if (!core.flag.world_loaded)
             goto section_menu_title;

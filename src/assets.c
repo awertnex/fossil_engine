@@ -2,6 +2,7 @@
 #include <engine/h/math.h>
 #include <engine/h/memory.h>
 #include <engine/h/logger.h>
+#include <engine/h/shaders.h>
 #include <engine/h/string.h>
 
 #include "h/assets.h"
@@ -113,31 +114,31 @@ u32 assets_init(void)
 
     if (
             texture_init(&texture[TEXTURE_CROSSHAIR], (v2i32){16, 16},
-                GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
+                GL_RGBA, GL_RGBA, GL_NEAREST, COLOR_CHANNELS_RGBA, FALSE,
                 GAME_DIR_NAME_GUI"crosshair.png") != ERR_SUCCESS ||
 
             texture_init(&texture[TEXTURE_ITEM_BAR], (v2i32){256, 256},
-                GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
+                GL_RGBA, GL_RGBA, GL_NEAREST, COLOR_CHANNELS_RGBA, FALSE,
                 GAME_DIR_NAME_GUI"item_bar.png") != ERR_SUCCESS ||
 
             texture_init(&texture[TEXTURE_SKYBOX_VAL], (v2i32){512, 512},
-                GL_RED, GL_RED, GL_NEAREST, 1, FALSE,
+                GL_RED, GL_RED, GL_NEAREST, COLOR_CHANNELS_GRAY, FALSE,
                 GAME_DIR_NAME_ENV"skybox_val.png") != ERR_SUCCESS ||
 
             texture_init(&texture[TEXTURE_SKYBOX_HORIZON], (v2i32){512, 512},
-                GL_RED, GL_RED, GL_NEAREST, 1, FALSE,
+                GL_RED, GL_RED, GL_NEAREST, COLOR_CHANNELS_GRAY, FALSE,
                 GAME_DIR_NAME_ENV"skybox_horizon.png") != ERR_SUCCESS ||
 
             texture_init(&texture[TEXTURE_SKYBOX_STARS], (v2i32){512, 512},
-                GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
+                GL_RGBA, GL_RGBA, GL_NEAREST, COLOR_CHANNELS_RGBA, FALSE,
                 GAME_DIR_NAME_ENV"skybox_stars.png") != ERR_SUCCESS ||
 
             texture_init(&texture[TEXTURE_SUN], (v2i32){128, 128},
-                    GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
+                    GL_RGBA, GL_RGBA, GL_NEAREST, COLOR_CHANNELS_RGBA, FALSE,
                     GAME_DIR_NAME_ENV"sun.png") != ERR_SUCCESS ||
 
             texture_init(&texture[TEXTURE_MOON], (v2i32){128, 128},
-                    GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
+                    GL_RGBA, GL_RGBA, GL_NEAREST, COLOR_CHANNELS_RGBA, FALSE,
                     GAME_DIR_NAME_ENV"moon.png") != ERR_SUCCESS)
         goto cleanup;
 
@@ -266,7 +267,7 @@ u32 block_texture_init(u32 index, v2i32 size, str *name)
 {
     if (!name)
     {
-        LOGERROR(FALSE, ERR_POINTER_NULL,
+        LOGERROR(FALSE, FALSE, ERR_POINTER_NULL,
                 "Failed to Initialize Texture [%p], 'name' NULL\n",
                 &block_textures[index]);
         goto cleanup;
@@ -276,7 +277,7 @@ u32 block_texture_init(u32 index, v2i32 size, str *name)
 
     if (
             texture_init(&block_textures[index], block_textures[index].size,
-                GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
+                GL_RGBA, GL_RGBA, GL_NEAREST, COLOR_CHANNELS_RGBA, FALSE,
                 stringf("%s%s", DIR_ROOT[DIR_BLOCKS], name)) != ERR_SUCCESS ||
 
             texture_generate(&block_textures[index], TRUE) != ERR_SUCCESS)

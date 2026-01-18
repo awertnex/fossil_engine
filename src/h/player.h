@@ -117,7 +117,7 @@ typedef struct Player
     u32 inventory_slots[PLAYER_INVENTORY_SLOTS_MAX];
 
     BoundingBox bbox;
-    enum PlayerDeath death;
+    u32 death; /* enum: PlayerDeath */
 } Player;
 
 /*! @brief update everything related to a player.

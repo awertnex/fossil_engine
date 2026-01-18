@@ -1,7 +1,8 @@
+#include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "h/build.h"
-#include "h/common.h"
 #include "dir.c"
 #include "logger.c"
 #include "memory.c"
@@ -88,13 +89,13 @@ void build_init(int argc, char **argv, const str *build_src_name, const str *bui
 
     if (STD != 199901)
     {
-        LOGINFO(FALSE, "%s\n", "Rebuilding Self With -std=c99..");
+        LOGINFO(FALSE, FALSE, "%s\n", "Rebuilding Self With -std=c99..");
         self_rebuild(argv);
     }
 
     if (is_build_source_changed() == ERR_SUCCESS)
     {
-        LOGINFO(FALSE, "%s\n", "Rebuilding Self..");
+        LOGINFO(FALSE, FALSE, "%s\n", "Rebuilding Self..");
         self_rebuild(argv);
     }
 
@@ -113,7 +114,7 @@ static u32 is_build_source_changed(void)
         mtime_src = stats.st_mtime;
     else
     {
-        LOGERROR(FALSE, ERR_FILE_NOT_FOUND, "%s\n", "Build Source File Not Found");
+        LOGERROR(FALSE, FALSE, ERR_FILE_NOT_FOUND, "%s\n", "Build Source File Not Found");
         return engine_err;
     }
 
@@ -121,7 +122,7 @@ static u32 is_build_source_changed(void)
         mtime_bin = stats.st_mtime;
     else
     {
-        LOGERROR(FALSE, ERR_FILE_NOT_FOUND, "%s\n", "File 'build"EXE"' Not Found");
+        LOGERROR(FALSE, FALSE, ERR_FILE_NOT_FOUND, "%s\n", "File 'build"EXE"' Not Found");
         return engine_err;
     }
 
@@ -156,17 +157,17 @@ static void self_rebuild(char **argv)
 
     if (exec(&cmd, "self_rebuild()") == ERR_SUCCESS)
     {
-        LOGINFO(FALSE, "%s\n", "Self Rebuild Success");
+        LOGINFO(FALSE, FALSE, "%s\n", "Self Rebuild Success");
         rename(str_build_bin, str_build_bin_old);
         rename(str_build_bin_new, str_build_bin);
         remove(str_build_bin_old);
 
         execvp(argv[0], (str *const *)argv);
-        LOGFATAL(FALSE, ERR_EXECVP_FAIL, "%s\n", "'build"EXE"' Failed, Process Aborted");
+        LOGFATAL(FALSE, FALSE, ERR_EXECVP_FAIL, "%s\n", "'build"EXE"' Failed, Process Aborted");
         cmd_fail();
     }
 
-    LOGFATAL(FALSE, engine_err, "%s\n", "Self-Rebuild Failed, Process Aborted");
+    LOGFATAL(FALSE, FALSE, engine_err, "%s\n", "Self-Rebuild Failed, Process Aborted");
     cmd_fail();
 }
 
@@ -178,6 +179,7 @@ u32 engine_build(const str *out_dir)
         return engine_err;
 
     cmd_push(COMPILER);
+    cmd_push("engine/assets.c");
     cmd_push("engine/collision.c");
     cmd_push("engine/core.c");
     cmd_push("engine/dir.c");
@@ -186,6 +188,7 @@ u32 engine_build(const str *out_dir)
     cmd_push("engine/math.c");
     cmd_push("engine/memory.c");
     cmd_push("engine/platform_"_PLATFORM".c");
+    cmd_push("engine/shaders.c");
     cmd_push("engine/string.c");
     cmd_push("engine/text.c");
     cmd_push("engine/time.c");
@@ -282,18 +285,18 @@ void cmd_push(const str *string)
 {
     if (cmd_pos >= CMD_MEMB - 1)
     {
-        LOGERROR(FALSE, ERR_BUFFER_FULL, "%s\n", "cmd Full");
+        LOGERROR(FALSE, FALSE, ERR_BUFFER_FULL, "%s\n", "cmd Full");
         return;
     }
 
     if (strlen(string) >= CMD_SIZE - 1)
     {
-        LOGERROR(FALSE, ERR_STRING_TOO_LONG,
+        LOGERROR(FALSE, FALSE, ERR_STRING_TOO_LONG,
                 "Failed to Push String '%s' to cmd.i[%"PRIu64"], String Too Long\n", string, cmd_pos);
         return;
     }
 
-    LOGTRACE(FALSE, "Pushing String '%s' to cmd.i[%"PRIu64"]..\n", string, cmd_pos);
+    LOGTRACE(FALSE, FALSE, "Pushing String '%s' to cmd.i[%"PRIu64"]..\n", string, cmd_pos);
     strncpy(cmd.i[cmd_pos++], string, CMD_SIZE);
 }
 

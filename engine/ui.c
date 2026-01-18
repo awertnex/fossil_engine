@@ -2,6 +2,7 @@
 #include "h/core.h"
 #include "h/diagnostics.h"
 #include "h/logger.h"
+#include "h/shaders.h"
 #include "h/ui.h"
 
 static struct /* ui_core */
@@ -44,11 +45,11 @@ u32 ui_init(b8 multisample)
 
     if (
             texture_init(&engine_texture[ENGINE_TEXTURE_PANEL_ACTIVE], (v2i32){32, 32},
-                GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
+                GL_RGBA, GL_RGBA, GL_NEAREST, COLOR_CHANNELS_RGBA, FALSE,
                 ENGINE_DIR_NAME_TEXTURES"panel_active.png") != ERR_SUCCESS ||
 
             texture_init(&engine_texture[ENGINE_TEXTURE_PANEL_INACTIVE], (v2i32){32, 32},
-                GL_RGBA, GL_RGBA, GL_NEAREST, 4, FALSE,
+                GL_RGBA, GL_RGBA, GL_NEAREST, COLOR_CHANNELS_RGBA, FALSE,
                 ENGINE_DIR_NAME_TEXTURES"panel_inactive.png") != ERR_SUCCESS)
         goto cleanup;
 

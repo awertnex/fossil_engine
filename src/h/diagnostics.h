@@ -15,4 +15,10 @@ enum GameErrorCodes
     ERR_WORLD_CREATION_FAIL,
 }; /* GameErrorCodes */
 
+/*! @brief global pointer to error variable.
+ *
+ *  @remark declared and initialized internally in 'src/main.c'.
+ */
+extern u32 *const GAME_ERR;
+
 #endif /* GAME_DIAGNOSTICS_H */

@@ -2,8 +2,9 @@
 #define GAME_ASSETS_H
 
 #include <engine/h/core.h>
-#include <engine/h/types.h>
 #include <engine/h/limits.h>
+#include <engine/h/shaders.h>
+#include <engine/h/types.h>
 
 #include "common.h"
 #include "dir.h"

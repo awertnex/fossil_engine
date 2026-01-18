@@ -26,7 +26,7 @@
 #define I64_MAX 9223372036854775807
 #define I64_MIN (-I64_MAX - 1)
 
-#define STRING_MAX              1024
+#define STRING_MAX              2048
 #define STRING_TOKEN_MAX        128
 #define STRINGF_BUFFERS_MAX     4
 #define TIME_STRING_MAX         128
@@ -35,5 +35,6 @@
 #define LOGGER_HISTORY_MAX      2048
 #define GLYPH_MAX               256
 #define INCLUDE_RECURSION_MAX   512
+#define SCREENSHOT_RATE_MAX     128
 
 #endif /* ENGINE_LIMITS_H */

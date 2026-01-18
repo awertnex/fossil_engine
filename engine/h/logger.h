@@ -9,7 +9,7 @@
 
 enum /* LogFlag */
 {
-    FLAG_LOG_OPEN = 0x0001,
+    FLAG_GUI_LOGGER_OPEN = 0x0001,
 }; /* LogFlag */
 
 enum /* LogMessageFlag */
@@ -19,7 +19,8 @@ enum /* LogMessageFlag */
     FLAG_LOG_TIME =         0x0004,
     FLAG_LOG_DATE_TIME =    0x0006,
     FLAG_LOG_FULL_TIME =    0x0007,
-    FLAG_LOG_COLOR =        0x0008,
+    FLAG_LOG_TAG =          0x0008,
+    FLAG_LOG_COLOR =        0x0010,
 }; /* LogMessageFlag */
 
 enum /* LogLevel */
@@ -46,66 +47,66 @@ enum /* LogFile */
 
 /* ---- external-use macros ------------------------------------------------- */
 
-#define LOGFATAL(verbose, err, format, ...) \
+#define LOGFATAL(verbose, cmd, err, format, ...) \
 { \
     engine_err = (u32)err; \
-    _log_output(verbose, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_FATAL, err, format, ##__VA_ARGS__); \
+    _log_output(verbose, cmd, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_FATAL, err, format, ##__VA_ARGS__); \
 }
 
-#define LOGERROR(verbose, err, format, ...) \
+#define LOGERROR(verbose, cmd, err, format, ...) \
 { \
     engine_err = (u32)err; \
-    _log_output(verbose, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_ERROR, err, format, ##__VA_ARGS__); \
+    _log_output(verbose, cmd, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_ERROR, err, format, ##__VA_ARGS__); \
 }
 
-#define LOGWARNING(verbose, err, format, ...) \
+#define LOGWARNING(verbose, cmd, err, format, ...) \
 { \
     engine_err = (u32)err; \
-    _log_output(verbose, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_WARNING, err, format, ##__VA_ARGS__); \
+    _log_output(verbose, cmd, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_WARNING, err, format, ##__VA_ARGS__); \
 }
 
-#define LOGINFO(verbose, format, ...) \
-    _log_output(verbose, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_INFO, 0, format, ##__VA_ARGS__)
+#define LOGINFO(verbose, cmd, format, ...) \
+    _log_output(verbose, cmd, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_INFO, 0, format, ##__VA_ARGS__)
 
-#define LOGDEBUG(verbose, format, ...) \
-    _log_output(verbose, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_DEBUG, 0, format, ##__VA_ARGS__)
+#define LOGDEBUG(verbose, cmd, format, ...) \
+    _log_output(verbose, cmd, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_DEBUG, 0, format, ##__VA_ARGS__)
 
-#define LOGTRACE(verbose, format, ...) \
-    _log_output(verbose, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_TRACE, 0, format, ##__VA_ARGS__)
+#define LOGTRACE(verbose, cmd, format, ...) \
+    _log_output(verbose, cmd, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_TRACE, 0, format, ##__VA_ARGS__)
 
-#define LOGFATALEX(verbose, file, line, err, format, ...); \
+#define LOGFATALEX(verbose, cmd, file, line, err, format, ...); \
 { \
     engine_err = (u32)err; \
-    _log_output(verbose, log_dir, file, line, LOGLEVEL_FATAL, err, format, ##__VA_ARGS__); \
+    _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_FATAL, err, format, ##__VA_ARGS__); \
 }
 
-#define LOGERROREX(verbose, file, line, err, format, ...); \
+#define LOGERROREX(verbose, cmd, file, line, err, format, ...); \
 { \
     engine_err = (u32)err; \
-    _log_output(verbose, log_dir, file, line, LOGLEVEL_ERROR, err, format, ##__VA_ARGS__); \
+    _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_ERROR, err, format, ##__VA_ARGS__); \
 }
 
-#define LOGWARNINGEX(verbose, file, line, err, format, ...) \
+#define LOGWARNINGEX(verbose, cmd, file, line, err, format, ...) \
 { \
     engine_err = (u32)err; \
-    _log_output(verbose, log_dir, file, line, LOGLEVEL_WARNING, err, format, ##__VA_ARGS__); \
+    _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_WARNING, err, format, ##__VA_ARGS__); \
 }
 
-#define LOGINFOEX(verbose, file, line, format, ...) \
-    _log_output(verbose, log_dir, file, line, LOGLEVEL_INFO, 0, format, ##__VA_ARGS__)
+#define LOGINFOEX(verbose, cmd, file, line, format, ...) \
+    _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_INFO, 0, format, ##__VA_ARGS__)
 
-#define LOGDEBUGEX(verbose, file, line, format, ...) \
-    _log_output(verbose, log_dir, file, line, LOGLEVEL_DEBUG, 0, format, ##__VA_ARGS__)
+#define LOGDEBUGEX(verbose, cmd, file, line, format, ...) \
+    _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_DEBUG, 0, format, ##__VA_ARGS__)
 
-#define LOGTRACEEX(verbose, file, line, format, ...) \
-    _log_output(verbose, log_dir, file, line, LOGLEVEL_TRACE, 0, format, ##__VA_ARGS__)
+#define LOGTRACEEX(verbose, cmd, file, line, format, ...) \
+    _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_TRACE, 0, format, ##__VA_ARGS__)
 
-#define LOG_MESH_GENERATE(err, mesh_name) \
+#define LOG_MESH_GENERATE(err, cmd, mesh_name) \
 { \
     if (err == ERR_SUCCESS) \
-    LOGINFO(FALSE, "Mesh '%s' Generated\n", mesh_name); \
+    LOGINFO(FALSE, cmd, "Mesh '%s' Generated\n", mesh_name); \
     else if (err == ERR_MESH_GENERATION_FAIL) \
-    LOGERROR(TRUE, ERR_MESH_GENERATION_FAIL, "Failed to Generate Mesh '%s'\n", mesh_name); \
+    LOGERROR(TRUE, cmd, ERR_MESH_GENERATION_FAIL, "Failed to Generate Mesh '%s'\n", mesh_name); \
 }
 
 /* ---- internal-use macros ------------------------------------------------- */
@@ -113,56 +114,56 @@ enum /* LogFile */
 #define _LOGFATAL(verbose, err, format, ...) \
 { \
     engine_err = (u32)err; \
-    _log_output(verbose, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_FATAL, err, format, ##__VA_ARGS__); \
+    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_FATAL, err, format, ##__VA_ARGS__); \
 }
 
 #define _LOGERROR(verbose, err, format, ...) \
 { \
     engine_err = (u32)err; \
-    _log_output(verbose, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_ERROR, err, format, ##__VA_ARGS__); \
+    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_ERROR, err, format, ##__VA_ARGS__); \
 }
 
 #define _LOGWARNING(verbose, err, format, ...) \
 { \
     engine_err = (u32)err; \
-    _log_output(verbose, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_WARNING, err, format, ##__VA_ARGS__); \
+    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_WARNING, err, format, ##__VA_ARGS__); \
 }
 
 #define _LOGINFO(verbose, format, ...) \
-    _log_output(verbose, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_INFO, 0, format, ##__VA_ARGS__)
+    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_INFO, 0, format, ##__VA_ARGS__)
 
 #define _LOGDEBUG(verbose, format, ...) \
-    _log_output(verbose, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_DEBUG, 0, format, ##__VA_ARGS__)
+    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_DEBUG, 0, format, ##__VA_ARGS__)
 
 #define _LOGTRACE(verbose, format, ...) \
-    _log_output(verbose, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_TRACE, 0, format, ##__VA_ARGS__)
+    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_TRACE, 0, format, ##__VA_ARGS__)
 
 #define _LOGFATALEX(verbose, file, line, err, format, ...); \
 { \
     engine_err = (u32)err; \
-    _log_output(verbose, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_FATAL, err, format, ##__VA_ARGS__); \
+    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_FATAL, err, format, ##__VA_ARGS__); \
 }
 
 #define _LOGERROREX(verbose, file, line, err, format, ...); \
 { \
     engine_err = (u32)err; \
-    _log_output(verbose, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_ERROR, err, format, ##__VA_ARGS__); \
+    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_ERROR, err, format, ##__VA_ARGS__); \
 }
 
 #define _LOGWARNINGEX(verbose, file, line, err, format, ...) \
 { \
     engine_err = (u32)err; \
-    _log_output(verbose, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_WARNING, err, format, ##__VA_ARGS__); \
+    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_WARNING, err, format, ##__VA_ARGS__); \
 }
 
 #define _LOGINFOEX(verbose, file, line, format, ...) \
-    _log_output(verbose, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_INFO, 0, format, ##__VA_ARGS__)
+    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_INFO, 0, format, ##__VA_ARGS__)
 
 #define _LOGDEBUGEX(verbose, file, line, format, ...) \
-    _log_output(verbose, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_DEBUG, 0, format, ##__VA_ARGS__)
+    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_DEBUG, 0, format, ##__VA_ARGS__)
 
 #define _LOGTRACEEX(verbose, file, line, format, ...) \
-    _log_output(verbose, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_TRACE, 0, format, ##__VA_ARGS__)
+    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_TRACE, 0, format, ##__VA_ARGS__)
 
 extern u32 log_level_max;
 extern str log_dir[PATH_MAX];
@@ -212,9 +213,10 @@ void logger_close(void);
 
 /*! -- INTERNAL USE ONLY --;
  *
+ *  @param cmd = log a command, used for on-screen output of basic commands.
  *  @param _log_dir = directory to write log files into, if NULL, logs won't be written to disk.
  */
-void _log_output(b8 verbose, const str *_log_dir, const str *file, u64 line,
+void _log_output(b8 verbose, b8 cmd, const str *_log_dir, const str *file, u64 line,
         u8 level, u32 error_code, const str *format, ...);
 
 #endif /* ENGINE_LOGGER_H */

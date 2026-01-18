@@ -66,6 +66,7 @@
 #define ERR_WINDOW_NOT_FOUND            4145
 #define ERR_UI_INIT_FAIL                4146
 #define ERR_SHADER_TYPE_NULL            4147
+#define ERR_SCREENSHOT_FAIL             4148
 
 /*! @brief global variable for engine-specific error codes.
  *

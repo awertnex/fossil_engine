@@ -671,7 +671,7 @@ void player_kill(Player *p)
     p->health = 0.0f;
     p->flag |= FLAG_PLAYER_DEAD;
 
-    LOGINFO(FALSE, "%s %s\n", p->name, get_death_str(p));
+    LOGINFO(FALSE, TRUE, "%s %s\n", p->name, get_death_str(p));
 }
 
 str *get_death_str(Player *p)

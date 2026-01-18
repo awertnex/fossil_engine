@@ -128,7 +128,7 @@ u32 logger_init(int argc, char **argv, u64 flags, const str *_log_dir)
     for (i = 0; i < LOGGER_HISTORY_MAX; ++i)
         logger_tab[i] = logger_buf + i * LOGGER_STRING_MAX;
 
-    log_flag |= FLAG_LOG_OPEN;
+    log_flag |= FLAG_GUI_LOGGER_OPEN;
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -138,13 +138,13 @@ void logger_close(void)
 {
     _LOGTRACE(TRUE, "%s\n", "Closing Logger..");
 
-    log_flag &= ~FLAG_LOG_OPEN;
+    log_flag &= ~FLAG_GUI_LOGGER_OPEN;
     mem_unmap((void*)&logger_color, LOGGER_HISTORY_MAX * sizeof(u32), "logger_init().logger_color");
     mem_unmap((void*)&logger_buf, LOGGER_HISTORY_MAX * LOGGER_STRING_MAX, "logger_close().logger_buf");
     mem_unmap((void*)&logger_tab, LOGGER_HISTORY_MAX * sizeof(str*), "logger_close().logger_tab");
 }
 
-void _log_output(b8 verbose, const str *_log_dir, const str *file, u64 line,
+void _log_output(b8 verbose, b8 cmd, const str *_log_dir, const str *file, u64 line,
         u8 level, u32 error_code, const str *format, ...)
 {
     va_list args;
@@ -158,12 +158,18 @@ void _log_output(b8 verbose, const str *_log_dir, const str *file, u64 line,
     vsnprintf(str_in, STRING_MAX, format, args);
     va_end(args);
 
-    _get_log_str(str_in, str_out, FLAG_LOG_COLOR, verbose, level, error_code, file, line);
+    _get_log_str(str_in, str_out, FLAG_LOG_TAG | FLAG_LOG_COLOR,
+            verbose, level, error_code, file, line);
     fprintf(stderr, "%s", str_out);
 
-    if (log_flag & FLAG_LOG_OPEN)
+    if (log_flag & FLAG_GUI_LOGGER_OPEN)
     {
-        _get_log_str(str_in, str_out, FLAG_LOG_DATE_TIME, verbose, level, error_code, file, line);
+        if (cmd)
+            _get_log_str(str_in, str_out, 0, FALSE, level, 0, file, line);
+        else
+            _get_log_str(str_in, str_out, FLAG_LOG_TAG | FLAG_LOG_DATE_TIME,
+                    verbose, level, error_code, file, line);
+
         snprintf(logger_tab[logger_tab_index], strnlen(str_out, LOGGER_STRING_MAX), "%s", str_out);
         logger_color[logger_tab_index] = logger_color_tab[level];
         logger_tab_index = (logger_tab_index + 1) % LOGGER_HISTORY_MAX;
@@ -171,7 +177,8 @@ void _log_output(b8 verbose, const str *_log_dir, const str *file, u64 line,
 
     if (_log_dir)
     {
-        _get_log_str(str_in, str_out, FLAG_LOG_FULL_TIME, verbose, level, error_code, file, line);
+        _get_log_str(str_in, str_out, FLAG_LOG_TAG | FLAG_LOG_FULL_TIME,
+                verbose, level, error_code, file, line);
         snprintf(temp, PATH_MAX, "%s%s", _log_dir, LOG_FILE_NAME[level]);
         _append_file(temp, 1, strlen(str_out), str_out, FALSE, FALSE);
     }
@@ -212,7 +219,7 @@ static void _get_log_str(const str *str_in, str *str_out, u32 flags, b8 verbose,
 
     if (level <= LOGLEVEL_WARNING)
         snprintf(str_tag, 32, "[%s][%"PRIu32"] ", log_tag[level], error_code);
-    else
+    else if (flags & FLAG_LOG_TAG)
         snprintf(str_tag, 32, "[%s] ", log_tag[level]);
 
     if (verbose)

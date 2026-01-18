@@ -51,7 +51,7 @@ u32 world_dir_init(const str *world_name)
 
     if (!strlen(world_name))
     {
-        LOGERROR(FALSE, ERR_POINTER_NULL, "%s\n", "World Name Cannot Be Empty");
+        LOGERROR(FALSE, TRUE, ERR_POINTER_NULL, "%s\n", "World Name Cannot Be Empty");
         return *GAME_ERR;
     }
 
@@ -63,14 +63,14 @@ u32 world_dir_init(const str *world_name)
 
     if (is_dir_exists(DIR_PROC_ROOT, TRUE) != ERR_SUCCESS)
     {
-        LOGERROR(FALSE, ERR_WORLD_CREATION_FAIL,
+        LOGERROR(FALSE, TRUE, ERR_WORLD_CREATION_FAIL,
                 "Failed to Create World '%s', Root Directory Not Found\n", world_name);
         return *GAME_ERR;
     }
 
     if (is_dir_exists(GAME_DIR_NAME_WORLDS, TRUE) != ERR_SUCCESS)
     {
-        LOGERROR(FALSE, ERR_WORLD_CREATION_FAIL,
+        LOGERROR(FALSE, TRUE, ERR_WORLD_CREATION_FAIL,
                 "Failed to Create World '%s', World Directory Not Found\n", world_name);
         return *GAME_ERR;
     }
@@ -88,7 +88,7 @@ u32 world_dir_init(const str *world_name)
     make_dir(string);
     snprintf(world.path, PATH_MAX, "%s", string);
 
-    LOGINFO(FALSE, "Creating World Directories '%s'..\n", world.path);
+    LOGINFO(FALSE, TRUE, "Creating World Directories '%s'..\n", world.path);
 
     for (i = 0; i < DIR_WORLD_COUNT; ++i)
     {
@@ -98,7 +98,7 @@ u32 world_dir_init(const str *world_name)
             return *GAME_ERR;
     }
 
-    LOGINFO(FALSE, "World Created '%s'\n", world_name);
+    LOGINFO(FALSE, TRUE, "World Created '%s'\n", world_name);
     *GAME_ERR = ERR_SUCCESS;
     return *GAME_ERR;
 }
@@ -111,28 +111,28 @@ u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
 
     if (!strlen(world_name))
     {
-        LOGERROR(FALSE, ERR_POINTER_NULL, "%s\n", "Failed to Load World, World Name Empty");
+        LOGERROR(FALSE, TRUE, ERR_POINTER_NULL, "%s\n", "Failed to Load World, World Name Empty");
         return *GAME_ERR;
     }
 
     if (is_dir_exists(DIR_PROC_ROOT, TRUE) != ERR_SUCCESS)
     {
-        LOGERROR(FALSE, ERR_WORLD_CREATION_FAIL,
+        LOGERROR(FALSE, TRUE, ERR_WORLD_CREATION_FAIL,
                 "Failed to Load World '%s', Root Directory Not Found\n", world_name);
         return *GAME_ERR;
     }
 
     if (is_dir_exists(GAME_DIR_NAME_WORLDS, TRUE) != ERR_SUCCESS)
     {
-        LOGERROR(FALSE, ERR_WORLD_CREATION_FAIL,
-                "Failed to Load World '%s', 'worlds/' Directory Not Found\n", world_name);
+        LOGERROR(FALSE, TRUE, ERR_WORLD_CREATION_FAIL,
+                "Failed to Load World '%s', '"GAME_DIR_NAME_WORLDS"' Directory Not Found\n", world_name);
         return *GAME_ERR;
     }
 
     snprintf(string[0], PATH_MAX, GAME_DIR_NAME_WORLDS"%s", world_name);
     if (is_dir_exists(string[0], TRUE) != ERR_SUCCESS)
     {
-        LOGERROR(FALSE, ERR_WORLD_CREATION_FAIL,
+        LOGERROR(FALSE, TRUE, ERR_WORLD_CREATION_FAIL,
                 "Failed to Load World '%s', World Not Found\n", world_name);
         return *GAME_ERR;
     }
@@ -181,7 +181,7 @@ u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
 
     debug_mode[DEBUG_MODE_CHUNK_GIZMO] = 1;
 
-    LOGINFO(FALSE, "World Loaded '%s'\n", world_name);
+    LOGINFO(FALSE, TRUE, "World Loaded '%s'\n", world_name);
 
     *GAME_ERR = ERR_SUCCESS;
     return *GAME_ERR;

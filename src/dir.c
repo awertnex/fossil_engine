@@ -49,7 +49,7 @@ u32 game_init(void)
 {
     u32 i = 0;
 
-    LOGINFO(TRUE, "Creating Main Directories '%s'..\n", DIR_PROC_ROOT);
+    LOGINFO(TRUE, TRUE, "Creating Main Directories '%s'..\n", DIR_PROC_ROOT);
 
     for (i = 0; i < DIR_ROOT_COUNT; ++i)
         if (is_dir_exists(DIR_ROOT[i], FALSE) != ERR_SUCCESS)
@@ -59,7 +59,7 @@ u32 game_init(void)
                 return *GAME_ERR;
         }
 
-    LOGINFO(TRUE, "Main Directory Created '%s'\n", DIR_PROC_ROOT);
+    LOGINFO(TRUE, TRUE, "Main Directory Created '%s'\n", DIR_PROC_ROOT);
 
     glfwSwapInterval(MODE_INTERNAL_VSYNC);
     glfwWindowHint(GLFW_DEPTH_BITS, 24);
