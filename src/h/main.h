@@ -24,6 +24,15 @@ struct Core
         u64 world_loaded: 1;
         u64 chunk_buf_dirty: 1;
     } flag;
+
+    struct /* debug */
+    {
+        u64 trans_blocks: 1;
+        u64 chunk_bounds: 1;
+        u64 bounding_boxes: 1;
+        u64 chunk_gizmo: 1;
+        u64 chunk_queue_visualizer: 1;
+    } debug;
 }; /* Core */
 
 struct Settings
@@ -142,7 +151,6 @@ struct Uniform
 
 extern struct Core core;
 extern struct Settings settings;
-extern u8 debug_mode[DEBUG_MODE_COUNT];
 extern Projection projection_world;
 extern Projection projection_hud;
 extern Font *font[FONT_COUNT];

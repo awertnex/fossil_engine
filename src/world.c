@@ -179,7 +179,7 @@ u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
 
     /* ---- other stuff ----------------------------------------------------- */
 
-    debug_mode[DEBUG_MODE_CHUNK_GIZMO] = 1;
+    core.debug.chunk_gizmo = 1;
 
     LOGINFO(FALSE, TRUE, "World Loaded '%s'\n", world_name);
 

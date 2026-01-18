@@ -138,16 +138,6 @@ enum /* FontIndex */
     FONT_COUNT,
 }; /* FontIndex */
 
-enum /* DebugMode */
-{
-    DEBUG_MODE_TRANS_BLOCKS,
-    DEBUG_MODE_CHUNK_BOUNDS,
-    DEBUG_MODE_BOUNDING_BOXES,
-    DEBUG_MODE_CHUNK_GIZMO,
-    DEBUG_MODE_CHUNK_QUEUE_VISUALIZER,
-    DEBUG_MODE_COUNT,
-}; /* DebugMode */
-
 enum PlayerDeath
 {
     PLAYER_DEATH_COLLISION_WALL = 1,

@@ -4,6 +4,11 @@
 
 #### changes
 - fixed engine build tool not copying required libraries to deployment directory
+- improved logging of commands:
+    - chunk boundary toggling commands
+    - chunk queue visualizer toggling commands
+    - bounding box toggling commands
+    - flashlight toggling commands
 
 ## v0.4.0-beta (18 Jan 2026)
 

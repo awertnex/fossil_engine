@@ -234,14 +234,22 @@ void input_update(Player *p)
 
         if (is_key_press(bind_toggle_flashlight))
         {
-            LOGDEBUG(FALSE, TRUE, "%s\n", "Flashlight Toggled On");
             p->flag ^= FLAG_PLAYER_FLASHLIGHT;
+
+            if (p->flag & FLAG_PLAYER_FLASHLIGHT)
+                LOGDEBUG(FALSE, TRUE, "%s\n", "Flashlight Toggled On");
+            else
+                LOGDEBUG(FALSE, TRUE, "%s\n", "Flashlight Toggled Off");
         }
 
         if (is_key_press(bind_toggle_cinematic_motion))
         {
-            LOGDEBUG(FALSE, TRUE, "%s\n", "Flashlight Toggled Off");
             p->flag ^= FLAG_PLAYER_CINEMATIC_MOTION;
+
+            if (p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
+                LOGDEBUG(FALSE, TRUE, "%s\n", "Cinematic Motion On");
+            else
+                LOGDEBUG(FALSE, TRUE, "%s\n", "Cinematic Motion Off");
         }
     }
 
@@ -255,18 +263,46 @@ void input_update(Player *p)
     if (is_key_hold(bind_debug_mod))
     {
         if (is_key_press(bind_toggle_trans_blocks))
-            debug_mode[DEBUG_MODE_TRANS_BLOCKS] ^= 1;
+        {
+            core.debug.trans_blocks ^= 1;
+
+            if (core.debug.trans_blocks)
+                LOGDEBUG(FALSE, TRUE, "%s\n", "View Transparent Blocks On");
+            else
+                LOGDEBUG(FALSE, TRUE, "%s\n", "View Transparent Blocks Off");
+        }
 
         if (is_key_press(bind_toggle_chunk_bounds))
-            debug_mode[DEBUG_MODE_CHUNK_BOUNDS] ^= 1;
+        {
+            core.debug.chunk_bounds ^= 1;
+
+            if (core.debug.chunk_bounds)
+                LOGDEBUG(FALSE, TRUE, "%s\n", "View Chunk Boundaries On");
+            else
+                LOGDEBUG(FALSE, TRUE, "%s\n", "View Chunk Boundaries Off");
+        }
 
         if (is_key_press(bind_toggle_bounding_boxes))
-            debug_mode[DEBUG_MODE_BOUNDING_BOXES] ^= 1;
+        {
+            core.debug.bounding_boxes ^= 1;
+
+            if (core.debug.bounding_boxes)
+                LOGDEBUG(FALSE, TRUE, "%s\n", "View Bounding Boxes On");
+            else
+                LOGDEBUG(FALSE, TRUE, "%s\n", "View Bounding Boxes Off");
+        }
 
         if (is_key_press(bind_toggle_chunk_gizmo))
-            debug_mode[DEBUG_MODE_CHUNK_GIZMO] ^= 1;
+            core.debug.chunk_gizmo ^= 1;
 
         if (is_key_press(bind_toggle_chunk_queue_visualizer))
-            debug_mode[DEBUG_MODE_CHUNK_QUEUE_VISUALIZER] ^= 1;
+        {
+            core.debug.chunk_queue_visualizer ^= 1;
+
+            if (core.debug.chunk_queue_visualizer)
+                LOGDEBUG(FALSE, TRUE, "%s\n", "View Chunk Queue Visualizer On");
+            else
+                LOGDEBUG(FALSE, TRUE, "%s\n", "View Chunk Queue Visualizer Off");
+        }
     }
 }

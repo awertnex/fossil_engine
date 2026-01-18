@@ -32,7 +32,6 @@ u32 *const GAME_ERR = (u32*)&engine_err;
 struct Core core = {0};
 struct Settings settings = {0};
 static struct Uniform uniform = {0};
-u8 debug_mode[DEBUG_MODE_COUNT] = {0};
 static Mesh mesh[MESH_COUNT] = {0};
 static FBO fbo[FBO_COUNT] = {0};
 Projection projection_world = {0};
@@ -764,7 +763,7 @@ static void draw_everything(void)
     glUniform1i(uniform.voxel.render_distance, settings.render_distance * CHUNK_DIAMETER);
 
     f32 opacity = 1.0f;
-    if (debug_mode[DEBUG_MODE_TRANS_BLOCKS])
+    if (core.debug.trans_blocks)
         opacity = 0.7f;
 
     glUniform1f(uniform.voxel.opacity, opacity);
@@ -840,7 +839,7 @@ static void draw_everything(void)
 
     /* ---- draw player chunk bounding box ---------------------------------- */
 
-    if (debug_mode[DEBUG_MODE_CHUNK_BOUNDS])
+    if (core.debug.chunk_bounds)
     {
         glUniform3f(uniform.bounding_box.position,
                 (f32)(player.chunk.x * CHUNK_DIAMETER),
@@ -856,7 +855,7 @@ static void draw_everything(void)
 
     /* ---- draw player bounding box ---------------------------------------- */
 
-    if (debug_mode[DEBUG_MODE_BOUNDING_BOXES])
+    if (core.debug.bounding_boxes)
     {
         glUniform3f(uniform.bounding_box.position,
                 player.bbox.pos.x, player.bbox.pos.y, player.bbox.pos.z);
@@ -870,7 +869,7 @@ static void draw_everything(void)
 
     /* ---- draw player chunk queue visualizer ------------------------------ */
 
-    if (debug_mode[DEBUG_MODE_CHUNK_QUEUE_VISUALIZER])
+    if (core.debug.chunk_queue_visualizer)
     {
         glUniformMatrix4fv(uniform.bounding_box.mat_perspective, 1, GL_FALSE,
                 (GLfloat*)&projection_world.perspective);
@@ -972,7 +971,7 @@ static void draw_everything(void)
 
     /* ---- draw hud chunk gizmo -------------------------------------------- */
 
-    if (debug_mode[DEBUG_MODE_CHUNK_GIZMO] && core.flag.hud)
+    if (core.debug.chunk_gizmo && core.flag.hud)
     {
         glClear(GL_DEPTH_BUFFER_BIT);
         glUseProgram(shader[SHADER_GIZMO_CHUNK].id);
