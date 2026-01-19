@@ -18,11 +18,16 @@
     - all: build build tool, engine and game
     - noproject: don't execute the build function passed to 'engine_build()'
 - added memory manamgement stuff:
-    - arena allocators
+    - arena allocators:
+        - function '_mem_map_arena()'
+        - cool function '_mem_push_arena()', grows dynamically and auto-relocates all resident pointers with it
+        - function '_mem_unmap_arena()'
+        - functions '_mem_request_page_size()' and 'mem_request_page_size()' (internal use)
     - function '_mem_remap()'
+- added page size alignment for 'mman' functions
 
 #### bugs and flaws
-- fix segfault when allocating smaller than 256 bytes for 'size' parameter of function 'mem_alloc_buf()'
+- segfault when allocating smaller than 256 bytes for 'size' in function 'mem_alloc_buf()'
 
 ## v0.4.0-beta (18 Jan 2026)
 

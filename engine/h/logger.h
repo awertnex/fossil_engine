@@ -90,12 +90,12 @@ enum /* LogLevel */
 #define LOGTRACEEX(verbose, cmd, file, line, format, ...) \
     _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_TRACE, 0, format, ##__VA_ARGS__)
 
-#define LOG_MESH_GENERATE(err, cmd, mesh_name) \
+#define LOG_MESH_GENERATE(err, mesh_name) \
 { \
     if (err == ERR_SUCCESS) \
-    LOGINFO(FALSE, cmd, "Mesh '%s' Generated\n", mesh_name); \
+    LOGDEBUG(FALSE, FALSE, "Mesh '%s' Generated\n", mesh_name); \
     else if (err == ERR_MESH_GENERATION_FAIL) \
-    LOGERROR(TRUE, cmd, ERR_MESH_GENERATION_FAIL, "Failed to Generate Mesh '%s'\n", mesh_name); \
+    LOGERROR(TRUE, FALSE, ERR_MESH_GENERATION_FAIL, "Failed to Generate Mesh '%s'\n", mesh_name); \
 }
 
 /* ---- internal-use macros ------------------------------------------------- */

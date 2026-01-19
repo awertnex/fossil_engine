@@ -5,11 +5,16 @@
 #include "limits.h"
 #include "types.h"
 
+#define MEM_ARENA_MEMB_ALIGNMENT 16
+
 typedef struct MemArena
 {
-    void *buf;
-    u64 size;   /* total mapped size */
-    u64 cursor; /* current usage */
+    void ***i;      /* pointers to members of arena */
+    void *buf;      /* raw data */
+    u64 memb;       /* current number of 'i' members */
+    u64 size_i;     /* total mapped size for 'i' in bytes */
+    u64 size_buf;   /* total mapped size for 'buf' in bytes */
+    u64 cursor;     /* current usage */
 } MemArena;
 
 #define arr_len(arr) ((u64)sizeof(arr) / sizeof(arr[0]))
@@ -64,6 +69,29 @@ typedef struct MemArena
 
 #define mem_unmap_arena(x, name) \
     _mem_unmap_arena(x, name, __BASE_FILE__, __LINE__)
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief global page size variable.
+ *
+ *  initialized in '_mem_map()', '_mem_remap()', '_mem_commit()',
+ *  '_mem_map_arena()', '_mem_remap_arena()' and '_mem_push_arena()'.
+ */
+extern u64 _PAGE_SIZE;
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief initialize '_PAGE_SIZE' if not initialized.
+ */
+void mem_request_page_size(void);
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief request memory page size for platform.
+ *
+ *  @return page size in bytes.
+ */
+u64 _mem_request_page_size(void);
 
 /*! -- INTERNAL USE ONLY --;
  *

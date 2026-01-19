@@ -5,6 +5,7 @@
 
 #include <engine/h/diagnostics.h>
 #include <engine/h/dir.h>
+#include <engine/h/input.h>
 #include <engine/h/memory.h>
 #include <engine/h/math.h>
 #include <engine/h/logger.h>

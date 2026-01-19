@@ -29,6 +29,10 @@ u32 log_level_max = LOGLEVEL_TRACE;
 static u64 log_flag = 0;
 str log_dir[PATH_MAX] = {0};
 
+/*! @brief logger arena, raw logger memory data.
+ */
+static MemArena logger_arena = {0};
+
 /*! @brief logger ring buffer.
  */
 static str *logger_buf = NULL;
@@ -123,14 +127,20 @@ u32 logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 log_di
         snprintf(log_dir, PATH_MAX, "%s", _log_dir);
 
     if (
-            mem_map((void*)&logger_tab, LOGGER_HISTORY_MAX * sizeof(str*),
+            mem_map_arena(&logger_arena,
+                LOGGER_HISTORY_MAX * sizeof(u32) +
+                LOGGER_HISTORY_MAX * sizeof(str*) +
+                LOGGER_HISTORY_MAX * LOGGER_STRING_MAX,
+                "logger_init().logger_arena") != ERR_SUCCESS ||
+
+            mem_push_arena(&logger_arena, (void*)&logger_color, LOGGER_HISTORY_MAX * sizeof(u32),
+                "logger_init().logger_color") != ERR_SUCCESS ||
+
+            mem_push_arena(&logger_arena, (void*)&logger_tab, LOGGER_HISTORY_MAX * sizeof(str*),
                 "logger_init().logger_tab") != ERR_SUCCESS ||
 
-            mem_map((void*)&logger_buf, LOGGER_HISTORY_MAX * LOGGER_STRING_MAX,
-                "logger_init().logger_buf") != ERR_SUCCESS ||
-
-            mem_map((void*)&logger_color, LOGGER_HISTORY_MAX * sizeof(u32),
-                "logger_init().logger_color") != ERR_SUCCESS)
+            mem_push_arena(&logger_arena, (void*)&logger_buf, LOGGER_HISTORY_MAX * LOGGER_STRING_MAX,
+                "logger_init().logger_buf") != ERR_SUCCESS)
     {
         _LOGFATAL(FALSE, ERR_LOGGER_INIT_FAIL,
                 "%s\n", "Failed to Initialize Logger, Process Aborted");
@@ -151,9 +161,7 @@ void logger_close(void)
     _LOGTRACE(TRUE, "%s\n", "Closing Logger..");
 
     log_flag &= ~FLAG_LOGGER_GUI_OPEN;
-    mem_unmap((void*)&logger_color, LOGGER_HISTORY_MAX * sizeof(u32), "logger_init().logger_color");
-    mem_unmap((void*)&logger_buf, LOGGER_HISTORY_MAX * LOGGER_STRING_MAX, "logger_close().logger_buf");
-    mem_unmap((void*)&logger_tab, LOGGER_HISTORY_MAX * sizeof(str*), "logger_close().logger_tab");
+    mem_unmap_arena(&logger_arena, "logger_init().logger_color");
 }
 
 void _log_output(b8 verbose, b8 cmd, const str *_log_dir, const str *file, u64 line,

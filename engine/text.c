@@ -231,7 +231,7 @@ u32 text_init(u32 resolution, b8 multisample)
             goto cleanup;
 
     if (
-            mem_alloc((void*)&text_core.buf, STRING_MAX * sizeof(struct TextData),
+            mem_map((void*)&text_core.buf, STRING_MAX * sizeof(struct TextData),
                 "text_init().text_core.buf") != ERR_SUCCESS)
         goto cleanup;
 
@@ -301,7 +301,8 @@ void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear)
     else if (length > text_core.buf_len)
     {
         if (
-                mem_realloc((void*)&text_core.buf,
+                mem_remap((void*)&text_core.buf,
+                    text_core.buf_len * sizeof(struct TextData),
                     length * sizeof(struct TextData),
                     "text_start().text_core.buf") != ERR_SUCCESS)
             goto cleanup;
@@ -376,7 +377,8 @@ void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, u32 color)
     if (text_core.cursor + len >= text_core.buf_len)
     {
         if (
-                mem_realloc((void*)&text_core.buf,
+                mem_remap((void*)&text_core.buf,
+                    text_core.buf_len * sizeof(struct TextData),
                     (text_core.buf_len + STRING_MAX) * sizeof(struct TextData),
                     "text_push().text_core.buf_len") != ERR_SUCCESS)
         {
@@ -505,6 +507,6 @@ void text_fbo_blit(GLuint fbo)
 void text_free(void)
 {
     fbo_free(&text_core.fbo);
-    mem_free((void*)&text_core.buf, text_core.buf_len * sizeof(struct TextData),
+    mem_unmap((void*)&text_core.buf, text_core.buf_len * sizeof(struct TextData),
             "text_free().text_core.buf");
 }

@@ -23,6 +23,7 @@ FSLAPI f32 clamp_f32(f32 n, f32 min, f32 max);
 FSLAPI i64 clamp_i64(i64 n, i64 min, i64 max);
 FSLAPI u64 clamp_u64(u64 n, u64 min, u64 max);
 FSLAPI f64 clamp_f64(f64 n, f64 min, f64 max);
+FSLAPI u64 round_up_u64(u64 x, u64 n);
 FSLAPI f32 min_v3f32(v3f32 v);
 FSLAPI f32 max_v3f32(v3f32 v);
 FSLAPI f32 map_range_f32(f32 n, f32 n_min, f32 n_max, f32 r_min, f32 r_max);

@@ -6,9 +6,17 @@
 #include <inttypes.h>
 
 #include "h/diagnostics.h"
+#include "h/math.h"
 #include "h/memory.h"
 #include "h/limits.h"
 #include "h/logger.h"
+
+u64 _PAGE_SIZE = 0;
+
+void mem_request_page_size(void)
+{
+    if (!_PAGE_SIZE) _PAGE_SIZE = _mem_request_page_size();
+}
 
 u32 _mem_alloc(void **x, u64 size, const str *name, const str *file, u64 line)
 {
@@ -77,6 +85,7 @@ u32 _mem_alloc_buf(Buf *x, u64 memb, u64 size, const str *name, const str *file,
 
     for (i = 0; i < memb; ++i)
         x->i[i] = x->buf + i * size;
+
     x->memb = memb;
     x->size = size;
     x->loaded = TRUE;
@@ -194,7 +203,7 @@ void _mem_free(void **x, u64 size, const str *name, const str *file, u64 line)
         return;
 
     temp = *x;
-    mem_clear(x, size, name);
+    _mem_clear(x, size, name, file, line);
     free(*x);
     *x = NULL;
     _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name, temp);
@@ -214,7 +223,7 @@ void _mem_free_buf(Buf *x, const str *name, const str *file, u64 line)
     if (x->i)
     {
         temp = x->i;
-        mem_clear((void*)&x->i, x->memb * sizeof(str*), name_i);
+        _mem_clear((void*)&x->i, x->memb * sizeof(str*), name_i, file, line);
         free(x->i);
         _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name_i, temp);
     }
@@ -222,7 +231,7 @@ void _mem_free_buf(Buf *x, const str *name, const str *file, u64 line)
     if (x->buf)
     {
         temp = x->buf;
-        mem_clear((void*)&x->buf, x->memb * x->size, name_buf);
+        _mem_clear((void*)&x->buf, x->memb * x->size, name_buf, file, line);
         free(x->buf);
         _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name_buf, temp);
     }
@@ -248,7 +257,7 @@ void _mem_free_key_val(KeyValue *x, const str *name, const str *file, u64 line)
     if (x->key)
     {
         temp = x->key;
-        mem_clear((void*)&x->key, x->memb * sizeof(str*), name_key);
+        _mem_clear((void*)&x->key, x->memb * sizeof(str*), name_key, file, line);
         free(x->key);
         _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name_key, temp);
     }
@@ -256,7 +265,7 @@ void _mem_free_key_val(KeyValue *x, const str *name, const str *file, u64 line)
     if (x->val)
     {
         temp = x->val;
-        mem_clear((void*)&x->val, x->memb * sizeof(str*), name_val);
+        _mem_clear((void*)&x->val, x->memb * sizeof(str*), name_val, file, line);
         free(x->val);
         _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name_val, temp);
     }
@@ -264,7 +273,7 @@ void _mem_free_key_val(KeyValue *x, const str *name, const str *file, u64 line)
     if (x->buf_key)
     {
         temp = x->buf_key;
-        mem_clear((void*)&x->buf_key, x->memb * x->size_key, name_buf_key);
+        _mem_clear((void*)&x->buf_key, x->memb * x->size_key, name_buf_key, file, line);
         free(x->buf_key);
         _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name_buf_key, temp);
     }
@@ -272,7 +281,7 @@ void _mem_free_key_val(KeyValue *x, const str *name, const str *file, u64 line)
     if (x->buf_val)
     {
         temp = x->buf_val;
-        mem_clear((void*)&x->buf_val, x->memb * x->size_val, name_buf_val);
+        _mem_clear((void*)&x->buf_val, x->memb * x->size_val, name_buf_val, file, line);
         free(x->buf_val);
         _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unloaded\n", name_buf_val, temp);
     }
@@ -282,7 +291,8 @@ void _mem_free_key_val(KeyValue *x, const str *name, const str *file, u64 line)
 
 u32 _mem_map_arena(MemArena* x, u64 size, const str *name, const str *file, u64 line)
 {
-    MemArena *temp = NULL;
+    u64 memb_aligned = 0;
+    u64 size_aligned = 0;
 
     if (!x)
     {
@@ -292,16 +302,25 @@ u32 _mem_map_arena(MemArena* x, u64 size, const str *name, const str *file, u64 
         return engine_err;
     }
 
-    temp = x;
-    if (_mem_map((void*)&x->buf, size, name, file, line) != ERR_SUCCESS)
+    mem_request_page_size();
+    memb_aligned = round_up_u64(MEM_ARENA_MEMB_ALIGNMENT * sizeof(void*), _PAGE_SIZE);
+    size_aligned = round_up_u64(size, _PAGE_SIZE);
+
+    if (
+            _mem_map((void*)&x->i, memb_aligned, name, file, line) != ERR_SUCCESS ||
+            _mem_map((void*)&x->buf, size_aligned, name, file, line) != ERR_SUCCESS)
     {
         _LOGFATALEX(TRUE, file, line, ERR_MEM_ARENA_MAP_FAIL,
-                "%s[%p] Failed to Map Memory Arena, Process Aborted\n", name, temp);
+                "%s[%p] Failed to Map Memory Arena, Process Aborted\n", name, x);
         return engine_err;
     }
-    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Arena Mapped [%"PRIu64"B]\n", name, x->buf, size);
 
-    x->size = size;
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Arena Mapped [%"PRIu64"B] Memb [%"PRIu64"B]\n",
+            name, x->buf, size_aligned, memb_aligned);
+
+    x->memb = 0;
+    x->size_i = memb_aligned;
+    x->size_buf = size_aligned;
     x->cursor = 0;
 
     engine_err = ERR_SUCCESS;
@@ -310,6 +329,11 @@ u32 _mem_map_arena(MemArena* x, u64 size, const str *name, const str *file, u64 
 
 u32 _mem_push_arena(MemArena *x, void **p, u64 size, const str *name, const str *file, u64 line)
 {
+    u64 i = 0, diff = 0;
+    u64 memb_aligned = 0;
+    u64 size_aligned = 0;
+    void *buf_old = NULL;
+
     if (!p)
     {
         _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
@@ -331,6 +355,13 @@ u32 _mem_push_arena(MemArena *x, void **p, u64 size, const str *name, const str 
         return engine_err;
     }
 
+    if (!x->i)
+    {
+        _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
+                "%s[%p] Failed to Push Memory Arena, Arena Memb Pointer NULL\n", name, NULL);
+        return engine_err;
+    }
+
     if (size == 0)
     {
         _LOGERROREX(TRUE, file, line, ERR_SIZE_TOO_SMALL,
@@ -339,16 +370,48 @@ u32 _mem_push_arena(MemArena *x, void **p, u64 size, const str *name, const str 
         return engine_err;
     }
 
-    if (size > x->size - x->cursor)
+    mem_request_page_size();
+    memb_aligned = round_up_u64(x->size_i + sizeof(void*), _PAGE_SIZE);
+    size_aligned = round_up_u64(x->cursor + size, _PAGE_SIZE);
+
+    if (size_aligned > x->size_buf)
     {
-        _LOGERROREX(TRUE, file, line, ERR_SIZE_LIMIT,
-                "%s[%p] Failed to Push Memory Arena, Size Limit Exceeded By [%"PRIu64"B]\n",
-                name, x->buf + x->cursor, x->cursor - x->size + size);
+        buf_old = x->buf;
+
+        if (_mem_remap((void*)&x->buf, x->size_buf, size_aligned, name, file, line) != ERR_SUCCESS)
+        {
+            _LOGERROREX(TRUE, file, line, ERR_SIZE_TOO_SMALL,
+                    "%s[%p] Failed to Push Memory Arena, Memory Remap Failed\n",
+                    name, x->buf + x->cursor);
+            return engine_err;
+        }
+
+        diff = x->buf - buf_old;
+        i = x->memb;
+        while (i--)
+            *x->i[i] += diff;
+    }
+
+    if (memb_aligned > x->size_i &&
+            _mem_remap((void*)&x->i, x->size_i, memb_aligned, name, file, line) != ERR_SUCCESS)
+    {
+        _LOGERROREX(TRUE, file, line, ERR_SIZE_TOO_SMALL,
+                "%s[%p] Failed to Push Memory Arena, Memory Remap Failed\n",
+                name, x->i + sizeof(void*));
         return engine_err;
     }
 
+    _LOGTRACEEX(TRUE, file, line,
+            "%s[%p] Memory Arena Pushed [%p][%"PRIu64"B] Memb %"PRIu64"[%"PRIu64"B]\n",
+            name, x->buf, x->buf + x->cursor, size_aligned, x->memb, memb_aligned);
+
     *p = x->buf + x->cursor;
+    x->size_buf = size_aligned;
     x->cursor += size;
+
+    x->i[x->memb] = &*p;
+    x->size_i = memb_aligned;
+    ++x->memb;
 
     engine_err = ERR_SUCCESS;
     return engine_err;

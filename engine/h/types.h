@@ -29,23 +29,23 @@ typedef uint32_t    b32;
 typedef struct Buf
 {
     b8 loaded;
-    void **i;
-    void *buf;
-    u64 memb;
-    u64 size;
-    u64 cursor; /* for iteration, optional */
+    void **i;       /* members of 'buf' */
+    void *buf;      /* raw data */
+    u64 memb;       /* number of 'i' members */
+    u64 size;       /* size of each member in bytes */
+    u64 cursor;     /* for iteration, optional */
 } Buf;
 
 typedef struct KeyValue
 {
     b8 loaded;
-    void **key;
-    void **val;
-    void *buf_key;
-    void *buf_val;
-    u64 memb;
-    u64 size_key;
-    u64 size_val;
+    void **key;     /* members of 'buf_key' */
+    void **val;     /* members of 'buf_val' */
+    void *buf_key;  /* raw data */
+    void *buf_val;  /* raw data */
+    u64 memb;       /* numbers of members */
+    u64 size_key;   /* size of each key in bytes */
+    u64 size_val;   /* size of each val in bytes */
 } KeyValue;
 
 /* ---- vector2u ------------------------------------------------------------ */

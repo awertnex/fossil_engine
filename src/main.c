@@ -178,7 +178,7 @@ static u32 settings_init(void)
 
     settings.lerp_speed = SET_LERP_SPEED_DEFAULT;
 
-    settings.render_distance = 8;
+    settings.render_distance = 2;
     settings.chunk_buf_radius = settings.render_distance;
     settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
 
@@ -513,36 +513,36 @@ static void generate_standard_meshes(void)
                 VBO_LEN_SKYBOX, EBO_LEN_SKYBOX,
                 vbo_data_skybox, ebo_data_skybox) != ERR_SUCCESS)
     {
-        LOG_MESH_GENERATE(ERR_MESH_GENERATION_FAIL, TRUE, "Skybox");
+        LOG_MESH_GENERATE(ERR_MESH_GENERATION_FAIL, "Skybox");
         goto cleanup;
     }
-    LOG_MESH_GENERATE(ERR_SUCCESS, TRUE, "Skybox");
+    LOG_MESH_GENERATE(ERR_SUCCESS, "Skybox");
 
     if (mesh_generate(&mesh[MESH_CUBE_OF_HAPPINESS], &attrib_vec3, GL_STATIC_DRAW,
                 VBO_LEN_COH, EBO_LEN_COH,
                 vbo_data_coh, ebo_data_coh) != ERR_SUCCESS)
     {
-        LOG_MESH_GENERATE(ERR_MESH_GENERATION_FAIL, TRUE, "Cube of Happiness");
+        LOG_MESH_GENERATE(ERR_MESH_GENERATION_FAIL, "Cube of Happiness");
         goto cleanup;
     }
-    LOG_MESH_GENERATE(ERR_SUCCESS, TRUE, "Cube of Happiness");
+    LOG_MESH_GENERATE(ERR_SUCCESS, "Cube of Happiness");
 
     if (mesh_generate(&mesh[MESH_PLAYER], &attrib_vec3_vec3, GL_STATIC_DRAW,
                 VBO_LEN_PLAYER, 0, vbo_data_player, NULL) != ERR_SUCCESS)
     {
-        LOG_MESH_GENERATE(ERR_MESH_GENERATION_FAIL, TRUE, "Player");
+        LOG_MESH_GENERATE(ERR_MESH_GENERATION_FAIL, "Player");
         goto cleanup;
     }
-    LOG_MESH_GENERATE(ERR_SUCCESS, TRUE, "Player");
+    LOG_MESH_GENERATE(ERR_SUCCESS, "Player");
 
     if (mesh_generate(&mesh[MESH_GIZMO], &attrib_vec3, GL_STATIC_DRAW,
                 VBO_LEN_GIZMO, EBO_LEN_GIZMO,
                 vbo_data_gizmo, ebo_data_gizmo) != ERR_SUCCESS)
     {
-        LOG_MESH_GENERATE(ERR_MESH_GENERATION_FAIL, TRUE, "Gizmo");
+        LOG_MESH_GENERATE(ERR_MESH_GENERATION_FAIL, "Gizmo");
         goto cleanup;
     }
-    LOG_MESH_GENERATE(ERR_SUCCESS, TRUE, "Gizmo");
+    LOG_MESH_GENERATE(ERR_SUCCESS, "Gizmo");
 
     *GAME_ERR = ERR_SUCCESS;
     return;
@@ -1067,7 +1067,7 @@ static void draw_everything(void)
 
     if (core.flag.hud && core.flag.debug)
     {
-        text_push(stringf("\n"
+        text_push(stringf("\n\n"
                     "TIME        [%.2lf]\n"
                     "CLOCK       [%02"PRIu64":%02"PRIu64"]\n"
                     "DAYS        [%"PRIu64"]\n",
@@ -1279,7 +1279,7 @@ int main(int argc, char **argv)
     if (glfwRawMouseMotionSupported())
     {
         glfwSetInputMode(render->window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-        LOGINFO(FALSE, TRUE, "%s\n", "GLFW: Raw Mouse Motion Enabled");
+        LOGDEBUG(FALSE, TRUE, "%s\n", "GLFW: Raw Mouse Motion Enabled");
     }
     else LOGERROR(FALSE, TRUE, ERR_GLFW, "%s\n", "GLFW: Raw Mouse Motion Not Supported");
 
@@ -1351,6 +1351,7 @@ section_world_loaded:
     {
         glfwPollEvents();
         update_key_states();
+
         input_update(&player);
         update_mouse_movement();
 

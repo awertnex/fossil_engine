@@ -40,6 +40,11 @@ f64 clamp_f64(f64 n, f64 min, f64 max)
     return n < min ? min : n > max ? max : n;
 }
 
+u64 round_up_u64(u64 n, u64 val)
+{
+    return n + (val - (n % val)) % val;
+}
+
 f32 min_v3f32(v3f32 v)
 {
     return v.x < v.y ? v.x < v.z ? v.x : v.z : v.y < v.z ? v.y : v.z;
