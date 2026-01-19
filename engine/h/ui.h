@@ -1,6 +1,7 @@
 #ifndef ENGINE_UI_H
 #define ENGINE_UI_H
 
+#include "common.h"
 #include "core.h"
 #include "types.h"
 
@@ -15,7 +16,7 @@
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 ui_init(b8 multisample);
+FSLAPI u32 ui_init(b8 multisample);
 
 /*! @brief start ui rendering batch.
  *
@@ -30,22 +31,22 @@ u32 ui_init(b8 multisample);
  *  @remark disables 'GL_DEPTH_TEST', 'ui_stop()' re-enables it.
  *  @remark can re-allocate 'fbo' with 'multisample' setting used in 'ui_init()'.
  */
-void ui_start(FBO *fbo, b8 nine_slice, b8 clear);
+FSLAPI void ui_start(FBO *fbo, b8 nine_slice, b8 clear);
 
-void ui_render(void);
-void ui_draw(Texture texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
+FSLAPI void ui_render(void);
+FSLAPI void ui_draw(Texture texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
         f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint);
-void ui_draw_nine_slice(Texture texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
+FSLAPI void ui_draw_nine_slice(Texture texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
         f32 slice_size, f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint);
 
 /*! @remark enables 'GL_DEPTH_TEST'.
  */
-void ui_stop(void);
+FSLAPI void ui_stop(void);
 
-/*! @brief blit rendered ui onto 'fbo.
+/*! @brief blit rendered ui onto 'fbo'.
  */
-void ui_fbo_blit(GLuint fbo);
+FSLAPI void ui_fbo_blit(GLuint fbo);
 
-void ui_free(void);
+FSLAPI void ui_free(void);
 
 #endif /* ENGINE_UI_H */

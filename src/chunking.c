@@ -8,13 +8,15 @@
 #include <engine/h/memory.h>
 #include <engine/h/math.h>
 #include <engine/h/logger.h>
-#include <engine/h/platform.h>
+#include <engine/h/string.h>
 
 #include "h/assets.h"
 #include "h/chunking.h"
+#include "h/common.h"
 #include "h/dir.h"
 #include "h/main.h"
 #include "h/terrain.h"
+#include "h/world.h"
 
 u64 CHUNKS_MAX[SET_RENDER_DISTANCE_MAX + 1] = {0};
 
@@ -66,7 +68,9 @@ static void _block_break(Chunk *ch,
         Chunk *px, Chunk *nx, Chunk *py, Chunk *ny, Chunk *pz, Chunk *nz, 
         v3u32 chunk_tab_coordinates, i32 x, i32 y, i32 z);
 
-/*! @brief generate chunk blocks.
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief generate chunk blocks.
  *
  *  @param rate = number of blocks to process per chunk per frame.
  *
@@ -74,6 +78,19 @@ static void _block_break(Chunk *ch,
  *  @remark must be called before 'chunk_mesh_update()'.
  */
 static void chunk_generate(Chunk **chunk, u32 rate, Terrain terrain());
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief generate chunk blocks.
+ *
+ *  automatically called from 'chunk_generate()'.
+ *
+ *  @param rate = number of blocks to process per chunk per frame.
+ *
+ *  @remark calls 'chunk_mesh_init()' when done generating.
+ *  @remark must be called before 'chunk_mesh_update()'.
+ */
+static void _chunk_generate(Chunk **chunk, u32 rate, Terrain terrain());
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -89,11 +106,11 @@ static void chunk_mesh_update(u32 index, Chunk *ch);
 
 /*! -- INTERNAL USE ONLY --;
  */
-static void _chunk_serialize(Chunk *ch, str *world_name);
+static void _chunk_serialize(Chunk *ch);
 
 /*! -- INTERNAL USE ONLY --;
  */
-static void _chunk_deserialize(Chunk *ch, str *world_name);
+static void _chunk_deserialize(const str *file_name, Chunk *ch);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -935,6 +952,27 @@ static void _block_break(Chunk *ch,
 
 static void chunk_generate(Chunk **chunk, u32 rate, Terrain terrain())
 {
+    str file_name[PATH_MAX] = {0};
+    Chunk *ch = NULL;
+
+    if (!chunk || !*chunk || !terrain)
+        return;
+
+    ch = *chunk;
+
+    snprintf(file_name, PATH_MAX, GAME_DIR_NAME_WORLDS"%s/"GAME_DIR_WORLD_NAME_CHUNKS FORMAT_FILE_NAME_HHCC,
+            world.name, ch->pos.x, ch->pos.y, ch->pos.z);
+
+    if (is_file_exists(file_name, FALSE) == ERR_SUCCESS)
+        _chunk_deserialize(file_name, ch);
+    else
+        _chunk_serialize(ch);
+
+    _chunk_generate(chunk, rate, terrain);
+}
+
+static void _chunk_generate(Chunk **chunk, u32 rate, Terrain terrain())
+{
     u32 index;
     v3u32 chunk_tab_coordinates;
     v3i32 coordinates;
@@ -944,8 +982,6 @@ static void chunk_generate(Chunk **chunk, u32 rate, Terrain terrain())
           *py = NULL, *ny = NULL,
           *pz = NULL, *nz = NULL;
     i32 x, y, z;
-
-    if (!chunk || !*chunk || !terrain) return;
 
     ch = *chunk;
     index = chunk - chunk_tab;
@@ -968,6 +1004,9 @@ static void chunk_generate(Chunk **chunk, u32 rate, Terrain terrain())
         pz = *(chunk + settings.chunk_buf_layer);
     if (chunk_tab_coordinates.z > 0)
         nz = *(chunk - settings.chunk_buf_layer);
+
+    if (ch->cursor == CHUNK_VOLUME)
+        goto mesh;
 
     x = ch->cursor % CHUNK_DIAMETER;
     y = (ch->cursor / CHUNK_DIAMETER) % CHUNK_DIAMETER;
@@ -1018,6 +1057,8 @@ static void chunk_generate(Chunk **chunk, u32 rate, Terrain terrain())
         y = 0;
     }
     ch->cursor = x + y * CHUNK_DIAMETER + z * CHUNK_LAYER;
+
+mesh:
 
     if (ch->cursor == CHUNK_VOLUME && !(ch->flag & FLAG_CHUNK_GENERATED))
         chunk_mesh_init(index, ch);
@@ -1093,6 +1134,8 @@ static void chunk_mesh_update(u32 index, Chunk *ch)
     static u64 cur_buf = 0;
 
     if (!ch->vbo || !ch->vao) return;
+
+    str file_name[PATH_MAX] = {0};
     u64 *buf = &buffer[cur_buf][0];
     u64 *cursor = buf;
     u32 *i = (u32*)ch->block;
@@ -1138,16 +1181,50 @@ static void chunk_mesh_update(u32 index, Chunk *ch)
     }
 
     _chunk_gizmo_write(index, ch);
+
+    snprintf(file_name, PATH_MAX, GAME_DIR_NAME_WORLDS"%s/"GAME_DIR_WORLD_NAME_CHUNKS FORMAT_FILE_NAME_HHCC,
+            world.name, ch->pos.x, ch->pos.y, ch->pos.z);
+
+    _chunk_serialize(ch);
 }
 
 /* TODO: make chunk_serialize() */
-static void _chunk_serialize(Chunk *ch, str *world_name)
+static void _chunk_serialize(Chunk *ch)
 {
+    str file_name[PATH_MAX] = {0};
+
+    if (ch->cursor < CHUNK_VOLUME)
+        return;
+
+    snprintf(file_name, PATH_MAX, GAME_DIR_NAME_WORLDS"%s/"GAME_DIR_WORLD_NAME_CHUNKS FORMAT_FILE_NAME_HHCC,
+            world.name,
+            (i32)floorf((f32)ch->pos.x / CHUNK_REGION_DIAMETER),
+            (i32)floorf((f32)ch->pos.y / CHUNK_REGION_DIAMETER),
+            (i32)floorf((f32)ch->pos.z / CHUNK_REGION_DIAMETER));
+
+    snprintf(file_name, PATH_MAX, GAME_DIR_NAME_WORLDS"%s/"GAME_DIR_WORLD_NAME_CHUNKS FORMAT_FILE_NAME_HHCC,
+            world.name, ch->pos.x, ch->pos.y, ch->pos.z);
+
+    write_file(file_name, sizeof(u32), CHUNK_VOLUME, ch->block, TRUE, FALSE);
 }
 
 /* TODO: make chunk_deserialize() */
-static void _chunk_deserialize(Chunk *ch, str *world_name)
+static void _chunk_deserialize(const str *file_name, Chunk *ch)
 {
+    str str_file_name[NAME_MAX] = {0};
+    str *cursor = str_file_name + 2;
+
+    get_base_name(file_name, str_file_name, NAME_MAX);
+
+    cursor = strchr(cursor, '.') + 1;
+    ch->pos.x = atoi(cursor);
+    cursor = strchr(cursor, '.') + 1;
+    ch->pos.y = atoi(cursor);
+    cursor = strchr(cursor, '.') + 1;
+    ch->pos.z = atoi(cursor);
+
+    ch->cursor = CHUNK_VOLUME;
+    get_file_contents(file_name, (void*)&ch->block, sizeof(u32), FALSE);
 }
 
 static void _chunk_buf_push(u32 index, v3i32 player_chunk_delta)
@@ -1228,10 +1305,13 @@ static void _chunk_buf_pop(u32 index)
     chunk_tab[index] = NULL;
 }
 
-/* TODO: grab chunks from disk if previously generated */
 static void _chunk_queue_update(ChunkQueue *q)
 {
     if (!MODE_INTERNAL_LOAD_CHUNKS) return;
+
+    if (is_dir_exists(stringf(GAME_DIR_NAME_WORLDS"%s/"GAME_DIR_WORLD_NAME_CHUNKS,
+                    world.name), TRUE) != ERR_SUCCESS)
+        return;
 
     u32 i;
     u64 size = q->size;

@@ -55,6 +55,20 @@ static void glfw_callback_error(int error, const char* message)
     _LOGERROR(TRUE, ERR_GLFW, "GLFW: %s\n", message);
 }
 
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief take screenshot and save into dir at '_screenshot_dir'.
+ *  
+ *  save pixel data as 'RGB' into 'render->screen_buf'.
+ *
+ *  @param special_text = string appended to file name before extension.
+ *
+ *  @remark if directory not found, screenshot is still saved at 'render->screen_buf'.
+ *
+ *  @return non-zero on failure and 'engine_err' is set accordingly.
+ */
+static u32 take_screenshot(const str *_screenshot_dir, const str *special_text);
+
 /* ---- section: init ------------------------------------------------------- */
 
 u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
@@ -274,7 +288,7 @@ u32 process_screenshot_request(const str *_screenshot_dir, const str *special_te
     return ERR_SUCCESS;
 }
 
-u32 take_screenshot(const str *_screenshot_dir, const str *special_text)
+static u32 take_screenshot(const str *_screenshot_dir, const str *special_text)
 {
     u64 i = 0;
     str str_time[TIME_STRING_MAX] = {0};
@@ -603,7 +617,7 @@ u32 _texture_generate(GLuint *id, const GLint format_internal,  const GLint form
     if (!width || !height)
     {
         _LOGERROR(FALSE, ERR_IMAGE_SIZE_TOO_SMALL,
-                "Failed to Generate Texture [%d], Size Too Small\n", *id);
+                "Failed to Generate Texture [%d], Texture Size Too Small\n", *id);
         return engine_err;
     }
 

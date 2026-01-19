@@ -5,12 +5,13 @@
 #include <windows.h>
 #include <direct.h>
 
+#include "h/common.h"
 #include "h/diagnostics.h"
 #include "h/dir.h"
 #include "h/limits.h"
 #include "h/logger.h"
 #include "h/memory.h"
-#include "h/platform.h"
+#include "h/process.h"
 
 u32 make_dir(const str *path)
 {

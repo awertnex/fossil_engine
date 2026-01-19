@@ -8,7 +8,6 @@
 #include <engine/h/input.h>
 #include <engine/h/logger.h>
 #include <engine/h/math.h>
-#include <engine/h/platform.h>
 #include <engine/h/shaders.h>
 #include <engine/h/string.h>
 #include <engine/h/text.h>
@@ -179,7 +178,7 @@ static u32 settings_init(void)
 
     settings.lerp_speed = SET_LERP_SPEED_DEFAULT;
 
-    settings.render_distance = 16;
+    settings.render_distance = 2;
     settings.chunk_buf_radius = settings.render_distance;
     settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
 
@@ -1083,6 +1082,7 @@ static void draw_everything(void)
                     "XYZ         [%5.2lf %5.2lf %5.2lf]\n"
                     "BLOCK       [%.0lf %.0lf %.0lf]\n"
                     "CHUNK       [%d %d %d]\n"
+                    "REGION      [%.0f %.0f %.0f]\n"
                     "PITCH/YAW   [%5.2f][%5.2f]\n"
                     "ACCELERATION[%5.2f %5.2f %5.2f]\n"
                     "VELOCITY    [%5.2f %5.2f %5.2f]\n"
@@ -1092,6 +1092,9 @@ static void draw_everything(void)
                     floor(player.pos.y),
                     floor(player.pos.z),
                     player.chunk.x, player.chunk.y, player.chunk.z,
+                    floorf((f32)player.chunk.x / CHUNK_REGION_DIAMETER),
+                    floorf((f32)player.chunk.y / CHUNK_REGION_DIAMETER),
+                    floorf((f32)player.chunk.z / CHUNK_REGION_DIAMETER),
                     player.pitch, player.yaw,
                     player.acceleration.x, player.acceleration.y, player.acceleration.z,
                     player.velocity.x, player.velocity.y, player.velocity.z,
@@ -1196,11 +1199,14 @@ static void draw_everything(void)
 
     text_start(font[FONT_MONO_BOLD], settings.font_size, 0, NULL, FALSE);
     i32 i = 0;
-    for (i = 24; i >= 0; --i)
-        text_push(stringf("%s",
-                    logger_tab[mod(logger_tab_index - i, LOGGER_HISTORY_MAX)]),
+    u32 index = 0;
+    for (i = 24; i > 0; --i)
+    {
+        index = mod(logger_tab_index - i, LOGGER_HISTORY_MAX);
+        text_push(stringf("%s", logger_tab[index]),
                 (v2f32){SET_MARGIN, render->size.y - SET_MARGIN - settings.font_size * i},
-                0, TEXT_ALIGN_BOTTOM, logger_color[logger_tab_index - i]);
+                0, TEXT_ALIGN_BOTTOM, logger_color[index]);
+    }
     text_render(TRUE, TEXT_COLOR_SHADOW);
     text_stop();
 

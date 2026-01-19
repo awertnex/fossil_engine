@@ -1,4 +1,4 @@
-#include "h/platform.h"
+#include "h/common.h"
 
 #if PLATFORM_LINUX
 

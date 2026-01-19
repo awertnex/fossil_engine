@@ -9,9 +9,21 @@
 #include "h/limits.h"
 #include "h/logger.h"
 #include "h/math.h"
+#include "h/process.h"
 #include "h/string.h"
 #include "h/time.h"
 #include "h/types.h"
+
+enum LogFileIndex
+{
+    LOGFILE_FATAL = 0,
+    LOGFILE_ERROR = 0,
+    LOGFILE_WARNING = 0,
+    LOGFILE_INFO = 1,
+    LOGFILE_DEBUG = 2,
+    LOGFILE_TRACE = 2,
+    LOGFILE_COUNT,
+}; /* LogFileIndex */
 
 u32 log_level_max = LOGLEVEL_TRACE;
 static u64 log_flag = 0;
@@ -147,7 +159,7 @@ void logger_close(void)
 void _log_output(b8 verbose, b8 cmd, const str *_log_dir, const str *file, u64 line,
         u8 level, u32 error_code, const str *format, ...)
 {
-    va_list args;
+    __builtin_va_list args;
     str str_in[STRING_MAX] = {0};
     str str_out[LOGGER_STRING_MAX] = {0};
     str temp[PATH_MAX] = {0};

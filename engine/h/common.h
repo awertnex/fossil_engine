@@ -1,7 +1,53 @@
 #ifndef ENGINE_COMMON_H
 #define ENGINE_COMMON_H
 
+#define ENGINE_VERSION_STABLE   "-stable"
+#define ENGINE_VERSION_BETA     "-beta"
+#define ENGINE_VERSION_ALPHA    "-alpha"
+#define ENGINE_VERSION_DEV      "-dev"
+
+#define ENGINE_AUTHOR           "Lily Awertnex"
+#define ENGINE_NAME             "Fossil Engine"
+#define ENGINE_VERSION          "0.2.0"ENGINE_VERSION_BETA
+#define ENGINE_TITLE            ENGINE_NAME": "ENGINE_VERSION
+
 #include "types.h"
+
+#if defined(__linux__) || defined(__linux)
+    #define PLATFORM_LINUX 1
+    #define PLATFORM "linux"
+    #define ENGINE_FILE_NAME_LIB "libfossil.so"
+    #define ENGINE_FILE_NAME_PLATFORM "platform_linux.c"
+    #define EXE ""
+    #define RUNTIME_PATH "$ORIGIN"
+
+    #define SLASH_NATIVE '/'
+    #define SLASH_NON_NATIVE '\\'
+#elif defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
+    #define PLATFORM_WIN 1
+    #define PLATFORM "win"
+    #define ENGINE_FILE_NAME_LIB "fossil.dll"
+    #define ENGINE_FILE_NAME_PLATFORM "platform_win.c"
+    #define EXE ".exe"
+    #define RUNTIME_PATH "%CD%"
+
+    #define SLASH_NATIVE '\\'
+    #define SLASH_NON_NATIVE '/'
+#endif /* PLATFORM */
+
+#if PLATFORM_WIN
+    #if defined(BUILD_LIBTYPE_SHARED)
+        #define FSLAPI __declspec(dllexport)
+    #else
+        #define FSLAPI __declspec(dllimport)
+    #endif
+#else
+    #define FSLAPI __attribute__((visibility("default")))
+#endif /* PLATFORM */
+
+#ifndef FSLAPI
+    #define FSLAPI
+#endif /* FSLAPI */
 
 #define ENGINE_DIR_NAME_FONTS       "engine/assets/fonts/"
 #define ENGINE_DIR_NAME_TEXTURES    "engine/assets/textures/"
@@ -117,6 +163,6 @@ extern u64 init_time;
  *
  *  @remark declared internally.
  */
-extern str *DIR_PROC_ROOT;
+FSLAPI extern str *DIR_PROC_ROOT;
 
 #endif /* ENGINE_COMMON_H */

@@ -5,7 +5,6 @@
 #include <stdarg.h>
 
 #include "h/diagnostics.h"
-#include "h/platform.h"
 #include "h/memory.h"
 #include "h/limits.h"
 #include "h/logger.h"
@@ -34,7 +33,7 @@ u32 _mem_alloc(void **x, u64 size, const str *name, const str *file, u64 line)
 u32 _mem_alloc_memb(void **x, u64 memb, u64 size, const str *name, const str *file, u64 line)
 {
     if (*x)
-        return TRUE;
+        return ERR_SUCCESS;
 
     *x = calloc(memb, size);
     if (!*x)
@@ -53,7 +52,7 @@ u32 _mem_alloc_buf(Buf *x, u64 memb, u64 size, const str *name, const str *file,
 {
     str name_i[NAME_MAX] = {0};
     str name_buf[NAME_MAX] = {0};
-    u64 i;
+    u64 i = 0;
 
     if (!x)
     {
@@ -92,7 +91,7 @@ u32 _mem_alloc_key_val(KeyValue *x, u64 memb, u64 size_key, u64 size_val,
     str name_val[NAME_MAX] = {0};
     str name_buf_key[NAME_MAX] = {0};
     str name_buf_val[NAME_MAX] = {0};
-    u64 i;
+    u64 i = 0;
 
     if (!x)
     {

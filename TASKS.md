@@ -46,3 +46,4 @@ quirks:
 - [ ] possibly fix overhead from bubble-sorting in function 'chunking_init()'
 - [ ] put blocks in a contiguous array and bind it all to an SSBO, and bind
       chunk pointers to their addresses
+- [ ] fix segfault when allocating smaller than 256 bytes for 'size' parameter of function 'mem_alloc_buf()'

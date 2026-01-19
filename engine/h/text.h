@@ -3,6 +3,7 @@
 
 #include <engine/include/stb_truetype.h>
 
+#include "common.h"
 #include "core.h"
 #include "types.h"
 
@@ -15,16 +16,6 @@ typedef struct Glyph
     v2f32 texture_sample;
     b8 loaded;
 } Glyph;
-
-typedef struct Glyphf
-{
-    v2f32 scale;
-    v2f32 bearing;
-    f32 advance;
-    f32 x0, y0, x1, y1;
-    v2f32 texture_sample;
-    b8 loaded;
-} Glyphf;
 
 typedef struct Font
 {
@@ -73,7 +64,7 @@ typedef struct Font
  *
  *  @remark declared internally in 'text_init()'.
  */
-extern Font engine_font[ENGINE_FONT_COUNT];
+FSLAPI extern Font engine_font[ENGINE_FONT_COUNT];
 
 /*! @brief load font from file at 'file_name' or at 'font.path'.
  *
@@ -87,9 +78,9 @@ extern Font engine_font[ENGINE_FONT_COUNT];
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 font_init(Font *font, u32 resolution, const str *name, const str *file_name);
+FSLAPI u32 font_init(Font *font, u32 resolution, const str *name, const str *file_name);
 
-void font_free(Font *font);
+FSLAPI void font_free(Font *font);
 
 /*! @brief init text rendering settings.
  *
@@ -97,7 +88,7 @@ void font_free(Font *font);
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 text_init(u32 resolution, b8 multisample);
+FSLAPI u32 text_init(u32 resolution, b8 multisample);
 
 /*! @brief start text rendering batch.
  *
@@ -112,7 +103,7 @@ u32 text_init(u32 resolution, b8 multisample);
  *  @remark disables 'GL_DEPTH_TEST', 'text_stop()' re-enables it.
  *  @remark can re-allocate 'fbo' with 'multisample' setting used in 'text_init()'.
  */
-void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear);
+FSLAPI void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear);
 
 /*! @brief push string's glyph metrics, position and alignment to render buffer.
  *
@@ -126,7 +117,7 @@ void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear);
  *
  *  @remark default alignment top left (0, 0), enum: TextAlignment.
  */
-void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, u32 color);
+FSLAPI void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, u32 color);
 
 /*! @brief render text to framebuffer.
  *
@@ -139,18 +130,18 @@ void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, u32 color);
  *  @remark can be called multiple times within a text rendering batch,
  *  chained with 'text_push()'.
  */
-void text_render(b8 shadow, u32 shadow_color);
+FSLAPI void text_render(b8 shadow, u32 shadow_color);
 
 /*! @brief stop text rendering batch.
  *
  *  @remark enables 'GL_DEPTH_TEST'.
  */
-void text_stop(void);
+FSLAPI void text_stop(void);
 
 /*! @brief blit rendered text onto 'fbo'.
  */
-void text_fbo_blit(GLuint fbo);
+FSLAPI void text_fbo_blit(GLuint fbo);
 
-void text_free(void);
+FSLAPI void text_free(void);
 
 #endif /* ENGINE_TEXT_H */

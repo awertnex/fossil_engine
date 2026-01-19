@@ -6,9 +6,12 @@
 #include <sys/wait.h>
 #include <sys/mman.h>
 
+#include "h/common.h"
 #include "h/diagnostics.h"
+#include "h/dir.h"
 #include "h/limits.h"
 #include "h/logger.h"
+#include "h/process.h"
 
 u32 make_dir(const str *path)
 {

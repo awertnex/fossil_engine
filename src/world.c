@@ -1,5 +1,8 @@
 #include <string.h>
 
+#include <engine/h/common.h>
+#include <engine/h/dir.h>
+#include <engine/h/limits.h>
 #include <engine/h/logger.h>
 #include <engine/h/math.h>
 #include <engine/h/string.h>

@@ -9,6 +9,17 @@
     - chunk queue visualizer toggling commands
     - bounding box toggling commands
     - flashlight toggling commands
+- added function 'engine/dir.c/get_base_name()'
+- fixed misaligned GUI logger strings
+- added engine API exposure definitions in 'engine/h/common.h'
+- changed 'engine/h/platform.h' -> 'engine/h/process.h'
+- added helpful build commands:
+    - self: build build tool
+    - all: build build tool, engine and game
+    - noproject: don't execute the build function passed to 'engine_build()'
+
+#### bugs and flaws
+- fix segfault when allocating smaller than 256 bytes for 'size' parameter of function 'mem_alloc_buf()'
 
 ## v0.4.0-beta (18 Jan 2026)
 

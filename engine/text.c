@@ -13,6 +13,16 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <engine/include/stb_truetype.h>
 
+struct Glyphf
+{
+    v2f32 scale;
+    v2f32 bearing;
+    f32 advance;
+    f32 x0, y0, x1, y1;
+    v2f32 texture_sample;
+    b8 loaded;
+}; /* Glyphf */
+
 struct TextData
 {
     v2f32 pos;
@@ -51,7 +61,7 @@ static struct /* text_core */
 {
     b8 multisample;
     Font *font;
-    Glyphf glyph[GLYPH_MAX];
+    struct Glyphf glyph[GLYPH_MAX];
     f32 font_size;
     f32 line_height_total;
     v2f32 text_scale;
@@ -275,7 +285,7 @@ void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear)
     static v2i32 render_size = {0};
     FBO *_fbo = &text_core.fbo;
     f32 scale = 0.0f;
-    Glyphf *g = NULL;
+    struct Glyphf *g = NULL;
     u32 i = 0;
 
     if (fbo) _fbo = fbo;
@@ -343,7 +353,7 @@ void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, u32 color)
     u64 len = 0, i = 0;
     i64 j = 0;
     f32 advance = 0.0f, descent = 0.0f, line_height = 0.0f;
-    Glyphf *g = NULL;
+    struct Glyphf *g = NULL;
 
     if (!text_core.buf)
     {

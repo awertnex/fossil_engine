@@ -1,7 +1,7 @@
 #ifndef ENGINE_INPUT_H
 #define ENGINE_INPUT_H
 
-#include "core.h"
+#include "common.h"
 #include "types.h"
 
 #define MOUSE_BUTTONS_MAX 8
@@ -145,18 +145,22 @@ enum KeyboardKeys
     KEY_MENU,
 }; /* KeyboardKeys */
 
-void update_mouse_movement(void);
+/*! @brief update internal mouse movement.
+ *
+ *  update parameters at 'core.c/render.mouse_movement' and 'core.c/render.mouse_delta'.
+ */
+FSLAPI void update_mouse_movement(void);
 
-b8 is_mouse_press(const u32 button);
-b8 is_mouse_hold(const u32 button);
-b8 is_mouse_release(const u32 button);
-b8 is_key_press(const u32 key);
-b8 is_key_press_double(const u32 key);
-b8 is_key_hold(const u32 key);
-b8 is_key_release(const u32 key);
+FSLAPI b8 is_mouse_press(const u32 button);
+FSLAPI b8 is_mouse_hold(const u32 button);
+FSLAPI b8 is_mouse_release(const u32 button);
+FSLAPI b8 is_key_press(const u32 key);
+FSLAPI b8 is_key_press_double(const u32 key);
+FSLAPI b8 is_key_hold(const u32 key);
+FSLAPI b8 is_key_release(const u32 key);
 
 /*! @brief update internal mouse and key states: press, double-press, hold and release.
  */
-void update_key_states(void);
+FSLAPI void update_key_states(void);
 
 #endif /* ENGINE_INPUT_H */

@@ -64,7 +64,7 @@ u64 find_token(str *arg, int argc, char **argv)
     return 0;
 }
 
-u32 convert_i32_to_str(str *dest, i32 size, i32 n)
+u32 convert_i32_to_str(str *dst, i32 size, i32 n)
 {
     i32 i = 1, j = 0, len = 0, sign = n;
 
@@ -77,8 +77,8 @@ u32 convert_i32_to_str(str *dest, i32 size, i32 n)
 
     if (n == 0)
     {
-        dest[0] = '0';
-        dest[1] = '\0';
+        dst[0] = '0';
+        dst[1] = '\0';
         engine_err = ERR_SUCCESS;
         return engine_err;
     }
@@ -91,22 +91,22 @@ u32 convert_i32_to_str(str *dest, i32 size, i32 n)
     i = 0;
     while (n > 0 && i < size - 1)
     {
-        dest[i++] = (n % 10) + '0';
+        dst[i++] = (n % 10) + '0';
       	n /= 10;
     }
 
     if (sign < 0)
-        dest[i++] = '-';
-    dest[i] = '\0';
+        dst[i++] = '-';
+    dst[i] = '\0';
 
     for (j = i - 1, i = 0; i < j; i++, j--)
-        swap_bits(&dest[i], &dest[j]);
+        swap_bits(&dst[i], &dst[j]);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
 }
 
-u32 convert_u64_to_str(str *dest, u64 size, u64 n)
+u32 convert_u64_to_str(str *dst, u64 size, u64 n)
 {
     u64 i = 1, j = 0, len = 0;
 
@@ -119,8 +119,8 @@ u32 convert_u64_to_str(str *dest, u64 size, u64 n)
 
     if (n == 0)
     {
-        dest[0] = '0';
-        dest[1] = '\0';
+        dst[0] = '0';
+        dst[1] = '\0';
         engine_err = ERR_SUCCESS;
         return engine_err;
     }
@@ -131,14 +131,14 @@ u32 convert_u64_to_str(str *dest, u64 size, u64 n)
     i = 0;
     while (n > 0 && i < size - 1)
     {
-        dest[i++] = (n % 10) + '0';
+        dst[i++] = (n % 10) + '0';
       	n /= 10;
     }
 
-    dest[i] = '\0';
+    dst[i] = '\0';
 
     for (j = i - 1, i = 0; i < j; i++, j--)
-        swap_bits(&dest[i], &dest[j]);
+        swap_bits(&dst[i], &dst[j]);
 
     engine_err = ERR_SUCCESS;
     return engine_err;

@@ -89,8 +89,14 @@
 #define GAME_DIR_WORLD_NAME_ENTITIES    "entities/"
 #define GAME_DIR_WORLD_NAME_PLAYER      "chunks/"
 
+/* ---- file names ---------------------------------------------------------- */
+
 #define GAME_FILE_NAME_SETTINGS     "settings.txt"
 #define GAME_FILE_NAME_WORLD_SEED   "seed.txt"
+
+/* ---- name formats -------------------------------------------------------- */
+
+#define FORMAT_FILE_NAME_HHCC "r.%d.%d.%d.hhcc"
 
 /* ---- strings: death ------------------------------------------------------ */
 

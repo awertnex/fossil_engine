@@ -1,7 +1,7 @@
 #ifndef ENGINE_LIMITS_H
 #define ENGINE_LIMITS_H
 
-#include "platform.h"
+#include "common.h"
 
 #if PLATFORM_LINUX
     #include <linux/limits.h>

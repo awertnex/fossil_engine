@@ -1,6 +1,7 @@
 #ifndef ENGINE_TIME_H
 #define ENGINE_TIME_H
 
+#include "common.h"
 #include "types.h"
 
 #define USEC2NSEC 1e3
@@ -12,44 +13,44 @@
 
 /*! @brief get elapsed nanoseconds since the unix epoch, 1970-01-01 00:00:00 UTC.
  */
-u64 get_time_raw_nsec(void);
+FSLAPI u64 get_time_raw_nsec(void);
 
 /*! @brief get elapsed milliseconds since the unix epoch, 1970-01-01 00:00:00 UTC.
  */
-u64 get_time_raw_usec(void);
+FSLAPI u64 get_time_raw_usec(void);
 
 /*! @brief get elapsed nanoseconds since this function's first call in the process.
  *
  *  @remark the macro 'NSEC2SEC' can be used to convert from nanoseconds to
  *  seconds.nanoseconds when multiplied by output.
  */
-u64 get_time_nsec(void);
+FSLAPI u64 get_time_nsec(void);
 
 /*! @brief get elapsed seconds.nanoseconds since this function's first call in the process.
  *
  *  @remark this function is called inside 'core.c/engine_init()' to automatically
  *  initialize time.
  */
-f64 get_time_nsecf(void);
+FSLAPI f64 get_time_nsecf(void);
 
 /*! @brief get elapsed nanoseconds since this function's last call in the process.
  *
  *  @remark the macro 'NSEC2SEC' can be used to convert from nanoseconds to
  *  seconds.nanoseconds when multiplied by output.
  */
-u64 get_time_delta_nsec(void);
+FSLAPI u64 get_time_delta_nsec(void);
 
 /*! @brief get time string with max length of 'limits.h/TIME_STRING_MAX' as per 'format'.
  */
-void get_time_str(str *buf, const str *format);
+FSLAPI void get_time_str(str *buf, const str *format);
 
-b8 get_timer(f64 *time_start, f32 interval);
+FSLAPI b8 get_timer(f64 *time_start, f32 interval);
 
 /*! @brief sleep for specified nanoseconds.
  *
  *  @remark the macros 'SEC2NSEC', 'NSEC2SEC' can be used to convert from
  *  seconds to nanoseconds and vice-versa when multiplied by specified value.
  */
-void sleep_nsec(u64 nsec);
+FSLAPI void sleep_nsec(u64 nsec);
 
 #endif /* ENGINE_TIME_H */

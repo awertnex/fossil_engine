@@ -34,17 +34,6 @@ enum /* LogLevel */
     LOGLEVEL_COUNT,
 }; /* LogLevel */
 
-enum /* LogFile */
-{
-    LOGFILE_FATAL = 0,
-    LOGFILE_ERROR = 0,
-    LOGFILE_WARNING = 0,
-    LOGFILE_INFO = 1,
-    LOGFILE_DEBUG = 2,
-    LOGFILE_TRACE = 2,
-    LOGFILE_COUNT,
-};
-
 /* ---- external-use macros ------------------------------------------------- */
 
 #define LOGFATAL(verbose, cmd, err, format, ...) \
@@ -166,25 +155,25 @@ enum /* LogFile */
     _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_TRACE, 0, format, ##__VA_ARGS__)
 
 extern u32 log_level_max;
-extern str log_dir[PATH_MAX];
+FSLAPI extern str log_dir[PATH_MAX];
 
 /*! @brief logger pointer look-up table that points to 'logger_buf' addresses.
  *
  *  @remark read-only, initialized internally in 'logger_init()'.
  */
-extern str **logger_tab;
+FSLAPI extern str **logger_tab;
 
 /*! @brief logger color look-up table for 'logger_tab' entries.
  *
  *  @remark read-only, initialized internally in 'logger_init()'.
  */
-extern u32 *logger_color;
+FSLAPI extern u32 *logger_color;
 
 /*! @brief current position in 'logger_tab'.
  *
  *  @remark read-only, updated internally in '_log_output()'.
  */
-extern i32 logger_tab_index;
+FSLAPI extern i32 logger_tab_index;
 
 /*! @brief initialize logger.
  *
@@ -210,16 +199,16 @@ extern i32 logger_tab_index;
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 log_dir_not_found);
+FSLAPI u32 logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 log_dir_not_found);
 
-void logger_close(void);
+FSLAPI void logger_close(void);
 
 /*! -- INTERNAL USE ONLY --;
  *
  *  @param cmd = log a command, used for on-screen output of basic commands.
  *  @param _log_dir = directory to write log files into, if NULL, logs won't be written to disk.
  */
-void _log_output(b8 verbose, b8 cmd, const str *_log_dir, const str *file, u64 line,
+FSLAPI void _log_output(b8 verbose, b8 cmd, const str *_log_dir, const str *file, u64 line,
         u8 level, u32 error_code, const str *format, ...);
 
 #endif /* ENGINE_LOGGER_H */

@@ -1,3 +1,5 @@
+#include "h/common.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,11 +9,11 @@
 #include <inttypes.h>
 
 #include "h/diagnostics.h"
-#include "h/platform.h"
 #include "h/dir.h"
 #include "h/limits.h"
 #include "h/logger.h"
 #include "h/memory.h"
+#include "h/process.h"
 
 u64 get_file_type(const str *name)
 {
@@ -412,7 +414,7 @@ str *get_path_absolute(const str *name)
 
     if (strlen(name) >= PATH_MAX - 1)
     {
-        _LOGERROR(TRUE, ERR_GET_PATH_ABSOLUTE_FAIL, "%s\n", "Path Too Long");
+        _LOGERROR(TRUE, ERR_GET_PATH_ABSOLUTE_FAIL, "%s\n", "Failed to Get Absolute Path, Path Too Long");
         return NULL;
     }
 
@@ -568,4 +570,51 @@ str *retract_path(str *path)
 
     engine_err = ERR_SUCCESS;
     return path;
+}
+
+void get_base_name(const str *path, str *dst, u64 size)
+{
+    i64 i = 0;
+    u64 len = 0;
+    str path_resolved[PATH_MAX] = {0};
+
+    if (size == 0)
+    {
+        _LOGERROR(TRUE, ERR_SIZE_TOO_SMALL,
+                "Failed to Get Base Name of '%s', 'size' Too Small\n", path);
+        return;
+    }
+
+    if (!path || !path[0] || !dst)
+    {
+        _LOGERROR(TRUE, ERR_POINTER_NULL, "%s\n", "Failed to Get Base Name, Pointer NULL");
+        return;
+    }
+
+    len = strlen(path);
+    if (len >= PATH_MAX - 1)
+    {
+        _LOGERROR(TRUE, ERR_PATH_TOO_LONG,
+                "Failed to Get Base Name of '%s', Path Too Long\n", path);
+        return;
+    }
+
+    snprintf(path_resolved, PATH_MAX, "%s", path);
+    posix_slash(path_resolved);
+
+    i = (i64)len - 1;
+    if (path_resolved[i] == '/')
+    {
+        if (i == 0)
+        {
+            dst[0] = '/';
+            return;
+        }
+        else --i;
+    }
+
+    while (i > 0 && path_resolved[i - 1] != '/')
+        --i;
+
+    snprintf(dst, size, "%s", path_resolved + i);
 }

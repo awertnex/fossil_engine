@@ -34,7 +34,7 @@ typedef struct UBO
  *
  *  @remark declared internally in 'core.h/engine_init()'.
  */
-extern ShaderProgram engine_shader[ENGINE_SHADER_COUNT];
+FSLAPI extern ShaderProgram engine_shader[ENGINE_SHADER_COUNT];
 
 /*! @brief initialize single shader.
  *
@@ -43,7 +43,7 @@ extern ShaderProgram engine_shader[ENGINE_SHADER_COUNT];
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 shader_init(const str *shaders_dir, Shader *shader);
+FSLAPI u32 shader_init(const str *shaders_dir, Shader *shader);
 
 /*! @brief initialize shader program.
  *
@@ -54,8 +54,8 @@ u32 shader_init(const str *shaders_dir, Shader *shader);
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 shader_program_init(const str *shaders_dir, ShaderProgram *program);
+FSLAPI u32 shader_program_init(const str *shaders_dir, ShaderProgram *program);
 
-void shader_program_free(ShaderProgram *program);
+FSLAPI void shader_program_free(ShaderProgram *program);
 
 #endif /* ENGINE_SHADERS_H */

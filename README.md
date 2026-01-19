@@ -68,7 +68,9 @@ cd heaven-hell_continuum/
 ### additional build commands:
 
 - `./build help`: show help
-- `./build engine`: build engine; it places it into './lib/linux', run `./build` again to copy it to 'Heaven-Hell Continuum/lib/linux'
+- `./build engine`: build engine and place at './engine/lib/linux' and './Heaven-Hell Continuum'
+- `./build self`: re-build build tool
+- `./build all`: build build tool, engine and game
 - `./build show`: show build command
 - `./build raw`: show build command, raw
 
@@ -99,7 +101,9 @@ cd heaven-hell_continuum
 ### additional build commands:
 
 - `./build.exe help`: show help
-- `./build.exe engine`: build engine; it places it into './lib/win', run `./build` again to copy it to 'Heaven-Hell Continuum/lib/win'
+- `./build.exe engine`: build engine and place at './engine/lib/win' and './Heaven-Hell Continuum'
+- `./build.exe self`: re-build build tool
+- `./build.exe all`: build build tool, engine and game
 - `./build.exe show`: show build command
 - `./build.exe raw`: show build command, raw
 
@@ -112,7 +116,7 @@ gcc.exe build.c -o build.exe
 ```
 
 ## Contributing:
-currently not accepting contributions since the project is in an early stage, but I will be opening contributions soon (saying this as today is 24-Oct-2025)
+currently not accepting contributions since the project is in an early stage, but I will be opening contributions soon (saying this as of today: 24 Oct 2025)
 
 ## Contributors:
 - [sofia](https://github.com/EdgySofia666): alpha-testing on windows

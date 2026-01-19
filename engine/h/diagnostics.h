@@ -1,6 +1,7 @@
 #ifndef ENGINE_DIAGNOSTICS_H
 #define ENGINE_DIAGNOSTICS_H
 
+#include "common.h"
 #include "types.h"
 #include "limits.h"
 
@@ -67,11 +68,12 @@
 #define ERR_UI_INIT_FAIL                4146
 #define ERR_SHADER_TYPE_NULL            4147
 #define ERR_SCREENSHOT_FAIL             4148
+#define ERR_BUILD_FUNCTION_NOT_FOUND    4149
 
 /*! @brief global variable for engine-specific error codes.
  *
  *  @remark must be declared by the user if not including 'core.c'.
  */
-extern u32 engine_err;
+FSLAPI extern u32 engine_err;
 
 #endif /* ENGING_DIAGNOSTICS_H */

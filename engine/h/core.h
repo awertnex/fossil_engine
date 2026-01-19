@@ -1,19 +1,8 @@
 #ifndef ENGINE_CORE_H
 #define ENGINE_CORE_H
 
-#define ENGINE_VERSION_STABLE   "-stable"
-#define ENGINE_VERSION_BETA     "-beta"
-#define ENGINE_VERSION_ALPHA    "-alpha"
-#define ENGINE_VERSION_DEV      "-dev"
-
-#define ENGINE_AUTHOR           "Lily Awertnex"
-#define ENGINE_NAME             "Fossil Engine"
-#define ENGINE_VERSION          "0.1.3"ENGINE_VERSION_STABLE
-#define ENGINE_TITLE            ENGINE_NAME": "ENGINE_VERSION
-
 #include "common.h"
 #include "limits.h"
-#include "platform.h"
 #include "types.h"
 
 #include <engine/include/glad/glad.h>
@@ -115,15 +104,15 @@ typedef struct Projection
  *
  *  @remark declared internally.
  */
-extern Render *render;
+FSLAPI extern Render *render;
 
 /*! @brief default textures.
  *
  *  @remark declared internally.
  */
-extern Texture engine_texture[ENGINE_TEXTURE_COUNT];
+FSLAPI extern Texture engine_texture[ENGINE_TEXTURE_COUNT];
 
-extern Mesh engine_mesh_unit;
+FSLAPI extern Mesh engine_mesh_unit;
 
 /*! @brief initialize engine stuff.
  *
@@ -159,14 +148,14 @@ extern Mesh engine_mesh_unit;
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
+FSLAPI u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
         i32 size_x, i32 size_y, Render *_render, u64 flags);
 
 /*! @brief free engine resources.
  *
  *  free logger, destroy window (if not NULL) and terminate glfw.
  */
-void engine_close(void);
+FSLAPI void engine_close(void);
 
 /*! @param multisample = turn on multisampling.
  *
@@ -174,7 +163,7 @@ void engine_close(void);
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 glfw_init(b8 multisample);
+FSLAPI u32 glfw_init(b8 multisample);
 
 /*! @param title = window/application title, if NULL, default title is used.
  *  @param size_x, size_y = window size, if either is 0, default size is used.
@@ -183,19 +172,19 @@ u32 glfw_init(b8 multisample);
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 window_init(const str *title, i32 size_x, i32 size_y);
+FSLAPI u32 window_init(const str *title, i32 size_x, i32 size_y);
 
 /*! @remark called automatically from 'engine_init()'.
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 glad_init(void);
+FSLAPI u32 glad_init(void);
 
 /*! @brief engine main loop check.
  *
  *  @return TRUE unless 'glfw/glfwWindowShouldClose()' returns FALSE or engine inactive.
  */
-b8 engine_update(void);
+FSLAPI b8 engine_update(void);
 
 /*! @brief update render settings like frame size, used mainly in
  *  'glfw/glfwSetFramebufferSizeCallback()'.
@@ -204,18 +193,18 @@ b8 engine_update(void);
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 engine_update_render_settings(i32 size_x, i32 size_y);
+FSLAPI u32 engine_update_render_settings(i32 size_x, i32 size_y);
 
 /*! @brief switch engine's current bound render to '_render'.
  */
-u32 change_render(Render *_render);
+FSLAPI u32 change_render(Render *_render);
 
 /*! @remark send screenshot request.
  *
  *  can be called from anywhere, then 'process_screenshot_request()' can be called
  *  after the render loop has finished to take the screenshot.
  */
-void request_screenshot(void);
+FSLAPI void request_screenshot(void);
 
 /*! @remark take screenshot if requested by 'request_screenshot()' and save into dir at '_screenshot_dir'.
  *  
@@ -229,51 +218,39 @@ void request_screenshot(void);
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 process_screenshot_request(const str *_screenshot_dir, const str *special_text);
-
-/*! @remark take screenshot and save into dir at '_screenshot_dir'.
- *  
- *  save pixel data as 'RGB' into 'render->screen_buf'.
- *
- *  @param special_text = string appended to file name before extension.
- *
- *  @remark if directory not found, screenshot is still saved at 'render->screen_buf'.
- *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
- */
-u32 take_screenshot(const str *_screenshot_dir, const str *special_text);
+FSLAPI u32 process_screenshot_request(const str *_screenshot_dir, const str *special_text);
 
 /*! @brief set a vec3 attribute array for a vao.
  */
-void attrib_vec3(void);
+FSLAPI void attrib_vec3(void);
 
 /*! @brief set a vec3 and a vec2 attribute arrays for a vao.
  */
-void attrib_vec3_vec2(void);
+FSLAPI void attrib_vec3_vec2(void);
 
 /*! @brief set a vec3 and a vec3 attribute arrays for a vao.
  */
-void attrib_vec3_vec3(void);
+FSLAPI void attrib_vec3_vec3(void);
 
 /*! @brief set a vec3 and a vec4 attribute arrays for a vao.
  */
-void attrib_vec3_vec4(void);
+FSLAPI void attrib_vec3_vec4(void);
 
 /*! @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 fbo_init(FBO *fbo, Mesh *mesh_fbo, b8 multisample, u32 samples);
+FSLAPI u32 fbo_init(FBO *fbo, Mesh *mesh_fbo, b8 multisample, u32 samples);
 
 /*! @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 fbo_realloc(FBO *fbo, b8 multisample, u32 samples);
+FSLAPI u32 fbo_realloc(FBO *fbo, b8 multisample, u32 samples);
 
-void fbo_free(FBO *fbo);
+FSLAPI void fbo_free(FBO *fbo);
 
 /*! @brief load image data from disk into 'texture->buf' and set texture info.
  *
  *  @return non-zero on failure and engine_err is set accordingly.
  */
-u32 texture_init(Texture *texture, v2i32 size, const GLint format_internal, const GLint format,
+FSLAPI u32 texture_init(Texture *texture, v2i32 size, const GLint format_internal, const GLint format,
         GLint filter, int channels, b8 grayscale, const str *file_name);
 
 /*! @brief generate texture for opengl from image loaded by 'texture_init()'.
@@ -283,9 +260,11 @@ u32 texture_init(Texture *texture, v2i32 size, const GLint format_internal, cons
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 texture_generate(Texture *texture, b8 bindless);
+FSLAPI u32 texture_generate(Texture *texture, b8 bindless);
 
-/*! @brief generate texture for opengl from 'buf'.
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief generate texture for opengl from 'buf'.
  *
  *  automatically called from 'texture_generate()' if texture data is already
  *  loaded into a texture by calling 'texture_init()'.
@@ -295,7 +274,7 @@ u32 texture_generate(Texture *texture, b8 bindless);
 u32 _texture_generate(GLuint *id, const GLint format_internal,  const GLint format,
         GLint filter, u32 width, u32 height, void *buf, b8 grayscale);
 
-void texture_free(Texture *texture);
+FSLAPI void texture_free(Texture *texture);
 
 /*! @param attrib = pointer to a function to set attribute arrays for 'mesh->vao'
  *  (e.g. &attrib_vec3, set a single vec3 attribute array),
@@ -304,10 +283,10 @@ void texture_free(Texture *texture);
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 mesh_generate(Mesh *mesh, void (*attrib)(), GLenum usage,
+FSLAPI u32 mesh_generate(Mesh *mesh, void (*attrib)(), GLenum usage,
         GLuint vbo_len, GLuint ebo_len, GLfloat *vbo_data, GLuint *ebo_data);
 
-void mesh_free(Mesh *mesh);
+FSLAPI void mesh_free(Mesh *mesh);
 
 /*! @brief apply sin() and cos() to camera's roll, pitch and yaw from camera rotation.
  *
@@ -315,11 +294,11 @@ void mesh_free(Mesh *mesh);
  *  and set to 0 if FALSE.
  *
  *  @remark rotation limits:
- *      roll: [0, 360].
- *      pitch: [-90, 90].
- *      yaw: [0, 360].
+ *      roll:  [  0, 360].
+ *      pitch: [-90,  90].
+ *      yaw:   [  0, 360].
  */
-void update_camera_movement(Camera *camera, b8 roll);
+FSLAPI void update_camera_movement(Camera *camera, b8 roll);
 
 /*! @brief make perspective projection matrices from camera parameters.
  *
@@ -328,12 +307,12 @@ void update_camera_movement(Camera *camera, b8 roll);
  *
  *  @param roll = if TRUE, roll rotation will be applied from 'camera.rot.x'.
  */
-void update_projection_perspective(Camera camera, Projection *projection, b8 roll);
+FSLAPI void update_projection_perspective(Camera camera, Projection *projection, b8 roll);
 
 /*! @brief get camera look-at angles from camera position and target position.
  *  
  *  assign vertical angle to 'pitch' and horizontal angle to 'yaw'.
  */
-void get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f64 *yaw);
+FSLAPI void get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f64 *yaw);
 
 #endif /* ENGINE_CORE_H */

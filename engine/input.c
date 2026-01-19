@@ -1,3 +1,4 @@
+#include "h/core.h"
 #include "h/input.h"
 #include "h/time.h"
 

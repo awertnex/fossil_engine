@@ -1,8 +1,9 @@
 #ifndef ENGINE_MEMORY_H
 #define ENGINE_MEMORY_H
 
-#include "types.h"
+#include "common.h"
 #include "limits.h"
+#include "types.h"
 
 #define arr_len(arr) ((u64)sizeof(arr) / sizeof(arr[0]))
 
@@ -52,7 +53,7 @@
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 _mem_alloc(void **x, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 _mem_alloc(void **x, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -62,7 +63,7 @@ u32 _mem_alloc(void **x, u64 size, const str *name, const str *file, u64 line);
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 _mem_alloc_memb(void **x, u64 memb, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 _mem_alloc_memb(void **x, u64 memb, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -72,7 +73,7 @@ u32 _mem_alloc_memb(void **x, u64 memb, u64 size, const str *name, const str *fi
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 _mem_alloc_buf(Buf *x, u64 memb, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 _mem_alloc_buf(Buf *x, u64 memb, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -83,7 +84,7 @@ u32 _mem_alloc_buf(Buf *x, u64 memb, u64 size, const str *name, const str *file,
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 _mem_alloc_key_val(KeyValue *x, u64 memb, u64 size_key, u64 size_val,
+FSLAPI u32 _mem_alloc_key_val(KeyValue *x, u64 memb, u64 size_key, u64 size_val,
         const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
@@ -93,7 +94,7 @@ u32 _mem_alloc_key_val(KeyValue *x, u64 memb, u64 size_key, u64 size_val,
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 _mem_realloc(void **x, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 _mem_realloc(void **x, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -103,26 +104,26 @@ u32 _mem_realloc(void **x, u64 size, const str *name, const str *file, u64 line)
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 _mem_realloc_memb(void **x, u64 memb, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 _mem_realloc_memb(void **x, u64 memb, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
  *  @param size = size in bytes.
  *  @param name = pointer name (for logging).
  */
-void _mem_free(void **x, u64 size, const str *name, const str *file, u64 line);
+FSLAPI void _mem_free(void **x, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
  *  @param name = pointer name (for logging).
  */
-void _mem_free_buf(Buf *x, const str *name, const str *file, u64 line);
+FSLAPI void _mem_free_buf(Buf *x, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
  *  @param name = pointer name (for logging).
  */
-void _mem_free_key_val(KeyValue *x, const str *name, const str *file, u64 line);
+FSLAPI void _mem_free_key_val(KeyValue *x, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -131,7 +132,7 @@ void _mem_free_key_val(KeyValue *x, const str *name, const str *file, u64 line);
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 _mem_clear(void **x, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 _mem_clear(void **x, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -144,7 +145,7 @@ u32 _mem_clear(void **x, u64 size, const str *name, const str *file, u64 line);
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 _mem_map(void **x, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 _mem_map(void **x, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -157,7 +158,7 @@ u32 _mem_map(void **x, u64 size, const str *name, const str *file, u64 line);
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */
-u32 _mem_commit(void **x, void *offset, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 _mem_commit(void **x, void *offset, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -168,34 +169,34 @@ u32 _mem_commit(void **x, void *offset, u64 size, const str *name, const str *fi
  *  @oaram size = size in bytes.
  *  @oaram name = pointer name (for logging).
  */
-void _mem_unmap(void **x, u64 size, const str *name, const str *file, u64 line);
+FSLAPI void _mem_unmap(void **x, u64 size, const str *name, const str *file, u64 line);
 
-void print_bits(u64 x, u8 bit_count);
+FSLAPI void print_bits(u64 x, u8 bit_count);
 
 /*! @brief swap bits of 'c1' and 's2' with each other.
  *
  *  @remark doesn't use a temp variable, swaps bits in-place.
  */
-void swap_bits(char *c1, char *c2);
+FSLAPI void swap_bits(char *c1, char *c2);
 
 /*! @brief swap bits of 'a' and 'b' with each other.
  *
  *  @remark doesn't use a temp variable, swaps bits in-place.
  */
-void swap_bits_u8(u8 *a, u8 *b);
+FSLAPI void swap_bits_u8(u8 *a, u8 *b);
 
 /*! @brief swap bits of 'a' and 'b' with each other.
  *
  *  @remark doesn't use a temp variable, swaps bits in-place.
  */
-void swap_bits_u32(u32 *a, u32 *b);
+FSLAPI void swap_bits_u32(u32 *a, u32 *b);
 
 /*! @brief swap bits of 'a' and 'b' with each other.
  *
  *  @remark doesn't use a temp variable, swaps bits in-place.
  */
-void swap_bits_u64(u64 *a, u64 *b);
+FSLAPI void swap_bits_u64(u64 *a, u64 *b);
 
-void sort_buf(Buf *buf);
+FSLAPI void sort_buf(Buf *buf);
 
 #endif /* ENGINE_MEMORY_H */

@@ -33,6 +33,7 @@ typedef struct Buf
     void *buf;
     u64 memb;
     u64 size;
+    u64 cursor; /* for iteration, optional */
 } Buf;
 
 typedef struct KeyValue

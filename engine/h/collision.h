@@ -1,6 +1,7 @@
 #ifndef ENGINE_COLLISION_H
 #define ENGINE_COLLISION_H
 
+#include "common.h"
 #include "types.h"
 
 #define COLLISION_EPSILON 1e-5
@@ -11,7 +12,7 @@ typedef struct BoundingBox
     v3f64 size;
 } BoundingBox;
 
-b8 is_intersect_aabb(BoundingBox a, BoundingBox b);
+FSLAPI b8 is_intersect_aabb(BoundingBox a, BoundingBox b);
 
 /*! @brief get collision status and stats between 'a' and 'b' using
  *  the 'Swept AABB' algorithm.
@@ -20,6 +21,6 @@ b8 is_intersect_aabb(BoundingBox a, BoundingBox b);
  *
  *  @return entry time.
  */
-f32 get_swept_aabb(BoundingBox a, BoundingBox b, v3f32 displacement, v3f32 *normal);
+FSLAPI f32 get_swept_aabb(BoundingBox a, BoundingBox b, v3f32 displacement, v3f32 *normal);
 
 #endif /* ENGINE_COLLISION_H */

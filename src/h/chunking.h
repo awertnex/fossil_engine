@@ -11,6 +11,8 @@
 #define CHUNK_LAYER     (CHUNK_DIAMETER * CHUNK_DIAMETER)
 #define CHUNK_VOLUME    (CHUNK_DIAMETER * CHUNK_DIAMETER * CHUNK_DIAMETER)
 
+#define CHUNK_REGION_DIAMETER   32
+
 #define WORLD_RADIUS            (2048 * CHUNK_DIAMETER)
 #define WORLD_RADIUS_VERTICAL   (64 * CHUNK_DIAMETER)
 
@@ -194,7 +196,7 @@ typedef struct Chunk
     GLuint vbo;
     u64 vbo_len;
     u32 block[CHUNK_DIAMETER][CHUNK_DIAMETER][CHUNK_DIAMETER];
-    u8 flag;
+    u8 flag; /* enum: ChunkFlag */
 } Chunk;
 
 typedef struct ChunkQueue
