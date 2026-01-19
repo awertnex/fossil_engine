@@ -24,7 +24,10 @@
         - function '_mem_unmap_arena()'
         - functions '_mem_request_page_size()' and 'mem_request_page_size()' (internal use)
     - function '_mem_remap()'
-- added page size alignment for 'mman' functions
+- added page size alignment for 'sys/mman.h' functions
+- added better memory alignment for memory arena pushes but also tight-packing for small pushes:
+    - I made it so that multiple pushes can use the same memory page as long as they're small enough to fit within it,
+      otherwise the overlapping block will be pushed to the next page
 
 #### bugs and flaws
 - segfault when allocating smaller than 256 bytes for 'size' in function 'mem_alloc_buf()'

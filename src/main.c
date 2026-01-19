@@ -178,7 +178,7 @@ static u32 settings_init(void)
 
     settings.lerp_speed = SET_LERP_SPEED_DEFAULT;
 
-    settings.render_distance = 2;
+    settings.render_distance = 16;
     settings.chunk_buf_radius = settings.render_distance;
     settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
 
@@ -225,12 +225,9 @@ void time_update(b8 fps_cap, u64 fps_target)
     static u64 time_next = 0;
     time_next += SEC2NSEC / clamp_u64(fps_target, TARGET_FPS_MIN, TARGET_FPS_MAX);
 
-    render->time = get_time_nsec();
     if (fps_cap && render->time < time_next)
         sleep_nsec(time_next - render->time);
     else time_next = render->time;
-
-    render->time_delta = get_time_delta_nsec();
 }
 
 static void bind_shader_uniforms(void)
@@ -1247,8 +1244,6 @@ int main(int argc, char **argv)
             game_init() != ERR_SUCCESS)
         goto cleanup;
 
-    core.flag.active = 1;
-
     if (!GAME_RELEASE_BUILD)
         LOGDEBUG(FALSE, TRUE, "%s\n", "DEVELOPMENT BUILD");
 
@@ -1347,7 +1342,7 @@ section_world_loaded:
 
     generate_standard_meshes();
 
-    while (engine_update() && core.flag.active)
+    while (engine_running())
     {
         glfwPollEvents();
         update_key_states();

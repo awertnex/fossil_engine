@@ -184,7 +184,7 @@ FSLAPI u32 glad_init(void);
  *
  *  @return TRUE unless 'glfw/glfwWindowShouldClose()' returns FALSE or engine inactive.
  */
-FSLAPI b8 engine_update(void);
+FSLAPI b8 engine_running(void);
 
 /*! @brief update render settings like frame size, used mainly in
  *  'glfw/glfwSetFramebufferSizeCallback()'.

@@ -1,5 +1,6 @@
+#include <stdio.h>
+
 #include <engine/h/core.h>
-#include <engine/h/math.h>
 #include <engine/h/memory.h>
 #include <engine/h/logger.h>
 #include <engine/h/shaders.h>

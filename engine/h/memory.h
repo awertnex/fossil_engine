@@ -5,8 +5,6 @@
 #include "limits.h"
 #include "types.h"
 
-#define MEM_ARENA_MEMB_ALIGNMENT 16
-
 typedef struct MemArena
 {
     void ***i;      /* pointers to members of arena */
@@ -78,6 +76,10 @@ typedef struct MemArena
  *  '_mem_map_arena()', '_mem_remap_arena()' and '_mem_push_arena()'.
  */
 extern u64 _PAGE_SIZE;
+
+/*! @brief like 'math.c/round_up_u64()' but only works on powers of two for 'size'.
+ */
+FSLAPI u64 align_up_u64(u64 n, u64 size);
 
 /*! -- INTERNAL USE ONLY --;
  *

@@ -276,10 +276,11 @@ extern GLuint chunk_gizmo_render_vbo;
 
 /*! @brief initialize chunking resources.
  *
- *  allocate resources for 'chunk_buf', 'chunk_tab', 'CHUNK_ORDER' and
- *  'CHUNK_QUEUE[]' and load necessary look-ups from disk if found and build them if not found.
+ *  - allocate 'chunk_arena' and push 'chunk_buf', 'chunk_tab', 'CHUNK_ORDER' and
+ *  'CHUNK_QUEUE[<x>]' onto it.
+ *  - load necessary look-ups from disk if found and build them if not.
  *
- *  @remark building the look-ups is cpu-guzzling (performance-taxing).
+ *  @remark building the look-ups is very taxing currently.
  *
  *  @return non-zero on failure and '*GAME_ERR' is set accordingly.
  */
@@ -289,13 +290,13 @@ u32 chunking_init(void);
  *
  *  1. load dirty chunks into their priority queues based on their distance from
  *     the player.
- *  2. if '(flag & FLAG_MAIN_CHUNK_BUF_DIRTY)', shift 'chunk_tab'
- *     to compensate for the player crossing a chunk boundary.
- *  3. check if player has crossed more than one axis and go back to shift
+ *  2. if 'core.flag.chunk_buf_dirty', shift 'chunk_tab'
+ *     to compensate for player crossing a chunk boundary.
+ *  3. check if player has crossed on more than one axis and go back to shift
  *     along that axis if true.
- *  4. find empty slots within 'settings.render_distance' and push chunks to
- *     'chunk_buf' and return that address to the respective index in 'chunk_tab'.
- *  5. remove flag 'FLAG_MAIN_CHUNK_BUF_DIRTY' when no further processing is required.
+ *  4. find empty chunk slots within 'settings.render_distance' distance, push chunks onto
+ *     'chunk_buf' and return the address to the respective index to 'chunk_tab'.
+ *  5. remove 'core.flag.chunk_buf_dirty' when no further processing is required.
  */
 void chunking_update(v3i32 player_chunk, v3i32 *player_chunk_delta);
 

@@ -154,7 +154,7 @@ u32 _mem_map(void **x, u64 size, const str *name, const str *file, u64 line)
     }
 
     mem_request_page_size();
-    size_aligned = round_up_u64(size, _PAGE_SIZE);
+    size_aligned = align_up_u64(size, _PAGE_SIZE);
 
     temp = VirtualAlloc(NULL, size_aligned, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     if (!temp)
@@ -184,7 +184,7 @@ u32 _mem_commit(void **x, void *offset, u64 size, const str *name, const str *fi
     }
 
     mem_request_page_size();
-    size_aligned = round_up_u64(size, _PAGE_SIZE);
+    size_aligned = align_up_u64(size, _PAGE_SIZE);
 
     if (!VirtualAlloc((*(u8*)x + (u8*)offset), size_aligned, MEM_COMMIT, PAGE_READWRITE))
     {
@@ -215,8 +215,8 @@ u32 _mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const str 
     }
 
     mem_request_page_size();
-    size_old_aligned = round_up_u64(size_old, _PAGE_SIZE);
-    size_new_aligned = round_up_u64(size_new, _PAGE_SIZE);
+    size_old_aligned = align_up_u64(size_old, _PAGE_SIZE);
+    size_new_aligned = align_up_u64(size_new, _PAGE_SIZE);
 
     temp = mremap(*x, size_old_aligned, size_new_aligned, MREMAP_MAYMOVE);
     if (temp == MAP_FAILED)
@@ -247,7 +247,7 @@ void _mem_unmap_arena(MemArena *x, const str *name, const str *file, u64 line)
     if (!x || !x->buf) return;
     VirtualFree(x->i, 0, MEM_RELEASE);
     VirtualFree(x->buf, 0, MEM_RELEASE);
-    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Arena Unmapped [%"PRIu64"B] Memb %"PRIu64"[%"PRIu64"B]\n",
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Arena Unmapped [%"PRIu64"B] Memb Total [%"PRIu64"][%"PRIu64"B]\n",
             name, x->buf, x->size_buf, x->memb, x->size_i);
     *x = (MemArena){0};
 }

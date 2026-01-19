@@ -12,7 +12,6 @@ struct Core
 {
     struct /* flag */
     {
-        u64 active: 1;
         u64 paused: 1;
         u64 hud: 1;
         u64 debug: 1;

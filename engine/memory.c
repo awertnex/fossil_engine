@@ -11,7 +11,19 @@
 #include "h/limits.h"
 #include "h/logger.h"
 
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief global page size variable.
+ *
+ *  initialized in '_mem_map()', '_mem_remap()', '_mem_commit()',
+ *  '_mem_map_arena()', '_mem_remap_arena()' and '_mem_push_arena()'.
+ */
 u64 _PAGE_SIZE = 0;
+
+u64 align_up_u64(u64 n, u64 size)
+{
+    return (n + (size - 1)) & ~(size - 1);
+}
 
 void mem_request_page_size(void)
 {
@@ -303,8 +315,8 @@ u32 _mem_map_arena(MemArena* x, u64 size, const str *name, const str *file, u64 
     }
 
     mem_request_page_size();
-    memb_aligned = round_up_u64(MEM_ARENA_MEMB_ALIGNMENT * sizeof(void*), _PAGE_SIZE);
-    size_aligned = round_up_u64(size, _PAGE_SIZE);
+    memb_aligned = align_up_u64(sizeof(void*), _PAGE_SIZE);
+    size_aligned = align_up_u64(size, _PAGE_SIZE);
 
     if (
             _mem_map((void*)&x->i, memb_aligned, name, file, line) != ERR_SUCCESS ||
@@ -332,6 +344,9 @@ u32 _mem_push_arena(MemArena *x, void **p, u64 size, const str *name, const str 
     u64 i = 0, diff = 0;
     u64 memb_aligned = 0;
     u64 size_aligned = 0;
+    u64 cursor_aligned = 0;
+    u64 cursor_pos = 0;
+    u64 cursor_pos_new = 0;
     void *buf_old = NULL;
 
     if (!p)
@@ -371,8 +386,16 @@ u32 _mem_push_arena(MemArena *x, void **p, u64 size, const str *name, const str 
     }
 
     mem_request_page_size();
-    memb_aligned = round_up_u64(x->size_i + sizeof(void*), _PAGE_SIZE);
-    size_aligned = round_up_u64(x->cursor + size, _PAGE_SIZE);
+    memb_aligned = align_up_u64(x->size_i + sizeof(void*), _PAGE_SIZE);
+    cursor_aligned = align_up_u64(x->cursor, _PAGE_SIZE);
+
+    if (size > cursor_aligned - x->cursor)
+        cursor_pos = cursor_aligned;
+    else
+        cursor_pos = x->cursor;
+
+    cursor_pos_new = cursor_pos + size;
+    size_aligned = align_up_u64(cursor_pos_new, _PAGE_SIZE);
 
     if (size_aligned > x->size_buf)
     {
@@ -405,12 +428,11 @@ u32 _mem_push_arena(MemArena *x, void **p, u64 size, const str *name, const str 
             "%s[%p] Memory Arena Pushed [%p][%"PRIu64"B] Memb %"PRIu64"[%"PRIu64"B]\n",
             name, x->buf, x->buf + x->cursor, size_aligned, x->memb, memb_aligned);
 
-    *p = x->buf + x->cursor;
-    x->size_buf = size_aligned;
-    x->cursor += size;
-
+    *p = x->buf + cursor_pos;
+    x->cursor = cursor_pos_new;
     x->i[x->memb] = &*p;
     x->size_i = memb_aligned;
+    x->size_buf = size_aligned;
     ++x->memb;
 
     engine_err = ERR_SUCCESS;

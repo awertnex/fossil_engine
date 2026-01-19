@@ -146,7 +146,7 @@ u32 _mem_map(void **x, u64 size, const str *name, const str *file, u64 line)
     }
 
     mem_request_page_size();
-    size_aligned = round_up_u64(size, _PAGE_SIZE);
+    size_aligned = align_up_u64(size, _PAGE_SIZE);
 
     temp = mmap(NULL, size_aligned,
             PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
@@ -177,7 +177,7 @@ u32 _mem_commit(void **x, void *offset, u64 size, const str *name, const str *fi
     }
 
     mem_request_page_size();
-    size_aligned = round_up_u64(size, _PAGE_SIZE);
+    size_aligned = align_up_u64(size, _PAGE_SIZE);
 
     if (mprotect(offset, size_aligned, PROT_READ | PROT_WRITE) != 0)
     {
@@ -207,8 +207,8 @@ u32 _mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const str 
     }
 
     mem_request_page_size();
-    size_old_aligned = round_up_u64(size_old, _PAGE_SIZE);
-    size_new_aligned = round_up_u64(size_new, _PAGE_SIZE);
+    size_old_aligned = align_up_u64(size_old, _PAGE_SIZE);
+    size_new_aligned = align_up_u64(size_new, _PAGE_SIZE);
 
     temp = mremap(*x, size_old_aligned, size_new_aligned, MREMAP_MAYMOVE);
     if (temp == MAP_FAILED)
@@ -233,7 +233,7 @@ void _mem_unmap(void **x, u64 size, const str *name, const str *file, u64 line)
     if (!x || !*x) return;
 
     mem_request_page_size();
-    size_aligned = round_up_u64(size, _PAGE_SIZE);
+    size_aligned = align_up_u64(size, _PAGE_SIZE);
     munmap(*x, size_aligned);
     _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unmapped [%"PRIu64"B]\n", name, *x, size_aligned);
     *x = NULL;
@@ -244,7 +244,7 @@ void _mem_unmap_arena(MemArena *x, const str *name, const str *file, u64 line)
     if (!x || !x->buf) return;
     munmap(x->i, x->size_i);
     munmap(x->buf, x->size_buf);
-    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Arena Unmapped [%"PRIu64"B] Memb %"PRIu64"[%"PRIu64"B]\n",
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Arena Unmapped [%"PRIu64"B] Memb Total [%"PRIu64"][%"PRIu64"B]\n",
             name, x->buf, x->size_buf, x->memb, x->size_i);
     *x = (MemArena){0};
 }

@@ -222,10 +222,14 @@ u32 glad_init(void)
     return engine_err;
 }
 
-b8 engine_update(void)
+b8 engine_running(void)
 {
     if (glfwWindowShouldClose(render->window) || !flag.active)
         return FALSE;
+
+    /* order doesn't matter here, independent state */
+    render->time = get_time_nsec();
+    render->time_delta = get_time_delta_nsec();
 
     return TRUE;
 }
