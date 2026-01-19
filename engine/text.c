@@ -64,6 +64,7 @@ static struct /* text_core */
     struct Glyphf glyph[GLYPH_MAX];
     f32 font_size;
     f32 line_height_total;
+    f32 advance;
     v2f32 text_scale;
 
     /*! @brief iterator for 'buf',
@@ -180,7 +181,7 @@ u32 font_init(Font *font, u32 resolution, const str *name, const str *file_name)
                             y * resolution * FONT_ATLAS_CELL_RESOLUTION,
                             canvas + x + y * resolution, 1);
 
-            memset(canvas, 0, resolution * resolution);
+            bzero(canvas, resolution * resolution);
         }
 
         g->texture_sample.x = col * font->char_size;
@@ -310,6 +311,7 @@ void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear)
     text_core.font = font;
     text_core.font_size = size;
     text_core.line_height_total = 0.0f;
+    text_core.advance = 0.0f;
     text_core.cursor = 0;
 
     scale = stbtt_ScaleForPixelHeight(&font->info, size);
@@ -352,8 +354,10 @@ void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, u32 color)
 {
     u64 len = 0, i = 0;
     i64 j = 0;
-    f32 advance = 0.0f, descent = 0.0f, line_height = 0.0f;
+    f32 descent = 0.0f, line_height = 0.0f;
     struct Glyphf *g = NULL;
+    v2u8 align = {0};
+    v2f32 alignment = {0};
 
     if (!text_core.buf)
     {
@@ -382,55 +386,67 @@ void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, u32 color)
         text_core.buf_len += STRING_MAX;
     }
 
+    if (align_x == TEXT_ALIGN_CENTER)
+    {
+        align.x = 1;
+        alignment.x = 0.5f;
+    }
+    else if (align_x == TEXT_ALIGN_RIGHT)
+    {
+        align.x = 1;
+        alignment.x = 1.0f;
+    }
+
+    if (align_y == TEXT_ALIGN_CENTER)
+    {
+        align.y = 1;
+        alignment.y = 0.5f;
+    }
+    else if (align_y == TEXT_ALIGN_BOTTOM)
+    {
+        align.y = 1;
+        alignment.y = 1.0f;
+    }
+
     pos.x *= render->ndc_scale.x;
     pos.y *= render->ndc_scale.y;
     pos.y += text_core.font->scale.y * text_core.text_scale.y;
 
-    advance = 0.0f;
     descent = text_core.font->descent * text_core.text_scale.y;
     line_height = text_core.font->line_height;
     for (i = 0; i < len; ++i)
     {
         g = &text_core.glyph[(u64)text[i]];
-        if (text[i] == '\n')
+        if (text[i] == '\n' || text[i] == '\r')
         {
-            if (align_x == TEXT_ALIGN_CENTER)
-            {
-                for (j = 1; (i64)i - j >= 0 && text[i - j] != '\n'; ++j)
-                    text_core.buf[text_core.cursor - j].pos.x -= advance * 0.5f;
-            }
-            else if (align_x == TEXT_ALIGN_RIGHT)
-            {
-                for (j = 1; (i64)i - j >= 0 && text[i - j] != '\n'; ++j)
-                    text_core.buf[text_core.cursor - j].pos.x -= advance;
-            }
+            if (align.x)
+                for (j = 1; (i64)i - j >= 0 && text[i - j] != '\n' && text[i - j] != '\r'; ++j)
+                    text_core.buf[text_core.cursor - j].pos.x -= text_core.advance * alignment.x;
 
-            advance = 0.0f;
-            text_core.line_height_total += line_height * text_core.text_scale.y;
+            text_core.advance = 0.0f;
+            if (text[i] == '\n')
+                text_core.line_height_total += line_height * text_core.text_scale.y;
             continue;
         }
-        if (text[i] == '\t')
+        else if (text[i] == '\t')
         {
-            advance += text_core.glyph[' '].advance * TEXT_TAB_SIZE;
+            text_core.advance += text_core.glyph[' '].advance * TEXT_TAB_SIZE;
             continue;
         }
 
-        text_core.buf[text_core.cursor].pos.x = pos.x + advance + g->bearing.x;
+        text_core.buf[text_core.cursor].pos.x = pos.x + text_core.advance + g->bearing.x;
         text_core.buf[text_core.cursor].pos.y = -pos.y - descent - text_core.line_height_total - g->bearing.y;
         text_core.buf[text_core.cursor].tex_coords.x = g->texture_sample.x;
         text_core.buf[text_core.cursor].tex_coords.y = g->texture_sample.y;
         text_core.buf[text_core.cursor].color = color;
         ++text_core.cursor;
 
-        advance += g->advance;
+        text_core.advance += g->advance;
     }
 
-    if (align_y == TEXT_ALIGN_CENTER)
+    if (align.y)
         for (i = 0; i < text_core.cursor; ++i)
-            text_core.buf[i].pos.y += text_core.line_height_total * 0.5f;
-    else if (align_y == TEXT_ALIGN_BOTTOM)
-        for (i = 0; i < text_core.cursor; ++i)
-            text_core.buf[i].pos.y += text_core.line_height_total;
+            text_core.buf[i].pos.y += text_core.line_height_total * alignment.y;
 }
 
 void text_render(b8 shadow, u32 shadow_color)
@@ -464,6 +480,7 @@ void text_render(b8 shadow, u32 shadow_color)
 
     text_core.cursor = 0;
     text_core.line_height_total = 0;
+    text_core.advance = 0.0f;
 }
 
 void text_stop(void)

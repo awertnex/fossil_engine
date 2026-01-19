@@ -963,11 +963,6 @@ static void chunk_generate(Chunk **chunk, u32 rate, Terrain terrain())
     snprintf(file_name, PATH_MAX, GAME_DIR_NAME_WORLDS"%s/"GAME_DIR_WORLD_NAME_CHUNKS FORMAT_FILE_NAME_HHCC,
             world.name, ch->pos.x, ch->pos.y, ch->pos.z);
 
-    if (is_file_exists(file_name, FALSE) == ERR_SUCCESS)
-        _chunk_deserialize(file_name, ch);
-    else
-        _chunk_serialize(ch);
-
     _chunk_generate(chunk, rate, terrain);
 }
 
@@ -1004,9 +999,6 @@ static void _chunk_generate(Chunk **chunk, u32 rate, Terrain terrain())
         pz = *(chunk + settings.chunk_buf_layer);
     if (chunk_tab_coordinates.z > 0)
         nz = *(chunk - settings.chunk_buf_layer);
-
-    if (ch->cursor == CHUNK_VOLUME)
-        goto mesh;
 
     x = ch->cursor % CHUNK_DIAMETER;
     y = (ch->cursor / CHUNK_DIAMETER) % CHUNK_DIAMETER;
@@ -1057,8 +1049,6 @@ static void _chunk_generate(Chunk **chunk, u32 rate, Terrain terrain())
         y = 0;
     }
     ch->cursor = x + y * CHUNK_DIAMETER + z * CHUNK_LAYER;
-
-mesh:
 
     if (ch->cursor == CHUNK_VOLUME && !(ch->flag & FLAG_CHUNK_GENERATED))
         chunk_mesh_init(index, ch);
@@ -1135,7 +1125,6 @@ static void chunk_mesh_update(u32 index, Chunk *ch)
 
     if (!ch->vbo || !ch->vao) return;
 
-    str file_name[PATH_MAX] = {0};
     u64 *buf = &buffer[cur_buf][0];
     u64 *cursor = buf;
     u32 *i = (u32*)ch->block;
@@ -1181,11 +1170,6 @@ static void chunk_mesh_update(u32 index, Chunk *ch)
     }
 
     _chunk_gizmo_write(index, ch);
-
-    snprintf(file_name, PATH_MAX, GAME_DIR_NAME_WORLDS"%s/"GAME_DIR_WORLD_NAME_CHUNKS FORMAT_FILE_NAME_HHCC,
-            world.name, ch->pos.x, ch->pos.y, ch->pos.z);
-
-    _chunk_serialize(ch);
 }
 
 /* TODO: make chunk_serialize() */

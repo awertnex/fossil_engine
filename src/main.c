@@ -178,7 +178,7 @@ static u32 settings_init(void)
 
     settings.lerp_speed = SET_LERP_SPEED_DEFAULT;
 
-    settings.render_distance = 2;
+    settings.render_distance = 8;
     settings.chunk_buf_radius = settings.render_distance;
     settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
 
@@ -1203,10 +1203,11 @@ static void draw_everything(void)
     for (i = 24; i > 0; --i)
     {
         index = mod(logger_tab_index - i, LOGGER_HISTORY_MAX);
-        text_push(stringf("%s", logger_tab[index]),
-                (v2f32){SET_MARGIN, render->size.y - SET_MARGIN - settings.font_size * i},
-                0, TEXT_ALIGN_BOTTOM, logger_color[index]);
+        text_push(stringf("%s\n", logger_tab[index]),
+                (v2f32){SET_MARGIN, render->size.y - SET_MARGIN},
+                0, 0, logger_color[index]);
     }
+    text_push("", (v2f32){0, 0}, 0, TEXT_ALIGN_BOTTOM, 0x00000000);
     text_render(TRUE, TEXT_COLOR_SHADOW);
     text_stop();
 
