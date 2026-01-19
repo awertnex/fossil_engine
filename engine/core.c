@@ -334,7 +334,7 @@ static u32 take_screenshot(const str *_screenshot_dir, const str *special_text)
     }
 
     LOGERROR(FALSE, TRUE, ERR_SCREENSHOT_FAIL, "%s\n",
-            "Failed to Take Screenshot, Screenshot Rate Exceeded");
+            "Failed to Take Screenshot, Screenshot Rate Limit Exceeded");
     return engine_err;
 }
 

@@ -69,6 +69,9 @@
 #define ERR_SHADER_TYPE_NULL            4147
 #define ERR_SCREENSHOT_FAIL             4148
 #define ERR_BUILD_FUNCTION_NOT_FOUND    4149
+#define ERR_MEM_ARENA_MAP_FAIL          4150
+#define ERR_SIZE_LIMIT                  4151
+#define ERR_MEM_REMAP_FAIL              4152
 
 /*! @brief global variable for engine-specific error codes.
  *

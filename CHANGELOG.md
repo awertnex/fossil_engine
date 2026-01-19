@@ -17,6 +17,9 @@
     - self: build build tool
     - all: build build tool, engine and game
     - noproject: don't execute the build function passed to 'engine_build()'
+- added memory manamgement stuff:
+    - arena allocators
+    - function '_mem_remap()'
 
 #### bugs and flaws
 - fix segfault when allocating smaller than 256 bytes for 'size' parameter of function 'mem_alloc_buf()'

@@ -128,12 +128,12 @@ u32 font_init(Font *font, u32 resolution, const str *name, const str *file_name)
         goto cleanup;
     }
 
-    if (mem_alloc((void*)&font->bitmap, GLYPH_MAX * resolution * resolution,
+    if (mem_map((void*)&font->bitmap, GLYPH_MAX * resolution * resolution,
                 stringf("font_init().%s", file_name)) != ERR_SUCCESS)
         goto cleanup;
 
-    if (mem_alloc((void*)&canvas, resolution * resolution,
-                "font_init().font_glyph_canvas") != ERR_SUCCESS)
+    if (mem_map((void*)&canvas, resolution * resolution,
+                "font_init().canvas") != ERR_SUCCESS)
         goto cleanup;
 
     if (name && !font->name[0])
@@ -195,14 +195,15 @@ u32 font_init(Font *font, u32 resolution, const str *name, const str *file_name)
                 font->bitmap, TRUE) != ERR_SUCCESS)
         goto cleanup;
 
-    mem_free((void*)&canvas, resolution * resolution, "font_init().font_glyph_canvas");
+    mem_unmap((void*)&canvas, resolution * resolution, "font_init().canvas");
+    mem_unmap((void*)&font->bitmap, GLYPH_MAX * font->resolution * font->resolution, font->name);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
 
 cleanup:
 
-    mem_free((void*)&canvas, resolution * resolution, "font_init().font_glyph_canvas");
+    mem_unmap((void*)&canvas, resolution * resolution, "font_init().canvas");
     font_free(font);
     return engine_err;
 }
@@ -210,8 +211,8 @@ cleanup:
 void font_free(Font *font)
 {
     if (!font) return;
-    mem_free((void*)&font->buf, font->buf_len, "font_free().file_contents");
-    mem_free((void*)&font->bitmap, GLYPH_MAX * font->resolution * font->resolution, font->name);
+    mem_free((void*)&font->buf, font->buf_len, font->name);
+    mem_unmap((void*)&font->bitmap, GLYPH_MAX * font->resolution * font->resolution, font->name);
     *font = (Font){0};
 }
 

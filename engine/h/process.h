@@ -12,7 +12,7 @@ FSLAPI str *get_path_bin_root(void);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  -- IMPLEMENTATION: engine/platform_<x> --;
+ *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
  *  @brief get current path of binary/executable, assign allocated path string to 'path'.
  *
@@ -22,7 +22,7 @@ u32 _get_path_bin_root(str *path);
 
 /*! @brief fork child process and execute command, based on 'execvp()'.
  * 
- *  -- IMPLEMENTATION: engine/platform_<X> --;
+ *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
  *  @param cmd = command and args.
  *  @param cmd_name = command name (for logging).

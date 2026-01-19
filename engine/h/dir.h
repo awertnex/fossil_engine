@@ -30,7 +30,7 @@ FSLAPI u32 is_dir(const str *name);
  */
 FSLAPI u32 is_dir_exists(const str *name, b8 log);
 
-/*! -- IMPLEMENTATION: engine/platform_<x> --;
+/*! -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
  *  @brief make directory 'path' if it doesn't exist.
  *
@@ -40,7 +40,7 @@ FSLAPI u32 is_dir_exists(const str *name, b8 log);
  */
 FSLAPI u32 make_dir(const str *path);
 
-/*! -- IMPLEMENTATION: engine/platform_<x> --;
+/*! -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
  *  @brief change current working directory.
  */
@@ -137,7 +137,7 @@ FSLAPI str *get_path_absolute(const str *name);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  -- IMPLEMENTATION: engine/platform_<x> --;
+ *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
  *  @brief get real path.
  * 

@@ -5,6 +5,13 @@
 #include "limits.h"
 #include "types.h"
 
+typedef struct MemArena
+{
+    void *buf;
+    u64 size;   /* total mapped size */
+    u64 cursor; /* current usage */
+} MemArena;
+
 #define arr_len(arr) ((u64)sizeof(arr) / sizeof(arr[0]))
 
 #define mem_alloc(x, size, name) \
@@ -43,8 +50,20 @@
 #define mem_commit(x, offset, size, name) \
     _mem_commit(x, offset, size, name, __BASE_FILE__, __LINE__)
 
+#define mem_remap(x, size_old, size_new, name) \
+    _mem_remap(x, size_old, size_new, name, __BASE_FILE__, __LINE__)
+
 #define mem_unmap(x, size, name) \
     _mem_unmap(x, size, name, __BASE_FILE__, __LINE__)
+
+#define mem_map_arena(x, size, name) \
+    _mem_map_arena(x, size, name, __BASE_FILE__, __LINE__)
+
+#define mem_push_arena(arena, p, size, name) \
+    _mem_push_arena(arena, p, size, name, __BASE_FILE__, __LINE__)
+
+#define mem_unmap_arena(x, name) \
+    _mem_unmap_arena(x, name, __BASE_FILE__, __LINE__)
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -164,6 +183,20 @@ FSLAPI u32 _mem_commit(void **x, void *offset, u64 size, const str *name, const 
  *
  *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
+ *  @brief remap a block of memory for '*x'.
+ *  
+ *  @param size_old = old size in bytes.
+ *  @param size_new = new size in bytes.
+ *  @param name = pointer name (for logging).
+ *
+ *  @return non-zero on failure and 'engine_err' is set accordingly.
+ */
+FSLAPI u32 _mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const str *file, u64 line);
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
+ *
  *  @brief unmap a block of memory '*x'.
  *
  *  @oaram size = size in bytes.
@@ -171,6 +204,40 @@ FSLAPI u32 _mem_commit(void **x, void *offset, u64 size, const str *name, const 
  */
 FSLAPI void _mem_unmap(void **x, u64 size, const str *name, const str *file, u64 line);
 
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief reserve a memory arena for 'x'.
+ *
+ *  @param size = size in bytes.
+ *  @param name = pointer name (for logging).
+ *
+ *  @return non-zero on failure and 'engine_err' is set accordingly.
+ */
+FSLAPI u32 _mem_map_arena(MemArena* x, u64 size, const str *name, const str *file, u64 line);
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief push a block of mapped memory for '*p' hosted by available space in 'x'.
+ *
+ *  @oaram size = size in bytes.
+ *  @oaram name = pointer name (for logging).
+ *
+ *  @return non-zero on failure and 'engine_err' is set accordingly.
+ */
+FSLAPI u32 _mem_push_arena(MemArena *x, void **p, u64 size, const str *name, const str *file, u64 line);
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
+ *
+ *  @brief unmap a memory arena 'x'.
+ *
+ *  @oaram name = pointer name (for logging).
+ */
+FSLAPI void _mem_unmap_arena(MemArena *x, const str *name, const str *file, u64 line);
+
+/*! @brief similar to 'printf("%b\n", x)' but only output 'bit_count' bits.
+ */
 FSLAPI void print_bits(u64 x, u8 bit_count);
 
 /*! @brief swap bits of 'c1' and 's2' with each other.

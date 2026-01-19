@@ -59,7 +59,7 @@ u32 _get_path_bin_root(str *path)
     if (strlen(_pgmptr) + 1 >= PATH_MAX)
     {
         _LOGFATAL(FALSE, ERR_GET_PATH_BIN_ROOT_FAIL,
-                "%s\n", "'get_path_bin_root()' Failed, Process Aborted");
+                "%s\n", "Failed 'get_path_bin_root()', Process Aborted");
         return engine_err;
     }
     strncpy(path, _pgmptr, PATH_MAX);
@@ -84,7 +84,7 @@ u32 exec(Buf *cmd, str *cmd_name)
     if (!cmd->loaded || !cmd->buf)
     {
         _LOGERROR(TRUE, ERR_BUFFER_EMPTY,
-                "exec '%s' Failed, cmd Empty\n", cmd_name);
+                "Failed to Execute '%s', cmd Empty\n", cmd_name);
         return engine_err;
     }
 
@@ -99,7 +99,7 @@ u32 exec(Buf *cmd, str *cmd_name)
                 &startup_info, &process_info))
     {
         _LOGFATAL(TRUE, ERR_EXEC_FAIL,
-                "'%s' Fork Failed, Process Aborted\n", cmd_name);
+                "Failed to Fork '%s', Process Aborted\n", cmd_name);
         goto cleanup;
     }
 
@@ -139,10 +139,10 @@ u32 _mem_map(void **x, u64 size, const str *name, const str *file, u64 line)
     }
 
     *x = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-    if (!*x)
+    if (!x || !*x)
     {
         _LOGFATALEX(TRUE, file, line, ERR_MEM_MAP_FAIL,
-                "%s[%p] Memory Map Failed, Process Aborted\n", name, NULL);
+                "%s[%p] Failed to Map Memory, Process Aborted\n", name, NULL);
         return engine_err;
     }
     _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Mapped [%"PRIu64"B]\n", name, *x, size);
@@ -156,7 +156,7 @@ u32 _mem_commit(void **x, void *offset, u64 size, const str *name, const str *fi
     if (!x)
     {
         _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
-                "%s[%p][%p] Memory Commit [%"PRIu64"B] Failed, Pointer NULL\n",
+                "%s[%p][%p] Failed to Commit Memory [%"PRIu64"B], Pointer NULL\n",
                 name, x, offset, size);
         return engine_err;
     }
@@ -164,7 +164,7 @@ u32 _mem_commit(void **x, void *offset, u64 size, const str *name, const str *fi
     if (!VirtualAlloc((*(u8*)x + (u8*)offset), size, MEM_COMMIT, PAGE_READWRITE))
     {
         _LOGFATALEX(TRUE, file, line, ERR_MEM_COMMIT_FAIL,
-                "%s[%p][%p] Memory Commit [%"PRIu64"B] Failed, Process Aborted\n",
+                "%s[%p][%p] Failed to Commit Memory [%"PRIu64"B], Process Aborted\n",
                 name, *x, offset, size);
         return engine_err;
     }
@@ -175,10 +175,46 @@ u32 _mem_commit(void **x, void *offset, u64 size, const str *name, const str *fi
     return engine_err;
 }
 
+/* TODO: make '_mem_remap()' for windows */
+u32 _mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const str *file, u64 line)
+{
+    void *temp = NULL;
+
+    if (!x || !*x)
+    {
+        _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
+                "%s[%p] Failed to Remap Memory, Pointer NULL\n", name, NULL);
+        return engine_err;
+    }
+
+    temp = mremap(*x, size_old, size_new, MREMAP_MAYMOVE);
+    if (temp == MAP_FAILED)
+    {
+        _LOGERROREX(TRUE, file, line, ERR_MEM_REMAP_FAIL,
+                "%s[%p] Failed to Remap Memory\n", name, *x);
+        return engine_err;
+    }
+
+    *x = temp;
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Remapped [%"PRIu64"B] -> [%"PRIu64"B]\n",
+            name, *x, size_old, size_new);
+
+    engine_err = ERR_SUCCESS;
+    return engine_err;
+}
+
 void _mem_unmap(void **x, u64 size, const str *name, const str *file, u64 line)
 {
-    if (!*x) return;
+    if (!x || !*x) return;
     VirtualFree(x, 0, MEM_RELEASE);
     _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unmapped [%"PRIu64"B]\n", name, *x, size);
     *x = NULL;
+}
+
+void _mem_unmap_arena(MemArena *x, const str *name, const str *file, u64 line)
+{
+    if (!x || !x->buf) return;
+    VirtualFree(x->buf, 0, MEM_RELEASE);
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Arena Unmapped [%"PRIu64"B]\n", name, x->buf, x->size);
+    *x = (MemArena){0};
 }

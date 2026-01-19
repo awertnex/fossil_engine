@@ -8,7 +8,7 @@
 
 #define ENGINE_AUTHOR           "Lily Awertnex"
 #define ENGINE_NAME             "Fossil Engine"
-#define ENGINE_VERSION          "0.2.0"ENGINE_VERSION_DEV
+#define ENGINE_VERSION          "0.3.0"ENGINE_VERSION_BETA
 #define ENGINE_TITLE            ENGINE_NAME": "ENGINE_VERSION
 
 #include "types.h"

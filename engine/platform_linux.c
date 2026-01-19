@@ -59,7 +59,7 @@ u32 _get_path_bin_root(str *path)
     if (!readlink("/proc/self/exe", path, PATH_MAX))
     {
         _LOGFATAL(FALSE, ERR_GET_PATH_BIN_ROOT_FAIL,
-                "%s\n", "'get_path_bin_root()' Failed, Process Aborted");
+                "%s\n", "Failed 'get_path_bin_root()', Process Aborted");
         return engine_err;
     }
 
@@ -75,19 +75,19 @@ u32 exec(Buf *cmd, str *cmd_name)
     if (pid < 0)
     {
         _LOGERROR(TRUE, ERR_PROCESS_FORK_FAIL,
-                "'%s' Fork Failed\n", cmd_name);
+                "Failed to Fork '%s'\n", cmd_name);
         return engine_err;
     }
     else if (pid == 0)
     {
         execvp((const str*)cmd->i[0], (str *const *)cmd->i);
-        _LOGERROR(TRUE, ERR_EXEC_FAIL, "'%s' Failed\n", cmd_name);
+        _LOGERROR(TRUE, ERR_EXEC_FAIL, "Failed '%s'\n", cmd_name);
         return engine_err;
     }
 
     if (waitpid(pid, &status, 0) == -1)
     {
-        _LOGERROR(TRUE, ERR_WAITPID_FAIL, "'%s' Waitpid Failed\n", cmd_name);
+        _LOGERROR(TRUE, ERR_WAITPID_FAIL, "Failed to Waitpid '%s'\n", cmd_name);
         return engine_err;
     }
 
@@ -124,18 +124,21 @@ u32 exec(Buf *cmd, str *cmd_name)
 
 u32 _mem_map(void **x, u64 size, const str *name, const str *file, u64 line)
 {
+    void *temp = NULL;
+
     if (*x)
     {
         engine_err = ERR_POINTER_NOT_NULL;
         return engine_err;
     }
 
+    temp = *x;
     *x = mmap(NULL, size,
             PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
     if (*x == MAP_FAILED)
     {
         _LOGFATALEX(TRUE, file, line, ERR_MEM_MAP_FAIL,
-                "%s[%p] Memory Map Failed, Process Aborted\n", name, NULL);
+                "%s[%p] Failed to Map Memory, Process Aborted\n", name, temp);
         return engine_err;
     }
     _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Mapped [%"PRIu64"B]\n", name, *x, size);
@@ -149,7 +152,7 @@ u32 _mem_commit(void **x, void *offset, u64 size, const str *name, const str *fi
     if (!x)
     {
         _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
-                "%s[%p][%p] Memory Commit [%"PRIu64"B] Failed, Pointer NULL\n",
+                "%s[%p][%p] Failed to Commit Memory [%"PRIu64"B], Pointer NULL\n",
                 name, x, offset, size);
         return engine_err;
     }
@@ -157,7 +160,7 @@ u32 _mem_commit(void **x, void *offset, u64 size, const str *name, const str *fi
     if (mprotect(offset, size, PROT_READ | PROT_WRITE) != 0)
     {
         _LOGFATALEX(TRUE, file, line, ERR_MEM_COMMIT_FAIL,
-                "%s[%p][%p] Memory Commit [%"PRIu64"B] Failed, Process Aborted\n",
+                "%s[%p][%p] Failed to Commit Memory [%"PRIu64"B], Process Aborted\n",
                 name, *x, offset, size);
         return engine_err;
     }
@@ -168,10 +171,45 @@ u32 _mem_commit(void **x, void *offset, u64 size, const str *name, const str *fi
     return engine_err;
 }
 
+u32 _mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const str *file, u64 line)
+{
+    void *temp = NULL;
+
+    if (!x || !*x)
+    {
+        _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
+                "%s[%p] Failed to Remap Memory, Pointer NULL\n", name, NULL);
+        return engine_err;
+    }
+
+    temp = mremap(*x, size_old, size_new, MREMAP_MAYMOVE);
+    if (temp == MAP_FAILED)
+    {
+        _LOGERROREX(TRUE, file, line, ERR_MEM_REMAP_FAIL,
+                "%s[%p] Failed to Remap Memory\n", name, *x);
+        return engine_err;
+    }
+
+    *x = temp;
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Remapped [%"PRIu64"B] -> [%"PRIu64"B]\n",
+            name, *x, size_old, size_new);
+
+    engine_err = ERR_SUCCESS;
+    return engine_err;
+}
+
 void _mem_unmap(void **x, u64 size, const str *name, const str *file, u64 line)
 {
-    if (!*x) return;
+    if (!x || !*x) return;
     munmap(*x, size);
     _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Unmapped [%"PRIu64"B]\n", name, *x, size);
     *x = NULL;
+}
+
+void _mem_unmap_arena(MemArena *x, const str *name, const str *file, u64 line)
+{
+    if (!x || !x->buf) return;
+    munmap(x->buf, x->size);
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Arena Unmapped [%"PRIu64"B]\n", name, x->buf, x->size);
+    *x = (MemArena){0};
 }

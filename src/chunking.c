@@ -20,6 +20,14 @@
 
 u64 CHUNKS_MAX[SET_RENDER_DISTANCE_MAX + 1] = {0};
 
+/*! @brief chunk arena, raw chunk memory data.
+ */
+static MemArena chunk_arena = {0};
+
+/*! @brief chunk queue arena.
+ */
+static MemArena CHUNK_QUEUE_ARENA = {0};
+
 /*! @brief chunk buffer, raw chunk data.
  */
 static Chunk *chunk_buf = NULL;
@@ -149,29 +157,40 @@ u32 chunking_init(void)
     u64 chunk_buf_diameter = 0;
     u64 chunk_buf_volume = 0;
     u64 chunks_max = 0;
+    u64 chunk_arena_size_init = 0;
 
-    if (mem_map((void*)&chunk_buf, CHUNK_BUF_VOLUME_MAX * sizeof(Chunk),
-                "chunking_init().chunk_buf") != ERR_SUCCESS)
-        return *GAME_ERR;
+    chunk_arena_size_init += CHUNK_BUF_VOLUME_MAX * sizeof(Chunk**); /* 'CHUNK_ORDER' slice */
+    chunk_arena_size_init += CHUNK_BUF_VOLUME_MAX * sizeof(Chunk*); /* 'chunk_tab' slice */
+    chunk_arena_size_init += CHUNK_BUF_VOLUME_MAX * sizeof(Chunk); /* 'chunk_buf' slice */
+    chunk_arena_size_init += CHUNK_BUF_VOLUME_MAX * sizeof(v2u32); /* 'chunk_gizmo_loaded' slice */
+    chunk_arena_size_init += CHUNK_BUF_VOLUME_MAX * sizeof(v2u32); /* 'chunk_gizmo_render' slice */
 
     if (
-            mem_map((void*)&chunk_tab, CHUNK_BUF_VOLUME_MAX * sizeof(Chunk*),
-                "chunking_init().chunk_tab") != ERR_SUCCESS ||
+            mem_map_arena(&chunk_arena, chunk_arena_size_init,
+                "chunking_init().chunk_arena") != ERR_SUCCESS ||
 
-            mem_map((void*)&CHUNK_ORDER, CHUNK_BUF_VOLUME_MAX * sizeof(Chunk**),
+            mem_push_arena(&chunk_arena, (void*)&CHUNK_ORDER, CHUNK_BUF_VOLUME_MAX * sizeof(Chunk**),
                 "chunking_init().CHUNK_ORDER") != ERR_SUCCESS ||
 
+            mem_push_arena(&chunk_arena, (void*)&chunk_tab, CHUNK_BUF_VOLUME_MAX * sizeof(Chunk*),
+                "chunking_init().chunk_tab") != ERR_SUCCESS ||
+
+            mem_push_arena(&chunk_arena, (void*)&chunk_buf, CHUNK_BUF_VOLUME_MAX * sizeof(Chunk),
+                "chunking_init().chunk_buf") != ERR_SUCCESS ||
+
+            mem_push_arena(&chunk_arena, (void*)&chunk_gizmo_loaded, CHUNK_BUF_VOLUME_MAX * sizeof(v2u32),
+                "chunking_init().chunk_gizmo_loaded") != ERR_SUCCESS ||
+
+            mem_push_arena(&chunk_arena, (void*)&chunk_gizmo_render, CHUNK_BUF_VOLUME_MAX * sizeof(v2u32),
+                "chunking_init().chunk_gizmo_render") != ERR_SUCCESS)
+        goto cleanup;
+
+    if (
             mem_map((void*)&distance, CHUNK_BUF_VOLUME_MAX * sizeof(u32),
                 "chunking_init().distance") != ERR_SUCCESS ||
 
             mem_map((void*)&index, CHUNK_BUF_VOLUME_MAX * sizeof(u32),
-                "chunking_init().index") != ERR_SUCCESS ||
-
-            mem_map((void*)&chunk_gizmo_loaded, CHUNK_BUF_VOLUME_MAX * sizeof(v2u32),
-                "chunking_init().chunk_gizmo_loaded") != ERR_SUCCESS ||
-
-            mem_map((void*)&chunk_gizmo_render, CHUNK_BUF_VOLUME_MAX * sizeof(v2u32),
-                "chunking_init().chunk_gizmo_render") != ERR_SUCCESS)
+                "chunking_init().index") != ERR_SUCCESS)
         goto cleanup;
 
     /* ---- build distance look-ups ----------------------------------------- */
@@ -324,15 +343,19 @@ u32 chunking_init(void)
     CHUNK_QUEUE[2].rate_block = BLOCK_PARSE_RATE;
 
     if (
-            mem_map((void*)&CHUNK_QUEUE[0].queue,
+            mem_map_arena(&CHUNK_QUEUE_ARENA,
+                (CHUNK_QUEUE_1ST_MAX + CHUNK_QUEUE_2ND_MAX + CHUNK_QUEUE_3RD_MAX) * sizeof(Chunk**),
+                "chunking_init().chunk_arena") != ERR_SUCCESS ||
+
+            mem_push_arena(&CHUNK_QUEUE_ARENA, (void*)&CHUNK_QUEUE[0].queue,
                 CHUNK_QUEUE_1ST_MAX * sizeof(Chunk**),
                 "chunking_init().CHUNK_QUEUE[0].queue") != ERR_SUCCESS ||
 
-            mem_map((void*)&CHUNK_QUEUE[1].queue,
+            mem_push_arena(&CHUNK_QUEUE_ARENA, (void*)&CHUNK_QUEUE[1].queue,
                 CHUNK_QUEUE_2ND_MAX * sizeof(Chunk**),
                 "chunking_init().CHUNK_QUEUE[1].queue") != ERR_SUCCESS ||
 
-            mem_map((void*)&CHUNK_QUEUE[2].queue,
+            mem_push_arena(&CHUNK_QUEUE_ARENA, (void*)&CHUNK_QUEUE[2].queue,
                 CHUNK_QUEUE_3RD_MAX * sizeof(Chunk**),
                 "chunking_init().CHUNK_QUEUE[2].queue") != ERR_SUCCESS)
         goto cleanup;
@@ -658,34 +681,13 @@ void chunking_free(void)
                 _chunk_buf_pop(i);
     }
 
-    mem_unmap((void*)&chunk_buf, CHUNK_BUF_VOLUME_MAX * sizeof(Chunk),
-            "chunking_free().chunk_buf");
-
-    mem_unmap((void*)&chunk_tab, CHUNK_BUF_VOLUME_MAX * sizeof(Chunk*),
-            "chunking_free().chunk_tab");
-
-    mem_unmap((void*)&CHUNK_ORDER, CHUNK_BUF_VOLUME_MAX * sizeof(Chunk**),
-            "chunking_free().CHUNK_ORDER");
-
-    mem_unmap((void*)&CHUNK_QUEUE[0].queue, CHUNK_QUEUE_1ST_MAX * sizeof(Chunk**),
-            "chunking_free().CHUNK_QUEUE[0].queue");
-
-    mem_unmap((void*)&CHUNK_QUEUE[1].queue, CHUNK_QUEUE_2ND_MAX * sizeof(Chunk**),
-            "chunking_free().CHUNK_QUEUE[1].queue");
-
-    mem_unmap((void*)&CHUNK_QUEUE[2].queue, CHUNK_QUEUE_3RD_MAX * sizeof(Chunk**),
-            "chunking_free().CHUNK_QUEUE[2].queue");
+    mem_unmap_arena(&chunk_arena, "chunking_free().chunk_arena");
+    mem_unmap_arena(&CHUNK_QUEUE_ARENA, "chunking_free().CHUNK_QUEUE_ARENA");
 
     if (chunk_gizmo_loaded_vao) glDeleteVertexArrays(1, &chunk_gizmo_loaded_vao);
     if (chunk_gizmo_loaded_vbo) glDeleteBuffers(1, &chunk_gizmo_loaded_vbo);
     if (chunk_gizmo_render_vao) glDeleteVertexArrays(1, &chunk_gizmo_render_vao);
     if (chunk_gizmo_render_vbo) glDeleteBuffers(1, &chunk_gizmo_render_vbo);
-
-    mem_unmap((void*)&chunk_gizmo_loaded, CHUNK_BUF_VOLUME_MAX * sizeof(v2u32),
-            "chunking_free().chunk_gizmo_loaded");
-
-    mem_unmap((void*)&chunk_gizmo_render, CHUNK_BUF_VOLUME_MAX * sizeof(v2u32),
-            "chunking_free().chunk_gizmo_render");
 }
 
 void block_place(u32 index, i32 x, i32 y, i32 z, v3f64 normal, enum BlockID block_id)

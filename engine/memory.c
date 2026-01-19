@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <inttypes.h>
 
 #include "h/diagnostics.h"
 #include "h/memory.h"
@@ -18,13 +19,13 @@ u32 _mem_alloc(void **x, u64 size, const str *name, const str *file, u64 line)
     }
 
     *x = calloc(1, size);
-    if (!*x)
+    if (!x || !*x)
     {
         _LOGFATALEX(TRUE, file, line, ERR_MEM_ALLOC_FAIL,
-                "%s[%p] Memory Allocation Failed, Process Aborted\n", name, NULL);
+                "%s[%p] Failed to Allocate Memory, Process Aborted\n", name, NULL);
         return engine_err;
     }
-    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Allocated [%lldB]\n", name, *x, size);
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Allocated [%"PRIu64"B]\n", name, *x, size);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -36,13 +37,13 @@ u32 _mem_alloc_memb(void **x, u64 memb, u64 size, const str *name, const str *fi
         return ERR_SUCCESS;
 
     *x = calloc(memb, size);
-    if (!*x)
+    if (!x || !*x)
     {
         _LOGFATALEX(TRUE, file, line, ERR_MEM_ALLOC_FAIL,
-                "%s[%p] Memory Allocation Failed, Process Aborted\n", name, NULL);
+                "%s[%p] Failed to Allocate Memory, Process Aborted\n", name, NULL);
         return engine_err;
     }
-    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Allocated [%lldB]\n", name, *x, memb * size);
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Allocated [%"PRIu64"B]\n", name, *x, memb * size);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -57,7 +58,7 @@ u32 _mem_alloc_buf(Buf *x, u64 memb, u64 size, const str *name, const str *file,
     if (!x)
     {
         _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
-                "%s[%p] Memory Allocation Failed, Pointer NULL\n", name, NULL);
+                "%s[%p] Failed to Allocate Memory, Pointer NULL\n", name, NULL);
         return engine_err;
     }
 
@@ -96,7 +97,7 @@ u32 _mem_alloc_key_val(KeyValue *x, u64 memb, u64 size_key, u64 size_val,
     if (!x)
     {
         _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
-                "%s[%p] Memory Allocation Failed, Pointer NULL\n", name, NULL);
+                "%s[%p] Failed to Allocate Memory, Pointer NULL\n", name, NULL);
         return engine_err;
     }
 
@@ -138,10 +139,10 @@ u32 _mem_realloc(void **x, u64 size, const str *name, const str *file, u64 line)
 {
     void *temp = NULL;
 
-    if (!*x)
+    if (!x || !*x)
     {
         _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
-                "%s[%p] Memory Reallocation Failed, Pointer NULL\n", name, NULL);
+                "%s[%p] Failed to Reallocate Memory, Pointer NULL\n", name, NULL);
         return engine_err;
     }
 
@@ -149,26 +150,25 @@ u32 _mem_realloc(void **x, u64 size, const str *name, const str *file, u64 line)
     if (!temp)
     {
         _LOGFATALEX(TRUE, file, line, ERR_MEM_REALLOC_FAIL,
-                "%s[%p] Memory Reallocation Failed, Process Aborted\n", name, *x);
+                "%s[%p] Failed to Reallocate Memory, Process Aborted\n", name, *x);
         return engine_err;
     }
 
     *x = temp;
-    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Reallocated [%lldB]\n", name, *x, size);
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Reallocated [%"PRIu64"B]\n", name, *x, size);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
 }
 
-u32 _mem_realloc_memb(void **x, u64 memb, u64 size,
-        const str *name, const str *file, u64 line)
+u32 _mem_realloc_memb(void **x, u64 memb, u64 size, const str *name, const str *file, u64 line)
 {
     void *temp = NULL;
 
-    if (!*x)
+    if (!x || !*x)
     {
         _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
-                "%s[%p] Memory Reallocation Failed, Pointer NULL\n", name, NULL);
+                "%s[%p] Failed to Reallocate Memory, Pointer NULL\n", name, NULL);
         return engine_err;
     }
 
@@ -176,12 +176,12 @@ u32 _mem_realloc_memb(void **x, u64 memb, u64 size,
     if (!temp)
     {
         _LOGFATALEX(TRUE, file, line, ERR_MEM_REALLOC_FAIL,
-                "%s[%p] Memory Reallocation Failed, Process Aborted\n", name, *x);
+                "%s[%p] Failed to Reallocate Memory, Process Aborted\n", name, *x);
         return engine_err;
     }
 
     *x = temp;
-    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Reallocated [%lldB]\n", name, *x, memb * size);
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Reallocated [%"PRIu64"B]\n", name, *x, memb * size);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -190,7 +190,7 @@ u32 _mem_realloc_memb(void **x, u64 memb, u64 size,
 void _mem_free(void **x, u64 size, const str *name, const str *file, u64 line)
 {
     void *temp = NULL;
-    if (!*x)
+    if (!x || !*x)
         return;
 
     temp = *x;
@@ -280,16 +280,90 @@ void _mem_free_key_val(KeyValue *x, const str *name, const str *file, u64 line)
     *x = (KeyValue){0};
 }
 
+u32 _mem_map_arena(MemArena* x, u64 size, const str *name, const str *file, u64 line)
+{
+    MemArena *temp = NULL;
+
+    if (!x)
+    {
+        _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
+                "%s[%p] Failed to Map Memory Arena, Pointer NULL\n", name, NULL);
+        engine_err = ERR_POINTER_NULL;
+        return engine_err;
+    }
+
+    temp = x;
+    if (_mem_map((void*)&x->buf, size, name, file, line) != ERR_SUCCESS)
+    {
+        _LOGFATALEX(TRUE, file, line, ERR_MEM_ARENA_MAP_FAIL,
+                "%s[%p] Failed to Map Memory Arena, Process Aborted\n", name, temp);
+        return engine_err;
+    }
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Arena Mapped [%"PRIu64"B]\n", name, x->buf, size);
+
+    x->size = size;
+    x->cursor = 0;
+
+    engine_err = ERR_SUCCESS;
+    return engine_err;
+}
+
+u32 _mem_push_arena(MemArena *x, void **p, u64 size, const str *name, const str *file, u64 line)
+{
+    if (!p)
+    {
+        _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
+                "%s[%p] Failed to Push Memory Arena, Pointer NULL\n", name, NULL);
+        return engine_err;
+    }
+
+    if (!x)
+    {
+        _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
+                "%s[%p] Failed to Push Memory Arena, Arena Pointer NULL\n", name, NULL);
+        return engine_err;
+    }
+
+    if (!x->buf)
+    {
+        _LOGERROREX(TRUE, file, line, ERR_POINTER_NULL,
+                "%s[%p] Failed to Push Memory Arena, Arena Buf Pointer NULL\n", name, NULL);
+        return engine_err;
+    }
+
+    if (size == 0)
+    {
+        _LOGERROREX(TRUE, file, line, ERR_SIZE_TOO_SMALL,
+                "%s[%p] Failed to Push Memory Arena, Size Too Small\n",
+                name, x->buf + x->cursor);
+        return engine_err;
+    }
+
+    if (size > x->size - x->cursor)
+    {
+        _LOGERROREX(TRUE, file, line, ERR_SIZE_LIMIT,
+                "%s[%p] Failed to Push Memory Arena, Size Limit Exceeded By [%"PRIu64"B]\n",
+                name, x->buf + x->cursor, x->cursor - x->size + size);
+        return engine_err;
+    }
+
+    *p = x->buf + x->cursor;
+    x->cursor += size;
+
+    engine_err = ERR_SUCCESS;
+    return engine_err;
+}
+
 u32 _mem_clear(void **x, u64 size, const str *name, const str *file, u64 line)
 {
-    if (!*x)
+    if (!x || !*x)
     {
         engine_err = ERR_POINTER_NULL;
         return engine_err;
     }
 
     bzero(*x, size);
-    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Cleared [%lldB]\n", name, *x, size);
+    _LOGTRACEEX(TRUE, file, line, "%s[%p] Memory Cleared [%"PRIu64"B]\n", name, *x, size);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
