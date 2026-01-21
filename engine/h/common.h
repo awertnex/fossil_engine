@@ -11,9 +11,9 @@
 #define ENGINE_VERSION          "0.3.1"ENGINE_VERSION_DEV
 #define ENGINE_TITLE            ENGINE_NAME": "ENGINE_VERSION
 
-#include "types.h"
-
 #if defined(__linux__) || defined(__linux)
+#   define _GNU_SOURCE
+
 #   define PLATFORM_LINUX 1
 #   define PLATFORM "linux"
 #   define ENGINE_FILE_NAME_LIB "libfossil.so"
@@ -34,6 +34,8 @@
 #   define SLASH_NATIVE '\\'
 #   define SLASH_NON_NATIVE '/'
 #endif /* PLATFORM */
+
+#include "types.h"
 
 #if PLATFORM_WIN
 #   define FSLAPI __declspec(dllexport)

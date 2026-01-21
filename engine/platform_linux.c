@@ -1,3 +1,5 @@
+#include "h/common.h"
+
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -6,7 +8,6 @@
 #include <sys/wait.h>
 #include <sys/mman.h>
 
-#include "h/common.h"
 #include "h/diagnostics.h"
 #include "h/dir.h"
 #include "h/limits.h"

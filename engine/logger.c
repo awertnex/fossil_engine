@@ -1,9 +1,10 @@
+#include "h/common.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
 #include <inttypes.h>
 
-#include "h/common.h"
 #include "h/diagnostics.h"
 #include "h/dir.h"
 #include "h/limits.h"

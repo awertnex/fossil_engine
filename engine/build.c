@@ -1,8 +1,8 @@
+#include "h/common.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-
-#include "h/common.h"
 
 #include "h/build.h"
 #include "diagnostics.h"
@@ -93,9 +93,16 @@ static void help(void);
 void engine_build(int argc, char **argv, const str *build_src_name, const str *build_bin_name,
         const str *dir_out, u32 (*build_function)())
 {
-    int i = 0;
-    u64 token_self = 0;
-    u64 token_all = 0;
+    const u64 TOKEN_ALL = 0;
+    const u64 TOKEN_SELF = 1;
+    const u64 TOKEN_ENGINE = 2;
+    const u64 TOKEN_PROJECT = 3;
+    const u64 TOKEN_NOPROJECT = 4;
+    const u64 TOKEN_SHOW = 5;
+    const u64 TOKEN_RAW = 6;
+    u64 tokens[7] = {0};
+
+    if (find_token("help", argc, argv)) help();
 
     if (logger_init(argc, argv, TRUE, NULL, FALSE) != ERR_SUCCESS)
         cmd_fail();
@@ -103,43 +110,48 @@ void engine_build(int argc, char **argv, const str *build_src_name, const str *b
     if (mem_alloc_buf(&args, ARG_MEMB, ARG_SIZE, "engine_build().args") != ERR_SUCCESS)
         goto cleanup;
 
-    for (i = 0; i < argc; ++i)
-        cmd_push(&args, argv[i]);
+    cmd_push(&args, argv[0]);
 
-    token_self = find_token("self", argc, (char**)args.i);
-    token_all = find_token("all", argc, (char**)args.i);
+    tokens[TOKEN_ALL] = find_token("all", argc, argv);
+    tokens[TOKEN_SELF] = find_token("self", argc, argv);
+    tokens[TOKEN_ENGINE] = find_token("engine", argc, argv);
+    tokens[TOKEN_PROJECT] = find_token("project", argc, argv);
+    tokens[TOKEN_NOPROJECT] = find_token("noproject", argc, argv);
+    tokens[TOKEN_SHOW] = find_token("show", argc, argv);
+    tokens[TOKEN_RAW] = find_token("raw", argc, argv);
 
-    if (token_self)
+    if (tokens[TOKEN_SELF])
     {
         flag |= FLAG_BUILD_SELF;
-        flag &= ~FLAG_BUILD_PROJECT;
-        snprintf(args.i[token_self], ARG_SIZE, "%s", "noproject");
+        cmd_push(&args, "noproject");
     }
-
-    if (token_all)
+    if (tokens[TOKEN_ALL])
     {
         flag |= FLAG_BUILD_ALL;
-        snprintf(args.i[token_all], ARG_SIZE, "%s", "engine");
+        cmd_push(&args, "engine");
         cmd_push(&args, "project");
     }
 
-    if (find_token("help", argc, argv)) help();
-    if (find_token("show", argc, argv)) flag |= FLAG_CMD_SHOW;
-    if (find_token("raw", argc, argv)) flag |= FLAG_CMD_RAW;
-    if (find_token("engine", argc, argv))
+    if (tokens[TOKEN_SHOW]) flag |= FLAG_CMD_SHOW;
+    if (tokens[TOKEN_RAW]) flag |= FLAG_CMD_RAW;
+    if (tokens[TOKEN_ENGINE])
     {
         flag |= FLAG_BUILD_ENGINE;
 
-        if (!token_all)
+        if (!tokens[TOKEN_ALL])
             flag &= ~FLAG_BUILD_PROJECT;
     }
-    if (find_token("noproject", argc, argv))
-        flag &= ~FLAG_BUILD_PROJECT;
-    if (find_token("project", argc, argv))
+    if (tokens[TOKEN_PROJECT])
         flag |= FLAG_BUILD_PROJECT;
 
+    if (tokens[TOKEN_NOPROJECT])
+        flag &= ~FLAG_BUILD_PROJECT;
+
     if (build_function)
-        flag |= FLAG_BUILD_PROJECT;
+    {
+        if (!tokens[TOKEN_NOPROJECT])
+            flag |= FLAG_BUILD_PROJECT;
+    }
     else
         LOGWARNING(FALSE, FALSE, ERR_BUILD_FUNCTION_NOT_FOUND, "%s\n", "Build Function Not Provided");
 
@@ -149,7 +161,7 @@ void engine_build(int argc, char **argv, const str *build_src_name, const str *b
         goto cleanup;
 
     snprintf(str_build_src, CMD_SIZE, "%s", build_src_name);
-    normalize_slash(str_build_src);
+    posix_slash(str_build_src);
 
     snprintf(str_build_bin, CMD_SIZE, "%s", build_bin_name);
     snprintf(str_build_bin_new, CMD_SIZE, "%s_new", build_bin_name);
@@ -180,11 +192,12 @@ void engine_build(int argc, char **argv, const str *build_src_name, const str *b
 
     if (flag & FLAG_BUILD_PROJECT)
     {
-        if (mem_alloc_buf(&_cmd, CMD_MEMB, CMD_SIZE, "engine_build()._cmd") != ERR_SUCCESS)
+        if (flag & FLAG_BUILD_ENGINE &&
+                mem_alloc_buf(&_cmd, CMD_MEMB, CMD_SIZE, "engine_build()._cmd") != ERR_SUCCESS)
             goto cleanup;
 
         build_function();
-        if (exec(&_cmd, "engine_build()") != ERR_SUCCESS)
+        if (exec(&_cmd, "engine_build()._cmd") != ERR_SUCCESS)
             goto cleanup;
     }
 
@@ -231,9 +244,6 @@ static void self_rebuild(char **argv)
 
     cmd_push(&_cmd, COMPILER);
     cmd_push(&_cmd, str_build_src);
-#if PLATFORM_LINUX
-    cmd_push(&_cmd, "-D_GNU_SOURCE");
-#endif /* PLATFORM_LINUX */
     cmd_push(&_cmd, "-std=c99");
     cmd_push(&_cmd, "-fvisibility=hidden");
     cmd_push(&_cmd, stringf("-ffile-prefix-map=%s=", DIR_PROC_ROOT));
@@ -293,9 +303,6 @@ static u32 _engine_build(const str *dir_out)
     cmd_push(&_cmd, "engine/ui.c");
     cmd_push(&_cmd, "engine/include/glad/glad.c");
     cmd_push(&_cmd, "-I.");
-#if PLATFORM_LINUX
-    cmd_push(&_cmd, "-D_GNU_SOURCE");
-#endif /* PLATFORM_LINUX */
     cmd_push(&_cmd, "-DGLAD_GLAPI_EXPORT");
     cmd_push(&_cmd, "-DGLAD_GLAPI_EXPORT_BUILD");
     cmd_push(&_cmd, "-shared");
