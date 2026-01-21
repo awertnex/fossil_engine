@@ -5,7 +5,11 @@
 
 #include "diagnostics.h"
 
-#define GAME_RELEASE_BUILD  0
+#ifdef _GAME_RELEASE_BUILD
+#   define GAME_RELEASE_BUILD 1
+#else
+#   define GAME_RELEASE_BUILD 0
+#endif /* _GAME_RELEASE_BUILD */
 
 #define GAME_VERSION_STABLE "-stable"
 #define GAME_VERSION_BETA   "-beta"

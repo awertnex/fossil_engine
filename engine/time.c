@@ -20,7 +20,7 @@ u64 get_time_raw_usec(void)
 {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
-    return (u64)(ts.tv_sec * SEC2USEC + ts.tv_nsec * NSEC2USEC);
+    return (u64)(ts.tv_sec * SEC2USEC + ts.tv_nsec * MSEC2SEC);
 }
 
 u64 get_time_nsec(void)
@@ -55,12 +55,12 @@ u64 get_time_delta_nsec(void)
     return _delta;
 }
 
-void get_time_str(str *buf, const str *format)
+void get_time_str(str *dst, const str *format)
 {
     u64 _time_nsec = get_time_raw_nsec();
     time_t _time = _time_nsec * NSEC2SEC;
     struct tm *_tm = localtime(&_time);
-    strftime(buf, TIME_STRING_MAX, format, _tm);
+    strftime(dst, TIME_STRING_MAX, format, _tm);
 }
 
 b8 get_timer(f64 *time_start, f32 interval)

@@ -11,13 +11,6 @@
 #include "h/limits.h"
 #include "h/logger.h"
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @brief global page size variable.
- *
- *  initialized in '_mem_map()', '_mem_remap()', '_mem_commit()',
- *  '_mem_map_arena()', '_mem_remap_arena()' and '_mem_push_arena()'.
- */
 u64 _PAGE_SIZE = 0;
 
 u64 align_up_u64(u64 n, u64 size)

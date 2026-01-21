@@ -73,7 +73,6 @@ u32 bind_toggle_chunk_queue_visualizer = KEY_V;
 
 void input_update(Player *p)
 {
-    str time_string[TIME_STRING_MAX] = {0};
     u32 i;
     f32 px = 0.0f, nx = 0.0f,
         py = 0.0f, ny = 0.0f,

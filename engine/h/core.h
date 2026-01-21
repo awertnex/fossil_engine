@@ -190,6 +190,7 @@ FSLAPI b8 engine_running(void);
  *  'glfw/glfwSetFramebufferSizeCallback()'.
  *
  *  - update uniform 'ndc_scale' of engine shaders.
+ *  - update 'render.time' and 'render.time_delta'.
  *
  *  @return non-zero on failure and 'engine_err' is set accordingly.
  */

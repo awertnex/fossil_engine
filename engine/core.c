@@ -227,7 +227,7 @@ b8 engine_running(void)
     if (glfwWindowShouldClose(render->window) || !flag.active)
         return FALSE;
 
-    /* order doesn't matter here, independent state */
+    /* order doesn't matter here, these functions have independent state */
     render->time = get_time_nsec();
     render->time_delta = get_time_delta_nsec();
 
