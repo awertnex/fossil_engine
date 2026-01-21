@@ -126,7 +126,7 @@ FSLAPI void text_start(Font *font, f32 size, u64 length, FBO *fbo, b8 clear);
  *
  *  @remark can be called multiple times within a text rendering batch.
  */
-FSLAPI void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, u32 color);
+FSLAPI void text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y, u32 color);
 
 /*! @brief render text to framebuffer.
  *

@@ -1057,7 +1057,7 @@ static void draw_everything(void)
     text_start(font[FONT_MONO_BOLD], settings.font_size, 0, NULL, TRUE);
 
     text_push(stringf("FPS         [%u]\n", settings.fps),
-            (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0,
+            SET_MARGIN, SET_MARGIN, 0, 0,
             settings.fps > 60 ? COLOR_TEXT_MOSS : COLOR_DIAGNOSTIC_ERROR);
 
     text_render(TRUE, TEXT_COLOR_SHADOW);
@@ -1072,7 +1072,7 @@ static void draw_everything(void)
                     (world.tick % SET_DAY_TICKS_MAX) / 1000,
                     ((world.tick * 60) / 1000) % 60,
                     world.days),
-                (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0,
+                SET_MARGIN, SET_MARGIN, 0, 0,
                 COLOR_TEXT_MOSS);
 
         text_push(stringf(
@@ -1096,7 +1096,7 @@ static void draw_everything(void)
                     player.acceleration.x, player.acceleration.y, player.acceleration.z,
                     player.velocity.x, player.velocity.y, player.velocity.z,
                     player.speed),
-                (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0,
+                SET_MARGIN, SET_MARGIN, 0, 0,
                 COLOR_TEXT_DEFAULT);
 
         text_push(stringf(
@@ -1110,7 +1110,7 @@ static void draw_everything(void)
                     (player.flag & FLAG_PLAYER_OVERFLOW_Z) ?
                     (player.flag & FLAG_PLAYER_OVERFLOW_PZ) ?
                     "        " : "        " : "NONE"),
-                (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0,
+                SET_MARGIN, SET_MARGIN, 0, 0,
                 COLOR_DIAGNOSTIC_NONE);
 
         text_push(stringf(
@@ -1121,7 +1121,7 @@ static void draw_everything(void)
                     (player.flag & FLAG_PLAYER_OVERFLOW_PY) ? "POSITIVE" : "    ",
                     (player.flag & FLAG_PLAYER_OVERFLOW_Z) &&
                     (player.flag & FLAG_PLAYER_OVERFLOW_PZ) ? "POSITIVE" : "    "),
-                (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0,
+                SET_MARGIN, SET_MARGIN, 0, 0,
                 DIAGNOSTIC_COLOR_SUCCESS);
 
         text_push(stringf(
@@ -1132,7 +1132,7 @@ static void draw_everything(void)
                     !(player.flag & FLAG_PLAYER_OVERFLOW_PY) ? "NEGATIVE" : "    ",
                     (player.flag & FLAG_PLAYER_OVERFLOW_Z) &&
                     !(player.flag & FLAG_PLAYER_OVERFLOW_PZ) ? "NEGATIVE" : "    "),
-                (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0,
+                SET_MARGIN, SET_MARGIN, 0, 0,
                 DIAGNOSTIC_COLOR_ERROR);
 
         text_push(stringf(
@@ -1148,7 +1148,7 @@ static void draw_everything(void)
                     skybox_data.sun_rotation.x,
                     skybox_data.sun_rotation.y,
                     skybox_data.sun_rotation.z),
-                (v2f32){SET_MARGIN, SET_MARGIN}, 0, 0,
+                SET_MARGIN, SET_MARGIN, 0, 0,
                 COLOR_DIAGNOSTIC_INFO);
 
         text_render(TRUE, TEXT_COLOR_SHADOW);
@@ -1162,7 +1162,7 @@ static void draw_everything(void)
                     CHUNK_QUEUE[1].count, CHUNK_QUEUE[1].size,
                     CHUNK_QUEUE[2].count, CHUNK_QUEUE[2].size,
                     CHUNKS_MAX[settings.render_distance]),
-                (v2f32){render->size.x - SET_MARGIN, SET_MARGIN},
+                render->size.x - SET_MARGIN, SET_MARGIN,
                 TEXT_ALIGN_RIGHT, 0,
                 COLOR_TEXT_DEFAULT);
 
@@ -1183,9 +1183,8 @@ static void draw_everything(void)
                     glGetString(GL_SHADING_LANGUAGE_VERSION),
                     glGetString(GL_VENDOR),
                     glGetString(GL_RENDERER)),
-                (v2f32){render->size.x - SET_MARGIN, render->size.y - SET_MARGIN},
-                TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM,
-                DIAGNOSTIC_COLOR_TRACE);
+                render->size.x - SET_MARGIN, render->size.y - SET_MARGIN,
+                TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM, DIAGNOSTIC_COLOR_TRACE);
 
         text_render(TRUE, TEXT_COLOR_SHADOW);
     }
@@ -1201,10 +1200,13 @@ static void draw_everything(void)
     {
         index = mod(logger_tab_index - i, LOGGER_HISTORY_MAX);
         text_push(stringf("%s\n", logger_tab[index]),
-                (v2f32){SET_MARGIN, render->size.y - SET_MARGIN},
-                0, 0, logger_color[index]);
+                SET_MARGIN, render->size.y - SET_MARGIN,
+                0, 0,
+                logger_color[index]);
     }
-    text_push("", (v2f32){0, 0}, 0, TEXT_ALIGN_BOTTOM, 0x00000000);
+
+    /* align once after all the strings' heights in text batch have accumulated into total text height */
+    text_push("", 0, 0, 0, TEXT_ALIGN_BOTTOM, 0x00000000);
     text_render(TRUE, TEXT_COLOR_SHADOW);
     text_stop();
 

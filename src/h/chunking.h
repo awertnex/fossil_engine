@@ -163,7 +163,8 @@ enum ChunkShiftState
 
 typedef struct Chunk
 {
-    v3i16 pos;      /* world position / CHUNK_DIAMETER */
+    u8 flag; /* enum: ChunkFlag */
+    v3i16 pos; /* world position / CHUNK_DIAMETER */
 
     /*! @brief chunk's unique id derived from its position.
      *
@@ -195,8 +196,12 @@ typedef struct Chunk
     GLuint vao;
     GLuint vbo;
     u64 vbo_len;
-    u32 block[CHUNK_DIAMETER][CHUNK_DIAMETER][CHUNK_DIAMETER];
-    u8 flag; /* enum: ChunkFlag */
+
+    union /* block */
+    {
+        u32 block[CHUNK_DIAMETER][CHUNK_DIAMETER][CHUNK_DIAMETER];
+        u32 block_raw[CHUNK_DIAMETER * CHUNK_DIAMETER * CHUNK_DIAMETER];
+    }; /* block */
 } Chunk;
 
 typedef struct ChunkQueue

@@ -352,7 +352,7 @@ cleanup:
     _LOGERROR(FALSE, engine_err, "%s\n", "Failed to Start Text");
 }
 
-void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, u32 color)
+void text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y, u32 color)
 {
     u64 len = 0, i = 0;
     i64 j = 0;
@@ -411,9 +411,9 @@ void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, u32 color)
         alignment.y = 1.0f;
     }
 
-    pos.x *= render->ndc_scale.x;
-    pos.y *= render->ndc_scale.y;
-    pos.y += text_core.font->scale.y * text_core.text_scale.y;
+    pos_x *= render->ndc_scale.x;
+    pos_y *= render->ndc_scale.y;
+    pos_y += text_core.font->scale.y * text_core.text_scale.y;
 
     descent = text_core.font->descent * text_core.text_scale.y;
     line_height = text_core.font->line_height;
@@ -437,8 +437,8 @@ void text_push(const str *text, v2f32 pos, i8 align_x, i8 align_y, u32 color)
             continue;
         }
 
-        text_core.buf[text_core.cursor].pos.x = pos.x + text_core.advance + g->bearing.x;
-        text_core.buf[text_core.cursor].pos.y = -pos.y - descent - text_core.line_height_total - g->bearing.y;
+        text_core.buf[text_core.cursor].pos.x = pos_x + text_core.advance + g->bearing.x;
+        text_core.buf[text_core.cursor].pos.y = -pos_y - descent - text_core.line_height_total - g->bearing.y;
         text_core.buf[text_core.cursor].tex_coords.x = g->texture_sample.x;
         text_core.buf[text_core.cursor].tex_coords.y = g->texture_sample.y;
         text_core.buf[text_core.cursor].color = color;
