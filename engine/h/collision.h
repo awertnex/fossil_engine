@@ -14,10 +14,10 @@ typedef struct BoundingBox
 
 FSLAPI b8 is_intersect_aabb(BoundingBox a, BoundingBox b);
 
-/*! @brief get collision status and stats between 'a' and 'b' using
+/*! @brief get collision status and stats between `a` and `b` using
  *  the 'Swept AABB' algorithm.
  *
- *  @param displacement = displacement of 'a', since this function assumes 'b' is static.
+ *  @param displacement displacement of `a`, since this function assumes `b` is static.
  *
  *  @return entry time.
  */

@@ -157,47 +157,48 @@ enum /* LogLevel */
 extern u32 log_level_max;
 FSLAPI extern str log_dir[PATH_MAX];
 
-/*! @brief logger pointer look-up table that points to 'logger_buf' addresses.
+/*! @brief logger pointer look-up table that points to `logger_buf` addresses.
  *
- *  @remark read-only, initialized internally in 'logger_init()'.
+ *  @remark read-only, initialized internally in @ref logger_init().
  */
 FSLAPI extern str **logger_tab;
 
-/*! @brief logger color look-up table for 'logger_tab' entries.
+/*! @brief logger color look-up table for @ref logger_tab entries.
  *
- *  @remark read-only, initialized internally in 'logger_init()'.
+ *  @remark read-only, initialized internally in @ref logger_init().
  */
 FSLAPI extern u32 *logger_color;
 
-/*! @brief current position in 'logger_tab'.
+/*! @brief current position in @ref logger_tab.
  *
- *  @remark read-only, updated internally in '_log_output()'.
+ *  @remark read-only, initialized and updated internally in @ref _log_output().
  */
 FSLAPI extern i32 logger_tab_index;
 
 /*! @brief initialize logger.
  *
- *  @param argc, argv = used for logger log level if args provided.
+ *  @param argc number of arguments in `argv` if `argv` provided.
+ *  @param argv used for logger log level if args provided.
  *
- *  @param flags = enum 'common.h/EngineFlag'.
+ *  @param flags enum @ref EngineFlag.
  *
- *  @param _log_dir = directory to write log files into for the lifetime of the process,
- *  if NULL, logs won't be written to disk.
+ *  @param _log_dir directory to write log files into for the lifetime of the process,
+ *  if `NULL`, logs won't be written to disk.
  *
- *  @param log_dir_not_found = if TRUE, will log ERR_DIR_NOT_FOUND if '_log_dir()' not found
- *  ('is_dir_exists()' parameter).
+ *  @param log_dir_not_found enable/disable logging @ref ERR_DIR_NOT_FOUND when `_log_dir` isn't found
+ *  (@ref is_dir_exists() parameter).
  *
- *  @remark called automatically from 'core.h/engine_init()'.
+ *  @remark called automatically from @ref engine_init().
  *
  *  @remark args:
- *      LOGLEVEL FATAL = log only fatal errors.
- *      LOGLEVEL ERROR = log errors and above.
- *      LOGLEVEL WARNING = log warnings and above.
- *      LOGLEVEL INFO = log info and above.
- *      LOGLEVEL DEBUG = log debug and above.
- *      LOGLEVEL TRACE = log everything, default.
+ *      logfatal:   only output fatal logs (least verbose).
+ *      logerror:   only output <= error logs.
+ *      logwarn:    only output <= warning logs.
+ *      loginfo:    only output <= info logs (default).
+ *      logdebug:   only output <= debug logs.
+ *      logtrace:   only output <= trace logs (most verbose).
  *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
+ *  @return non-zero on failure and @ref engine_err is set accordingly.
  */
 FSLAPI u32 logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 log_dir_not_found);
 
@@ -205,8 +206,8 @@ FSLAPI void logger_close(void);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @param cmd = log a command, used for on-screen output of basic commands.
- *  @param _log_dir = directory to write log files into, if NULL, logs won't be written to disk.
+ *  @param cmd log a command (used for on-screen output of basic commands).
+ *  @param _log_dir directory to write log files into, if `NULL`, logs won't be written to disk.
  */
 FSLAPI void _log_output(b8 verbose, b8 cmd, const str *_log_dir, const str *file, u64 line,
         u8 level, u32 error_code, const str *format, ...);

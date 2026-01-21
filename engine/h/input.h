@@ -145,12 +145,6 @@ enum KeyboardKeys
     KEY_MENU,
 }; /* KeyboardKeys */
 
-/*! @brief update internal mouse movement.
- *
- *  update parameters at 'core.c/render.mouse_movement' and 'core.c/render.mouse_delta'.
- */
-FSLAPI void update_mouse_movement(void);
-
 FSLAPI b8 is_mouse_press(const u32 button);
 FSLAPI b8 is_mouse_hold(const u32 button);
 FSLAPI b8 is_mouse_release(const u32 button);
@@ -158,6 +152,12 @@ FSLAPI b8 is_key_press(const u32 key);
 FSLAPI b8 is_key_press_double(const u32 key);
 FSLAPI b8 is_key_hold(const u32 key);
 FSLAPI b8 is_key_release(const u32 key);
+
+/*! @brief update internal mouse movement.
+ *
+ *  update parameters at @ref Render.mouse_pos and @ref Render.mouse_delta of the currently bound `Render`.
+ */
+FSLAPI void update_mouse_movement(void);
 
 /*! @brief update internal mouse and key states: press, double-press, hold and release.
  */

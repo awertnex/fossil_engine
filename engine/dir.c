@@ -350,20 +350,12 @@ u32 copy_dir(const str *src, const str *dst, b8 contents_only)
 
 u32 write_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text)
 {
-    if (_write_file(name, size, length, buf, log, text) == ERR_SUCCESS)
-        _LOGTRACE(FALSE, "File Written '%s'\n", name);
-
-    return engine_err;
-}
-
-u32 _write_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text)
-{
     FILE *file = NULL;
     if ((file = fopen(name, "wb")) == NULL)
     {
         if (log)
         {
-            _LOGERROR(TRUE, ERR_FILE_OPEN_FAIL, "Failed to Open File '%s'\n", name);
+            _LOGERROR(TRUE, ERR_FILE_OPEN_FAIL, "Failed to Write File '%s'\n", name);
         }
         else engine_err = ERR_FILE_OPEN_FAIL;
         return engine_err;
@@ -372,6 +364,8 @@ u32 _write_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 tex
     fwrite(buf, size, length, file);
     if (text) fprintf(file, "%c", '\n');
     fclose(file);
+
+    _LOGTRACE(FALSE, "File Written '%s'\n", name);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -392,7 +386,7 @@ u32 _append_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 te
     {
         if (log)
         {
-            _LOGERROR(TRUE, ERR_FILE_OPEN_FAIL, "Failed to Open File '%s'\n", name);
+            _LOGERROR(TRUE, ERR_FILE_OPEN_FAIL, "Failed to Append File '%s'\n", name);
         }
         else engine_err = ERR_FILE_OPEN_FAIL;
         return engine_err;

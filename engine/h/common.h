@@ -14,39 +14,35 @@
 #include "types.h"
 
 #if defined(__linux__) || defined(__linux)
-    #define PLATFORM_LINUX 1
-    #define PLATFORM "linux"
-    #define ENGINE_FILE_NAME_LIB "libfossil.so"
-    #define ENGINE_FILE_NAME_PLATFORM "platform_linux.c"
-    #define EXE ""
-    #define RUNTIME_PATH "$ORIGIN"
+#   define PLATFORM_LINUX 1
+#   define PLATFORM "linux"
+#   define ENGINE_FILE_NAME_LIB "libfossil.so"
+#   define ENGINE_FILE_NAME_PLATFORM "platform_linux.c"
+#   define EXE ""
+#   define RUNTIME_PATH "$ORIGIN"
 
-    #define SLASH_NATIVE '/'
-    #define SLASH_NON_NATIVE '\\'
+#   define SLASH_NATIVE '/'
+#   define SLASH_NON_NATIVE '\\'
 #elif defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
-    #define PLATFORM_WIN 1
-    #define PLATFORM "win"
-    #define ENGINE_FILE_NAME_LIB "fossil.dll"
-    #define ENGINE_FILE_NAME_PLATFORM "platform_win.c"
-    #define EXE ".exe"
-    #define RUNTIME_PATH "%CD%"
+#   define PLATFORM_WIN 1
+#   define PLATFORM "win"
+#   define ENGINE_FILE_NAME_LIB "fossil.dll"
+#   define ENGINE_FILE_NAME_PLATFORM "platform_win.c"
+#   define EXE ".exe"
+#   define RUNTIME_PATH "%CD%"
 
-    #define SLASH_NATIVE '\\'
-    #define SLASH_NON_NATIVE '/'
+#   define SLASH_NATIVE '\\'
+#   define SLASH_NON_NATIVE '/'
 #endif /* PLATFORM */
 
 #if PLATFORM_WIN
-    #if defined(BUILD_LIBTYPE_SHARED)
-        #define FSLAPI __declspec(dllexport)
-    #else
-        #define FSLAPI __declspec(dllimport)
-    #endif
+#   define FSLAPI __declspec(dllexport)
 #else
-    #define FSLAPI __attribute__((visibility("default")))
+#   define FSLAPI __attribute__((visibility("default")))
 #endif /* PLATFORM */
 
 #ifndef FSLAPI
-    #define FSLAPI
+#   define FSLAPI
 #endif /* FSLAPI */
 
 #define ENGINE_DIR_NAME_FONTS       "engine/assets/fonts/"
@@ -88,7 +84,14 @@
 #define TARGET_FPS_MIN 1
 #define TARGET_FPS_MAX 256
 
-/*! @brief convert rgba color to u32 hex color.
+/* ---- shader bindings ----------------------------------------------------- */
+
+#define ENGINE_SHADER_BUFFER_BINDING_UBO_NDC_SCALE 0
+#define ENGINE_SHADER_BUFFER_BINDING_COUNT 1
+
+/* ---- color conversion macros --------------------------------------------- */
+
+/*! @brief convert RGBA color to 4-Byte hex color.
  *  @remark color range [0.0f, 1.0f].
  */
 #define color_v4_to_hex(r, g, b, a) \
@@ -97,7 +100,7 @@
      ((u32)((b) * 0xff) << 0x08) | \
      ((u32)(a) * 0xff))
 
-/*! @brief convert u32 hex color to rgba color.
+/*! @brief convert 4-Byte hex color to RGBA color.
  *  @remark color range [0.0f, 1.0f].
  */
 #define color_hex_to_v4(n) (v4f32){ \
@@ -106,16 +109,11 @@
     (f32)(((n) >> 0x08) & 0xff) / 0xff, \
     (f32)(((n) >> 0x00) & 0xff) / 0xff}
 
-/* ---- shader bindings ----------------------------------------------------- */
-
-#define ENGINE_SHADER_BUFFER_BINDING_UBO_NDC_SCALE 0
-#define ENGINE_SHADER_BUFFER_BINDING_COUNT 1
-
 enum EngineFlag
 {
-    FLAG_ENGINE_RELEASE_BUILD =         0x0001, /* turn off TRACE and DEBUG logs */
+    FLAG_ENGINE_RELEASE_BUILD =         0x0001, /* output `TRACE` and `DEBUG` logs to console */
     FLAG_ENGINE_LOAD_DEFAULT_SHADERS =  0x0002, /* initialize default shaders (like 'text' and 'ui') */
-    FLAG_ENGINE_MULTISAMPLE =           0x0004, /* turn on 'glfw' multisampling */
+    FLAG_ENGINE_MULTISAMPLE =           0x0004, /* use `GLFW` multisampling */
 }; /* EngineFlag */
 
 enum ShaderIndex
@@ -158,8 +156,9 @@ enum TextureIndex
  */
 extern u64 init_time;
 
-/*! @brief project root directory (used in 'engine_init()' and 'logger_init()'
- *  to change current working dirctory.
+/*! @brief project root directory.
+ *  
+ *  @remark called from @ref engine_init() and @ref logger_init() to change current working dirctory.
  *
  *  @remark declared internally.
  */

@@ -20,7 +20,7 @@ void swap_strings(str *s1, str *s2)
 
 str *swap_string_char(str *string, char c1, char c2)
 {
-    u64 len = strlen(string), i;
+    u64 i, len = strlen(string);
     if (!len) return string;
 
     for (i = 0; i < len; ++i)

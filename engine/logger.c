@@ -97,16 +97,15 @@ u32 logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 log_di
     if (flags & FLAG_ENGINE_RELEASE_BUILD)
         log_level_max = LOGLEVEL_INFO;
 
-    if (argc && argv && argc > 2 &&
-            strncmp(argv[1], "LOGLEVEL", 8ul) == 0)
-        {
-            if (strncmp(argv[2], "FATAL", 5ul) == 0)        log_level_max = LOGLEVEL_FATAL;
-            else if (strncmp(argv[2], "ERROR", 5ul) == 0)   log_level_max = LOGLEVEL_ERROR;
-            else if (strncmp(argv[2], "WARN", 4ul) == 0)    log_level_max = LOGLEVEL_WARNING;
-            else if (strncmp(argv[2], "INFO", 4ul) == 0)    log_level_max = LOGLEVEL_INFO;
-            else if (strncmp(argv[2], "DEBUG", 5ul) == 0)   log_level_max = LOGLEVEL_DEBUG;
-            else if (strncmp(argv[2], "TRACE", 5ul) == 0)   log_level_max = LOGLEVEL_TRACE;
-        }
+    if (argc && argc > 2 && argv)
+    {
+        if (strncmp(argv[2], "logfatal", 8ul) == 0)        log_level_max = LOGLEVEL_FATAL;
+        else if (strncmp(argv[2], "logerror", 8ul) == 0)   log_level_max = LOGLEVEL_ERROR;
+        else if (strncmp(argv[2], "logwarn", 7ul) == 0)    log_level_max = LOGLEVEL_WARNING;
+        else if (strncmp(argv[2], "loginfo", 7ul) == 0)    log_level_max = LOGLEVEL_INFO;
+        else if (strncmp(argv[2], "logdebug", 8ul) == 0)   log_level_max = LOGLEVEL_DEBUG;
+        else if (strncmp(argv[2], "logtrace", 8ul) == 0)   log_level_max = LOGLEVEL_TRACE;
+    }
 
     if (!init_time)
     {

@@ -22,67 +22,58 @@ enum BuildFlag
 
 /*! @brief initialize build.
  *
- *  - allocate resources for 'cmd' and other internals.
- *  - parse commands in 'argv', with no particular order:
- *      engine:     build engine, place into 'engine/lib/<PLATFORM>' and into deployment directory at 'dir_out'.
- *      self:       build the build tool at 'build_src_name' into 'build_bin_name' if build successful.
- *      noproject:  don't execute 'build_function()'.
+ *  - allocate resources for @ref cmd and other internals.
+ *  - parse commands in `argv`, with no particular order:
+ *      engine:     build engine, place into `engine/lib/<PLATFORM>` and into directory at `dir_out`.
+ *      self:       build the build tool at `build_src_name` into `build_bin_name` if build successful.
+ *      noproject:  don't execute `build_function()`.
  *      help:       show help and exit.
  *      show:       show the build command in list format.
  *      raw:        show the build command in raw format.
- *      LOGFATAL:   only output fatal logs (least verbose).
- *      LOGERROR:   only output <= error logs.
- *      LOGWARN:    only output <= warning logs.
- *      LOGINFO:    only output <= info logs (default).
- *      LOGDEBUG:   only output <= debug logs.
- *      LOGTRACE:   only output <= trace logs (most verbose).
- *  - check if source uses a c-standard other than c99 and re-build with c99 if true.
- *  - check if source at 'build_bin_name' has changed and rebuild if true.
+ *      @ref logger_init() commands:
+ *          logfatal:   only output fatal logs (least verbose).
+ *          logerror:   only output <= error logs.
+ *          logwarn:    only output <= warning logs.
+ *          loginfo:    only output <= info logs (default).
+ *          logdebug:   only output <= debug logs.
+ *          logtrace:   only output <= trace logs (most verbose).
+ *  - check if source uses a c-standard other than c99 and re-build with `-std=c99` if true.
+ *  - check if source at `build_bin_name` has changed and rebuild if true.
  *
- *  @oaram build_src_name = name of the source file that's using this header.
- *  @oaram build_bin_name = name of the binary file that's using this header,
+ *  @oaram build_src_name name of the build source file that's using this header.
+ *  @oaram build_bin_name name of the build binary file that's using this header,
  *  including extension if needed.
  *
- *  @oaram dir_out = name of deployment directory.
- *  @oaram build_function = build function to execute, optional.
+ *  @oaram dir_out name of deployment directory.
+ *  @oaram build_function build function to execute, optional.
  *
  *  @remark must be called before anything in the build tool.
  *  @remark can force-terminate process.
- *  @remark 'engine_err' is set accordingly on failure.
+ *  @remark @ref engine_err is set accordingly on failure.
  */
 void engine_build(int argc, char **argv, const str *build_src_name, const str *build_bin_name,
         const str *dir_out, u32 (*build_function)());
 
-/*! @brief build the engine itself into a dynamic/shared library.
- *
- *  @param out_dir = destination directory of the compiled library.
- *
- *  @remark the engine source directory 'engine' must be next to the build tool.
- *  @remark can force-terminate process.
- *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
- */
-u32 _engine_build(const str *out_dir);
-
 /*! @brief link engine's dependencies with the including software.
  *
- *  @remark if 'cmd' NULL, internal cmd is used.
+ *  @param cmd cmd to push engine's required libs to, if `NULL`, internal cmd is used.
  */
 void engine_link_libs(Buf *cmd);
 
 b8 extension_evaluate(const str *file_name);
-void extension_strip(const str *file_name, str *dest);
+void extension_strip(const str *file_name, str *dst);
 
 /*! @brief push arguments to the build command.
  *
- *  @remark if 'cmd' NULL, internal cmd is used.
+ *  @param cmd cmd to push to, if `NULL`, internal cmd is used.
  */
 void cmd_push(Buf *cmd, const str *string);
 
 /*! @brief finalize build command for execution.
  *
- *  @remark must be called after loading 'cmd' with all arguments and before 'exec()'.
- *  @remark if 'cmd' NULL, internal cmd is used.
+ *  @param cmd cmd to finalize, if `NULL`, internal cmd is used.
+ *
+ *  @remark must be called after loading `cmd` with all arguments and before @ref exec().
  */
 void cmd_ready(Buf *cmd);
 

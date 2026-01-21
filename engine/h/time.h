@@ -22,30 +22,28 @@ FSLAPI u64 get_time_raw_usec(void);
 
 /*! @brief get elapsed nanoseconds since this function's first call in the process.
  *
- *  @remark this function is called inside 'core.c/engine_init()' to automatically
- *  initialize time.
+ *  @remark called from @ref engine_init() to automatically initialize time.
  *
- *  @remark the macro 'NSEC2SEC' can be used to convert from nanoseconds to
+ *  @remark the macro `NSEC2SEC` can be used to convert from nanoseconds to
  *  seconds when multiplied by output.
  */
 FSLAPI u64 get_time_nsec(void);
 
 /*! @brief get elapsed seconds.nanoseconds since this function's first call in the process.
  *
- *  @remark this function is called inside 'core.c/engine_init()' to automatically
- *  initialize time.
+ *  @remark called from @ref engine_init() to automatically initialize time.
  */
 FSLAPI f64 get_time_nsecf(void);
 
 /*! @brief get elapsed nanoseconds since this function's last call in the process.
  *
- *  @remark the macro 'NSEC2SEC' can be used to convert from nanoseconds to
+ *  @remark the macro `NSEC2SEC` can be used to convert from nanoseconds to
  *  seconds when multiplied by output.
  */
 FSLAPI u64 get_time_delta_nsec(void);
 
-/*! @brief get time string with max length of 'limits.h/TIME_STRING_MAX' as per 'format'
- *  and load into 'dst'.
+/*! @brief get time string with max length of @ref TIME_STRING_MAX as per `format`
+ *  and load into `dst`.
  */
 FSLAPI void get_time_str(str *dst, const str *format);
 
@@ -53,7 +51,7 @@ FSLAPI b8 get_timer(f64 *time_start, f32 interval);
 
 /*! @brief sleep for specified nanoseconds.
  *
- *  @remark the macros 'SEC2NSEC', 'NSEC2SEC' can be used to convert from
+ *  @remark the macros `SEC2NSEC`, `NSEC2SEC` can be used to convert from
  *  seconds to nanoseconds and vice-versa when multiplied by specified value.
  */
 FSLAPI void sleep_nsec(u64 nsec);

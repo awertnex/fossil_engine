@@ -10,6 +10,7 @@
 #include "h/logger.h"
 #include "h/math.h"
 #include "h/memory.h"
+#include "h/process.h"
 #include "h/shaders.h"
 #include "h/string.h"
 #include "h/time.h"
@@ -18,6 +19,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <engine/include/stb_image.h>
+
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <engine/include/stb_image_write.h>
 
@@ -40,6 +42,10 @@ static Render render_internal =
 
 Render *render = &render_internal;
 
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief internal `UBO` group.
+ */
 static struct /* ubo */
 {
     UBO ndc_scale;
@@ -48,6 +54,8 @@ static struct /* ubo */
 /* ---- section: signatures ------------------------------------------------- */
 
 /*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief default error callback for 'GLFW'.
  */
 static void glfw_callback_error(int error, const char* message)
 {
@@ -57,17 +65,21 @@ static void glfw_callback_error(int error, const char* message)
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief take screenshot and save into dir at '_screenshot_dir'.
+ *  @brief take screenshot and save it into dir at `dir_screenshots`.
  *  
- *  save pixel data as 'RGB' into 'render->screen_buf'.
+ *  save pixel data as RGB into @ref Render.screen_buf.
  *
- *  @param special_text = string appended to file name before extension.
+ *  @param _screenshot_dir directory to save screenshot to.
  *
- *  @remark if directory not found, screenshot is still saved at 'render->screen_buf'.
+ *  @param special_text text appended to file name before file extension (usually level name),
+ *  if provided, an underscore (`_`) will be inserted to separate `special_text` from default name.
  *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
+ *  @remark if directory not found, screenshot is still saved at @ref Render.screen_buf of the
+ *  currently bound `Render` till next screenshot.
+ *
+ *  @return non-zero on failure and @ref engine_err is set accordingly.
  */
-static u32 take_screenshot(const str *_screenshot_dir, const str *special_text);
+static u32 take_screenshot(const str *dir_screenshots, const str *special_text);
 
 /* ---- section: init ------------------------------------------------------- */
 
@@ -76,14 +88,31 @@ u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
 {
     u32 i = 0;
 
+    flag.active = 1;
+
     if (logger_init(argc, argv, flags & FLAG_ENGINE_RELEASE_BUILD, _log_dir,
                 TRUE) != ERR_SUCCESS)
         goto cleanup;
 
+    if (!init_time)
+    {
+        init_time = get_time_raw_usec();
+        get_time_nsec(); /* initialize start time */
+        get_time_nsecf(); /* initialize start time */
+    }
+
+    if (!DIR_PROC_ROOT)
+    {
+        DIR_PROC_ROOT = get_path_bin_root();
+        if (!DIR_PROC_ROOT)
+            goto cleanup;
+        change_dir(DIR_PROC_ROOT);
+    }
+
     glfwSetErrorCallback(glfw_callback_error);
 
-    if (_render)
-        change_render(_render);
+    if (_render && change_render(_render) != ERR_SUCCESS)
+        goto cleanup;
 
     if (
             glfw_init(flags & FLAG_ENGINE_MULTISAMPLE) != ERR_SUCCESS ||
@@ -106,12 +135,45 @@ u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
                 ubo.ndc_scale.buf);
     }
 
-    flag.active = 1;
+    engine_err = ERR_SUCCESS;
     return engine_err;
 
 cleanup:
 
     engine_close();
+    return engine_err;
+}
+
+b8 engine_running(void)
+{
+    if (glfwWindowShouldClose(render->window) || !flag.active)
+        return FALSE;
+
+    /* order doesn't matter here, these functions have independent state */
+    render->time = get_time_nsec();
+    render->time_delta = get_time_delta_nsec();
+
+    return TRUE;
+}
+
+u32 engine_update_render_settings(i32 size_x, i32 size_y)
+{
+    render->size.x = size_x;
+    render->size.y = size_y;
+    glViewport(0, 0, size_x, size_y);
+
+    render->ndc_scale.x = 2.0f / size_x;
+    render->ndc_scale.y = 2.0f / size_y;
+
+    glBindBuffer(GL_UNIFORM_BUFFER, ubo.ndc_scale.buf);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(v2f32), &render->ndc_scale, GL_STATIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    if (mem_realloc((void*)&render->screen_buf, size_x * size_y * COLOR_CHANNELS_RGB,
+            "engine_update_render_settings().render.screen_buf") != ERR_SUCCESS)
+        return engine_err;
+
+    engine_err = ERR_SUCCESS;
     return engine_err;
 }
 
@@ -222,39 +284,6 @@ u32 glad_init(void)
     return engine_err;
 }
 
-b8 engine_running(void)
-{
-    if (glfwWindowShouldClose(render->window) || !flag.active)
-        return FALSE;
-
-    /* order doesn't matter here, these functions have independent state */
-    render->time = get_time_nsec();
-    render->time_delta = get_time_delta_nsec();
-
-    return TRUE;
-}
-
-u32 engine_update_render_settings(i32 size_x, i32 size_y)
-{
-    render->size.x = size_x;
-    render->size.y = size_y;
-    glViewport(0, 0, size_x, size_y);
-
-    render->ndc_scale.x = 2.0f / size_x;
-    render->ndc_scale.y = 2.0f / size_y;
-
-    glBindBuffer(GL_UNIFORM_BUFFER, ubo.ndc_scale.buf);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(v2f32), &render->ndc_scale, GL_STATIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-    if (mem_realloc((void*)&render->screen_buf, size_x * size_y * COLOR_CHANNELS_RGB,
-            "engine_update_render_settings().render.screen_buf") != ERR_SUCCESS)
-        return engine_err;
-
-    engine_err = ERR_SUCCESS;
-    return engine_err;
-}
-
 u32 change_render(Render *_render)
 {
     if (_render == NULL)
@@ -282,42 +311,42 @@ void request_screenshot(void)
     flag.request_screenshot = 1;
 }
 
-u32 process_screenshot_request(const str *_screenshot_dir, const str *special_text)
+u32 process_screenshot_request(const str *dir_screenshots, const str *special_text)
 {
     if (flag.request_screenshot)
     {
         flag.request_screenshot = 0;
-        return take_screenshot(_screenshot_dir, special_text);
+        return take_screenshot(dir_screenshots, special_text);
     }
     return ERR_SUCCESS;
 }
 
-static u32 take_screenshot(const str *_screenshot_dir, const str *special_text)
+static u32 take_screenshot(const str *dir_screenshots, const str *special_text)
 {
     u64 i = 0;
     str str_time[TIME_STRING_MAX] = {0};
     str str_special_text[NAME_MAX] = {0};
-    str file_name[NAME_MAX] = {0};
+    str file_name[PATH_MAX] = {0};
     str file_name_full[PATH_MAX] = {0};
-    str screenshot_dir[PATH_MAX] = {0};
+    str str_dir_screenshots[PATH_MAX] = {0};
 
-    if (is_dir_exists(_screenshot_dir, TRUE) != ERR_SUCCESS)
+    if (is_dir_exists(dir_screenshots, TRUE) != ERR_SUCCESS)
     {
         LOGERROR(FALSE, TRUE, ERR_SCREENSHOT_FAIL,
-                "Failed to Take Screenshot, '%s' Directory Not Found\n", _screenshot_dir);
+                "Failed to Take Screenshot, '%s' Directory Not Found\n", dir_screenshots);
         return engine_err;
     }
 
-    snprintf(screenshot_dir, PATH_MAX, "%s", _screenshot_dir);
-    check_slash(screenshot_dir);
-    posix_slash(screenshot_dir);
+    snprintf(str_dir_screenshots, PATH_MAX, "%s", dir_screenshots);
+    check_slash(str_dir_screenshots);
+    posix_slash(str_dir_screenshots);
 
     get_time_str(str_time, "%F_%H-%M-%S");
 
     if (special_text[0])
         snprintf(str_special_text, NAME_MAX, "_%s", special_text);
 
-    snprintf(file_name, NAME_MAX, "%s%s", screenshot_dir, str_time);
+    snprintf(file_name, PATH_MAX, "%s%s", str_dir_screenshots, str_time);
 
     for (i = 0; i < SCREENSHOT_RATE_MAX; ++i)
     {

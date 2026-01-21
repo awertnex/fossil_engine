@@ -129,17 +129,6 @@ static u32 keyboard_tab[KEYBOARD_KEYS_MAX] =
     GLFW_KEY_MENU,
 }; /* keyboard_tab */
 
-void update_mouse_movement(void)
-{
-    static v2f64 mouse_last = {0};
-    glfwGetCursorPos(render->window, &render->mouse_pos.x, &render->mouse_pos.y);
-    render->mouse_delta = (v2f64){
-        render->mouse_pos.x - mouse_last.x,
-        render->mouse_pos.y - mouse_last.y,
-    };
-    mouse_last = render->mouse_pos;
-}
-
 b8 is_mouse_press(const u32 button)
 {
     return mouse_button[button] == KEY_PRESS;
@@ -176,6 +165,17 @@ b8 is_key_release(const u32 key)
 {
     return keyboard_key[key] == KEY_RELEASE ||
         keyboard_key[key] == KEY_RELEASE_DOUBLE;
+}
+
+void update_mouse_movement(void)
+{
+    static v2f64 mouse_last = {0};
+    glfwGetCursorPos(render->window, &render->mouse_pos.x, &render->mouse_pos.y);
+    render->mouse_delta = (v2f64){
+        render->mouse_pos.x - mouse_last.x,
+        render->mouse_pos.y - mouse_last.y,
+    };
+    mouse_last = render->mouse_pos;
 }
 
 void update_key_states(void)

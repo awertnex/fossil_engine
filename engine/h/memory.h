@@ -7,11 +7,11 @@
 
 typedef struct MemArena
 {
-    void ***i;      /* pointers to members of arena */
+    void ***i;      /* members of `buf` */
     void *buf;      /* raw data */
-    u64 memb;       /* current number of 'i' members */
-    u64 size_i;     /* total mapped size for 'i' in bytes */
-    u64 size_buf;   /* total mapped size for 'buf' in bytes */
+    u64 memb;       /* number of `i` members */
+    u64 size_i;     /* total mapped size for `i` in bytes */
+    u64 size_buf;   /* total mapped size for `buf` in bytes */
     u64 cursor;     /* current usage */
 } MemArena;
 
@@ -72,18 +72,23 @@ typedef struct MemArena
  *
  *  @brief global page size variable.
  *
- *  initialized in '_mem_map()', '_mem_remap()', '_mem_commit()',
- *  '_mem_map_arena()', '_mem_remap_arena()' and '_mem_push_arena()'.
+ *  initialized once in any of:
+ *      @ref _mem_map().
+ *      @ref _mem_remap().
+ *      @ref _mem_commit().
+ *      @ref _mem_map_arena().
+ *      @ref _mem_remap_arena().
+ *      @ref _mem_push_arena().
  */
 extern u64 _PAGE_SIZE;
 
-/*! @brief like 'math.c/round_up_u64()' but only works on powers of two for 'size'.
+/*! @brief like @ref round_up_u64() but only works on powers of two for `size`.
  */
 FSLAPI u64 align_up_u64(u64 n, u64 size);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief initialize '_PAGE_SIZE' if not initialized.
+ *  @brief initialize @ref _PAGE_SIZE if not initialized.
  */
 void mem_request_page_size(void);
 
@@ -97,89 +102,89 @@ u64 _mem_request_page_size(void);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @param size = size in bytes.
- *  @param name = pointer name (for logging).
+ *  @param size size in bytes.
+ *  @param name pointer name (for logging).
  *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
+ *  @return non-zero on failure and @ref engine_err is set accordingly.
  */
 FSLAPI u32 _mem_alloc(void **x, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @param memb = number of members.
- *  @param size = member size in bytes.
- *  @param name = pointer name (for logging).
+ *  @param memb number of members.
+ *  @param size member size in bytes.
+ *  @param name pointer name (for logging).
  *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
+ *  @return non-zero on failure and @ref engine_err is set accordingly.
  */
 FSLAPI u32 _mem_alloc_memb(void **x, u64 memb, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @param memb = number of members.
- *  @param size = member size in bytes.
- *  @param name = pointer name (for logging).
+ *  @param memb number of members.
+ *  @param size member size in bytes.
+ *  @param name pointer name (for logging).
  *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
+ *  @return non-zero on failure and @ref engine_err is set accordingly.
  */
 FSLAPI u32 _mem_alloc_buf(Buf *x, u64 memb, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @param memb = number of members per buffer.
- *  @param size_key = 'key' member size in bytes.
- *  @param size_val = 'val' member size in bytes.
- *  @param name = pointer name (for logging).
+ *  @param memb number of members per buffer.
+ *  @param size_key `x->key` member size in bytes.
+ *  @param size_val `x->val` member size in bytes.
+ *  @param name pointer name (for logging).
  *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
+ *  @return non-zero on failure and @ref engine_err is set accordingly.
  */
 FSLAPI u32 _mem_alloc_key_val(KeyValue *x, u64 memb, u64 size_key, u64 size_val,
         const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @param size = size in bytes.
- *  @param name = pointer name (for logging).
+ *  @param size size in bytes.
+ *  @param name pointer name (for logging).
  *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
+ *  @return non-zero on failure and @ref engine_err is set accordingly.
  */
 FSLAPI u32 _mem_realloc(void **x, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @param memb = number of members.
- *  @param size = member size in bytes.
- *  @param name = pointer name (for logging).
+ *  @param memb number of members.
+ *  @param size member size in bytes.
+ *  @param name pointer name (for logging).
  *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
+ *  @return non-zero on failure and @ref engine_err is set accordingly.
  */
 FSLAPI u32 _mem_realloc_memb(void **x, u64 memb, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @param size = size in bytes.
- *  @param name = pointer name (for logging).
+ *  @param size size in bytes.
+ *  @param name pointer name (for logging).
  */
 FSLAPI void _mem_free(void **x, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @param name = pointer name (for logging).
+ *  @param name pointer name (for logging).
  */
 FSLAPI void _mem_free_buf(Buf *x, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @param name = pointer name (for logging).
+ *  @param name pointer name (for logging).
  */
 FSLAPI void _mem_free_key_val(KeyValue *x, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @param size = size in bytes.
- *  @param name = pointer name (for logging).
+ *  @param size size in bytes.
+ *  @param name pointer name (for logging).
  *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
+ *  @return non-zero on failure and @ref engine_err is set accordingly.
  */
 FSLAPI u32 _mem_clear(void **x, u64 size, const str *name, const str *file, u64 line);
 
@@ -187,12 +192,12 @@ FSLAPI u32 _mem_clear(void **x, u64 size, const str *name, const str *file, u64 
  *
  *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
- *  @brief reserve a block of memory for '*x'.
+ *  @brief reserve a block of memory for `*x`.
  *
- *  @param size = size in bytes.
- *  @param name = pointer name (for logging).
+ *  @param size size in bytes.
+ *  @param name pointer name (for logging).
  *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
+ *  @return non-zero on failure and @ref engine_err is set accordingly.
  */
 FSLAPI u32 _mem_map(void **x, u64 size, const str *name, const str *file, u64 line);
 
@@ -200,12 +205,12 @@ FSLAPI u32 _mem_map(void **x, u64 size, const str *name, const str *file, u64 li
  *
  *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
- *  @brief commit a block of mapped memory for '*x'.
+ *  @brief commit a block of mapped memory for `*x`.
  *
- *  @param size = size in bytes.
- *  @param name = pointer name (for logging).
+ *  @param size size in bytes.
+ *  @param name pointer name (for logging).
  *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
+ *  @return non-zero on failure and @ref engine_err is set accordingly.
  */
 FSLAPI u32 _mem_commit(void **x, void *offset, u64 size, const str *name, const str *file, u64 line);
 
@@ -213,13 +218,13 @@ FSLAPI u32 _mem_commit(void **x, void *offset, u64 size, const str *name, const 
  *
  *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
- *  @brief remap a block of memory for '*x'.
+ *  @brief remap a block of memory for `*x`.
  *  
- *  @param size_old = old size in bytes.
- *  @param size_new = new size in bytes.
- *  @param name = pointer name (for logging).
+ *  @param size_old old size in bytes.
+ *  @param size_new new size in bytes.
+ *  @param name pointer name (for logging).
  *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
+ *  @return non-zero on failure and @ref engine_err is set accordingly.
  */
 FSLAPI u32 _mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const str *file, u64 line);
 
@@ -227,32 +232,32 @@ FSLAPI u32 _mem_remap(void **x, u64 size_old, u64 size_new, const str *name, con
  *
  *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
- *  @brief unmap a block of memory '*x'.
+ *  @brief unmap a block of memory `*x`.
  *
- *  @oaram size = size in bytes.
- *  @oaram name = pointer name (for logging).
+ *  @oaram size size in bytes.
+ *  @oaram name pointer name (for logging).
  */
 FSLAPI void _mem_unmap(void **x, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief reserve a memory arena for 'x'.
+ *  @brief reserve a memory arena for `x`.
  *
- *  @param size = size in bytes.
- *  @param name = pointer name (for logging).
+ *  @param size size in bytes.
+ *  @param name pointer name (for logging).
  *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
+ *  @return non-zero on failure and @ref engine_err is set accordingly.
  */
 FSLAPI u32 _mem_map_arena(MemArena* x, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief push a block of mapped memory for '*p' hosted by available space in 'x'.
+ *  @brief push a block of mapped memory for `*p` hosted by available space in `x` and grow arena if needed.
  *
- *  @oaram size = size in bytes.
- *  @oaram name = pointer name (for logging).
+ *  @oaram size size in bytes.
+ *  @oaram name pointer name (for logging).
  *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
+ *  @return non-zero on failure and @ref engine_err is set accordingly.
  */
 FSLAPI u32 _mem_push_arena(MemArena *x, void **p, u64 size, const str *name, const str *file, u64 line);
 
@@ -260,37 +265,29 @@ FSLAPI u32 _mem_push_arena(MemArena *x, void **p, u64 size, const str *name, con
  *
  *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
- *  @brief unmap a memory arena 'x'.
+ *  @brief unmap a memory arena `x`.
  *
- *  @oaram name = pointer name (for logging).
+ *  @oaram name pointer name (for logging).
  */
 FSLAPI void _mem_unmap_arena(MemArena *x, const str *name, const str *file, u64 line);
 
-/*! @brief similar to 'printf("%b\n", x)' but only output 'bit_count' bits.
+/*! @brief similar to `printf("%b\n", x)` but only output `bit_count` bits.
  */
 FSLAPI void print_bits(u64 x, u8 bit_count);
 
-/*! @brief swap bits of 'c1' and 's2' with each other.
- *
- *  @remark doesn't use a temp variable, swaps bits in-place.
+/*! @brief swap bits of `c1` and `s2` with each other (without a `temp` variable).
  */
 FSLAPI void swap_bits(char *c1, char *c2);
 
-/*! @brief swap bits of 'a' and 'b' with each other.
- *
- *  @remark doesn't use a temp variable, swaps bits in-place.
+/*! @brief swap bits of 'a' and 'b' with each other (without a `temp` variable).
  */
 FSLAPI void swap_bits_u8(u8 *a, u8 *b);
 
-/*! @brief swap bits of 'a' and 'b' with each other.
- *
- *  @remark doesn't use a temp variable, swaps bits in-place.
+/*! @brief swap bits of 'a' and 'b' with each other (without a `temp` variable).
  */
 FSLAPI void swap_bits_u32(u32 *a, u32 *b);
 
-/*! @brief swap bits of 'a' and 'b' with each other.
- *
- *  @remark doesn't use a temp variable, swaps bits in-place.
+/*! @brief swap bits of 'a' and 'b' with each other (without a `temp` variable).
  */
 FSLAPI void swap_bits_u64(u64 *a, u64 *b);
 

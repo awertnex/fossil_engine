@@ -13,7 +13,7 @@
 #include "time.c"
 
 #if PLATFORM_LINUX
-    #include "platform_linux.c"
+#   include "platform_linux.c"
 
     static str str_libs[][CMD_SIZE] =
     {
@@ -21,7 +21,7 @@
         "-lglfw",
     };
 #elif PLATFORM_WIN
-    #include "platform_windows.c"
+#   include "platform_windows.c"
 
     static str str_libs[][CMD_SIZE] =
     {
@@ -33,13 +33,13 @@
 #endif /* PLATFORM */
 
 #ifdef __STDC_VERSION__
-    #if (__STDC_VERSION__ == 199901)
-        #define STD __STDC_VERSION__
-    #else
-        #define STD 0
-    #endif
+#   if (__STDC_VERSION__ == 199901)
+#       define STD __STDC_VERSION__
+#   else
+#       define STD 0
+#   endif
 #else
-    #define STD 0
+#   define STD 0
 #endif /* STD */
 
 u64 init_time = 0;
@@ -59,21 +59,32 @@ static u32 is_build_source_changed(void);
  */
 static void self_rebuild(char **argv);
 
+/*! @brief build the engine itself into a dynamic/shared library.
+ *
+ *  @param dir_out where to place the compiled library.
+ *
+ *  @remark the engine source directory `engine` must be next to the build tool.
+ *  @remark can force-terminate process.
+ *
+ *  @return non-zero on failure and @ref engine_err is set accordingly.
+ */
+static u32 _engine_build(const str *dir_out);
+
 /*! -- INTERNAL USE ONLY --;
  *
- *  @remark if 'cmd' NULL, internal cmd is used.
+ *  @param cmd cmd to push engine's required libs to, if `NULL`, internal cmd is used.
  */
 static void _engine_link_libs(Buf *cmd);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @remark if 'cmd' NULL, internal cmd is used.
+ *  @param cmd cmd to show, if `NULL`, internal cmd is used.
  */
 static void cmd_show(Buf *cmd);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @remark if 'cmd' NULL, internal cmd is used.
+ *  @param cmd cmd to show, if `NULL`, internal cmd is used.
  */
 static void cmd_raw(Buf *cmd);
 
@@ -252,12 +263,18 @@ static void self_rebuild(char **argv)
     cmd_fail();
 }
 
-u32 _engine_build(const str *out_dir)
+static u32 _engine_build(const str *dir_out)
 {
+    str dir_out_processed[PATH_MAX] = {0};
+
     if (
             is_dir_exists("engine", TRUE) != ERR_SUCCESS ||
-            is_dir_exists(out_dir, TRUE) != ERR_SUCCESS)
+            is_dir_exists(dir_out, TRUE) != ERR_SUCCESS)
         return engine_err;
+
+    snprintf(dir_out_processed, PATH_MAX, "%s", dir_out);
+    check_slash(dir_out_processed);
+    posix_slash(dir_out_processed);
 
     cmd_push(&_cmd, COMPILER);
     cmd_push(&_cmd, "engine/assets.c");
@@ -298,20 +315,20 @@ u32 _engine_build(const str *out_dir)
     if (flag & FLAG_CMD_SHOW) cmd_show(&_cmd);
     if (flag & FLAG_CMD_RAW) cmd_raw(&_cmd);
 
-    make_dir(stringf("%sengine", out_dir));
-    make_dir(stringf("%sengine/logs", out_dir));
+    make_dir(stringf("%sengine", dir_out_processed));
+    make_dir(stringf("%sengine/logs", dir_out_processed));
     if (engine_err != ERR_SUCCESS && engine_err != ERR_DIR_EXISTS)
         cmd_fail();
 
     if (copy_dir(
                 stringf("%sengine/assets", DIR_PROC_ROOT),
-                stringf("%sengine/assets", out_dir), TRUE) != ERR_SUCCESS)
+                stringf("%sengine/assets", dir_out_processed), TRUE) != ERR_SUCCESS)
         cmd_fail();
 
     if (exec(&_cmd, "_engine_build()") != ERR_SUCCESS)
         cmd_fail();
 
-    if (copy_dir("engine/lib/"PLATFORM, out_dir, TRUE) != ERR_SUCCESS)
+    if (copy_dir("engine/lib/"PLATFORM, dir_out_processed, TRUE) != ERR_SUCCESS)
         cmd_fail();
 
     engine_err = ERR_SUCCESS;

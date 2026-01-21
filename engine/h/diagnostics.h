@@ -75,7 +75,7 @@
 
 /*! @brief global variable for engine-specific error codes.
  *
- *  @remark must be declared by the user if not including 'core.c'.
+ *  @remark must be declared by the user if not including @ref core.c.
  */
 FSLAPI extern u32 engine_err;
 

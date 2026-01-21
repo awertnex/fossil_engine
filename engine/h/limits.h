@@ -4,10 +4,10 @@
 #include "common.h"
 
 #if PLATFORM_LINUX
-    #include <linux/limits.h>
+#   include <linux/limits.h>
 #elif PLATFORM_WIN
-    #define NAME_MAX 255
-    #include <limits.h>
+#   define NAME_MAX 255
+#   include <limits.h>
 #endif /* PLATFORM */
 
 #define U8_MAX 255

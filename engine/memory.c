@@ -398,7 +398,7 @@ u32 _mem_push_arena(MemArena *x, void **p, u64 size, const str *name, const str 
         {
             _LOGERROREX(TRUE, file, line, ERR_SIZE_TOO_SMALL,
                     "%s[%p] Failed to Push Memory Arena, Memory Remap Failed\n",
-                    name, x->buf + x->cursor);
+                    name, x->buf + cursor_pos);
             return engine_err;
         }
 
@@ -419,7 +419,7 @@ u32 _mem_push_arena(MemArena *x, void **p, u64 size, const str *name, const str 
 
     _LOGTRACEEX(TRUE, file, line,
             "%s[%p] Memory Arena Pushed [%p][%"PRIu64"B] Memb %"PRIu64"[%"PRIu64"B]\n",
-            name, x->buf, x->buf + x->cursor, size_aligned, x->memb, memb_aligned);
+            name, x->buf, x->buf + cursor_pos, size_aligned, x->memb, memb_aligned);
 
     *p = x->buf + cursor_pos;
     x->cursor = cursor_pos_new;
