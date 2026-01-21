@@ -161,7 +161,7 @@ void logger_close(void)
     _LOGTRACE(TRUE, "%s\n", "Closing Logger..");
 
     log_flag &= ~FLAG_LOGGER_GUI_OPEN;
-    mem_unmap_arena(&logger_arena, "logger_init().logger_color");
+    mem_unmap_arena(&logger_arena, "logger_close().logger_color");
 }
 
 void _log_output(b8 verbose, b8 cmd, const str *_log_dir, const str *file, u64 line,

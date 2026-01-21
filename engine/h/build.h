@@ -22,7 +22,7 @@ enum BuildFlag
 
 /*! @brief initialize build.
  *
- *  - allocate resources for @ref cmd and other internals.
+ *  - allocate resources for internal `cmd` and other internals.
  *  - parse commands in `argv`, with no particular order:
  *      engine:     build engine, place into `engine/lib/<PLATFORM>` and into directory at `dir_out`.
  *      self:       build the build tool at `build_src_name` into `build_bin_name` if build successful.

@@ -1,7 +1,7 @@
 #include "engine/build.c"
 
-#define DIR_OUT         "Heaven-Hell Continuum/"
 #define DIR_SRC         "src/"
+#define DIR_OUT         "Heaven-Hell Continuum/"
 
 #if PLATFORM_LINUX
     #define STR_OUT     DIR_OUT"hhc"
