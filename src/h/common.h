@@ -5,12 +5,6 @@
 
 #include "diagnostics.h"
 
-#ifdef _GAME_RELEASE_BUILD
-#   define GAME_RELEASE_BUILD 1
-#else
-#   define GAME_RELEASE_BUILD 0
-#endif /* _GAME_RELEASE_BUILD */
-
 #define GAME_VERSION_STABLE "-stable"
 #define GAME_VERSION_BETA   "-beta"
 #define GAME_VERSION_ALPHA  "-alpha"
@@ -20,6 +14,12 @@
 #define GAME_NAME           "Heaven-Hell Continuum"
 #define GAME_VERSION        "0.4.0"GAME_VERSION_DEV
 #define GAME_TITLE          GAME_NAME": "GAME_VERSION
+
+#ifdef _GAME_RELEASE_BUILD
+#   define GAME_RELEASE_BUILD 1
+#else
+#   define GAME_RELEASE_BUILD 0
+#endif /* _GAME_RELEASE_BUILD */
 
 /* ---- settings ------------------------------------------------------------ */
 
