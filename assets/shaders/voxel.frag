@@ -44,7 +44,7 @@ void main()
     vec3 color_ambient_light = texture_base.rgb * GLOBAL_ILLUMINATION;
     vec3 color_flashlight = FLASHLIGHT_COLOR * texture_base.rgb * flashlight_intensity;
 
-    vec3 color_composite = 
+    vec3 color_composite =
         color_sky_influence +
         color_block_light +
         color_ambient_light +
