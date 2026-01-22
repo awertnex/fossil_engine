@@ -1,18 +1,21 @@
-#include "engine/build.c"
+#include "engine/build/build.h"
+#include "engine/h/build.h"
 
-#define DIR_SRC         "src/"
-#define DIR_OUT         "Heaven-Hell Continuum/"
+#define DIR_SRC     "src/"
+#define DIR_OUT     "Heaven-Hell Continuum/"
 
 #if PLATFORM_LINUX
-    #define STR_OUT     DIR_OUT"hhc"
+#   define STR_OUT  DIR_OUT"hhc"
 #elif PLATFORM_WIN
-    #define STR_OUT     "\""DIR_OUT"hhc"EXE"\""
+#   define STR_OUT  "\""DIR_OUT"hhc"EXE"\""
 #endif /* PLATFORM */
 
-u32 game_build(void)
+int main(int argc, char **argv)
 {
+    build_init(argc, argv, "build.c", "build"EXE);
+
     if (is_dir_exists(DIR_SRC, TRUE) != ERR_SUCCESS)
-        return engine_err;
+        return build_err;
 
     cmd_push(NULL, COMPILER);
     cmd_push(NULL, DIR_SRC"main.c");
@@ -38,14 +41,13 @@ u32 game_build(void)
     cmd_push(NULL, STR_OUT);
     cmd_ready(NULL);
 
+    if (exec(&_cmd, "main().cmd") != ERR_SUCCESS)
+        cmd_fail();
+
     if (copy_file("LICENSE", DIR_OUT"LICENSE") != ERR_SUCCESS ||
             copy_dir("assets/", DIR_OUT"assets/", TRUE) != ERR_SUCCESS)
-        return engine_err;
+        cmd_fail();
 
-    return engine_err;
-}
-
-int main(int argc, char **argv)
-{
-    engine_build(argc, argv, "build.c", "build"EXE, DIR_OUT, &game_build);
+    build_err = ERR_SUCCESS;
+    return build_err;
 }

@@ -85,7 +85,6 @@ static str *esc_code_color[LOGLEVEL_COUNT] =
     "\033[33m",
 };
 
-
 /*! -- INTERNAL USE ONLY --;
  */
 static void _get_log_str(const str *str_in, str *str_out, u32 flags, b8 verbose,

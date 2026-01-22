@@ -1,5 +1,6 @@
 #include "h/common.h"
 
+#include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -33,7 +34,7 @@ u32 make_dir(const str *path)
             _LOGERROR(TRUE, ERR_DIR_CREATE_FAIL, "Failed to Create Directory '%s'\n", path);
     }
 
-    return exit_code;
+    return engine_err;
 }
 
 /* TODO: make 'change_dir()' for windows */

@@ -47,7 +47,7 @@ FSLAPI u32 make_dir(const str *path);
 FSLAPI int change_dir(const str *path);
 
 /*! @param dst pointer to `NULL` buffer to store file contents.
- *  @remark `dst` is allocated file size, + 1 if `terminate` is TRUE.
+ *  @remark `dst` is allocated file size, + 1 if `terminate` is `TRUE`.
  *
  *  @param format read file `name` using `format` (@ref fopen() parameter).
  *  @param terminate enable/disable null (`\0`) termination.
