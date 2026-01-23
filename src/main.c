@@ -1,21 +1,10 @@
+#include <engine/h/fossil_engine.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
 
-#include <engine/h/common.h>
-#include <engine/h/core.h>
-#include <engine/h/diagnostics.h>
-#include <engine/h/input.h>
-#include <engine/h/logger.h>
-#include <engine/h/math.h>
-#include <engine/h/shaders.h>
-#include <engine/h/string.h>
-#include <engine/h/text.h>
-#include <engine/h/time.h>
-#include <engine/h/ui.h>
-
 #include "h/main.h"
-
 #include "h/assets.h"
 #include "h/chunking.h"
 #include "h/common.h"

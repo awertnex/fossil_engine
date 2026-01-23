@@ -107,7 +107,7 @@ v3f32 random_3d(i32 x, i32 y, i32 z, u64 seed)
     };
 }
 
-#pragma GCC diagnostic pop
+#pragma GCC diagnostic pop /* ignored "-Wshift-count-overflow" */
 
 f32 gradient_2d(f32 vx, f32 vy, i32 x, i32 y, u64 seed)
 {
