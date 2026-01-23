@@ -77,6 +77,9 @@ u32 _mem_alloc_buf(Buf *x, u64 memb, u64 size, const str *name, const str *file,
         return engine_err;
     }
 
+    if (x->loaded || x->buf || x->i)
+        return ERR_SUCCESS;
+
     snprintf(name_i, NAME_MAX, "%s.i", name);
     snprintf(name_buf, NAME_MAX, "%s.buf", name);
 

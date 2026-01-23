@@ -1,7 +1,7 @@
 #ifndef ENGINE_BUILD_H
 #define ENGINE_BUILD_H
 
-#include "../../buildtool/build.h"
+#include "../../deps/buildtool/buildtool.h"
 
 #ifdef OMIT_LFOSSIL
 #   define LFOSSIL ""
