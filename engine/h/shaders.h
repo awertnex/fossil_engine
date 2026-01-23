@@ -1,54 +1,55 @@
-#ifndef ENGINE_SHADERS_H
-#define ENGINE_SHADERS_H
+#ifndef FSL_SHADERS_H
+#define FSL_SHADERS_H
 
 #include <engine/include/glad/glad.h>
 
+#include "common.h"
 #include "types.h"
 
-typedef struct Shader
+typedef struct fsl_shader
 {
     str *file_name;
     GLuint id;          /* used by @ref glCreateShader() */
     GLuint type;        /* `GL_<x>_SHADER` */
     GLchar *source;     /* shader file source code */
     GLint loaded;       /* used by @ref glGetShaderiv() */
-} Shader;
+} fsl_shader;
 
-typedef struct ShaderProgram
+typedef struct fsl_shader_program
 {
     str *name;          /* for debugging */
     GLuint id;          /* used by @ref glCreateProgram() */
     GLint loaded;       /* used by @ref glGetProgramiv() */
-    Shader vertex;
-    Shader geometry;
-    Shader fragment;
-} ShaderProgram;
+    fsl_shader vertex;
+    fsl_shader geometry;
+    fsl_shader fragment;
+} fsl_shader_program;
 
 /*! @brief default shaders.
  *
- *  @remark declared internally in @ref engine_init().
+ *  @remark read-only, declared and initialized internally in @ref fsl_init().
  */
-FSLAPI extern ShaderProgram engine_shader[ENGINE_SHADER_COUNT];
+FSLAPI extern fsl_shader_program fsl_shader_buf[FSL_SHADER_INDEX_COUNT];
 
 /*! @brief initialize single shader.
  *
- *  call @ref shader_pre_process() on `shader->file_name` before compiling shader and compile shader.
+ *  - call @ref fsl_shader_pre_process() on `shader->file_name` before compiling shader and compile shader.
  *
- *  @return non-zero on failure and @ref engine_err is set accordingly.
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 shader_init(const str *shaders_dir, Shader *shader);
+FSLAPI u32 fsl_shader_init(const str *shaders_dir, fsl_shader *shader);
 
 /*! @brief initialize shader program.
  *
- *  call @ref shader_init() on all shaders in `program` if `shader->type` is set.
+ *  - call @ref fsl_shader_init() on all shaders in `program` if `shader->type` is set.
  *
  *  @param shaders_dir path to shader files of `program`,
  *  shader file names must be pre-defined in `program->shader.file_name`.
  *
- *  @return non-zero on failure and @ref engine_err is set accordingly.
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 shader_program_init(const str *shaders_dir, ShaderProgram *program);
+FSLAPI u32 fsl_shader_program_init(const str *shaders_dir, fsl_shader_program *program);
 
-FSLAPI void shader_program_free(ShaderProgram *program);
+FSLAPI void fsl_shader_program_free(fsl_shader_program *program);
 
-#endif /* ENGINE_SHADERS_H */
+#endif /* FSL_SHADERS_H */

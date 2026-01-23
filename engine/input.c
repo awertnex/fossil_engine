@@ -2,9 +2,9 @@
 #include "h/input.h"
 #include "h/time.h"
 
-static u32 mouse_button[MOUSE_BUTTONS_MAX] = {0};
-static u32 keyboard_key[KEYBOARD_KEYS_MAX] = {0};
-static u32 keyboard_tab[KEYBOARD_KEYS_MAX] =
+static u32 fsl_mouse_button[FSL_MOUSE_BUTTONS_MAX] = {0};
+static u32 fsl_keyboard_key[FSL_KEYBOARD_KEYS_MAX] = {0};
+static u32 fsl_keyboard_tab[FSL_KEYBOARD_KEYS_MAX] =
 {
     GLFW_KEY_SPACE,
     GLFW_KEY_APOSTROPHE,
@@ -127,47 +127,47 @@ static u32 keyboard_tab[KEYBOARD_KEYS_MAX] =
     GLFW_KEY_RIGHT_ALT,
     GLFW_KEY_RIGHT_SUPER,
     GLFW_KEY_MENU,
-}; /* keyboard_tab */
+}; /* fsl_keyboard_tab */
 
-b8 is_mouse_press(const u32 button)
+b8 fsl_is_mouse_press(const u32 button)
 {
-    return mouse_button[button] == KEY_PRESS;
+    return fsl_mouse_button[button] == FSL_STATE_KEY_PRESS;
 }
 
-b8 is_mouse_hold(const u32 button)
+b8 fsl_is_mouse_hold(const u32 button)
 {
-    return mouse_button[button] == KEY_HOLD;
+    return fsl_mouse_button[button] == FSL_STATE_KEY_HOLD;
 }
 
-b8 is_mouse_release(const u32 button)
+b8 fsl_is_mouse_release(const u32 button)
 {
-    return mouse_button[button] == KEY_RELEASE;
+    return fsl_mouse_button[button] == FSL_STATE_KEY_RELEASE;
 }
 
-b8 is_key_press(const u32 key)
+b8 fsl_is_key_press(const u32 key)
 {
-    return keyboard_key[key] == KEY_PRESS ||
-        keyboard_key[key] == KEY_PRESS_DOUBLE;
+    return fsl_keyboard_key[key] == FSL_STATE_KEY_PRESS ||
+        fsl_keyboard_key[key] == FSL_STATE_KEY_PRESS_DOUBLE;
 }
 
-b8 is_key_press_double(const u32 key)
+b8 fsl_is_key_press_double(const u32 key)
 {
-    return keyboard_key[key] == KEY_PRESS_DOUBLE;
+    return fsl_keyboard_key[key] == FSL_STATE_KEY_PRESS_DOUBLE;
 }
 
-b8 is_key_hold(const u32 key)
+b8 fsl_is_key_hold(const u32 key)
 {
-    return keyboard_key[key] == KEY_HOLD ||
-        keyboard_key[key] == KEY_HOLD_DOUBLE;
+    return fsl_keyboard_key[key] == FSL_STATE_KEY_HOLD ||
+        fsl_keyboard_key[key] == FSL_STATE_KEY_HOLD_DOUBLE;
 }
 
-b8 is_key_release(const u32 key)
+b8 fsl_is_key_release(const u32 key)
 {
-    return keyboard_key[key] == KEY_RELEASE ||
-        keyboard_key[key] == KEY_RELEASE_DOUBLE;
+    return fsl_keyboard_key[key] == FSL_STATE_KEY_RELEASE ||
+        fsl_keyboard_key[key] == FSL_STATE_KEY_RELEASE_DOUBLE;
 }
 
-void update_mouse_movement(void)
+void fsl_update_mouse_movement(void)
 {
     static v2f64 mouse_last = {0};
     glfwGetCursorPos(render->window, &render->mouse_pos.x, &render->mouse_pos.y);
@@ -178,58 +178,58 @@ void update_mouse_movement(void)
     mouse_last = render->mouse_pos;
 }
 
-void update_key_states(void)
+void fsl_update_key_states(void)
 {
     GLFWwindow *_window = render->window;
     u64 _time = render->time;
-    static u64 double_press_time_interval = (u64)(DOUBLE_PRESS_TIME_INTERVAL * SEC2NSEC);
-    static u64 key_press_start_time[KEYBOARD_KEYS_MAX] = {0};
+    static u64 double_press_time_interval = (u64)(FSL_DOUBLE_PRESS_TIME_INTERVAL * FSL_SEC2NSEC);
+    static u64 key_press_start_time[FSL_KEYBOARD_KEYS_MAX] = {0};
     b8 key_press = FALSE, key_release = FALSE,
        mouse_press = FALSE, mouse_release = FALSE;
     u32 i;
 
-    for (i = 0; i < MOUSE_BUTTONS_MAX; ++i)
+    for (i = 0; i < FSL_MOUSE_BUTTONS_MAX; ++i)
     {
         mouse_press = glfwGetMouseButton(_window, i) == GLFW_PRESS;
         mouse_release = glfwGetMouseButton(_window, i) == GLFW_RELEASE;
 
         if (mouse_press &&
-                (mouse_button[i] == KEY_IDLE))
+                (fsl_mouse_button[i] == FSL_STATE_KEY_IDLE))
         {
-            mouse_button[i] = KEY_PRESS;
+            fsl_mouse_button[i] = FSL_STATE_KEY_PRESS;
             continue;
         }
         else if (mouse_release &&
-                (mouse_button[i] == KEY_PRESS || mouse_button[i] == KEY_HOLD))
+                (fsl_mouse_button[i] == FSL_STATE_KEY_PRESS || fsl_mouse_button[i] == FSL_STATE_KEY_HOLD))
         {
-            mouse_button[i] = KEY_RELEASE;
+            fsl_mouse_button[i] = FSL_STATE_KEY_RELEASE;
             continue;
         }
 
-        if (mouse_button[i] == KEY_PRESS)           mouse_button[i] = KEY_HOLD;
-        else if (mouse_button[i] == KEY_RELEASE)    mouse_button[i] = KEY_IDLE;
+        if (fsl_mouse_button[i] == FSL_STATE_KEY_PRESS)         fsl_mouse_button[i] = FSL_STATE_KEY_HOLD;
+        else if (fsl_mouse_button[i] == FSL_STATE_KEY_RELEASE)  fsl_mouse_button[i] = FSL_STATE_KEY_IDLE;
     }
 
-    for (i = 0; i < KEYBOARD_KEYS_MAX; ++i)
+    for (i = 0; i < FSL_KEYBOARD_KEYS_MAX; ++i)
     {
-        key_press = glfwGetKey(_window, keyboard_tab[i]) == GLFW_PRESS;
-        key_release = glfwGetKey(_window, keyboard_tab[i]) == GLFW_RELEASE;
+        key_press = glfwGetKey(_window, fsl_keyboard_tab[i]) == GLFW_PRESS;
+        key_release = glfwGetKey(_window, fsl_keyboard_tab[i]) == GLFW_RELEASE;
 
         if (key_press)
         {
-            if (keyboard_key[i] == KEY_IDLE)
+            if (fsl_keyboard_key[i] == FSL_STATE_KEY_IDLE)
             {
-                keyboard_key[i] = KEY_PRESS;
+                fsl_keyboard_key[i] = FSL_STATE_KEY_PRESS;
                 key_press_start_time[i] = _time;
                 continue;
             }
-            else if (keyboard_key[i] == KEY_LISTEN_DOUBLE)
+            else if (fsl_keyboard_key[i] == FSL_STATE_KEY_LISTEN_DOUBLE)
             {
                 if (_time - key_press_start_time[i] <= double_press_time_interval)
-                    keyboard_key[i] = KEY_PRESS_DOUBLE;
+                    fsl_keyboard_key[i] = FSL_STATE_KEY_PRESS_DOUBLE;
                 else
                 {
-                    keyboard_key[i] = KEY_PRESS;
+                    fsl_keyboard_key[i] = FSL_STATE_KEY_PRESS;
                     key_press_start_time[i] = _time;
                 }
                 continue;
@@ -237,23 +237,23 @@ void update_key_states(void)
         }
         else if (key_release)
         {
-            if (keyboard_key[i] == KEY_PRESS ||
-                    keyboard_key[i] == KEY_HOLD)
+            if (fsl_keyboard_key[i] == FSL_STATE_KEY_PRESS ||
+                    fsl_keyboard_key[i] == FSL_STATE_KEY_HOLD)
             {
-                keyboard_key[i] = KEY_RELEASE;
+                fsl_keyboard_key[i] = FSL_STATE_KEY_RELEASE;
                 continue;
             }
-            else if (keyboard_key[i] == KEY_PRESS_DOUBLE ||
-                    keyboard_key[i] == KEY_HOLD_DOUBLE)
+            else if (fsl_keyboard_key[i] == FSL_STATE_KEY_PRESS_DOUBLE ||
+                    fsl_keyboard_key[i] == FSL_STATE_KEY_HOLD_DOUBLE)
             {
-                keyboard_key[i] = KEY_RELEASE_DOUBLE;
+                fsl_keyboard_key[i] = FSL_STATE_KEY_RELEASE_DOUBLE;
                 continue;
             }
         }
 
-        if (keyboard_key[i] == KEY_PRESS)               keyboard_key[i] = KEY_HOLD;
-        else if (keyboard_key[i] == KEY_RELEASE)        keyboard_key[i] = KEY_LISTEN_DOUBLE;
-        if (keyboard_key[i] == KEY_PRESS_DOUBLE)        keyboard_key[i] = KEY_HOLD_DOUBLE;
-        else if (keyboard_key[i] == KEY_RELEASE_DOUBLE) keyboard_key[i] = KEY_IDLE;
+        if (fsl_keyboard_key[i] == FSL_STATE_KEY_PRESS)                 fsl_keyboard_key[i] = FSL_STATE_KEY_HOLD;
+        else if (fsl_keyboard_key[i] == FSL_STATE_KEY_RELEASE)          fsl_keyboard_key[i] = FSL_STATE_KEY_LISTEN_DOUBLE;
+        if (fsl_keyboard_key[i] == FSL_STATE_KEY_PRESS_DOUBLE)          fsl_keyboard_key[i] = FSL_STATE_KEY_HOLD_DOUBLE;
+        else if (fsl_keyboard_key[i] == FSL_STATE_KEY_RELEASE_DOUBLE)   fsl_keyboard_key[i] = FSL_STATE_KEY_IDLE;
     }
 }

@@ -2,12 +2,12 @@
 #include "h/core.h"
 #include "h/shaders.h"
 
-Mesh engine_mesh_unit = {0};
-Texture engine_texture[ENGINE_TEXTURE_COUNT] = {0};
+fsl_mesh fsl_mesh_unit_quad = {0};
+fsl_texture fsl_texture_buf[FSL_TEXTURE_INDEX_COUNT] = {0};
 
-ShaderProgram engine_shader[ENGINE_SHADER_COUNT] =
+fsl_shader_program fsl_shader_buf[FSL_SHADER_INDEX_COUNT] =
 {
-    [ENGINE_SHADER_UNIT_QUAD] =
+    [FSL_SHADER_INDEX_UNIT_QUAD] =
     {
         .name = "unit_quad",
         .vertex.file_name = "unit_quad.vert",
@@ -16,7 +16,7 @@ ShaderProgram engine_shader[ENGINE_SHADER_COUNT] =
         .fragment.type = GL_FRAGMENT_SHADER,
     },
 
-    [ENGINE_SHADER_TEXT] =
+    [FSL_SHADER_INDEX_TEXT] =
     {
         .name = "text",
         .vertex.file_name = "text.vert",
@@ -27,7 +27,7 @@ ShaderProgram engine_shader[ENGINE_SHADER_COUNT] =
         .fragment.type = GL_FRAGMENT_SHADER,
     },
 
-    [ENGINE_SHADER_UI] =
+    [FSL_SHADER_INDEX_UI] =
     {
         .name = "ui",
         .vertex.file_name = "ui.vert",
@@ -36,7 +36,7 @@ ShaderProgram engine_shader[ENGINE_SHADER_COUNT] =
         .fragment.type = GL_FRAGMENT_SHADER,
     },
 
-    [ENGINE_SHADER_UI_9_SLICE] =
+    [FSL_SHADER_INDEX_UI_9_SLICE] =
     {
         .name = "ui_9_slice",
         .vertex.file_name = "ui_9_slice.vert",

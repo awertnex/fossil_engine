@@ -1,5 +1,5 @@
-#ifndef ENGINE_CORE_H
-#define ENGINE_CORE_H
+#ifndef FSL_CORE_H
+#define FSL_CORE_H
 
 #include "common.h"
 #include "limits.h"
@@ -13,7 +13,7 @@
 #include <engine/include/stb_image.h>
 #include <engine/include/stb_image_write.h>
 
-typedef struct Render
+typedef struct fsl_render
 {
     GLFWwindow *window;
     char title[128];
@@ -21,7 +21,7 @@ typedef struct Render
 
     /*! @brief conversion from world-space to screen-space.
      *
-     *  @remark read-only, updated internally in @ref engine_update().
+     *  @remark read-only, updated internally in @ref fsl_running().
      */
     v2f32 ndc_scale;
 
@@ -34,9 +34,9 @@ typedef struct Render
     /*! @brief for reading screen pixels back to RAM (e.g. screenshots).
      */
     u8 *screen_buf;
-} Render;
+} fsl_render;
 
-typedef struct Mesh
+typedef struct fsl_mesh
 {
     GLuint vao;
     GLuint vbo;
@@ -45,16 +45,16 @@ typedef struct Mesh
     GLuint ebo_len;
     GLfloat *vbo_data;
     GLfloat *ebo_data;
-} Mesh;
+} fsl_mesh;
 
-typedef struct FBO
+typedef struct fsl_fbo
 {
     GLuint fbo;
     GLuint color_buf;
     GLuint rbo;
-} FBO;
+} fsl_fbo;
 
-typedef struct Texture
+typedef struct fsl_texture
 {
     v2i32 size;
     u64 data_len;
@@ -74,9 +74,9 @@ typedef struct Texture
 
     b8 grayscale;
     u8 *buf;
-} Texture;
+} fsl_texture;
 
-typedef struct Camera
+typedef struct fsl_camera
 {
     v3f64 pos;
     f64 roll, pitch, yaw;
@@ -88,9 +88,9 @@ typedef struct Camera
     f32 far;
     f32 near;
     f32 zoom;
-} Camera;
+} fsl_camera;
 
-typedef struct Projection
+typedef struct fsl_projection
 {
     m4f32 target;
     m4f32 translation;
@@ -99,7 +99,7 @@ typedef struct Projection
     m4f32 view;
     m4f32 projection;
     m4f32 perspective;
-} Projection;
+} fsl_projection;
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -107,21 +107,21 @@ typedef struct Projection
  *
  *  @remark declared internally.
  */
-FSLAPI extern Render *render;
+FSLAPI extern fsl_render *render;
 
 /*! @brief default textures.
  *
  *  @remark declared internally.
  */
-FSLAPI extern Texture engine_texture[ENGINE_TEXTURE_COUNT];
+FSLAPI extern fsl_texture fsl_texture_buf[FSL_TEXTURE_INDEX_COUNT];
 
-FSLAPI extern Mesh engine_mesh_unit;
+FSLAPI extern fsl_mesh fsl_mesh_unit_quad;
 
 /*! @brief initialize engine stuff.
  *
  *  - set 'GLFW' error callback.
- *  - call @ref change_dir() to change working directory to the running process'.
- *  - call @ref logger_init(), @ref glfw_init(), @ref window_init() and @ref glad_init().
+ *  - call @ref fsl_change_dir() to change working directory to the running process'.
+ *  - call @ref fsl_logger_init(), @ref fsl_glfw_init(), @ref fsl_window_init() and @ref fsl_glad_init().
  *  - initialize default shaders if requested.
  *
  *  @param argc number of arguments in `argv` if `argv` provided.
@@ -130,19 +130,19 @@ FSLAPI extern Mesh engine_mesh_unit;
  *  @param _log_dir directory to write log files into for the lifetime of the process,
  *  if `NULL`, logs won't be written to disk.
  *
- *  @param _render `Render` to use for engine,
+ *  @param _render `fsl_render` to use for engine,
  *  if `NULL`, @ref render is defined as default, declared and used internally.
  *
- *  @param flags enum: @ref EngineFlag.
+ *  @param flags enum: @ref fsl_flag.
  *
  *  @param title = window/application title, if `NULL`, default title is used
- *  (@ref window_init() parameter).
+ *  (@ref fsl_window_init() parameter).
  *
- *  @param size_x window width, if 0, @ref RENDER_WIDTH_DEFAULT is used
- *  (@ref window_init() parameter).
+ *  @param size_x window width, if 0, @ref FSL_RENDER_WIDTH_DEFAULT is used
+ *  (@ref fsl_window_init() parameter).
  *
- *  @param size_y window height, if 0, @ref RENDER_HEIGHT_DEFAULT is used
- *  (@ref window_init() parameter).
+ *  @param size_y window height, if 0, @ref FSL_RENDER_HEIGHT_DEFAULT is used
+ *  (@ref fsl_window_init() parameter).
  *
  *  @remark release_build can be overridden with these args in `argv`:
  *      logfatal:   only output fatal logs (least verbose).
@@ -152,134 +152,135 @@ FSLAPI extern Mesh engine_mesh_unit;
  *      logdebug:   only output <= debug logs.
  *      logtrace:   only output <= trace logs (most verbose).
  *
- *  @remark on error, 'engine_close()' must be called to free allocated resources.
+ *  @remark on error, @ref fsl_close() must be called to free allocated resources.
  *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
-        i32 size_x, i32 size_y, Render *_render, u64 flags);
+FSLAPI u32 fsl_init(int argc, char **argv, const str *_log_dir, const str *title,
+        i32 size_x, i32 size_y, fsl_render *_render, u64 flags);
 
 /*! @brief engine main loop check.
  *
- *  - update @ref Render.time and @ref Render.time_delta of the currently bound `Render`.
+ *  - update @ref fsl_render.time and @ref fsl_render.time_delta of the currently bound `fsl_render`.
  *
  *  @return `TRUE` unless @ref glfwWindowShouldClose() returns `FALSE` or engine inactive.
  */
-FSLAPI b8 engine_running(void);
+FSLAPI b8 fsl_running(void);
 
 /*! @brief update render settings (like render size).
  *
- *  - update @ref Render.ndc_scale of the currently bound `Render`.
+ *  - update @ref fsl_render.ndc_scale of the currently bound `fsl_render`.
  *
  *  @remark usually passed into @ref glfwSetFramebufferSizeCallback().
  *
- *  @return non-zero on failure and @ref engine_err is set accordingly.
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 engine_update_render_settings(i32 size_x, i32 size_y);
+FSLAPI u32 fsl_update_render_settings(i32 size_x, i32 size_y);
 
 /*! @brief free engine resources.
  *
  *  free logger, destroy window (if not `NULL`) and terminate 'GLFW'.
  */
-FSLAPI void engine_close(void);
+FSLAPI void fsl_close(void);
 
 /*! @brief get engine-specific string no longer than @ref NAME_MAX bytes.
  *
  *  @param dst pointer to buffer to store string.
  *  
- *  @return non-zero on failure and @ref engine_err is set accordingly.
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_get_string(str *dst, enum FossilStringIndex type);
+FSLAPI u32 fsl_get_string(str *dst, enum fsl_string_index type);
 
 /*! @brief initialize 'GLFW'.
  *
  *  @param multisample = turn on multisampling.
  *
- *  @remark called automatically from @ref engine_init().
+ *  @remark called automatically from @ref fsl_init().
  *
- *  @return non-zero on failure and @ref engine_err is set accordingly.
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 glfw_init(b8 multisample);
+FSLAPI u32 fsl_glfw_init(b8 multisample);
 
-/*! @brief initialize a new 'GLFW' window for the currently bound `Render`.
+/*! @brief initialize a new 'GLFW' window for the currently bound `fsl_render`.
  *
  *  @param title = window/application title, if `NULL`, default title is used.
- *  @param size_x window width, if 0, @ref RENDER_WIDTH_DEFAULT is used.
- *  @param size_y window height, if 0, @ref RENDER_HEIGHT_DEFAULT is used.
+ *  @param size_x window width, if 0, @ref FSL_RENDER_WIDTH_DEFAULT is used.
+ *  @param size_y window height, if 0, @ref FSL_RENDER_HEIGHT_DEFAULT is used.
  *
- *  @remark called automatically from @ref engine_init().
+ *  @remark called automatically from @ref fsl_init().
  *
- *  @return non-zero on failure and @ref engine_err is set accordingly.
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 window_init(const str *title, i32 size_x, i32 size_y);
+FSLAPI u32 fsl_window_init(const str *title, i32 size_x, i32 size_y);
 
 /*! @brief initialize 'OpenGL' function loader 'GLAD'.
  *
- *  @remark called automatically from @ref engine_init().
+ *  @remark called automatically from @ref fsl_init().
  *
- *  @return non-zero on failure and @ref engine_err is set accordingly.
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 glad_init(void);
+FSLAPI u32 fsl_glad_init(void);
 
-/*! @brief switch engine's current bound `Render` to `_render`.
+/*! @brief switch engine's current bound `fsl_render` to `_render`.
  *
  *  @remark only if you know what you're doing.
  */
-FSLAPI u32 change_render(Render *_render);
+FSLAPI u32 fsl_change_render(fsl_render *_render);
 
-/*! @remark send screenshot request to then be processed by @ref process_screenshot_request().
+/*! @remark send screenshot request to then be processed by @ref fsl_process_screenshot_request().
  *
- *  can be called from anywhere, then @ref process_screenshot_request() can be called
+ *  can be called from anywhere, then @ref fsl_process_screenshot_request() can be called
  *  to take the screenshot at the end of the render loop.
  */
-FSLAPI void request_screenshot(void);
+FSLAPI void fsl_request_screenshot(void);
 
-/*! @remark take screenshot requested by @ref request_screenshot() and save into dir at `dir_screenshots`.
+/*! @remark take screenshot requested by @ref fsl_request_screenshot() and save into dir at `dir_screenshots`.
  *  
+ *  @param dir_screenshots directory to save screenshot to.
  *  @param special_text string appended to file name before extension.
  *
- *  @remark if directory not found, screenshot is still saved at @def Render.screen_buf
- *  of the currently bound `Render`.
+ *  @remark if directory not found, screenshot is still saved at @ref fsl_render.screen_buf
+ *  of the currently bound `fsl_render`.
  *
  *  @remark the internals for taking a screenshot are separated into their own function
  *  internally so to reduce function call overhead since this function is meant to be called
  *  in a render loop and the code for taking a screenshot allocates a sizable block of memory when called.
  *
- *  @return non-zero on failure and 'engine_err' is set accordingly.
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 process_screenshot_request(const str *dir_screenshots, const str *special_text);
+FSLAPI u32 fsl_process_screenshot_request(const str *dir_screenshots, const str *special_text);
 
 /*! @brief set a `vec3` attribute array for a `vao`.
  */
-FSLAPI void attrib_vec3(void);
+FSLAPI void fsl_attrib_vec3(void);
 
 /*! @brief set a `vec3` and a `vec2` attribute arrays for a `vao`.
  */
-FSLAPI void attrib_vec3_vec2(void);
+FSLAPI void fsl_attrib_vec3_vec2(void);
 
 /*! @brief set a `vec3` and a `vec3` attribute arrays for a `vao`.
  */
-FSLAPI void attrib_vec3_vec3(void);
+FSLAPI void fsl_attrib_vec3_vec3(void);
 
 /*! @brief set a `vec3` and a `vec4` attribute arrays for a `vao`.
  */
-FSLAPI void attrib_vec3_vec4(void);
+FSLAPI void fsl_attrib_vec3_vec4(void);
 
-/*! @return non-zero on failure and @ref engine_err is set accordingly.
+/*! @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fbo_init(FBO *fbo, Mesh *mesh_fbo, b8 multisample, u32 samples);
+FSLAPI u32 fsl_fbo_init(fsl_fbo *fbo, fsl_mesh *mesh_fbo, b8 multisample, u32 samples);
 
-/*! @return non-zero on failure and @ref engine_err is set accordingly.
+/*! @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fbo_realloc(FBO *fbo, b8 multisample, u32 samples);
+FSLAPI u32 fsl_fbo_realloc(fsl_fbo *fbo, b8 multisample, u32 samples);
 
-FSLAPI void fbo_free(FBO *fbo);
+FSLAPI void fsl_fbo_free(fsl_fbo *fbo);
 
 /*! @brief load image data from disk into `texture->buf` and set texture info.
  *
- *  @return non-zero on failure and @ref engine_err is set accordingly.
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 texture_init(Texture *texture, v2i32 size, const GLint format_internal, const GLint format,
+FSLAPI u32 fsl_texture_init(fsl_texture *texture, v2i32 size, const GLint format_internal, const GLint format,
         GLint filter, int channels, b8 grayscale, const str *file_name);
 
 /*! @brief generate texture for `OpenGL` from image loaded by 'texture_init()'.
@@ -287,9 +288,9 @@ FSLAPI u32 texture_init(Texture *texture, v2i32 size, const GLint format_interna
  *  @param bindless use `OpenGL` extension `GL_ARB_bindless_texture`
  *  (handle is in `texture->handle`).
  *
- *  @return non-zero on failure and @ref engine_err is set accordingly.
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 texture_generate(Texture *texture, b8 bindless);
+FSLAPI u32 fsl_texture_generate(fsl_texture *texture, b8 bindless);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -298,27 +299,27 @@ FSLAPI u32 texture_generate(Texture *texture, b8 bindless);
  *  @param id where to store texture ID.
  *  @param buf texture data to upload to `gpu` memory.
  *
- *  @remark called automatically from @ref texture_generate() if texture data is
- *  already loaded into a texture by calling @ref texture_init().
+ *  @remark called automatically from @ref fsl_texture_generate() if texture data is
+ *  already loaded into a texture by calling @ref fsl_texture_init().
  *
- *  @return non-zero on failure and @ref engine_err is set accordingly.
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 _texture_generate(GLuint *id, const GLint format_internal,  const GLint format,
+u32 _fsl_texture_generate(GLuint *id, const GLint format_internal,  const GLint format,
         GLint filter, u32 width, u32 height, void *buf, b8 grayscale);
 
-FSLAPI void texture_free(Texture *texture);
+FSLAPI void fsl_texture_free(fsl_texture *texture);
 
 /*! @param attrib pointer to a function to set attribute arrays for `mesh->vao`
  *  (e.g. &attrib_vec3, set a single vec3 attribute array).
  *
  *  @param usage `GL_<x>_DRAW`.
  *
- *  @return non-zero on failure and @ref engine_err is set accordingly.
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 mesh_generate(Mesh *mesh, void (*attrib)(), GLenum usage,
+FSLAPI u32 fsl_mesh_generate(fsl_mesh *mesh, void (*attrib)(), GLenum usage,
         GLuint vbo_len, GLuint ebo_len, GLfloat *vbo_data, GLuint *ebo_data);
 
-FSLAPI void mesh_free(Mesh *mesh);
+FSLAPI void fsl_mesh_free(fsl_mesh *mesh);
 
 /*! @brief update `sine` and `cosine` of camera roll, pitch and yaw.
  *
@@ -329,7 +330,7 @@ FSLAPI void mesh_free(Mesh *mesh);
  *      pitch: [-90,  90].
  *      yaw:   [  0, 360].
  */
-FSLAPI void update_camera_movement(Camera *camera, b8 roll);
+FSLAPI void fsl_update_camera_movement(fsl_camera *camera, b8 roll);
 
 /*! @brief make perspective projection matrices from camera parameters.
  *
@@ -337,12 +338,12 @@ FSLAPI void update_camera_movement(Camera *camera, b8 roll);
  *
  *  @param roll enable/disable roll rotation.
  */
-FSLAPI void update_projection_perspective(Camera camera, Projection *projection, b8 roll);
+FSLAPI void fsl_update_projection_perspective(fsl_camera camera, fsl_projection *projection, b8 roll);
 
 /*! @brief get camera look-at angles from camera position and target position.
  *  
  *  assign vertical angle to `pitch` and horizontal angle to `yaw`.
  */
-FSLAPI void get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f64 *yaw);
+FSLAPI void fsl_get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f64 *yaw);
 
-#endif /* ENGINE_CORE_H */
+#endif /* FSL_CORE_H */

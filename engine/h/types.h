@@ -1,5 +1,5 @@
-#ifndef ENGINE_TYPES_H
-#define ENGINE_TYPES_H
+#ifndef FSL_TYPES_H
+#define FSL_TYPES_H
 
 #include <stdint.h>
 
@@ -26,7 +26,7 @@ typedef char        str;
 typedef uint8_t     b8;
 typedef uint32_t    b32;
 
-typedef struct Buf
+typedef struct fsl_buf
 {
     b8 loaded;
     void **i;       /* members of `buf` */
@@ -34,9 +34,9 @@ typedef struct Buf
     u64 memb;       /* number of `i` members */
     u64 size;       /* size of each member in bytes */
     u64 cursor;     /* for iteration, optional */
-} Buf;
+} fsl_buf;
 
-typedef struct KeyValue
+typedef struct fsl_key_value
 {
     b8 loaded;
     void **key;     /* members of `buf_key` */
@@ -46,7 +46,7 @@ typedef struct KeyValue
     u64 memb;       /* numbers of members */
     u64 size_key;   /* size of each key in bytes */
     u64 size_val;   /* size of each val in bytes */
-} KeyValue;
+} fsl_key_value;
 
 /* ---- vector2u ------------------------------------------------------------ */
 
@@ -227,4 +227,4 @@ typedef struct m4f32
         a41, a42, a43, a44;
 } m4f32;
 
-#endif /* ENGINE_TYPES_H */
+#endif /* FSL_TYPES_H */

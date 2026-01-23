@@ -1,27 +1,16 @@
-#ifndef ENGINE_BUILD_H
-#define ENGINE_BUILD_H
+#ifndef FSL_BUILD_H
+#define FSL_BUILD_H
 
 #include "../../deps/buildtool/buildtool.h"
 
-#ifdef OMIT_LFOSSIL
+#ifdef FSL_OMIT_LFOSSIL
 #   define LFOSSIL ""
 #else
 #   define LFOSSIL "-lfossil"
-#endif /* FOSSIL_ENGINE */
+#endif /* FSL_OMIT_LFOSSIL */
 
-#if PLATFORM_LINUX
-    static const str str_engine_libs[][CMD_SIZE] =
-    {
-        "-Lengine/lib/"PLATFORM,
-        "-lm",
-        "-lglfw",
-        "", /* empty slots for alignment across different platforms */
-        "",
-        "",
-        LFOSSIL,
-    };
-#elif PLATFORM_WIN
-    static const str str_engine_libs[][CMD_SIZE] =
+#if FSL_PLATFORM_WIN
+    static const str fsl_str_libs[][CMD_SIZE] =
     {
         "-Lengine/lib/"PLATFORM,
         "-lgdi32",
@@ -31,7 +20,18 @@
         "-lglfw3",
         LFOSSIL,
     };
-#endif /* PLATFORM */
+#else
+    static const str fsl_str_libs[][CMD_SIZE] =
+    {
+        "-Lengine/lib/"PLATFORM,
+        "-lm",
+        "-lglfw",
+        "", /* empty slots for alignment across different platforms */
+        "",
+        "",
+        LFOSSIL,
+    };
+#endif /* FSL_PLATFORM */
 
 /* ---- section: signatures ------------------------------------------------- */
 
@@ -39,19 +39,19 @@
  *
  *  @param cmd cmd to push to, if `NULL`, @ref _cmd is used.
  */
-static void engine_link_libs(_buf *cmd);
+static void fsl_link_libs(_buf *cmd);
 
 /* ---- section: implementation --------------------------------------------- */
 
-void engine_link_libs(_buf *cmd)
+void fsl_link_libs(_buf *cmd)
 {
     u32 i = 0;
     _buf *_cmdp = cmd;
     if (!cmd)
         _cmdp = &_cmd;
 
-    for (; i < arr_len(str_engine_libs); ++i)
-        cmd_push(_cmdp, str_engine_libs[i]);
+    for (i = 0; i < arr_len(fsl_str_libs); ++i)
+        cmd_push(_cmdp, fsl_str_libs[i]);
 }
 
-#endif /* ENGINE_BUILD_H */
+#endif /* FSL_BUILD_H */

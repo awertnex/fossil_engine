@@ -1,71 +1,72 @@
 #include "h/common.h"
 
-#if PLATFORM_LINUX
+#if FSL_PLATFORM_WIN
+/* TODO: make time functions for windows */
+#else
+#   include <time.h>
+#   include <sys/time.h>
+#   include <unistd.h>
 
-#include <time.h>
-#include <sys/time.h>
-#include <unistd.h>
+#   include "h/limits.h"
+#   include "h/time.h"
 
-#include "h/limits.h"
-#include "h/time.h"
-
-u64 get_time_raw_nsec(void)
+u64 fsl_get_time_raw_nsec(void)
 {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
-    return (u64)(ts.tv_sec * SEC2NSEC + ts.tv_nsec);
+    return (u64)(ts.tv_sec * FSL_SEC2NSEC + ts.tv_nsec);
 }
 
-u64 get_time_raw_usec(void)
+u64 fsl_get_time_raw_usec(void)
 {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
-    return (u64)(ts.tv_sec * SEC2USEC + ts.tv_nsec * MSEC2SEC);
+    return (u64)(ts.tv_sec * FSL_SEC2USEC + ts.tv_nsec * FSL_MSEC2SEC);
 }
 
-u64 get_time_nsec(void)
+u64 fsl_get_time_nsec(void)
 {
     static u64 _time = 0;
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    if (!_time) _time = (u64)(ts.tv_sec * SEC2NSEC + ts.tv_nsec);
-    return (u64)(ts.tv_sec * SEC2NSEC + ts.tv_nsec) - _time;
+    if (!_time) _time = (u64)(ts.tv_sec * FSL_SEC2NSEC + ts.tv_nsec);
+    return (u64)(ts.tv_sec * FSL_SEC2NSEC + ts.tv_nsec) - _time;
 }
 
-f64 get_time_nsecf(void)
+f64 fsl_get_time_nsecf(void)
 {
     static u64 _time = 0;
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     if (!_time) _time = ts.tv_sec;
-    return (f64)(ts.tv_sec - _time) + (f64)ts.tv_nsec * NSEC2SEC;
+    return (f64)(ts.tv_sec - _time) + (f64)ts.tv_nsec * FSL_NSEC2SEC;
 }
 
-u64 get_time_delta_nsec(void)
+u64 fsl_get_time_delta_nsec(void)
 {
     static u64 _curr = 0;
     static u64 _last = 0;
     static u64 _delta = 0;
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    _curr = ts.tv_sec * SEC2NSEC + ts.tv_nsec;
+    _curr = ts.tv_sec * FSL_SEC2NSEC + ts.tv_nsec;
     if (!_last) _last = _curr;
     _delta = _curr - _last;
     _last = _curr;
     return _delta;
 }
 
-void get_time_str(str *dst, const str *format)
+void fsl_get_time_str(str *dst, const str *format)
 {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     struct tm *_tm = localtime(&ts.tv_sec);
-    strftime(dst, TIME_STRING_MAX, format, _tm);
+    strftime(dst, FSL_TIME_STRING_MAX, format, _tm);
 }
 
-b8 get_timer(f64 *time_start, f32 interval)
+b8 fsl_get_timer(f64 *time_start, f32 interval)
 {
-    f64 _cur = get_time_nsecf();
+    f64 _cur = fsl_get_time_nsecf();
     if (!*time_start || _cur - *time_start >= interval)
     {
         *time_start = _cur;
@@ -74,62 +75,10 @@ b8 get_timer(f64 *time_start, f32 interval)
     return FALSE;
 }
 
-void sleep_nsec(u64 nsec)
+void fsl_sleep_nsec(u64 nsec)
 {
-    u64 sec = nsec * NSEC2SEC;
-    struct timespec ts = {.tv_sec = sec, .tv_nsec = nsec - sec * SEC2NSEC};
+    u64 sec = nsec * FSL_NSEC2SEC;
+    struct timespec ts = {.tv_sec = sec, .tv_nsec = nsec - sec * FSL_SEC2NSEC};
     clock_nanosleep(CLOCK_MONOTONIC, 0, &ts, NULL);
 }
-
-#elif PLATFORM_WIN /* TODO: make time functions for windows */
-
-u64 get_time_logic(void)
-{
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (u64)(ts.tv_sec + ts.tv_nsec);
-}
-
-f64 get_time_f64(void)
-{
-    static u64 _time = 0;
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    if (!_time) _time = ts.tv_sec;
-    return (f64)(ts.tv_sec - _time) + (f64)ts.tv_nsec * NSEC2SEC;
-}
-
-f64 get_time_delta_f64(void)
-{
-    static u64 _curr = 0;
-    static u64 _last = 0;
-    static u64 _delta = 0;
-    f64 delta = 0.0;
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    _curr = ts.tv_sec * SEC2NSEC + ts.tv_nsec;
-    _delta = _curr - _last;
-    _last = _curr;
-    delta = (f64)_delta * NSEC2SEC;
-    return delta > 0.1 ? 0.1 : delta;
-}
-
-b8 get_timer(f64 *time_start, f32 interval)
-{
-    f64 time_current = get_time_f64();
-    if (time_current - *time_start >= interval)
-    {
-        *time_start = time_current;
-        return TRUE;
-    }
-    return FALSE;
-}
-
-void sleep_ns(u64 ns)
-{
-    u64 sec = nsec * NSEC2SEC;
-    struct timespec ts = {.tv_sec = sec, .tv_nsec = nsec - sec * SEC2NSEC};
-    clock_nanosleep(CLOCK_MONOTONIC, 0, &ts, NULL);
-}
-
-#endif /* PLATFORM */
+#endif /* FSL_PLATFORM */

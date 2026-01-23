@@ -1,10 +1,9 @@
-#ifndef ENGINE_LOGGER_H
-#define ENGINE_LOGGER_H
+#ifndef FSL_LOGGER_H
+#define FSL_LOGGER_H
 
 /*  Notes:
- *      log macros that begin with an underscore (`_`) are reserved for the engine.
- *      log macros that end in `EX` (extended) are internal-use, specific to functions that pass
- *      `file` and `line` explicitly (e.g. _mem_alloc()).
+ *      log macros that begin with an underscore (`_`) are used by the engine.
+ *      log macros that end in `EX` (extended) are used to pass `file` and `line` manually.
  */
 
 #include "common.h"
@@ -13,147 +12,122 @@
 #include "memory.h"
 #include "types.h"
 
-enum /* LoggerFlag */
+enum /* fsl_logger_flag */
 {
-    FLAG_LOGGER_GUI_OPEN = 0x0001,
+    FSL_FLAG_LOGGER_GUI_OPEN = 0x0001,
 }; /* LoggerFlag */
 
-enum /* LogMessageFlag */
+enum /* fsl_log_message_flag */
 {
-    FLAG_LOG_TIMESTAMP =    0x0001,
-    FLAG_LOG_DATE =         0x0002,
-    FLAG_LOG_TIME =         0x0004,
-    FLAG_LOG_DATE_TIME =    0x0006,
-    FLAG_LOG_FULL_TIME =    0x0007,
-    FLAG_LOG_TAG =          0x0008,
-    FLAG_LOG_TERM_COLOR =   0x0010,
-}; /* LogMessageFlag */
+    FSL_FLAG_LOG_TIMESTAMP =    0x0001,
+    FSL_FLAG_LOG_DATE =         0x0002,
+    FSL_FLAG_LOG_TIME =         0x0004,
+    FSL_FLAG_LOG_DATE_TIME =    0x0006,
+    FSL_FLAG_LOG_FULL_TIME =    0x0007,
+    FSL_FLAG_LOG_TAG =          0x0008,
+    FSL_FLAG_LOG_TERM_COLOR =   0x0010,
+}; /* fsl_log_message_flag */
 
-enum /* LogLevel */
+enum /* fsl_log_level */
 {
-    LOGLEVEL_FATAL,
-    LOGLEVEL_ERROR,
-    LOGLEVEL_WARNING,
-    LOGLEVEL_INFO,
-    LOGLEVEL_DEBUG,
-    LOGLEVEL_TRACE,
-    LOGLEVEL_COUNT,
-}; /* LogLevel */
+    FSL_LOG_LEVEL_FATAL,
+    FSL_LOG_LEVEL_ERROR,
+    FSL_LOG_LEVEL_WARNING,
+    FSL_LOG_LEVEL_INFO,
+    FSL_LOG_LEVEL_DEBUG,
+    FSL_LOG_LEVEL_TRACE,
+    FSL_LOG_LEVEL_COUNT,
+}; /* fsl_log_level */
 
 /* ---- external-use macros ------------------------------------------------- */
 
 #define LOGFATAL(verbose, cmd, err, format, ...) \
 { \
-    engine_err = (u32)err; \
-    _log_output(verbose, cmd, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_FATAL, err, format, ##__VA_ARGS__); \
+    fsl_err = (u32)err; \
+    _fsl_log_output(verbose, cmd, fsl_log_dir, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_FATAL, err, format, ##__VA_ARGS__); \
 }
 
 #define LOGERROR(verbose, cmd, err, format, ...) \
 { \
-    engine_err = (u32)err; \
-    _log_output(verbose, cmd, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_ERROR, err, format, ##__VA_ARGS__); \
+    fsl_err = (u32)err; \
+    _fsl_log_output(verbose, cmd, fsl_log_dir, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_ERROR, err, format, ##__VA_ARGS__); \
 }
 
 #define LOGWARNING(verbose, cmd, err, format, ...) \
 { \
-    engine_err = (u32)err; \
-    _log_output(verbose, cmd, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_WARNING, err, format, ##__VA_ARGS__); \
+    fsl_err = (u32)err; \
+    _fsl_log_output(verbose, cmd, fsl_log_dir, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_WARNING, err, format, ##__VA_ARGS__); \
 }
 
 #define LOGINFO(verbose, cmd, format, ...) \
-    _log_output(verbose, cmd, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_INFO, ERR_SUCCESS, format, ##__VA_ARGS__)
-
-#define LOGFATALEX(verbose, cmd, file, line, err, format, ...); \
-{ \
-    engine_err = (u32)err; \
-    _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_FATAL, err, format, ##__VA_ARGS__); \
-}
-
-#define LOGERROREX(verbose, cmd, file, line, err, format, ...); \
-{ \
-    engine_err = (u32)err; \
-    _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_ERROR, err, format, ##__VA_ARGS__); \
-}
-
-#define LOGWARNINGEX(verbose, cmd, file, line, err, format, ...) \
-{ \
-    engine_err = (u32)err; \
-    _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_WARNING, err, format, ##__VA_ARGS__); \
-}
+    _fsl_log_output(verbose, cmd, fsl_log_dir, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_INFO, FSL_ERR_SUCCESS, format, ##__VA_ARGS__)
 
 #define LOGINFOEX(verbose, cmd, file, line, format, ...) \
-    _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_INFO, ERR_SUCCESS, format, ##__VA_ARGS__)
+    _fsl_log_output(verbose, cmd, fsl_log_dir, file, line, FSL_LOG_LEVEL_INFO, FSL_ERR_SUCCESS, format, ##__VA_ARGS__)
 
 #ifdef FOSSIL_RELEASE_BUILD
 #   define LOGDEBUG(verbose, cmd, format, ...)
 #   define LOGTRACE(verbose, cmd, format, ...)
-#   define LOGDEBUGEX(verbose, cmd, file, line, format, ...)
-#   define LOGTRACEEX(verbose, cmd, file, line, format, ...)
 #else
 #   define LOGDEBUG(verbose, cmd, format, ...) \
-    _log_output(verbose, cmd, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_DEBUG, ERR_SUCCESS, format, ##__VA_ARGS__)
+    _fsl_log_output(verbose, cmd, fsl_log_dir, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_DEBUG, FSL_ERR_SUCCESS, format, ##__VA_ARGS__)
 
 #   define LOGTRACE(verbose, cmd, format, ...) \
-    _log_output(verbose, cmd, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_TRACE, ERR_SUCCESS, format, ##__VA_ARGS__)
+    _fsl_log_output(verbose, cmd, fsl_log_dir, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_TRACE, FSL_ERR_SUCCESS, format, ##__VA_ARGS__)
 
-#   define LOGDEBUGEX(verbose, cmd, file, line, format, ...) \
-    _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_DEBUG, ERR_SUCCESS, format, ##__VA_ARGS__)
-
-#   define LOGTRACEEX(verbose, cmd, file, line, format, ...) \
-    _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_TRACE, ERR_SUCCESS, format, ##__VA_ARGS__)
 #endif /* FOSSIL_RELEASE_BUILD */
 
 #define LOG_MESH_GENERATE(err, mesh_name) \
 { \
-    if (err == ERR_SUCCESS) \
+    if (err == FSL_ERR_SUCCESS) \
     LOGDEBUG(FALSE, FALSE, "Mesh '%s' Generated\n", mesh_name); \
-    else if (err == ERR_MESH_GENERATION_FAIL) \
-    LOGERROR(TRUE, FALSE, ERR_MESH_GENERATION_FAIL, "Failed to Generate Mesh '%s'\n", mesh_name); \
+    else if (err == FSL_ERR_MESH_GENERATION_FAIL) \
+    LOGERROR(TRUE, FALSE, FSL_ERR_MESH_GENERATION_FAIL, "Failed to Generate Mesh '%s'\n", mesh_name); \
 }
 
 /* ---- internal-use macros ------------------------------------------------- */
 
 #define _LOGFATAL(verbose, err, format, ...) \
 { \
-    engine_err = (u32)err; \
-    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_FATAL, err, format, ##__VA_ARGS__); \
+    fsl_err = (u32)err; \
+    _fsl_log_output(verbose, FALSE, FSL_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_FATAL, err, format, ##__VA_ARGS__); \
 }
 
 #define _LOGERROR(verbose, err, format, ...) \
 { \
-    engine_err = (u32)err; \
-    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_ERROR, err, format, ##__VA_ARGS__); \
+    fsl_err = (u32)err; \
+    _fsl_log_output(verbose, FALSE, FSL_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_ERROR, err, format, ##__VA_ARGS__); \
 }
 
 #define _LOGWARNING(verbose, err, format, ...) \
 { \
-    engine_err = (u32)err; \
-    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_WARNING, err, format, ##__VA_ARGS__); \
+    fsl_err = (u32)err; \
+    _fsl_log_output(verbose, FALSE, FSL_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_WARNING, err, format, ##__VA_ARGS__); \
 }
 
 #define _LOGINFO(verbose, format, ...) \
-    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_INFO, ERR_SUCCESS, format, ##__VA_ARGS__)
+    _fsl_log_output(verbose, FALSE, FSL_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_INFO, FSL_ERR_SUCCESS, format, ##__VA_ARGS__)
 
 #define _LOGFATALEX(verbose, file, line, err, format, ...); \
 { \
-    engine_err = (u32)err; \
-    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_FATAL, err, format, ##__VA_ARGS__); \
+    fsl_err = (u32)err; \
+    _fsl_log_output(verbose, FALSE, FSL_DIR_NAME_LOGS, file, line, FSL_LOG_LEVEL_FATAL, err, format, ##__VA_ARGS__); \
 }
 
 #define _LOGERROREX(verbose, file, line, err, format, ...); \
 { \
-    engine_err = (u32)err; \
-    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_ERROR, err, format, ##__VA_ARGS__); \
+    fsl_err = (u32)err; \
+    _fsl_log_output(verbose, FALSE, FSL_DIR_NAME_LOGS, file, line, FSL_LOG_LEVEL_ERROR, err, format, ##__VA_ARGS__); \
 }
 
 #define _LOGWARNINGEX(verbose, file, line, err, format, ...) \
 { \
-    engine_err = (u32)err; \
-    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_WARNING, err, format, ##__VA_ARGS__); \
+    fsl_err = (u32)err; \
+    _fsl_log_output(verbose, FALSE, FSL_DIR_NAME_LOGS, file, line, FSL_LOG_LEVEL_WARNING, err, format, ##__VA_ARGS__); \
 }
 
 #define _LOGINFOEX(verbose, file, line, format, ...) \
-    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_INFO, ERR_SUCCESS, format, ##__VA_ARGS__)
+    _fsl_log_output(verbose, FALSE, FSL_DIR_NAME_LOGS, file, line, FSL_LOG_LEVEL_INFO, FSL_ERR_SUCCESS, format, ##__VA_ARGS__)
 
 #ifdef FOSSIL_RELEASE_BUILD
 #   define _LOGDEBUG(verbose, format, ...)
@@ -162,53 +136,53 @@ enum /* LogLevel */
 #   define _LOGTRACEEX(verbose, file, line, format, ...)
 #else
 #   define _LOGDEBUG(verbose, format, ...) \
-    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_DEBUG, ERR_SUCCESS, format, ##__VA_ARGS__)
+    _fsl_log_output(verbose, FALSE, FSL_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_DEBUG, FSL_ERR_SUCCESS, format, ##__VA_ARGS__)
 
 #   define _LOGTRACE(verbose, format, ...) \
-    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_TRACE, ERR_SUCCESS, format, ##__VA_ARGS__)
+    _fsl_log_output(verbose, FALSE, FSL_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_TRACE, FSL_ERR_SUCCESS, format, ##__VA_ARGS__)
 
 #   define _LOGDEBUGEX(verbose, file, line, format, ...) \
-    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_DEBUG, ERR_SUCCESS, format, ##__VA_ARGS__)
+    _fsl_log_output(verbose, FALSE, FSL_DIR_NAME_LOGS, file, line, FSL_LOG_LEVEL_DEBUG, FSL_ERR_SUCCESS, format, ##__VA_ARGS__)
 
 #   define _LOGTRACEEX(verbose, file, line, format, ...) \
-    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_TRACE, ERR_SUCCESS, format, ##__VA_ARGS__)
+    _fsl_log_output(verbose, FALSE, FSL_DIR_NAME_LOGS, file, line, FSL_LOG_LEVEL_TRACE, FSL_ERR_SUCCESS, format, ##__VA_ARGS__)
 #endif /* FOSSIL_RELEASE_BUILD */
 
-extern u32 log_level_max;
-FSLAPI extern str log_dir[PATH_MAX];
+extern u32 fsl_log_level_max;
+FSLAPI extern str fsl_log_dir[PATH_MAX];
 
-/*! @brief logger pointer look-up table that points to `logger_buf` addresses.
+/*! @brief logger pointer look-up table that points to `fsl_logger_buf` addresses.
  *
- *  @remark read-only, initialized internally in @ref logger_init().
+ *  @remark read-only, initialized internally in @ref fsl_logger_init().
  */
-FSLAPI extern str **logger_tab;
+FSLAPI extern str **fsl_logger_tab;
 
 /*! @brief logger color look-up table for @ref logger_tab entries.
  *
- *  @remark read-only, initialized internally in @ref logger_init().
+ *  @remark read-only, initialized internally in @ref fsl_logger_init().
  */
-FSLAPI extern u32 *logger_color;
+FSLAPI extern u32 *fsl_logger_color;
 
-/*! @brief current position in @ref logger_tab.
+/*! @brief current position in @ref fsl_logger_tab.
  *
- *  @remark read-only, initialized and updated internally in @ref _log_output().
+ *  @remark read-only, updated internally in @ref _fsl_log_output().
  */
-FSLAPI extern i32 logger_tab_index;
+FSLAPI extern i32 fsl_logger_tab_index;
 
 /*! @brief initialize logger.
  *
  *  @param argc number of arguments in `argv` if `argv` provided.
  *  @param argv used for logger log level if args provided.
  *
- *  @param flags enum @ref EngineFlag.
+ *  @param flags enum @ref fsl_flag.
  *
  *  @param _log_dir directory to write log files into for the lifetime of the process,
  *  if `NULL`, logs won't be written to disk.
  *
- *  @param log_dir_not_found enable/disable logging @ref ERR_DIR_NOT_FOUND when `_log_dir` isn't found
- *  (@ref is_dir_exists() parameter).
+ *  @param log_dir_not_found enable/disable logging @ref FSL_ERR_DIR_NOT_FOUND when `_log_dir` isn't found
+ *  (@ref fsl_is_dir_exists() parameter).
  *
- *  @remark called automatically from @ref engine_init().
+ *  @remark called automatically from @ref fsl_init().
  *
  *  @remark args:
  *      logfatal:   only output fatal logs (least verbose).
@@ -218,18 +192,18 @@ FSLAPI extern i32 logger_tab_index;
  *      logdebug:   only output <= debug logs.
  *      logtrace:   only output <= trace logs (most verbose).
  *
- *  @return non-zero on failure and @ref engine_err is set accordingly.
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 log_dir_not_found);
+FSLAPI u32 fsl_logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 log_dir_not_found);
 
-FSLAPI void logger_close(void);
+FSLAPI void fsl_logger_close(void);
 
 /*! -- INTERNAL USE ONLY --;
  *
  *  @param cmd log a command (used for on-screen output of basic commands).
  *  @param _log_dir directory to write log files into, if `NULL`, logs won't be written to disk.
  */
-FSLAPI void _log_output(b8 verbose, b8 cmd, const str *_log_dir, const str *file, u64 line,
+FSLAPI void _fsl_log_output(b8 verbose, b8 cmd, const str *_log_dir, const str *file, u64 line,
         u8 level, u32 error_code, const str *format, ...);
 
-#endif /* ENGINE_LOGGER_H */
+#endif /* FSL_LOGGER_H */

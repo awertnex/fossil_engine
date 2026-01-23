@@ -2,14 +2,14 @@
 #include "h/types.h"
 #include "h/math.h"
 
-b8 is_intersect_aabb(BoundingBox a, BoundingBox b)
+b8 fsl_is_intersect_aabb(fsl_bounding_box a, fsl_bounding_box b)
 {
     return !(a.pos.x >= b.pos.x + b.size.x || b.pos.x >= a.pos.x + a.size.x ||
             a.pos.y >= b.pos.y + b.size.y || b.pos.y >= a.pos.y + a.size.y ||
             a.pos.z >= b.pos.z + b.size.z || b.pos.z >= a.pos.z + a.size.z);
 }
 
-f32 get_swept_aabb(BoundingBox a, BoundingBox b, v3f32 displacement, v3f32 *normal)
+f32 fsl_get_swept_aabb(fsl_bounding_box a, fsl_bounding_box b, v3f32 displacement, v3f32 *normal)
 {
     v3f32 entry, exit, entry_distance, exit_distance;
     f32 entry_time, exit_time;
@@ -84,8 +84,8 @@ f32 get_swept_aabb(BoundingBox a, BoundingBox b, v3f32 displacement, v3f32 *norm
         exit.z = exit_distance.z / displacement.z;
     }
 
-    entry_time = max_v3f32(entry);
-    exit_time = min_v3f32(exit);
+    entry_time = fsl_max_v3f32(entry);
+    exit_time = fsl_min_v3f32(exit);
 
     if (entry_time > exit_time || exit_time < 0.0f || entry_time > 1.0f)
         goto cleanup;
@@ -94,7 +94,7 @@ f32 get_swept_aabb(BoundingBox a, BoundingBox b, v3f32 displacement, v3f32 *norm
 
     *normal = (v3f32){0};
 
-    switch (max_axis_v3f32(entry))
+    switch (fsl_max_axis_v3f32(entry))
     {
         case 1:
             normal->x = displacement.x > 0.0f ? -1.0f : 1.0f;

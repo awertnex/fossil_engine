@@ -1,5 +1,5 @@
-#ifndef FOSSIL_ENGINE_H
-#define FOSSIL_ENGINE_H
+#ifndef FSL_FOSSIL_ENGINE_H
+#define FSL_FOSSIL_ENGINE_H
 
 #include "common.h"
 #include "types.h"
@@ -21,4 +21,4 @@
 #include "time.h"
 #include "ui.h"
 
-#endif /* FOSSIL_ENGINE_H */
+#endif /* FSL_FOSSIL_ENGINE_H */

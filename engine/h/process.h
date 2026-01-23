@@ -1,14 +1,14 @@
-#ifndef ENGINE_PROCESS_H
-#define ENGINE_PROCESS_H
+#ifndef FSL_PROCESS_H
+#define FSL_PROCESS_H
 
 #include "common.h"
 #include "types.h"
 
 /*! @brief get calloc'd string of executable's path, slash (`/`) and null (`\0`) terminated.
  *
- *  @return `NULL` on failure and @ref engine_err is set accordingly.
+ *  @return `NULL` on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI str *get_path_bin_root(void);
+FSLAPI str *fsl_get_path_bin_root(void);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -16,9 +16,9 @@ FSLAPI str *get_path_bin_root(void);
  *
  *  @brief get current path of binary/executable, assign allocated path string to `path`.
  *
- *  @return non-zero on failure and @ref engine_err is set accordingly.
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 _get_path_bin_root(str *path);
+u32 _fsl_get_path_bin_root(str *path);
 
 /*! @brief execute command in a separate child process (based on @ref execvp()).
  * 
@@ -27,8 +27,8 @@ u32 _get_path_bin_root(str *path);
  *  @param cmd command and args to execute.
  *  @param cmd_name command name (for logging).
  *
- *  @return non-zero on failure and @ref engine_err is set accordingly.
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 exec(Buf *cmd, str *cmd_name);
+FSLAPI u32 fsl_exec(fsl_buf *cmd, str *cmd_name);
 
-#endif /* ENGINE_PROCESS_H */
+#endif /* FSL_PROCESS_H */

@@ -1,4 +1,4 @@
-#ifdef SUPER_DEBUGGER_ENGINE
+#ifdef FSL_SUPER_DEBUGGER
 #include "include/raylib.h"
 
 #include "h/super_debugger.h"
@@ -143,4 +143,4 @@ void draw_super_debugger()
             (debug_button_add.width*2),
             debug_rectangle.pos.y + (SDB_BASE_SIZE*2)}, &button_state_sub, 0);
 }
-#endif
+#endif /* FSL_SUPER_DEBUGGER */
