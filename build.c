@@ -1,4 +1,4 @@
-#include "buildtool/build.h"
+#include "deps/buildtool/buildtool.h"
 #include "engine/h/build.h"
 
 #define DIR_SRC     "src/"

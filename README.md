@@ -18,6 +18,7 @@ zip | [v0.3.0-beta-linux-x86_64.zip](https://github.com/awertnex/heaven-hell_con
 
 ## Dependencies (already bundled)
 
+- [buildtool](https://github.com/awertnex/buildtool): build tool used to build the game
 - [glfw v3.4](https://github.com/glfw/glfw/releases): platform-independent windowing (headers modified)
 - [glad v0.1.36](https://github.com/dav1dde/glad-web): OpenGL function loader (modified)
     - extension: GL_ARB_bindless_texture
@@ -42,7 +43,6 @@ zip | [v0.3.0-beta-linux-x86_64.zip](https://github.com/awertnex/heaven-hell_con
 >**NOTES:**
 >- for development build, turn off `GAME_RELEASE_BUILD` in `src/h/main.h` (set as `0`), enables TRACE and DEBUG logging.
 >- if build successful, you can place the built directory 'Heaven-Hell Continuum' anywhere you wish, that's the entire bundle.
->- the build tool will rebuild itself before building the project if you either have modified its source or didn't build it in C99.
 
 
 - - -
@@ -67,12 +67,10 @@ cd heaven-hell_continuum/
 
 ### additional build commands:
 
-- `./build help`: show help
-- `./build engine`: build engine and place at './engine/lib/linux' and './Heaven-Hell Continuum'
+- `./build help`: show help and exit
+- `./build show`: show build command in list format
+- `./build raw`: show build command in raw format
 - `./build self`: re-build build tool
-- `./build all`: build build tool, engine and game
-- `./build show`: show build command
-- `./build raw`: show build command, raw
 
 
 - - -
@@ -100,12 +98,10 @@ cd heaven-hell_continuum
 
 ### additional build commands:
 
-- `./build.exe help`: show help
-- `./build.exe engine`: build engine and place at './engine/lib/win' and './Heaven-Hell Continuum'
+- `./build.exe help`: show help and exit
+- `./build.exe show`: show build command in list format
+- `./build.exe raw`: show build command in raw format
 - `./build.exe self`: re-build build tool
-- `./build.exe all`: build build tool, engine and game
-- `./build.exe show`: show build command
-- `./build.exe raw`: show build command, raw
 
 
 - - -

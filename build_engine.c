@@ -1,4 +1,4 @@
-#include "buildtool/build.h"
+#include "deps/buildtool/buildtool.h"
 #include "engine/h/common.h"
 
 #define OMIT_LFOSSIL
@@ -36,7 +36,7 @@ int main(int argc, char **argv)
             "-std=c99",
             "-fPIC",
             "-fvisibility=hidden",
-            stringf("-ffile-prefix-map=%s=", DIR_PROC_ROOT),
+            stringf("-ffile-prefix-map=%s=", DIR_BUILDTOOL_BIN_ROOT),
             "-Ofast",
             "-Wall",
             "-Wextra",
@@ -78,7 +78,7 @@ int main(int argc, char **argv)
 
     if (
             copy_dir(
-                stringf("%sengine/assets", DIR_PROC_ROOT),
+                stringf("%sengine/assets", DIR_BUILDTOOL_BIN_ROOT),
                 DIR_OUT"engine/assets", TRUE) != ERR_SUCCESS ||
 
             copy_dir("engine/lib/"PLATFORM, DIR_OUT, TRUE) != ERR_SUCCESS)

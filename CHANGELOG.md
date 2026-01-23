@@ -28,6 +28,7 @@
 - added better memory alignment for memory arena pushes but also tight-packing for small pushes:
     - I made it so that multiple pushes can use the same memory page as long as they're small enough to fit within it,
       otherwise the overlapping block will be pushed to the next page
+- removed build tool into its own repository and re-introduced as a dependency
 
 #### bugs and flaws
 - segfault when allocating smaller than 256 bytes for 'size' in function 'mem_alloc_buf()'
