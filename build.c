@@ -12,12 +12,17 @@
 
 int main(int argc, char **argv)
 {
+    /* will fail and exit if error */
     build_init(argc, argv, "build.c", "build"EXE);
 
     if (is_dir_exists(DIR_SRC, TRUE) != ERR_SUCCESS)
         return build_err;
 
     cmd_push(NULL, COMPILER);
+
+    if (find_token("release", argc, argv))
+        cmd_push(NULL, "-DHHC_RELEASE_BUILD");
+
     cmd_push(NULL, DIR_SRC"main.c");
     cmd_push(NULL, DIR_SRC"assets.c");
     cmd_push(NULL, DIR_SRC"chunking.c");

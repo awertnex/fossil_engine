@@ -1006,22 +1006,20 @@ static void draw_everything(void)
 
     /* ---- draw ui --------------------------------------------------------- */
 
+    ui_start(NULL, FALSE, TRUE); /* clear ui buffer */
+    ui_stop();
+
     if (core.flag.hud)
     {
-        ui_start(NULL, FALSE, TRUE);
+        ui_start(NULL, FALSE, FALSE);
 
         if (!core.flag.debug)
-            ui_draw(texture[TEXTURE_CROSSHAIR], render->size.x / 2, render->size.y / 2,
+            ui_draw(&texture[TEXTURE_CROSSHAIR], render->size.x / 2, render->size.y / 2,
                     8, 8, 0.0f, 0.0f, 0, 0, 0xffffffff);
 
-        ui_draw(texture[TEXTURE_ITEM_BAR], render->size.x / 2, render->size.y,
+        ui_draw(&texture[TEXTURE_ITEM_BAR], render->size.x / 2, render->size.y,
                 texture[TEXTURE_ITEM_BAR].size.x, texture[TEXTURE_ITEM_BAR].size.y,
                 84.5f, 18.0f, 1, 1, 0xffffffff);
-        ui_stop();
-    }
-    else
-    {
-        ui_start(NULL, FALSE, TRUE);
         ui_stop();
     }
 
@@ -1030,16 +1028,15 @@ static void draw_everything(void)
     if (core.flag.super_debug)
     {
         //ui_render();
-        ui_start(NULL, TRUE, TRUE);
-        ui_draw_nine_slice(engine_texture[ENGINE_TEXTURE_PANEL_ACTIVE],
+        ui_start(NULL, TRUE, FALSE);
+        ui_draw_nine_slice(&engine_texture[ENGINE_TEXTURE_PANEL_ACTIVE],
                 10, 10, 8.0f, 400, render->size.y - 20, 0, 0, -1, -1, 0xffffffef);
         ui_stop();
     }
-    else /* ---- clear ui buffer -------------------------------------------- */
-    {
-        ui_start(NULL, TRUE, TRUE);
-        ui_stop();
-    }
+    ui_start(NULL, TRUE, FALSE);
+    ui_draw_nine_slice(&engine_texture[ENGINE_TEXTURE_PANEL_ACTIVE],
+            10, 10, 8.0f, 400, render->size.y - 20, 0, 0, -1, -1, 0xffffffef);
+    ui_stop();
 
     /* ---- draw debug info ------------------------------------------------- */
 
@@ -1158,6 +1155,8 @@ static void draw_everything(void)
         text_render(TRUE, TEXT_COLOR_SHADOW);
         text_start(font[FONT_MONO], FONT_SIZE_DEFAULT, 0, NULL, FALSE);
 
+        static str temp[NAME_MAX] = {0};
+        fsl_get_string(temp, FSL_STR_VERSION);
         text_push(stringf(
                     "Game:     %s v%s\n"
                     "Engine:   %s v%s\n"
@@ -1167,7 +1166,7 @@ static void draw_everything(void)
                     "Vendor:   %s\n"
                     "Renderer: %s\n",
                     GAME_NAME, GAME_VERSION,
-                    ENGINE_NAME, ENGINE_VERSION, ENGINE_AUTHOR,
+                    ENGINE_NAME, temp, ENGINE_AUTHOR,
                     glGetString(GL_VERSION),
                     glGetString(GL_SHADING_LANGUAGE_VERSION),
                     glGetString(GL_VENDOR),
