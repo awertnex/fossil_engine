@@ -50,6 +50,9 @@ static _buf args = {0};
  *  - check if source uses a c-standard other than c99 and re-build with `-std=c99` if true.
  *  - check if source at `build_bin_name` has changed and rebuild if true.
  *
+ *  @param argc number of arguments in `argv` if `argv` provided.
+ *  @param argv command line arguments, optional.
+ *
  *  @oaram build_src_name name of the build source file that's using this header.
  *  @oaram build_bin_name name of the build binary file that's using this header,
  *  including extension if needed.
@@ -65,9 +68,6 @@ static u32 is_build_source_changed(void);
 /*! @remark can force-terminate process.
  */
 static void self_rebuild(char **argv);
-
-static b8 extension_evaluate(const str *file_name);
-static void extension_strip(const str *file_name, str *dst);
 
 /*! @brief allocate, load, execute and free a command as variadic arguments.
  *

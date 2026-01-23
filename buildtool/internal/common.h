@@ -137,6 +137,8 @@ str *stringf(const str *format, ...)
 u64 find_token(str *arg, int argc, char **argv)
 {
     u32 i = 0;
+    if (!argc || !argv || !argv[0])
+        return 0;
     for (; (int)i < argc; ++i)
         if (!strncmp(argv[i], arg, strlen(arg) + 1))
             return i;
