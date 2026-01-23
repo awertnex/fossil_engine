@@ -1,6 +1,12 @@
 #ifndef ENGINE_LOGGER_H
 #define ENGINE_LOGGER_H
 
+/*  Notes:
+ *      log macros that begin with an underscore (`_`) are reserved for the engine.
+ *      log macros that end in `EX` (extended) are internal-use, specific to functions that pass
+ *      `file` and `line` explicitly (e.g. _mem_alloc()).
+ */
+
 #include "common.h"
 #include "diagnostics.h"
 #include "limits.h"
@@ -55,13 +61,7 @@ enum /* LogLevel */
 }
 
 #define LOGINFO(verbose, cmd, format, ...) \
-    _log_output(verbose, cmd, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_INFO, 0, format, ##__VA_ARGS__)
-
-#define LOGDEBUG(verbose, cmd, format, ...) \
-    _log_output(verbose, cmd, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_DEBUG, 0, format, ##__VA_ARGS__)
-
-#define LOGTRACE(verbose, cmd, format, ...) \
-    _log_output(verbose, cmd, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_TRACE, 0, format, ##__VA_ARGS__)
+    _log_output(verbose, cmd, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_INFO, ERR_SUCCESS, format, ##__VA_ARGS__)
 
 #define LOGFATALEX(verbose, cmd, file, line, err, format, ...); \
 { \
@@ -82,13 +82,26 @@ enum /* LogLevel */
 }
 
 #define LOGINFOEX(verbose, cmd, file, line, format, ...) \
-    _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_INFO, 0, format, ##__VA_ARGS__)
+    _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_INFO, ERR_SUCCESS, format, ##__VA_ARGS__)
 
-#define LOGDEBUGEX(verbose, cmd, file, line, format, ...) \
-    _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_DEBUG, 0, format, ##__VA_ARGS__)
+#ifdef FOSSIL_RELEASE_BUILD
+#   define LOGDEBUG(verbose, cmd, format, ...)
+#   define LOGTRACE(verbose, cmd, format, ...)
+#   define LOGDEBUGEX(verbose, cmd, file, line, format, ...)
+#   define LOGTRACEEX(verbose, cmd, file, line, format, ...)
+#else
+#   define LOGDEBUG(verbose, cmd, format, ...) \
+    _log_output(verbose, cmd, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_DEBUG, ERR_SUCCESS, format, ##__VA_ARGS__)
 
-#define LOGTRACEEX(verbose, cmd, file, line, format, ...) \
-    _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_TRACE, 0, format, ##__VA_ARGS__)
+#   define LOGTRACE(verbose, cmd, format, ...) \
+    _log_output(verbose, cmd, log_dir, __BASE_FILE__, __LINE__, LOGLEVEL_TRACE, ERR_SUCCESS, format, ##__VA_ARGS__)
+
+#   define LOGDEBUGEX(verbose, cmd, file, line, format, ...) \
+    _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_DEBUG, ERR_SUCCESS, format, ##__VA_ARGS__)
+
+#   define LOGTRACEEX(verbose, cmd, file, line, format, ...) \
+    _log_output(verbose, cmd, log_dir, file, line, LOGLEVEL_TRACE, ERR_SUCCESS, format, ##__VA_ARGS__)
+#endif /* FOSSIL_RELEASE_BUILD */
 
 #define LOG_MESH_GENERATE(err, mesh_name) \
 { \
@@ -119,13 +132,7 @@ enum /* LogLevel */
 }
 
 #define _LOGINFO(verbose, format, ...) \
-    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_INFO, 0, format, ##__VA_ARGS__)
-
-#define _LOGDEBUG(verbose, format, ...) \
-    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_DEBUG, 0, format, ##__VA_ARGS__)
-
-#define _LOGTRACE(verbose, format, ...) \
-    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_TRACE, 0, format, ##__VA_ARGS__)
+    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_INFO, ERR_SUCCESS, format, ##__VA_ARGS__)
 
 #define _LOGFATALEX(verbose, file, line, err, format, ...); \
 { \
@@ -146,13 +153,26 @@ enum /* LogLevel */
 }
 
 #define _LOGINFOEX(verbose, file, line, format, ...) \
-    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_INFO, 0, format, ##__VA_ARGS__)
+    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_INFO, ERR_SUCCESS, format, ##__VA_ARGS__)
 
-#define _LOGDEBUGEX(verbose, file, line, format, ...) \
-    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_DEBUG, 0, format, ##__VA_ARGS__)
+#ifdef FOSSIL_RELEASE_BUILD
+#   define _LOGDEBUG(verbose, format, ...)
+#   define _LOGTRACE(verbose, format, ...)
+#   define _LOGDEBUGEX(verbose, file, line, format, ...)
+#   define _LOGTRACEEX(verbose, file, line, format, ...)
+#else
+#   define _LOGDEBUG(verbose, format, ...) \
+    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_DEBUG, ERR_SUCCESS, format, ##__VA_ARGS__)
 
-#define _LOGTRACEEX(verbose, file, line, format, ...) \
-    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_TRACE, 0, format, ##__VA_ARGS__)
+#   define _LOGTRACE(verbose, format, ...) \
+    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, __BASE_FILE__, __LINE__, LOGLEVEL_TRACE, ERR_SUCCESS, format, ##__VA_ARGS__)
+
+#   define _LOGDEBUGEX(verbose, file, line, format, ...) \
+    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_DEBUG, ERR_SUCCESS, format, ##__VA_ARGS__)
+
+#   define _LOGTRACEEX(verbose, file, line, format, ...) \
+    _log_output(verbose, FALSE, ENGINE_DIR_NAME_LOGS, file, line, LOGLEVEL_TRACE, ERR_SUCCESS, format, ##__VA_ARGS__)
+#endif /* FOSSIL_RELEASE_BUILD */
 
 extern u32 log_level_max;
 FSLAPI extern str log_dir[PATH_MAX];

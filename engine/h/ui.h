@@ -20,13 +20,13 @@ FSLAPI u32 ui_init(b8 multisample);
 
 /*! @brief start ui rendering batch.
  *
- *  @param clear clear the framebuffer before rendering.
- *
  *  @param fbo fbo to draw ui to, if `NULL`, internal fbo is used
  *  (must then call @ref ui_fbo_blit() to blit result onto desired fbo).
  *
  *  @param nine_slice use a nine_slice shader
  *  (ui elements with separate edge and corner slices of a texture).
+ *
+ *  @param clear clear the framebuffer before rendering.
  *
  *  @remark disables @ref GL_DEPTH_TEST, @ref ui_stop() re-enables it.
  *  @remark can re-allocate `fbo` with `multisample` setting used in @ref ui_init().
@@ -34,9 +34,9 @@ FSLAPI u32 ui_init(b8 multisample);
 FSLAPI void ui_start(FBO *fbo, b8 nine_slice, b8 clear);
 
 FSLAPI void ui_render(void);
-FSLAPI void ui_draw(Texture texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
+FSLAPI void ui_draw(Texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
         f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint);
-FSLAPI void ui_draw_nine_slice(Texture texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
+FSLAPI void ui_draw_nine_slice(Texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
         f32 slice_size, f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint);
 
 /*! @remark enables @ref GL_DEPTH_TEST.

@@ -64,7 +64,7 @@ u32 shader_init(const str *shaders_dir, Shader *shader)
         _LOGERROR(FALSE, ERR_SHADER_COMPILE_FAIL, "Shader '%s':\n%s\n", shader->file_name, log);
         return engine_err;
     }
-    else _LOGINFO(FALSE, "Shader %d '%s' Loaded\n", shader->id, shader->file_name);
+    else _LOGDEBUG(FALSE, "Shader %d '%s' Loaded\n", shader->id, shader->file_name);
 
     engine_err = ERR_SUCCESS;
     return engine_err;
@@ -198,8 +198,7 @@ u32 shader_program_init(const str *shaders_dir, ShaderProgram *program)
                 "Shader Program '%s':\n%s\n", program->name, log);
         return engine_err;
     }
-    else _LOGINFO(FALSE,
-            "Shader Program %d '%s' Loaded\n", program->id, program->name);
+    else _LOGDEBUG(FALSE, "Shader Program %d '%s' Loaded\n", program->id, program->name);
 
     if (program->vertex.loaded)
         glDeleteShader(program->vertex.id);

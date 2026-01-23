@@ -183,6 +183,14 @@ FSLAPI u32 engine_update_render_settings(i32 size_x, i32 size_y);
  */
 FSLAPI void engine_close(void);
 
+/*! @brief get engine-specific string no longer than @ref NAME_MAX bytes.
+ *
+ *  @param dst pointer to buffer to store string.
+ *  
+ *  @return non-zero on failure and @ref engine_err is set accordingly.
+ */
+FSLAPI u32 fsl_get_string(str *dst, enum FossilStringIndex type);
+
 /*! @brief initialize 'GLFW'.
  *
  *  @param multisample = turn on multisampling.
@@ -288,7 +296,7 @@ FSLAPI u32 texture_generate(Texture *texture, b8 bindless);
  *  @brief generate texture for `OpenGL` and upload to `GPU` memory.
  *
  *  @param id where to store texture ID.
- *  @param buf texture data to upload to `GPU` memory.
+ *  @param buf texture data to upload to `gpu` memory.
  *
  *  @remark called automatically from @ref texture_generate() if texture data is
  *  already loaded into a texture by calling @ref texture_init().

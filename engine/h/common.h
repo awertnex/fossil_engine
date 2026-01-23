@@ -8,8 +8,11 @@
 
 #define ENGINE_AUTHOR           "Lily Awertnex"
 #define ENGINE_NAME             "Fossil Engine"
-#define ENGINE_VERSION          "0.3.1"ENGINE_VERSION_DEV
-#define ENGINE_TITLE            ENGINE_NAME": "ENGINE_VERSION
+
+#define ENGINE_VERSION_MAJOR 0
+#define ENGINE_VERSION_MINOR 3
+#define ENGINE_VERSION_PATCH 1
+#define ENGINE_VERSION_BUILD ENGINE_VERSION_DEV
 
 #if defined(__linux__) || defined(__linux)
 #   define _GNU_SOURCE
@@ -117,6 +120,13 @@ enum EngineFlag
     FLAG_ENGINE_LOAD_DEFAULT_SHADERS =  0x0002, /* initialize default shaders (like 'text' and 'ui') */
     FLAG_ENGINE_MULTISAMPLE =           0x0004, /* use `GLFW` multisampling */
 }; /* EngineFlag */
+
+enum FossilStringIndex
+{
+    FSL_STR_TITLE,
+    FSL_STR_VERSION,
+    FSL_STR_COUNT,
+}; /* EngineStringIndex */
 
 enum ShaderIndex
 {

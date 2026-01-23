@@ -19,7 +19,7 @@ u32 make_dir(const str *path)
 {
     if (mkdir(path) == 0)
     {
-        _LOGINFO(FALSE, "Directory Created '%s'\n", path);
+        _LOGDEBUG(FALSE, "Directory Created '%s'\n", path);
         engine_err = ERR_SUCCESS;
         return engine_err;
     }
@@ -114,11 +114,11 @@ u32 exec(Buf *cmd, str *cmd_name)
     CloseHandle(process_info.hThread);
 
     if (exit_code == 0)
-        _LOGINFO(FALSE, "'%s' Success, Exit Code: %d\n", cmd_name, exit_code);
+        _LOGDEBUG(FALSE, "'%s' Success, Exit Code: %d\n", cmd_name, exit_code);
     else
     {
         engine_err = ERR_EXEC_PROCESS_NON_ZERO;
-        _LOGINFO(TRUE, "'%s' Exit Code: %d\n", cmd_name, exit_code);
+        _LOGDEBUG(TRUE, "'%s' Exit Code: %d\n", cmd_name, exit_code);
         goto cleanup;
     }
 

@@ -24,12 +24,6 @@ typedef struct ShaderProgram
     Shader fragment;
 } ShaderProgram;
 
-typedef struct UBO
-{
-    GLuint index;
-    GLuint buf;
-} UBO;
-
 /*! @brief default shaders.
  *
  *  @remark declared internally in @ref engine_init().

@@ -37,19 +37,16 @@ static struct /* flag */
 
 static Render render_internal =
 {
-    .title = ENGINE_TITLE,
     .size = (v2i32){RENDER_WIDTH_DEFAULT, RENDER_HEIGHT_DEFAULT},
 };
 
 Render *render = &render_internal;
 
 /*! -- INTERNAL USE ONLY --;
- *
- *  @brief internal `UBO` group.
  */
 static struct /* ubo */
 {
-    UBO ndc_scale;
+    GLuint ndc_scale;
 } ubo;
 
 /* ---- section: signatures ------------------------------------------------- */
@@ -90,6 +87,7 @@ u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
     u32 i = 0;
 
     flag.active = 1;
+    fsl_get_string(render->title, FSL_STR_TITLE);
 
     if (logger_init(argc, argv, flags & FLAG_ENGINE_RELEASE_BUILD, _log_dir,
                 TRUE) != ERR_SUCCESS)
@@ -127,13 +125,13 @@ u32 engine_init(int argc, char **argv, const str *_log_dir, const str *title,
             if (shader_program_init(ENGINE_DIR_NAME_SHADERS, &engine_shader[i]) != ERR_SUCCESS)
                 goto cleanup;
 
-        glGenBuffers(1, &ubo.ndc_scale.buf);
-        glBindBuffer(GL_UNIFORM_BUFFER, ubo.ndc_scale.buf);
+        glGenBuffers(1, &ubo.ndc_scale);
+        glBindBuffer(GL_UNIFORM_BUFFER, ubo.ndc_scale);
         glBufferData(GL_UNIFORM_BUFFER, sizeof(v2f32), NULL, GL_STATIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         glBindBufferBase(GL_UNIFORM_BUFFER, ENGINE_SHADER_BUFFER_BINDING_UBO_NDC_SCALE,
-                ubo.ndc_scale.buf);
+                ubo.ndc_scale);
     }
 
     engine_err = ERR_SUCCESS;
@@ -166,8 +164,8 @@ u32 engine_update_render_settings(i32 size_x, i32 size_y)
     render->ndc_scale.x = 2.0f / size_x;
     render->ndc_scale.y = 2.0f / size_y;
 
-    glBindBuffer(GL_UNIFORM_BUFFER, ubo.ndc_scale.buf);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(v2f32), &render->ndc_scale, GL_STATIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, ubo.ndc_scale);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(v2f32), &render->ndc_scale);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     if (mem_realloc((void*)&render->screen_buf, size_x * size_y * COLOR_CHANNELS_RGB,
@@ -208,6 +206,41 @@ void engine_close(void)
     mem_free((void*)&DIR_PROC_ROOT, strlen(DIR_PROC_ROOT), "engine_close().DIR_PROC_ROOT");
 
     logger_close();
+}
+
+u32 fsl_get_string(str *dst, enum FossilStringIndex type)
+{
+    if (!dst)
+    {
+        _LOGERROR(TRUE, ERR_POINTER_NULL,
+                "Failed to Get String, Pointer NULL\n");
+        return engine_err;
+    }
+
+    switch(type)
+    {
+        case FSL_STR_TITLE:
+            snprintf(dst, NAME_MAX, ENGINE_NAME": %u.%u.%u%s",
+                    ENGINE_VERSION_MAJOR,
+                    ENGINE_VERSION_MINOR,
+                    ENGINE_VERSION_PATCH,
+                    ENGINE_VERSION_BUILD);
+            break;
+
+        case FSL_STR_VERSION:
+            snprintf(dst, NAME_MAX, "%u.%u.%u%s",
+                    ENGINE_VERSION_MAJOR,
+                    ENGINE_VERSION_MINOR,
+                    ENGINE_VERSION_PATCH,
+                    ENGINE_VERSION_BUILD);
+            break;
+
+        case FSL_STR_COUNT:
+            break;
+    }
+
+    engine_err = ERR_SUCCESS;
+    return engine_err;
 }
 
 u32 glfw_init(b8 multisample)
@@ -276,10 +309,10 @@ u32 glad_init(void)
         return engine_err;
     }
 
-    _LOGINFO(FALSE, "OpenGL:    %s\n", glGetString(GL_VERSION));
-    _LOGINFO(FALSE, "GLSL:      %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-    _LOGINFO(FALSE, "Vendor:    %s\n", glGetString(GL_VENDOR));
-    _LOGINFO(FALSE, "Renderer:  %s\n", glGetString(GL_RENDERER));
+    _LOGDEBUG(FALSE, "OpenGL:    %s\n", glGetString(GL_VERSION));
+    _LOGDEBUG(FALSE, "GLSL:      %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+    _LOGDEBUG(FALSE, "Vendor:    %s\n", glGetString(GL_VENDOR));
+    _LOGDEBUG(FALSE, "Renderer:  %s\n", glGetString(GL_RENDERER));
 
     engine_err = ERR_SUCCESS;
     return engine_err;

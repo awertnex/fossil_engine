@@ -139,12 +139,12 @@ void ui_render(void)
     glDrawArrays(GL_POINTS, 0, 1);
 }
 
-void ui_draw(Texture texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
+void ui_draw(Texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
         f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint)
 {
     glUniform2i(ui_core.uniform.ui.position, pos_x, pos_y);
     glUniform2i(ui_core.uniform.ui.size, size_x, size_y);
-    glUniform2i(ui_core.uniform.ui.texture_size, texture.size.x, texture.size.y);
+    glUniform2i(ui_core.uniform.ui.texture_size, texture->size.x, texture->size.y);
     glUniform2f(ui_core.uniform.ui.offset, offset_x, offset_y);
     glUniform2i(ui_core.uniform.ui.alignment, align_x, align_y);
     glUniform4f(ui_core.uniform.ui.tint,
@@ -153,11 +153,11 @@ void ui_draw(Texture texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
             (f32)((tint >> 0x08) & 0xff) / 0xff,
             (f32)((tint >> 0x00) & 0xff) / 0xff);
 
-    glBindTexture(GL_TEXTURE_2D, texture.id);
+    glBindTexture(GL_TEXTURE_2D, texture->id);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
-void ui_draw_nine_slice(Texture texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
+void ui_draw_nine_slice(Texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
         f32 slice_size, f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint)
 {
     glUniform2i(ui_core.uniform.nine_slice.position, pos_x, pos_y);
@@ -168,12 +168,12 @@ void ui_draw_nine_slice(Texture texture, i32 pos_x, i32 pos_y, i32 size_x, i32 s
             (f32)((tint >> 0x10) & 0xff) / 0xff,
             (f32)((tint >> 0x08) & 0xff) / 0xff,
             (f32)((tint >> 0x00) & 0xff) / 0xff);
-    glUniform2iv(ui_core.uniform.nine_slice.texture_size, 1, (GLint*)&texture.size);
-    glUniform2i(ui_core.uniform.nine_slice.sprite_size, texture.size.x / 2, texture.size.y / 2);
+    glUniform2iv(ui_core.uniform.nine_slice.texture_size, 1, (GLint*)&texture->size);
+    glUniform2i(ui_core.uniform.nine_slice.sprite_size, texture->size.x / 2, texture->size.y / 2);
     glUniform1i(ui_core.uniform.nine_slice.use_nine_slice, ui_core.use_nine_slice);
     glUniform1f(ui_core.uniform.nine_slice.slice_size, slice_size);
 
-    glBindTexture(GL_TEXTURE_2D, texture.id);
+    glBindTexture(GL_TEXTURE_2D, texture->id);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 

@@ -20,17 +20,32 @@ static str str_dir[][CMD_SIZE] =
     DIR_OUT"engine/logs",
 };
 
+static str str_cflags[][CMD_SIZE] =
+{
+    "-Wall",
+    "-Wextra",
+    "-Wformat-truncation=0",
+};
+
 int main(int argc, char **argv)
 {
-    u32 i = 0;
+    u32 i = 0, token_release = 0;
 
-    if (build_init(argc, argv, "build_engine.c", "build_engine"EXE) != ERR_SUCCESS)
-        return build_err;
+    /* will fail and exit if error */
+    build_init(argc, argv, "build_engine.c", "build_engine"EXE);
 
     if (is_dir_exists("engine", TRUE) != ERR_SUCCESS)
         return build_err;
 
-    cmd_exec(37,
+    if (find_token("release", argc, argv))
+    {
+        token_release = 1;
+        str_cflags[0][0] = 0;
+        str_cflags[1][0] = 0;
+        str_cflags[2][0] = 0;
+    }
+
+    cmd_exec(38,
             COMPILER,
             "-shared",
             "-std=c99",
@@ -38,9 +53,9 @@ int main(int argc, char **argv)
             "-fvisibility=hidden",
             stringf("-ffile-prefix-map=%s=", DIR_BUILDTOOL_BIN_ROOT),
             "-Ofast",
-            "-Wall",
-            "-Wextra",
-            "-Wformat-truncation=0",
+            str_cflags[0],
+            str_cflags[1],
+            str_cflags[2],
             str_engine_libs[0],
             str_engine_libs[1],
             str_engine_libs[2],
@@ -52,6 +67,7 @@ int main(int argc, char **argv)
             "-DGLAD_GLAPI_EXPORT",
             "-DGLAD_GLAPI_EXPORT_BUILD",
             "engine/include/glad/glad.c",
+            stringf("%s", token_release ? "-DFOSSIL_RELEASE_BUILD" : ""),
             "engine/assets.c",
             "engine/collision.c",
             "engine/core.c",
