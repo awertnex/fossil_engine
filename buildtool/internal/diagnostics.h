@@ -61,6 +61,8 @@
 #define ERR_MEM_REMAP_FAIL              4152
 
 /*! @brief global variable for build-specific error codes.
+ *
+ *  @remark must be declared by the user if not including @ref build.h.
  */
 extern u32 build_err;
 

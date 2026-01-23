@@ -35,8 +35,6 @@
 #   define SLASH_NON_NATIVE '/'
 #endif /* PLATFORM */
 
-#include "types.h"
-
 #if PLATFORM_WIN
 #   define FSLAPI __declspec(dllexport)
 #else
@@ -46,6 +44,8 @@
 #ifndef FSLAPI
 #   define FSLAPI
 #endif /* FSLAPI */
+
+#include "types.h"
 
 #define ENGINE_DIR_NAME_FONTS       "engine/assets/fonts/"
 #define ENGINE_DIR_NAME_TEXTURES    "engine/assets/textures/"

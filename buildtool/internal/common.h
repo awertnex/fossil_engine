@@ -1,5 +1,5 @@
-#ifndef BUILD_COMMON_H
-#define BUILD_COMMON_H
+#ifndef BUILDTOOL_COMMON_H
+#define BUILDTOOL_COMMON_H
 
 #if defined(__linux__) || defined(__linux)
 #   define _GNU_SOURCE
@@ -87,10 +87,6 @@ typedef struct _buf
 #define TIME_STRING_MAX 256
 #define STRINGF_BUFFERS_MAX 4
 
-#define MSEC2SEC 1e-3
-#define NSEC2SEC 1e-9
-#define SEC2USEC 1e6
-
 /* ---- section: signatures ------------------------------------------------- */
 
 /*! @brief write temporary formatted string.
@@ -149,16 +145,10 @@ u64 find_token(str *arg, int argc, char **argv)
 
 void get_time_str(str *dst, const str *format)
 {
-    u64 _time_nsec = 0;
-    time_t _time = 0;
     struct timespec ts;
-
     clock_gettime(CLOCK_REALTIME, &ts);
-    _time_nsec = (u64)(ts.tv_sec * SEC2USEC + ts.tv_nsec * MSEC2SEC);
-    _time = _time_nsec * NSEC2SEC;
-
-    struct tm *_tm = localtime(&_time);
+    struct tm *_tm = localtime(&ts.tv_sec);
     strftime(dst, TIME_STRING_MAX, format, _tm);
 }
 
-#endif /* BUILD_COMMON_H */
+#endif /* BUILDTOOL_COMMON_H */

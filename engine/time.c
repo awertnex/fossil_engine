@@ -57,9 +57,9 @@ u64 get_time_delta_nsec(void)
 
 void get_time_str(str *dst, const str *format)
 {
-    u64 _time_nsec = get_time_raw_nsec();
-    time_t _time = _time_nsec * NSEC2SEC;
-    struct tm *_tm = localtime(&_time);
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    struct tm *_tm = localtime(&ts.tv_sec);
     strftime(dst, TIME_STRING_MAX, format, _tm);
 }
 

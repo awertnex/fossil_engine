@@ -349,4 +349,4 @@ u64 rand_u64(u64 n)
     return a * 2048419325;
 }
 
-#pragma GCC diagnostic pop
+#pragma GCC diagnostic pop /* ignored "-Wshift-count-overflow" */

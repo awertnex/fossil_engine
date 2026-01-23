@@ -33,10 +33,11 @@ u32 make_dir(const str *path)
     return build_err;
 }
 
-/* TODO: make 'change_dir()' for windows */
 int change_dir(const str *path)
 {
-    return _chdir(path);
+    int success = _chdir(path);
+    LOGTRACE(TRUE, "Working Directory Changed to '%s'\n", path);
+    return success;
 }
 
 u32 _get_path_absolute(const str *path, str *path_real)

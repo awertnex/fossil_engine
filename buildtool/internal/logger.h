@@ -137,7 +137,7 @@ void _get_log_str(const str *str_in, str *str_out, b8 verbose,
     str *trunc = NULL;
     int cursor = 0;
 
-    get_time_str(str_time, "[%T] ");
+    get_time_str(str_time, "[%F %T] ");
 
     if (level <= LOGLEVEL_WARNING)
         snprintf(str_tag, 32, "[%s][%"PRIu32"] ", log_tag[level], error_code);
