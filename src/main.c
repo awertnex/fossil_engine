@@ -17,6 +17,7 @@
 #include "h/terrain.h"
 #include "h/world.h"
 
+i32 scrool = 0;
 u32 *const GAME_ERR = (u32*)&fsl_err;
 struct hhc_core core = {0};
 struct hhc_settings settings = {0};
@@ -129,6 +130,9 @@ static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset)
         else if (_player.hotbar_slot_selected < 0)
             _player.hotbar_slot_selected = PLAYER_HOTBAR_SLOTS_MAX - 1;
     }
+
+    if (core.flag.super_debug)
+        scrool = fsl_clamp_i32(scrool + (i32)yoffset * SET_CONSOLE_SCROLL_SPEED, 0, fsl_logger_tab_index);
 }
 
 static u32 settings_init(void)
@@ -1183,22 +1187,25 @@ static void draw_everything(void)
 
     /* ---- draw logger strings --------------------------------------------- */
 
-    fsl_text_start(font[FONT_MONO_BOLD], settings.font_size, 0, NULL, FALSE);
-    i32 i = 0;
-    u32 index = 0;
-    for (i = 24; i > 0; --i)
+    if (core.flag.super_debug)
     {
-        index = fsl_mod_i32(fsl_logger_tab_index - i, FSL_LOGGER_HISTORY_MAX);
-        fsl_text_push(fsl_stringf("%s\n", fsl_logger_tab[index]),
-                SET_MARGIN, render->size.y - SET_MARGIN,
-                0, 0,
-                fsl_logger_color[index]);
-    }
+        fsl_text_start(font[FONT_MONO_BOLD], settings.font_size, 0, NULL, FALSE);
+        i32 i = 0;
+        u32 index = 0;
+        for (i = 24; i > 0; --i)
+        {
+            index = fsl_mod_i32(fsl_logger_tab_index - i - scrool, FSL_LOGGER_HISTORY_MAX);
+            fsl_text_push(fsl_stringf("%s\n", fsl_logger_tab[index]),
+                    SET_MARGIN, render->size.y - SET_MARGIN,
+                    0, 0,
+                    fsl_logger_color[index]);
+        }
 
-    /* align once after all the strings' heights in text batch have accumulated into total text height */
-    fsl_text_push("", 0, 0, 0, FSL_TEXT_ALIGN_BOTTOM, 0x00000000);
-    fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
-    fsl_text_stop();
+        /* align once after all the strings' heights in text batch have accumulated into total text height */
+        fsl_text_push("", 0, 0, 0, FSL_TEXT_ALIGN_BOTTOM, 0x00000000);
+        fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
+        fsl_text_stop();
+    }
 
     /* ---- post processing ------------------------------------------------- */
 
