@@ -8,7 +8,7 @@
 #define WORLD_DRAG_AIR          0.2f
 #define WORLD_DRAG_WATER        2.0f
 
-typedef struct WorldInfo
+typedef struct world_info
 {
     u64 id;
     str name[NAME_MAX];
@@ -21,29 +21,29 @@ typedef struct WorldInfo
 
     f32 gravity;
     v3f32 drag;
-} WorldInfo;
+} world_info;
 
 /*! @brief info of current world loaded.
  *
- *  @remark declared internally in 'world.c'.
+ *  @remark declared internally in @ref world.c.
  */
-extern WorldInfo world;
+extern world_info world;
 
 /*! @brief init, create and load world.
  *
- *  @remark if 'seed' is 0, a random seed will be generated.
+ *  @remark if `seed` is 0, a random seed will be generated.
  *
- *  @return non-zero on failure and '*GAME_ERR' is set accordingly.
+ *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
-u32 world_init(str *name, u64 seed, Player *p);
+u32 world_init(str *name, u64 seed, player *p);
 
 /*! @brief initialize world directory structure.
  *
  *  create world directories needed on disk.
  *
- *  @remark called automatically from 'world_init()'.
+ *  @remark called automatically from @ref world_init().
  *
- *  @return non-zero on failure and '*GAME_ERR' is set accordingly.
+ *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
 u32 world_dir_init(const str *world_name);
 
@@ -53,15 +53,15 @@ u32 world_dir_init(const str *world_name);
  *  1. seed.txt, file containing world seed, can be changed,
  *     but changes only apply if world is loaded again.
  *
- *  @param seed = if file 'seed.txt' not present, it will be created and 'seed'
+ *  @param seed = if file 'seed.txt' not present, it will be created and `seed`
  *  will be written to it.
  *
- *  @remark if 'seed' is 0, a random seed will be generated.
+ *  @remark if `seed` is 0, a random seed will be generated.
  *
- *  @return non-zero on failure and '*GAME_ERR' is set accordingly.
+ *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
-u32 world_load(WorldInfo *world, const str *world_name, u64 seed);
+u32 world_load(world_info *world, const str *world_name, u64 seed);
 
-void world_update(Player *p);
+void world_update(player *p);
 
 #endif /* GAME_WORLD_H */

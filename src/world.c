@@ -16,22 +16,22 @@
 #include "h/main.h"
 #include "h/world.h"
 
-WorldInfo world = {0};
+world_info world = {0};
 
-u32 world_init(str *name, u64 seed, Player *p)
+u32 world_init(str *name, u64 seed, player *p)
 {
     world_dir_init(name);
-    if (*GAME_ERR != ERR_SUCCESS && *GAME_ERR != ERR_WORLD_EXISTS)
+    if (*GAME_ERR != FSL_ERR_SUCCESS && *GAME_ERR != ERR_WORLD_EXISTS)
         return *GAME_ERR;
 
     world_load(&world, name, seed);
-    if (*GAME_ERR != ERR_SUCCESS && *GAME_ERR != ERR_WORLD_EXISTS)
+    if (*GAME_ERR != FSL_ERR_SUCCESS && *GAME_ERR != ERR_WORLD_EXISTS)
         return *GAME_ERR;
 
-    if (chunking_init() != ERR_SUCCESS)
+    if (chunking_init() != FSL_ERR_SUCCESS)
         return *GAME_ERR;
 
-    world.gravity = GRAVITY * 3.0f;
+    world.gravity = FSL_GRAVITY * 3.0f;
 
     set_player_spawn(p, 0, 0, 30);
     player_spawn(p, TRUE);
@@ -43,7 +43,7 @@ u32 world_init(str *name, u64 seed, Player *p)
     disable_cursor;
     center_cursor;
 
-    *GAME_ERR = ERR_SUCCESS;
+    *GAME_ERR = FSL_ERR_SUCCESS;
     return *GAME_ERR;
 }
 
@@ -54,24 +54,24 @@ u32 world_dir_init(const str *world_name)
 
     if (!strlen(world_name))
     {
-        LOGERROR(FALSE, TRUE, ERR_POINTER_NULL, "%s\n", "World Name Cannot Be Empty");
+        LOGERROR(FALSE, TRUE, FSL_ERR_POINTER_NULL, "%s\n", "World Name Cannot Be Empty");
         return *GAME_ERR;
     }
 
     if (!strlen(world_name))
     {
-        *GAME_ERR = ERR_POINTER_NULL;
+        *GAME_ERR = FSL_ERR_POINTER_NULL;
         return *GAME_ERR;
     }
 
-    if (is_dir_exists(DIR_PROC_ROOT, TRUE) != ERR_SUCCESS)
+    if (fsl_is_dir_exists(FSL_DIR_PROC_ROOT, TRUE) != FSL_ERR_SUCCESS)
     {
         LOGERROR(FALSE, TRUE, ERR_WORLD_CREATION_FAIL,
                 "Failed to Create World '%s', Root Directory Not Found\n", world_name);
         return *GAME_ERR;
     }
 
-    if (is_dir_exists(GAME_DIR_NAME_WORLDS, TRUE) != ERR_SUCCESS)
+    if (fsl_is_dir_exists(GAME_DIR_NAME_WORLDS, TRUE) != FSL_ERR_SUCCESS)
     {
         LOGERROR(FALSE, TRUE, ERR_WORLD_CREATION_FAIL,
                 "Failed to Create World '%s', World Directory Not Found\n", world_name);
@@ -79,16 +79,16 @@ u32 world_dir_init(const str *world_name)
     }
 
     snprintf(string, PATH_MAX, GAME_DIR_NAME_WORLDS"%s", world_name);
-    check_slash(string);
-    normalize_slash(string);
+    fsl_check_slash(string);
+    fsl_normalize_slash(string);
 
-    if (is_dir_exists(string, FALSE) == ERR_SUCCESS)
+    if (fsl_is_dir_exists(string, FALSE) == FSL_ERR_SUCCESS)
     {
         snprintf(world.path, PATH_MAX, "%s", string);
         return *GAME_ERR;
     }
 
-    make_dir(string);
+    fsl_make_dir(string);
     snprintf(world.path, PATH_MAX, "%s", string);
 
     LOGINFO(FALSE, TRUE, "Creating World Directories '%s'..\n", world.path);
@@ -96,17 +96,17 @@ u32 world_dir_init(const str *world_name)
     for (i = 0; i < DIR_WORLD_COUNT; ++i)
     {
         snprintf(string, PATH_MAX, "%s%s", world.path, DIR_WORLD[i]);
-        make_dir(string);
-        if (*GAME_ERR != ERR_SUCCESS && *GAME_ERR != ERR_DIR_EXISTS)
+        fsl_make_dir(string);
+        if (*GAME_ERR != FSL_ERR_SUCCESS && *GAME_ERR != FSL_ERR_DIR_EXISTS)
             return *GAME_ERR;
     }
 
     LOGINFO(FALSE, TRUE, "World Created '%s'\n", world_name);
-    *GAME_ERR = ERR_SUCCESS;
+    *GAME_ERR = FSL_ERR_SUCCESS;
     return *GAME_ERR;
 }
 
-u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
+u32 world_load(world_info *world, const str *world_name, u64 seed)
 {
     str string[2][PATH_MAX] = {0};
     str *file_contents = NULL;
@@ -114,18 +114,18 @@ u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
 
     if (!strlen(world_name))
     {
-        LOGERROR(FALSE, TRUE, ERR_POINTER_NULL, "%s\n", "Failed to Load World, World Name Empty");
+        LOGERROR(FALSE, TRUE, FSL_ERR_POINTER_NULL, "%s\n", "Failed to Load World, World Name Empty");
         return *GAME_ERR;
     }
 
-    if (is_dir_exists(DIR_PROC_ROOT, TRUE) != ERR_SUCCESS)
+    if (fsl_is_dir_exists(FSL_DIR_PROC_ROOT, TRUE) != FSL_ERR_SUCCESS)
     {
         LOGERROR(FALSE, TRUE, ERR_WORLD_CREATION_FAIL,
                 "Failed to Load World '%s', Root Directory Not Found\n", world_name);
         return *GAME_ERR;
     }
 
-    if (is_dir_exists(GAME_DIR_NAME_WORLDS, TRUE) != ERR_SUCCESS)
+    if (fsl_is_dir_exists(GAME_DIR_NAME_WORLDS, TRUE) != FSL_ERR_SUCCESS)
     {
         LOGERROR(FALSE, TRUE, ERR_WORLD_CREATION_FAIL,
                 "Failed to Load World '%s', '"GAME_DIR_NAME_WORLDS"' Directory Not Found\n", world_name);
@@ -133,7 +133,7 @@ u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
     }
 
     snprintf(string[0], PATH_MAX, GAME_DIR_NAME_WORLDS"%s", world_name);
-    if (is_dir_exists(string[0], TRUE) != ERR_SUCCESS)
+    if (fsl_is_dir_exists(string[0], TRUE) != FSL_ERR_SUCCESS)
     {
         LOGERROR(FALSE, TRUE, ERR_WORLD_CREATION_FAIL,
                 "Failed to Load World '%s', World Not Found\n", world_name);
@@ -151,22 +151,22 @@ u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
     /* ---- world seed ------------------------------------------------------ */
 
     snprintf(string[0], PATH_MAX, GAME_DIR_NAME_WORLDS"%s/"GAME_FILE_NAME_WORLD_SEED, world_name);
-    if (is_file_exists(string[0], FALSE) == ERR_SUCCESS)
+    if (fsl_is_file_exists(string[0], FALSE) == FSL_ERR_SUCCESS)
     {
-        file_len = get_file_contents(string[0], (void*)&file_contents, 1, TRUE);
-        if (*GAME_ERR != ERR_SUCCESS || !file_contents)
+        file_len = fsl_get_file_contents(string[0], (void*)&file_contents, 1, TRUE);
+        if (*GAME_ERR != FSL_ERR_SUCCESS || !file_contents)
             return *GAME_ERR;
         seed = (u64)strtoul(file_contents, NULL, 10);
-        mem_free((void*)&file_contents, file_len, "world_init().file_contents");
+        fsl_mem_free((void*)&file_contents, file_len, "world_load().file_contents");
     }
     else
     {
         if (!seed)
-            seed = rand_u64(get_time_raw_nsec());
+            seed = fsl_rand_u64(fsl_get_time_raw_nsec());
 
-        convert_u64_to_str(string[1], NAME_MAX, seed);
-        if (write_file(string[0], 1, strlen(string[1]),
-                    &string[1], TRUE, TRUE) != ERR_SUCCESS)
+        fsl_convert_u64_to_str(string[1], NAME_MAX, seed);
+        if (fsl_write_file(string[0], 1, strlen(string[1]),
+                    &string[1], TRUE, TRUE) != FSL_ERR_SUCCESS)
             return *GAME_ERR;
     }
 
@@ -186,27 +186,27 @@ u32 world_load(WorldInfo *world, const str *world_name, u64 seed)
 
     LOGINFO(FALSE, TRUE, "World Loaded '%s'\n", world_name);
 
-    *GAME_ERR = ERR_SUCCESS;
+    *GAME_ERR = FSL_ERR_SUCCESS;
     return *GAME_ERR;
 }
 
-void world_update(Player *p)
+void world_update(player *p)
 {
-    world.tick = world.tick_start + (u64)((f64)render->time * NSEC2SEC * WORLD_TICK_SPEED);
+    world.tick = world.tick_start + (u64)((f64)render->time * FSL_NSEC2SEC * WORLD_TICK_SPEED);
     world.days = world.tick / SET_DAY_TICKS_MAX;
 
     if (state_menu_depth || core.flag.super_debug)
         show_cursor;
     else disable_cursor;
 
-    player_update(p, 1.0 - exp(-1.0 * (f64)render->time_delta * NSEC2SEC));
+    player_update(p, 1.0 - exp(-1.0 * (f64)render->time_delta * FSL_NSEC2SEC));
     b8 use_mouse = !state_menu_depth && !core.flag.super_debug && !(p->flag & FLAG_PLAYER_DEAD);
     player_camera_movement_update(p, render->mouse_delta, use_mouse);
     player_target_update(p);
 
-    chunking_update(p->chunk, &p->chunk_delta);
-    chunk_tab_index = get_chunk_index(p->chunk, p->target);
+    chunking_update(p->ch, &p->ch_delta);
+    chunk_tab_index = get_chunk_index(p->ch, p->target);
 
-    update_projection_perspective(p->camera, &projection_world, FALSE);
-    update_projection_perspective(p->camera_hud, &projection_hud, FALSE);
+    fsl_update_projection_perspective(p->camera, &projection_world, FALSE);
+    fsl_update_projection_perspective(p->camera_hud, &projection_hud, FALSE);
 }

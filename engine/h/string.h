@@ -12,7 +12,7 @@ FSLAPI void fsl_swap_strings(str *s1, str *s2);
  *
  *  @return processed `string`.
  */
-FSLAPI str *fsl_swap_string_char(str *string, char c1, char c2);
+FSLAPI void fsl_swap_string_char(str *string, char c1, char c2);
 
 /*! @brief write temporary formatted string.
  *

@@ -55,8 +55,8 @@
 
 #define DEATH_STRING_MAX        128
 
-#define COLOR_TEXT_DEFAULT      DIAGNOSTIC_COLOR_DEBUG
-#define COLOR_TEXT_BRIGHT       DIAGNOSTIC_COLOR_DEFAULT
+#define COLOR_TEXT_DEFAULT      FSL_DIAGNOSTIC_COLOR_DEBUG
+#define COLOR_TEXT_BRIGHT       FSL_DIAGNOSTIC_COLOR_DEFAULT
 #define COLOR_TEXT_MOSS         0x6f9f3fff
 #define COLOR_TEXT_RADIOACTIVE  0x3f9f3fff
 #define COLOR_DIAGNOSTIC_NONE   0x995429ff
@@ -65,8 +65,8 @@
 
 /* ---- shader bindings ----------------------------------------------------- */
 
-#define SHADER_BUFFER_BINDING_SSBO_TEXTURE_INDICES (0 + ENGINE_SHADER_BUFFER_BINDING_COUNT)
-#define SHADER_BUFFER_BINDING_SSBO_TEXTURE_HANDLES (1 + ENGINE_SHADER_BUFFER_BINDING_COUNT)
+#define SHADER_BUFFER_BINDING_SSBO_TEXTURE_INDICES (0 + FSL_SHADER_BUFFER_BINDING_COUNT)
+#define SHADER_BUFFER_BINDING_SSBO_TEXTURE_HANDLES (1 + FSL_SHADER_BUFFER_BINDING_COUNT)
 
 /* ---- strings ------------------------------------------------------------- */
 
@@ -119,16 +119,16 @@
 #define DEATH_STRING_COLLISION_CEILING_2        "splat on a ceiling"
 #define DEATH_STRING_COLLISION_CEILING_COUNT    3
 
-enum /* MeshIndex */
+enum /* mesh_index */
 {
     MESH_SKYBOX,
     MESH_CUBE_OF_HAPPINESS,
     MESH_PLAYER,
     MESH_GIZMO,
     MESH_COUNT,
-}; /* MeshIndex */
+}; /* mesh_index */
 
-enum /* FBOIndex */
+enum /* fbo_index */
 {
     FBO_SKYBOX,
     FBO_WORLD,
@@ -137,30 +137,30 @@ enum /* FBOIndex */
     FBO_HUD_MSAA,
     FBO_POST_PROCESSING,
     FBO_COUNT,
-}; /* FBOIndex */
+}; /* fbo_index */
 
-enum /* FontIndex */
+enum /* font_index */
 {
     FONT_REG,
     FONT_REG_BOLD,
     FONT_MONO,
     FONT_MONO_BOLD,
     FONT_COUNT,
-}; /* FontIndex */
+}; /* font_index */
 
-enum PlayerDeath
+enum player_death_reason_index
 {
-    PLAYER_DEATH_COLLISION_WALL = 1,
-    PLAYER_DEATH_COLLISION_FLOOR,
-    PLAYER_DEATH_COLLISION_CEILING,
-    PLAYER_DEATH_COUNT,
-}; /* PlayerDeath */
+    PLAYER_DEATH_REASON_COLLISION_WALL = 1,
+    PLAYER_DEATH_REASON_COLLISION_FLOOR,
+    PLAYER_DEATH_REASON_COLLISION_CEILING,
+    PLAYER_DEATH_REASON_COUNT,
+}; /* player_death_reason_index */
 
-/*! @brief look-up table for 'str_death_' buffer sizes.
+/*! @brief look-up table for @ref str_death_<x> buffer sizes.
  *
- *  @remark read-only, initialized internally in 'src/common.c'.
+ *  @remark read-only, initialized internally in @ref common.c.
  */
-extern u32 DEATH_STRINGS_MAX[PLAYER_DEATH_COUNT];
+extern u32 DEATH_STRINGS_MAX[PLAYER_DEATH_REASON_COUNT];
 
 extern str str_death_collision_wall[DEATH_STRING_COLLISION_WALL_COUNT][DEATH_STRING_MAX];
 extern str str_death_collision_floor[DEATH_STRING_COLLISION_FLOOR_COUNT][DEATH_STRING_MAX];

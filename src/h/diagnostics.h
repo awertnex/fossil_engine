@@ -7,17 +7,17 @@
 
 #define GAME_ERR_OFFSET 512
 
-enum GameErrorCodes
+enum game_error_code
 {
     ERR_MODE_INTERNAL_DEBUG_DISABLE = GAME_ERR_OFFSET,
     ERR_MODE_INTERNAL_COLLIDE_DISABLE,
     ERR_WORLD_EXISTS,
     ERR_WORLD_CREATION_FAIL,
-}; /* GameErrorCodes */
+}; /* game_error_code */
 
 /*! @brief global pointer to error variable.
  *
- *  @remark declared and initialized internally in 'src/main.c'.
+ *  @remark declared and initialized internally in @ref main.c.
  */
 extern u32 *const GAME_ERR;
 

@@ -18,18 +18,16 @@ void fsl_swap_strings(str *s1, str *s2)
         fsl_swap_bits(&s1[i], &s2[i]);
 }
 
-str *fsl_swap_string_char(str *string, char c1, char c2)
+void fsl_swap_string_char(str *string, char c1, char c2)
 {
     u64 i, len = strlen(string);
-    if (!len) return string;
+    if (!len) return;
 
     for (i = 0; i < len; ++i)
     {
         if (string[i] == c1)
             string[i] = c2;
     }
-
-    return string;
 }
 
 str *fsl_stringf(const str *format, ...)

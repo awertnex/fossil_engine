@@ -145,9 +145,9 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 lo
 
     if (!FSL_DIR_PROC_ROOT)
     {
-        FSL_DIR_PROC_ROOT = fsl_get_path_bin_root();
-        if (!FSL_DIR_PROC_ROOT)
+        if (fsl_get_path_bin_root(&FSL_DIR_PROC_ROOT) != FSL_ERR_SUCCESS)
             return fsl_err;
+
         fsl_change_dir(FSL_DIR_PROC_ROOT);
     }
 
@@ -187,7 +187,7 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 lo
     return fsl_err;
 }
 
-void logger_close(void)
+void fsl_logger_close(void)
 {
     _LOGTRACE(TRUE, "%s\n", "Closing Logger..");
 

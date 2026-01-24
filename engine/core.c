@@ -102,8 +102,7 @@ u32 fsl_init(int argc, char **argv, const str *_log_dir, const str *title,
 
     if (!FSL_DIR_PROC_ROOT)
     {
-        FSL_DIR_PROC_ROOT = fsl_get_path_bin_root();
-        if (!FSL_DIR_PROC_ROOT)
+        if (fsl_get_path_bin_root(&FSL_DIR_PROC_ROOT) != FSL_ERR_SUCCESS)
             goto cleanup;
         fsl_change_dir(FSL_DIR_PROC_ROOT);
     }

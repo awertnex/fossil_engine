@@ -102,7 +102,7 @@ cleanup:
     return fsl_err;
 }
 
-void ui_start(fsl_fbo *fbo, b8 nine_slice, b8 clear)
+void fsl_ui_start(fsl_fbo *fbo, b8 nine_slice, b8 clear)
 {
     static v2i32 render_size = {0};
     fsl_fbo *_fbo = &fsl_ui_core.fbo;

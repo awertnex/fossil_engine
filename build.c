@@ -4,15 +4,15 @@
 #define DIR_SRC     "src/"
 #define DIR_OUT     "Heaven-Hell Continuum/"
 
-#if PLATFORM_LINUX
-#   define STR_OUT  DIR_OUT"hhc"
-#elif PLATFORM_WIN
+#if PLATFORM_WIN
 #   define STR_OUT  "\""DIR_OUT"hhc"EXE"\""
+#else
+#   define STR_OUT  DIR_OUT"hhc"
 #endif /* PLATFORM */
 
 int main(int argc, char **argv)
 {
-    /* will fail and exit if error */
+    /* if error, will fail and exit */
     build_init(argc, argv, "build.c", "build"EXE);
 
     if (is_dir_exists(DIR_SRC, TRUE) != ERR_SUCCESS)
@@ -41,7 +41,7 @@ int main(int argc, char **argv)
     cmd_push(NULL, "-Wformat-truncation=0");
     cmd_push(NULL, "-ggdb");
     cmd_push(NULL, "-Wl,-rpath="RUNTIME_PATH);
-    engine_link_libs(NULL);
+    fsl_link_libs(NULL);
     cmd_push(NULL, "-o");
     cmd_push(NULL, STR_OUT);
     cmd_ready(NULL);

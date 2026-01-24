@@ -27,7 +27,7 @@ extern u32 bind_build_or_use;
 
 /* extern u32 bind_drop_item; */
 
-/* two arrays for number keys and numberpad keys */
+/*! @remark two arrays for number keys and numberpad keys */
 extern u32 bind_hotbar[2][PLAYER_HOTBAR_SLOTS_MAX];
 
 extern u32 bind_inventory;
@@ -35,7 +35,7 @@ extern u32 bind_inventory;
 /* ---- misc ---------------------------------------------------------------- */
 
 extern u32 bind_toggle_hud;
-/* extern u32 bind_take_screenshot; */
+extern u32 bind_take_screenshot;
 extern u32 bind_toggle_debug;
 extern u32 bind_toggle_cinematic_motion;
 extern u32 bind_toggle_perspective;
@@ -62,11 +62,11 @@ extern u32 bind_toggle_chunk_queue_visualizer;
 
 /*! @brief update input from keyboard.
  *
- *  handle all key binds listed above and perform their logic on mostly 'p->flag'.
+ *  handle all key binds listed above and perform their logic on mostly `p->flag`.
  *
  *  @remark only updates player flags, no parameters are updated except for
- *  'p->input'.
+ *  `p->input`.
  */
-void input_update(Player *p);
+void input_update(player *p);
 
 #endif /* GAME_INPUT_H */

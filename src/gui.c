@@ -13,7 +13,7 @@
 #include "h/gui.h"
 #include "h/dir.h"
 
-u16 menu_index;
+u16 menu_index_cur;
 u16 menu_layer[5] = {0};
 u8 state_menu_depth = 0;
 b8 is_menu_ready;
@@ -22,9 +22,9 @@ u8 buttons[BTN_COUNT];
 u32 gui_init(void)
 {
     //game_menu_pos = setting.render_size.y / 3; /* TODO: figure this out */
-    //menu_index = MENU_TITLE;
+    //menu_index_cur = MENU_TITLE;
     //memset(buttons, 0, BTN_COUNT);
-    return ERR_SUCCESS;
+    return FSL_ERR_SUCCESS;
 }
 
 #ifdef FUCK /* TODO: undef FUCK */
@@ -64,16 +64,16 @@ void draw_texture_a(Texture2D texture, Rectangle source, Rectangle dest, v2i16 p
 
 void update_menus(v2f32 render_size)
 {
-    if (!menu_index)
+    if (!menu_index_cur)
         return;
 
-    switch (menu_index)
+    switch (menu_index_cur)
     {
         case MENU_TITLE:
             if (!is_menu_ready)
             {
                 menu_layer[state_menu_depth] = MENU_TITLE;
-                menu_index = MENU_TITLE;
+                menu_index_cur = MENU_TITLE;
                 memset(buttons, 0, BTN_COUNT);
                 buttons[BTN_SINGLEPLAYER] = 1;
                 buttons[BTN_MULTIPLAYER] = 1;
@@ -531,7 +531,7 @@ void draw_button(Texture2D texture, Rectangle button, v2i16 pos, u8 align_x, u8 
 
 void btn_func_singleplayer()
 {
-    menu_index = 0; /* TODO: set actual value (MENU_SINGLEPLAYER) */
+    menu_index_cur = 0; /* TODO: set actual value (MENU_SINGLEPLAYER) */
     state_menu_depth = 0; /* TODO: set actual value (2) */
     is_menu_ready = 0;
     flag &= ~FLAG_PAUSED; /*temp*/
@@ -541,14 +541,14 @@ void btn_func_singleplayer()
 
 void btn_func_multiplayer()
 {
-    menu_index = MENU_MULTIPLAYER;
+    menu_index_cur = MENU_MULTIPLAYER;
     state_menu_depth = 2;
     is_menu_ready = 0;
 }
 
 void btn_func_settings()
 {
-    menu_index = MENU_SETTINGS;
+    menu_index_cur = MENU_SETTINGS;
     state_menu_depth = 2;
     is_menu_ready = 0;
 }
@@ -560,7 +560,7 @@ void btn_func_quit_game()
 
 void btn_func_unpause()
 {
-    menu_index = 0;
+    menu_index_cur = 0;
     state_menu_depth = 0;
     is_menu_ready = 0;
     flag &= ~FLAG_PAUSED;
@@ -570,7 +570,7 @@ void btn_func_unpause()
 
 void btn_func_quit_world()
 {
-    menu_index = MENU_TITLE;
+    menu_index_cur = MENU_TITLE;
     state_menu_depth = 1;
     is_menu_ready = 0;
     /* TODO: save and unload world */
@@ -581,7 +581,7 @@ void btn_func_back()
 {
     menu_layer[state_menu_depth] = 0;
     --state_menu_depth;
-    menu_index = menu_layer[state_menu_depth];
+    menu_index_cur = menu_layer[state_menu_depth];
     is_menu_ready = 0;
 }
 #endif /* TODO: undef FUCK */

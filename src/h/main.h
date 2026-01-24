@@ -8,7 +8,7 @@
 
 #include "common.h"
 
-struct Core
+struct hhc_core
 {
     struct /* flag */
     {
@@ -32,9 +32,9 @@ struct Core
         u64 chunk_gizmo: 1;
         u64 chunk_queue_visualizer: 1;
     } debug;
-}; /* Core */
+}; /* hhc_core */
 
-struct Settings
+struct hhc_settings
 {
     /* ---- internal -------------------------------------------------------- */
 
@@ -63,9 +63,9 @@ struct Settings
     f32 fov;
     u32 render_distance;
     b8 anti_aliasing;
-}; /* Settings */
+}; /* hhc_settings */
 
-struct Uniform
+struct hhc_uniform
 {
     struct /* defaults */
     {
@@ -146,12 +146,12 @@ struct Uniform
         GLint color;
     } bounding_box;
 
-}; /* Uniform */
+}; /* hhc_uniform */
 
-extern struct Core core;
-extern struct Settings settings;
-extern Projection projection_world;
-extern Projection projection_hud;
-extern Font *font[FONT_COUNT];
+extern struct hhc_core core;
+extern struct hhc_settings settings;
+extern fsl_projection projection_world;
+extern fsl_projection projection_hud;
+extern fsl_font *font[FONT_COUNT];
 
 #endif /* GAME_MAIN_H */

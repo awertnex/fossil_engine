@@ -10,7 +10,7 @@
 #include "h/dir.h"
 #include "h/main.h"
 
-ShaderProgram shader[SHADER_COUNT] =
+fsl_shader_program shader[SHADER_COUNT] =
 {
     [SHADER_DEFAULT] =
     {
@@ -80,9 +80,9 @@ ShaderProgram shader[SHADER_COUNT] =
     },
 };
 
-Texture texture[TEXTURE_COUNT] = {0};
-Block *blocks = NULL;
-static Texture *block_textures = NULL;
+fsl_texture texture[TEXTURE_COUNT] = {0};
+block *blocks = NULL;
+static fsl_texture *block_textures = NULL;
 static GLuint ssbo_texture_indices_id = 0;
 static u32 ssbo_texture_indices[BLOCK_COUNT * 6] = {0};
 static GLuint ssbo_texture_handles_id = 0;
@@ -93,113 +93,113 @@ u32 assets_init(void)
     u32 i = 0, j = 0;
 
     if (
-            mem_map((void*)&block_textures, TEXTURE_BLOCK_COUNT * sizeof(Texture),
-                "assets_init().block_textures") != ERR_SUCCESS ||
-            mem_map((void*)&blocks, BLOCK_COUNT * sizeof(Block),
-                "assets_init().blocks") != ERR_SUCCESS)
+            fsl_mem_map((void*)&block_textures, TEXTURE_BLOCK_COUNT * sizeof(fsl_texture),
+                "assets_init().block_textures") != FSL_ERR_SUCCESS ||
+            fsl_mem_map((void*)&blocks, BLOCK_COUNT * sizeof(block),
+                "assets_init().blocks") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     /* ---- shaders --------------------------------------------------------- */
 
     if (
-            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_DEFAULT]) != ERR_SUCCESS ||
-            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_GIZMO]) != ERR_SUCCESS ||
-            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_GIZMO_CHUNK]) != ERR_SUCCESS ||
-            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_SKYBOX]) != ERR_SUCCESS ||
-            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_POST_PROCESSING]) != ERR_SUCCESS ||
-            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_VOXEL]) != ERR_SUCCESS ||
-            shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_BOUNDING_BOX]) != ERR_SUCCESS)
+            fsl_shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_DEFAULT]) != FSL_ERR_SUCCESS ||
+            fsl_shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_GIZMO]) != FSL_ERR_SUCCESS ||
+            fsl_shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_GIZMO_CHUNK]) != FSL_ERR_SUCCESS ||
+            fsl_shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_SKYBOX]) != FSL_ERR_SUCCESS ||
+            fsl_shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_POST_PROCESSING]) != FSL_ERR_SUCCESS ||
+            fsl_shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_VOXEL]) != FSL_ERR_SUCCESS ||
+            fsl_shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_BOUNDING_BOX]) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     /* ---- textures -------------------------------------------------------- */
 
     if (
-            texture_init(&texture[TEXTURE_CROSSHAIR], (v2i32){16, 16},
-                GL_RGBA, GL_RGBA, GL_NEAREST, COLOR_CHANNELS_RGBA, FALSE,
-                GAME_DIR_NAME_GUI"crosshair.png") != ERR_SUCCESS ||
+            fsl_texture_init(&texture[TEXTURE_CROSSHAIR], (v2i32){16, 16},
+                GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
+                GAME_DIR_NAME_GUI"crosshair.png") != FSL_ERR_SUCCESS ||
 
-            texture_init(&texture[TEXTURE_ITEM_BAR], (v2i32){256, 256},
-                GL_RGBA, GL_RGBA, GL_NEAREST, COLOR_CHANNELS_RGBA, FALSE,
-                GAME_DIR_NAME_GUI"item_bar.png") != ERR_SUCCESS ||
+            fsl_texture_init(&texture[TEXTURE_ITEM_BAR], (v2i32){256, 256},
+                GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
+                GAME_DIR_NAME_GUI"item_bar.png") != FSL_ERR_SUCCESS ||
 
-            texture_init(&texture[TEXTURE_SKYBOX_VAL], (v2i32){512, 512},
-                GL_RED, GL_RED, GL_NEAREST, COLOR_CHANNELS_GRAY, FALSE,
-                GAME_DIR_NAME_ENV"skybox_val.png") != ERR_SUCCESS ||
+            fsl_texture_init(&texture[TEXTURE_SKYBOX_VAL], (v2i32){512, 512},
+                GL_RED, GL_RED, GL_NEAREST, FSL_COLOR_CHANNELS_GRAY, FALSE,
+                GAME_DIR_NAME_ENV"skybox_val.png") != FSL_ERR_SUCCESS ||
 
-            texture_init(&texture[TEXTURE_SKYBOX_HORIZON], (v2i32){512, 512},
-                GL_RED, GL_RED, GL_NEAREST, COLOR_CHANNELS_GRAY, FALSE,
-                GAME_DIR_NAME_ENV"skybox_horizon.png") != ERR_SUCCESS ||
+            fsl_texture_init(&texture[TEXTURE_SKYBOX_HORIZON], (v2i32){512, 512},
+                GL_RED, GL_RED, GL_NEAREST, FSL_COLOR_CHANNELS_GRAY, FALSE,
+                GAME_DIR_NAME_ENV"skybox_horizon.png") != FSL_ERR_SUCCESS ||
 
-            texture_init(&texture[TEXTURE_SKYBOX_STARS], (v2i32){512, 512},
-                GL_RGBA, GL_RGBA, GL_NEAREST, COLOR_CHANNELS_RGBA, FALSE,
-                GAME_DIR_NAME_ENV"skybox_stars.png") != ERR_SUCCESS ||
+            fsl_texture_init(&texture[TEXTURE_SKYBOX_STARS], (v2i32){512, 512},
+                GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
+                GAME_DIR_NAME_ENV"skybox_stars.png") != FSL_ERR_SUCCESS ||
 
-            texture_init(&texture[TEXTURE_SUN], (v2i32){128, 128},
-                    GL_RGBA, GL_RGBA, GL_NEAREST, COLOR_CHANNELS_RGBA, FALSE,
-                    GAME_DIR_NAME_ENV"sun.png") != ERR_SUCCESS ||
+            fsl_texture_init(&texture[TEXTURE_SUN], (v2i32){128, 128},
+                    GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
+                    GAME_DIR_NAME_ENV"sun.png") != FSL_ERR_SUCCESS ||
 
-            texture_init(&texture[TEXTURE_MOON], (v2i32){128, 128},
-                    GL_RGBA, GL_RGBA, GL_NEAREST, COLOR_CHANNELS_RGBA, FALSE,
-                    GAME_DIR_NAME_ENV"moon.png") != ERR_SUCCESS)
+            fsl_texture_init(&texture[TEXTURE_MOON], (v2i32){128, 128},
+                    GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
+                    GAME_DIR_NAME_ENV"moon.png") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     for (i = 0; i < TEXTURE_COUNT; ++i)
-        if (texture_generate(&texture[i], FALSE) != ERR_SUCCESS)
+        if (fsl_texture_generate(&texture[i], FALSE) != FSL_ERR_SUCCESS)
             goto cleanup;
 
     /* ---- block textures -------------------------------------------------- */
 
     if (
             block_texture_init(TEXTURE_BLOCK_GRASS_SIDE, (v2i32){16, 16},
-                "grass_side.png") != ERR_SUCCESS ||
+                "grass_side.png") != FSL_ERR_SUCCESS ||
 
             block_texture_init(TEXTURE_BLOCK_GRASS_TOP, (v2i32){16, 16},
-                "grass_top.png") != ERR_SUCCESS ||
+                "grass_top.png") != FSL_ERR_SUCCESS ||
 
             block_texture_init(TEXTURE_BLOCK_DIRT, (v2i32){16, 16},
-                "dirt.png") != ERR_SUCCESS ||
+                "dirt.png") != FSL_ERR_SUCCESS ||
 
             block_texture_init(TEXTURE_BLOCK_DIRTUP, (v2i32){16, 16},
-                "dirtup.png") != ERR_SUCCESS ||
+                "dirtup.png") != FSL_ERR_SUCCESS ||
 
             block_texture_init(TEXTURE_BLOCK_STONE, (v2i32){16, 16},
-                "stone.png") != ERR_SUCCESS ||
+                "stone.png") != FSL_ERR_SUCCESS ||
 
             block_texture_init(TEXTURE_BLOCK_SAND, (v2i32){16, 16},
-                "sand.png") != ERR_SUCCESS ||
+                "sand.png") != FSL_ERR_SUCCESS ||
 
             block_texture_init(TEXTURE_BLOCK_GLASS, (v2i32){16, 16},
-                "glass.png") != ERR_SUCCESS ||
+                "glass.png") != FSL_ERR_SUCCESS ||
 
             block_texture_init(TEXTURE_BLOCK_WOOD_BIRCH_LOG_SIDE, (v2i32){16, 16},
-                    "wood_birch_log_side.png") != ERR_SUCCESS ||
+                    "wood_birch_log_side.png") != FSL_ERR_SUCCESS ||
 
             block_texture_init(TEXTURE_BLOCK_WOOD_BIRCH_LOG_TOP, (v2i32){16, 16},
-                    "wood_birch_log_top.png") != ERR_SUCCESS ||
+                    "wood_birch_log_top.png") != FSL_ERR_SUCCESS ||
 
             block_texture_init(TEXTURE_BLOCK_WOOD_BIRCH_PLANKS, (v2i32){16, 16},
-                    "wood_birch_planks.png") != ERR_SUCCESS ||
+                    "wood_birch_planks.png") != FSL_ERR_SUCCESS ||
 
             block_texture_init(TEXTURE_BLOCK_WOOD_CHERRY_LOG_SIDE, (v2i32){16, 16},
-                    "wood_cherry_log_side.png") != ERR_SUCCESS ||
+                    "wood_cherry_log_side.png") != FSL_ERR_SUCCESS ||
 
             block_texture_init(TEXTURE_BLOCK_WOOD_CHERRY_LOG_TOP, (v2i32){16, 16},
-                    "wood_cherry_log_top.png") != ERR_SUCCESS ||
+                    "wood_cherry_log_top.png") != FSL_ERR_SUCCESS ||
 
             block_texture_init(TEXTURE_BLOCK_WOOD_CHERRY_PLANKS, (v2i32){16, 16},
-                    "wood_cherry_planks.png") != ERR_SUCCESS ||
+                    "wood_cherry_planks.png") != FSL_ERR_SUCCESS ||
 
             block_texture_init(TEXTURE_BLOCK_WOOD_OAK_LOG_SIDE, (v2i32){16, 16},
-                    "wood_oak_log_side.png") != ERR_SUCCESS ||
+                    "wood_oak_log_side.png") != FSL_ERR_SUCCESS ||
 
             block_texture_init(TEXTURE_BLOCK_WOOD_OAK_LOG_TOP, (v2i32){16, 16},
-                    "wood_oak_log_top.png") != ERR_SUCCESS ||
+                    "wood_oak_log_top.png") != FSL_ERR_SUCCESS ||
 
             block_texture_init(TEXTURE_BLOCK_WOOD_OAK_PLANKS, (v2i32){16, 16},
-                    "wood_oak_planks.png") != ERR_SUCCESS ||
+                    "wood_oak_planks.png") != FSL_ERR_SUCCESS ||
 
             block_texture_init(TEXTURE_BLOCK_BLOOD, (v2i32){16, 16},
-                "block_blood.png") != ERR_SUCCESS)
+                "block_blood.png") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     for (i = 0; i < TEXTURE_BLOCK_COUNT; ++i)
@@ -233,7 +233,7 @@ u32 assets_init(void)
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-    *GAME_ERR = ERR_SUCCESS;
+    *GAME_ERR = FSL_ERR_SUCCESS;
     return *GAME_ERR;
 
 cleanup:
@@ -246,16 +246,16 @@ void assets_free(void)
 {
     u32 i = 0;
     for (i = 0; i < TEXTURE_BLOCK_COUNT; ++i)
-        texture_free(&block_textures[i]);
-
-    mem_unmap((void*)&block_textures, TEXTURE_BLOCK_COUNT * sizeof(Texture),
-            "assets_free().block_textures");
-
-    mem_unmap((void*)&blocks, BLOCK_COUNT * sizeof(Block),
-            "assets_free().blocks");
+        fsl_texture_free(&block_textures[i]);
 
     for (i = 0; i < TEXTURE_COUNT; ++i)
-        texture_free(&texture[i]);
+        fsl_texture_free(&texture[i]);
+
+    fsl_mem_unmap((void*)&block_textures, TEXTURE_BLOCK_COUNT * sizeof(fsl_texture),
+            "assets_free().block_textures");
+
+    fsl_mem_unmap((void*)&blocks, BLOCK_COUNT * sizeof(block),
+            "assets_free().blocks");
 
     if (ssbo_texture_indices_id)
         glDeleteBuffers(1, &ssbo_texture_indices_id);
@@ -268,7 +268,7 @@ u32 block_texture_init(u32 index, v2i32 size, str *name)
 {
     if (!name)
     {
-        LOGERROR(FALSE, FALSE, ERR_POINTER_NULL,
+        LOGERROR(FALSE, FALSE, FSL_ERR_POINTER_NULL,
                 "Failed to Initialize Texture [%p], 'name' NULL\n",
                 &block_textures[index]);
         goto cleanup;
@@ -277,19 +277,19 @@ u32 block_texture_init(u32 index, v2i32 size, str *name)
     block_textures[index].size = size;
 
     if (
-            texture_init(&block_textures[index], block_textures[index].size,
-                GL_RGBA, GL_RGBA, GL_NEAREST, COLOR_CHANNELS_RGBA, FALSE,
-                stringf("%s%s", DIR_ROOT[DIR_BLOCKS], name)) != ERR_SUCCESS ||
+            fsl_texture_init(&block_textures[index], block_textures[index].size,
+                GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
+                fsl_stringf("%s%s", DIR_ROOT[DIR_BLOCKS], name)) != FSL_ERR_SUCCESS ||
 
-            texture_generate(&block_textures[index], TRUE) != ERR_SUCCESS)
+            fsl_texture_generate(&block_textures[index], TRUE) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    *GAME_ERR = ERR_SUCCESS;
+    *GAME_ERR = FSL_ERR_SUCCESS;
     return *GAME_ERR;
 
 cleanup:
 
-    texture_free(&block_textures[index]);
+    fsl_texture_free(&block_textures[index]);
     return *GAME_ERR;
 }
 

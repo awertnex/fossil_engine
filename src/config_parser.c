@@ -33,9 +33,9 @@ void parse_config(void)
     str *file_contents = NULL;
     str string[NAME_MAX] = {0};
     u32 i = 0;
-    u64 file_len = get_file_contents("Heaven-Hell Continuum/config/settings.txt",
+    u64 file_len = fsl_get_file_contents("Heaven-Hell Continuum/config/settings.txt",
             (void*)&file_contents, 1, TRUE);
-    if (engine_err != ERR_SUCCESS || !file_contents)
+    if (fsl_err != FSL_ERR_SUCCESS || !file_contents)
         return;
 
     for (i = 0; i < file_len; ++i)
@@ -45,5 +45,5 @@ void parse_config(void)
 
     }
 
-    mem_free((void*)&file_contents, file_len, "parse_config().file_contents");
+    fsl_mem_free((void*)&file_contents, file_len, "parse_config().file_contents");
 }

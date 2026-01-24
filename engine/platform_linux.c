@@ -44,9 +44,9 @@ int fsl_change_dir(const str *path)
     return success;
 }
 
-u32 _fsl_get_path_absolute(const str *path, str *path_real)
+u32 _fsl_get_path_absolute(const str *name, str *dst)
 {
-    if (!realpath(path, path_real))
+    if (!realpath(name, dst))
     {
         fsl_err = FSL_ERR_GET_PATH_ABSOLUTE_FAIL;
         return fsl_err;
@@ -56,9 +56,9 @@ u32 _fsl_get_path_absolute(const str *path, str *path_real)
     return fsl_err;
 }
 
-u32 _fsl_get_path_bin_root(str *path)
+u32 _fsl_get_path_bin_root(str *dst)
 {
-    if (!readlink("/proc/self/exe", path, PATH_MAX))
+    if (!readlink("/proc/self/exe", dst, PATH_MAX))
     {
         _LOGFATAL(FALSE, FSL_ERR_GET_PATH_BIN_ROOT_FAIL,
                 "%s\n", "Failed 'get_path_bin_root()', Process Aborted");

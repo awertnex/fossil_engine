@@ -13,7 +13,7 @@
 #define FRICTION_BLOCK_WET      0.1f
 #define FRICTION_BLOCK_HARD     0.6f
 
-enum /* ShaderIndex */
+enum /* shader_index */
 {
     SHADER_DEFAULT,
     SHADER_SKYBOX,
@@ -23,9 +23,9 @@ enum /* ShaderIndex */
     SHADER_VOXEL,
     SHADER_BOUNDING_BOX,
     SHADER_COUNT,
-}; /* ShaderIndex */
+}; /* shader_index */
 
-enum /* TextureIndex */
+enum /* texture_index */
 {
     TEXTURE_CROSSHAIR,
     TEXTURE_ITEM_BAR,
@@ -35,9 +35,9 @@ enum /* TextureIndex */
     TEXTURE_SUN,
     TEXTURE_MOON,
     TEXTURE_COUNT,
-}; /* TextureIndex */
+}; /* texture_index */
 
-enum /* TextureBlockIndex */
+enum /* texture_block_index */
 {
     TEXTURE_BLOCK_GRASS_SIDE,
     TEXTURE_BLOCK_GRASS_TOP,
@@ -57,9 +57,9 @@ enum /* TextureBlockIndex */
     TEXTURE_BLOCK_WOOD_OAK_PLANKS,
     TEXTURE_BLOCK_BLOOD,
     TEXTURE_BLOCK_COUNT,
-}; /* TextureBlockIndex */
+}; /* texture_block_index */
 
-enum BlockID
+enum block_id
 {
     BLOCK_NONE,
     BLOCK_GRASS,
@@ -76,39 +76,39 @@ enum BlockID
     BLOCK_WOOD_OAK_PLANKS,
     BLOCK_BLOOD,
     BLOCK_COUNT,
-}; /* BlockID */
+}; /* block_id */
 
-enum BlockState
+enum block_state
 {
     BLOCK_STATE_SOLID = 1,
-}; /* BlockState */
+}; /* block_state */
 
-typedef struct Block
+typedef struct block
 {
     str name[NAME_MAX];
-    enum BlockState state;
+    enum block_state state;
     u32 texture_index[6]; /* px, nx, py, ny, pz, nz */
     f32 friction;
-} Block;
+} block;
 
-extern ShaderProgram shader[SHADER_COUNT];
-extern Texture texture[TEXTURE_COUNT];
+extern fsl_shader_program shader[SHADER_COUNT];
+extern fsl_texture texture[TEXTURE_COUNT];
 
-extern Block *blocks;
+extern block *blocks;
 
-/*! @return non-zero on failure and '*GAME_ERR' is set accordingly.
+/*! @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
 u32 assets_init(void);
 
 void assets_free(void);
 
-/*! @param index = index into global array 'block_textures'.
+/*! @param index = index into @ref block_textures.
  *
- *  @return non-zero on failure and '*GAME_ERR' is set accordingly.
+ *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
 u32 block_texture_init(u32 index, v2i32 size, str *name);
 
-/*! @return non-zero on failure and '*GAME_ERR' is set accordingly.
+/*! @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
 void blocks_init(void);
 

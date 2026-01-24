@@ -126,9 +126,12 @@ FSLAPI u32 _fsl_append_file(const str *name, u64 size, u64 length, void *buf, b8
 
 /*! @brief get calloc'd string of resolved `name`.
  *
- *  @return `NULL` on failure and @ref fsl_err is set accordingly.
+ *  @param name relative path.
+ *  @param dst result/canonical path at `name`, ending with slash (`/`).
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI str *fsl_get_path_absolute(const str *name);
+FSLAPI u32 fsl_get_path_absolute(const str *name, str **dst);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -136,12 +139,12 @@ FSLAPI str *fsl_get_path_absolute(const str *name);
  *
  *  @brief get real path.
  * 
- *  @param path relative path.
- *  @param path_real result/canonical `path`, ending with slash (`/`).
+ *  @param name relative path.
+ *  @param dst result/canonical `path`, ending with slash (`/`).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 _fsl_get_path_absolute(const str *path, str *path_real);
+u32 _fsl_get_path_absolute(const str *name, str *dst);
 
 /*! @brief append @ref FSL_SLASH_NATIVE onto `path` if `path` not ending in
  *  @ref FSL_SLASH_NATIVE, null (`\n`) terminated.
@@ -164,16 +167,18 @@ FSLAPI void fsl_posix_slash(str *path);
 
 /*! @brief get `path` retracted to its parent directory.
  *
- *  @return `NULL` on failure and @ref fsl_err is set accordingly.
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI str *fsl_retract_path(str *path);
+FSLAPI u32 fsl_retract_path(str *path);
 
 /*! @brief get base name of `path`.
  *
  *  @param size max size of `dst` to use.
  *
  *  @remark @ref fsl_err is set accordingly on failure.
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI void fsl_get_base_name(const str *path, str *dst, u64 size);
+FSLAPI u32 fsl_get_base_name(const str *path, str *dst, u64 size);
 
 #endif /* FSL_DIR_H */

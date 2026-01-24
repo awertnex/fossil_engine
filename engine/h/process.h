@@ -4,21 +4,22 @@
 #include "common.h"
 #include "types.h"
 
-/*! @brief get calloc'd string of executable's path, slash (`/`) and null (`\0`) terminated.
+/*! @brief get current path of binary/executable, slash (`/`) and null (`\0`) terminated,
+ *  assign allocated path string to `dst`.
  *
- *  @return `NULL` on failure and @ref fsl_err is set accordingly.
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI str *fsl_get_path_bin_root(void);
+FSLAPI u32 fsl_get_path_bin_root(str **dst);
 
 /*! -- INTERNAL USE ONLY --;
  *
  *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
- *  @brief get current path of binary/executable, assign allocated path string to `path`.
+ *  @brief get current path of binary/executable and assign to `dst`.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 _fsl_get_path_bin_root(str *path);
+u32 _fsl_get_path_bin_root(str *dst);
 
 /*! @brief execute command in a separate child process (based on @ref execvp()).
  * 

@@ -170,8 +170,7 @@ fsl_buf fsl_get_dir_contents(const str *name)
     if (fsl_is_dir_exists(name, TRUE) != FSL_ERR_SUCCESS)
         return (fsl_buf){0};
 
-    dir_name_absolute = fsl_get_path_absolute(name);
-    if (!dir_name_absolute)
+    if (fsl_get_path_absolute(name, &dir_name_absolute) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     snprintf(dir_name_absolute_usable, PATH_MAX, "%s", dir_name_absolute);
@@ -226,7 +225,7 @@ cleanup:
     return (fsl_buf){0};
 }
 
-u64 get_dir_entry_count(const str *name)
+u64 fsl_get_dir_entry_count(const str *name)
 {
     DIR *dir = NULL;
     u64 count;
@@ -348,7 +347,7 @@ u32 fsl_copy_dir(const str *src, const str *dst, b8 contents_only)
     return fsl_err;
 }
 
-u32 write_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text)
+u32 fsl_write_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text)
 {
     FILE *file = NULL;
     if ((file = fopen(name, "wb")) == NULL)
@@ -371,7 +370,7 @@ u32 write_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text
     return fsl_err;
 }
 
-u32 append_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text)
+u32 fsl_append_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text)
 {
     if (_fsl_append_file(name, size, length, buf, log, text) == FSL_ERR_SUCCESS)
         _LOGTRACE(FALSE, "File Appended '%s'\n", name);
@@ -400,70 +399,68 @@ u32 _fsl_append_file(const str *name, u64 size, u64 length, void *buf, b8 log, b
     return fsl_err;
 }
 
-str *fsl_get_path_absolute(const str *name)
+u32 fsl_get_path_absolute(const str *name, str **dst)
 {
     str path_absolute[PATH_MAX] = {0};
-    str *result = NULL;
     u64 len = 0;
 
     if (strlen(name) >= PATH_MAX - 1)
     {
         _LOGERROR(TRUE, FSL_ERR_GET_PATH_ABSOLUTE_FAIL, "%s\n", "Failed to Get Absolute Path, Path Too Long");
-        return NULL;
+        return fsl_err;
     }
 
     if (fsl_is_dir_exists(name, TRUE) != FSL_ERR_SUCCESS)
-        return NULL;
+        return fsl_err;
 
     if (_fsl_get_path_absolute(name, path_absolute) != FSL_ERR_SUCCESS)
-        return NULL;
+        return fsl_err;
 
     len = strlen(path_absolute) + 1;
 
-    if (fsl_mem_alloc((void*)&result, sizeof(str*) * (len + 1),
-                "fsl_get_path_absolute().result") != FSL_ERR_SUCCESS)
-        return NULL;
+    if (!*dst && fsl_mem_alloc((void*)dst, sizeof(str*) * (len + 1),
+                "fsl_get_path_absolute().dst") != FSL_ERR_SUCCESS)
+        return fsl_err;
 
-    strncpy(result, path_absolute, len);
-    fsl_check_slash(result);
+    strncpy(*dst, path_absolute, len);
+    fsl_check_slash(*dst);
 
     fsl_err = FSL_ERR_SUCCESS;
-    return result;
+    return fsl_err;
 }
 
-str *fsl_get_path_bin_root(void)
+u32 fsl_get_path_bin_root(str **dst)
 {
     str path_bin_root[PATH_MAX] = {0};
-    str *result = NULL;
     u64 len = 0;
     char *last_slash = NULL;
 
     if (_fsl_get_path_bin_root(path_bin_root) != FSL_ERR_SUCCESS)
-        return NULL;
+        return fsl_err;
 
     len = strlen(path_bin_root) + 1;
     if (len >= PATH_MAX - 1)
     {
         _LOGFATAL(TRUE, FSL_ERR_PATH_TOO_LONG,
                 "Path Too Long '%s', Process Aborted\n", path_bin_root);
-        return NULL;
+        return fsl_err;
     }
 
     path_bin_root[len] = 0;
-    if (fsl_mem_alloc((void*)&result, PATH_MAX,
-                "fsl_get_path_bin_root().path_bin_root") != FSL_ERR_SUCCESS)
-        return NULL;
+    if (!*dst && fsl_mem_alloc((void*)dst, PATH_MAX,
+                "fsl_get_path_bin_root().dst") != FSL_ERR_SUCCESS)
+        return fsl_err;
 
-    strncpy(result, path_bin_root, len);
+    strncpy(*dst, path_bin_root, len);
 
-    last_slash = strrchr(result, '/');
+    last_slash = strrchr(*dst, '/');
     if (last_slash)
         *last_slash = 0;
-    fsl_check_slash(result);
-    fsl_normalize_slash(result);
+    fsl_check_slash(*dst);
+    fsl_normalize_slash(*dst);
 
     fsl_err = FSL_ERR_SUCCESS;
-    return result;
+    return fsl_err;
 }
 
 void fsl_check_slash(str *path)
@@ -536,18 +533,22 @@ void fsl_posix_slash(str *path)
     fsl_err = FSL_ERR_SUCCESS;
 }
 
-str *retract_path(str *path)
+u32 fsl_retract_path(str *path)
 {
     u64 len, i, stage = 0;
 
     if (!path)
     {
         fsl_err = FSL_ERR_POINTER_NULL;
-        return NULL;
+        return fsl_err;
     }
 
     len = strlen(path);
-    if (len <= 1) return path;
+    if (len <= 1)
+    {
+        _LOGERROR(TRUE, FSL_ERR_SIZE_TOO_SMALL, "%s\n", "Failed to Retract Path, Size Too Small");
+        return fsl_err;
+    }
 
     for (i = 0; i < len; ++i)
     {
@@ -563,10 +564,10 @@ str *retract_path(str *path)
     }
 
     fsl_err = FSL_ERR_SUCCESS;
-    return path;
+    return fsl_err;
 }
 
-void fsl_get_base_name(const str *path, str *dst, u64 size)
+u32 fsl_get_base_name(const str *path, str *dst, u64 size)
 {
     i64 i = 0;
     u64 len = 0;
@@ -576,13 +577,13 @@ void fsl_get_base_name(const str *path, str *dst, u64 size)
     {
         _LOGERROR(TRUE, FSL_ERR_SIZE_TOO_SMALL,
                 "Failed to Get Base Name of '%s', 'size' Too Small\n", path);
-        return;
+        return fsl_err;
     }
 
     if (!path || !path[0] || !dst)
     {
         _LOGERROR(TRUE, FSL_ERR_POINTER_NULL, "%s\n", "Failed to Get Base Name, Pointer NULL");
-        return;
+        return fsl_err;
     }
 
     len = strlen(path);
@@ -590,7 +591,7 @@ void fsl_get_base_name(const str *path, str *dst, u64 size)
     {
         _LOGERROR(TRUE, FSL_ERR_PATH_TOO_LONG,
                 "Failed to Get Base Name of '%s', Path Too Long\n", path);
-        return;
+        return fsl_err;
     }
 
     snprintf(path_resolved, PATH_MAX, "%s", path);
@@ -602,7 +603,8 @@ void fsl_get_base_name(const str *path, str *dst, u64 size)
         if (i == 0)
         {
             dst[0] = '/';
-            return;
+            fsl_err = FSL_ERR_SUCCESS;
+            return fsl_err;
         }
         else --i;
     }
@@ -611,4 +613,7 @@ void fsl_get_base_name(const str *path, str *dst, u64 size)
         --i;
 
     snprintf(dst, size, "%s", path_resolved + i);
+
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
 }

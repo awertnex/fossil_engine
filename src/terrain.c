@@ -16,37 +16,37 @@ u32 rand_init(void)
     u64 file_len = 0;
     i32 i;
 
-    if (mem_map((void*)&RAND_TAB, RAND_TAB_VOLUME * sizeof(f32),
-                "rand_init().RAND_TAB") != ERR_SUCCESS)
+    if (fsl_mem_map((void*)&RAND_TAB, RAND_TAB_VOLUME * sizeof(f32),
+                "rand_init().RAND_TAB") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     snprintf(file_name, PATH_MAX, "%slookup_rand_tab.bin", DIR_ROOT[DIR_LOOKUPS]);
 
-    if (is_file_exists(file_name, FALSE) == ERR_SUCCESS)
+    if (fsl_is_file_exists(file_name, FALSE) == FSL_ERR_SUCCESS)
     {
-        file_len = get_file_contents(file_name,
+        file_len = fsl_get_file_contents(file_name,
                 (void*)&file_contents, sizeof(f32), FALSE);
-        if (*GAME_ERR != ERR_SUCCESS || file_contents == NULL)
+        if (*GAME_ERR != FSL_ERR_SUCCESS || file_contents == NULL)
             goto cleanup;
 
         for (i = 0; i < RAND_TAB_VOLUME; ++i)
             RAND_TAB[i] = file_contents[i];
 
-        mem_free((void*)&file_contents, file_len,
+        fsl_mem_free((void*)&file_contents, file_len,
                 "rand_init().file_contents");
     }
     else
     {
 
         for (i = 0; i < RAND_TAB_VOLUME; ++i)
-            RAND_TAB[i] = rand_f32(i);
+            RAND_TAB[i] = fsl_rand_f32(i);
 
-        if (write_file(file_name, sizeof(i32), RAND_TAB_VOLUME,
-                    RAND_TAB, TRUE, FALSE) != ERR_SUCCESS)
+        if (fsl_write_file(file_name, sizeof(i32), RAND_TAB_VOLUME,
+                    RAND_TAB, TRUE, FALSE) != FSL_ERR_SUCCESS)
             goto cleanup;
     }
 
-    *GAME_ERR = ERR_SUCCESS;
+    *GAME_ERR = FSL_ERR_SUCCESS;
     return *GAME_ERR;
 
 cleanup:
@@ -57,7 +57,7 @@ cleanup:
 
 void rand_free(void)
 {
-    mem_unmap((void*)&RAND_TAB, RAND_TAB_VOLUME * sizeof(f32),
+    fsl_mem_unmap((void*)&RAND_TAB, RAND_TAB_VOLUME * sizeof(f32),
             "rand_free().RAND_TAB");
 }
 
@@ -75,7 +75,7 @@ v3f32 random_2d(i32 x, i32 y, u64 seed)
     b *= 1911520717;
     a ^= b << S | b >> S;
     a *= 2048419325;
-    f64 land_final = (f64)a * RAND_SCALE;
+    f64 land_final = (f64)a * FSL_RAND_SCALE;
 
     return (v3f32){
         sinf((f32)land_final),
@@ -98,7 +98,7 @@ v3f32 random_3d(i32 x, i32 y, i32 z, u64 seed)
     a *= 2048419325;
     c ^= a << S | b >> S;
     c *= 3567382653;
-    f64 land_final = (f64)c * RAND_SCALE;
+    f64 land_final = (f64)c * FSL_RAND_SCALE;
 
     return (v3f32){
         sinf((f32)land_final),
@@ -145,13 +145,13 @@ f32 perlin_noise_2d(v2i32 coordinates, f32 amplitude, f32 frequency, u64 seed)
 
     f32 g0 = gradient_2d(vx, vy, ax, ay, seed);
     f32 g1 = gradient_2d(vx, vy, bx, ay, seed);
-    f32 l0 = lerp_cubic_f32(g0, g1, dx);
+    f32 l0 = fsl_lerp_cubic_f32(g0, g1, dx);
 
     g0 = gradient_2d(vx, vy, ax, by, seed);
     g1 = gradient_2d(vx, vy, bx, by, seed);
-    f32 l1 = lerp_cubic_f32(g0, g1, dx);
+    f32 l1 = fsl_lerp_cubic_f32(g0, g1, dx);
 
-    return lerp_cubic_f32(l0, l1, dy) * amplitude;
+    return fsl_lerp_cubic_f32(l0, l1, dy) * amplitude;
 }
 
 f32 perlin_noise_2d_ex(v2i32 coordinates, f32 intensity, f32 scale,
@@ -186,25 +186,25 @@ f32 perlin_noise_3d(v3i32 coordinates, f32 intensity, f32 scale, u64 seed)
 
     f32 g0 = gradient_3d(vx, vy, vz, ax, ay, az, seed);
     f32 g1 = gradient_3d(vx, vy, vz, bx, ay, az, seed);
-    f32 l0 = lerp_cubic_f32(g0, g1, dx);
+    f32 l0 = fsl_lerp_cubic_f32(g0, g1, dx);
 
     g0 = gradient_3d(vx, vy, vz, ax, by, az, seed);
     g1 = gradient_3d(vx, vy, vz, bx, by, az, seed);
-    f32 l1 = lerp_cubic_f32(g0, g1, dx);
+    f32 l1 = fsl_lerp_cubic_f32(g0, g1, dx);
 
-    f32 ll0 = lerp_cubic_f32(l0, l1, dy);
+    f32 ll0 = fsl_lerp_cubic_f32(l0, l1, dy);
 
     g0 = gradient_3d(vx, vy, vz, ax, ay, bz, seed);
     g1 = gradient_3d(vx, vy, vz, bx, ay, bz, seed);
-    l0 = lerp_cubic_f32(g0, g1, dx);
+    l0 = fsl_lerp_cubic_f32(g0, g1, dx);
 
     g0 = gradient_3d(vx, vy, vz, ax, by, bz, seed);
     g1 = gradient_3d(vx, vy, vz, bx, by, bz, seed);
-    l1 = lerp_cubic_f32(g0, g1, dx);
+    l1 = fsl_lerp_cubic_f32(g0, g1, dx);
 
-    f32 ll1 = lerp_cubic_f32(l0, l1, dy);
+    f32 ll1 = fsl_lerp_cubic_f32(l0, l1, dy);
 
-    return lerp_cubic_f32(ll0, ll1, dz) * intensity;
+    return fsl_lerp_cubic_f32(ll0, ll1, dz) * intensity;
 }
 
 f32 perlin_noise_3d_ex(v3i32 coordinates, f32 intensity, f32 scale,
@@ -222,9 +222,9 @@ f32 perlin_noise_3d_ex(v3i32 coordinates, f32 intensity, f32 scale,
     return land_final;
 }
 
-Terrain terrain_land(v3i32 coordinates)
+terrain terrain_land(v3i32 coordinates)
 {
-    Terrain terrain = {0};
+    terrain result = {0};
     coordinates.x += 7324;
     coordinates.y -= 7272;
     coordinates.z -= 30;
@@ -251,9 +251,9 @@ Terrain terrain_land(v3i32 coordinates)
     /* ---- flow control ---------------------------------------------------- */
 
     elevation = perlin_noise_2d(coordinates_2d, 1.0f, 129.0f, world.seed + 34723) + 0.5f;
-    elevation = clamp_f32(elevation, 0.0f, 1.0f);
+    elevation = fsl_clamp_f32(elevation, 0.0f, 1.0f);
     influence = perlin_noise_2d(coordinates_2d, 1.0f, 53.0f, world.seed - 3792374) + 0.5f;
-    influence = clamp_f32(influence, 0.0f, 1.0f);
+    influence = fsl_clamp_f32(influence, 0.0f, 1.0f);
     gathering = perlin_noise_2d(coordinates_2d, 0.5f, 133.0f, world.seed + 4777348);
 
     /* ---- land shape ------------------------------------------------------ */
@@ -286,37 +286,37 @@ Terrain terrain_land(v3i32 coordinates)
 
     if (biome_blend > 0.0f)
     {
-        terrain.biome = BIOME_HILLS;
-        terrain.block_id = BLOCK_GRASS;
+        result.biome = BIOME_HILLS;
+        result.block_id = BLOCK_GRASS;
     }
     else
     {
-        terrain.biome = BIOME_SANDSTORM;
-        terrain.block_id = BLOCK_SAND;
+        result.biome = BIOME_SANDSTORM;
+        result.block_id = BLOCK_SAND;
     }
 
     if (cave_level > (f32)coordinates.z)
     {
-        terrain.block_id = BLOCK_STONE;
+        result.block_id = BLOCK_STONE;
         if (cave_final > crush)
-            terrain.block_id = 0;
+            result.block_id = 0;
 
-        terrain.block_light = (u32)map_range_f64(
-                    clamp_f64((f64)coordinates.z, -64.0, 0.0),
+        result.block_light = (u32)fsl_map_range_f64(
+                    fsl_clamp_f64((f64)coordinates.z, -64.0, 0.0),
                     -64.0, 0.0, 2.0, 63.0) << SHIFT_BLOCK_LIGHT;
     }
     else
-        terrain.block_light = 63 << SHIFT_BLOCK_LIGHT;
+        result.block_light = 63 << SHIFT_BLOCK_LIGHT;
 
     if (land_final < (f32)coordinates.z || cave_entrances > 0.22f)
-        terrain.block_id = 0;
+        result.block_id = 0;
 
-    return terrain;
+    return result;
 }
 
-Terrain terrain_decaying_lands(v3i32 coordinates)
+terrain terrain_decaying_lands(v3i32 coordinates)
 {
-    Terrain terrain = {0};
+    terrain result = {0};
     coordinates.x += 7324;
     coordinates.y -= 7272;
     coordinates.z += 30;
@@ -348,27 +348,27 @@ Terrain terrain_decaying_lands(v3i32 coordinates)
     cave_final = cave_spaghetti + cave_frequency + cave_features_big + cave_features_small;
     cave_level = land_final - 8.0f;
 
-    terrain.biome = BIOME_DECAYING_LANDS;
-    terrain.block_id = BLOCK_GRASS;
+    result.biome = BIOME_DECAYING_LANDS;
+    result.block_id = BLOCK_GRASS;
 
     if (cave_level > (f32)coordinates.z)
     {
-        terrain.block_id = BLOCK_GRASS;
-        terrain.block_light = (u32)map_range_f64(
-                    clamp_f64((f64)coordinates.z, -64.0, 0.0),
+        result.block_id = BLOCK_GRASS;
+        result.block_light = (u32)fsl_map_range_f64(
+                    fsl_clamp_f64((f64)coordinates.z, -64.0, 0.0),
                     -64.0, 0.0, 0.0, 63.0) << SHIFT_BLOCK_LIGHT;
     }
-    else terrain.block_light = 63 << SHIFT_BLOCK_LIGHT;
+    else result.block_light = 63 << SHIFT_BLOCK_LIGHT;
 
     if (land_final < (f32)coordinates.z || cave_final > crush)
-        terrain.block_id = 0;
+        result.block_id = 0;
 
-    return terrain;
+    return result;
 }
 
-Terrain terrain_biome_blend_test(v3i32 coordinates)
+terrain terrain_biome_blend_test(v3i32 coordinates)
 {
-    Terrain terrain = {0};
+    terrain result = {0};
     v2i32 coordinates_2d = {coordinates.x, coordinates.y};
     v3i32 coordinates_shifted = coordinates;
     coordinates_shifted.z *= 1.5f;
@@ -391,33 +391,33 @@ Terrain terrain_biome_blend_test(v3i32 coordinates)
 
     f32 biome_blend = biome_hills + biome_sandstorm + biome_decaying_lands + biome_rocks;
 
-    biome_blend = lerp_f32(0.0f, 1.0f, biome_blend);
+    biome_blend = fsl_lerp_f32(0.0f, 1.0f, biome_blend);
     f32 land_final = (biome_hills_mountains + biome_sandstorm_mountains + biome_decaying_lands) * biome_blend;
 
-    terrain.biome = BIOME_HILLS;
-    terrain.block_id = BLOCK_GRASS;
+    result.biome = BIOME_HILLS;
+    result.block_id = BLOCK_GRASS;
 
     if (biome_sandstorm > biome_hills + biome_decaying_lands)
     {
-        terrain.biome = BIOME_SANDSTORM;
-        terrain.block_id = BLOCK_SAND;
+        result.biome = BIOME_SANDSTORM;
+        result.block_id = BLOCK_SAND;
     }
 
     if (biome_decaying_lands > biome_sandstorm)
     {
-        terrain.biome = BIOME_DECAYING_LANDS;
-        terrain.block_id = BLOCK_BLOOD;
+        result.biome = BIOME_DECAYING_LANDS;
+        result.block_id = BLOCK_BLOOD;
     }
 
     if (biome_rocks > biome_hills + biome_sandstorm + biome_decaying_lands)
     {
-        terrain.block_id = BLOCK_STONE;
+        result.block_id = BLOCK_STONE;
     }
 
-    terrain.block_light = 63 << SHIFT_BLOCK_LIGHT;
+    result.block_light = 63 << SHIFT_BLOCK_LIGHT;
 
     if (biome_decaying_lands > crush || biome_decaying_lands_caves > crush)
-        terrain.block_id = 0;
+        result.block_id = 0;
 
-    return terrain;
+    return result;
 }

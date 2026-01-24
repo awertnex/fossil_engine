@@ -44,20 +44,20 @@ int fsl_change_dir(const str *path)
     return success;
 }
 
-u32 _fsl_get_path_absolute(const str *path, str *path_real)
+u32 _fsl_get_path_absolute(const str *name, str *dst)
 {
-    if (!GetFullPathNameA(path, PATH_MAX, path_real, NULL))
+    if (!GetFullPathNameA(name, PATH_MAX, dst, NULL))
     {
         fsl_err = FSL_ERR_GET_PATH_ABSOLUTE_FAIL;
         return fsl_err;
     }
 
-    posix_slash(path_real);
+    posix_slash(dst);
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
 
-u32 _fsl_get_path_bin_root(str *path)
+u32 _fsl_get_path_bin_root(str *dst)
 {
     if (strlen(_pgmptr) + 1 >= PATH_MAX)
     {
@@ -65,9 +65,9 @@ u32 _fsl_get_path_bin_root(str *path)
                 "%s\n", "Failed 'get_path_bin_root()', Process Aborted");
         return fsl_err;
     }
-    strncpy(path, _pgmptr, PATH_MAX);
-    fsl_retract_path(path);
-    fsl_posix_slash(path);
+    strncpy(dst, _pgmptr, PATH_MAX);
+    fsl_retract_path(dst);
+    fsl_posix_slash(dst);
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;

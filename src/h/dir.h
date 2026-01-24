@@ -6,7 +6,7 @@
 
 #define DIR_MAX 128
 
-enum Directories
+enum directory_index
 {
     /* ---- root directories ------------------------------------------------ */
 
@@ -36,7 +36,7 @@ enum Directories
     DIR_WORLD_ENTITIES,
     DIR_WORLD_PLAYER,
     DIR_WORLD_COUNT,
-}; /* Directories */
+}; /* directory_index */
 
 extern str DIR_ROOT[DIR_ROOT_COUNT][NAME_MAX];
 extern str DIR_WORLD[DIR_WORLD_COUNT][NAME_MAX];
@@ -45,7 +45,7 @@ extern str DIR_WORLD[DIR_WORLD_COUNT][NAME_MAX];
  *
  *  @remark will create directories if not found next to the binary.
  *
- *  @return non-zero on failure and '*GAME_ERR' is set accordingly.
+ *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
 u32 game_init(void);
 

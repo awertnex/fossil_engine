@@ -48,17 +48,17 @@ u32 game_init(void)
 {
     u32 i = 0;
 
-    LOGINFO(TRUE, TRUE, "Creating Main Directories '%s'..\n", DIR_PROC_ROOT);
+    LOGINFO(TRUE, TRUE, "Creating Main Directories '%s'..\n", FSL_DIR_PROC_ROOT);
 
     for (i = 0; i < DIR_ROOT_COUNT; ++i)
-        if (is_dir_exists(DIR_ROOT[i], FALSE) != ERR_SUCCESS)
+        if (fsl_is_dir_exists(DIR_ROOT[i], FALSE) != FSL_ERR_SUCCESS)
         {
-            make_dir(DIR_ROOT[i]);
-            if (*GAME_ERR != ERR_SUCCESS && *GAME_ERR != ERR_DIR_EXISTS)
+            fsl_make_dir(DIR_ROOT[i]);
+            if (*GAME_ERR != FSL_ERR_SUCCESS && *GAME_ERR != FSL_ERR_DIR_EXISTS)
                 return *GAME_ERR;
         }
 
-    LOGINFO(TRUE, TRUE, "Main Directory Created '%s'\n", DIR_PROC_ROOT);
+    LOGINFO(TRUE, TRUE, "Main Directory Created '%s'\n", FSL_DIR_PROC_ROOT);
 
     glfwSwapInterval(MODE_INTERNAL_VSYNC);
     glfwWindowHint(GLFW_DEPTH_BITS, 24);
@@ -69,6 +69,6 @@ u32 game_init(void)
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_MULTISAMPLE);
 
-    *GAME_ERR = ERR_SUCCESS;
+    *GAME_ERR = FSL_ERR_SUCCESS;
     return *GAME_ERR;
 }

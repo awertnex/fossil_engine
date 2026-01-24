@@ -35,7 +35,7 @@
 #define CHUNK_QUEUES_MAX        3
 
 /*! @brief count of temporary static buffers in internal functions
- *  'chunk_mesh_init()' and 'chunk_mesh_update()'.
+ *  @ref chunk_mesh_init() and @ref chunk_mesh_update().
  */
 #define BLOCK_BUFFERS_MAX       2
 
@@ -48,83 +48,83 @@
 /* number of blocks to process per chunk per frame */
 #define BLOCK_PARSE_RATE                    512
 
-#define CHUNK_COLOR_LOADED  color_v4_to_hex(0.70f, 0.01f, 0.02f, 0.39f)
-#define CHUNK_COLOR_RENDER  color_v4_to_hex(0.24f, 0.47f, 0.3f, 1.0f)
+#define CHUNK_COLOR_LOADED  fsl_color_v4_to_hex(0.70f, 0.01f, 0.02f, 0.39f)
+#define CHUNK_COLOR_RENDER  fsl_color_v4_to_hex(0.24f, 0.47f, 0.3f, 1.0f)
 #define CHUNK_COLOR_FACTOR_INFLUENCE 0.1
 
-enum BlockFlag
+enum block_flag
 {
-    /* 63 [00000000 00000000 00000000 00000000] 32;
-     * 31 [00000000 00000001 00000000 00000000] 00; */
+    /*  63 [00000000 00000000 00000000 00000000] 32;
+     *  31 [00000000 00000001 00000000 00000000] 00; */
     FLAG_BLOCK_FACE_PX =        0x0000000000010000,
 
-    /* 63 [00000000 00000000 00000000 00000000] 32;
-     * 31 [00000000 00000010 00000000 00000000] 00; */
+    /*  63 [00000000 00000000 00000000 00000000] 32;
+     *  31 [00000000 00000010 00000000 00000000] 00; */
     FLAG_BLOCK_FACE_NX =        0x0000000000020000,
 
-    /* 63 [00000000 00000000 00000000 00000000] 32;
-     * 31 [00000000 00000100 00000000 00000000] 00; */
+    /*  63 [00000000 00000000 00000000 00000000] 32;
+     *  31 [00000000 00000100 00000000 00000000] 00; */
     FLAG_BLOCK_FACE_PY =        0x0000000000040000,
 
-    /* 63 [00000000 00000000 00000000 00000000] 32;
-     * 31 [00000000 00001000 00000000 00000000] 00; */
+    /*  63 [00000000 00000000 00000000 00000000] 32;
+     *  31 [00000000 00001000 00000000 00000000] 00; */
     FLAG_BLOCK_FACE_NY =        0x0000000000080000,
 
-    /* 63 [00000000 00000000 00000000 00000000] 32;
-     * 31 [00000000 00010000 00000000 00000000] 00; */
+    /*  63 [00000000 00000000 00000000 00000000] 32;
+     *  31 [00000000 00010000 00000000 00000000] 00; */
     FLAG_BLOCK_FACE_PZ =        0x0000000000100000,
 
-    /* 63 [00000000 00000000 00000000 00000000] 32;
-     * 31 [00000000 00100000 00000000 00000000] 00; */
+    /*  63 [00000000 00000000 00000000 00000000] 32;
+     *  31 [00000000 00100000 00000000 00000000] 00; */
     FLAG_BLOCK_FACE_NZ =        0x0000000000200000,
 
     /*! @brief run-length encoding, for chunk serialization.
      *
-     * 63 [00000000 00000000 00000000 00000000] 32;
-     * 31 [00000000 10000000 00000000 00000000] 00; */
+     *  63 [00000000 00000000 00000000 00000000] 32;
+     *  31 [00000000 10000000 00000000 00000000] 00; */
     FLAG_BLOCK_RLE =            0x0000000000800000,
-}; /* BlockFlag */
+}; /* block_flag */
 
-enum BlockMask
+enum block_mask
 {
-    /* 63 [00000000 00000000 00000000 00000000] 32;
-     * 31 [00000000 00000000 00111111 11111111] 00; */
+    /*  63 [00000000 00000000 00000000 00000000] 32;
+     *  31 [00000000 00000000 00111111 11111111] 00; */
     MASK_BLOCK_DATA =           0x0000000000003fff,
 
-    /* 63 [00000000 00000000 00000000 00000000] 32;
-     * 31 [00000000 00000000 00000011 11111111] 00; */
+    /*  63 [00000000 00000000 00000000 00000000] 32;
+     *  31 [00000000 00000000 00000011 11111111] 00; */
     MASK_BLOCK_ID =             0x00000000000003ff,
 
-    /* 63 [00000000 00000000 00000000 00000000] 32;
-     * 31 [00000000 00000000 00111100 00000000] 00; */
+    /*  63 [00000000 00000000 00000000 00000000] 32;
+     *  31 [00000000 00000000 00111100 00000000] 00; */
     MASK_BLOCK_STATE =          0x0000000000003c00,
 
-    /* 63 [00000000 00000000 00000000 00000000] 32;
-     * 31 [00000000 00111111 00000000 00000000] 00; */
+    /*  63 [00000000 00000000 00000000 00000000] 32;
+     *  31 [00000000 00111111 00000000 00000000] 00; */
     MASK_BLOCK_FACES =          0x00000000003f0000,
 
-    /* 63 [00000000 00000000 00000000 00000000] 32;
-     * 31 [00111111 00000000 00000000 00000000] 00; */
+    /*  63 [00000000 00000000 00000000 00000000] 32;
+     *  31 [00111111 00000000 00000000 00000000] 00; */
     MASK_BLOCK_LIGHT =          0x000000003f000000,
 
-    /* 63 [00000000 00000000 00001111 11111111] 32;
-     * 31 [00000000 00000000 00000000 00000000] 00; */
+    /*  63 [00000000 00000000 00001111 11111111] 32;
+     *  31 [00000000 00000000 00000000 00000000] 00; */
     MASK_BLOCK_COORDINATES =    0x00000fff00000000,
 
-    /* 63 [00000000 00000000 00000000 00001111] 32;
-     * 31 [00000000 00000000 00000000 00000000] 00; */
+    /*  63 [00000000 00000000 00000000 00001111] 32;
+     *  31 [00000000 00000000 00000000 00000000] 00; */
     MASK_BLOCK_X =              0x0000000f00000000,
 
-    /* 63 [00000000 00000000 00000000 11110000] 32;
-     * 31 [00000000 00000000 00000000 00000000] 00; */
+    /*  63 [00000000 00000000 00000000 11110000] 32;
+     *  31 [00000000 00000000 00000000 00000000] 00; */
     MASK_BLOCK_Y =              0x000000f000000000,
 
-    /* 63 [00000000 00000000 00001111 00000000] 32;
-     * 31 [00000000 00000000 00000000 00000000] 00; */
+    /*  63 [00000000 00000000 00001111 00000000] 32;
+     *  31 [00000000 00000000 00000000 00000000] 00; */
     MASK_BLOCK_Z =              0x00000f0000000000,
-}; /* BlockMask */
+}; /* block_mask */
 
-enum BlockShift
+enum block_shift
 {
     SHIFT_BLOCK_DATA =          0,
     SHIFT_BLOCK_ID =            0,
@@ -135,9 +135,9 @@ enum BlockShift
     SHIFT_BLOCK_X =             32,
     SHIFT_BLOCK_Y =             36,
     SHIFT_BLOCK_Z =             40,
-}; /* BlockShift */
+}; /* block_shift */
 
-enum ChunkFlag
+enum chunk_flag
 {
     FLAG_CHUNK_LOADED =     0x01,
     FLAG_CHUNK_DIRTY =      0x02,
@@ -146,12 +146,12 @@ enum ChunkFlag
     FLAG_CHUNK_RENDER =     0x10,
     FLAG_CHUNK_MODIFIED =   0x20,
 
-    /*! @brief chunk marking for 'chunk_tab' shifting logic.
+    /*! @brief chunk marking for @ref chunk_tab shifting logic.
      */
     FLAG_CHUNK_EDGE =       0x40,
-}; /* ChunkFlag */
+}; /* chunk_flag */
 
-enum ChunkShiftState
+enum chunk_shift_state
 {
     STATE_CHUNK_SHIFT_PX = 1,
     STATE_CHUNK_SHIFT_NX = 2,
@@ -159,12 +159,12 @@ enum ChunkShiftState
     STATE_CHUNK_SHIFT_NY = 4,
     STATE_CHUNK_SHIFT_PZ = 5,
     STATE_CHUNK_SHIFT_NZ = 6,
-}; /* ChunkShiftState */
+}; /* chunk_shift_state */
 
-typedef struct Chunk
+typedef struct chunk
 {
-    u8 flag; /* enum: ChunkFlag */
-    v3i16 pos; /* world position / CHUNK_DIAMETER */
+    u8 flag; /* enum: chunk_flag */
+    v3i16 pos; /* world position / @ref CHUNK_DIAMETER */
 
     /*! @brief chunk's unique id derived from its position.
      *
@@ -202,61 +202,62 @@ typedef struct Chunk
         u32 block[CHUNK_DIAMETER][CHUNK_DIAMETER][CHUNK_DIAMETER];
         u32 block_raw[CHUNK_DIAMETER * CHUNK_DIAMETER * CHUNK_DIAMETER];
     }; /* block */
-} Chunk;
+} chunk;
 
-typedef struct ChunkQueue
+typedef struct chunk_queue
 {
     u32 id;
     u32 count;          /* number of chunks queued */
-    u32 offset;         /* first CHUNK_ORDER index to queue */
+    u32 offset;         /* offset of queue into @ref CHUNK_ORDER */
     u64 size;
     u32 cursor;         /* parse position */
     u32 rate_chunk;     /* number of chunks to process per frame */
     u32 rate_block;     /* number of blocks to process per chunk per frame */
-    Chunk ***queue;
-} ChunkQueue;
+    chunk ***queue;
+} chunk_queue;
 
 #define GET_BLOCK_ID(block)     (block & MASK_BLOCK_ID)
 #define SET_BLOCK_ID(block, id) (block = (block & ~MASK_BLOCK_ID) | id)
 
-/*! @brief look-up table to reduce redundant checks of untouched regions of 'chunk_buf'.
+/*! @brief look-up table to reduce redundant checks of untouched regions of `chunk_buf`.
  *
- *  the sphere of chunks around 'chunk_tab' center are the only chunks that get processed,
- *  and since 'CHUNK_ORDER' is a look-up that orders 'chunk_tab' addresses based on
- *  is useful for iteration from 'CHUNK_ORDER[0]' to 'CHUNK_ORDER[CHUNKS_MAX[render_distance]]'.
+ *  the sphere of chunks around @ref chunk_tab center are the only chunks that get processed,
+ *  and since @ref CHUNK_ORDER is a look-up that orders @ref chunk_tab addresses based on
+ *  their distance from that tab's center index, it becomes easy to iterate from
+ *  @ref CHUNK_ORDER[0] to @ref CHUNK_ORDER[CHUNKS_MAX[render_distance]] and get exactly that sphere.
  *
  *  @remark index 0 of this array is always 0 since render distance of 0 is not
  *  possible (it's possible, but goofy).
  *
- *  @remark read-only, initialized internally in 'chunking_init()'.
+ *  @remark read-only, initialized internally in @ref chunking_init().
  */
 extern u64 CHUNKS_MAX[CHUNK_BUF_RADIUS_MAX + 1];
 
-/*! @brief chunk pointer look-up table that points to 'chunk_buf' addresses.
+/*! @brief chunk pointer look-up table that points to `chunk_buf` addresses.
  *
- *  'chunk_buf' addresses ordered by their positions in 3d space relative to player position.
+ *  `chunk_buf` addresses ordered by their positions in 3d space relative to player position.
  */
-extern Chunk **chunk_tab;
+extern chunk **chunk_tab;
 
-/*! @brief player relative 'chunk_tab' access.
+/*! @brief player relative @ref chunk_tab access.
  *
  *  @remark declared by the user.
  */
 extern u32 chunk_tab_index;
 
-/*! @brief chunk pointer pointer look-up table that points to 'chunk_tab' addresses.
+/*! @brief chunk pointer pointer look-up table that points to @ref chunk_tab addresses.
  *
- *  'chunk_tab' addresses ordered by distance from 'chunk_tab' center in ascending order.
+ *  @ref chunk_tab addresses ordered by distance from @ref chunk_tab center in ascending order.
  *
- *  @remark read-only, initialized internally in 'chunking_init()'.
+ *  @remark read-only, initialized internally in @ref chunking_init().
  */
-extern Chunk ***CHUNK_ORDER;
+extern chunk ***CHUNK_ORDER;
 
 /*! @brief queues of chunks to be processed.
  *
- *  @remark read-only, updated internally in 'chunking_update()'.
+ *  @remark read-only, updated internally in @ref chunking_update().
  */
-extern ChunkQueue CHUNK_QUEUE[CHUNK_QUEUES_MAX];
+extern chunk_queue CHUNK_QUEUE[CHUNK_QUEUES_MAX];
 
 /*! @brief chunk gizmo render buffer data for opaque chunk colors.
  *
@@ -281,13 +282,13 @@ extern GLuint chunk_gizmo_render_vbo;
 
 /*! @brief initialize chunking resources.
  *
- *  - allocate 'chunk_arena' and push 'chunk_buf', 'chunk_tab', 'CHUNK_ORDER' and
- *  'CHUNK_QUEUE[<x>]' onto it.
+ *  - allocate @ref chunk_arena and push @ref chunk_buf, @ref chunk_tab, @ref CHUNK_ORDER and
+ *  @ref CHUNK_QUEUE[<x>] onto it.
  *  - load necessary look-ups from disk if found and build them if not.
  *
  *  @remark building the look-ups is very taxing currently.
  *
- *  @return non-zero on failure and '*GAME_ERR' is set accordingly.
+ *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
 u32 chunking_init(void);
 
@@ -295,48 +296,52 @@ u32 chunking_init(void);
  *
  *  1. load dirty chunks into their priority queues based on their distance from
  *     the player.
- *  2. if 'core.flag.chunk_buf_dirty', shift 'chunk_tab'
- *     to compensate for player crossing a chunk boundary.
+ *
+ *  2. if @ref core.flag.chunk_buf_dirty, shift @ref chunk_tab to compensate for
+ *     player crossing a chunk boundary.
+ *
  *  3. check if player has crossed on more than one axis and go back to shift
  *     along that axis if true.
- *  4. find empty chunk slots within 'settings.render_distance' distance, push chunks onto
- *     'chunk_buf' and return the address to the respective index to 'chunk_tab'.
- *  5. remove 'core.flag.chunk_buf_dirty' when no further processing is required.
+ *
+ *  4. find empty chunk slots within @ref settings.render_distance distance, push chunks onto
+ *     @ref chunk_buf and return the address to the respective index to @ref chunk_tab.
+ *
+ *  5. remove @ref core.flag.chunk_buf_dirty when no further processing is required.
  */
 void chunking_update(v3i32 player_chunk, v3i32 *player_chunk_delta);
 
 void chunking_free(void);
 
-/*! @param index = index into global array 'chunk_tab'.
+/*! @param index = index into global array @ref chunk_tab.
  *  @param normal = face direction to place block onto.
  */
-void block_place(u32 index, i32 x, i32 y, i32 z, v3f64 normal, enum BlockID block_id);
+void block_place(u32 index, i32 x, i32 y, i32 z, v3f64 normal, enum block_id block_id);
 
-/*! @param index = index into global array 'chunk_tab'.
+/*! @param index = index into global array @ref chunk_tab.
  */
 void block_break(u32 index, i32 x, i32 y, i32 z);
 
 /*! @brief get block relative to chunk.
  *
- *  @return block address in chunk if 'x', 'y' and 'z' are within chunk bounds and
+ *  @return block address in chunk if `x`, `y` and `z` are within chunk bounds and
  *  return the correct block in the neighboring chunk otherwise.
  */
-u32 *get_block_resolved(Chunk *ch, i32 x, i32 y, i32 z);
+u32 *get_block_resolved(chunk *ch, i32 x, i32 y, i32 z);
 
 /*! @brief get chunk relative to position.
  *
- *  @return chunk at index if 'x', 'y' and 'z' are within chunk bounds and
+ *  @return chunk at index if `x`, `y` and `z` are within chunk bounds and
  *  return the correct neighboring chunk otherwise.
  */
-Chunk *get_chunk_resolved(u32 index, i32 x, i32 y, i32 z);
+chunk *get_chunk_resolved(u32 index, i32 x, i32 y, i32 z);
 
-/*! @brief get index of chunk in 'chunk_tab' by world coordinates relative to chunk position.
+/*! @brief get index of chunk in @ref chunk_tab by world coordinates relative to chunk position.
  *
  *  @param chunk_pos = chunk position in world coordinates.
  *  @param pos = block position in world coordinates.
  *
- *  @return index into global array 'chunk_tab'.
- *  @return 'settings.chunk_tab_center' if index out of bounds.
+ *  @return index into global array @ref chunk_tab.
+ *  @return @ref settings.chunk_tab_center if index out of bounds.
  */
 u32 get_chunk_index(v3i32 chunk_pos, v3f64 pos);
 

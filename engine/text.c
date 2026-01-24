@@ -209,7 +209,7 @@ cleanup:
     return fsl_err;
 }
 
-void font_free(fsl_font *font)
+void fsl_font_free(fsl_font *font)
 {
     if (!font) return;
     fsl_mem_free((void*)&font->buf, font->buf_len, font->name);

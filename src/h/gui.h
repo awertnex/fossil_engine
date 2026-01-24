@@ -12,7 +12,7 @@
 #define COL_TEXT_DEFAULT    0xbcbcbcff
 #define COL_TEXT_HOVER      0xa4ed74ff
 
-enum MenuNames
+enum menu_index
 {
     MENU_TITLE = 1,
     MENU_SINGLEPLAYER,
@@ -23,9 +23,9 @@ enum MenuNames
     MENU_GAME_PAUSE,
     MENU_DEATH,
 
-}; /* MenuNames */
+}; /* menu_index */
 
-enum ButtonNames
+enum button_index
 {
     /* ---- title screen ---------------------------------------------------- */
 
@@ -78,9 +78,9 @@ enum ButtonNames
 
     BTN_SDB_ADD,
     BTN_SDB_SUB,
-}; /* ButtonNames */
+}; /* button_index */
 
-extern u16 menu_index;
+extern u16 menu_index_cur;
 extern u16 menu_layer[5];
 extern u8 state_menu_depth;
 extern b8 is_menu_ready;
