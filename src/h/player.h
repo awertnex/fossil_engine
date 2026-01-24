@@ -1,5 +1,5 @@
-#ifndef GAME_PLAYER_H
-#define GAME_PLAYER_H
+#ifndef HHC_PLAYER_H
+#define HHC_PLAYER_H
 
 #include <engine/h/collision.h>
 
@@ -184,4 +184,4 @@ void player_kill(player *p);
  */
 str *get_death_str(player *p);
 
-#endif /* GAME_PLAYER_H */
+#endif /* HHC_PLAYER_H */

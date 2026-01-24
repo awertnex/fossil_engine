@@ -25,6 +25,7 @@ static str str_cflags[][CMD_SIZE] =
     "-Wall",
     "-Wextra",
     "-Wformat-truncation=0",
+    "-ggdb",
 };
 
 int main(int argc, char **argv)

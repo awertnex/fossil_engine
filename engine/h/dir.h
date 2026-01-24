@@ -30,6 +30,15 @@ FSLAPI u32 fsl_is_dir(const str *name);
  */
 FSLAPI u32 fsl_is_dir_exists(const str *name, b8 log);
 
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief like @ref fsl_is_dir_exists(), but no logging on success, no writing to
+ *  log file and no modifying @ref fsl_err (used for logger dir checks).
+ *
+ *  @return non-zero on failure, error codes can be found in @ref diagnostics.h.
+ */
+u32 fsl_logger_is_dir_exists(const str *name);
+
 /*! -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
  *  @brief make directory `path` if it doesn't exist.
@@ -112,17 +121,6 @@ FSLAPI u32 fsl_write_file(const str *name, u64 size, u64 length, void *buf, b8 l
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_append_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text);
-
-/*! @brief like @ref fsl_append_file(), but without logging on success (used for logger file writes).
- *
- *  @param log = enable/disable logging.
- *  @param text enable/disable newline (`\n`) termination of file.
- *
- *  @remark 'write' and 'append' functions are deliberately separate, to better avoid human error.
- *
- *  @return non-zero on failure and @ref fsl_err is set accordingly.
- */
-FSLAPI u32 _fsl_append_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text);
 
 /*! @brief get calloc'd string of resolved `name`.
  *

@@ -39,6 +39,8 @@ FSLAPI extern fsl_shader_program fsl_shader_buf[FSL_SHADER_INDEX_COUNT];
  */
 FSLAPI u32 fsl_shader_init(const str *shaders_dir, fsl_shader *shader);
 
+FSLAPI void fsl_shader_free(fsl_shader *shader);
+
 /*! @brief initialize shader program.
  *
  *  - call @ref fsl_shader_init() on all shaders in `program` if `shader->type` is set.

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <sys/stat.h>
 #include <inttypes.h>
 
 #include "h/diagnostics.h"
@@ -14,17 +15,6 @@
 #include "h/string.h"
 #include "h/time.h"
 #include "h/types.h"
-
-#ifdef FOSSIL_RELEASE_BUILD
-#   define LOGDEBUGEX(verbose, cmd, file, line, format, ...)
-#   define LOGTRACEEX(verbose, cmd, file, line, format, ...)
-#else
-#   define LOGDEBUGEX(verbose, cmd, file, line, format, ...) \
-    _log_output(verbose, cmd, fsl_log_dir, file, line, FSL_LOG_LEVEL_DEBUG, ERR_SUCCESS, format, ##__VA_ARGS__)
-
-#   define LOGTRACEEX(verbose, cmd, file, line, format, ...) \
-    _log_output(verbose, cmd, fsl_log_dir, file, line, FSL_LOG_LEVEL_TRACE, ERR_SUCCESS, format, ##__VA_ARGS__)
-#endif /* FOSSIL_RELEASE_BUILD */
 
 enum fsl_log_file_index
 {
@@ -155,7 +145,8 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 lo
                 FSL_LOGGER_HISTORY_MAX * FSL_LOGGER_STRING_MAX,
                 "fsl_logger_init().fsl_logger_buf") != FSL_ERR_SUCCESS)
     {
-        _LOGFATAL(FALSE, FSL_ERR_LOGGER_INIT_FAIL,
+        _LOGFATAL(FSL_ERR_LOGGER_INIT_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 "%s\n", "Failed to Initialize Logger, Process Aborted");
         return fsl_err;
     }
@@ -171,19 +162,24 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 lo
 
 void fsl_logger_close(void)
 {
-    _LOGTRACE(TRUE, "%s\n", "Closing Logger..");
+    _LOGTRACE(0, "%s\n", "Closing Logger..");
 
     fsl_log_flag &= ~FSL_FLAG_LOGGER_GUI_OPEN;
     fsl_mem_unmap_arena(&fsl_logger_arena, "logger_close().fsl_logger_arena");
 }
 
-void _fsl_log_output(b8 verbose, b8 cmd, const str *_log_dir, const str *file, u64 line,
-        u8 level, u32 error_code, const str *format, ...)
+void _fsl_log_output(u32 error_code, u32 flags, const str *file, u64 line, u8 level,
+        const str *_log_dir, const str *format, ...)
 {
     __builtin_va_list args;
     str str_in[FSL_STRING_MAX] = {0};
     str str_out[FSL_LOGGER_STRING_MAX] = {0};
     str temp[PATH_MAX] = {0};
+    b8 verbose =    !(flags & FSL_FLAG_LOG_NO_VERBOSE);
+    b8 cmd =        (flags & FSL_FLAG_LOG_CMD);
+    b8 write_file = !(flags & FSL_FLAG_LOG_NO_FILE);
+
+    fsl_err = error_code;
 
     if (level > fsl_log_level_max) return;
 
@@ -208,12 +204,12 @@ void _fsl_log_output(b8 verbose, b8 cmd, const str *_log_dir, const str *file, u
         fsl_logger_tab_index = (fsl_logger_tab_index + 1) % FSL_LOGGER_HISTORY_MAX;
     }
 
-    if (_fsl_is_dir_exists(_log_dir, FALSE) == FSL_ERR_SUCCESS)
+    if (write_file && fsl_logger_is_dir_exists(_log_dir) == FSL_ERR_SUCCESS)
     {
         _fsl_get_log_str(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_FULL_TIME,
                 verbose, level, error_code, file, line);
         snprintf(temp, PATH_MAX, "%s%s", _log_dir, FSL_LOG_FILE_NAME[level]);
-        _fsl_append_file(temp, 1, strlen(str_out), str_out, FALSE, FALSE);
+        fsl_logger_append_file(temp, 1, strlen(str_out), str_out);
     }
 }
 
@@ -266,4 +262,26 @@ static void _fsl_get_log_str(const str *str_in, str *str_out, u32 flags, b8 verb
         trunc = str_out + FSL_LOGGER_STRING_MAX - 4;
         snprintf(trunc, 4, "...");
     }
+}
+
+u32 fsl_logger_is_dir_exists(const str *name)
+{
+    struct stat stats;
+    if (stat(name, &stats) == 0)
+    {
+        if (S_ISDIR(stats.st_mode))
+            return FSL_ERR_SUCCESS;
+        else return FSL_ERR_IS_NOT_DIR;
+    }
+    return FSL_ERR_DIR_NOT_FOUND;
+}
+
+u32 fsl_logger_append_file(const str *name, u64 size, u64 length, void *buf)
+{
+    FILE *file = NULL;
+    if ((file = fopen(name, "ab")) == NULL)
+        return FSL_ERR_FILE_OPEN_FAIL;
+    fwrite(buf, size, length, file);
+    fclose(file);
+    return FSL_ERR_SUCCESS;
 }

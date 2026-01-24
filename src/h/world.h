@@ -1,5 +1,5 @@
-#ifndef GAME_WORLD_H
-#define GAME_WORLD_H
+#ifndef HHC_WORLD_H
+#define HHC_WORLD_H
 
 #include "player.h"
 
@@ -64,4 +64,4 @@ u32 world_load(world_info *world, const str *world_name, u64 seed);
 
 void world_update(player *p);
 
-#endif /* GAME_WORLD_H */
+#endif /* HHC_WORLD_H */

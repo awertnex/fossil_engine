@@ -1,5 +1,5 @@
-#ifndef GAME_DIR_H
-#define GAME_DIR_H
+#ifndef HHC_DIR_H
+#define HHC_DIR_H
 
 #include <engine/h/types.h>
 #include <engine/h/dir.h>
@@ -49,4 +49,4 @@ extern str DIR_WORLD[DIR_WORLD_COUNT][NAME_MAX];
  */
 u32 game_init(void);
 
-#endif /* GAME_DIR_H */
+#endif /* HHC_DIR_H */

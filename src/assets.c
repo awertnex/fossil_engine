@@ -2,12 +2,12 @@
 
 #include <engine/h/core.h>
 #include <engine/h/memory.h>
-#include <engine/h/logger.h>
 #include <engine/h/shaders.h>
 #include <engine/h/string.h>
 
 #include "h/assets.h"
 #include "h/dir.h"
+#include "h/logger.h"
 #include "h/main.h"
 
 fsl_shader_program shader[SHADER_COUNT] =
@@ -245,11 +245,13 @@ cleanup:
 void assets_free(void)
 {
     u32 i = 0;
-    for (i = 0; i < TEXTURE_BLOCK_COUNT; ++i)
-        fsl_texture_free(&block_textures[i]);
+    if (block_textures)
+        for (i = 0; i < TEXTURE_BLOCK_COUNT; ++i)
+            fsl_texture_free(&block_textures[i]);
 
-    for (i = 0; i < TEXTURE_COUNT; ++i)
-        fsl_texture_free(&texture[i]);
+    if (texture)
+        for (i = 0; i < TEXTURE_COUNT; ++i)
+            fsl_texture_free(&texture[i]);
 
     fsl_mem_unmap((void*)&block_textures, TEXTURE_BLOCK_COUNT * sizeof(fsl_texture),
             "assets_free().block_textures");
@@ -268,7 +270,8 @@ u32 block_texture_init(u32 index, v2i32 size, str *name)
 {
     if (!name)
     {
-        LOGERROR(FALSE, FALSE, FSL_ERR_POINTER_NULL,
+        HHC_LOGERROR(FSL_ERR_POINTER_NULL,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 "Failed to Initialize Texture [%p], 'name' NULL\n",
                 &block_textures[index]);
         goto cleanup;

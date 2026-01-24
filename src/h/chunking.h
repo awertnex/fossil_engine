@@ -1,5 +1,5 @@
-#ifndef GAME_CHUNKING_H
-#define GAME_CHUNKING_H
+#ifndef HHC_CHUNKING_H
+#define HHC_CHUNKING_H
 
 #include <engine/h/common.h>
 #include <engine/h/types.h>
@@ -345,4 +345,4 @@ chunk *get_chunk_resolved(u32 index, i32 x, i32 y, i32 z);
  */
 u32 get_chunk_index(v3i32 chunk_pos, v3f64 pos);
 
-#endif /* GAME_CHUNKING_H */
+#endif /* HHC_CHUNKING_H */

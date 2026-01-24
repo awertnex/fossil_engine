@@ -68,7 +68,8 @@ u32 fsl_convert_i32_to_str(str *dst, i32 size, i32 n)
 
     if (size <= 0)
     {
-        _LOGERROR(FALSE, FSL_ERR_SIZE_TOO_SMALL,
+        _LOGERROR(FSL_ERR_SIZE_TOO_SMALL,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 "%s\n", "Failed to Convert i32 to str, 'size' Too Small");
         return fsl_err;
     }
@@ -110,7 +111,8 @@ u32 fsl_convert_u64_to_str(str *dst, u64 size, u64 n)
 
     if (size == 0)
     {
-        _LOGERROR(FALSE, FSL_ERR_SIZE_TOO_SMALL,
+        _LOGERROR(FSL_ERR_SIZE_TOO_SMALL,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 "%s\n", "Failed to Convert u64 to str, 'size' Too Small");
         return fsl_err;
     }

@@ -1,5 +1,5 @@
-#ifndef GAME_GUI_H
-#define GAME_GUI_H
+#ifndef HHC_GUI_H
+#define HHC_GUI_H
 
 #include "main.h"
 
@@ -110,4 +110,4 @@ void btn_func_unpause();
 void btn_func_quit_game();
 void btn_func_quit_world();
 
-#endif /* GAME_GUI_H */
+#endif /* HHC_GUI_H */

@@ -72,8 +72,15 @@ typedef struct fsl_texture
      */
     int channels;
 
-    b8 grayscale;
     u8 *buf;
+
+    struct /* flag */
+    {
+        b8 grayscale: 1;
+        b8 loaded: 1;
+        b8 generated: 1;
+        b8 bindless: 1;
+    }; /* flag */
 } fsl_texture;
 
 typedef struct fsl_camera

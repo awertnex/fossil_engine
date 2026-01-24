@@ -1,5 +1,5 @@
-#ifndef GAME_COMMON_H
-#define GAME_COMMON_H
+#ifndef HHC_COMMON_H
+#define HHC_COMMON_H
 
 #include <engine/h/types.h>
 
@@ -15,16 +15,15 @@
 #define GAME_VERSION        "0.4.0"GAME_VERSION_DEV
 #define GAME_TITLE          GAME_NAME": "GAME_VERSION
 
-#ifdef _GAME_RELEASE_BUILD
+#ifdef HHC_RELEASE_BUILD
 #   define GAME_RELEASE_BUILD 1
 #else
 #   define GAME_RELEASE_BUILD 0
-#endif /* _GAME_RELEASE_BUILD */
+#endif /* HHC_RELEASE_BUILD */
 
 /* ---- settings ------------------------------------------------------------ */
 
 #define MODE_INTERNAL_VSYNC         0
-#define MODE_INTERNAL_DEBUG         1
 #define MODE_INTERNAL_LOAD_CHUNKS   1
 #define MODE_INTERNAL_COLLIDE       1
 
@@ -166,4 +165,4 @@ extern str str_death_collision_wall[DEATH_STRING_COLLISION_WALL_COUNT][DEATH_STR
 extern str str_death_collision_floor[DEATH_STRING_COLLISION_FLOOR_COUNT][DEATH_STRING_MAX];
 extern str str_death_collision_ceiling[DEATH_STRING_COLLISION_CEILING_COUNT][DEATH_STRING_MAX];
 
-#endif /* GAME_COMMON_H */
+#endif /* HHC_COMMON_H */

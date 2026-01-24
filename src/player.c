@@ -1,10 +1,10 @@
 #include <engine/h/collision.h>
-#include <engine/h/logger.h>
 #include <engine/h/math.h>
 #include <engine/h/time.h>
 
 #include "h/chunking.h"
 #include "h/common.h"
+#include "h/logger.h"
 #include "h/player.h"
 #include "h/world.h"
 
@@ -670,7 +670,8 @@ void player_kill(player *p)
     p->health = 0.0f;
     p->flag |= FLAG_PLAYER_DEAD;
 
-    LOGINFO(FALSE, TRUE, "%s %s\n", p->name, get_death_str(p));
+    HHC_LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+            "%s %s\n", p->name, get_death_str(p));
 }
 
 str *get_death_str(player *p)

@@ -1,5 +1,5 @@
-#ifndef GAME_H
-#define GAME_H
+#ifndef HHC_H
+#define HHC_H
 
 #include <engine/h/core.h>
 #include <engine/h/diagnostics.h>
@@ -154,4 +154,4 @@ extern fsl_projection projection_world;
 extern fsl_projection projection_hud;
 extern fsl_font *font[FONT_COUNT];
 
-#endif /* GAME_MAIN_H */
+#endif /* HHC_MAIN_H */

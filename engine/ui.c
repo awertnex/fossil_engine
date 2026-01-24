@@ -98,7 +98,9 @@ u32 fsl_ui_init(b8 multisample)
 cleanup:
 
     fsl_ui_free();
-    _LOGFATAL(FALSE, FSL_ERR_UI_INIT_FAIL, "%s\n", "Failed to Initialize UI, Process Aborted");
+    _LOGFATAL(FSL_ERR_UI_INIT_FAIL,
+            FSL_FLAG_LOG_NO_VERBOSE,
+            "%s\n", "Failed to Initialize UI, Process Aborted");
     return fsl_err;
 }
 

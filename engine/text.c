@@ -103,14 +103,16 @@ u32 fsl_font_init(fsl_font *font, u32 resolution, const str *name, const str *fi
 
     if (resolution <= 2)
     {
-        _LOGERROR(FALSE, FSL_ERR_IMAGE_SIZE_TOO_SMALL,
+        _LOGERROR(FSL_ERR_IMAGE_SIZE_TOO_SMALL,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 "Failed to Initialize Font '%s', Font Size Too Small\n", file_name);
         return fsl_err;
     }
 
     if (strlen(file_name) >= PATH_MAX)
     {
-        _LOGERROR(FALSE, FSL_ERR_PATH_TOO_LONG,
+        _LOGERROR(FSL_ERR_PATH_TOO_LONG,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 "Failed to Initialize Font '%s', File Path Too Long\n", file_name);
         return fsl_err;
     }
@@ -124,7 +126,8 @@ u32 fsl_font_init(fsl_font *font, u32 resolution, const str *name, const str *fi
 
     if (!stbtt_InitFont(&font->info, (const unsigned char*)font->buf, 0))
     {
-        _LOGERROR(FALSE, FSL_ERR_FONT_INIT_FAIL,
+        _LOGERROR(FSL_ERR_FONT_INIT_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 "Failed to Initialize Font '%s', 'stbtt_InitFont()' Failed\n", file_name);
         goto cleanup;
     }
@@ -284,7 +287,9 @@ u32 fsl_text_init(u32 resolution, b8 multisample)
 cleanup:
 
     fsl_text_free();
-    _LOGFATAL(FALSE, FSL_ERR_TEXT_INIT_FAIL, "%s\n", "Failed to Initialize Text, Process Aborted");
+    _LOGFATAL(FSL_ERR_TEXT_INIT_FAIL,
+            FSL_FLAG_LOG_NO_VERBOSE,
+            "%s\n", "Failed to Initialize Text, Process Aborted");
     return fsl_err;
 }
 
@@ -355,7 +360,9 @@ void fsl_text_start(fsl_font *font, f32 size, u64 length, fsl_fbo *fbo, b8 clear
 
 cleanup:
 
-    _LOGERROR(FALSE, fsl_err, "%s\n", "Failed to Start Text");
+    _LOGERROR(fsl_err,
+            FSL_FLAG_LOG_NO_VERBOSE,
+            "%s\n", "Failed to Start Text");
 }
 
 void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y, u32 color)
@@ -369,14 +376,18 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
 
     if (!fsl_text_core.buf)
     {
-        _LOGERROR(FALSE, FSL_ERR_BUFFER_EMPTY, "%s\n", "Failed to Push Text, 'fsl_text_core.buf' Null");
+        _LOGERROR(FSL_ERR_BUFFER_EMPTY,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                "%s\n", "Failed to Push Text, 'fsl_text_core.buf' Null");
         return;
     }
 
     len = strlen(text);
     if (len >= FSL_STRING_MAX)
     {
-        _LOGERROR(FALSE, FSL_ERR_STRING_TOO_LONG, "%s\n", "Failed to Push Text, Text Too Long");
+        _LOGERROR(FSL_ERR_STRING_TOO_LONG,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                "%s\n", "Failed to Push Text, Text Too Long");
         return;
     }
 
@@ -388,7 +399,9 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
                     (fsl_text_core.buf_len + FSL_STRING_MAX) * sizeof(struct fsl_text_data),
                     "fsl_text_push().fsl_text_core.buf_len") != FSL_ERR_SUCCESS)
         {
-            _LOGERROR(FALSE, fsl_err, "%s\n", "Failed to Push Text");
+            _LOGERROR(fsl_err,
+                    FSL_FLAG_LOG_NO_VERBOSE,
+                    "%s\n", "Failed to Push Text");
             return;
         }
 
@@ -472,7 +485,8 @@ void fsl_text_render(b8 shadow, u32 shadow_color)
 {
     if (!fsl_text_core.buf)
     {
-        _LOGERROR(FALSE, FSL_ERR_BUFFER_EMPTY,
+        _LOGERROR(FSL_ERR_BUFFER_EMPTY,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 "%s\n", "Failed to Render Text, 'fsl_text_core.buf' Null");
         return;
     }

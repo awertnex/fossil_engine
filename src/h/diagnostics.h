@@ -1,19 +1,13 @@
-#ifndef GAME_DIAGNOSTICS_H
-#define GAME_DIAGNOSTICS_H
+#ifndef HHC_DIAGNOSTICS_H
+#define HHC_DIAGNOSTICS_H
 
 #include <engine/h/types.h>
 #include <engine/h/diagnostics.h>
 #include <engine/h/limits.h>
 
-#define GAME_ERR_OFFSET 512
-
-enum game_error_code
-{
-    ERR_MODE_INTERNAL_DEBUG_DISABLE = GAME_ERR_OFFSET,
-    ERR_MODE_INTERNAL_COLLIDE_DISABLE,
-    ERR_WORLD_EXISTS,
-    ERR_WORLD_CREATION_FAIL,
-}; /* game_error_code */
+#define HHC_ERR_WORLD_EXISTS        513
+#define HHC_ERR_WORLD_CREATION_FAIL 514
+#define HHC_ERR_COLLISIONS_DISABLED 515
 
 /*! @brief global pointer to error variable.
  *
@@ -21,4 +15,4 @@ enum game_error_code
  */
 extern u32 *const GAME_ERR;
 
-#endif /* GAME_DIAGNOSTICS_H */
+#endif /* HHC_DIAGNOSTICS_H */

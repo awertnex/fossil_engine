@@ -1,5 +1,5 @@
-#ifndef GAME_ASSETS_H
-#define GAME_ASSETS_H
+#ifndef HHC_ASSETS_H
+#define HHC_ASSETS_H
 
 #include <engine/h/core.h>
 #include <engine/h/limits.h>
@@ -112,4 +112,4 @@ u32 block_texture_init(u32 index, v2i32 size, str *name);
  */
 void blocks_init(void);
 
-#endif /* GAME_ASSETS_H */
+#endif /* HHC_ASSETS_H */

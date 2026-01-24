@@ -10,6 +10,14 @@
 #   define STR_OUT  DIR_OUT"hhc"
 #endif /* PLATFORM */
 
+static str str_cflags[][CMD_SIZE] =
+{
+    "-Wall",
+    "-Wextra",
+    "-Wformat-truncation=0",
+    "-ggdb",
+};
+
 int main(int argc, char **argv)
 {
     /* if error, will fail and exit */
@@ -22,6 +30,13 @@ int main(int argc, char **argv)
 
     if (find_token("release", argc, argv))
         cmd_push(NULL, "-DHHC_RELEASE_BUILD");
+    else
+    {
+        cmd_push(NULL, "-Wall");
+        cmd_push(NULL, "-Wextra");
+        cmd_push(NULL, "-Wformat-truncation=0");
+        cmd_push(NULL, "-ggdb");
+    }
 
     cmd_push(NULL, DIR_SRC"main.c");
     cmd_push(NULL, DIR_SRC"assets.c");
@@ -36,10 +51,6 @@ int main(int argc, char **argv)
     cmd_push(NULL, "-I.");
     cmd_push(NULL, "-std=c99");
     cmd_push(NULL, "-Ofast");
-    cmd_push(NULL, "-Wall");
-    cmd_push(NULL, "-Wextra");
-    cmd_push(NULL, "-Wformat-truncation=0");
-    cmd_push(NULL, "-ggdb");
     cmd_push(NULL, "-Wl,-rpath="RUNTIME_PATH);
     fsl_link_libs(NULL);
     cmd_push(NULL, "-o");

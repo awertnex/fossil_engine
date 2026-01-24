@@ -1,5 +1,5 @@
-#ifndef GAME_INPUT_H
-#define GAME_INPUT_H
+#ifndef HHC_INPUT_H
+#define HHC_INPUT_H
 
 #include <engine/h/core.h>
 #include <engine/h/types.h>
@@ -69,4 +69,4 @@ extern u32 bind_toggle_chunk_queue_visualizer;
  */
 void input_update(player *p);
 
-#endif /* GAME_INPUT_H */
+#endif /* HHC_INPUT_H */

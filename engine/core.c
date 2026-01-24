@@ -58,7 +58,7 @@ static struct /* fsl_ubo */
 static void glfw_callback_error(int error, const char* message)
 {
     (void)error;
-    _LOGERROR(TRUE, FSL_ERR_GLFW, "GLFW: %s\n", message);
+    _LOGERROR(FSL_ERR_GLFW, 0, "GLFW: %s\n", message);
 }
 
 /*! -- INTERNAL USE ONLY --;
@@ -178,6 +178,12 @@ u32 fsl_update_render_settings(i32 size_x, i32 size_y)
 void fsl_close(void)
 {
     u32 i = 0;
+    u32 fsl_err_temp = fsl_err;
+
+    if (!fsl_flag.active)
+        return;
+
+    fsl_flag.active = FALSE;
 
     for (i = 0; i < FSL_FONT_INDEX_COUNT; ++i)
         fsl_font_free(&fsl_font_buf[i]);
@@ -201,17 +207,17 @@ void fsl_close(void)
 
     fsl_mem_free((void*)&render->screen_buf, render->size.x * render->size.y * FSL_COLOR_CHANNELS_RGB,
                 "fsl_free().render.screen_buf");
-
     fsl_mem_free((void*)&FSL_DIR_PROC_ROOT, strlen(FSL_DIR_PROC_ROOT), "fsl_close().FSL_DIR_PROC_ROOT");
 
     fsl_logger_close();
+    fsl_err = fsl_err_temp;
 }
 
 u32 fsl_get_string(str *dst, enum fsl_string_index type)
 {
     if (!dst)
     {
-        _LOGERROR(TRUE, FSL_ERR_POINTER_NULL,
+        _LOGERROR(FSL_ERR_POINTER_NULL, 0,
                 "Failed to Get String, Pointer NULL\n");
         return fsl_err;
     }
@@ -243,7 +249,8 @@ u32 fsl_glfw_init(b8 multisample)
 {
     if (!glfwInit())
     {
-        _LOGFATAL(FALSE, FSL_ERR_GLFW_INIT_FAIL,
+        _LOGFATAL(FSL_ERR_GLFW_INIT_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 "%s\n", "Failed to Initialize GLFW, Process Aborted");
         return fsl_err;
     }
@@ -270,7 +277,8 @@ u32 fsl_window_init(const str *title, i32 size_x, i32 size_y)
 
     if (!render->window)
     {
-        _LOGFATAL(FALSE, FSL_ERR_WINDOW_INIT_FAIL,
+        _LOGFATAL(FSL_ERR_WINDOW_INIT_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 "%s\n", "Failed to Initialize Window or OpenGL Context, Process Aborted");
         return fsl_err;
     }
@@ -292,23 +300,32 @@ u32 fsl_glad_init(void)
 {
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        _LOGFATAL(FALSE, FSL_ERR_GLAD_INIT_FAIL,
+        _LOGFATAL(FSL_ERR_GLAD_INIT_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 "%s\n", "Failed to Initialize GLAD, Process Aborted");
         return fsl_err;
     }
 
     if (GLVersion.major < 4 || (GLVersion.major == 4 && GLVersion.minor < 3))
     {
-        _LOGFATAL(FALSE, FSL_ERR_GL_VERSION_NOT_SUPPORT,
+        _LOGFATAL(FSL_ERR_GL_VERSION_NOT_SUPPORT,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 "OpenGL 4.3+ Required, Current Version '%d.%d', Process Aborted\n",
                 GLVersion.major, GLVersion.minor);
         return fsl_err;
     }
 
-    _LOGDEBUG(FALSE, "OpenGL:    %s\n", glGetString(GL_VERSION));
-    _LOGDEBUG(FALSE, "GLSL:      %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-    _LOGDEBUG(FALSE, "Vendor:    %s\n", glGetString(GL_VENDOR));
-    _LOGDEBUG(FALSE, "Renderer:  %s\n", glGetString(GL_RENDERER));
+    _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+            "OpenGL:    %s\n", glGetString(GL_VERSION));
+
+    _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+            "GLSL:      %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+    _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+            "Vendor:    %s\n", glGetString(GL_VENDOR));
+
+    _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+            "Renderer:  %s\n", glGetString(GL_RENDERER));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -318,7 +335,8 @@ u32 fsl_change_render(fsl_render *_render)
 {
     if (_render == NULL)
     {
-        _LOGERROR(TRUE, FSL_ERR_POINTER_NULL, "%s\n", "Failed to Change Render, Pointer NULL");
+        _LOGERROR(FSL_ERR_POINTER_NULL, 0,
+                "%s\n", "Failed to Change Render, Pointer NULL");
         return fsl_err;
     }
 
@@ -328,7 +346,8 @@ u32 fsl_change_render(fsl_render *_render)
         glfwMakeContextCurrent(render->window);
     else
     {
-        _LOGWARNING(TRUE, FSL_ERR_WINDOW_NOT_FOUND, "%s\n", "No Window Found for Currently Bound Render");
+        _LOGWARNING(FSL_ERR_WINDOW_NOT_FOUND, 0,
+                "%s\n", "No Window Found for Currently Bound Render");
         return fsl_err;
     }
     
@@ -362,7 +381,8 @@ static u32 fsl_take_screenshot(const str *dir_screenshots, const str *special_te
 
     if (fsl_is_dir_exists(dir_screenshots, TRUE) != FSL_ERR_SUCCESS)
     {
-        LOGERROR(FALSE, TRUE, FSL_ERR_SCREENSHOT_FAIL,
+        LOGERROR(FSL_ERR_SCREENSHOT_FAIL,
+                FSL_FLAG_LOG_CMD,
                 "Failed to Take Screenshot, '%s' Directory Not Found\n", dir_screenshots);
         return fsl_err;
     }
@@ -387,7 +407,8 @@ static u32 fsl_take_screenshot(const str *dir_screenshots, const str *special_te
             glReadPixels(0, 0, render->size.x, render->size.y, GL_RGB, GL_UNSIGNED_BYTE, render->screen_buf);
 
             stbi_flip_vertically_on_write(TRUE);
-            LOGDEBUG(FALSE, TRUE, "Screenshot: %s\n", file_name_full);
+            LOGDEBUG(FSL_FLAG_LOG_CMD,
+                    "Screenshot: %s\n", file_name_full);
             stbi_write_png(file_name_full, render->size.x, render->size.y, FSL_COLOR_CHANNELS_RGB,
                     render->screen_buf, render->size.x * FSL_COLOR_CHANNELS_RGB);
 
@@ -396,8 +417,9 @@ static u32 fsl_take_screenshot(const str *dir_screenshots, const str *special_te
         }
     }
 
-    LOGERROR(FALSE, TRUE, FSL_ERR_SCREENSHOT_FAIL, "%s\n",
-            "Failed to Take Screenshot, Screenshot Rate Limit Exceeded");
+    LOGERROR(FSL_ERR_SCREENSHOT_FAIL,
+            FSL_FLAG_LOG_CMD,
+            "%s\n", "Failed to Take Screenshot, Screenshot Rate Limit Exceeded");
     return fsl_err;
 }
 
@@ -502,7 +524,9 @@ u32 fsl_fbo_init(fsl_fbo *fbo, fsl_mesh *mesh_fbo, b8 multisample, u32 samples)
     GLuint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE)
     {
-        _LOGFATAL(FALSE, FSL_ERR_FBO_INIT_FAIL, "FBO '%u': Status '%u' Not Complete, Process Aborted\n",
+        _LOGFATAL(FSL_ERR_FBO_INIT_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                "FBO '%u': Status '%u' Not Complete, Process Aborted\n",
                 fbo->fbo, status);
         return fsl_err;
     }
@@ -511,7 +535,8 @@ u32 fsl_fbo_init(fsl_fbo *fbo, fsl_mesh *mesh_fbo, b8 multisample, u32 samples)
 
     /* ---- mesh data ------------------------------------------------------- */
 
-    if (mesh_fbo == NULL || mesh_fbo->vbo_data != NULL) return 0;
+    if (mesh_fbo == NULL || mesh_fbo->vbo_data != NULL)
+        return 0;
 
     mesh_fbo->vbo_len = 16;
     GLfloat vbo_data[] =
@@ -597,7 +622,8 @@ u32 fsl_fbo_realloc(fsl_fbo *fbo, b8 multisample, u32 samples)
     GLuint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE)
     {
-        _LOGFATAL(FALSE, FSL_ERR_FBO_REALLOC_FAIL,
+        _LOGFATAL(FSL_ERR_FBO_REALLOC_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 "FBO '%u': Status '%u' Not Complete, Process Aborted\n", fbo->fbo, status);
 
         fsl_fbo_free(fbo);
@@ -624,14 +650,16 @@ u32 fsl_texture_init(fsl_texture *texture, v2i32 size, const GLint format_intern
 {
     if (!size.x || !size.y)
     {
-        _LOGERROR(FALSE, FSL_ERR_IMAGE_SIZE_TOO_SMALL,
+        _LOGERROR(FSL_ERR_IMAGE_SIZE_TOO_SMALL,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 "Failed to Initialize Texture '%s', Image Size Too Small\n", file_name);
         return fsl_err;
     }
 
     if (strlen(file_name) >= PATH_MAX)
     {
-        _LOGERROR(FALSE, FSL_ERR_PATH_TOO_LONG,
+        _LOGERROR(FSL_ERR_PATH_TOO_LONG,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 "Failed to Initialize Texture '%s', File Path Too Long\n", file_name);
         return fsl_err;
     }
@@ -643,7 +671,8 @@ u32 fsl_texture_init(fsl_texture *texture, v2i32 size, const GLint format_intern
             &texture->channels, channels);
     if (!texture->buf)
     {
-        _LOGERROR(FALSE, FSL_ERR_IMAGE_LOAD_FAIL,
+        _LOGERROR(FSL_ERR_IMAGE_LOAD_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 "Failed to Initialize Texture '%s', 'stbi_load()' Failed\n", file_name);
         return fsl_err;
     }
@@ -652,6 +681,7 @@ u32 fsl_texture_init(fsl_texture *texture, v2i32 size, const GLint format_intern
     texture->format_internal = format_internal;
     texture->filter = filter;
     texture->grayscale = grayscale;
+    texture->loaded = TRUE;
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -662,15 +692,20 @@ u32 fsl_texture_generate(fsl_texture *texture, b8 bindless)
     _fsl_texture_generate(&texture->id, texture->format_internal, texture->format,
             texture->filter, texture->size.x, texture->size.y,
             texture->buf, texture->grayscale);
+    texture->generated = TRUE;
 
     if (fsl_err == FSL_ERR_SUCCESS && bindless)
     {
         texture->handle = glGetTextureHandleARB(texture->id);
         glMakeTextureHandleResidentARB(texture->handle);
-        _LOGTRACE(FALSE, "Handle[%"PRIu64"] for Texture[%u] Created\n", texture->handle, texture->id);
+        _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+                "Handle[%"PRIu64"] for Texture[%u] Created\n", texture->handle, texture->id);
+        texture->bindless = TRUE;
     }
 
-    (texture->buf) ? stbi_image_free(texture->buf) : 0;
+    if (texture->buf)
+        stbi_image_free(texture->buf);
+
     return fsl_err;
 }
 
@@ -679,7 +714,8 @@ u32 _fsl_texture_generate(GLuint *id, const GLint format_internal,  const GLint 
 {
     if (!width || !height)
     {
-        _LOGERROR(FALSE, FSL_ERR_IMAGE_SIZE_TOO_SMALL,
+        _LOGERROR(FSL_ERR_IMAGE_SIZE_TOO_SMALL,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 "Failed to Generate Texture [%u], Texture Size Too Small\n", *id);
         return fsl_err;
     }
@@ -705,20 +741,24 @@ void fsl_texture_free(fsl_texture *texture)
 {
     if (!texture) return;
 
-    if (texture->handle)
+    if (texture->bindless)
     {
         glMakeTextureHandleNonResidentARB(texture->handle);
-        _LOGTRACE(FALSE, "Handle[%"PRIu64"] for Texture[%u] Destroyed\n",
+        _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+                "Handle[%"PRIu64"] for Texture[%u] Destroyed\n",
                 texture->handle, texture->id);
+        texture->bindless = FALSE;
     }
 
-    if (texture->id)
+    if (texture->generated)
     {
         glDeleteTextures(1, &texture->id);
-        _LOGTRACE(FALSE, "Texture[%u] Unloaded\n", texture->id);
+        _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+                "Texture[%u] Unloaded\n", texture->id);
+        texture->generated = FALSE;
     }
 
-    *texture = (fsl_texture){0};
+    texture->loaded = FALSE;
 }
 
 u32 fsl_mesh_generate(fsl_mesh *mesh, void (*attrib)(), GLenum usage,
@@ -770,7 +810,9 @@ cleanup:
 
 void fsl_mesh_free(fsl_mesh *mesh)
 {
-    if (!mesh) return;
+    if (!mesh)
+        return;
+
     mesh->ebo ? glDeleteBuffers(1, &mesh->ebo) : 0;
     mesh->vbo ? glDeleteBuffers(1, &mesh->vbo) : 0;
     mesh->vao ? glDeleteVertexArrays(1, &mesh->vao) : 0;

@@ -8,15 +8,8 @@
 #include "h/memory.h"
 #include "h/shaders.h"
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @brief process shader before compilation.
- *
- *  parse includes recursively.
- *
- *  @return `NULL` on failure and @ref fsl_err is set accordingly.
- */
-static str *fsl_shader_pre_process(const str *path, u64 *file_len);
+#define fsl_shader_pre_process(path, file_len) \
+    _fsl_shader_pre_process(path, file_len, FSL_INCLUDE_RECURSION_MAX)
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -45,7 +38,9 @@ u32 fsl_shader_init(const str *shaders_dir, fsl_shader *shader)
     shader->source = fsl_shader_pre_process(str_reg, NULL);
     if (!shader->source)
     {
-        _LOGERROR(FALSE, FSL_ERR_POINTER_NULL, "Shader Source '%s' NULL\n", shader->file_name);
+        _LOGERROR(FSL_ERR_POINTER_NULL,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                "Shader Source '%s' NULL\n", shader->file_name);
         return fsl_err;
     }
     (shader->id) ? glDeleteShader(shader->id) : 0;
@@ -61,26 +56,25 @@ u32 fsl_shader_init(const str *shaders_dir, fsl_shader *shader)
     {
         char log[FSL_STRING_MAX];
         glGetShaderInfoLog(shader->id, FSL_STRING_MAX, NULL, log);
-        _LOGERROR(FALSE, FSL_ERR_SHADER_COMPILE_FAIL, "Shader '%s':\n%s\n", shader->file_name, log);
+        _LOGERROR(FSL_ERR_SHADER_COMPILE_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                "Shader '%s':\n%s\n", shader->file_name, log);
         return fsl_err;
     }
-    else _LOGDEBUG(FALSE, "Shader %d '%s' Loaded\n", shader->id, shader->file_name);
+    else _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+            "Shader %s[%u] Loaded\n", shader->file_name, shader->id);
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
-}
-
-static str *fsl_shader_pre_process(const str *path, u64 *file_len)
-{
-    return _fsl_shader_pre_process(path, file_len, FSL_INCLUDE_RECURSION_MAX);
 }
 
 static str *_fsl_shader_pre_process(const str *path, u64 *file_len, u64 recursion_limit)
 {
     if (!recursion_limit)
     {
-        _LOGFATAL(FALSE, FSL_ERR_INCLUDE_RECURSION_LIMIT,
-                "Include Recursion Limit Exceeded '%s', Process Aborted\n", path);
+        _LOGERROR(FSL_ERR_INCLUDE_RECURSION_LIMIT,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                "Failed to Pre-Process Shader, Include Recursion Limit Exceeded '%s'\n", path);
         return NULL;
     }
 
@@ -127,8 +121,9 @@ static str *_fsl_shader_pre_process(const str *path, u64 *file_len, u64 recursio
 
             if (!strncmp(string, path, strlen(string)))
             {
-                _LOGFATAL(FALSE, FSL_ERR_SELF_INCLUDE,
-                        "Self Include Detected '%s', Process Aborted\n", path);
+                _LOGERROR(FSL_ERR_SELF_INCLUDE,
+                        FSL_FLAG_LOG_NO_VERBOSE,
+                        "Failed to Pre-Process Shader, Self Include Detected '%s'\n", path);
                 goto cleanup;
             }
             buf_include = _fsl_shader_pre_process(string, &buf_include_len, recursion_limit - 1);
@@ -155,6 +150,7 @@ static str *_fsl_shader_pre_process(const str *path, u64 *file_len, u64 recursio
 
     fsl_mem_free((void*)&buf, buf_len, "_fsl_shader_pre_process().buf");
     if (file_len) *file_len = buf_resolved_len;
+
     fsl_err = FSL_ERR_SUCCESS;
     return buf_resolved;
 
@@ -164,6 +160,21 @@ cleanup:
     fsl_mem_free((void*)&buf_resolved, buf_resolved_len, "_fslshader_pre_process().buf_resolved");
     fsl_mem_free((void*)&buf, buf_len, "_fslshader_pre_process().buf");
     return NULL;
+}
+
+void fsl_shader_free(fsl_shader *shader)
+{
+    if (!shader || !shader->type || !shader->loaded)
+        return;
+
+    if (shader->source)
+        fsl_mem_free((void*)&shader->source, strlen(shader->source),
+                "fsl_shader_free().shader.source");
+
+    shader->loaded = FALSE;
+
+    _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+            "Shader %s[%u] Unloaded\n", shader->file_name, shader->id);
 }
 
 u32 fsl_shader_program_init(const str *shaders_dir, fsl_shader_program *program)
@@ -194,11 +205,13 @@ u32 fsl_shader_program_init(const str *shaders_dir, fsl_shader_program *program)
     {
         char log[FSL_STRING_MAX];
         glGetProgramInfoLog(program->id, FSL_STRING_MAX, NULL, log);
-        _LOGERROR(FALSE, FSL_ERR_SHADER_PROGRAM_LINK_FAIL,
+        _LOGERROR(FSL_ERR_SHADER_PROGRAM_LINK_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 "Shader Program '%s':\n%s\n", program->name, log);
         return fsl_err;
     }
-    else _LOGDEBUG(FALSE, "Shader Program %d '%s' Loaded\n", program->id, program->name);
+    else _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+            "Shader Program %s[%u] Loaded\n", program->name, program->id);
 
     if (program->vertex.loaded)
         glDeleteShader(program->vertex.id);
@@ -213,18 +226,17 @@ u32 fsl_shader_program_init(const str *shaders_dir, fsl_shader_program *program)
 
 void fsl_shader_program_free(fsl_shader_program *program)
 {
-    if (program == NULL || !program->id) return;
+    if (program == NULL || !program->loaded)
+        return;
+
     glDeleteProgram(program->id);
 
-    if (program->vertex.source)
-        fsl_mem_free((void*)&program->vertex.source, strlen(program->vertex.source),
-                "fsl_shader_program_free().vertex.source");
+    fsl_shader_free(&program->vertex);
+    fsl_shader_free(&program->geometry);
+    fsl_shader_free(&program->fragment);
 
-    if (program->fragment.source)
-        fsl_mem_free((void*)&program->fragment.source, strlen(program->fragment.source),
-                "fsl_shader_program_free().fragment.source");
+    program->loaded = FALSE;
 
-    if (program->geometry.source)
-        fsl_mem_free((void*)&program->geometry.source, strlen(program->geometry.source),
-                "fsl_shader_program_free().geometry.source");
+    _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+            "Shader Program %s[%u] Unloaded\n", program->name, program->id);
 }

@@ -12,6 +12,7 @@
 #include "h/dir.h"
 #include "h/gui.h"
 #include "h/input.h"
+#include "h/logger.h"
 #include "h/player.h"
 #include "h/terrain.h"
 #include "h/world.h"
@@ -500,36 +501,36 @@ static void generate_standard_meshes(void)
                 VBO_LEN_SKYBOX, EBO_LEN_SKYBOX,
                 vbo_data_skybox, ebo_data_skybox) != FSL_ERR_SUCCESS)
     {
-        LOG_MESH_GENERATE(FSL_ERR_MESH_GENERATION_FAIL, "Skybox");
+        HHC_LOG_MESH_GENERATE(FSL_ERR_MESH_GENERATION_FAIL, "Skybox");
         goto cleanup;
     }
-    LOG_MESH_GENERATE(FSL_ERR_SUCCESS, "Skybox");
+    HHC_LOG_MESH_GENERATE(FSL_ERR_SUCCESS, "Skybox");
 
     if (fsl_mesh_generate(&mesh[MESH_CUBE_OF_HAPPINESS], &fsl_attrib_vec3, GL_STATIC_DRAW,
                 VBO_LEN_COH, EBO_LEN_COH,
                 vbo_data_coh, ebo_data_coh) != FSL_ERR_SUCCESS)
     {
-        LOG_MESH_GENERATE(FSL_ERR_MESH_GENERATION_FAIL, "Cube of Happiness");
+        HHC_LOG_MESH_GENERATE(FSL_ERR_MESH_GENERATION_FAIL, "Cube of Happiness");
         goto cleanup;
     }
-    LOG_MESH_GENERATE(FSL_ERR_SUCCESS, "Cube of Happiness");
+    HHC_LOG_MESH_GENERATE(FSL_ERR_SUCCESS, "Cube of Happiness");
 
     if (fsl_mesh_generate(&mesh[MESH_PLAYER], &fsl_attrib_vec3_vec3, GL_STATIC_DRAW,
                 VBO_LEN_PLAYER, 0, vbo_data_player, NULL) != FSL_ERR_SUCCESS)
     {
-        LOG_MESH_GENERATE(FSL_ERR_MESH_GENERATION_FAIL, "Player");
+        HHC_LOG_MESH_GENERATE(FSL_ERR_MESH_GENERATION_FAIL, "Player");
         goto cleanup;
     }
-    LOG_MESH_GENERATE(FSL_ERR_SUCCESS, "Player");
+    HHC_LOG_MESH_GENERATE(FSL_ERR_SUCCESS, "Player");
 
     if (fsl_mesh_generate(&mesh[MESH_GIZMO], &fsl_attrib_vec3, GL_STATIC_DRAW,
                 VBO_LEN_GIZMO, EBO_LEN_GIZMO,
                 vbo_data_gizmo, ebo_data_gizmo) != FSL_ERR_SUCCESS)
     {
-        LOG_MESH_GENERATE(FSL_ERR_MESH_GENERATION_FAIL, "Gizmo");
+        HHC_LOG_MESH_GENERATE(FSL_ERR_MESH_GENERATION_FAIL, "Gizmo");
         goto cleanup;
     }
-    LOG_MESH_GENERATE(FSL_ERR_SUCCESS, "Gizmo");
+    HHC_LOG_MESH_GENERATE(FSL_ERR_SUCCESS, "Gizmo");
 
     *GAME_ERR = FSL_ERR_SUCCESS;
     return;
@@ -1235,19 +1236,17 @@ int main(int argc, char **argv)
             game_init() != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    if (!GAME_RELEASE_BUILD)
-        LOGDEBUG(FALSE, TRUE, "%s\n", "DEVELOPMENT BUILD");
+#ifndef HHC_RELEASE_BUILD
+    HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+            "%s\n", "DEBUG BUILD");
 
-    if (!MODE_INTERNAL_DEBUG)
-    {
-        LOGWARNING(FALSE, TRUE, ERR_MODE_INTERNAL_DEBUG_DISABLE,
-                "%s\n", "'MODE_INTERNAL_DEBUG' Disabled");
-    }
-    else LOGDEBUG(FALSE, TRUE, "%s\n", "Debugging Enabled");
+    glfwSetWindowPos(render->window, 1920 - render->size.x, 24);
+#endif /* HHC_RELEASE_BUILD */
 
     if (!MODE_INTERNAL_COLLIDE)
     {
-        LOGWARNING(FALSE, TRUE, ERR_MODE_INTERNAL_COLLIDE_DISABLE,
+        HHC_LOGWARNING(HHC_ERR_COLLISIONS_DISABLED,
+                FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                 "%s\n", "'MODE_INTERNAL_COLLIDE' Disabled");
     }
 
@@ -1255,19 +1254,18 @@ int main(int argc, char **argv)
             settings_init() != FSL_ERR_SUCCESS)
         goto cleanup;
 
-#if !GAME_RELEASE_BUILD
-    glfwSetWindowPos(render->window, 1920 - render->size.x, 24);
-#endif /* GAME_RELEASE_BUILD */
-
     /* ---- set mouse input ------------------------------------------------- */
 
     glfwSetInputMode(render->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     if (glfwRawMouseMotionSupported())
     {
         glfwSetInputMode(render->window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-        LOGDEBUG(FALSE, TRUE, "%s\n", "GLFW: Raw Mouse Motion Enabled");
+        HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                "%s\n", "GLFW: Raw Mouse Motion Enabled");
     }
-    else LOGERROR(FALSE, TRUE, FSL_ERR_GLFW, "%s\n", "GLFW: Raw Mouse Motion Not Supported");
+    else HHC_LOGERROR(FSL_ERR_GLFW,
+            FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+            "%s\n", "GLFW: Raw Mouse Motion Not Supported");
 
     /* ---- set callbacks --------------------------------------------------- */
 

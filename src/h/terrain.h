@@ -1,5 +1,5 @@
-#ifndef GAME_TERRAIN_H
-#define GAME_TERRAIN_H
+#ifndef HHC_TERRAIN_H
+#define HHC_TERRAIN_H
 
 #include <engine/h/types.h>
 
@@ -131,4 +131,4 @@ terrain terrain_land(v3i32 coordinates);
 terrain terrain_decaying_lands(v3i32 coordinates);
 terrain terrain_biome_blend_test(v3i32 coordinates);
 
-#endif /* GAME_TERRAIN_H */
+#endif /* HHC_TERRAIN_H */

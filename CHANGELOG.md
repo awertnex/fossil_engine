@@ -29,6 +29,10 @@
     - I made it so that multiple pushes can use the same memory page as long as they're small enough to fit within it,
       otherwise the overlapping block will be pushed to the next page
 - removed build tool into its own repository and re-introduced as a dependency
+- advanced logger, now logs to console, to screen, to file, and takes flags for custom options
+- fixed very sneaky and annoying segfault:
+    - I wrongfully assumed since "if (!p)" protected against NULL pointers it protected against un-allocated memory... and then I ate dirt
+- added function 'fsl_shader_free()' to unload individual shaders
 
 #### bugs and flaws
 - segfault when allocating smaller than 256 bytes for 'size' in function 'mem_alloc_buf()'

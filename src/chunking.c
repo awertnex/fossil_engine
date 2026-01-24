@@ -8,13 +8,13 @@
 #include <engine/h/input.h>
 #include <engine/h/memory.h>
 #include <engine/h/math.h>
-#include <engine/h/logger.h>
 #include <engine/h/string.h>
 
 #include "h/assets.h"
 #include "h/chunking.h"
 #include "h/common.h"
 #include "h/dir.h"
+#include "h/logger.h"
 #include "h/main.h"
 #include "h/terrain.h"
 #include "h/world.h"
@@ -206,7 +206,7 @@ u32 chunking_init(void)
         {
             for (j = 0; j < chunk_buf_volume; ++j)
             {
-                LOGTRACE(FALSE, TRUE,
+                HHC_LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                         "Building CHUNK_ORDER Distance Lookup [0x%02"PRIx64"/0x%02x] Progress [%"PRIu64"/%"PRIu64"]..\n",
                         i, SET_RENDER_DISTANCE_MAX, j, chunk_buf_volume);
 
@@ -220,7 +220,7 @@ u32 chunking_init(void)
                 index[j] = j;
             }
 
-            LOGTRACE(FALSE, TRUE,
+            HHC_LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     "Sorting CHUNK_ORDER Distance Lookup [0x%02"PRIx64"/0x%02x]..\n",
                     i, SET_RENDER_DISTANCE_MAX);
 
@@ -232,7 +232,7 @@ u32 chunking_init(void)
                         fsl_swap_bits_u32(&index[j], &index[k]);
                     }
 
-            LOGTRACE(FALSE, TRUE,
+            HHC_LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     "Writing CHUNK_ORDER Distance Lookup [0x%02"PRIx64"/0x%02x] To File..\n",
                     i, SET_RENDER_DISTANCE_MAX);
 
@@ -267,7 +267,7 @@ u32 chunking_init(void)
     {
         for (i = 0; i <= SET_RENDER_DISTANCE_MAX; ++i)
         {
-            LOGTRACE(FALSE, TRUE,
+            HHC_LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     "Building CHUNKS_MAX Lookup, Progress [%"PRIu64"/%d]..\n",
                     i, SET_RENDER_DISTANCE_MAX);
             chunk_buf_diameter = (i * 2) + 1;
@@ -292,7 +292,8 @@ u32 chunking_init(void)
             CHUNKS_MAX[i] = chunks_max;
         }
 
-        LOGTRACE(FALSE, TRUE, "%s\n", "Writing CHUNKS_MAX Lookup To File..\n");
+        HHC_LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                "%s\n", "Writing CHUNKS_MAX Lookup To File..\n");
 
         if (fsl_write_file(CHUNKS_MAX_lookup_file_name,
                 sizeof(u64), SET_RENDER_DISTANCE_MAX + 1,
@@ -1238,7 +1239,9 @@ static void _chunk_buf_push(u32 index, v3i32 player_chunk_delta)
             return;
         }
 
-    LOGERROR(FALSE, TRUE, FSL_ERR_BUFFER_FULL, "'%s'\n", "'chunk_buf' Full");
+    HHC_LOGERROR(FSL_ERR_BUFFER_FULL,
+            FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+            "'%s'\n", "'chunk_buf' Full");
 }
 
 static void _chunk_buf_pop(u32 index)
