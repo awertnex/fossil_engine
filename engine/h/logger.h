@@ -1,9 +1,9 @@
 #ifndef FSL_LOGGER_H
 #define FSL_LOGGER_H
 
-/*  Notes:
- *      log macros that begin with an underscore (`_`) are used by the engine.
- *      log macros that end in `EX` (extended) are used to pass `file` and `line` manually.
+/*  notes:
+ *      log macros beginning with an underscore (`_`) are used by the engine.
+ *      log macros ending in `EX` are used to pass `file` and `line` manually.
  */
 
 #include "common.h"
@@ -12,12 +12,19 @@
 #include "memory.h"
 #include "types.h"
 
-enum /* fsl_logger_flag */
+enum fsl_logger_flag
 {
     FSL_FLAG_LOGGER_GUI_OPEN = 0x0001,
 }; /* LoggerFlag */
 
-enum /* fsl_log_message_flag */
+enum fsl_log_output_flag
+{
+    FSL_FLAG_LOG_VERBOSE =      0x0001,
+    FSL_FLAG_LOG_CMD =          0x0002,
+    FSL_FLAG_LOG_PRESERVE_ERR = 0x0004,
+}; /* fsl_log_output_flag */
+
+enum fsl_log_message_flag
 {
     FSL_FLAG_LOG_TIMESTAMP =    0x0001,
     FSL_FLAG_LOG_DATE =         0x0002,
@@ -28,7 +35,7 @@ enum /* fsl_log_message_flag */
     FSL_FLAG_LOG_TERM_COLOR =   0x0010,
 }; /* fsl_log_message_flag */
 
-enum /* fsl_log_level */
+enum fsl_log_level
 {
     FSL_LOG_LEVEL_FATAL,
     FSL_LOG_LEVEL_ERROR,
@@ -62,9 +69,6 @@ enum /* fsl_log_level */
 #define LOGINFO(verbose, cmd, format, ...) \
     _fsl_log_output(verbose, cmd, fsl_log_dir, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_INFO, FSL_ERR_SUCCESS, format, ##__VA_ARGS__)
 
-#define LOGINFOEX(verbose, cmd, file, line, format, ...) \
-    _fsl_log_output(verbose, cmd, fsl_log_dir, file, line, FSL_LOG_LEVEL_INFO, FSL_ERR_SUCCESS, format, ##__VA_ARGS__)
-
 #ifdef FOSSIL_RELEASE_BUILD
 #   define LOGDEBUG(verbose, cmd, format, ...)
 #   define LOGTRACE(verbose, cmd, format, ...)
@@ -74,7 +78,6 @@ enum /* fsl_log_level */
 
 #   define LOGTRACE(verbose, cmd, format, ...) \
     _fsl_log_output(verbose, cmd, fsl_log_dir, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_TRACE, FSL_ERR_SUCCESS, format, ##__VA_ARGS__)
-
 #endif /* FOSSIL_RELEASE_BUILD */
 
 #define LOG_MESH_GENERATE(err, mesh_name) \

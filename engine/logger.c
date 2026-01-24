@@ -15,24 +15,6 @@
 #include "h/time.h"
 #include "h/types.h"
 
-#define LOGFATALEX(verbose, cmd, file, line, err, format, ...); \
-{ \
-    fsl_err = (u32)err; \
-    _log_output(verbose, cmd, fsl_log_dir, file, line, FSL_LOG_LEVEL_FATAL, err, format, ##__VA_ARGS__); \
-}
-
-#define LOGERROREX(verbose, cmd, file, line, err, format, ...); \
-{ \
-    fsl_err = (u32)err; \
-    _log_output(verbose, cmd, fsl_log_dir, file, line, FSL_LOG_LEVEL_ERROR, err, format, ##__VA_ARGS__); \
-}
-
-#define LOGWARNINGEX(verbose, cmd, file, line, err, format, ...) \
-{ \
-    fsl_err = (u32)err; \
-    _log_output(verbose, cmd, fsl_log_dir, file, line, FSL_LOG_LEVEL_WARNING, err, format, ##__VA_ARGS__); \
-}
-
 #ifdef FOSSIL_RELEASE_BUILD
 #   define LOGDEBUGEX(verbose, cmd, file, line, format, ...)
 #   define LOGTRACEEX(verbose, cmd, file, line, format, ...)
@@ -226,7 +208,7 @@ void _fsl_log_output(b8 verbose, b8 cmd, const str *_log_dir, const str *file, u
         fsl_logger_tab_index = (fsl_logger_tab_index + 1) % FSL_LOGGER_HISTORY_MAX;
     }
 
-    if (fsl_is_dir_exists(_log_dir, FALSE) == FSL_ERR_SUCCESS)
+    if (_fsl_is_dir_exists(_log_dir, FALSE) == FSL_ERR_SUCCESS)
     {
         _fsl_get_log_str(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_FULL_TIME,
                 verbose, level, error_code, file, line);

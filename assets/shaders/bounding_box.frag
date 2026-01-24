@@ -5,5 +5,5 @@ out vec4 color;
 
 void main()
 {
-    color = box_color;
+    color = box_color * vec3(0.5);
 }
