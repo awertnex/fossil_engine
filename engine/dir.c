@@ -53,12 +53,12 @@ u32 fsl_is_file_exists(const str *name, b8 log)
             fsl_err = FSL_ERR_SUCCESS;
             return fsl_err;
         }
-        else if (log)
-            _LOGERROR(FSL_ERR_IS_NOT_FILE, 0,
-                    "'%s' is Not a Regular File\n", name);
         else
         {
-            fsl_err = FSL_ERR_IS_NOT_FILE;
+            if (log)
+                _LOGERROR(FSL_ERR_IS_NOT_FILE, 0,
+                        "'%s' is Not a Regular File\n", name);
+            else fsl_err = FSL_ERR_IS_NOT_FILE;
             return fsl_err;
         }
     }
@@ -95,12 +95,12 @@ u32 fsl_is_dir_exists(const str *name, b8 log)
             fsl_err = FSL_ERR_SUCCESS;
             return fsl_err;
         }
-        else if (log)
-            _LOGERROR(FSL_ERR_IS_NOT_DIR, 0,
-                    "'%s' is Not a Directory\n", name);
         else
         {
-            fsl_err = FSL_ERR_IS_NOT_DIR;
+            if (log)
+                _LOGERROR(FSL_ERR_IS_NOT_DIR, 0,
+                        "'%s' is Not a Directory\n", name);
+            else fsl_err = FSL_ERR_IS_NOT_DIR;
             return fsl_err;
         }
     }

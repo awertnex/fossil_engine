@@ -33,6 +33,7 @@
 - fixed very sneaky and annoying segfault:
     - I wrongfully assumed since "if (!p)" protected against NULL pointers it protected against un-allocated memory... and then I ate dirt
 - added function 'fsl_shader_free()' to unload individual shaders
+- added mouse wheel scrolling in GUI logger (press 'Tab' for 'super debug' to scroll)
 
 #### bugs and flaws
 - segfault when allocating smaller than 256 bytes for 'size' in function 'mem_alloc_buf()'

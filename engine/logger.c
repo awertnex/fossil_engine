@@ -16,6 +16,8 @@
 #include "h/time.h"
 #include "h/types.h"
 
+/* ---- section: definitions ------------------------------------------------ */
+
 enum fsl_log_file_index
 {
     FSL_LOG_FILE_INDEX_FATAL = 0,
@@ -26,6 +28,8 @@ enum fsl_log_file_index
     FSL_LOG_FILE_INDEX_TRACE = 2,
     FSL_LOG_FILE_INDEX_COUNT,
 }; /* fsl_log_file_index */
+
+/* ---- section: declarations ----------------------------------------------- */
 
 u32 fsl_log_level_max = FSL_LOG_LEVEL_TRACE;
 static u64 fsl_log_flag = 0;
@@ -86,10 +90,32 @@ static str *fsl_esc_code_color[FSL_LOG_LEVEL_COUNT] =
     "\033[33m",
 };
 
+/* ---- section: signatures ------------------------------------------------- */
+
 /*! -- INTERNAL USE ONLY --;
  */
 static void _fsl_get_log_str(const str *str_in, str *str_out, u32 flags, b8 verbose,
         u8 level, u32 error_code, const str *file, u64 line);
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief like @ref fsl_is_dir_exists(), but no logging on success, no writing to
+ *  log file and no modifying @ref fsl_err (used for logger dir checks).
+ *
+ *  @return non-zero on failure, error codes can be found in @ref diagnostics.h.
+ */
+static u32 fsl_logger_is_dir_exists(const str *name);
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief like @ref fsl_append_file(), but no logging on success and no modifying
+ *  @ref fsl_err (used for logger file writes).
+ *
+ *  @return non-zero on failure, error codes can be found in @ref diagnostics.h.
+ */
+static u32 fsl_logger_append_file(const str *name, u64 size, u64 length, void *buf);
+
+/* ---- section: implementation --------------------------------------------- */
 
 u32 fsl_logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 log_dir_not_found)
 {

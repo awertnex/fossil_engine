@@ -182,22 +182,4 @@ FSLAPI void fsl_logger_close(void);
 FSLAPI void _fsl_log_output(u32 error_code, u32 flags, const str *file, u64 line, u8 level,
         const str *_log_dir, const str *format, ...);
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @brief like @ref fsl_is_dir_exists(), but no logging on success, no writing to
- *  log file and no modifying @ref fsl_err (used for logger dir checks).
- *
- *  @return non-zero on failure, error codes can be found in @ref diagnostics.h.
- */
-u32 fsl_logger_is_dir_exists(const str *name);
-
-/*! -- INTERNAL USE ONLY --;
- *
- *  @brief like @ref fsl_append_file(), but no logging on success and no modifying
- *  @ref fsl_err (used for logger file writes).
- *
- *  @return non-zero on failure, error codes can be found in @ref diagnostics.h.
- */
-u32 fsl_logger_append_file(const str *name, u64 size, u64 length, void *buf);
-
 #endif /* FSL_LOGGER_H */

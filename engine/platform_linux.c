@@ -109,7 +109,6 @@ u32 fsl_exec(fsl_buf *cmd, str *cmd_name)
         {
             _LOGDEBUG(0,
                     "'%s' Exit Code: %d\n", cmd_name, exit_code);
-
             fsl_err = FSL_ERR_EXEC_PROCESS_NON_ZERO;
             return fsl_err;
         }

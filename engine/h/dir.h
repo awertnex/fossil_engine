@@ -30,15 +30,6 @@ FSLAPI u32 fsl_is_dir(const str *name);
  */
 FSLAPI u32 fsl_is_dir_exists(const str *name, b8 log);
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @brief like @ref fsl_is_dir_exists(), but no logging on success, no writing to
- *  log file and no modifying @ref fsl_err (used for logger dir checks).
- *
- *  @return non-zero on failure, error codes can be found in @ref diagnostics.h.
- */
-u32 fsl_logger_is_dir_exists(const str *name);
-
 /*! -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
  *  @brief make directory `path` if it doesn't exist.
