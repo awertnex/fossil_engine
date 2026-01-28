@@ -326,10 +326,8 @@ u32 fsl_copy_file(const str *src, const str *dst)
                 "Failed to Copy File Permissions '%s' -> '%s', 'stat()' Failed\n",
                 src, str_dst);
 
-    ts[0].tv_sec = stats.st_atim.tv_sec;
-    ts[0].tv_nsec = stats.st_atim.tv_nsec;
-    ts[1].tv_sec = stats.st_mtim.tv_sec;
-    ts[1].tv_nsec = stats.st_mtim.tv_nsec;
+    ts[0] = stats.st_atim;
+    ts[1] = stats.st_mtim;
     utimensat(AT_FDCWD, str_dst, ts, 0);
 
     fsl_err = FSL_ERR_SUCCESS;
@@ -364,10 +362,10 @@ u32 fsl_copy_dir(const str *src, const str *dst, b8 contents_only)
 
     if (fsl_is_dir_exists(str_dst, FALSE) == FSL_ERR_SUCCESS && !contents_only)
     {
-        get_base_name(str_src, str_dst + strlen(str_dst), PATH_MAX - strlen(str_dst));
-        check_slash(str_dst);
-        posix_slash(str_dst);
-        make_dir(str_dst);
+        fsl_get_base_name(str_src, str_dst + strlen(str_dst), PATH_MAX - strlen(str_dst));
+        fsl_check_slash(str_dst);
+        fsl_posix_slash(str_dst);
+        fsl_make_dir(str_dst);
     }
     else fsl_make_dir(str_dst);
 
@@ -395,10 +393,8 @@ u32 fsl_copy_dir(const str *src, const str *dst, b8 contents_only)
                 "Failed to Copy Directory Permissions '%s' -> '%s', 'stat()' Failed\n",
                 str_src, str_dst);
 
-    ts[0].tv_sec = stats.st_atim.tv_sec;
-    ts[0].tv_nsec = stats.st_atim.tv_nsec;
-    ts[1].tv_sec = stats.st_mtim.tv_sec;
-    ts[1].tv_nsec = stats.st_mtim.tv_nsec;
+    ts[0] = stats.st_atim;
+    ts[1] = stats.st_mtim;
     utimensat(AT_FDCWD, str_dst, ts, 0);
 
     fsl_err = FSL_ERR_SUCCESS;

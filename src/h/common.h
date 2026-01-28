@@ -22,7 +22,7 @@
 #define FSL_ENGINE_AUTHOR           "Lily Awertnex"
 #define FSL_ENGINE_NAME             "Fossil Engine"
 
-#define FSL_ENGINE_VERSION_STABLE   "-stable"
+#define FSL_ENGINE_VERSION_STABLE   ""
 #define FSL_ENGINE_VERSION_BETA     "-beta"
 #define FSL_ENGINE_VERSION_ALPHA    "-alpha"
 #define FSL_ENGINE_VERSION_DEV      "-dev"

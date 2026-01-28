@@ -19,8 +19,6 @@
     - Copy directory permissions
     - Copy directory access and modification times
 - Add error code `FSL_ERR_FILE_STAT_FAIL`
-- Add copying file permissions for function `fsl_copy_file()`
-- Add error code `ERR_FILE_STAT_FAIL`
 
 - - -
 ## v0.3.4-beta (2026 Jan 28)

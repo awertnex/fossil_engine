@@ -79,7 +79,7 @@ u32 fsl_shader_init(const str *shaders_dir, fsl_shader *shader)
                 "Shader '%s':\n%s\n", shader->file_name, log);
         return fsl_err;
     }
-    else _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+    else _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             "Shader %s[%u] Loaded\n", shader->file_name, shader->id);
 
     fsl_err = FSL_ERR_SUCCESS;
@@ -191,7 +191,7 @@ void fsl_shader_free(fsl_shader *shader)
 
     shader->loaded = FALSE;
 
-    _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+    _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             "Shader %s[%u] Unloaded\n", shader->file_name, shader->id);
 }
 
@@ -228,7 +228,7 @@ u32 fsl_shader_program_init(const str *shaders_dir, fsl_shader_program *program)
                 "Shader Program '%s':\n%s\n", program->name, log);
         return fsl_err;
     }
-    else _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+    else _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             "Shader Program %s[%u] Loaded\n", program->name, program->id);
 
     if (program->vertex.loaded)
@@ -255,6 +255,6 @@ void fsl_shader_program_free(fsl_shader_program *program)
 
     program->loaded = FALSE;
 
-    _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+    _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             "Shader Program %s[%u] Unloaded\n", program->name, program->id);
 }
