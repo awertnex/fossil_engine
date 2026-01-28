@@ -1,169 +1,195 @@
-#ifndef HHC_COMMON_H
-#define HHC_COMMON_H
+/*  Copyright 2026 Lily Awertnex
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.OFTWARE.
+ */
 
-#include <engine/h/types.h>
+/*  common.h - engine info and commonly shared values
+ */
 
-#include "diagnostics.h"
+#ifndef FSL_COMMON_H
+#define FSL_COMMON_H
 
-#define GAME_VERSION_STABLE "-stable"
-#define GAME_VERSION_BETA   "-beta"
-#define GAME_VERSION_ALPHA  "-alpha"
-#define GAME_VERSION_DEV    "-dev"
+#define FSL_ENGINE_AUTHOR           "Lily Awertnex"
+#define FSL_ENGINE_NAME             "Fossil Engine"
 
-#define GAME_AUTHOR         "Author: Lily Awertnex"
-#define GAME_NAME           "Heaven-Hell Continuum"
-#define GAME_VERSION        "0.4.0"GAME_VERSION_DEV
-#define GAME_TITLE          GAME_NAME": "GAME_VERSION
+#define FSL_ENGINE_VERSION_STABLE   "-stable"
+#define FSL_ENGINE_VERSION_BETA     "-beta"
+#define FSL_ENGINE_VERSION_ALPHA    "-alpha"
+#define FSL_ENGINE_VERSION_DEV      "-dev"
 
-#ifdef HHC_RELEASE_BUILD
-#   define GAME_RELEASE_BUILD 1
+#define FSL_ENGINE_VERSION_MAJOR    0
+#define FSL_ENGINE_VERSION_MINOR    3
+#define FSL_ENGINE_VERSION_PATCH    4
+#define FSL_ENGINE_VERSION_BUILD    FSL_ENGINE_VERSION_BETA
+
+#if defined(__linux__) || defined(__linux)
+#   define _GNU_SOURCE
+
+#   define FSL_PLATFORM_LINUX       1
+#   define FSL_PLATFORM             "linux"
+#   define FSL_FILE_NAME_LIB        "libfossil.so"
+#   define FSL_FILE_NAME_PLATFORM   "platform_linux.c"
+#   define FSL_EXE                  ""
+#   define FSL_RUNTIME_PATH         "$ORIGIN"
+#   define FSL_SLASH_NATIVE         '/'
+#   define FSL_SLASH_NON_NATIVE     '\\'
+#elif defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
+#   define FSL_PLATFORM_WIN         1
+#   define FSL_PLATFORM             "win"
+#   define FSL_FILE_NAME_LIB        "fossil.dll"
+#   define FSL_FILE_NAME_PLATFORM   "platform_win.c"
+#   define FSL_EXE                  ".exe"
+#   define FSL_RUNTIME_PATH         "%CD%"
+#   define FSL_SLASH_NATIVE         '\\'
+#   define FSL_SLASH_NON_NATIVE     '/'
+#endif /* FSL_PLATFORM */
+
+#if FSL_PLATFORM_WIN
+#   define FSLAPI __declspec(dllexport)
 #else
-#   define GAME_RELEASE_BUILD 0
-#endif /* HHC_RELEASE_BUILD */
+#   define FSLAPI __attribute__((visibility("default")))
+#endif /* FSL_PLATFORM */
 
-/* ---- settings ------------------------------------------------------------ */
+#ifndef FSLAPI
+#   define FSLAPI
+#endif /* FSLAPI */
 
-#define MODE_INTERNAL_VSYNC         0
-#define MODE_INTERNAL_LOAD_CHUNKS   1
-#define MODE_INTERNAL_COLLIDE       1
+#include "types.h"
 
-/* ---- defaults ------------------------------------------------------------ */
+#define FSL_DIR_NAME_FONTS      "engine/assets/fonts/"
+#define FSL_DIR_NAME_TEXTURES   "engine/assets/textures/"
+#define FSL_DIR_NAME_SHADERS    "engine/assets/shaders/"
+#define FSL_DIR_NAME_LOGS       "engine/logs/"
 
-#define SET_MARGIN                      10
-#define SET_CAMERA_DISTANCE_MAX         4.0f
-#define SET_DAY_TICKS_MAX               24000
-#define SET_RENDER_DISTANCE_DEFAULT     6
-#define SET_RENDER_DISTANCE_MIN         2
-#define SET_RENDER_DISTANCE_MAX         32
-#define SET_FOV_DEFAULT                 70
-#define SET_FOV_MIN                     30
-#define SET_FOV_MAX                     160
-#define SET_MOUSE_SENSITIVITY_DEFAULT   100
-#define SET_MOUSE_SENSITIVITY_MIN       10
-#define SET_MOUSE_SENSITIVITY_MAX       200
-#define SET_GUI_SCALE_DEFAULT           2
-#define SET_GUI_SCALE_0                 0 /* TODO: auto gui scale */
-#define SET_GUI_SCALE_1                 1
-#define SET_GUI_SCALE_2                 2
-#define SET_GUI_SCALE_3                 3
-#define SET_GUI_SCALE_4                 4
-#define SET_LERP_SPEED_DEFAULT          25.0f
-#define SET_LERP_SPEED_FOV_MODE         16.0f
-#define SET_COLLISION_CAPSULE_PADDING   1.0f
-#define SET_TEXT_REFRESH_INTERVAL       10 /* unit: fps */
-#define SET_CONSOLE_SCROLL_SPEED        4
+#define FSL_FILE_NAME_LOG_ERROR "log_error.log"
+#define FSL_FILE_NAME_LOG_INFO  "log_info.log"
+#define FSL_FILE_NAME_LOG_EXTRA "log_verbose.log"
 
-#define DEATH_STRING_MAX        128
+#define FSL_COLOR_CHANNELS_RGBA 4
+#define FSL_COLOR_CHANNELS_RGB 3
+#define FSL_COLOR_CHANNELS_GRAY 1
 
-#define COLOR_TEXT_DEFAULT      FSL_DIAGNOSTIC_COLOR_DEBUG
-#define COLOR_TEXT_BRIGHT       FSL_DIAGNOSTIC_COLOR_DEFAULT
-#define COLOR_TEXT_MOSS         0x6f9f3fff
-#define COLOR_TEXT_RADIOACTIVE  0x3f9f3fff
-#define COLOR_DIAGNOSTIC_NONE   0x995429ff
-#define COLOR_DIAGNOSTIC_ERROR  0xec6051ff
-#define COLOR_DIAGNOSTIC_INFO   0x3f6f9fff
+#define FSL_RENDER_WIDTH_DEFAULT 1280
+#define FSL_RENDER_WIDTH_MIN 512
+#define FSL_RENDER_WIDTH_MAX 3840
+#define FSL_RENDER_HEIGHT_DEFAULT 720
+#define FSL_RENDER_HEIGHT_MIN 288
+#define FSL_RENDER_HEIGHT_MAX 2160
+#define FSL_CAMERA_CLIP_FAR_DEFAULT GL_CLIP_DISTANCE0
+#define FSL_CAMERA_CLIP_FAR_OPTIMAL 2048.0f
+#define FSL_CAMERA_CLIP_FAR_UI 256.0f
+#define FSL_CAMERA_CLIP_NEAR_DEFAULT 0.03f
+#define FSL_CAMERA_ANGLE_MAX 90.0
+#define FSL_CAMERA_RANGE_MAX 360.0
+#define FSL_CAMERA_ZOOM_MAX 69.0f
+#define FSL_CAMERA_ZOOM_SPEED 10.0
+#define FSL_CAMERA_ZOOM_SENSITIVITY 6.0
+#define FSL_FONT_ATLAS_CELL_RESOLUTION 16
+#define FSL_FONT_RESOLUTION_DEFAULT 64
+#define FSL_FONT_SIZE_DEFAULT 22.0f
+#define FSL_TEXT_TAB_SIZE 4
+#define FSL_TEXT_CHAR_STRIDE 5
+#define FSL_TEXT_COLOR_SHADOW 0x00000060
+#define FSL_TEXT_OFFSET_SHADOW 2.0f
+#define FSL_TARGET_FPS_DEFAULT 60
+#define FSL_TARGET_FPS_MIN 1
+#define FSL_TARGET_FPS_MAX 256
 
 /* ---- shader bindings ----------------------------------------------------- */
 
-#define SHADER_BUFFER_BINDING_SSBO_TEXTURE_INDICES (0 + FSL_SHADER_BUFFER_BINDING_COUNT)
-#define SHADER_BUFFER_BINDING_SSBO_TEXTURE_HANDLES (1 + FSL_SHADER_BUFFER_BINDING_COUNT)
+#define FSL_SHADER_BUFFER_BINDING_UBO_NDC_SCALE 0
+#define FSL_SHADER_BUFFER_BINDING_COUNT 1
 
-/* ---- strings ------------------------------------------------------------- */
+/* ---- color conversion macros --------------------------------------------- */
 
-#define GAME_DIR_NAME_ASSETS        "assets/"
-#define GAME_DIR_NAME_AUDIO         "assets/audio/"
-#define GAME_DIR_NAME_FONTS         "assets/fonts/"
-#define GAME_DIR_NAME_LOOKUPS       "assets/lookups/"
-#define GAME_DIR_NAME_MODELS        "assets/models/"
-#define GAME_DIR_NAME_SHADERS       "assets/shaders/"
-#define GAME_DIR_NAME_TEXTURES      "assets/textures/"
-#define GAME_DIR_NAME_BLOCKS        "assets/textures/blocks/"
-#define GAME_DIR_NAME_ENTITIES      "assets/textures/entities/"
-#define GAME_DIR_NAME_ENV           "assets/textures/env/"
-#define GAME_DIR_NAME_GUI           "assets/textures/gui/"
-#define GAME_DIR_NAME_ITEMS         "assets/textures/items/"
-#define GAME_DIR_NAME_LOGO          "assets/textures/logo/"
-#define GAME_DIR_NAME_CONFIG        "config/"
-#define GAME_DIR_NAME_LOGS          "logs/"
-#define GAME_DIR_NAME_SCREENSHOTS   "screenshots/"
-#define GAME_DIR_NAME_TEXT          "text/"
-#define GAME_DIR_NAME_WORLDS        "worlds/"
-
-#define GAME_DIR_WORLD_NAME_CHUNKS      "chunks/"
-#define GAME_DIR_WORLD_NAME_ENTITIES    "entities/"
-#define GAME_DIR_WORLD_NAME_PLAYER      "chunks/"
-
-/* ---- file names ---------------------------------------------------------- */
-
-#define GAME_FILE_NAME_SETTINGS     "settings.txt"
-#define GAME_FILE_NAME_WORLD_SEED   "seed.txt"
-
-/* ---- name formats -------------------------------------------------------- */
-
-#define FORMAT_FILE_NAME_HHCC "r.%d.%d.%d.hhcc"
-
-/* ---- strings: death ------------------------------------------------------ */
-
-#define DEATH_STRING_COLLISION_WALL_0           "died by headbutting a wall"
-#define DEATH_STRING_COLLISION_WALL_1           "rammed a wall at high speed"
-#define DEATH_STRING_COLLISION_WALL_2           "splat on a wall"
-#define DEATH_STRING_COLLISION_WALL_COUNT       3
-
-#define DEATH_STRING_COLLISION_FLOOR_0          "jumped off a cliff"
-#define DEATH_STRING_COLLISION_FLOOR_1          "fell to their death"
-#define DEATH_STRING_COLLISION_FLOOR_2          "splat on the ground"
-#define DEATH_STRING_COLLISION_FLOOR_COUNT      3
-
-#define DEATH_STRING_COLLISION_CEILING_0        "cracked their skull at a ceiling"
-#define DEATH_STRING_COLLISION_CEILING_1        "flew into a ceiling"
-#define DEATH_STRING_COLLISION_CEILING_2        "splat on a ceiling"
-#define DEATH_STRING_COLLISION_CEILING_COUNT    3
-
-enum /* mesh_index */
-{
-    MESH_SKYBOX,
-    MESH_CUBE_OF_HAPPINESS,
-    MESH_PLAYER,
-    MESH_GIZMO,
-    MESH_COUNT,
-}; /* mesh_index */
-
-enum /* fbo_index */
-{
-    FBO_SKYBOX,
-    FBO_WORLD,
-    FBO_WORLD_MSAA,
-    FBO_HUD,
-    FBO_HUD_MSAA,
-    FBO_POST_PROCESSING,
-    FBO_COUNT,
-}; /* fbo_index */
-
-enum /* font_index */
-{
-    FONT_REG,
-    FONT_REG_BOLD,
-    FONT_MONO,
-    FONT_MONO_BOLD,
-    FONT_COUNT,
-}; /* font_index */
-
-enum player_death_reason_index
-{
-    PLAYER_DEATH_REASON_COLLISION_WALL = 1,
-    PLAYER_DEATH_REASON_COLLISION_FLOOR,
-    PLAYER_DEATH_REASON_COLLISION_CEILING,
-    PLAYER_DEATH_REASON_COUNT,
-}; /* player_death_reason_index */
-
-/*! @brief look-up table for @ref str_death_<x> buffer sizes.
- *
- *  @remark read-only, initialized internally in @ref common.c.
+/*! @brief convert RGBA color to 4-Byte hex color.
+ *  @remark color range [0.0f, 1.0f].
  */
-extern u32 DEATH_STRINGS_MAX[PLAYER_DEATH_REASON_COUNT];
+#define fsl_color_v4_to_hex(r, g, b, a) \
+    (((u32)((r) * 0xff) << 0x18) | \
+     ((u32)((g) * 0xff) << 0x10) | \
+     ((u32)((b) * 0xff) << 0x08) | \
+     ((u32)(a) * 0xff))
 
-extern str str_death_collision_wall[DEATH_STRING_COLLISION_WALL_COUNT][DEATH_STRING_MAX];
-extern str str_death_collision_floor[DEATH_STRING_COLLISION_FLOOR_COUNT][DEATH_STRING_MAX];
-extern str str_death_collision_ceiling[DEATH_STRING_COLLISION_CEILING_COUNT][DEATH_STRING_MAX];
+/*! @brief convert 4-Byte hex color to RGBA color.
+ *  @remark color range [0.0f, 1.0f].
+ */
+#define fsl_color_hex_to_v4(n) (v4f32){ \
+    (f32)(((n) >> 0x18) & 0xff) / 0xff, \
+    (f32)(((n) >> 0x10) & 0xff) / 0xff, \
+    (f32)(((n) >> 0x08) & 0xff) / 0xff, \
+    (f32)(((n) >> 0x00) & 0xff) / 0xff}
 
-#endif /* HHC_COMMON_H */
+enum fsl_flag
+{
+    FSL_FLAG_RELEASE_BUILD =        0x0001, /* output `TRACE` and `DEBUG` logs to console */
+    FSL_FLAG_LOAD_DEFAULT_SHADERS = 0x0002, /* initialize default shaders (like 'text' and 'ui') */
+    FSL_FLAG_MULTISAMPLE =          0x0004, /* use `GLFW` multisampling */
+}; /* fsl_flag */
+
+enum fsl_string_index
+{
+    FSL_STR_INDEX_ENGINE_TITLE, /* ENGINE_NAME: ENGINE_VERSION */
+    FSL_STR_INDEX_ENGINE_VERSION,
+    FSL_STR_INDEX_COUNT,
+}; /* fsl_string_index */
+
+enum fsl_shader_index
+{
+    FSL_SHADER_INDEX_UNIT_QUAD,
+    FSL_SHADER_INDEX_TEXT,
+    FSL_SHADER_INDEX_UI,
+    FSL_SHADER_INDEX_UI_9_SLICE,
+    FSL_SHADER_INDEX_COUNT,
+}; /* fsl_shader_index */
+
+enum fsl_font_index
+{
+    FSL_FONT_INDEX_DEJAVU_SANS,
+    FSL_FONT_INDEX_DEJAVU_SANS_BOLD,
+    FSL_FONT_INDEX_DEJAVU_SANS_MONO,
+    FSL_FONT_INDEX_DEJAVU_SANS_MONO_BOLD,
+    FSL_FONT_INDEX_COUNT,
+}; /* fsl_font_index */
+
+enum fsl_text_alignment
+{
+    FSL_TEXT_ALIGN_LEFT = 0,
+    FSL_TEXT_ALIGN_CENTER = 1,
+    FSL_TEXT_ALIGN_RIGHT = 2,
+    FSL_TEXT_ALIGN_TOP = 0,
+    FSL_TEXT_ALIGN_BOTTOM = 2,
+}; /* fsl_text_alignment */
+
+enum fsl_texture_index
+{
+    FSL_TEXTURE_INDEX_PANEL_ACTIVE,
+    FSL_TEXTURE_INDEX_PANEL_INACTIVE,
+    FSL_TEXTURE_INDEX_COUNT,
+}; /* fsl_texture_index */
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief POSIX timestamp of the main process' start in milliseconds.
+ */
+extern u64 fsl_init_time;
+
+/*! @brief project root directory.
+ *  
+ *  @remark called from @ref fsl_init() and @ref fsl_logger_init() to change current working dirctory.
+ *
+ *  @remark declared internally.
+ */
+FSLAPI extern str *FSL_DIR_PROC_ROOT;
+
+#endif /* FSL_COMMON_H */

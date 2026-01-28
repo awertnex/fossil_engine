@@ -1,4 +1,0 @@
-#ifndef FSL_SUPER_DEBUGGER_H
-#define FSL_SUPER_DEBUGGER_H
-
-#endif /* FSL_SUPER_DEBUGGER_H */

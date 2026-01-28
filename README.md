@@ -1,68 +1,49 @@
 # Heaven/Hell Continuum
 
-<h1 align="center">
-  <img src="assets/textures/logo/128x128.png" alt="Heaven-Hell Continuum">
-</h1>
-
-**a voxel game/engine in C99, with minimal dependencies if any.**
-
-
-## Download (unzip and launch)
-
-\# | Linux x86_64 (latest) | Windows (latest)
---- | --- | ---
-tar | [v0.3.0-beta-linux-x86_64.tar.gz](https://github.com/awertnex/heaven-hell_continuum/releases/download/v0.3.0-beta/heaven-hell_continuum-v0.3.0-beta-linux-x86_64.tar.gz)
-zip | [v0.3.0-beta-linux-x86_64.zip](https://github.com/awertnex/heaven-hell_continuum/releases/download/v0.3.0-beta/heaven-hell_continuum-v0.3.0-beta-linux-x86_64.zip) | not yet available
-[All Release Builds](https://github.com/awertnex/heaven-hell_continuum/blob/main/RELEASE_BUILDS.md)
-
+**a game engine/library in C99, with minimal dependencies if any.**
 
 ## Dependencies (already bundled)
 
-- [buildtool](https://github.com/awertnex/buildtool): build tool used to build the game
+- [buildtool](https://github.com/awertnex/buildtool): build tool used to build the engine
 - [glfw v3.4](https://github.com/glfw/glfw/releases): platform-independent windowing (headers modified)
 - [glad v0.1.36](https://github.com/dav1dde/glad-web): OpenGL function loader (modified)
     - extension: GL_ARB_bindless_texture
-- [stb_image.h v2.30](https://github.com/nothings/stb/blob/master/stb_image.h): for loading image data (modified)
-- [stb_image_write.h v1.26](https://github.com/nothings/stb/blob/master/stb_image_write.h): for writing images (modified, unused)
 - [stb_truetype.h v1.26](https://github.com/nothings/stb/blob/master/stb_truetype.h): for loading font data (modified)
 - [dejavu-fonts v2.37](https://github.com/dejavu-fonts/dejavu-fonts): font of choice (modified)
     - dejavu_sans_ansi.ttf (subset: U+0000-00ff)
     - dejavu_sans_bold_ansi.ttf (subset: U+0000-00ff)
     - dejavu_sans_mono_ansi.ttf (subset: U+0000-00ff)
     - dejavu_sans_mono_bold_ansi.ttf (subset: U+0000-00ff)
+- [stb_image.h v2.30](https://github.com/nothings/stb/blob/master/stb_image.h): for loading image data (modified)
+- [stb_image_write.h v1.26](https://github.com/nothings/stb/blob/master/stb_image_write.h): for writing images (modified, unused)
 
 ### windows-specific:
 - [w64devkit v2.4.0](https://github.com/skeeto/w64devkit): not necessary for runtime, just for building from source
 
-
 ## Note About Versioning
-**Before v0.4.0-beta, v0.4.0-dev used to be "development of v0.4.0-beta", after that v0.4.0-dev is "development after v0.4.0-beta".**
+**Before version v0.3.4-beta, the repo used to be a directory in [heaven-hell_continuum](htpps://github.com/awertnex/heaven-hell_continuum), so all tags before that are not engine tags and are not aligned with engine version changes.**
 
 ## Build From Source
 
 >**NOTES:**
->- for development build, turn off `GAME_RELEASE_BUILD` in `src/h/main.h` (set as `0`), enables TRACE and DEBUG logging.
->- if build successful, you can place the built directory 'Heaven-Hell Continuum' anywhere you wish, that's the entire bundle.
-
+>- for release build, pass argument "release" into the build tool.
+>- if build successful, you can place the files inside `fossil/` in your project's deployment directory.
 
 - - -
 ### for linux x86_64:
 
-1. clone and build:
+clone and build:
 
 ```bash
-git clone --depth=1 https://github.com/awertnex/heaven-hell_continuum.git
-cd heaven-hell_continuum/
+git clone --depth=1 https://github.com/awertnex/fossil_engine.git
+cd fossil_engine/
 ./build
-
-# optionally, but has to be called before './build'
-./build engine
 ```
 
-2. run:
+if you want, bootstrap the build script:
 
 ```bash
-./Heaven-Hell\ Continuum/hhc
+gcc build.c -o build
 ```
 
 ### additional build commands:
@@ -72,28 +53,24 @@ cd heaven-hell_continuum/
 - `./build raw`: show build command in raw format
 - `./build self`: re-build build tool
 
-
 - - -
-### for windows (using any C compiler, a suggestion is "gcc" from "mingw"): (it is very broken)
+### for windows (using any C compiler, a suggestion is "gcc" from "mingw"):
 
 if you don't already have a C compiler:
 - [w64devkit v2.4.0](https://github.com/skeeto/w64devkit) (includes gcc toolchain)
 
-1. clone and build:
+clone and build:
 
 ```command
-git clone --depth=1 https://github.com/awertnex/heaven-hell_continuum.git
-cd heaven-hell_continuum
+git clone --depth=1 https://github.com/awertnex/fossil_engine.git
+cd fossil_engine
 ./build.exe
-
-# optionally, but has to be called before './build.exe'
-./build.exe engine
 ```
 
-2. run:
+if you want, bootstrap the build script:
 
 ```command
-`./Heaven-Hell\ Continuum/hhc.exe`.
+gcc.exe build.c -o build.exe
 ```
 
 ### additional build commands:
@@ -103,17 +80,6 @@ cd heaven-hell_continuum
 - `./build.exe raw`: show build command in raw format
 - `./build.exe self`: re-build build tool
 
-
 - - -
-## Build The Build Tool:
-
-```command
-gcc.exe build.c -o build.exe
-```
-
 ## Contributing:
 currently not accepting contributions since the project is in an early stage, but I will be opening contributions soon (saying this as of today: 24 Oct 2025)
-
-## Contributors:
-- [sofia](https://github.com/EdgySofia666): alpha-testing on windows
-
