@@ -19,6 +19,8 @@
     - Copy directory permissions
     - Copy directory access and modification times
 - Add error code `FSL_ERR_FILE_STAT_FAIL`
+- Add guards around copying `tv_nsec` in `fsl_copy_dir()` and `fsl_copy_file()`
+- Fix function `fsl_on_time_interval()` triggering once on first call
 
 - - -
 ## v0.3.4-beta (2026 Jan 28)

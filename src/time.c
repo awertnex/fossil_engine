@@ -95,23 +95,14 @@ b8 fsl_is_in_time_window(u64 *_time, u64 interval, u64 _curr)
 
 b8 fsl_on_time_interval(u64 *_time, u64 interval, u64 _curr)
 {
-    i64 diff = _curr - *_time;
+    if (!interval)
+        return TRUE;
 
-    if (_curr <= *_time || !interval)
+    if (_curr < *_time + interval)
         return FALSE;
 
-    if (diff > (i64)interval)
-    {
-        *_time = _curr;
-        return TRUE;
-    }
-    else if (diff >= 0)
-    {
-        *_time += interval;
-        return TRUE;
-    }
-
-    return FALSE;
+    *_time += interval;
+    return TRUE;
 }
 
 void fsl_sleep_nsec(u64 nsec)

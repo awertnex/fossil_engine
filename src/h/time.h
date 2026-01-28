@@ -22,12 +22,12 @@
 #include "common.h"
 #include "types.h"
 
-#define FSL_SEC2MSEC 1e3
-#define FSL_MSEC2SEC 1e-3
-#define FSL_SEC2USEC 1e6
-#define FSL_USEC2SEC 1e-6
-#define FSL_SEC2NSEC 1e9
-#define FSL_NSEC2SEC 1e-9
+#define FSL_SEC2MSEC 1000L
+#define FSL_MSEC2SEC 0.001
+#define FSL_SEC2USEC 1000000L
+#define FSL_USEC2SEC 0.000001
+#define FSL_SEC2NSEC 1000000000L
+#define FSL_NSEC2SEC 0.000000001
 
 /*! @brief get elapsed nanoseconds since the unix epoch, 1970-01-01 00:00:00 UTC.
  */

@@ -34,6 +34,7 @@
 #include "h/logger.h"
 #include "h/memory.h"
 #include "h/process.h"
+#include "h/time.h"
 
 /* TODO: fix 'fsl_get_file_type()' */
 u64 fsl_get_file_type(const str *name)
@@ -326,6 +327,16 @@ u32 fsl_copy_file(const str *src, const str *dst)
                 "Failed to Copy File Permissions '%s' -> '%s', 'stat()' Failed\n",
                 src, str_dst);
 
+    if (stats.st_atim.tv_nsec == 0)
+        stats.st_atim.tv_nsec = 1;
+    else if (stats.st_atim.tv_nsec >= 1000000000L)
+        stats.st_atim.tv_nsec = 1000000000L - 1;
+
+    if (stats.st_mtim.tv_nsec == 0)
+        stats.st_mtim.tv_nsec = 1;
+    else if (stats.st_mtim.tv_nsec >= 1000000000L)
+        stats.st_mtim.tv_nsec = 1000000000L - 1;
+
     ts[0] = stats.st_atim;
     ts[1] = stats.st_mtim;
     utimensat(AT_FDCWD, str_dst, ts, 0);
@@ -392,6 +403,16 @@ u32 fsl_copy_dir(const str *src, const str *dst, b8 contents_only)
                 FSL_FLAG_LOG_NO_VERBOSE,
                 "Failed to Copy Directory Permissions '%s' -> '%s', 'stat()' Failed\n",
                 str_src, str_dst);
+
+    if (stats.st_atim.tv_nsec == 0)
+        stats.st_atim.tv_nsec = 1;
+    else if (stats.st_atim.tv_nsec >= 1000000000L)
+        stats.st_atim.tv_nsec = 1000000000L - 1;
+
+    if (stats.st_mtim.tv_nsec == 0)
+        stats.st_mtim.tv_nsec = 1;
+    else if (stats.st_mtim.tv_nsec >= 1000000000L)
+        stats.st_mtim.tv_nsec = 1000000000L - 1;
 
     ts[0] = stats.st_atim;
     ts[1] = stats.st_mtim;
