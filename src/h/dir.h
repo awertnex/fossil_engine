@@ -88,7 +88,7 @@ FSLAPI fsl_buf fsl_get_dir_contents(const str *name);
  */
 FSLAPI u64 fsl_get_dir_entry_count(const str *name);
 
-/*! @brief copy `src` into `dst`.
+/*! @brief copy `src` into `dst`, preserve permissions and modification time.
  *
  *  @remark can overwrite files.
  *
@@ -96,7 +96,7 @@ FSLAPI u64 fsl_get_dir_entry_count(const str *name);
  */
 FSLAPI u32 fsl_copy_file(const str *src, const str *dst);
 
-/*! @brief copy `src` into `dst`.
+/*! @brief copy `src` into `dst`, preserve all permissions and modification times.
  *
  *  @param contents_only
  *      TRUE: copy directory contents of `src` and place inside `dst`.

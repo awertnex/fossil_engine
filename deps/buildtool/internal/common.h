@@ -67,6 +67,7 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <inttypes.h>
+#include <fcntl.h>
 
 /* ---- section: types ------------------------------------------------------ */
 

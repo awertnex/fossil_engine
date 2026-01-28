@@ -13,7 +13,8 @@ static str str_dir[][CMD_SIZE] =
     DIR_OUT,
     DIR_OUT"engine/",
     DIR_OUT"engine/logs/",
-    DIR_OUT"include/",
+    DIR_OUT"deps/",
+    DIR_OUT"deps/fossil/",
 };
 
 static str str_cflags[][CMD_SIZE] =
@@ -92,11 +93,12 @@ int main(int argc, char **argv)
             "lib/"PLATFORM"/"FSL_FILE_NAME_LIB);
 
     if (
-            copy_dir("assets/", DIR_OUT"engine/assets", TRUE) != ERR_SUCCESS ||
-            copy_dir(DIR_SRC"h/", DIR_OUT"include/", FALSE) != ERR_SUCCESS ||
-            copy_dir("lib/"PLATFORM, DIR_OUT, TRUE) != ERR_SUCCESS ||
             copy_dir(DIR_DEPS, DIR_OUT, FALSE) != ERR_SUCCESS ||
-            copy_file("LICENSE", DIR_OUT"engine/") != ERR_SUCCESS)
+            copy_dir(DIR_SRC"h/", DIR_OUT"deps/fossil/", TRUE) != ERR_SUCCESS ||
+            copy_dir("lib/"PLATFORM, DIR_OUT, TRUE) != ERR_SUCCESS ||
+            copy_dir("assets/", DIR_OUT"engine/assets", TRUE) != ERR_SUCCESS ||
+            copy_file("LICENSE", DIR_OUT"engine/") != ERR_SUCCESS ||
+            copy_file("LICENSE", DIR_OUT"deps/fossil/") != ERR_SUCCESS)
         cmd_fail();
 
     return ERR_SUCCESS;

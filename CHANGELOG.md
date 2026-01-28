@@ -7,6 +7,22 @@
    first version of the engine as standalone in this repo
 
 - - -
+## v<version> (YYYY MMM DD)
+
+#### changes
+- `copy_file()` bug fix and new features:
+    - Replace clunky usage of `strrchr()` with `fsl_get_base_name()`
+    - Copy file permissions
+    - Copy file access and modification times
+- `copy_dir()` bug fix and new features:
+    - Fix parameter `contents_only` not working
+    - Copy directory permissions
+    - Copy directory access and modification times
+- Add error code `FSL_ERR_FILE_STAT_FAIL`
+- Add copying file permissions for function `fsl_copy_file()`
+- Add error code `ERR_FILE_STAT_FAIL`
+
+- - -
 ## v0.3.4-beta (2026 Jan 28)
 
 #### changes

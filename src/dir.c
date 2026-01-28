@@ -26,6 +26,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <inttypes.h>
+#include <fcntl.h>
 
 #include "h/diagnostics.h"
 #include "h/dir.h"
@@ -281,6 +282,8 @@ u32 fsl_copy_file(const str *src, const str *dst)
     str *in_file = NULL;
     FILE *out_file = NULL;
     u64 len = 0;
+    struct stat stats;
+    struct timespec ts[2] = {0};
 
     if (fsl_is_file_exists(src, TRUE) != FSL_ERR_SUCCESS)
             return fsl_err;
@@ -288,7 +291,11 @@ u32 fsl_copy_file(const str *src, const str *dst)
     snprintf(str_dst, PATH_MAX, "%s", dst);
 
     if (fsl_is_dir(dst) == FSL_ERR_SUCCESS)
-        strncat(str_dst, strrchr(src, FSL_SLASH_NATIVE), PATH_MAX - 1);
+    {
+        fsl_check_slash(str_dst);
+        fsl_get_base_name(src, str_dst + strlen(str_dst), PATH_MAX);
+        fsl_posix_slash(str_dst);
+    }
 
     if ((out_file = fopen(str_dst, "wb")) == NULL)
     {
@@ -311,6 +318,20 @@ u32 fsl_copy_file(const str *src, const str *dst)
     _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             "File Copied '%s' -> '%s'\n", src, str_dst);
 
+    if (stat(src, &stats) == 0)
+        chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
+    else
+        _LOGWARNING(FSL_ERR_FILE_STAT_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                "Failed to Copy File Permissions '%s' -> '%s', 'stat()' Failed\n",
+                src, str_dst);
+
+    ts[0].tv_sec = stats.st_atim.tv_sec;
+    ts[0].tv_nsec = stats.st_atim.tv_nsec;
+    ts[1].tv_sec = stats.st_mtim.tv_sec;
+    ts[1].tv_nsec = stats.st_mtim.tv_nsec;
+    utimensat(AT_FDCWD, str_dst, ts, 0);
+
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
@@ -323,6 +344,8 @@ u32 fsl_copy_dir(const str *src, const str *dst, b8 contents_only)
     str in_dir[PATH_MAX] = {0};
     str out_dir[PATH_MAX] = {0};
     u64 i;
+    struct stat stats;
+    struct timespec ts[2] = {0};
 
     if (fsl_is_dir_exists(src, TRUE) != FSL_ERR_SUCCESS)
         return fsl_err;
@@ -341,8 +364,10 @@ u32 fsl_copy_dir(const str *src, const str *dst, b8 contents_only)
 
     if (fsl_is_dir_exists(str_dst, FALSE) == FSL_ERR_SUCCESS && !contents_only)
     {
-        strncat(str_dst, strrchr(str_src, FSL_SLASH_NATIVE), PATH_MAX - 1);
-        fsl_check_slash(str_dst);
+        get_base_name(str_src, str_dst + strlen(str_dst), PATH_MAX - strlen(str_dst));
+        check_slash(str_dst);
+        posix_slash(str_dst);
+        make_dir(str_dst);
     }
     else fsl_make_dir(str_dst);
 
@@ -361,6 +386,20 @@ u32 fsl_copy_dir(const str *src, const str *dst, b8 contents_only)
 
     _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             "Directory Copied '%s' -> '%s'\n", src, str_dst);
+
+    if (stat(str_src, &stats) == 0)
+        chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
+    else
+        _LOGWARNING(FSL_ERR_FILE_STAT_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                "Failed to Copy Directory Permissions '%s' -> '%s', 'stat()' Failed\n",
+                str_src, str_dst);
+
+    ts[0].tv_sec = stats.st_atim.tv_sec;
+    ts[0].tv_nsec = stats.st_atim.tv_nsec;
+    ts[1].tv_sec = stats.st_mtim.tv_sec;
+    ts[1].tv_nsec = stats.st_mtim.tv_nsec;
+    utimensat(AT_FDCWD, str_dst, ts, 0);
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;

@@ -88,7 +88,7 @@ extern u64 get_file_contents(const str *name, void **dst, u64 size, b8 terminate
  */
 extern _buf get_dir_contents(const str *name);
 
-/*! @brief copy `src` into `dst`.
+/*! @brief copy `src` into `dst`, preserve permissions and modification time.
  *
  *  @remark can overwrite files.
  *
@@ -96,7 +96,7 @@ extern _buf get_dir_contents(const str *name);
  */
 extern u32 copy_file(const str *src, const str *dst);
 
-/*! @brief copy `src` into `dst`.
+/*! @brief copy `src` into `dst`, preserve all permissions and modification times.
  *
  *  @param contents_only
  *      TRUE: copy directory contents of `src` and place inside `dst`.
@@ -178,7 +178,7 @@ extern u32 get_base_name(const str *path, str *dst, u64 size);
 
 u32 is_file_exists(const str *name, b8 log)
 {
-    struct stat stats;
+    struct stat stats = {0};
     if (stat(name, &stats) == 0)
     {
         if (S_ISREG(stats.st_mode))
@@ -208,7 +208,7 @@ u32 is_dir(const str *name)
     if (is_dir_exists(name, FALSE) != ERR_SUCCESS)
         return build_err;
 
-    struct stat stats;
+    struct stat stats = {0};
     if (stat(name, &stats) == 0 && S_ISDIR(stats.st_mode))
     {
         build_err = ERR_SUCCESS;
@@ -221,7 +221,7 @@ u32 is_dir(const str *name)
 
 u32 is_dir_exists(const str *name, b8 log)
 {
-    struct stat stats;
+    struct stat stats = {0};
     if (stat(name, &stats) == 0)
     {
         if (S_ISDIR(stats.st_mode))
@@ -249,7 +249,7 @@ u32 is_dir_exists(const str *name, b8 log)
 u64 get_file_contents(const str *name, void **dst, u64 size, b8 terminate)
 {
     FILE *file = NULL;
-    u64 cursor;
+    u64 cursor = 0;
 
     if (is_file_exists(name, TRUE) != ERR_SUCCESS)
             return 0;
@@ -288,9 +288,9 @@ _buf get_dir_contents(const str *name)
     str dir_name_absolute_usable[PATH_MAX] = {0};
     str entry_name_full[PATH_MAX] = {0};
     DIR *dir = NULL;
-    struct dirent *entry;
+    struct dirent *entry = {0};
     _buf contents = {0};
-    u64 i;
+    u64 i = 0;
 
     if (!name)
     {
@@ -363,6 +363,8 @@ u32 copy_file(const str *src, const str *dst)
     str *in_file = NULL;
     FILE *out_file = NULL;
     u64 len = 0;
+    struct stat stats = {0};
+    struct timespec ts[2] = {0};
 
     if (is_file_exists(src, TRUE) != ERR_SUCCESS)
             return build_err;
@@ -396,6 +398,19 @@ u32 copy_file(const str *src, const str *dst)
     LOGTRACE(FALSE,
             "File Copied '%s' -> '%s'\n", src, str_dst);
 
+    if (stat(src, &stats) == 0)
+        chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
+    else
+        LOGWARNING(ERR_FILE_STAT_FAIL, FALSE,
+                "Failed to Copy File Permissions '%s' -> '%s', 'stat()' Failed\n",
+                src, str_dst);
+
+    ts[0].tv_sec = stats.st_atim.tv_sec;
+    ts[0].tv_nsec = stats.st_atim.tv_nsec;
+    ts[1].tv_sec = stats.st_mtim.tv_sec;
+    ts[1].tv_nsec = stats.st_mtim.tv_nsec;
+    utimensat(AT_FDCWD, str_dst, ts, 0);
+
     build_err = ERR_SUCCESS;
     return build_err;
 }
@@ -407,7 +422,9 @@ u32 copy_dir(const str *src, const str *dst, b8 contents_only)
     str str_dst[PATH_MAX] = {0};
     str in_dir[PATH_MAX] = {0};
     str out_dir[PATH_MAX] = {0};
-    u64 i;
+    u64 i = 0;
+    struct stat stats = {0};
+    struct timespec ts[2] = {0};
 
     if (is_dir_exists(src, TRUE) != ERR_SUCCESS)
         return build_err;
@@ -424,11 +441,12 @@ u32 copy_dir(const str *src, const str *dst, b8 contents_only)
     check_slash(str_dst);
     posix_slash(str_dst);
 
-
     if (is_dir_exists(str_dst, FALSE) == ERR_SUCCESS && !contents_only)
     {
-        strncat(str_dst, strrchr(str_src, SLASH_NATIVE), PATH_MAX - 1);
+        get_base_name(str_src, str_dst + strlen(str_dst), PATH_MAX - strlen(str_dst));
         check_slash(str_dst);
+        posix_slash(str_dst);
+        make_dir(str_dst);
     }
     else make_dir(str_dst);
 
@@ -447,6 +465,19 @@ u32 copy_dir(const str *src, const str *dst, b8 contents_only)
 
     LOGTRACE(FALSE,
             "Directory Copied '%s' -> '%s'\n", src, str_dst);
+
+    if (stat(str_src, &stats) == 0)
+        chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
+    else
+        LOGWARNING(ERR_FILE_STAT_FAIL, FALSE,
+                "Failed to Copy Directory Permissions '%s' -> '%s', 'stat()' Failed\n",
+                str_src, str_dst);
+
+    ts[0].tv_sec = stats.st_atim.tv_sec;
+    ts[0].tv_nsec = stats.st_atim.tv_nsec;
+    ts[1].tv_sec = stats.st_mtim.tv_sec;
+    ts[1].tv_nsec = stats.st_mtim.tv_nsec;
+    utimensat(AT_FDCWD, str_dst, ts, 0);
 
     build_err = ERR_SUCCESS;
     return build_err;
@@ -549,7 +580,7 @@ void check_slash(str *path)
 
 void posix_slash(str *path)
 {
-    u64 len, i;
+    u64 len = 0, i = 0;
 
     if (!path)
     {

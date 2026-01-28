@@ -1,5 +1,4 @@
-/*  
- *  MIT License
+/*  MIT License
  *
  *  Copyright (c) 2026 Lily Awertnex
  *
@@ -26,6 +25,17 @@
 #define BUILD_H
 
 /* ---- section: changelog -------------------------------------------------- */
+
+/*  v1.6.2 (2026 Jan 28):
+ *      - `copy_dir()` bug fix and new features:
+ *          - Fix parameter `contents_only` not working
+ *          - Copy directory permissions
+ *          - Copy directory access and modification times
+ *      - Add error code `ERR_FILE_STAT_FAIL`
+ *      - New `copy_file()` features:
+ *          - Copy file permissions
+ *          - Copy file access and modification times
+ */
 
 /*  v1.6.1 (2026 Jan 24):
  *      - Fix segfault when copying file into destination that's a directory without
@@ -206,7 +216,7 @@
 
 #define BUILDTOOL_VERSION_MAJOR 1
 #define BUILDTOOL_VERSION_MINOR 6
-#define BUILDTOOL_VERSION_PATCH 1
+#define BUILDTOOL_VERSION_PATCH 2
 
 #define BUILDTOOL_VERSION \
     BUILDTOOL_VERSION_MAJOR"."BUILDTOOL_VERSION_MINOR"."BUILDTOOL_VERSION_PATCH
@@ -377,11 +387,6 @@ u32 build_init(int argc, char **argv, const str *build_src_name, const str *buil
     }
 
     build_err = ERR_SUCCESS;
-    return build_err;
-
-cleanup:
-
-    cmd_fail();
     return build_err;
 }
 
