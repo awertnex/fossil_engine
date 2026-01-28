@@ -97,7 +97,7 @@ int main(int argc, char **argv)
             copy_dir(DIR_DEPS,          DIR_OUT, FALSE) != ERR_SUCCESS ||
             copy_dir(DIR_SRC"h/",       DIR_OUT DIR_DEPS DIR_OUT, TRUE) != ERR_SUCCESS ||
             copy_file("LICENSE",        DIR_OUT DIR_DEPS DIR_OUT) != ERR_SUCCESS ||
-
+            copy_dir("lib/",            DIR_OUT, FALSE) != ERR_SUCCESS ||
             copy_dir("lib/"PLATFORM,    DIR_OUT DIR_OUT, TRUE) != ERR_SUCCESS ||
             copy_dir("assets/",         DIR_OUT DIR_OUT DIR_OUT, FALSE) != ERR_SUCCESS ||
             copy_file("LICENSE",        DIR_OUT DIR_OUT DIR_OUT) != ERR_SUCCESS)

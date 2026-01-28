@@ -66,10 +66,10 @@
 
 #include "types.h"
 
-#define FSL_DIR_NAME_FONTS      "engine/assets/fonts/"
-#define FSL_DIR_NAME_TEXTURES   "engine/assets/textures/"
-#define FSL_DIR_NAME_SHADERS    "engine/assets/shaders/"
-#define FSL_DIR_NAME_LOGS       "engine/logs/"
+#define FSL_DIR_NAME_FONTS      "fossil/assets/fonts/"
+#define FSL_DIR_NAME_TEXTURES   "fossil/assets/textures/"
+#define FSL_DIR_NAME_SHADERS    "fossil/assets/shaders/"
+#define FSL_DIR_NAME_LOGS       "fossil/logs/"
 
 #define FSL_FILE_NAME_LOG_ERROR "log_error.log"
 #define FSL_FILE_NAME_LOG_INFO  "log_info.log"
