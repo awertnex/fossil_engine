@@ -1,63 +1,278 @@
-#include <engine/h/core.h>
-#include <engine/h/types.h>
+/*  Copyright 2026 Lily Awertnex
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.OFTWARE.
+ */
 
-#include "h/main.h"
+/*
+ *	input.c - keyboard and mouse input handling
+ */
+
+#include "h/core.h"
 #include "h/input.h"
+#include "h/time.h"
 
-/* ---- movement ------------------------------------------------------------ */
-
-u32 bind_walk_forward =             KEY_W;
-u32 bind_walk_backward =            KEY_S;
-u32 bind_strafe_left =              KEY_A;
-u32 bind_strafe_right =             KEY_D;
-u32 bind_jump =                     KEY_SPACE;
-u32 bind_sprint =                   KEY_LEFT_SHIFT;
-u32 bind_sneak =                    KEY_LEFT_CONTROL;
-
-/* ---- gameplay ------------------------------------------------------------ */
-
-u32 bind_attack_or_destroy =        GLFW_MOUSE_BUTTON_LEFT;
-u32 bind_sample_block =             GLFW_MOUSE_BUTTON_MIDDLE;
-u32 bind_build_or_use =             GLFW_MOUSE_BUTTON_RIGHT;
-
-/* ---- inventory ----------------------------------------------------------- */
-
-u32 bind_selected_item =            KEY_Q;
-u32 bind_hotbar[SET_HOTBAR_SLOTS_MAX] =
+static u32 fsl_mouse_button[FSL_MOUSE_BUTTONS_MAX] = {0};
+static u32 fsl_keyboard_key[FSL_KEYBOARD_KEYS_MAX] = {0};
+static u32 fsl_keyboard_tab[FSL_KEYBOARD_KEYS_MAX] =
 {
-    KEY_1, KEY_2, KEY_3, KEY_4, KEY_5,
-    KEY_6, KEY_7, KEY_8, KEY_9, KEY_0,
-};
-u32 bind_hotbar_kp[SET_HOTBAR_SLOTS_MAX] =
+    GLFW_KEY_SPACE,
+    GLFW_KEY_APOSTROPHE,
+    GLFW_KEY_COMMA,
+    GLFW_KEY_MINUS,
+    GLFW_KEY_PERIOD,
+    GLFW_KEY_SLASH,
+    GLFW_KEY_0,
+    GLFW_KEY_1,
+    GLFW_KEY_2,
+    GLFW_KEY_3,
+    GLFW_KEY_4,
+    GLFW_KEY_5,
+    GLFW_KEY_6,
+    GLFW_KEY_7,
+    GLFW_KEY_8,
+    GLFW_KEY_9,
+    GLFW_KEY_SEMICOLON,
+    GLFW_KEY_EQUAL,
+    GLFW_KEY_A,
+    GLFW_KEY_B,
+    GLFW_KEY_C,
+    GLFW_KEY_D,
+    GLFW_KEY_E,
+    GLFW_KEY_F,
+    GLFW_KEY_G,
+    GLFW_KEY_H,
+    GLFW_KEY_I,
+    GLFW_KEY_J,
+    GLFW_KEY_K,
+    GLFW_KEY_L,
+    GLFW_KEY_M,
+    GLFW_KEY_N,
+    GLFW_KEY_O,
+    GLFW_KEY_P,
+    GLFW_KEY_Q,
+    GLFW_KEY_R,
+    GLFW_KEY_S,
+    GLFW_KEY_T,
+    GLFW_KEY_U,
+    GLFW_KEY_V,
+    GLFW_KEY_W,
+    GLFW_KEY_X,
+    GLFW_KEY_Y,
+    GLFW_KEY_Z,
+    GLFW_KEY_LEFT_BRACKET,
+    GLFW_KEY_BACKSLASH,
+    GLFW_KEY_RIGHT_BRACKET,
+    GLFW_KEY_GRAVE_ACCENT,
+    GLFW_KEY_WORLD_1,
+    GLFW_KEY_WORLD_2,
+
+    GLFW_KEY_ESCAPE,
+    GLFW_KEY_ENTER,
+    GLFW_KEY_TAB,
+    GLFW_KEY_BACKSPACE,
+    GLFW_KEY_INSERT,
+    GLFW_KEY_DELETE,
+    GLFW_KEY_RIGHT,
+    GLFW_KEY_LEFT,
+    GLFW_KEY_DOWN,
+    GLFW_KEY_UP,
+    GLFW_KEY_PAGE_UP,
+    GLFW_KEY_PAGE_DOWN,
+    GLFW_KEY_HOME,
+    GLFW_KEY_END,
+    GLFW_KEY_CAPS_LOCK,
+    GLFW_KEY_SCROLL_LOCK,
+    GLFW_KEY_NUM_LOCK,
+    GLFW_KEY_PRINT_SCREEN,
+    GLFW_KEY_PAUSE,
+    GLFW_KEY_F1,
+    GLFW_KEY_F2,
+    GLFW_KEY_F3,
+    GLFW_KEY_F4,
+    GLFW_KEY_F5,
+    GLFW_KEY_F6,
+    GLFW_KEY_F7,
+    GLFW_KEY_F8,
+    GLFW_KEY_F9,
+    GLFW_KEY_F10,
+    GLFW_KEY_F11,
+    GLFW_KEY_F12,
+    GLFW_KEY_F13,
+    GLFW_KEY_F14,
+    GLFW_KEY_F15,
+    GLFW_KEY_F16,
+    GLFW_KEY_F17,
+    GLFW_KEY_F18,
+    GLFW_KEY_F19,
+    GLFW_KEY_F20,
+    GLFW_KEY_F21,
+    GLFW_KEY_F22,
+    GLFW_KEY_F23,
+    GLFW_KEY_F24,
+    GLFW_KEY_F25,
+    GLFW_KEY_KP_0,
+    GLFW_KEY_KP_1,
+    GLFW_KEY_KP_2,
+    GLFW_KEY_KP_3,
+    GLFW_KEY_KP_4,
+    GLFW_KEY_KP_5,
+    GLFW_KEY_KP_6,
+    GLFW_KEY_KP_7,
+    GLFW_KEY_KP_8,
+    GLFW_KEY_KP_9,
+    GLFW_KEY_KP_DECIMAL,
+    GLFW_KEY_KP_DIVIDE,
+    GLFW_KEY_KP_MULTIPLY,
+    GLFW_KEY_KP_SUBTRACT,
+    GLFW_KEY_KP_ADD,
+    GLFW_KEY_KP_ENTER,
+    GLFW_KEY_KP_EQUAL,
+    GLFW_KEY_LEFT_SHIFT,
+    GLFW_KEY_LEFT_CONTROL,
+    GLFW_KEY_LEFT_ALT,
+    GLFW_KEY_LEFT_SUPER,
+    GLFW_KEY_RIGHT_SHIFT,
+    GLFW_KEY_RIGHT_CONTROL,
+    GLFW_KEY_RIGHT_ALT,
+    GLFW_KEY_RIGHT_SUPER,
+    GLFW_KEY_MENU,
+}; /* fsl_keyboard_tab */
+
+b8 fsl_is_mouse_press(const u32 button)
 {
-    KEY_KP_1, KEY_KP_2, KEY_KP_3, KEY_KP_4, KEY_KP_5,
-    KEY_KP_6, KEY_KP_7, KEY_KP_8, KEY_KP_9, KEY_KP_0,
-};
-u32 bind_inventory =                KEY_E;
+    return fsl_mouse_button[button] == FSL_STATE_KEY_PRESS;
+}
 
-/* ---- miscellaneous ------------------------------------------------------- */
+b8 fsl_is_mouse_hold(const u32 button)
+{
+    return fsl_mouse_button[button] == FSL_STATE_KEY_HOLD;
+}
 
-u32 bind_toggle_hud =               KEY_F1;
-u32 bind_take_screenshot =          KEY_F2;
-u32 bind_toggle_debug =             KEY_F3;
-u32 bind_toggle_cinematic_camera =  KEY_F4;
-u32 bind_toggle_perspective =       KEY_F5;
-u32 bind_toggle_fullscreen =        KEY_F11;
-u32 bind_toggle_zoom =              KEY_Z;
-u32 bind_pause =                    KEY_ESCAPE;
-u32 bind_chat_or_command =          KEY_SLASH;
+b8 fsl_is_mouse_release(const u32 button)
+{
+    return fsl_mouse_button[button] == FSL_STATE_KEY_RELEASE;
+}
 
-/* ---- debug & menu -------------------------------------------------------- */
+b8 fsl_is_key_press(const u32 key)
+{
+    return fsl_keyboard_key[key] == FSL_STATE_KEY_PRESS ||
+        fsl_keyboard_key[key] == FSL_STATE_KEY_PRESS_DOUBLE;
+}
 
-/* TODO: navigate menus with arrow keys */
-u32 bind_left =                     KEY_LEFT;
-u32 bind_right =                    KEY_RIGHT;
-u32 bind_down =                     KEY_DOWN;
-u32 bind_up =                       KEY_UP;
-u32 bind_debug_mod =                KEY_LEFT_ALT;
-u32 bind_toggle_super_debug =       KEY_TAB;
-u32 bind_toggle_trans_blocks =      KEY_T;
-u32 bind_toggle_chunk_bounds =      KEY_C;
-u32 bind_toggle_bounding_boxes =    KEY_B;
-u32 bind_toggle_chunk_gizmo =       KEY_G;
-u32 bind_toggle_chunk_queue_visualizer = KEY_V;
+b8 fsl_is_key_press_double(const u32 key)
+{
+    return fsl_keyboard_key[key] == FSL_STATE_KEY_PRESS_DOUBLE;
+}
+
+b8 fsl_is_key_hold(const u32 key)
+{
+    return fsl_keyboard_key[key] == FSL_STATE_KEY_HOLD ||
+        fsl_keyboard_key[key] == FSL_STATE_KEY_HOLD_DOUBLE;
+}
+
+b8 fsl_is_key_release(const u32 key)
+{
+    return fsl_keyboard_key[key] == FSL_STATE_KEY_RELEASE ||
+        fsl_keyboard_key[key] == FSL_STATE_KEY_RELEASE_DOUBLE;
+}
+
+void fsl_update_mouse_movement(void)
+{
+    static v2f64 mouse_last = {0};
+    glfwGetCursorPos(render->window, &render->mouse_pos.x, &render->mouse_pos.y);
+    render->mouse_delta = (v2f64){
+        render->mouse_pos.x - mouse_last.x,
+        render->mouse_pos.y - mouse_last.y,
+    };
+    mouse_last = render->mouse_pos;
+}
+
+void fsl_update_key_states(void)
+{
+    GLFWwindow *_window = render->window;
+    u64 _time = render->time;
+    static u64 double_press_time_interval = (u64)(FSL_DOUBLE_PRESS_TIME_INTERVAL * FSL_SEC2NSEC);
+    static u64 key_press_start_time[FSL_KEYBOARD_KEYS_MAX] = {0};
+    b8 key_press = FALSE, key_release = FALSE,
+       mouse_press = FALSE, mouse_release = FALSE;
+    u32 i;
+
+    for (i = 0; i < FSL_MOUSE_BUTTONS_MAX; ++i)
+    {
+        mouse_press = glfwGetMouseButton(_window, i) == GLFW_PRESS;
+        mouse_release = glfwGetMouseButton(_window, i) == GLFW_RELEASE;
+
+        if (mouse_press &&
+                (fsl_mouse_button[i] == FSL_STATE_KEY_IDLE))
+        {
+            fsl_mouse_button[i] = FSL_STATE_KEY_PRESS;
+            continue;
+        }
+        else if (mouse_release &&
+                (fsl_mouse_button[i] == FSL_STATE_KEY_PRESS || fsl_mouse_button[i] == FSL_STATE_KEY_HOLD))
+        {
+            fsl_mouse_button[i] = FSL_STATE_KEY_RELEASE;
+            continue;
+        }
+
+        if (fsl_mouse_button[i] == FSL_STATE_KEY_PRESS)         fsl_mouse_button[i] = FSL_STATE_KEY_HOLD;
+        else if (fsl_mouse_button[i] == FSL_STATE_KEY_RELEASE)  fsl_mouse_button[i] = FSL_STATE_KEY_IDLE;
+    }
+
+    for (i = 0; i < FSL_KEYBOARD_KEYS_MAX; ++i)
+    {
+        key_press = glfwGetKey(_window, fsl_keyboard_tab[i]) == GLFW_PRESS;
+        key_release = glfwGetKey(_window, fsl_keyboard_tab[i]) == GLFW_RELEASE;
+
+        if (key_press)
+        {
+            if (fsl_keyboard_key[i] == FSL_STATE_KEY_IDLE)
+            {
+                fsl_keyboard_key[i] = FSL_STATE_KEY_PRESS;
+                key_press_start_time[i] = _time;
+                continue;
+            }
+            else if (fsl_keyboard_key[i] == FSL_STATE_KEY_LISTEN_DOUBLE)
+            {
+                if (_time - key_press_start_time[i] <= double_press_time_interval)
+                    fsl_keyboard_key[i] = FSL_STATE_KEY_PRESS_DOUBLE;
+                else
+                {
+                    fsl_keyboard_key[i] = FSL_STATE_KEY_PRESS;
+                    key_press_start_time[i] = _time;
+                }
+                continue;
+            }
+        }
+        else if (key_release)
+        {
+            if (fsl_keyboard_key[i] == FSL_STATE_KEY_PRESS ||
+                    fsl_keyboard_key[i] == FSL_STATE_KEY_HOLD)
+            {
+                fsl_keyboard_key[i] = FSL_STATE_KEY_RELEASE;
+                continue;
+            }
+            else if (fsl_keyboard_key[i] == FSL_STATE_KEY_PRESS_DOUBLE ||
+                    fsl_keyboard_key[i] == FSL_STATE_KEY_HOLD_DOUBLE)
+            {
+                fsl_keyboard_key[i] = FSL_STATE_KEY_RELEASE_DOUBLE;
+                continue;
+            }
+        }
+
+        if (fsl_keyboard_key[i] == FSL_STATE_KEY_PRESS)                 fsl_keyboard_key[i] = FSL_STATE_KEY_HOLD;
+        else if (fsl_keyboard_key[i] == FSL_STATE_KEY_RELEASE)          fsl_keyboard_key[i] = FSL_STATE_KEY_LISTEN_DOUBLE;
+        if (fsl_keyboard_key[i] == FSL_STATE_KEY_PRESS_DOUBLE)          fsl_keyboard_key[i] = FSL_STATE_KEY_HOLD_DOUBLE;
+        else if (fsl_keyboard_key[i] == FSL_STATE_KEY_RELEASE_DOUBLE)   fsl_keyboard_key[i] = FSL_STATE_KEY_IDLE;
+    }
+}

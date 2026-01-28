@@ -1,36 +1,22 @@
-#ifndef GAME_SUPER_DEBUGGER_H
-#define GAME_SUPER_DEBUGGER_H
+/*  Copyright 2026 Lily Awertnex
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.OFTWARE.
+ */
 
-#include <engine/h/types.h>
-#include "gui.h"
+/*  super_debugger.h - gui debugger
+ */
 
-#define SDB_ROW_HEIGHT  22
-#define SDB_BASE_SIZE   5
-#define SDB_BUTTON_SIZE 14
+#ifndef FSL_SUPER_DEBUGGER_H
+#define FSL_SUPER_DEBUGGER_H
 
-typedef struct DebugRect
-{
-    Rectangle corner_00;
-    Rectangle corner_10;
-    Rectangle corner_01;
-    Rectangle corner_11;
-    Rectangle edge_left;
-    Rectangle edge_right;
-    Rectangle edge_top;
-    Rectangle edge_bottom;
-    Rectangle rect_center;
-    Vector2 pos;
-    Vector2 scl;
-} DebugRect;
-
-extern Texture texture_super_debugger;
-extern DebugRect debug_rectangle;
-
-extern Rectangle debug_button_add;
-extern Rectangle debug_button_sub;
-
-void init_super_debugger(v2f32 render_size);
-void free_super_debugger();
-void draw_super_debugger(v2f32 render_size);
-
-#endif /* GAME_SUPER_DEBUGGER_H */
+#endif /* FSL_SUPER_DEBUGGER_H */

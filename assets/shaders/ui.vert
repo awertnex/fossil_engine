@@ -3,11 +3,15 @@
 layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec2 a_tex_coords;
 
-uniform vec2 ndc_scale;
+layout (std140, binding = 0) uniform ubo_ndc_scale
+{
+    vec2 ndc_scale;
+};
+
 uniform ivec2 position;
-uniform vec2 offset;
-uniform ivec2 texture_size;
 uniform ivec2 size;
+uniform ivec2 texture_size;
+uniform vec2 offset;
 uniform ivec2 alignment;
 out vec2 vs_tex_coords;
 

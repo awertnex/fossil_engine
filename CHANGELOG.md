@@ -1,6 +1,187 @@
 # changelog
 
-## v0.3.0-beta (10 Dec 2025)
+>**NOTE:**
+>- history is mixed with the repo "awertnex/heaven-hell_continuum" since
+   this engine originated from the making of that game and later was moved here
+   at engine version v0.3.3-beta (2026 Jan 24), which makes v0.3.4-beta the
+   first version of the engine as standalone in this repo
+
+- - -
+## v0.3.4-beta (2026 Jan 28)
+
+#### changes
+- Move engine from game repo "heaven-hell_continuum" into its own repo
+- First version of engine as separate from the game
+- Move engine build tool into its own repo and re-introduce as dependency
+- Upgrade license from "MIT" license to "Apache 2.0" license
+- Change functios:
+    - `fsl_get_string()` -> `fsl_get_engine_string()`
+    - `fsl_init()` -> `fsl_engine_init()`
+    - `fsl_running()` -> `fsl_engine_running()`
+    - `fsl_close()` -> `fsl_engine_close()`
+- Re-write `README.md` and `TASKS.md`
+- Add function `fsl_request_engine_close()` to terminate application
+- Add function `fsl_on_time_interval()` to execute code on specific time
+  intervals
+- Add function `fsl_limit_framerate()` to limit framerate
+- Change function `fsl_get_timer()` -> `fsl_is_in_time_window()`
+- Change function `fsl_link_libs()` -> `fsl_engine_link_libs()`
+- Add function `fsl_engine_set_runtime_path()` to link engine's dependencies
+  with the including software for run time
+
+- - -
+## v0.3.3-beta (2026 Jan 24)
+
+#### changes
+- Make logger easier to use via flags
+- Add logger's own little 'check if dir' and 'write file' functions to
+  write to its log destinations on disk without modifying global error variable
+- Add guards around definitions `TRUE` and `FALSE`
+
+- - -
+## v0.3.2-beta (2026 Jan 24)
+
+#### changes
+- Add page size alignment for `sys/mman.h` functions:
+- Add better memory alignment for memory arena pushes but also tight-packing for
+  small pushes:
+    I made it so that multiple pushes can use the same memory page as long as
+    they're small enough to fit, otherwise the overlapping block will be pushed
+    to the next page
+- Change macros:
+    - `USEC2NSEC` -> `SEC2MSEC`
+    - `NSEC2USEC` -> `MSEC2SEC`
+- Add ifder wrappers for game release build macro (to use in build tool)
+- Improve documentation drastically and organize things
+- separate parameter `pos` in function `text_push()` into `pos_x` and `pos_y`
+- Put '#include h/common.h' before all includes
+- Move build tool out of the engine
+- Add defensive check in function `_mem_alloc_buf()`
+- Change some logs to the proper log level
+- Make logging for debug and release builds toggled at compile time
+- Add better 'release' and 'debug' build separation for the engine in the
+    build source
+- Add function `fsl_get_string()` to get engine-related strings (e.g. title, version)
+- Fix very sneaky and annoying segfault:
+    - I wrongfully assumed since "if (!p)" protected against `NULL` pointers,
+      then it must protect against un-allocated memory... and then I ate dirt
+- Advance logger, now logs to console, to screen, to file, and takes flags for
+  custom options
+- Add function `fsl_shader_free()` to unload individual shaders
+
+- - -
+## v0.3.1-beta (2026 Jan 19)
+
+#### changes
+- Optimize text rendering loop
+- Add arena allocators
+- Add function `_mem_remap()` for linux
+- Add memory alignment functions:
+    `_mem_request_page_size()` (internal use)
+    `mem_request_page_size()` (internal use)
+    `round_up_u64()`
+- Add memory arena allocation functions:
+    `_mem_map_arena()`
+    `_mem_push_arena()`
+    `_mem_unmap_arena()`
+- Fix header documentation in `engine/h/memory.h`
+
+- - -
+## v0.2.0-beta (2026 Jan 19)
+
+#### changes
+- Add engine API exposure definitions in 'h/common.h' for FSLAPI
+- Add function 'dir.c/get_base_name()'
+- Change 'h/platform.h' -> 'h/process.h'
+- Add helpful build commands:
+    self: Build build tool
+    all: Build build tool and engine
+    noproject: don't execute the build function passed to `engine_build()`
+
+- - -
+# previous history, from repo: [heaven-hell_continuum](https:/github.com/awertnex/heaven-hell_continuum)
+
+## Heaven-Hell Continuum - v0.4.0-dev
+
+#### changes
+- fixed engine build tool not copying required libraries to deployment directory
+- improved logging of commands:
+    - chunk boundary toggling commands
+    - chunk queue visualizer toggling commands
+    - bounding box toggling commands
+    - flashlight toggling commands
+- added function 'engine/dir.c/get_base_name()'
+- fixed misaligned GUI logger strings
+- added engine API exposure definitions in 'engine/h/common.h'
+- changed 'engine/h/platform.h' -> 'engine/h/process.h'
+- added helpful build commands:
+    - self: build build tool
+    - all: build build tool, engine and game
+    - noproject: don't execute the build function passed to 'engine_build()'
+- added memory manamgement stuff:
+    - arena allocators:
+        - function '_mem_map_arena()'
+        - cool function '_mem_push_arena()', grows dynamically and auto-relocates all resident pointers with it
+        - function '_mem_unmap_arena()'
+        - functions '_mem_request_page_size()' and 'mem_request_page_size()' (internal use)
+    - function '_mem_remap()'
+- added page size alignment for 'sys/mman.h' functions
+- added better memory alignment for memory arena pushes but also tight-packing for small pushes:
+    - I made it so that multiple pushes can use the same memory page as long as they're small enough to fit within it,
+      otherwise the overlapping block will be pushed to the next page
+- removed build tool into its own repository and re-introduced as a dependency
+- advanced logger, now logs to console, to screen, to file, and takes flags for custom options
+- fixed very sneaky and annoying segfault:
+    - I wrongfully assumed since "if (!p)" protected against NULL pointers it protected against un-allocated memory... and then I ate dirt
+- added function 'fsl_shader_free()' to unload individual shaders
+- added mouse wheel scrolling in GUI logger (press 'Tab' for 'super debug' to scroll)
+
+#### bugs and flaws
+- segfault when allocating smaller than 256 bytes for 'size' in function 'mem_alloc_buf()'
+
+## Heaven-Hell Continuum - v0.4.0-beta (18 Jan 2026)
+
+#### changes
+- added player air control while not flying
+- made movement kinematic (physically-based):
+    - acceleration_rate
+    - input: vector that takes raw keyboard input * acceleration_rate
+    - acceleration: vector that takes 'Player.input'
+    - velocity: vector that accumulates 'Player.acceleration'
+    - 'Player.pos' accumulates 'Player.velocity'
+    - Player.drag: air drag
+- added working collision even at high speeds (see 'bugs and fixes')
+- fixed double click infinite loop when a release state is recorded between
+  a key press and a key hold (when pressing and releasing too quick)
+- added nice color variation to chunk gizmo (Alt + G)
+- added caves, a sand biome, and better terrain in general
+- added multi-block placement (numbers 1..0, or scroll wheel to select)
+- added more blocks
+- fixed texture colors (semi-transparency used to be fully opaque)
+- added camera mode 'stalker':
+    - camera anchors itself to a random block within a certain distance from the
+      player and stalks the player, changes anchor if distance increases,
+      the distance limit is either the closer between max render distance or the
+      hard-coded max anchor distance
+    - mouse movement and keyboard controls still control the player,
+      not the camera
+- added screenshot support
+- added logger buffer, now it draws logs on screen
+- added logger saving to files on disk (see 'bugs and flaws')
+- added command logging (prints only the text to logger buffer, unless error, then prints tag and error code)
+- added player death and some death messages
+- optimized text rendering
+- added coloring per string for text rendering
+- added ui drawing module for engine (see 'bugs and flaws')
+
+#### bugs and flaws
+- extremely high speeds (e.g. 3000 m/s) break collision detection
+- high speeds now segfault
+- if logger can't find log directory, it saves logs to engine log directory, if not found, it saves to current working directory (it should not save at all if so)
+- 'draw_ui_9_slice()' function doesn't work yet
+
+- - -
+## Heaven-Hell Continuum - v0.3.0-beta (10 Dec 2025)
 
 #### changes
 - nudging the major version up by 1 is an understatement, this is almost
@@ -56,7 +237,7 @@
 - simplified build tool by removing some unnecessary commands
 
 - - -
-## v0.2.3-beta (16 Oct 2025)
+## Heaven-Hell Continuum - v0.2.3-beta (16 Oct 2025)
 
 #### changes
 - added image loading with stb_image.h
@@ -69,7 +250,7 @@
 - baked chunk order indices to a table on disk to avoid runtime re-calculation
 
 - - -
-## v0.2.2-beta (12 Oct 2025)
+## Heaven-Hell Continuum - v0.2.2-beta (12 Oct 2025)
 
 #### changes
 - optimized chunk rendering:
@@ -94,7 +275,7 @@
         - added 'rate_block' to limit number of blocks processed per chunk
 
 - - -
-## v0.2.0-beta (05 Oct 2025)
+## Heaven-Hell Continuum - v0.2.0-beta (05 Oct 2025)
 
 #### changes
 - added skybox colors for day/night cycle
@@ -167,7 +348,7 @@
 - setting render distance to 0 segfaults (ofc, but I'm not gonna patch that)
 
 - - -
-## v0.1.4-alpha (08 Apr 2025)
+## Heaven-Hell Continuum - v0.1.4-alpha (08 Apr 2025)
 
 #### changes
 - added windows support for build tool
@@ -179,7 +360,7 @@
 - added compiled release_build for windows
 
 - - -
-## v0.1.3 (03 Apr 2025)
+## Heaven-Hell Continuum - v0.1.3 (03 Apr 2025)
 
 #### changes
 - fixed segfault while placing or breaking blocks in non-allocated chunk area 
@@ -188,7 +369,7 @@
 - made build system more difficult to read but easier to use (not tested on windows)
 
 - - -
-## v0.1.2 (01 Apr 2025)
+## Heaven-Hell Continuum - v0.1.2 (01 Apr 2025)
 
 #### changes
 - can break and place blocks
@@ -208,7 +389,7 @@
 - made 'defines.h' a local file
 
 - - -
-## v0.1.1 (27 Mar 2025)
+## Heaven-Hell Continuum - v0.1.1 (27 Mar 2025)
 
 #### changes
 - added many button names for menus and containers enum
@@ -224,7 +405,7 @@
 - added delta time
 
 - - -
-## v0.1.0 (24 Mar 2025)
+## Heaven-Hell Continuum - v0.1.0 (2025 Mar 24)
 
 **first version, as I have started this project long before I version-controlled it with git**
 
