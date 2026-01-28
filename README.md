@@ -1,4 +1,4 @@
-# Heaven/Hell Continuum
+# Fossil Engine
 
 **a game engine/library in C99, with minimal dependencies if any.**
 
