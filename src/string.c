@@ -16,17 +16,17 @@
 /*  string.c - string parsing, token searching
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-
 #include "h/diagnostics.h"
 #include "h/dir.h"
 #include "h/limits.h"
 #include "h/logger.h"
 #include "h/memory.h"
 #include "h/string.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
 
 void fsl_swap_strings(str *s1, str *s2)
 {

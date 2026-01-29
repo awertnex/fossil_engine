@@ -30,6 +30,8 @@
 #include "diagnostics.h"
 #include "logger.h"
 
+/* ---- section: definitions ------------------------------------------------ */
+
 #define arr_len(arr) ((u64)sizeof(arr) / sizeof(arr[0]))
 
 #define mem_alloc(x, size, name) \

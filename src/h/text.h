@@ -19,11 +19,11 @@
 #ifndef FSL_TEXT_H
 #define FSL_TEXT_H
 
-#include <deps/stb_truetype.h>
-
 #include "common.h"
 #include "core.h"
 #include "types.h"
+
+#include <deps/stb_truetype.h>
 
 typedef struct fsl_glyph
 {

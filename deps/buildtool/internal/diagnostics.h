@@ -26,6 +26,8 @@
  *  SOFTWARE.
  */
 
+/* ---- section: definitions ------------------------------------------------ */
+
 #define ERR_SUCCESS                     0
 #define ERR_POINTER_NULL                4096
 #define ERR_POINTER_NOT_NULL            4097

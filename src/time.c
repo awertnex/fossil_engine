@@ -21,13 +21,13 @@
 #if FSL_PLATFORM_WIN
 /* TODO: make time functions for windows */
 #else
-#   include <time.h>
-#   include <sys/time.h>
-#   include <unistd.h>
-
 #   include "h/limits.h"
 #   include "h/math.h"
 #   include "h/time.h"
+
+#   include <time.h>
+#   include <sys/time.h>
+#   include <unistd.h>
 
 u64 fsl_get_time_raw_nsec(void)
 {

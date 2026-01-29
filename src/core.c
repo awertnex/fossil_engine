@@ -13,16 +13,10 @@
  *  limitations under the License.OFTWARE.
  */
 
-/*
- *	core.c - engine init, running, close, windowing, opengl loading
+/*  core.c - engine init, running, close, windowing, opengl loading
  */
 
 #include "h/common.h"
-
-#include <stdio.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <inttypes.h>
 
 #include "h/core.h"
 #include "h/diagnostics.h"
@@ -42,6 +36,11 @@
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <deps/stb_image_write.h>
+
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <inttypes.h>
 
 u64 fsl_init_time = 0;
 str *FSL_DIR_PROC_ROOT = NULL;
@@ -163,12 +162,14 @@ cleanup:
 
 b8 fsl_engine_running(void)
 {
+    static u64 time_last = 0;
     if (glfwWindowShouldClose(render->window) || !fsl_flag.active)
         return FALSE;
 
-    /* order doesn't matter here, these functions have independent state */
     render->time = fsl_get_time_nsec();
-    render->time_delta = fsl_get_time_delta_nsec();
+    if (!time_last) time_last = render->time;
+    render->time_delta = render->time - time_last;
+    time_last = render->time;
     return TRUE;
 }
 

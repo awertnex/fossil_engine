@@ -19,10 +19,10 @@
 #ifndef FSL_SHADERS_H
 #define FSL_SHADERS_H
 
-#include <deps/glad/glad.h>
-
 #include "common.h"
 #include "types.h"
+
+#include <deps/glad/glad.h>
 
 typedef struct fsl_shader
 {

@@ -13,13 +13,14 @@
  *  limitations under the License.OFTWARE.
  */
 
-/*
- *	collision.c - collision detection
+/*  collision.c - collision detection
  */
 
 #include "h/collision.h"
 #include "h/types.h"
 #include "h/math.h"
+
+#include <math.h>
 
 b8 fsl_is_intersect_aabb(fsl_bounding_box a, fsl_bounding_box b)
 {

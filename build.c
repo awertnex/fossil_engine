@@ -55,7 +55,7 @@ int main(int argc, char **argv)
     cmd_exec(39,
             COMPILER,
             "-shared",
-            "-std=c99",
+            FSL_C_STD,
             "-fPIC",
             "-fvisibility=hidden",
             stringf("-ffile-prefix-map=%s=", DIR_BUILDTOOL_BIN_ROOT),

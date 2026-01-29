@@ -34,7 +34,7 @@
 #if PLATFORM_LINUX
 #   include "platform_linux.h"
 #else
-#   include "platform_windows.h"
+#   include "platform_win.h"
 #endif /* PLATFORM */
 
 /* ---- section: signatures ------------------------------------------------- */
@@ -179,7 +179,7 @@ extern u32 get_base_name(const str *path, str *dst, u64 size);
 u32 is_file_exists(const str *name, b8 log)
 {
     struct stat stats = {0};
-    if (stat(name, &stats) == 0)
+    if (bt_stat(name, &stats) == 0)
     {
         if (S_ISREG(stats.st_mode))
         {
@@ -209,7 +209,7 @@ u32 is_dir(const str *name)
         return build_err;
 
     struct stat stats = {0};
-    if (stat(name, &stats) == 0 && S_ISDIR(stats.st_mode))
+    if (bt_stat(name, &stats) == 0 && S_ISDIR(stats.st_mode))
     {
         build_err = ERR_SUCCESS;
         return build_err;
@@ -222,7 +222,7 @@ u32 is_dir(const str *name)
 u32 is_dir_exists(const str *name, b8 log)
 {
     struct stat stats = {0};
-    if (stat(name, &stats) == 0)
+    if (bt_stat(name, &stats) == 0)
     {
         if (S_ISDIR(stats.st_mode))
         {
@@ -398,17 +398,25 @@ u32 copy_file(const str *src, const str *dst)
     LOGTRACE(FALSE,
             "File Copied '%s' -> '%s'\n", src, str_dst);
 
-    if (stat(src, &stats) == 0)
+    if (bt_stat(src, &stats) == 0)
         chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
     else
         LOGWARNING(ERR_FILE_STAT_FAIL, FALSE,
-                "Failed to Copy File Permissions '%s' -> '%s', 'stat()' Failed\n",
+                "Failed to Copy File Permissions '%s' -> '%s', 'bt_stat()' Failed\n",
                 src, str_dst);
 
-    ts[0].tv_sec = stats.st_atim.tv_sec;
-    ts[0].tv_nsec = stats.st_atim.tv_nsec;
-    ts[1].tv_sec = stats.st_mtim.tv_sec;
-    ts[1].tv_nsec = stats.st_mtim.tv_nsec;
+    if (stats.st_atim.tv_nsec == 0)
+        stats.st_atim.tv_nsec = 1;
+    else if (stats.st_atim.tv_nsec >= 1000000000L)
+        stats.st_atim.tv_nsec = 1000000000L - 1;
+
+    if (stats.st_mtim.tv_nsec == 0)
+        stats.st_mtim.tv_nsec = 1;
+    else if (stats.st_mtim.tv_nsec >= 1000000000L)
+        stats.st_mtim.tv_nsec = 1000000000L - 1;
+
+    ts[0] = stats.st_atim;
+    ts[1] = stats.st_mtim;
     utimensat(AT_FDCWD, str_dst, ts, 0);
 
     build_err = ERR_SUCCESS;
@@ -466,17 +474,25 @@ u32 copy_dir(const str *src, const str *dst, b8 contents_only)
     LOGTRACE(FALSE,
             "Directory Copied '%s' -> '%s'\n", src, str_dst);
 
-    if (stat(str_src, &stats) == 0)
+    if (bt_stat(str_src, &stats) == 0)
         chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
     else
         LOGWARNING(ERR_FILE_STAT_FAIL, FALSE,
-                "Failed to Copy Directory Permissions '%s' -> '%s', 'stat()' Failed\n",
+                "Failed to Copy Directory Permissions '%s' -> '%s', 'bt_stat()' Failed\n",
                 str_src, str_dst);
 
-    ts[0].tv_sec = stats.st_atim.tv_sec;
-    ts[0].tv_nsec = stats.st_atim.tv_nsec;
-    ts[1].tv_sec = stats.st_mtim.tv_sec;
-    ts[1].tv_nsec = stats.st_mtim.tv_nsec;
+    if (stats.st_atim.tv_nsec == 0)
+        stats.st_atim.tv_nsec = 1;
+    else if (stats.st_atim.tv_nsec >= 1000000000L)
+        stats.st_atim.tv_nsec = 1000000000L - 1;
+
+    if (stats.st_mtim.tv_nsec == 0)
+        stats.st_mtim.tv_nsec = 1;
+    else if (stats.st_mtim.tv_nsec >= 1000000000L)
+        stats.st_mtim.tv_nsec = 1000000000L - 1;
+
+    ts[0] = stats.st_atim;
+    ts[1] = stats.st_mtim;
     utimensat(AT_FDCWD, str_dst, ts, 0);
 
     build_err = ERR_SUCCESS;
@@ -650,4 +666,5 @@ u32 get_base_name(const str *path, str *dst, u64 size)
     build_err = ERR_SUCCESS;
     return build_err;
 }
+
 #endif /* BUILD_PLATFORM_H */

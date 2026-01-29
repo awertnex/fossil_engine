@@ -13,11 +13,18 @@
  *  limitations under the License.OFTWARE.
  */
 
-/*
- *	dir.c - directory and file parsing, writing, copying and path resolution
+/*  dir.c - directory and file parsing, writing, copying and path resolution
  */
 
 #include "h/common.h"
+
+#include "h/diagnostics.h"
+#include "h/dir.h"
+#include "h/limits.h"
+#include "h/logger.h"
+#include "h/memory.h"
+#include "h/process.h"
+#include "h/time.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,18 +35,10 @@
 #include <inttypes.h>
 #include <fcntl.h>
 
-#include "h/diagnostics.h"
-#include "h/dir.h"
-#include "h/limits.h"
-#include "h/logger.h"
-#include "h/memory.h"
-#include "h/process.h"
-#include "h/time.h"
-
-/* TODO: fix 'fsl_get_file_type()' */
+/* TODO: fix `fsl_get_file_type()`: handle file types other than 'reg' and 'dir' */
 u64 fsl_get_file_type(const str *name)
 {
-    struct stat stats;
+    struct stat stats = {0};
     if (stat(name, &stats) == 0)
         return S_ISREG(stats.st_mode) | (S_ISDIR(stats.st_mode) * 2);
 
@@ -66,7 +65,7 @@ u32 fsl_is_file(const str *name)
 
 u32 fsl_is_file_exists(const str *name, b8 log)
 {
-    struct stat stats;
+    struct stat stats = {0};
     if (stat(name, &stats) == 0)
     {
         if (S_ISREG(stats.st_mode))
@@ -108,7 +107,7 @@ u32 fsl_is_dir(const str *name)
 
 u32 fsl_is_dir_exists(const str *name, b8 log)
 {
-    struct stat stats;
+    struct stat stats = {0};
     if (stat(name, &stats) == 0)
     {
         if (S_ISDIR(stats.st_mode))
@@ -136,7 +135,7 @@ u32 fsl_is_dir_exists(const str *name, b8 log)
 u64 fsl_get_file_contents(const str *name, void **dst, u64 size, b8 terminate)
 {
     FILE *file = NULL;
-    u64 cursor;
+    u64 cursor = 0;
 
     if (fsl_is_file_exists(name, TRUE) != FSL_ERR_SUCCESS)
             return 0;
@@ -175,9 +174,9 @@ fsl_buf fsl_get_dir_contents(const str *name)
     str dir_name_absolute_usable[PATH_MAX] = {0};
     str entry_name_full[PATH_MAX] = {0};
     DIR *dir = NULL;
-    struct dirent *entry;
+    struct dirent *entry = {0};
     fsl_buf contents = {0};
-    u64 i;
+    u64 i = 0;
 
     if (!name)
     {
@@ -246,8 +245,8 @@ cleanup:
 u64 fsl_get_dir_entry_count(const str *name)
 {
     DIR *dir = NULL;
-    u64 count;
-    struct dirent *entry;
+    u64 count = 0;
+    struct dirent *entry = {0};
 
     if (!name)
     {
@@ -283,7 +282,7 @@ u32 fsl_copy_file(const str *src, const str *dst)
     str *in_file = NULL;
     FILE *out_file = NULL;
     u64 len = 0;
-    struct stat stats;
+    struct stat stats = {0};
     struct timespec ts[2] = {0};
 
     if (fsl_is_file_exists(src, TRUE) != FSL_ERR_SUCCESS)
@@ -352,8 +351,8 @@ u32 fsl_copy_dir(const str *src, const str *dst, b8 contents_only)
     str str_dst[PATH_MAX] = {0};
     str in_dir[PATH_MAX] = {0};
     str out_dir[PATH_MAX] = {0};
-    u64 i;
-    struct stat stats;
+    u64 i = 0;
+    struct stat stats = {0};
     struct timespec ts[2] = {0};
 
     if (fsl_is_dir_exists(src, TRUE) != FSL_ERR_SUCCESS)
@@ -567,7 +566,7 @@ void fsl_check_slash(str *path)
 
 void fsl_normalize_slash(str *path)
 {
-    u64 len, i;
+    u64 len = 0, i = 0;
 
     if (!path)
     {
@@ -588,7 +587,7 @@ void fsl_normalize_slash(str *path)
 
 void fsl_posix_slash(str *path)
 {
-    u64 len, i;
+    u64 len = 0, i = 0;
 
     if (!path)
     {
@@ -609,7 +608,7 @@ void fsl_posix_slash(str *path)
 
 u32 fsl_retract_path(str *path)
 {
-    u64 len, i, stage = 0;
+    u64 len = 0, i = 0, stage = 0;
 
     if (!path)
     {

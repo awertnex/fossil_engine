@@ -16,15 +16,15 @@
 /*  shaders.c - loading, pre-processing, parsing and unloading glsl shaders
  */
 
-#include <stdio.h>
-#include <string.h>
-
 #include "h/diagnostics.h"
 #include "h/dir.h"
 #include "h/limits.h"
 #include "h/logger.h"
 #include "h/memory.h"
 #include "h/shaders.h"
+
+#include <stdio.h>
+#include <string.h>
 
 #define fsl_shader_pre_process(path, file_len) \
     _fsl_shader_pre_process(path, file_len, FSL_INCLUDE_RECURSION_MAX)

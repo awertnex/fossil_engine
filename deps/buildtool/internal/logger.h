@@ -41,33 +41,6 @@ enum /* log_level */
     LOGLEVEL_COUNT,
 }; /* log_level */
 
-/* ---- section: declarations ----------------------------------------------- */
-
-extern u32 log_level_max;
-
-static str log_tag[][16] =
-{
-    "FATAL",
-    "ERROR",
-    "WARNING",
-    "INFO",
-    "DEBUG",
-    "TRACE",
-};
-
-static str *esc_code_nocolor = "\033[0m";
-static str *esc_code_color[LOGLEVEL_COUNT] =
-{
-    "\033[31m",
-    "\033[91m",
-    "\033[95m",
-    "\033[0m",
-    "\033[0m",
-    "\033[33m",
-};
-
-/* ---- section: signatures ------------------------------------------------- */
-
 #define LOGFATAL(err, verbose, format, ...) \
     _log_output(err, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_FATAL, format, ##__VA_ARGS__)
 
@@ -103,6 +76,33 @@ static str *esc_code_color[LOGLEVEL_COUNT] =
 
 #define LOGTRACEEX(verbose, file, line, format, ...) \
     _log_output(ERR_SUCCESS, verbose, file, line, LOGLEVEL_TRACE, format, ##__VA_ARGS__)
+
+/* ---- section: declarations ----------------------------------------------- */
+
+extern u32 log_level_max;
+
+static str log_tag[][16] =
+{
+    "FATAL",
+    "ERROR",
+    "WARNING",
+    "INFO",
+    "DEBUG",
+    "TRACE",
+};
+
+static str *esc_code_nocolor = "\033[0m";
+static str *esc_code_color[LOGLEVEL_COUNT] =
+{
+    "\033[31m",
+    "\033[91m",
+    "\033[95m",
+    "\033[0m",
+    "\033[0m",
+    "\033[33m",
+};
+
+/* ---- section: signatures ------------------------------------------------- */
 
 /*! -- INTERNAL USE ONLY --;
  */

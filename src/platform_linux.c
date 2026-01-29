@@ -13,11 +13,17 @@
  *  limitations under the License.OFTWARE.
  */
 
-/*
- *	platform_linux.c - code specific to the platform: linux, abstracted
+/*  platform_linux.c - code specific to the platform: linux, abstracted
  */
 
 #include "h/common.h"
+
+#include "h/diagnostics.h"
+#include "h/dir.h"
+#include "h/limits.h"
+#include "h/logger.h"
+#include "h/math.h"
+#include "h/process.h"
 
 #include <errno.h>
 #include <stdlib.h>
@@ -26,13 +32,6 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
-
-#include "h/diagnostics.h"
-#include "h/dir.h"
-#include "h/limits.h"
-#include "h/logger.h"
-#include "h/math.h"
-#include "h/process.h"
 
 u32 fsl_make_dir(const str *path)
 {
@@ -266,21 +265,29 @@ void _fsl_mem_unmap(void **x, u64 size, const str *name, const str *file, u64 li
 
     if (!x || !*x) return;
 
+    _LOGTRACEEX(0,
+            file, line, "%s[%p] Memory Unmapped [%"PRIu64"B]\n", name, *x, size_aligned);
+
     fsl_mem_request_page_size();
     size_aligned = fsl_align_up_u64(size, FSL_PAGE_SIZE);
     munmap(*x, size_aligned);
-    _LOGTRACEEX(0,
-            file, line, "%s[%p] Memory Unmapped [%"PRIu64"B]\n", name, *x, size_aligned);
     *x = NULL;
 }
 
 void _fsl_mem_unmap_arena(fsl_mem_arena *x, const str *name, const str *file, u64 line)
 {
+    u64 i = 0;
     if (!x || !x->buf) return;
-    munmap(x->i, x->size_i);
-    munmap(x->buf, x->size_buf);
+
     _LOGTRACEEX(0,
             file, line, "%s[%p] Memory Arena Unmapped [%"PRIu64"B] Memb Total [%"PRIu64"][%"PRIu64"B]\n",
             name, x->buf, x->size_buf, x->memb, x->size_i);
+
+    for (i = 0; i < x->memb; ++i)
+        *x->i[i] = NULL;
+
+    munmap(x->i, x->size_i);
+    munmap(x->buf, x->size_buf);
+
     *x = (fsl_mem_arena){0};
 }
