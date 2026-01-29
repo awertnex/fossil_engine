@@ -28,9 +28,9 @@
 #define FSL_ENGINE_VERSION_DEV      "-dev"
 
 #define FSL_ENGINE_VERSION_MAJOR    0
-#define FSL_ENGINE_VERSION_MINOR    3
-#define FSL_ENGINE_VERSION_PATCH    4
-#define FSL_ENGINE_VERSION_BUILD    FSL_ENGINE_VERSION_DEV
+#define FSL_ENGINE_VERSION_MINOR    4
+#define FSL_ENGINE_VERSION_PATCH    0
+#define FSL_ENGINE_VERSION_BUILD    FSL_ENGINE_VERSION_BETA
 
 #if defined(__linux__) || defined(__linux)
 #   define _GNU_SOURCE

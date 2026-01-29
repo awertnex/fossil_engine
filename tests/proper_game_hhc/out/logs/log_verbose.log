@@ -1,0 +1,7 @@
+[1769700553219072][2026-01-29 18:29:13] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1769700553219072][2026-01-29 18:29:13] [DEBUG] DEBUG BUILD
+[1769700553219072][2026-01-29 18:29:13] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1769700553219072][2026-01-29 18:29:13] [DEBUG] Mesh 'Skybox' Generated
+[1769700553219072][2026-01-29 18:29:13] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1769700553219072][2026-01-29 18:29:13] [DEBUG] Mesh 'Player' Generated
+[1769700553219072][2026-01-29 18:29:13] [DEBUG] Mesh 'Gizmo' Generated
