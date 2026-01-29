@@ -7,7 +7,7 @@
    first version of the engine as standalone in this repo
 
 - - -
-## v<version> (YYYY MMM DD)
+## v0.4.0-beta (2026 Jan 29)
 
 #### changes
 - `copy_file()` bug fix and new features:
