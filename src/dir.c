@@ -13,11 +13,18 @@
  *  limitations under the License.OFTWARE.
  */
 
-/*
- *	dir.c - directory and file parsing, writing, copying and path resolution
+/*  dir.c - directory and file parsing, writing, copying and path resolution
  */
 
 #include "h/common.h"
+
+#include "h/diagnostics.h"
+#include "h/dir.h"
+#include "h/limits.h"
+#include "h/logger.h"
+#include "h/memory.h"
+#include "h/process.h"
+#include "h/time.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,18 +33,12 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <inttypes.h>
+#include <fcntl.h>
 
-#include "h/diagnostics.h"
-#include "h/dir.h"
-#include "h/limits.h"
-#include "h/logger.h"
-#include "h/memory.h"
-#include "h/process.h"
-
-/* TODO: fix 'fsl_get_file_type()' */
+/* TODO: fix `fsl_get_file_type()`: handle file types other than 'reg' and 'dir' */
 u64 fsl_get_file_type(const str *name)
 {
-    struct stat stats;
+    struct stat stats = {0};
     if (stat(name, &stats) == 0)
         return S_ISREG(stats.st_mode) | (S_ISDIR(stats.st_mode) * 2);
 
@@ -64,7 +65,7 @@ u32 fsl_is_file(const str *name)
 
 u32 fsl_is_file_exists(const str *name, b8 log)
 {
-    struct stat stats;
+    struct stat stats = {0};
     if (stat(name, &stats) == 0)
     {
         if (S_ISREG(stats.st_mode))
@@ -106,7 +107,7 @@ u32 fsl_is_dir(const str *name)
 
 u32 fsl_is_dir_exists(const str *name, b8 log)
 {
-    struct stat stats;
+    struct stat stats = {0};
     if (stat(name, &stats) == 0)
     {
         if (S_ISDIR(stats.st_mode))
@@ -134,7 +135,7 @@ u32 fsl_is_dir_exists(const str *name, b8 log)
 u64 fsl_get_file_contents(const str *name, void **dst, u64 size, b8 terminate)
 {
     FILE *file = NULL;
-    u64 cursor;
+    u64 cursor = 0;
 
     if (fsl_is_file_exists(name, TRUE) != FSL_ERR_SUCCESS)
             return 0;
@@ -173,9 +174,9 @@ fsl_buf fsl_get_dir_contents(const str *name)
     str dir_name_absolute_usable[PATH_MAX] = {0};
     str entry_name_full[PATH_MAX] = {0};
     DIR *dir = NULL;
-    struct dirent *entry;
+    struct dirent *entry = {0};
     fsl_buf contents = {0};
-    u64 i;
+    u64 i = 0;
 
     if (!name)
     {
@@ -244,8 +245,8 @@ cleanup:
 u64 fsl_get_dir_entry_count(const str *name)
 {
     DIR *dir = NULL;
-    u64 count;
-    struct dirent *entry;
+    u64 count = 0;
+    struct dirent *entry = {0};
 
     if (!name)
     {
@@ -281,6 +282,8 @@ u32 fsl_copy_file(const str *src, const str *dst)
     str *in_file = NULL;
     FILE *out_file = NULL;
     u64 len = 0;
+    struct stat stats = {0};
+    struct timespec ts[2] = {0};
 
     if (fsl_is_file_exists(src, TRUE) != FSL_ERR_SUCCESS)
             return fsl_err;
@@ -288,7 +291,11 @@ u32 fsl_copy_file(const str *src, const str *dst)
     snprintf(str_dst, PATH_MAX, "%s", dst);
 
     if (fsl_is_dir(dst) == FSL_ERR_SUCCESS)
-        strncat(str_dst, strrchr(src, FSL_SLASH_NATIVE), PATH_MAX - 1);
+    {
+        fsl_check_slash(str_dst);
+        fsl_get_base_name(src, str_dst + strlen(str_dst), PATH_MAX);
+        fsl_posix_slash(str_dst);
+    }
 
     if ((out_file = fopen(str_dst, "wb")) == NULL)
     {
@@ -311,6 +318,28 @@ u32 fsl_copy_file(const str *src, const str *dst)
     _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             "File Copied '%s' -> '%s'\n", src, str_dst);
 
+    if (stat(src, &stats) == 0)
+        chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
+    else
+        _LOGWARNING(FSL_ERR_FILE_STAT_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                "Failed to Copy File Permissions '%s' -> '%s', 'stat()' Failed\n",
+                src, str_dst);
+
+    if (stats.st_atim.tv_nsec == 0)
+        stats.st_atim.tv_nsec = 1;
+    else if (stats.st_atim.tv_nsec >= 1000000000L)
+        stats.st_atim.tv_nsec = 1000000000L - 1;
+
+    if (stats.st_mtim.tv_nsec == 0)
+        stats.st_mtim.tv_nsec = 1;
+    else if (stats.st_mtim.tv_nsec >= 1000000000L)
+        stats.st_mtim.tv_nsec = 1000000000L - 1;
+
+    ts[0] = stats.st_atim;
+    ts[1] = stats.st_mtim;
+    utimensat(AT_FDCWD, str_dst, ts, 0);
+
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
@@ -322,7 +351,9 @@ u32 fsl_copy_dir(const str *src, const str *dst, b8 contents_only)
     str str_dst[PATH_MAX] = {0};
     str in_dir[PATH_MAX] = {0};
     str out_dir[PATH_MAX] = {0};
-    u64 i;
+    u64 i = 0;
+    struct stat stats = {0};
+    struct timespec ts[2] = {0};
 
     if (fsl_is_dir_exists(src, TRUE) != FSL_ERR_SUCCESS)
         return fsl_err;
@@ -341,8 +372,10 @@ u32 fsl_copy_dir(const str *src, const str *dst, b8 contents_only)
 
     if (fsl_is_dir_exists(str_dst, FALSE) == FSL_ERR_SUCCESS && !contents_only)
     {
-        strncat(str_dst, strrchr(str_src, FSL_SLASH_NATIVE), PATH_MAX - 1);
+        fsl_get_base_name(str_src, str_dst + strlen(str_dst), PATH_MAX - strlen(str_dst));
         fsl_check_slash(str_dst);
+        fsl_posix_slash(str_dst);
+        fsl_make_dir(str_dst);
     }
     else fsl_make_dir(str_dst);
 
@@ -361,6 +394,28 @@ u32 fsl_copy_dir(const str *src, const str *dst, b8 contents_only)
 
     _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             "Directory Copied '%s' -> '%s'\n", src, str_dst);
+
+    if (stat(str_src, &stats) == 0)
+        chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
+    else
+        _LOGWARNING(FSL_ERR_FILE_STAT_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                "Failed to Copy Directory Permissions '%s' -> '%s', 'stat()' Failed\n",
+                str_src, str_dst);
+
+    if (stats.st_atim.tv_nsec == 0)
+        stats.st_atim.tv_nsec = 1;
+    else if (stats.st_atim.tv_nsec >= 1000000000L)
+        stats.st_atim.tv_nsec = 1000000000L - 1;
+
+    if (stats.st_mtim.tv_nsec == 0)
+        stats.st_mtim.tv_nsec = 1;
+    else if (stats.st_mtim.tv_nsec >= 1000000000L)
+        stats.st_mtim.tv_nsec = 1000000000L - 1;
+
+    ts[0] = stats.st_atim;
+    ts[1] = stats.st_mtim;
+    utimensat(AT_FDCWD, str_dst, ts, 0);
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -511,7 +566,7 @@ void fsl_check_slash(str *path)
 
 void fsl_normalize_slash(str *path)
 {
-    u64 len, i;
+    u64 len = 0, i = 0;
 
     if (!path)
     {
@@ -532,7 +587,7 @@ void fsl_normalize_slash(str *path)
 
 void fsl_posix_slash(str *path)
 {
-    u64 len, i;
+    u64 len = 0, i = 0;
 
     if (!path)
     {
@@ -553,7 +608,7 @@ void fsl_posix_slash(str *path)
 
 u32 fsl_retract_path(str *path)
 {
-    u64 len, i, stage = 0;
+    u64 len = 0, i = 0, stage = 0;
 
     if (!path)
     {

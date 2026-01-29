@@ -92,7 +92,7 @@ enum fsl_log_level
 #define LOG_MESH_GENERATE(err, mesh_name) \
 { \
     if (err == FSL_ERR_SUCCESS) \
-    LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE, "Mesh '%s' Generated\n", mesh_name); \
+    LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE, "Mesh '%s' Generated\n", mesh_name); \
     else if (err == FSL_ERR_MESH_GENERATION_FAIL) \
     LOGERROR(FSL_ERR_MESH_GENERATION_FAIL, 0, "Failed to Generate Mesh '%s'\n", mesh_name); \
 }

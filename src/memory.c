@@ -13,11 +13,16 @@
  *  limitations under the License.OFTWARE.
  */
 
-/*
- *	memory.c - memory management
+/*  memory.c - memory management
  */
 
 #include "h/common.h"
+
+#include "h/diagnostics.h"
+#include "h/math.h"
+#include "h/memory.h"
+#include "h/limits.h"
+#include "h/logger.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,12 +30,6 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <inttypes.h>
-
-#include "h/diagnostics.h"
-#include "h/math.h"
-#include "h/memory.h"
-#include "h/limits.h"
-#include "h/logger.h"
 
 u64 FSL_PAGE_SIZE = 0;
 
@@ -495,7 +494,7 @@ u32 _fsl_mem_clear(void **x, u64 size, const str *name, const str *file, u64 lin
         return fsl_err;
     }
 
-    bzero(*x, size);
+    memset(*x, '\0', size);
     _LOGTRACEEX(0, file, line,
             "%s[%p] Memory Cleared [%"PRIu64"B]\n", name, *x, size);
 

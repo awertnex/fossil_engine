@@ -13,11 +13,17 @@
  *  limitations under the License.OFTWARE.
  */
 
-/*
- *	platform_windows.c - code specific to the platform: windows, abstracted
+/*  platform_windows.c - code specific to the platform: windows, abstracted
  */
 
 #include "h/common.h"
+
+#include "h/diagnostics.h"
+#include "h/dir.h"
+#include "h/limits.h"
+#include "h/logger.h"
+#include "h/memory.h"
+#include "h/process.h"
 
 #include <errno.h>
 #include <stdlib.h>
@@ -26,13 +32,6 @@
 #include <inttypes.h>
 #include <windows.h>
 #include <direct.h>
-
-#include "h/diagnostics.h"
-#include "h/dir.h"
-#include "h/limits.h"
-#include "h/logger.h"
-#include "h/memory.h"
-#include "h/process.h"
 
 u32 fsl_make_dir(const str *path)
 {
@@ -272,19 +271,27 @@ u32 _fsl_mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const 
 void _fsl_mem_unmap(void **x, u64 size, const str *name, const str *file, u64 line)
 {
     if (!x || !*x) return;
-    VirtualFree(x, 0, MEM_RELEASE);
+
     _LOGTRACEEX(0,
             file, line, "%s[%p] Memory Unmapped [%"PRIu64"B]\n", name, *x, size);
+
+    VirtualFree(x, 0, MEM_RELEASE);
     *x = NULL;
 }
 
 void _fsl_mem_unmap_arena(fsl_mem_arena *x, const str *name, const str *file, u64 line)
 {
     if (!x || !x->buf) return;
-    VirtualFree(x->i, 0, MEM_RELEASE);
-    VirtualFree(x->buf, 0, MEM_RELEASE);
+
     _LOGTRACEEX(0,
             file, line, "%s[%p] Memory Arena Unmapped [%"PRIu64"B] Memb Total [%"PRIu64"][%"PRIu64"B]\n",
             name, x->buf, x->size_buf, x->memb, x->size_i);
+
+    for (i = 0; i < x->memb; ++i)
+        *x->i[i] = NULL;
+
+    VirtualFree(x->i, 0, MEM_RELEASE);
+    VirtualFree(x->buf, 0, MEM_RELEASE);
+
     *x = (fsl_mem_arena){0};
 }

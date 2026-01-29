@@ -43,7 +43,7 @@ cd fossil_engine/
 if you want, bootstrap the build script:
 
 ```bash
-gcc build.c -o build
+cc build.c -o build
 ```
 
 ### additional build commands:
@@ -52,6 +52,7 @@ gcc build.c -o build
 - `./build show`: show build command in list format
 - `./build raw`: show build command in raw format
 - `./build self`: re-build build tool
+- `./build release`: build as release
 
 - - -
 ### for windows (using any C compiler, a suggestion is "gcc" from "mingw"):
@@ -70,7 +71,7 @@ cd fossil_engine
 if you want, bootstrap the build script:
 
 ```command
-gcc.exe build.c -o build.exe
+cc.exe build.c -o build.exe
 ```
 
 ### additional build commands:
@@ -79,6 +80,7 @@ gcc.exe build.c -o build.exe
 - `./build.exe show`: show build command in list format
 - `./build.exe raw`: show build command in raw format
 - `./build.exe self`: re-build build tool
+- `./build.exe release`: build as release
 
 - - -
 ## Contributing:

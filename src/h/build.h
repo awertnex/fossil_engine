@@ -21,6 +21,8 @@
 
 #include "../../deps/buildtool/buildtool.h"
 
+#define FSL_C_STD "-std=c89"
+
 #ifdef FSL_OMIT_LFOSSIL
 #   define LFOSSIL ""
 #else

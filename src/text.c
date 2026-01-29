@@ -18,8 +18,6 @@
 
 #include "h/common.h"
 
-#include <string.h>
-
 #include "h/core.h"
 #include "h/diagnostics.h"
 #include "h/dir.h"
@@ -28,6 +26,8 @@
 #include "h/string.h"
 #include "h/shaders.h"
 #include "h/text.h"
+
+#include <string.h>
 
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <deps/stb_truetype.h>

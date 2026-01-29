@@ -26,6 +26,8 @@
  *  SOFTWARE.
  */
 
+/* ---- section: definitions ------------------------------------------------ */
+
 #define ERR_SUCCESS                     0
 #define ERR_POINTER_NULL                4096
 #define ERR_POINTER_NOT_NULL            4097
@@ -84,6 +86,7 @@
 #define ERR_MEM_ARENA_MAP_FAIL          4150
 #define ERR_SIZE_LIMIT                  4151
 #define ERR_MEM_REMAP_FAIL              4152
+#define ERR_FILE_STAT_FAIL              4153
 
 /*! @brief global variable for build-specific error codes.
  *

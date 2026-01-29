@@ -13,11 +13,12 @@
  *  limitations under the License.OFTWARE.
  */
 
-/*
- *	math.c - math stuff
+/*  math.c - math stuff
  */
 
 #include "h/math.h"
+
+#include <math.h>
 
 v3f32 fsl_add_v3f32(v3f32 a, v3f32 b)
 {

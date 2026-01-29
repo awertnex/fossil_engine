@@ -7,6 +7,28 @@
    first version of the engine as standalone in this repo
 
 - - -
+## v<version> (YYYY MMM DD)
+
+#### changes
+- `copy_file()` bug fix and new features:
+    - Replace clunky usage of `strrchr()` with `fsl_get_base_name()`
+    - Copy file permissions
+    - Copy file access and modification times
+- `copy_dir()` bug fix and new features:
+    - Fix parameter `contents_only` not working
+    - Copy directory permissions
+    - Copy directory access and modification times
+- Add error code `FSL_ERR_FILE_STAT_FAIL`
+- Add guards around copying `tv_nsec` in `fsl_copy_dir()` and `fsl_copy_file()`
+- Fix function `fsl_on_time_interval()` triggering once on first call
+- Change C standard to C89
+- Modify 'stb' headers to comply with the C89 standard:
+    - Make all // comments /* */ block comments
+- Change directory structure of tests
+- Change build source of building tests
+- Update buildtool version `v1.6.2` -> `v1.7.0-beta`
+
+- - -
 ## v0.3.4-beta (2026 Jan 28)
 
 #### changes

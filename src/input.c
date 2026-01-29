@@ -13,8 +13,7 @@
  *  limitations under the License.OFTWARE.
  */
 
-/*
- *	input.c - keyboard and mouse input handling
+/*  input.c - keyboard and mouse input handling
  */
 
 #include "h/core.h"

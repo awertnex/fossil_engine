@@ -90,6 +90,7 @@
 #define FSL_ERR_MEM_ARENA_MAP_FAIL          4150
 #define FSL_ERR_SIZE_LIMIT                  4151
 #define FSL_ERR_MEM_REMAP_FAIL              4152
+#define FSL_ERR_FILE_STAT_FAIL              4153
 
 /*! @brief global variable for engine-specific error codes.
  *

@@ -26,20 +26,9 @@
  *  SOFTWARE.
  */
 
-#if defined(__linux__) || defined(__linux)
-#   define _GNU_SOURCE
-#   include <linux/limits.h>
-#   include <time.h>
-#   include <sys/time.h>
+/* ---- section: definitions ------------------------------------------------ */
 
-#   define PLATFORM_LINUX 1
-#   define PLATFORM "linux"
-#   define EXE ""
-#   define RUNTIME_PATH "$ORIGIN"
-
-#   define SLASH_NATIVE '/'
-#   define SLASH_NON_NATIVE '\\'
-#elif defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 #   define NAME_MAX 255
 #   include <limits.h>
 
@@ -50,6 +39,22 @@
 
 #   define SLASH_NATIVE '\\'
 #   define SLASH_NON_NATIVE '/'
+
+#   define bt_stat(name, st) _stat(name, st)
+#elif defined(__linux__) || defined(__linux)
+#   define _GNU_SOURCE
+#   include <linux/limits.h>
+#   include <sys/time.h>
+
+#   define PLATFORM_LINUX 1
+#   define PLATFORM "linux"
+#   define EXE ""
+#   define RUNTIME_PATH "$ORIGIN"
+
+#   define SLASH_NATIVE '/'
+#   define SLASH_NON_NATIVE '\\'
+
+#   define bt_stat(name, st) stat(name, st)
 #endif /* PLATFORM */
 
 #if defined(__STDC_VERSION__)
@@ -67,6 +72,9 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <inttypes.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <time.h>
 
 /* ---- section: types ------------------------------------------------------ */
 

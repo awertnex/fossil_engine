@@ -19,8 +19,6 @@
 #ifndef FSL_MATH_H
 #define FSL_MATH_H
 
-#include <math.h>
-
 #include "common.h"
 #include "types.h"
 

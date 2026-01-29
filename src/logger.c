@@ -13,17 +13,10 @@
  *  limitations under the License.OFTWARE.
  */
 
-/*
- *	logger.c - logger
+/*  logger.c - logger
  */
 
 #include "h/common.h"
-
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-#include <sys/stat.h>
-#include <inttypes.h>
 
 #include "h/diagnostics.h"
 #include "h/dir.h"
@@ -34,6 +27,12 @@
 #include "h/string.h"
 #include "h/time.h"
 #include "h/types.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <stdarg.h>
+#include <sys/stat.h>
+#include <inttypes.h>
 
 /* ---- section: definitions ------------------------------------------------ */
 
