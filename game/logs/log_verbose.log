@@ -1,7 +1,0 @@
-[1769674806771673][2026-01-29 11:20:06] [TRACE] [test0/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/game/'
-[1769674806771673][2026-01-29 11:20:06] [DEBUG] DEBUG BUILD
-[1769674806771673][2026-01-29 11:20:06] [DEBUG] GLFW: Raw Mouse Motion Enabled
-[1769674806771673][2026-01-29 11:20:06] [DEBUG] Mesh 'Skybox' Generated
-[1769674806771673][2026-01-29 11:20:06] [DEBUG] Mesh 'Cube of Happiness' Generated
-[1769674806771673][2026-01-29 11:20:06] [DEBUG] Mesh 'Player' Generated
-[1769674806771673][2026-01-29 11:20:06] [DEBUG] Mesh 'Gizmo' Generated
