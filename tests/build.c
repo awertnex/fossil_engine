@@ -18,9 +18,9 @@ int main(int argc, char **argv)
         return build_proper_game(argc, argv);
     else
     {
-        LOGFATAL(ERR_BUILD_FUNCTION_NOT_FOUND, FALSE,
-                "%s\n", "Failed to Build Test, No Test Specified");
-        cmd_fail();
+        LOGWARNING(ERR_BUILD_FUNCTION_NOT_FOUND, FALSE,
+                "%s\n", "No Test Specified, Pass Test Directory Name As Argument");
+        cmd_fail(NULL);
     }
 
     build_err = ERR_SUCCESS;
@@ -67,12 +67,12 @@ u32 build_proper_game(int argc, char **argv)
     cmd_ready(NULL);
 
     if (exec(&_cmd, "build_proper_game().cmd") != ERR_SUCCESS)
-        cmd_fail();
+        cmd_fail(&_cmd);
 
     if (
             copy_dir(DIR_ROOT"fossil/fossil/", DIR_OUT_PROPER_GAME, TRUE) != ERR_SUCCESS ||
             copy_dir(DIR_PROPER_GAME"assets/", DIR_OUT_PROPER_GAME, FALSE) != ERR_SUCCESS)
-        cmd_fail();
+        cmd_fail(&_cmd);
 
     build_err = ERR_SUCCESS;
     return build_err;

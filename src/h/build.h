@@ -25,14 +25,16 @@
 
 #ifdef FSL_OMIT_LFOSSIL
 #   define LFOSSIL ""
+#   define LLIB_PLATFORM ("-Lfossil/lib/"PLATFORM)
 #else
 #   define LFOSSIL "-lfossil"
+#   define LLIB_PLATFORM ("-Llib/"PLATFORM)
 #endif /* FSL_OMIT_LFOSSIL */
 
 #if FSL_PLATFORM_WIN
     static const str fsl_str_libs[][CMD_SIZE] =
     {
-        "-Llib/"PLATFORM,
+        LLIB_PLATFORM,
         "-lgdi32",
         "-lwinmm",
         "-mwindows",
@@ -43,7 +45,7 @@
 #else
     static const str fsl_str_libs[][CMD_SIZE] =
     {
-        "-Llib/"PLATFORM,
+        LLIB_PLATFORM,
         "-lm",
         "-lglfw",
         "", /* empty slots for alignment across different platforms */

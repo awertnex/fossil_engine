@@ -40,7 +40,10 @@
 #   define SLASH_NATIVE '\\'
 #   define SLASH_NON_NATIVE '/'
 
-#   define bt_stat(name, st) _stat(name, st)
+#   define bt_mkdir(name) _mkdir(name)
+#   define bt_chdir(name) _chdir(name)
+#   define bt_stat(name, st) _lstat(name, st)
+#   define bt_chmod(name, n) _chmod(name, n)
 #elif defined(__linux__) || defined(__linux)
 #   define _GNU_SOURCE
 #   include <linux/limits.h>
@@ -54,7 +57,10 @@
 #   define SLASH_NATIVE '/'
 #   define SLASH_NON_NATIVE '\\'
 
-#   define bt_stat(name, st) stat(name, st)
+#   define bt_mkdir(name) mkdir(name, 0755)
+#   define bt_chdir(name) chdir(name)
+#   define bt_stat(name, st) lstat(name, st)
+#   define bt_chmod(name, n) lchmod(name, n)
 #endif /* PLATFORM */
 
 #if defined(__STDC_VERSION__)
@@ -120,6 +126,17 @@ typedef struct _buf
 #define OUT_STRING_MAX  (STRING_MAX + 256)
 #define TIME_STRING_MAX 256
 #define STRINGF_BUFFERS_MAX 4
+
+enum file_type_index
+{
+    /* zero is reserved for "error" */
+    FILE_TYPE_REG = 1,
+    FILE_TYPE_LNK,
+    FILE_TYPE_DIR,
+    FILE_TYPE_CHR,
+    FILE_TYPE_BLK,
+    FILE_TYPE_FIFO,
+}; /* file_type_index */
 
 /* ---- section: signatures ------------------------------------------------- */
 

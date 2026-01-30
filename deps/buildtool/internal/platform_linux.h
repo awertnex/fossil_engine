@@ -37,38 +37,6 @@
 
 /* ---- section: implementation --------------------------------------------- */
 
-u32 make_dir(const str *path)
-{
-    if (mkdir(path, 0755) == 0)
-    {
-        LOGTRACE(FALSE,
-                "Directory Created '%s'\n", path);
-        build_err = ERR_SUCCESS;
-        return build_err;
-    }
-
-    switch (errno)
-    {
-        case EEXIST:
-            build_err = ERR_DIR_EXISTS;
-            break;
-
-        default:
-            LOGERROR(ERR_DIR_CREATE_FAIL, TRUE,
-                    "Failed to Create Directory '%s'\n", path);
-    }
-
-    return build_err;
-}
-
-int change_dir(const str *path)
-{
-    int success = chdir(path);
-    LOGTRACE(TRUE,
-            "Working Directory Changed to '%s'\n", path);
-    return success;
-}
-
 u32 _get_path_absolute(const str *path, str *path_real)
 {
     if (!realpath(path, path_real))
@@ -83,12 +51,14 @@ u32 _get_path_absolute(const str *path, str *path_real)
 
 u32 _get_path_bin_root(str *path)
 {
-    if (!readlink("/proc/self/exe", path, PATH_MAX))
+    if (readlink("/proc/self/exe", path, PATH_MAX) < 1)
     {
         LOGFATAL(ERR_GET_PATH_BIN_ROOT_FAIL, FALSE,
                 "%s\n", "Failed 'get_path_bin_root()', Process Aborted");
         return build_err;
     }
+
+    path[strnlen(path, PATH_MAX - 1)] = '\0';
 
     build_err = ERR_SUCCESS;
     return build_err;

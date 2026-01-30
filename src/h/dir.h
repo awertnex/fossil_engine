@@ -22,11 +22,16 @@
 #include "common.h"
 #include "types.h"
 
-/*! @brief get file type of `name`.
- *
- *  @return 0 on failure and @ref fsl_err is set accordingly.
- */
-FSLAPI u64 fsl_get_file_type(const str *name);
+enum fsl_file_type_index
+{
+    /* zero is reserved for "error" */
+    FSL_FILE_TYPE_REG = 1,
+    FSL_FILE_TYPE_LNK,
+    FSL_FILE_TYPE_DIR,
+    FSL_FILE_TYPE_CHR,
+    FSL_FILE_TYPE_BLK,
+    FSL_FILE_TYPE_FIFO,
+}; /* fsl_file_type_index */
 
 /*! @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -48,9 +53,7 @@ FSLAPI u32 fsl_is_dir(const str *name);
  */
 FSLAPI u32 fsl_is_dir_exists(const str *name, b8 log);
 
-/*! -- IMPLEMENTATION: platform_<PLATFORM>.c --;
- *
- *  @brief make directory `path` if it doesn't exist.
+/*! @brief make directory `path` if it doesn't exist.
  *
  *  @remark failure includes "directory already exists".
  *
@@ -58,11 +61,20 @@ FSLAPI u32 fsl_is_dir_exists(const str *name, b8 log);
  */
 FSLAPI u32 fsl_make_dir(const str *path);
 
-/*! -- IMPLEMENTATION: platform_<PLATFORM>.c --;
- *
- *  @brief change current working directory.
+/*! @brief change current working directory.
  */
 FSLAPI int fsl_change_dir(const str *path);
+
+/*! @brief get file type of `name` and store in `type`.
+ *
+ *  @param type pointer to u32 to store file type,
+ *  can be one of the enum values at @ref fsl_file_type_index.
+ *
+ *  @remark does not follow symlinks, reports symlinks themselves.
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+FSLAPI u32 fsl_get_file_type(const str *name, u32 *type);
 
 /*! @param dst pointer to `NULL` buffer to store file contents.
  *  @remark `dst` is allocated file size, + 1 if `terminate` is `TRUE`.
@@ -90,7 +102,7 @@ FSLAPI u64 fsl_get_dir_entry_count(const str *name);
 
 /*! @brief copy `src` into `dst`, preserve permissions and modification time.
  *
- *  @remark can overwrite files.
+ *  @remark can overwrite files and symlinks.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -102,7 +114,7 @@ FSLAPI u32 fsl_copy_file(const str *src, const str *dst);
  *      TRUE: copy directory contents of `src` and place inside `dst`.
  *      FALSE: copy directory `src` and place inside `dst`.
  *
- *  @remark can overwrite directories and files.
+ *  @remark can overwrite directories, files and symlinks.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */

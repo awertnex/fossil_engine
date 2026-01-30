@@ -49,7 +49,7 @@ int main(int argc, char **argv)
     {
         make_dir(str_dir[i]);
         if (build_err != ERR_SUCCESS && build_err != ERR_DIR_EXISTS)
-            cmd_fail();
+            cmd_fail(NULL);
     }
 
     cmd_exec(39,
@@ -97,11 +97,13 @@ int main(int argc, char **argv)
             copy_dir(DIR_DEPS,          DIR_OUT, FALSE) != ERR_SUCCESS ||
             copy_dir(DIR_SRC"h/",       DIR_OUT DIR_DEPS DIR_OUT, TRUE) != ERR_SUCCESS ||
             copy_file("LICENSE",        DIR_OUT DIR_DEPS DIR_OUT) != ERR_SUCCESS ||
+
             copy_dir("lib/",            DIR_OUT, FALSE) != ERR_SUCCESS ||
             copy_dir("lib/"PLATFORM,    DIR_OUT DIR_OUT, TRUE) != ERR_SUCCESS ||
+
             copy_dir("assets/",         DIR_OUT DIR_OUT DIR_OUT, FALSE) != ERR_SUCCESS ||
             copy_file("LICENSE",        DIR_OUT DIR_OUT DIR_OUT) != ERR_SUCCESS)
-        cmd_fail();
+        cmd_fail(NULL);
 
     return ERR_SUCCESS;
 }

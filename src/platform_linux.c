@@ -33,38 +33,6 @@
 #include <sys/wait.h>
 #include <sys/mman.h>
 
-u32 fsl_make_dir(const str *path)
-{
-    if (mkdir(path, 0755) == 0)
-    {
-        _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                "Directory Created '%s'\n", path);
-
-        fsl_err = FSL_ERR_SUCCESS;
-        return fsl_err;
-    }
-
-    switch (errno)
-    {
-        case EEXIST:
-            fsl_err = FSL_ERR_DIR_EXISTS;
-            break;
-
-        default:
-            _LOGERROR(FSL_ERR_DIR_CREATE_FAIL, 0,
-                    "Failed to Create Directory '%s'\n", path);
-    }
-
-    return fsl_err;
-}
-
-int fsl_change_dir(const str *path)
-{
-    int success = chdir(path);
-    _LOGTRACE(0, "Working Directory Changed to '%s'\n", path);
-    return success;
-}
-
 u32 _fsl_get_path_absolute(const str *name, str *dst)
 {
     if (!realpath(name, dst))
@@ -79,7 +47,7 @@ u32 _fsl_get_path_absolute(const str *name, str *dst)
 
 u32 _fsl_get_path_bin_root(str *dst)
 {
-    if (!readlink("/proc/self/exe", dst, PATH_MAX))
+    if (readlink("/proc/self/exe", dst, PATH_MAX - 1) < 1)
     {
         _LOGFATAL(FSL_ERR_GET_PATH_BIN_ROOT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,

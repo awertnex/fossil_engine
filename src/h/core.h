@@ -130,16 +130,20 @@ typedef struct fsl_projection
  *
  *  @brief default render.
  *
- *  @remark declared internally.
+ *  @remark declared and initialized internally.
  */
 FSLAPI extern fsl_render *render;
 
 /*! @brief default textures.
  *
- *  @remark declared internally.
+ *  @remark declared and initialized internally.
  */
 FSLAPI extern fsl_texture fsl_texture_buf[FSL_TEXTURE_INDEX_COUNT];
 
+/*! @brief default unit quad, with texture coordinates.
+ *
+ *  @remark declared and initialized internally.
+ */
 FSLAPI extern fsl_mesh fsl_mesh_unit_quad;
 
 /*! @brief initialize engine stuff.
