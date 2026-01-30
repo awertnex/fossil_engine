@@ -23,6 +23,14 @@
 #include "h/shaders.h"
 #include "h/ui.h"
 
+static f32 vbo_data_unit_quad[] =
+{
+    -1.0f, -1.0f, 0.0f, 0.0f,
+    -1.0f, 1.0f, 0.0f, 1.0f,
+    1.0f, 1.0f, 1.0f, 1.0f,
+    1.0f, -1.0f, 1.0f, 0.0f,
+};
+
 static struct /* fsl_ui_core */
 {
     b8 multisample;

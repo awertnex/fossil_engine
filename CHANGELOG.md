@@ -8,6 +8,8 @@
 
 - - -
 ## v0.4.0-dev (current)
+- (2026 01 30): Optimize text rendering by removing geometry shader and going
+                with instanced rendering
 - (2026 01 30): Add "catch-up" behavior to function `fsl_on_time_interval()`
 - (2026 01 30): Update buildtool version `v1.7.0-beta` -> `v1.8.1-beta`
 - (2026 01 30): Add `fsl_mkdir()`, `fsl_chdir()`, `fsl_stat()` and

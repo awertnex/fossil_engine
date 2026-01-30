@@ -39,8 +39,6 @@ fsl_shader_program fsl_shader_buf[FSL_SHADER_INDEX_COUNT] =
         .name = "text",
         .vertex.file_name = "text.vert",
         .vertex.type = GL_VERTEX_SHADER,
-        .geometry.file_name = "text.geom",
-        .geometry.type = GL_GEOMETRY_SHADER,
         .fragment.file_name = "text.frag",
         .fragment.type = GL_FRAGMENT_SHADER,
     },

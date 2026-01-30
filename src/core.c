@@ -67,6 +67,14 @@ static struct /* fsl_ubo */
     GLuint ndc_scale;
 } fsl_ubo;
 
+static f32 vbo_data_unit_quad[] =
+{
+    -1.0f, -1.0f, 0.0f, 0.0f,
+    -1.0f, 1.0f, 0.0f, 1.0f,
+    1.0f, 1.0f, 1.0f, 1.0f,
+    1.0f, -1.0f, 1.0f, 0.0f,
+};
+
 /* ---- section: signatures ------------------------------------------------- */
 
 /*! -- INTERNAL USE ONLY --;
@@ -134,6 +142,9 @@ u32 fsl_engine_init(int argc, char **argv, const str *_log_dir, const str *title
             fsl_glfw_init(flags & FSL_FLAG_MULTISAMPLE) != FSL_ERR_SUCCESS ||
             fsl_window_init(title, size_x, size_y) != FSL_ERR_SUCCESS ||
             fsl_glad_init() != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    if (fsl_fbo_init(NULL, &fsl_mesh_unit_quad, FALSE, 0) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     if (flags & FSL_FLAG_LOAD_DEFAULT_SHADERS)
@@ -487,6 +498,9 @@ void fsl_attrib_vec3_vec4(void)
 
 u32 fsl_fbo_init(fsl_fbo *fbo, fsl_mesh *mesh_fbo, b8 multisample, u32 samples)
 {
+    if (fbo == NULL)
+        goto mesh_fbo_init;
+
     fsl_fbo_free(fbo);
 
     glGenFramebuffers(1, &fbo->fbo);
@@ -560,25 +574,17 @@ u32 fsl_fbo_init(fsl_fbo *fbo, fsl_mesh *mesh_fbo, b8 multisample, u32 samples)
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    /* ---- mesh data ------------------------------------------------------- */
+mesh_fbo_init:
 
     if (mesh_fbo == NULL || mesh_fbo->vbo_data != NULL)
         return 0;
 
-    mesh_fbo->vbo_len = 16;
-    GLfloat vbo_data[] =
-    {
-        -1.0f, -1.0f, 0.0f, 0.0f,
-        -1.0f, 1.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 1.0f, 1.0f,
-        1.0f, -1.0f, 1.0f, 0.0f,
-    };
-
+    mesh_fbo->vbo_len = fsl_arr_len(vbo_data_unit_quad);
     if (fsl_mem_alloc((void*)&mesh_fbo->vbo_data, sizeof(GLfloat) * mesh_fbo->vbo_len,
                 "fbo_init().mesh_fbo.vbo_data") != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    memcpy(mesh_fbo->vbo_data, vbo_data, sizeof(GLfloat) * mesh_fbo->vbo_len);
+    memcpy(mesh_fbo->vbo_data, vbo_data_unit_quad, sizeof(GLfloat) * mesh_fbo->vbo_len);
 
     /* ---- bind mesh ------------------------------------------------------- */
 

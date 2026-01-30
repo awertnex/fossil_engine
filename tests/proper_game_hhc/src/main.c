@@ -171,7 +171,7 @@ static u32 settings_init(void)
 
     settings.lerp_speed = SET_LERP_SPEED_DEFAULT;
 
-    settings.render_distance = 16;
+    settings.render_distance = 2;
     settings.chunk_buf_radius = settings.render_distance;
     settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
 
@@ -1044,7 +1044,7 @@ static void draw_everything(void)
 
     if (core.flag.hud && core.flag.debug)
     {
-        fsl_text_push(fsl_stringf("\n\n"
+        fsl_text_push(fsl_stringf("\n"
                     "TIME        [%.2lf]\n"
                     "CLOCK       [%02"PRIu64":%02"PRIu64"]\n"
                     "DAYS        [%"PRIu64"]\n",
