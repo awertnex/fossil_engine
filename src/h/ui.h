@@ -55,7 +55,7 @@ FSLAPI void fsl_ui_render(void);
 FSLAPI void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
         f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint);
 FSLAPI void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
-        f32 slice_size, f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint);
+        f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, f32 slice_size, u32 tint);
 
 /*! @remark enables @ref GL_DEPTH_TEST.
  */

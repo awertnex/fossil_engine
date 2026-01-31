@@ -35,7 +35,7 @@ u32 world_init(str *name, u64 seed, player *p)
 
     world.gravity = FSL_GRAVITY * 3.0f;
 
-    set_player_spawn(p, 0, 0, 30);
+    set_player_spawn(p, 0, 0, -30);
     player_spawn(p, TRUE);
     player_chunk_update(p);
 

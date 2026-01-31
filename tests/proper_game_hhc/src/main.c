@@ -1003,11 +1003,14 @@ static void draw_everything(void)
 
         if (!core.flag.debug)
             fsl_ui_draw(&texture[TEXTURE_CROSSHAIR], render->size.x / 2, render->size.y / 2,
-                    8, 8, 0.0f, 0.0f, 0, 0, 0xffffffff);
+                    texture[TEXTURE_CROSSHAIR].size.x,
+                    texture[TEXTURE_CROSSHAIR].size.y,
+                    0.0f, 0.0f, -1, -1, 0xffffffff);
 
         fsl_ui_draw(&texture[TEXTURE_ITEM_BAR], render->size.x / 2, render->size.y,
-                texture[TEXTURE_ITEM_BAR].size.x, texture[TEXTURE_ITEM_BAR].size.y,
-                84.5f, 18.0f, 1, 1, 0xffffffff);
+                texture[TEXTURE_ITEM_BAR].size.x * 2,
+                texture[TEXTURE_ITEM_BAR].size.y * 2,
+                84.5f, 18.0f, 0, 0, 0xffffffff);
         fsl_ui_stop();
     }
 
@@ -1020,12 +1023,13 @@ static void draw_everything(void)
          */
         fsl_ui_start(NULL, TRUE, FALSE);
         fsl_ui_draw_nine_slice(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
-                10, 10, 8.0f, 400, render->size.y - 20, 0, 0, -1, -1, 0xffffffef);
+                10, 10, 400, render->size.y - 20, 0, 0, -1, -1, 8.0f, 0xffffff7f);
         fsl_ui_stop();
     }
     fsl_ui_start(NULL, TRUE, FALSE);
     fsl_ui_draw_nine_slice(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
-            10, 10, 8.0f, 400, render->size.y - 20, 0, 0, -1, -1, 0xffffffef);
+            10, 10, 400, render->size.y - 20, 0, 0, -1, -1, 8.0f, 0xffffff7f);
+
     fsl_ui_stop();
 
     /* ---- draw debug info ------------------------------------------------- */
@@ -1171,22 +1175,25 @@ static void draw_everything(void)
 
     /* ---- draw logger strings --------------------------------------------- */
 
-    fsl_text_start(font[FONT_MONO_BOLD], settings.font_size, 0, NULL, FALSE);
-    i32 i = 0;
-    u32 index = 0;
-    for (i = 24; i > 0; --i)
+    if (core.flag.super_debug)
     {
-        index = fsl_mod_i32(fsl_logger_tab_index - i - scrool, FSL_LOGGER_HISTORY_MAX);
-        fsl_text_push(fsl_stringf("%s\n", fsl_logger_tab[index]),
-                SET_MARGIN, render->size.y - SET_MARGIN,
-                0, 0,
-                fsl_logger_color[index]);
-    }
+        fsl_text_start(font[FONT_MONO_BOLD], settings.font_size, 0, NULL, FALSE);
+        i32 i = 0;
+        u32 index = 0;
+        for (i = 24; i > 0; --i)
+        {
+            index = fsl_mod_i32(fsl_logger_tab_index - i - scrool, FSL_LOGGER_HISTORY_MAX);
+            fsl_text_push(fsl_stringf("%s\n", fsl_logger_tab[index]),
+                    SET_MARGIN, render->size.y - SET_MARGIN,
+                    0, 0,
+                    fsl_logger_color[index]);
+        }
 
-    /* align once after all the strings' heights in text batch have accumulated into total text height */
-    fsl_text_push("", 0, 0, 0, FSL_TEXT_ALIGN_BOTTOM, 0x00000000);
-    fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
-    fsl_text_stop();
+        /* align once after all the strings' heights in text batch have accumulated into total text height */
+        fsl_text_push("", 0, 0, 0, FSL_TEXT_ALIGN_BOTTOM, 0x00000000);
+        fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
+        fsl_text_stop();
+    }
 
     /* ---- post processing ------------------------------------------------- */
 

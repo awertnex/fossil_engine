@@ -1,8 +1,5 @@
 #version 430 core
 
-layout (location = 0) in vec2 a_pos;
-layout (location = 1) in vec2 a_tex_coords;
-
 layout (std140, binding = 0) uniform ubo_ndc_scale
 {
     vec2 ndc_scale;

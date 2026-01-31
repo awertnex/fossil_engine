@@ -25,10 +25,10 @@
 
 static f32 vbo_data_unit_quad[] =
 {
-    -1.0f, -1.0f, 0.0f, 0.0f,
-    -1.0f, 1.0f, 0.0f, 1.0f,
-    1.0f, 1.0f, 1.0f, 1.0f,
-    1.0f, -1.0f, 1.0f, 0.0f,
+    0.0f, -1.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 1.0f, 0.0f,
+    1.0f, -1.0f, 1.0f, 1.0f,
 };
 
 static struct fsl_ui_core
@@ -217,7 +217,7 @@ void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 siz
 }
 
 void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
-        f32 slice_size, f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint)
+        f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, f32 slice_size, u32 tint)
 {
     glUniform2i(fsl_ui_core.uniform.nine_slice.position, pos_x, pos_y);
     glUniform2i(fsl_ui_core.uniform.nine_slice.size, size_x, size_y);
@@ -234,7 +234,7 @@ void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size
 
     glBindVertexArray(fsl_ui_core.vao);
     glBindTexture(GL_TEXTURE_2D, texture->id);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_POINTS, 0, 1);
 }
 
 void fsl_ui_stop(void)

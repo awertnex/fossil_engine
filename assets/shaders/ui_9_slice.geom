@@ -52,15 +52,19 @@ void main()
                 vec2(slice_size));
 
         vec2 tex_size = vec2(1.0 / texture_size);
+
         vec2 tex_0 = vec2(0.0, 1.0);
+
         vec2 tex_1 =
             vec2(
                     tex_size.x * slice_size,
                     1.0 - (tex_size.y * slice_size));
+
         vec2 tex_2 =
             vec2(
                     tex_size.x * (slice_size + 1.0),
                     1.0 - (tex_size.y * (slice_size + 1.0)));
+
         vec2 tex_3 =
             vec2(
                     tex_size.x * (sprite_size.x + 1.0),
