@@ -11,8 +11,13 @@
 #define DIR_SRC_TEXT_RENDERING  DIR_TEXT_RENDERING"src/"
 #define DIR_OUT_TEXT_RENDERING  DIR_TEXT_RENDERING"out/"
 
+#define DIR_NINE_SLICE          "nine_slice/"
+#define DIR_SRC_NINE_SLICE      DIR_NINE_SLICE"src/"
+#define DIR_OUT_NINE_SLICE      DIR_NINE_SLICE"out/"
+
 u32 build_proper_game(int argc, char **argv);
 u32 build_text_rendering(int argc, char **argv);
+u32 build_nine_slice(int argc, char **argv);
 
 int main(int argc, char **argv)
 {
@@ -23,6 +28,8 @@ int main(int argc, char **argv)
         return build_proper_game(argc, argv);
     else if (find_token("text_rendering", argc, argv))
         return build_text_rendering(argc, argv);
+    else if (find_token("nine_slice", argc, argv) || find_token("9s", argc, argv))
+        return build_nine_slice(argc, argv);
     else
     {
         LOGWARNING(ERR_BUILD_FUNCTION_NOT_FOUND, FALSE,
@@ -112,6 +119,41 @@ u32 build_text_rendering(int argc, char **argv)
         cmd_fail(&_cmd);
 
     if (copy_dir(DIR_ROOT"fossil/fossil/", DIR_OUT_TEXT_RENDERING, TRUE) != ERR_SUCCESS)
+        cmd_fail(&_cmd);
+
+    build_err = ERR_SUCCESS;
+    return build_err;
+}
+
+u32 build_nine_slice(int argc, char **argv)
+{
+    if (is_dir_exists(DIR_SRC_NINE_SLICE, TRUE) != ERR_SUCCESS)
+        return build_err;
+
+    make_dir(DIR_OUT_NINE_SLICE);
+
+    cmd_push(NULL, COMPILER);
+    cmd_push(NULL, "-Wall");
+    cmd_push(NULL, "-Wextra");
+    cmd_push(NULL, "-Wformat-truncation=0");
+    cmd_push(NULL, "-ggdb");
+    cmd_push(NULL, DIR_SRC_NINE_SLICE"main.c");
+    cmd_push(NULL, "-I"DIR_ROOT);
+    cmd_push(NULL, "-std=c89");
+    cmd_push(NULL, "-Ofast");
+    cmd_push(NULL, "-L"DIR_ROOT"lib/"PLATFORM);
+    fsl_engine_link_libs(NULL);
+    fsl_engine_set_runtime_path(NULL);
+    cmd_push(NULL, "-o");
+    cmd_push(NULL, DIR_OUT_NINE_SLICE"9s");
+    cmd_ready(NULL);
+
+    if (exec(&_cmd, "build_nine_slice().cmd") != ERR_SUCCESS)
+        cmd_fail(&_cmd);
+
+    if (
+            copy_dir(DIR_ROOT"fossil/fossil/", DIR_OUT_NINE_SLICE, TRUE) != ERR_SUCCESS ||
+            copy_dir(DIR_NINE_SLICE"shaders/", DIR_OUT_NINE_SLICE, TRUE) != ERR_SUCCESS)
         cmd_fail(&_cmd);
 
     build_err = ERR_SUCCESS;

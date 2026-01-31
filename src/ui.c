@@ -75,13 +75,17 @@ u32 fsl_ui_init(b8 multisample)
     u32 i = 0;
 
     if (
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE], (v2i32){32, 32},
-                GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
+            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE], (v2i32){16, 16},
+                GL_RGB, GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE,
                 FSL_DIR_NAME_TEXTURES"panel_active.png") != FSL_ERR_SUCCESS ||
 
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_INACTIVE], (v2i32){32, 32},
-                GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
-                FSL_DIR_NAME_TEXTURES"panel_inactive.png") != FSL_ERR_SUCCESS)
+            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_INACTIVE], (v2i32){16, 16},
+                GL_RGB, GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE,
+                FSL_DIR_NAME_TEXTURES"panel_inactive.png") != FSL_ERR_SUCCESS ||
+
+            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE], (v2i32){128, 128},
+                GL_RGB, GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE,
+                FSL_DIR_NAME_TEXTURES"panel_debug_nine_slice.png") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     for (i = 0; i < FSL_TEXTURE_INDEX_COUNT; ++i)

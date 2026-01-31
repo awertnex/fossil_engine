@@ -167,7 +167,7 @@ u32 fsl_engine_init(int argc, char **argv, const str *_log_dir, const str *title
 
         glGenBuffers(1, &fsl_ubo.ndc_scale);
         glBindBuffer(GL_UNIFORM_BUFFER, fsl_ubo.ndc_scale);
-        glBufferData(GL_UNIFORM_BUFFER, sizeof(v2f32), NULL, GL_STATIC_DRAW);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(v2f32), &render->ndc_scale, GL_STATIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         glBindBufferBase(GL_UNIFORM_BUFFER, FSL_SHADER_BUFFER_BINDING_UBO_NDC_SCALE,
@@ -203,7 +203,7 @@ b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32))
     render->time_delta = render->time - time_last;
     time_last = render->time;
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT);
     return TRUE;
 }
 
@@ -358,6 +358,12 @@ u32 fsl_window_init(const str *title, i32 size_x, i32 size_y)
     glfwSetWindowSizeLimits(render->window,
             FSL_RENDER_WIDTH_MIN, FSL_RENDER_HEIGHT_MIN,
             FSL_RENDER_WIDTH_MAX, FSL_RENDER_HEIGHT_MAX);
+
+    if (render->size.x && render->size.y)
+    {
+        render->ndc_scale.x = 2.0f / render->size.x;
+        render->ndc_scale.y = 2.0f / render->size.y;
+    }
 
     if (fsl_mem_alloc((void*)&render->screen_buf, render->size.x * render->size.y * FSL_COLOR_CHANNELS_RGB,
                 "fsl_window_init().render.screen_buf") != FSL_ERR_SUCCESS)

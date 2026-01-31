@@ -8,6 +8,9 @@
 
 - - -
 ## v0.4.0-dev (current)
+- (2026 01 31): Finish writing 9-slice UI
+- (2026 01 31): Fix missing `fsl_render.ndc_scale` at init time
+- (2026 01 31): Add test `nine_slice`
 - (2026 01 31): Split `fsl_str_libs[][]` into internal and external arrays
 - (2026 01 31): Add internal framebuffer size callback and an optional pointer
                 to an additional framebuffer size callback
