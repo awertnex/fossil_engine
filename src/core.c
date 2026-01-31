@@ -21,6 +21,7 @@
 #include "h/core.h"
 #include "h/diagnostics.h"
 #include "h/dir.h"
+#include "h/input.h"
 #include "h/logger.h"
 #include "h/math.h"
 #include "h/memory.h"
@@ -41,6 +42,8 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <inttypes.h>
+
+/* ---- section: declarations ----------------------------------------------- */
 
 u64 fsl_init_time = 0;
 str *FSL_DIR_PROC_ROOT = NULL;
@@ -144,6 +147,15 @@ u32 fsl_engine_init(int argc, char **argv, const str *_log_dir, const str *title
             fsl_glad_init() != FSL_ERR_SUCCESS)
         goto cleanup;
 
+    glfwSwapInterval(0);
+    glfwWindowHint(GLFW_DEPTH_BITS, 24);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+    glFrontFace(GL_CCW);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_MULTISAMPLE);
+
     if (fsl_fbo_init(NULL, &fsl_mesh_unit_quad, FALSE, 0) != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -171,35 +183,56 @@ cleanup:
     return fsl_err;
 }
 
-b8 fsl_engine_running(void)
+b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32))
 {
     static u64 time_last = 0;
     if (glfwWindowShouldClose(render->window) || !fsl_flag.active)
         return FALSE;
 
+    glfwSwapBuffers(render->window);
+    glfwPollEvents();
+    fsl_update_mouse_movement();
+    fsl_update_key_states();
+
+    if (fsl_update_render_settings(callback_framebuffer_size) != FSL_ERR_SUCCESS)
+        _LOGWARNING(fsl_err, 0,
+                "%s\n", "Something Went Wrong While Updating Render Settings");
+
     render->time = fsl_get_time_nsec();
     if (!time_last) time_last = render->time;
     render->time_delta = render->time - time_last;
     time_last = render->time;
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     return TRUE;
 }
 
-u32 fsl_update_render_settings(i32 size_x, i32 size_y)
+u32 fsl_update_render_settings(void (*callback_framebuffer_size)(i32, i32))
 {
-    render->size.x = size_x;
-    render->size.y = size_y;
-    glViewport(0, 0, size_x, size_y);
+    static v2i32 size = {0};
 
-    render->ndc_scale.x = 2.0f / size_x;
-    render->ndc_scale.y = 2.0f / size_y;
+    glfwGetFramebufferSize(render->window, &size.x, &size.y);
 
-    glBindBuffer(GL_UNIFORM_BUFFER, fsl_ubo.ndc_scale);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(v2f32), &render->ndc_scale);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    if (size.x != render->size.x || size.y != render->size.y)
+    {
+        render->size.x = size.x;
+        render->size.y = size.y;
+        glViewport(0, 0, size.x, size.y);
 
-    if (fsl_mem_realloc((void*)&render->screen_buf, size_x * size_y * FSL_COLOR_CHANNELS_RGB,
-            "fsl_update_render_settings().render.screen_buf") != FSL_ERR_SUCCESS)
-        return fsl_err;
+        render->ndc_scale.x = 2.0f / size.x;
+        render->ndc_scale.y = 2.0f / size.y;
+
+        glBindBuffer(GL_UNIFORM_BUFFER, fsl_ubo.ndc_scale);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(v2f32), &render->ndc_scale);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        if (fsl_mem_realloc((void*)&render->screen_buf, size.x * size.y * FSL_COLOR_CHANNELS_RGB,
+                    "fsl_update_render_settings().render.screen_buf") != FSL_ERR_SUCCESS)
+            return fsl_err;
+
+        if (callback_framebuffer_size)
+            callback_framebuffer_size(size.x, size.y);
+    }
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -385,7 +418,7 @@ u32 fsl_change_render(fsl_render *_render)
     else
     {
         _LOGWARNING(FSL_ERR_WINDOW_NOT_FOUND, 0,
-                "%s\n", "No Window Found for Currently Bound Render");
+                "%s\n", "No Window Found for the Currently Bound Render");
         return fsl_err;
     }
     

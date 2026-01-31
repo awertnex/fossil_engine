@@ -194,17 +194,20 @@ FSLAPI u32 fsl_engine_init(int argc, char **argv, const str *_log_dir, const str
  *
  *  @return `TRUE` unless @ref glfwWindowShouldClose() returns `FALSE` or engine inactive.
  */
-FSLAPI b8 fsl_engine_running(void);
+FSLAPI b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32));
 
-/*! @brief update render settings (like render size).
+/*! @brief update render settings (e.g. render size).
+ *
+ *  - update @ref fsl_render.size of the currently bound `fsl_render` to
+ *    window size.
  *
  *  - update @ref fsl_render.ndc_scale of the currently bound `fsl_render`.
  *
- *  @remark usually passed into @ref glfwSetFramebufferSizeCallback().
+ *  @remark called automatically from @ref fsl_engine_running().
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_update_render_settings(i32 size_x, i32 size_y);
+FSLAPI u32 fsl_update_render_settings(void (*callback_framebuffer_size)(i32, i32));
 
 /*! @brief send engine close request to then be processed by @ref fsl_engine_running().
  */

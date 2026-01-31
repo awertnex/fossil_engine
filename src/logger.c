@@ -167,8 +167,12 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 lo
         fsl_change_dir(FSL_DIR_PROC_ROOT);
     }
 
-    if (fsl_is_dir_exists(_log_dir, log_dir_not_found) == FSL_ERR_SUCCESS)
+    if (fsl_is_dir_exists(_log_dir, FALSE) == FSL_ERR_SUCCESS)
         snprintf(fsl_log_dir, PATH_MAX, "%s", _log_dir);
+    else if (log_dir_not_found)
+        _LOGWARNING(FSL_ERR_DIR_NOT_FOUND,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                "%s\n", "Log Directory Not Set");
 
     if (
             fsl_mem_map_arena(&fsl_logger_arena,

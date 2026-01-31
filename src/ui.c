@@ -31,10 +31,16 @@ static f32 vbo_data_unit_quad[] =
     1.0f, -1.0f, 1.0f, 0.0f,
 };
 
-static struct /* fsl_ui_core */
+static struct fsl_ui_core
 {
     b8 multisample;
     b8 use_nine_slice;
+
+    GLuint vao;
+    GLuint vbo_unit_quad;
+    GLuint vbo_ui_data;
+    b8 vao_loaded;
+    fsl_fbo fbo;
 
     struct /* uniform */
     {
@@ -62,7 +68,6 @@ static struct /* fsl_ui_core */
 
     } uniform;
 
-    fsl_fbo fbo;
 } fsl_ui_core;
 
 u32 fsl_ui_init(b8 multisample)
@@ -85,6 +90,30 @@ u32 fsl_ui_init(b8 multisample)
 
     if (fsl_fbo_init(&fsl_ui_core.fbo, &fsl_mesh_unit_quad, multisample, 4) != FSL_ERR_SUCCESS)
         goto cleanup;
+
+    if (!fsl_ui_core.vao_loaded)
+    {
+        glGenVertexArrays(1, &fsl_ui_core.vao);
+        glBindVertexArray(fsl_ui_core.vao);
+
+        /* ---- unit quad --------------------------------------------------- */
+
+        glGenBuffers(1, &fsl_ui_core.vbo_unit_quad);
+        glBindBuffer(GL_ARRAY_BUFFER, fsl_ui_core.vbo_unit_quad);
+        glBufferData(GL_ARRAY_BUFFER, fsl_arr_len(vbo_data_unit_quad) * sizeof(f32),
+                &vbo_data_unit_quad, GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
+                4 * sizeof(GLfloat), (void*)0);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
+                4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+
+        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
 
     fsl_ui_core.multisample = multisample;
 
@@ -151,7 +180,7 @@ void fsl_ui_start(fsl_fbo *fbo, b8 nine_slice, b8 clear)
         fsl_ui_core.use_nine_slice = FALSE;
         glUseProgram(fsl_shader_buf[FSL_SHADER_INDEX_UI].id);
     }
-    glBindVertexArray(fsl_mesh_unit_quad.vao);
+
     glDisable(GL_DEPTH_TEST);
     if (clear)
         glClear(GL_COLOR_BUFFER_BIT);
@@ -163,6 +192,7 @@ void fsl_ui_push_panel()
 
 void fsl_ui_render(void)
 {
+    glBindVertexArray(fsl_ui_core.vao);
     glBindTexture(GL_TEXTURE_2D, fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE].id);
     glDrawArrays(GL_POINTS, 0, 1);
 }
@@ -181,6 +211,7 @@ void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 siz
             (f32)((tint >> 0x08) & 0xff) / 0xff,
             (f32)((tint >> 0x00) & 0xff) / 0xff);
 
+    glBindVertexArray(fsl_ui_core.vao);
     glBindTexture(GL_TEXTURE_2D, texture->id);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
@@ -201,6 +232,7 @@ void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size
     glUniform1i(fsl_ui_core.uniform.nine_slice.use_nine_slice, fsl_ui_core.use_nine_slice);
     glUniform1f(fsl_ui_core.uniform.nine_slice.slice_size, slice_size);
 
+    glBindVertexArray(fsl_ui_core.vao);
     glBindTexture(GL_TEXTURE_2D, texture->id);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
@@ -224,5 +256,11 @@ void fsl_ui_fbo_blit(GLuint fbo)
 
 void fsl_ui_free(void)
 {
+    if (fsl_ui_core.vao_loaded)
+    {
+        glDeleteVertexArrays(1, &fsl_ui_core.vao);
+        glDeleteBuffers(1, &fsl_ui_core.vbo_unit_quad);
+    }
+
     fsl_fbo_free(&fsl_ui_core.fbo);
 }

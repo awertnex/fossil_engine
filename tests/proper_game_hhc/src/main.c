@@ -11,12 +11,12 @@
 #include "h/terrain.h"
 #include "h/world.h"
 
+#include <src/h/fossil_engine.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
 #include <math.h>
-
-#include <src/h/fossil_engine.h>
 
 i32 scrool = 0;
 u32 *const GAME_ERR = (u32*)&fsl_err;
@@ -70,7 +70,7 @@ static struct /* refresh_interval */
     u64 fps_string;
 } refresh_interval;
 
-static void callback_framebuffer_size(GLFWwindow* window, int width, int height);
+static void callback_framebuffer_size(i32 size_x, i32 size_y);
 static void callback_key(GLFWwindow *window, int key, int scancode, int action, int mods);
 static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset);
 
@@ -86,14 +86,10 @@ static u32 settings_init(void);
 void settings_update(void);
 static void draw_everything(void);
 
-static void callback_framebuffer_size(GLFWwindow* window, int width, int height)
+static void callback_framebuffer_size(i32 size_x, i32 size_y)
 {
-    (void)window;
-
-    fsl_update_render_settings((i32)width, (i32)height);
-
-    _player.camera.ratio = (f32)width / (f32)height;
-    _player.camera_hud.ratio = (f32)width / (f32)height;
+    _player.camera.ratio = (f32)size_x / (f32)size_y;
+    _player.camera_hud.ratio = (f32)size_x / (f32)size_y;
 
     fsl_fbo_realloc(&fbo[FBO_SKYBOX], FALSE, 4);
     fsl_fbo_realloc(&fbo[FBO_WORLD], FALSE, 4);
@@ -1261,9 +1257,6 @@ int main(int argc, char **argv)
 
     /* ---- set callbacks --------------------------------------------------- */
 
-    glfwSetFramebufferSizeCallback(render->window, callback_framebuffer_size);
-    callback_framebuffer_size(render->window, render->size.x, render->size.y);
-
     glfwSetKeyCallback(render->window, callback_key);
     callback_key(render->window, 0, 0, 0, 0);
 
@@ -1321,21 +1314,15 @@ section_world_loaded:
 
     generate_standard_meshes();
 
-    while (fsl_engine_running())
+    while (fsl_engine_running(callback_framebuffer_size))
     {
-        glfwPollEvents();
-        fsl_update_mouse_movement();
-        fsl_update_key_states();
-
         input_update(&_player);
         settings_update();
         world_update(&_player);
         draw_everything();
 
-        glfwSwapBuffers(render->window);
-        fsl_limit_framerate(settings.target_fps, render->time);
-
         fsl_process_screenshot_request(GAME_DIR_NAME_SCREENSHOTS, world.name);
+        fsl_limit_framerate(settings.target_fps, render->time);
 
         if (!core.flag.world_loaded)
             goto section_menu_title;

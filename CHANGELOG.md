@@ -8,6 +8,10 @@
 
 - - -
 ## v0.4.0-dev (current)
+- (2026 01 31): Split `fsl_str_libs[][]` into internal and external arrays
+- (2026 01 31): Add internal framebuffer size callback and an optional pointer
+                to an additional framebuffer size callback
+- (2026 01 30): Package engine-specific boilerplate into engine init functions
 - (2026 01 30): Optimize text rendering by removing geometry shader and going
                 with instanced rendering
 - (2026 01 30): Add "catch-up" behavior to function `fsl_on_time_interval()`

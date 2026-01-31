@@ -1,7 +1,5 @@
 #include "deps/buildtool/buildtool.h"
 #include "src/h/common.h"
-
-#define FSL_OMIT_LFOSSIL
 #include "src/h/build.h"
 
 #define DIR_SRC "src/"
@@ -52,7 +50,7 @@ int main(int argc, char **argv)
             cmd_fail(NULL);
     }
 
-    cmd_exec(39,
+    cmd_exec(40,
             COMPILER,
             "-shared",
             FSL_C_STD,
@@ -64,13 +62,14 @@ int main(int argc, char **argv)
             str_cflags[1],
             str_cflags[2],
             str_cflags[3],
-            fsl_str_libs[0],
-            fsl_str_libs[1],
-            fsl_str_libs[2],
-            fsl_str_libs[3],
-            fsl_str_libs[4],
-            fsl_str_libs[5],
-            fsl_str_libs[6],
+            fsl_str_libs_internal[0],
+            fsl_str_libs_internal[1],
+            fsl_str_libs_internal[2],
+            fsl_str_libs_internal[3],
+            fsl_str_libs_internal[4],
+            fsl_str_libs_internal[5],
+            fsl_str_libs_internal[6],
+            fsl_str_libs_internal[7],
             "-I.",
             "-DGLAD_GLAPI_EXPORT",
             "-DGLAD_GLAPI_EXPORT_BUILD",

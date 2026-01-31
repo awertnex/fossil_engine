@@ -370,6 +370,11 @@ void fsl_text_start(fsl_font *font, f32 size, u64 length, fsl_fbo *fbo, b8 clear
             goto cleanup;
 
         fsl_text_core.buf_len = length;
+
+        glBindBuffer(GL_ARRAY_BUFFER, fsl_text_core.vbo_text_data);
+        glBufferData(GL_ARRAY_BUFFER, fsl_text_core.buf_len * sizeof(struct fsl_text_data),
+                NULL, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     fsl_text_core.font = font;
@@ -457,6 +462,11 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
         }
 
         fsl_text_core.buf_len += FSL_STRING_MAX;
+
+        glBindBuffer(GL_ARRAY_BUFFER, fsl_text_core.vbo_text_data);
+        glBufferData(GL_ARRAY_BUFFER, fsl_text_core.buf_len * sizeof(struct fsl_text_data),
+                NULL, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     if (align_x == FSL_TEXT_ALIGN_CENTER)
@@ -542,10 +552,11 @@ void fsl_text_render(b8 shadow, u32 shadow_color)
         return;
     }
 
-    glBindVertexArray(fsl_text_core.vao);
     glBindBuffer(GL_ARRAY_BUFFER, fsl_text_core.vbo_text_data);
-    glBufferData(GL_ARRAY_BUFFER, fsl_text_core.cursor * sizeof(struct fsl_text_data),
-            fsl_text_core.buf, GL_DYNAMIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, fsl_text_core.cursor * sizeof(struct fsl_text_data),
+            fsl_text_core.buf);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(fsl_text_core.vao);
 
     if (shadow)
     {
@@ -561,9 +572,6 @@ void fsl_text_render(b8 shadow, u32 shadow_color)
 
     glUniform1i(fsl_text_core.uniform.draw_shadow, FALSE);
     glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, fsl_text_core.cursor);
-
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     fsl_text_core.cursor = 0;
     fsl_text_core.line_height_total = 0;

@@ -23,35 +23,57 @@
 
 #define FSL_C_STD "-std=c89"
 
-#ifdef FSL_OMIT_LFOSSIL
-#   define LFOSSIL ""
-#   define LLIB_PLATFORM ("-Lfossil/lib/"PLATFORM)
-#else
-#   define LFOSSIL "-lfossil"
-#   define LLIB_PLATFORM ("-Llib/"PLATFORM)
-#endif /* FSL_OMIT_LFOSSIL */
-
 #if FSL_PLATFORM_WIN
-    static const str fsl_str_libs[][CMD_SIZE] =
+
+    /*! @brief for the engine itself.
+     */
+    static const str fsl_str_libs_internal[][CMD_SIZE] =
     {
-        LLIB_PLATFORM,
+        "-Llib/"PLATFORM,
+        "-lm",
+        "-lmvec",
+        "-lglfw3",
         "-lgdi32",
         "-lwinmm",
         "-mwindows",
-        "-lm",
-        "-lglfw3",
-        LFOSSIL,
     };
-#else
+
+    /*! @brief for the including software.
+     */
     static const str fsl_str_libs[][CMD_SIZE] =
     {
-        LLIB_PLATFORM,
+        "-Lfossil/lib"PLATFORM,
         "-lm",
+        "-lglfw3",
+        "-lfossil",
+        "-lgdi32",
+        "-lwinmm",
+    };
+#else
+
+    /*! @brief for the engine itself.
+     */
+    static const str fsl_str_libs_internal[][CMD_SIZE] =
+    {
+        "-Llib/"PLATFORM,
+        "-lm",
+        "-lmvec",
         "-lglfw",
         "", /* empty slots for alignment across different platforms */
         "",
         "",
-        LFOSSIL,
+    };
+
+    /*! @brief for the including software.
+     */
+    static const str fsl_str_libs[][CMD_SIZE] =
+    {
+        "-Lfossil/lib/"PLATFORM,
+        "-lm",
+        "-lglfw",
+        "-lfossil",
+        "", /* empty slots for alignment across different platforms */
+        "",
     };
 #endif /* FSL_PLATFORM */
 
