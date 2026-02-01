@@ -1014,30 +1014,12 @@ static void draw_everything(void)
         fsl_ui_stop();
     }
 
-    /* ---- draw engine ui -------------------------------------------------- */
-
-    if (core.flag.super_debug)
-    {
-        /* 
-        fsl_ui_render();
-         */
-        fsl_ui_start(NULL, TRUE, FALSE);
-        fsl_ui_draw_nine_slice(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
-                10, 10, 400, render->size.y - 20, 0, 0, -1, -1, 8.0f, 0xffffff7f);
-        fsl_ui_stop();
-    }
-    fsl_ui_start(NULL, TRUE, FALSE);
-    fsl_ui_draw_nine_slice(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
-            10, 10, 400, render->size.y - 20, 0, 0, -1, -1, 8.0f, 0xffffff7f);
-
-    fsl_ui_stop();
-
     /* ---- draw debug info ------------------------------------------------- */
 
     fsl_text_start(font[FONT_MONO_BOLD], settings.font_size, 0, NULL, TRUE);
 
     fsl_text_push(fsl_stringf("FPS         [%u]\n", settings.fps),
-            SET_MARGIN, SET_MARGIN, 0, 0,
+            SET_MARGIN, SET_MARGIN, 0, 0, 0,
             settings.fps > 60 ? COLOR_TEXT_MOSS : COLOR_DIAGNOSTIC_ERROR);
 
     fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
@@ -1052,7 +1034,7 @@ static void draw_everything(void)
                     (world.tick % SET_DAY_TICKS_MAX) / 1000,
                     ((world.tick * 60) / 1000) % 60,
                     world.days),
-                SET_MARGIN, SET_MARGIN, 0, 0,
+                SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 COLOR_TEXT_MOSS);
 
         fsl_text_push(fsl_stringf(
@@ -1076,7 +1058,7 @@ static void draw_everything(void)
                     _player.acceleration.x, _player.acceleration.y, _player.acceleration.z,
                     _player.velocity.x, _player.velocity.y, _player.velocity.z,
                     _player.speed),
-                SET_MARGIN, SET_MARGIN, 0, 0,
+                SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 COLOR_TEXT_DEFAULT);
 
         fsl_text_push(fsl_stringf(
@@ -1090,7 +1072,7 @@ static void draw_everything(void)
                     (_player.flag & FLAG_PLAYER_OVERFLOW_Z) ?
                     (_player.flag & FLAG_PLAYER_OVERFLOW_PZ) ?
                     "        " : "        " : "NONE"),
-                SET_MARGIN, SET_MARGIN, 0, 0,
+                SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 COLOR_DIAGNOSTIC_NONE);
 
         fsl_text_push(fsl_stringf(
@@ -1101,7 +1083,7 @@ static void draw_everything(void)
                     (_player.flag & FLAG_PLAYER_OVERFLOW_PY) ? "POSITIVE" : "    ",
                     (_player.flag & FLAG_PLAYER_OVERFLOW_Z) &&
                     (_player.flag & FLAG_PLAYER_OVERFLOW_PZ) ? "POSITIVE" : "    "),
-                SET_MARGIN, SET_MARGIN, 0, 0,
+                SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 FSL_DIAGNOSTIC_COLOR_SUCCESS);
 
         fsl_text_push(fsl_stringf(
@@ -1112,7 +1094,7 @@ static void draw_everything(void)
                     !(_player.flag & FLAG_PLAYER_OVERFLOW_PY) ? "NEGATIVE" : "    ",
                     (_player.flag & FLAG_PLAYER_OVERFLOW_Z) &&
                     !(_player.flag & FLAG_PLAYER_OVERFLOW_PZ) ? "NEGATIVE" : "    "),
-                SET_MARGIN, SET_MARGIN, 0, 0,
+                SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 FSL_DIAGNOSTIC_COLOR_ERROR);
 
         fsl_text_push(fsl_stringf(
@@ -1128,7 +1110,7 @@ static void draw_everything(void)
                     skybox_data.sun_rotation.x,
                     skybox_data.sun_rotation.y,
                     skybox_data.sun_rotation.z),
-                SET_MARGIN, SET_MARGIN, 0, 0,
+                SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 COLOR_DIAGNOSTIC_INFO);
 
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
@@ -1143,7 +1125,7 @@ static void draw_everything(void)
                     CHUNK_QUEUE[2].count, CHUNK_QUEUE[2].size,
                     CHUNKS_MAX[settings.render_distance]),
                 render->size.x - SET_MARGIN, SET_MARGIN,
-                FSL_TEXT_ALIGN_RIGHT, 0,
+                FSL_TEXT_ALIGN_RIGHT, 0, 0,
                 COLOR_TEXT_DEFAULT);
 
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
@@ -1166,7 +1148,8 @@ static void draw_everything(void)
                     glGetString(GL_VENDOR),
                     glGetString(GL_RENDERER)),
                 render->size.x - SET_MARGIN, render->size.y - SET_MARGIN,
-                FSL_TEXT_ALIGN_RIGHT, FSL_TEXT_ALIGN_BOTTOM, FSL_DIAGNOSTIC_COLOR_TRACE);
+                FSL_TEXT_ALIGN_RIGHT, FSL_TEXT_ALIGN_BOTTOM, render->size.x,
+                FSL_DIAGNOSTIC_COLOR_TRACE);
 
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
     }
@@ -1180,19 +1163,29 @@ static void draw_everything(void)
         fsl_text_start(font[FONT_MONO_BOLD], settings.font_size, 0, NULL, FALSE);
         i32 i = 0;
         u32 index = 0;
+        f32 logger_panel_height = 0.0f;
         for (i = 24; i > 0; --i)
         {
             index = fsl_mod_i32(fsl_logger_tab_index - i - scrool, FSL_LOGGER_HISTORY_MAX);
             fsl_text_push(fsl_stringf("%s\n", fsl_logger_tab[index]),
-                    SET_MARGIN, render->size.y - SET_MARGIN,
-                    0, 0,
+                    SET_MARGIN * 2, render->size.y - SET_MARGIN * 2,
+                    0, 0, render->size.x - 40,
                     fsl_logger_color[index]);
         }
 
+        logger_panel_height = fsl_get_text_height();
+
         /* align once after all the strings' heights in text batch have accumulated into total text height */
-        fsl_text_push("", 0, 0, 0, FSL_TEXT_ALIGN_BOTTOM, 0x00000000);
+        fsl_text_push("", 0, 0, 0, FSL_TEXT_ALIGN_BOTTOM, 0, 0x00000000);
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
         fsl_text_stop();
+
+        fsl_ui_start(NULL, TRUE, FALSE);
+        fsl_ui_draw_nine_slice(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_INACTIVE],
+                10, render->size.y - logger_panel_height - 30,
+                render->size.x - 20, logger_panel_height + 20, 8, 0xffffff5f);
+
+        fsl_ui_stop();
     }
 
     /* ---- post processing ------------------------------------------------- */

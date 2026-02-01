@@ -421,7 +421,8 @@ cleanup:
             "%s\n", "Failed to Start Text");
 }
 
-void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y, u32 color)
+void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y,
+        i32 window_x, u32 color)
 {
     u64 len = 0, i = 0;
     i64 j = 0;
@@ -429,6 +430,7 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
     struct fsl_glyphf *g = NULL;
     v2u8 align = {0};
     v2f32 alignment = {0};
+    f32 _window_x = (f32)window_x * render->ndc_scale.x;
 
     if (!fsl_text_core.buf)
     {
@@ -500,6 +502,7 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
     for (i = 0; i < len; ++i)
     {
         g = &fsl_text_core.glyph[(u64)text[i]];
+
         if (text[i] == '\n' || text[i] == '\r')
         {
             if (align.x)
@@ -515,6 +518,16 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
         {
             fsl_text_core.advance += fsl_text_core.glyph[' '].advance * FSL_TEXT_TAB_SIZE;
             continue;
+        }
+
+        if (window_x && fsl_text_core.advance + g->advance >= _window_x)
+        {
+            if (align.x)
+                for (j = 1; (i64)i - j >= 0 && text[i - j] != '\n' && text[i - j] != '\r'; ++j)
+                    fsl_text_core.buf[fsl_text_core.cursor - j].pos.x -= fsl_text_core.advance * alignment.x;
+
+            fsl_text_core.advance = 0.0f;
+            fsl_text_core.line_height_total += line_height * fsl_text_core.text_scale.y;
         }
 
         fsl_text_core.buf[fsl_text_core.cursor].pos.x =
@@ -607,4 +620,9 @@ void fsl_text_free(void)
 
     fsl_mem_unmap((void*)&fsl_text_core.buf, fsl_text_core.buf_len * sizeof(struct fsl_text_data),
             "fsl_text_free().fsl_text_core.buf");
+}
+
+f32 fsl_get_text_height(void)
+{
+    return fsl_text_core.line_height_total / render->ndc_scale.y;
 }

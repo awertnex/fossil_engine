@@ -57,8 +57,6 @@ fsl_shader_program fsl_shader_buf[FSL_SHADER_INDEX_COUNT] =
         .name = "ui_9_slice",
         .vertex.file_name = "ui_9_slice.vert",
         .vertex.type = GL_VERTEX_SHADER,
-        .geometry.file_name = "ui_9_slice.geom",
-        .geometry.type = GL_GEOMETRY_SHADER,
         .fragment.file_name = "ui_9_slice.frag",
         .fragment.type = GL_FRAGMENT_SHADER,
     },

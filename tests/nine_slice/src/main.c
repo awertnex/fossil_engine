@@ -2,20 +2,19 @@
 
 #define MARGIN 10
 
-struct slice_data
+typedef struct panel_slice
 {
     v2f32 pos;
     v2f32 size;
     v2f32 tex_coords_pos;
     v2f32 tex_coords_size;
-}; /* slice_data */
+} panel_slice;
 
-typedef struct nine_slice_data
+typedef struct panel_nine_slice
 {
-    struct slice_data slice[9];
-} nine_slice_data;
+    struct panel_slice slice[9];
+} panel_nine_slice;
 
-fsl_fbo fbo = {0};
 fsl_shader_program nine_slice =
 {
     .vertex.file_name = "9s.vert",
@@ -37,19 +36,11 @@ static struct core
     GLuint vao;
     GLuint vbo_unit_quad;
     GLuint vbo_nine_slice;
-    b8 loaded;
-    nine_slice_data panel;
+    b8 vao_loaded;
+    panel_nine_slice panel;
 } core;
 
-void callback_framebuffer_size(i32 size_x, i32 size_y)
-{
-    (void)size_x;
-    (void)size_y;
-
-    fsl_fbo_realloc(&fbo, FALSE, 4);
-}
-
-nine_slice_data get_nine_slice(v2i32 texture_size, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, i32 slice_size)
+panel_nine_slice get_nine_slice(v2i32 texture_size, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, i32 slice_size)
 {
     f32 _pos_x = (f32)pos_x;
     f32 _pos_y = (f32)pos_y;
@@ -90,7 +81,7 @@ nine_slice_data get_nine_slice(v2i32 texture_size, i32 pos_x, i32 pos_y, i32 siz
         [2] = {_texture_scale.x * _slice_size, _texture_scale.y * _slice_size},
     };
 
-    return (nine_slice_data){
+    return (panel_nine_slice){
         .slice[0] =
         {
             .pos.x = _pos[0].x,
@@ -203,7 +194,7 @@ nine_slice_data get_nine_slice(v2i32 texture_size, i32 pos_x, i32 pos_y, i32 siz
 
 void draw_nine_slice(void)
 {
-    nine_slice_data panel = get_nine_slice(fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE].size,
+    panel_nine_slice panel = get_nine_slice(fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE].size,
             MARGIN, MARGIN,
             render->size.x - MARGIN * 2, render->size.y - MARGIN * 2,
             render->time / 100000000L);
@@ -212,27 +203,12 @@ void draw_nine_slice(void)
     glUseProgram(nine_slice.id);
 
     glBindBuffer(GL_ARRAY_BUFFER, core.vbo_nine_slice);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(nine_slice_data), &panel);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(panel_nine_slice), &panel);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glBindVertexArray(core.vao);
     glBindTexture(GL_TEXTURE_2D, fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE].id);
     glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, 9);
-}
-
-void draw_text(void)
-{
-    fsl_text_start(&fsl_font_buf[FSL_FONT_INDEX_DEJAVU_SANS_MONO_BOLD], 32.0f, 0, NULL, TRUE);
-
-    fsl_text_push(fsl_stringf(
-                "FPS [%u]",
-                (u32)(1 / ((f64)render->time_delta * FSL_NSEC2SEC))),
-            MARGIN, MARGIN, 0, 0,
-            FSL_DIAGNOSTIC_COLOR_SUCCESS);
-
-    fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
-    fsl_text_stop();
-    fsl_text_fbo_blit(0);
 }
 
 int main(int argc, char **argv)
@@ -243,12 +219,10 @@ int main(int argc, char **argv)
 
     if (
             fsl_ui_init(FALSE) != FSL_ERR_SUCCESS ||
-            fsl_text_init(FSL_FONT_RESOLUTION_DEFAULT, FALSE) ||
-            fsl_fbo_init(&fbo, NULL, FALSE, 4) != FSL_ERR_SUCCESS ||
             fsl_shader_program_init(".", &nine_slice) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    if (!core.loaded)
+    if (!core.vao_loaded)
     {
         glGenVertexArrays(1, &core.vao);
         glBindVertexArray(core.vao);
@@ -272,41 +246,48 @@ int main(int argc, char **argv)
 
         glGenBuffers(1, &core.vbo_nine_slice);
         glBindBuffer(GL_ARRAY_BUFFER, core.vbo_nine_slice);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(nine_slice_data),
+        glBufferData(GL_ARRAY_BUFFER, sizeof(panel_nine_slice),
                 NULL, GL_DYNAMIC_DRAW);
 
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
-                sizeof(struct slice_data), (void*)0);
+                sizeof(panel_slice), (void*)0);
         glVertexAttribDivisor(2, 1);
 
         glEnableVertexAttribArray(3);
         glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE,
-                sizeof(struct slice_data), (void*)(2 * sizeof(f32)));
+                sizeof(panel_slice), (void*)(2 * sizeof(f32)));
         glVertexAttribDivisor(3, 1);
 
         glEnableVertexAttribArray(4);
         glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE,
-                sizeof(struct slice_data), (void*)(4 * sizeof(f32)));
+                sizeof(panel_slice), (void*)(4 * sizeof(f32)));
         glVertexAttribDivisor(4, 1);
 
         glEnableVertexAttribArray(5);
         glVertexAttribPointer(5, 2, GL_FLOAT, GL_FALSE,
-                sizeof(struct slice_data), (void*)(6 * sizeof(f32)));
+                sizeof(panel_slice), (void*)(6 * sizeof(f32)));
         glVertexAttribDivisor(5, 1);
 
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        core.loaded = TRUE;
+        core.vao_loaded = TRUE;
     }
 
-    while (fsl_engine_running(callback_framebuffer_size))
+    while (fsl_engine_running(NULL))
     {
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 
+        /*
+        fsl_ui_start(NULL, TRUE, TRUE);
+        fsl_ui_draw_nine_slice(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE],
+                MARGIN, MARGIN, render->size.x - MARGIN * 2, render->size.y - MARGIN * 2,
+        0.0f, 0.0f, 0, 0, 64, 0xffffffff);
+        fsl_ui_stop();
+        fsl_ui_fbo_blit(0);
+        */
         draw_nine_slice();
-        draw_text();
 
         if (fsl_is_key_press(FSL_KEY_Q))
             fsl_request_engine_close();
@@ -314,12 +295,12 @@ int main(int argc, char **argv)
 
 cleanup:
 
-    if (core.loaded)
+    if (core.vao_loaded)
     {
         glDeleteVertexArrays(1, &core.vao);
         glDeleteBuffers(1, &core.vbo_unit_quad);
         glDeleteBuffers(1, &core.vbo_nine_slice);
-        core.loaded = FALSE;
+        core.vao_loaded = FALSE;
     }
 
     fsl_engine_close();

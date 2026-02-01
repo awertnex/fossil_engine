@@ -203,7 +203,7 @@ b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32))
     render->time_delta = render->time - time_last;
     time_last = render->time;
 
-    glClear(GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     return TRUE;
 }
 
