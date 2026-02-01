@@ -1184,7 +1184,6 @@ static void draw_everything(void)
         fsl_ui_draw_nine_slice(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_INACTIVE],
                 10, render->size.y - logger_panel_height - 30,
                 render->size.x - 20, logger_panel_height + 20, 8, 0xffffff5f);
-
         fsl_ui_stop();
     }
 
