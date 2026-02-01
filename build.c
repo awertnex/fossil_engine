@@ -1,7 +1,5 @@
 #include "deps/buildtool/buildtool.h"
 #include "src/h/common.h"
-
-#define FSL_OMIT_LFOSSIL
 #include "src/h/build.h"
 
 #define DIR_SRC "src/"
@@ -49,10 +47,10 @@ int main(int argc, char **argv)
     {
         make_dir(str_dir[i]);
         if (build_err != ERR_SUCCESS && build_err != ERR_DIR_EXISTS)
-            cmd_fail();
+            cmd_fail(NULL);
     }
 
-    cmd_exec(39,
+    cmd_exec(40,
             COMPILER,
             "-shared",
             FSL_C_STD,
@@ -64,13 +62,14 @@ int main(int argc, char **argv)
             str_cflags[1],
             str_cflags[2],
             str_cflags[3],
-            fsl_str_libs[0],
-            fsl_str_libs[1],
-            fsl_str_libs[2],
-            fsl_str_libs[3],
-            fsl_str_libs[4],
-            fsl_str_libs[5],
-            fsl_str_libs[6],
+            fsl_str_libs_internal[0],
+            fsl_str_libs_internal[1],
+            fsl_str_libs_internal[2],
+            fsl_str_libs_internal[3],
+            fsl_str_libs_internal[4],
+            fsl_str_libs_internal[5],
+            fsl_str_libs_internal[6],
+            fsl_str_libs_internal[7],
             "-I.",
             "-DGLAD_GLAPI_EXPORT",
             "-DGLAD_GLAPI_EXPORT_BUILD",
@@ -97,11 +96,13 @@ int main(int argc, char **argv)
             copy_dir(DIR_DEPS,          DIR_OUT, FALSE) != ERR_SUCCESS ||
             copy_dir(DIR_SRC"h/",       DIR_OUT DIR_DEPS DIR_OUT, TRUE) != ERR_SUCCESS ||
             copy_file("LICENSE",        DIR_OUT DIR_DEPS DIR_OUT) != ERR_SUCCESS ||
+
             copy_dir("lib/",            DIR_OUT, FALSE) != ERR_SUCCESS ||
             copy_dir("lib/"PLATFORM,    DIR_OUT DIR_OUT, TRUE) != ERR_SUCCESS ||
+
             copy_dir("assets/",         DIR_OUT DIR_OUT DIR_OUT, FALSE) != ERR_SUCCESS ||
             copy_file("LICENSE",        DIR_OUT DIR_OUT DIR_OUT) != ERR_SUCCESS)
-        cmd_fail();
+        cmd_fail(NULL);
 
     return ERR_SUCCESS;
 }

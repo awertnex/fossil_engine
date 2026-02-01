@@ -39,6 +39,17 @@
 
 /* ---- section: signatures ------------------------------------------------- */
 
+/*! @brief get file type of `name` and store in `type`.
+ *
+ *  @param type pointer to u32 to store file type,
+ *  can be one of the enum values at @ref file_type_index.
+ *
+ *  @remark does not follow symlinks, reports symlinks themselves.
+ *
+ *  @return non-zero on failure and @ref build_err is set accordingly.
+ */
+extern u32 get_file_type(const str *name, u32 *type);
+
 /*! @param log enable/disable logging.
  *
  *  @return non-zero on failure and @ref build_err is set accordingly.
@@ -55,9 +66,7 @@ extern u32 is_dir(const str *name);
  */
 extern u32 is_dir_exists(const str *name, b8 log);
 
-/*! -- IMPLEMENTATION: platform_<PLATFORM>.h --;
- *
- *  @brief make directory `path` if it doesn't exist.
+/*! @brief make directory `path` if it doesn't exist.
  *
  *  @remark failure includes "directory already exists".
  *
@@ -65,9 +74,7 @@ extern u32 is_dir_exists(const str *name, b8 log);
  */
 extern u32 make_dir(const str *path);
 
-/*! -- IMPLEMENTATION: platform_<PLATFORM>.h --;
- *
- *  @brief change current working directory.
+/*! @brief change current working directory.
  */
 extern int change_dir(const str *path);
 
@@ -90,7 +97,7 @@ extern _buf get_dir_contents(const str *name);
 
 /*! @brief copy `src` into `dst`, preserve permissions and modification time.
  *
- *  @remark can overwrite files.
+ *  @remark can overwrite files and symlinks.
  *
  *  @return non-zero on failure and @ref build_err is set accordingly.
  */
@@ -102,7 +109,7 @@ extern u32 copy_file(const str *src, const str *dst);
  *      TRUE: copy directory contents of `src` and place inside `dst`.
  *      FALSE: copy directory `src` and place inside `dst`.
  *
- *  @remark can overwrite directories and files.
+ *  @remark can overwrite directories, files and symlinks.
  *
  *  @return non-zero on failure and @ref build_err is set accordingly.
  */
@@ -176,30 +183,57 @@ extern u32 get_base_name(const str *path, str *dst, u64 size);
 
 /* ---- section: implementation --------------------------------------------- */
 
-u32 is_file_exists(const str *name, b8 log)
+u32 get_file_type(const str *name, u32 *type)
 {
     struct stat stats = {0};
     if (bt_stat(name, &stats) == 0)
     {
         if (S_ISREG(stats.st_mode))
-        {
+            *type = FILE_TYPE_REG;
+        else if (S_ISLNK(stats.st_mode))
+            *type = FILE_TYPE_LNK;
+        else if (S_ISDIR(stats.st_mode))
+            *type = FILE_TYPE_DIR;
+        else if (S_ISCHR(stats.st_mode))
+            *type = FILE_TYPE_CHR;
+        else if (S_ISBLK(stats.st_mode))
+            *type = FILE_TYPE_BLK;
+        else if (S_ISFIFO(stats.st_mode))
+            *type = FILE_TYPE_FIFO;
+
+        return ERR_SUCCESS;
+    }
+
+    LOGERROR(ERR_FILE_NOT_FOUND, FALSE,
+            "File '%s' Not Found\n", name);
+    return build_err;
+}
+
+u32 is_file_exists(const str *name, b8 log)
+{
+    struct stat stats = {0};
+    if (bt_stat(name, &stats) == 0)
+    {
+        if (S_ISREG(stats.st_mode) || S_ISLNK(stats.st_mode))
             build_err = ERR_SUCCESS;
-            return build_err;
-        }
         else
         {
             if (log)
                 LOGERROR(ERR_IS_NOT_FILE, TRUE,
-                        "'%s' is Not a Regular File\n", name);
-            else build_err = ERR_IS_NOT_FILE;
-            return build_err;
+                        "'%s' is Not a File\n", name);
+            else
+                build_err = ERR_IS_NOT_FILE;
         }
     }
+    else
+    {
+        if (log)
+            LOGERROR(ERR_FILE_NOT_FOUND, TRUE,
+                    "File '%s' Not Found\n", name);
+        else
+            build_err = ERR_FILE_NOT_FOUND;
+    }
 
-    if (log)
-        LOGERROR(ERR_FILE_NOT_FOUND, TRUE,
-                "File '%s' Not Found\n", name);
-    else build_err = ERR_FILE_NOT_FOUND;
     return build_err;
 }
 
@@ -209,13 +243,16 @@ u32 is_dir(const str *name)
         return build_err;
 
     struct stat stats = {0};
-    if (bt_stat(name, &stats) == 0 && S_ISDIR(stats.st_mode))
+    if (bt_stat(name, &stats) == 0)
     {
-        build_err = ERR_SUCCESS;
-        return build_err;
+        if (S_ISDIR(stats.st_mode))
+            build_err = ERR_SUCCESS;
+        else
+            build_err = ERR_IS_NOT_DIR;
     }
+    else
+        build_err = ERR_DIR_NOT_FOUND;
 
-    build_err = ERR_IS_NOT_DIR;
     return build_err;
 }
 
@@ -225,25 +262,57 @@ u32 is_dir_exists(const str *name, b8 log)
     if (bt_stat(name, &stats) == 0)
     {
         if (S_ISDIR(stats.st_mode))
-        {
             build_err = ERR_SUCCESS;
-            return build_err;
-        }
         else
         {
             if (log)
                 LOGERROR(ERR_IS_NOT_DIR, TRUE,
                         "'%s' is Not a Directory\n", name);
-            else build_err = ERR_IS_NOT_DIR;
-            return build_err;
+            else
+                build_err = ERR_IS_NOT_DIR;
         }
     }
+    else
+    {
+        if (log)
+            LOGERROR(ERR_DIR_NOT_FOUND, TRUE,
+                    "Directory '%s' Not Found\n", name);
+        else build_err = ERR_DIR_NOT_FOUND;
+    }
 
-    if (log)
-        LOGERROR(ERR_DIR_NOT_FOUND, TRUE,
-                "Directory '%s' Not Found\n", name);
-    else build_err = ERR_DIR_NOT_FOUND;
     return build_err;
+}
+
+u32 make_dir(const str *path)
+{
+    if (bt_mkdir(path) == 0)
+    {
+        LOGTRACE(FALSE,
+                "Directory Created '%s'\n", path);
+        build_err = ERR_SUCCESS;
+        return build_err;
+    }
+
+    switch (errno)
+    {
+        case EEXIST:
+            build_err = ERR_DIR_EXISTS;
+            break;
+
+        default:
+            LOGERROR(ERR_DIR_CREATE_FAIL, TRUE,
+                    "Failed to Create Directory '%s'\n", path);
+    }
+
+    return build_err;
+}
+
+int change_dir(const str *path)
+{
+    int success = bt_chdir(path);
+    LOGTRACE(TRUE,
+            "Working Directory Changed to '%s'\n", path);
+    return success;
 }
 
 u64 get_file_contents(const str *name, void **dst, u64 size, b8 terminate)
@@ -360,9 +429,11 @@ cleanup:
 u32 copy_file(const str *src, const str *dst)
 {
     str str_dst[PATH_MAX] = {0};
+    str str_lnk[PATH_MAX] = {0}; /* if is symlink, store symlink's link in this buffer */
     str *in_file = NULL;
     FILE *out_file = NULL;
     u64 len = 0;
+    u32 file_type = 0;
     struct stat stats = {0};
     struct timespec ts[2] = {0};
 
@@ -378,32 +449,74 @@ u32 copy_file(const str *src, const str *dst)
         posix_slash(str_dst);
     }
 
-    if ((out_file = fopen(str_dst, "wb")) == NULL)
-    {
-        LOGERROR(ERR_FILE_OPEN_FAIL, FALSE,
-                "Failed to Copy File '%s' -> '%s'\n", src, str_dst);
+    if (get_file_type(src, &file_type) != ERR_SUCCESS)
         return build_err;
-    }
 
-    len = get_file_contents(src, (void*)&in_file, 1, FALSE);
-    if (build_err != ERR_SUCCESS || !in_file)
+    switch (file_type)
     {
-        fclose(out_file);
-        return build_err;
+        case FILE_TYPE_REG:
+            if ((out_file = fopen(str_dst, "wb")) == NULL)
+            {
+                LOGERROR(ERR_FILE_OPEN_FAIL, FALSE,
+                        "Failed to Copy File '%s' -> '%s'\n", src, str_dst);
+                return build_err;
+            }
+
+            len = get_file_contents(src, (void*)&in_file, 1, FALSE);
+            if (build_err != ERR_SUCCESS || !in_file)
+            {
+                fclose(out_file);
+                return build_err;
+            }
+
+            fwrite(in_file, 1, len, out_file);
+
+            LOGTRACE(FALSE,
+                    "File Copied '%s' -> '%s'\n", src, str_dst);
+
+            fclose(out_file);
+            mem_free((void*)&in_file, len, "copy_file().in_file");
+
+            if (bt_stat(src, &stats) == 0)
+                bt_chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
+            else
+            {
+                LOGWARNING(ERR_FILE_STAT_FAIL, FALSE,
+                        "Failed to Copy File Permissions '%s' -> '%s', 'bt_stat()' Failed\n",
+                        src, str_dst);
+                return build_err;
+            }
+            break;
+
+        case FILE_TYPE_LNK:
+            if (readlink(src, str_lnk, PATH_MAX - 1) < 1)
+            {
+                LOGERROR(ERR_FILE_OPEN_FAIL, FALSE,
+                        "Failed to Copy Symlink '%s' -> '%s'\n", src, str_dst);
+                return build_err;
+            }
+
+            str_lnk[strnlen(str_lnk, PATH_MAX - 1)] = '\0';
+
+            if (is_file_exists(str_dst, FALSE) == ERR_SUCCESS)
+                remove(str_dst);
+
+            symlink(str_lnk, str_dst);
+
+            LOGTRACE(FALSE,
+                    "Symlink Copied '%s' -> '%s'\n", src, str_dst);
+
+            if (bt_stat(src, &stats) == 0)
+                bt_chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
+            else
+            {
+                LOGWARNING(ERR_FILE_STAT_FAIL, FALSE,
+                        "Failed to Copy File Permissions '%s' -> '%s', 'bt_stat()' Failed\n",
+                        src, str_dst);
+                return build_err;
+            }
+            break;
     }
-
-    fwrite(in_file, 1, len, out_file);
-    fclose(out_file);
-
-    LOGTRACE(FALSE,
-            "File Copied '%s' -> '%s'\n", src, str_dst);
-
-    if (bt_stat(src, &stats) == 0)
-        chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
-    else
-        LOGWARNING(ERR_FILE_STAT_FAIL, FALSE,
-                "Failed to Copy File Permissions '%s' -> '%s', 'bt_stat()' Failed\n",
-                src, str_dst);
 
     if (stats.st_atim.tv_nsec == 0)
         stats.st_atim.tv_nsec = 1;
@@ -417,7 +530,7 @@ u32 copy_file(const str *src, const str *dst)
 
     ts[0] = stats.st_atim;
     ts[1] = stats.st_mtim;
-    utimensat(AT_FDCWD, str_dst, ts, 0);
+    utimensat(AT_FDCWD, str_dst, ts, AT_SYMLINK_NOFOLLOW);
 
     build_err = ERR_SUCCESS;
     return build_err;
@@ -475,7 +588,7 @@ u32 copy_dir(const str *src, const str *dst, b8 contents_only)
             "Directory Copied '%s' -> '%s'\n", src, str_dst);
 
     if (bt_stat(str_src, &stats) == 0)
-        chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
+        bt_chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
     else
         LOGWARNING(ERR_FILE_STAT_FAIL, FALSE,
                 "Failed to Copy Directory Permissions '%s' -> '%s', 'bt_stat()' Failed\n",

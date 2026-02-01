@@ -23,10 +23,23 @@
 #include "h/shaders.h"
 #include "h/ui.h"
 
-static struct /* fsl_ui_core */
+static f32 vbo_data_unit_quad[] =
+{
+    0.0f, -1.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 1.0f, 0.0f,
+    1.0f, -1.0f, 1.0f, 1.0f,
+};
+
+static struct fsl_ui_core
 {
     b8 multisample;
-    b8 use_nine_slice;
+
+    GLuint vao;
+    GLuint vbo_unit_quad;
+    GLuint vbo_nine_slice;
+    b8 vao_loaded;
+    fsl_fbo fbo;
 
     struct /* uniform */
     {
@@ -42,19 +55,11 @@ static struct /* fsl_ui_core */
 
         struct /* nine_slice */
         {
-            GLint position;
-            GLint size;
-            GLint texture_size;
-            GLint sprite_size;
-            GLint alignment;
             GLint tint;
-            GLint use_nine_slice;
-            GLint slice_size;
         } nine_slice;
 
     } uniform;
 
-    fsl_fbo fbo;
 } fsl_ui_core;
 
 u32 fsl_ui_init(b8 multisample)
@@ -62,13 +67,17 @@ u32 fsl_ui_init(b8 multisample)
     u32 i = 0;
 
     if (
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE], (v2i32){32, 32},
-                GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
+            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE], (v2i32){16, 16},
+                GL_RGB, GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE,
                 FSL_DIR_NAME_TEXTURES"panel_active.png") != FSL_ERR_SUCCESS ||
 
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_INACTIVE], (v2i32){32, 32},
-                GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
-                FSL_DIR_NAME_TEXTURES"panel_inactive.png") != FSL_ERR_SUCCESS)
+            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_INACTIVE], (v2i32){16, 16},
+                GL_RGB, GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE,
+                FSL_DIR_NAME_TEXTURES"panel_inactive.png") != FSL_ERR_SUCCESS ||
+
+            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE], (v2i32){128, 128},
+                GL_RGB, GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE,
+                FSL_DIR_NAME_TEXTURES"panel_debug_nine_slice.png") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     for (i = 0; i < FSL_TEXTURE_INDEX_COUNT; ++i)
@@ -77,6 +86,59 @@ u32 fsl_ui_init(b8 multisample)
 
     if (fsl_fbo_init(&fsl_ui_core.fbo, &fsl_mesh_unit_quad, multisample, 4) != FSL_ERR_SUCCESS)
         goto cleanup;
+
+    if (!fsl_ui_core.vao_loaded)
+    {
+        glGenVertexArrays(1, &fsl_ui_core.vao);
+        glBindVertexArray(fsl_ui_core.vao);
+
+        /* ---- unit quad --------------------------------------------------- */
+
+        glGenBuffers(1, &fsl_ui_core.vbo_unit_quad);
+        glBindBuffer(GL_ARRAY_BUFFER, fsl_ui_core.vbo_unit_quad);
+        glBufferData(GL_ARRAY_BUFFER, fsl_arr_len(vbo_data_unit_quad) * sizeof(f32),
+                &vbo_data_unit_quad, GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
+                4 * sizeof(GLfloat), (void*)0);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
+                4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+
+        /* ---- nine-slice data --------------------------------------------- */
+
+        glGenBuffers(1, &fsl_ui_core.vbo_nine_slice);
+        glBindBuffer(GL_ARRAY_BUFFER, fsl_ui_core.vbo_nine_slice);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(fsl_panel_nine_slice),
+                NULL, GL_DYNAMIC_DRAW);
+
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
+                sizeof(fsl_panel_slice), (void*)0);
+        glVertexAttribDivisor(2, 1);
+
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE,
+                sizeof(fsl_panel_slice), (void*)(2 * sizeof(f32)));
+        glVertexAttribDivisor(3, 1);
+
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE,
+                sizeof(fsl_panel_slice), (void*)(4 * sizeof(f32)));
+        glVertexAttribDivisor(4, 1);
+
+        glEnableVertexAttribArray(5);
+        glVertexAttribPointer(5, 2, GL_FLOAT, GL_FALSE,
+                sizeof(fsl_panel_slice), (void*)(6 * sizeof(f32)));
+        glVertexAttribDivisor(5, 1);
+
+        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        fsl_ui_core.vao_loaded = TRUE;
+    }
 
     fsl_ui_core.multisample = multisample;
 
@@ -93,22 +155,8 @@ u32 fsl_ui_init(b8 multisample)
     fsl_ui_core.uniform.ui.tint =
         glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI].id, "tint");
 
-    fsl_ui_core.uniform.nine_slice.position =
-        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].id, "position");
-    fsl_ui_core.uniform.nine_slice.size =
-        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].id, "size");
-    fsl_ui_core.uniform.nine_slice.texture_size =
-        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].id, "texture_size");
-    fsl_ui_core.uniform.nine_slice.alignment =
-        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].id, "alignment");
     fsl_ui_core.uniform.nine_slice.tint =
         glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].id, "tint");
-    fsl_ui_core.uniform.nine_slice.use_nine_slice =
-        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].id, "use_nine_slice");
-    fsl_ui_core.uniform.nine_slice.slice_size =
-        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].id, "slice_size");
-    fsl_ui_core.uniform.nine_slice.sprite_size =
-        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].id, "sprite_size");
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -134,16 +182,10 @@ void fsl_ui_start(fsl_fbo *fbo, b8 nine_slice, b8 clear)
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo->fbo);
 
     if (nine_slice)
-    {
-        fsl_ui_core.use_nine_slice = TRUE;
         glUseProgram(fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].id);
-    }
     else
-    {
-        fsl_ui_core.use_nine_slice = FALSE;
         glUseProgram(fsl_shader_buf[FSL_SHADER_INDEX_UI].id);
-    }
-    glBindVertexArray(fsl_mesh_unit_quad.vao);
+
     glDisable(GL_DEPTH_TEST);
     if (clear)
         glClear(GL_COLOR_BUFFER_BIT);
@@ -151,12 +193,6 @@ void fsl_ui_start(fsl_fbo *fbo, b8 nine_slice, b8 clear)
 
 void fsl_ui_push_panel()
 {
-}
-
-void fsl_ui_render(void)
-{
-    glBindTexture(GL_TEXTURE_2D, fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE].id);
-    glDrawArrays(GL_POINTS, 0, 1);
 }
 
 void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
@@ -173,28 +209,31 @@ void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 siz
             (f32)((tint >> 0x08) & 0xff) / 0xff,
             (f32)((tint >> 0x00) & 0xff) / 0xff);
 
+    glBindVertexArray(fsl_ui_core.vao);
     glBindTexture(GL_TEXTURE_2D, texture->id);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
-void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
-        f32 slice_size, f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint)
+void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
+        i32 size_x, i32 size_y, i32 slice_size, u32 tint)
 {
-    glUniform2i(fsl_ui_core.uniform.nine_slice.position, pos_x, pos_y);
-    glUniform2i(fsl_ui_core.uniform.nine_slice.size, size_x, size_y);
-    glUniform2i(fsl_ui_core.uniform.nine_slice.alignment, align_x, align_y);
+    fsl_panel_nine_slice _panel = fsl_get_nine_slice(texture->size,
+            pos_x, pos_y,
+            size_x, size_y, slice_size);
+
     glUniform4f(fsl_ui_core.uniform.nine_slice.tint,
             (f32)((tint >> 0x18) & 0xff) / 0xff,
             (f32)((tint >> 0x10) & 0xff) / 0xff,
             (f32)((tint >> 0x08) & 0xff) / 0xff,
             (f32)((tint >> 0x00) & 0xff) / 0xff);
-    glUniform2iv(fsl_ui_core.uniform.nine_slice.texture_size, 1, (GLint*)&texture->size);
-    glUniform2i(fsl_ui_core.uniform.nine_slice.sprite_size, texture->size.x / 2, texture->size.y / 2);
-    glUniform1i(fsl_ui_core.uniform.nine_slice.use_nine_slice, fsl_ui_core.use_nine_slice);
-    glUniform1f(fsl_ui_core.uniform.nine_slice.slice_size, slice_size);
 
+    glBindBuffer(GL_ARRAY_BUFFER, fsl_ui_core.vbo_nine_slice);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(fsl_panel_nine_slice), &_panel);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glBindVertexArray(fsl_ui_core.vao);
     glBindTexture(GL_TEXTURE_2D, texture->id);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, 9);
 }
 
 void fsl_ui_stop(void)
@@ -216,5 +255,165 @@ void fsl_ui_fbo_blit(GLuint fbo)
 
 void fsl_ui_free(void)
 {
+    if (fsl_ui_core.vao_loaded)
+    {
+        glDeleteVertexArrays(1, &fsl_ui_core.vao);
+        glDeleteBuffers(1, &fsl_ui_core.vbo_unit_quad);
+        glDeleteBuffers(1, &fsl_ui_core.vbo_nine_slice);
+    }
+
     fsl_fbo_free(&fsl_ui_core.fbo);
+}
+
+fsl_panel_nine_slice fsl_get_nine_slice(v2i32 texture_size, i32 pos_x, i32 pos_y,
+        i32 size_x, i32 size_y, i32 slice_size)
+{
+    f32 _pos_x = (f32)pos_x;
+    f32 _pos_y = (f32)pos_y;
+    f32 _size_x = (f32)size_x;
+    f32 _size_y = (f32)size_y;
+    f32 _slice_size = (f32)slice_size;
+    v2f32 _texture_scale =
+    {
+        1.0f / (f32)texture_size.x,
+        1.0f / (f32)texture_size.y,
+    };
+
+    v2f32 _pos[3] =
+    {
+        [0] = {_pos_x, _pos_y},
+        [1] = {_pos_x + _slice_size, _pos_y + _slice_size},
+        [2] = {_pos_x + _size_x - _slice_size, _pos_y + _size_y - _slice_size},
+    };
+
+    v2f32 _size[3] =
+    {
+        [0] = {_slice_size, _slice_size},
+        [1] = {_size_x - _slice_size * 2, _size_y - _slice_size * 2},
+        [2] = {_slice_size, _slice_size},
+    };
+
+    v2f32 _tex_coords_pos[3] =
+    {
+        [0] = {0.0f, 0.0f},
+        [1] = {_texture_scale.x * _slice_size, _texture_scale.y * _slice_size},
+        [2] = {1.0f - _texture_scale.x * _slice_size, 1.0f - _texture_scale.y * _slice_size},
+    };
+
+    v2f32 _tex_coords_size[3] =
+    {
+        [0] = {_texture_scale.x * _slice_size, _texture_scale.y * _slice_size},
+        [1] = {1.0f - _texture_scale.x * _slice_size * 2.0f, 1.0f - _texture_scale.y * _slice_size * 2.0f},
+        [2] = {_texture_scale.x * _slice_size, _texture_scale.y * _slice_size},
+    };
+
+    return (fsl_panel_nine_slice){
+        .slice[0] =
+        {
+            .pos.x = _pos[0].x,
+            .pos.y = _pos[0].y,
+            .size.x = _size[0].x,
+            .size.y = _size[0].y,
+            .tex_coords_pos.x = _tex_coords_pos[0].x,
+            .tex_coords_pos.y = _tex_coords_pos[0].y,
+            .tex_coords_size.x = _tex_coords_size[0].x,
+            .tex_coords_size.y = _tex_coords_size[0].y,
+        },
+
+        .slice[1] =
+        {
+            .pos.x = _pos[1].x,
+            .pos.y = _pos[0].y,
+            .size.x = _size[1].x,
+            .size.y = _size[0].y,
+            .tex_coords_pos.x = _tex_coords_pos[1].x,
+            .tex_coords_pos.y = _tex_coords_pos[0].y,
+            .tex_coords_size.x = _tex_coords_size[1].x,
+            .tex_coords_size.y = _tex_coords_size[0].y,
+        },
+
+        .slice[2] =
+        {
+            .pos.x = _pos[2].x,
+            .pos.y = _pos[0].y,
+            .size.x = _size[2].x,
+            .size.y = _size[0].y,
+            .tex_coords_pos.x = _tex_coords_pos[2].x,
+            .tex_coords_pos.y = _tex_coords_pos[0].y,
+            .tex_coords_size.x = _tex_coords_size[2].x,
+            .tex_coords_size.y = _tex_coords_size[0].y,
+        },
+
+        .slice[3] =
+        {
+            .pos.x = _pos[0].x,
+            .pos.y = _pos[1].y,
+            .size.x = _size[0].x,
+            .size.y = _size[1].y,
+            .tex_coords_pos.x = _tex_coords_pos[0].x,
+            .tex_coords_pos.y = _tex_coords_pos[1].y,
+            .tex_coords_size.x = _tex_coords_size[0].x,
+            .tex_coords_size.y = _tex_coords_size[1].y,
+        },
+
+        .slice[4] =
+        {
+            .pos.x = _pos[1].x,
+            .pos.y = _pos[1].y,
+            .size.x = _size[1].x,
+            .size.y = _size[1].y,
+            .tex_coords_pos.x = _tex_coords_pos[1].x,
+            .tex_coords_pos.y = _tex_coords_pos[1].y,
+            .tex_coords_size.x = _tex_coords_size[1].x,
+            .tex_coords_size.y = _tex_coords_size[1].y,
+        },
+
+        .slice[5] =
+        {
+            .pos.x = _pos[2].x,
+            .pos.y = _pos[1].y,
+            .size.x = _size[2].x,
+            .size.y = _size[1].y,
+            .tex_coords_pos.x = _tex_coords_pos[2].x,
+            .tex_coords_pos.y = _tex_coords_pos[1].y,
+            .tex_coords_size.x = _tex_coords_size[2].x,
+            .tex_coords_size.y = _tex_coords_size[1].y,
+        },
+
+        .slice[6] =
+        {
+            .pos.x = _pos[0].x,
+            .pos.y = _pos[2].y,
+            .size.x = _size[0].x,
+            .size.y = _size[2].y,
+            .tex_coords_pos.x = _tex_coords_pos[0].x,
+            .tex_coords_pos.y = _tex_coords_pos[2].y,
+            .tex_coords_size.x = _tex_coords_size[0].x,
+            .tex_coords_size.y = _tex_coords_size[2].y,
+        },
+
+        .slice[7] =
+        {
+            .pos.x = _pos[1].x,
+            .pos.y = _pos[2].y,
+            .size.x = _size[1].x,
+            .size.y = _size[2].y,
+            .tex_coords_pos.x = _tex_coords_pos[1].x,
+            .tex_coords_pos.y = _tex_coords_pos[2].y,
+            .tex_coords_size.x = _tex_coords_size[1].x,
+            .tex_coords_size.y = _tex_coords_size[2].y,
+        },
+
+        .slice[8] =
+        {
+            .pos.x = _pos[2].x,
+            .pos.y = _pos[2].y,
+            .size.x = _size[2].x,
+            .size.y = _size[2].y,
+            .tex_coords_pos.x = _tex_coords_pos[2].x,
+            .tex_coords_pos.y = _tex_coords_pos[2].y,
+            .tex_coords_size.x = _tex_coords_size[2].x,
+            .tex_coords_size.y = _tex_coords_size[2].y,
+        },
+    };
 }

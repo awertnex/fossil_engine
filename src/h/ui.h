@@ -26,6 +26,23 @@
 #define FSL_PANEL_GAP_DEFAULT 10
 #define FSL_PANEL_PADDING_DEFAULT 10
 
+/*! @brief one slice in a 9-slice panel.
+ */
+typedef struct fsl_panel_slice
+{
+    v2f32 pos;
+    v2f32 size;
+    v2f32 tex_coords_pos;
+    v2f32 tex_coords_size;
+} fsl_panel_slice;
+
+/*! @brief one 9-slice panel.
+ */
+typedef struct fsl_panel_nine_slice
+{
+    struct fsl_panel_slice slice[9];
+} fsl_panel_nine_slice;
+
 /*! @brief initialize ui.
  *
  *  @param multisample turn on multisampling.
@@ -54,8 +71,9 @@ FSLAPI void fsl_ui_start(fsl_fbo *fbo, b8 nine_slice, b8 clear);
 FSLAPI void fsl_ui_render(void);
 FSLAPI void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
         f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint);
-FSLAPI void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
-        f32 slice_size, f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint);
+
+FSLAPI void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
+        i32 size_x, i32 size_y, i32 slice_size, u32 tint);
 
 /*! @remark enables @ref GL_DEPTH_TEST.
  */
@@ -66,5 +84,10 @@ FSLAPI void fsl_ui_stop(void);
 FSLAPI void fsl_ui_fbo_blit(GLuint fbo);
 
 FSLAPI void fsl_ui_free(void);
+
+/*! @brief make a 9-slice panel.
+ */
+FSLAPI fsl_panel_nine_slice fsl_get_nine_slice(v2i32 texture_size, i32 pos_x, i32 pos_y,
+        i32 size_x, i32 size_y, i32 slice_size);
 
 #endif /* FSL_UI_H */

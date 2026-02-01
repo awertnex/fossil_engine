@@ -95,13 +95,20 @@ b8 fsl_is_in_time_window(u64 *_time, u64 interval, u64 _curr)
 
 b8 fsl_on_time_interval(u64 *_time, u64 interval, u64 _curr)
 {
+    i64 diff = 0;
+
     if (!interval)
         return TRUE;
 
-    if (_curr < *_time + interval)
+    diff = (i64)(_curr - *_time);
+    if (diff < (i64)interval)
         return FALSE;
 
-    *_time += interval;
+    if (diff > (i64)(interval * 2))
+        *_time = _curr;
+    else
+        *_time += interval;
+
     return TRUE;
 }
 

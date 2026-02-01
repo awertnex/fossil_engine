@@ -32,6 +32,14 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <deps/stb_truetype.h>
 
+static f32 vbo_data_unit_quad[] =
+{
+    0.0f, -1.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 1.0f, 0.0f,
+    1.0f, -1.0f, 1.0f, 1.0f,
+};
+
 fsl_font fsl_font_buf[FSL_FONT_INDEX_COUNT] =
 {
     [FSL_FONT_INDEX_DEJAVU_SANS] =
@@ -76,7 +84,7 @@ struct fsl_text_data
     u32 color;
 }; /* fsl_text_data */
 
-static struct /* fsl_text_core */
+static struct fsl_text_core
 {
     b8 multisample;
     fsl_font *font;
@@ -96,7 +104,10 @@ static struct /* fsl_text_core */
     struct fsl_text_data *buf;
 
     u64 buf_len;
-    GLuint vao, vbo;
+    GLuint vao;
+    GLuint vbo_unit_quad;
+    GLuint vbo_text_data;
+    b8 vao_loaded;
     fsl_fbo fbo;
 
     struct /* uniform */
@@ -262,25 +273,47 @@ u32 fsl_text_init(u32 resolution, b8 multisample)
     if (fsl_fbo_init(&fsl_text_core.fbo, &fsl_mesh_unit_quad, multisample, 4) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    if (!fsl_text_core.vao)
+    if (!fsl_text_core.vao_loaded)
     {
         glGenVertexArrays(1, &fsl_text_core.vao);
-        glGenBuffers(1, &fsl_text_core.vbo);
-
         glBindVertexArray(fsl_text_core.vao);
-        glBindBuffer(GL_ARRAY_BUFFER, fsl_text_core.vbo);
+
+        /* ---- unit quad --------------------------------------------------- */
+
+        glGenBuffers(1, &fsl_text_core.vbo_unit_quad);
+        glBindBuffer(GL_ARRAY_BUFFER, fsl_text_core.vbo_unit_quad);
+        glBufferData(GL_ARRAY_BUFFER, fsl_arr_len(vbo_data_unit_quad) * sizeof(f32),
+                &vbo_data_unit_quad, GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
-                FSL_TEXT_CHAR_STRIDE * sizeof(GLfloat), (void*)0);
+                4 * sizeof(GLfloat), (void*)0);
 
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
-                FSL_TEXT_CHAR_STRIDE * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+                4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+
+        /* ---- text data --------------------------------------------------- */
+
+        glGenBuffers(1, &fsl_text_core.vbo_text_data);
+        glBindBuffer(GL_ARRAY_BUFFER, fsl_text_core.vbo_text_data);
+        glBufferData(GL_ARRAY_BUFFER, fsl_text_core.buf_len * sizeof(struct fsl_text_data),
+                NULL, GL_DYNAMIC_DRAW);
 
         glEnableVertexAttribArray(2);
-        glVertexAttribIPointer(2, 1, GL_UNSIGNED_INT,
-                FSL_TEXT_CHAR_STRIDE * sizeof(GLuint), (void*)(4 * sizeof(GLfloat)));
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
+                sizeof(struct fsl_text_data), (void*)0);
+        glVertexAttribDivisor(2, 1);
+
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE,
+                sizeof(struct fsl_text_data), (void*)(2 * sizeof(GLfloat)));
+        glVertexAttribDivisor(3, 1);
+
+        glEnableVertexAttribArray(4);
+        glVertexAttribIPointer(4, 1, GL_UNSIGNED_INT,
+                sizeof(struct fsl_text_data), (void*)(4 * sizeof(GLfloat)));
+        glVertexAttribDivisor(4, 1);
 
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -337,6 +370,11 @@ void fsl_text_start(fsl_font *font, f32 size, u64 length, fsl_fbo *fbo, b8 clear
             goto cleanup;
 
         fsl_text_core.buf_len = length;
+
+        glBindBuffer(GL_ARRAY_BUFFER, fsl_text_core.vbo_text_data);
+        glBufferData(GL_ARRAY_BUFFER, fsl_text_core.buf_len * sizeof(struct fsl_text_data),
+                NULL, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     fsl_text_core.font = font;
@@ -383,7 +421,8 @@ cleanup:
             "%s\n", "Failed to Start Text");
 }
 
-void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y, u32 color)
+void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y,
+        i32 window_x, u32 color)
 {
     u64 len = 0, i = 0;
     i64 j = 0;
@@ -391,6 +430,7 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
     struct fsl_glyphf *g = NULL;
     v2u8 align = {0};
     v2f32 alignment = {0};
+    f32 _window_x = (f32)window_x * render->ndc_scale.x;
 
     if (!fsl_text_core.buf)
     {
@@ -424,6 +464,11 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
         }
 
         fsl_text_core.buf_len += FSL_STRING_MAX;
+
+        glBindBuffer(GL_ARRAY_BUFFER, fsl_text_core.vbo_text_data);
+        glBufferData(GL_ARRAY_BUFFER, fsl_text_core.buf_len * sizeof(struct fsl_text_data),
+                NULL, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     if (align_x == FSL_TEXT_ALIGN_CENTER)
@@ -457,6 +502,7 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
     for (i = 0; i < len; ++i)
     {
         g = &fsl_text_core.glyph[(u64)text[i]];
+
         if (text[i] == '\n' || text[i] == '\r')
         {
             if (align.x)
@@ -472,6 +518,16 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
         {
             fsl_text_core.advance += fsl_text_core.glyph[' '].advance * FSL_TEXT_TAB_SIZE;
             continue;
+        }
+
+        if (window_x && fsl_text_core.advance + g->advance >= _window_x)
+        {
+            if (align.x)
+                for (j = 1; (i64)i - j >= 0 && text[i - j] != '\n' && text[i - j] != '\r'; ++j)
+                    fsl_text_core.buf[fsl_text_core.cursor - j].pos.x -= fsl_text_core.advance * alignment.x;
+
+            fsl_text_core.advance = 0.0f;
+            fsl_text_core.line_height_total += line_height * fsl_text_core.text_scale.y;
         }
 
         fsl_text_core.buf[fsl_text_core.cursor].pos.x =
@@ -509,10 +565,11 @@ void fsl_text_render(b8 shadow, u32 shadow_color)
         return;
     }
 
+    glBindBuffer(GL_ARRAY_BUFFER, fsl_text_core.vbo_text_data);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, fsl_text_core.cursor * sizeof(struct fsl_text_data),
+            fsl_text_core.buf);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(fsl_text_core.vao);
-    glBindBuffer(GL_ARRAY_BUFFER, fsl_text_core.vbo);
-    glBufferData(GL_ARRAY_BUFFER, fsl_text_core.cursor * sizeof(GLfloat) * FSL_TEXT_CHAR_STRIDE,
-            fsl_text_core.buf, GL_DYNAMIC_DRAW);
 
     if (shadow)
     {
@@ -523,11 +580,11 @@ void fsl_text_render(b8 shadow, u32 shadow_color)
                 (f32)((shadow_color >> 0x08) & 0xff) / 0xff,
                 (f32)((shadow_color >> 0x00) & 0xff) / 0xff);
         glUniform2f(fsl_text_core.uniform.shadow_offset, FSL_TEXT_OFFSET_SHADOW, FSL_TEXT_OFFSET_SHADOW);
-        glDrawArrays(GL_POINTS, 0, fsl_text_core.cursor);
+        glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, fsl_text_core.cursor);
     }
 
     glUniform1i(fsl_text_core.uniform.draw_shadow, FALSE);
-    glDrawArrays(GL_POINTS, 0, fsl_text_core.cursor);
+    glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, fsl_text_core.cursor);
 
     fsl_text_core.cursor = 0;
     fsl_text_core.line_height_total = 0;
@@ -554,7 +611,18 @@ void fsl_text_fbo_blit(GLuint fbo)
 
 void fsl_text_free(void)
 {
-    fsl_fbo_free(&fsl_text_core.fbo);
+    if (fsl_text_core.vao_loaded)
+    {
+        glDeleteVertexArrays(1, &fsl_text_core.vao);
+        glDeleteBuffers(1, &fsl_text_core.vbo_unit_quad);
+        glDeleteBuffers(1, &fsl_text_core.vbo_text_data);
+    }
+
     fsl_mem_unmap((void*)&fsl_text_core.buf, fsl_text_core.buf_len * sizeof(struct fsl_text_data),
             "fsl_text_free().fsl_text_core.buf");
+}
+
+f32 fsl_get_text_height(void)
+{
+    return fsl_text_core.line_height_total / render->ndc_scale.y;
 }

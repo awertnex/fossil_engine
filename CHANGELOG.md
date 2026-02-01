@@ -3,8 +3,46 @@
 >**NOTE:**
 >- history is mixed with the repo "awertnex/heaven-hell_continuum" since
    this engine originated from the making of that game and later was moved here
-   at engine version v0.3.3-beta (2026 Jan 24), which makes v0.3.4-beta the
+   at engine version v0.3.3-beta (2026 01 24), which makes v0.3.4-beta the
    first version of the engine as standalone in this repo
+
+- - -
+## v0.4.0-dev (current)
+
+#### changes
+- (2026 01 31): Add text window restriction
+- (2026 01 31): Fix missing `fsl_render.ndc_scale` at init time
+- (2026 01 31): Add 9-slice UI
+- (2026 01 31): Add test `nine_slice`
+- (2026 01 31): Split `fsl_str_libs[][]` into internal and external arrays
+- (2026 01 31): Add internal framebuffer size callback and an optional pointer
+                to an additional framebuffer size callback
+- (2026 01 30): Package engine-specific boilerplate into engine init functions
+- (2026 01 30): Optimize text rendering by removing geometry shader and going
+                with instanced rendering
+- (2026 01 30): Add "catch-up" behavior to function `fsl_on_time_interval()`
+- (2026 01 30): Update buildtool version `v1.7.0-beta` -> `v1.8.1-beta`
+- (2026 01 30): Add `fsl_mkdir()`, `fsl_chdir()`, `fsl_stat()` and
+                `fsl_chmod()` for platform abstraction
+- (2026 01 30): Move functions `fsl_make_dir()` and `fsl_change_dir()`
+                implementations to file `dir.c`
+- (2026 01 30): Treat symlinks as files in function `fsl_is_file_exists()`
+- (2026 01 30): Use proper error-handling for function `readlink()` in
+                function `fsl_get_path_bin_root()`
+- (2026 01 30): Terminate string buffer in function `fsl_get_path_bin_root()`
+- (2026 01 30): Preserve symlinks when using `copy_file()` and `copy_dir()`
+- (2026 01 30): Fix function `fsl_get_file_type()` doing funky bitwise
+- (2026 01 30): Add enum `fsl_file_type_index()` for file type checking
+                gymnastics
+- (2026 01 30): Add error code `FSL_ERR_READ_LINK_FAIL`
+- (2026 01 29): Change `str_libs` `"-Llib/"PLATFORM`:
+    - For engine: `"-Llib/"PLATFORM`
+    - For software that uses the engine: `"-Lfossil/lib/"PLATFORM`
+- (2026 01 29): Change `CHANGELOG.md` order of history from oldest top to
+                newest top
+- (2026 01 29): Change `CHANGELOG.md` format to include date in changes
+- (2026 01 29): Change date format in text files `(YYYY MMM DD)` ->
+                `(YYYY MM DD)`
 
 - - -
 ## v0.4.0-beta (2026 Jan 29)

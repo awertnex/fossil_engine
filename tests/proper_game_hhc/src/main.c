@@ -11,12 +11,12 @@
 #include "h/terrain.h"
 #include "h/world.h"
 
+#include <src/h/fossil_engine.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
 #include <math.h>
-
-#include <src/h/fossil_engine.h>
 
 i32 scrool = 0;
 u32 *const GAME_ERR = (u32*)&fsl_err;
@@ -70,7 +70,7 @@ static struct /* refresh_interval */
     u64 fps_string;
 } refresh_interval;
 
-static void callback_framebuffer_size(GLFWwindow* window, int width, int height);
+static void callback_framebuffer_size(i32 size_x, i32 size_y);
 static void callback_key(GLFWwindow *window, int key, int scancode, int action, int mods);
 static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset);
 
@@ -86,14 +86,10 @@ static u32 settings_init(void);
 void settings_update(void);
 static void draw_everything(void);
 
-static void callback_framebuffer_size(GLFWwindow* window, int width, int height)
+static void callback_framebuffer_size(i32 size_x, i32 size_y)
 {
-    (void)window;
-
-    fsl_update_render_settings((i32)width, (i32)height);
-
-    _player.camera.ratio = (f32)width / (f32)height;
-    _player.camera_hud.ratio = (f32)width / (f32)height;
+    _player.camera.ratio = (f32)size_x / (f32)size_y;
+    _player.camera_hud.ratio = (f32)size_x / (f32)size_y;
 
     fsl_fbo_realloc(&fbo[FBO_SKYBOX], FALSE, 4);
     fsl_fbo_realloc(&fbo[FBO_WORLD], FALSE, 4);
@@ -171,7 +167,7 @@ static u32 settings_init(void)
 
     settings.lerp_speed = SET_LERP_SPEED_DEFAULT;
 
-    settings.render_distance = 16;
+    settings.render_distance = 2;
     settings.chunk_buf_radius = settings.render_distance;
     settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
 
@@ -1007,44 +1003,30 @@ static void draw_everything(void)
 
         if (!core.flag.debug)
             fsl_ui_draw(&texture[TEXTURE_CROSSHAIR], render->size.x / 2, render->size.y / 2,
-                    8, 8, 0.0f, 0.0f, 0, 0, 0xffffffff);
+                    texture[TEXTURE_CROSSHAIR].size.x,
+                    texture[TEXTURE_CROSSHAIR].size.y,
+                    0.0f, 0.0f, -1, -1, 0xffffffff);
 
         fsl_ui_draw(&texture[TEXTURE_ITEM_BAR], render->size.x / 2, render->size.y,
-                texture[TEXTURE_ITEM_BAR].size.x, texture[TEXTURE_ITEM_BAR].size.y,
-                84.5f, 18.0f, 1, 1, 0xffffffff);
+                texture[TEXTURE_ITEM_BAR].size.x * 2,
+                texture[TEXTURE_ITEM_BAR].size.y * 2,
+                84.5f, 18.0f, 0, 0, 0xffffffff);
         fsl_ui_stop();
     }
-
-    /* ---- draw engine ui -------------------------------------------------- */
-
-    if (core.flag.super_debug)
-    {
-        /* 
-        fsl_ui_render();
-         */
-        fsl_ui_start(NULL, TRUE, FALSE);
-        fsl_ui_draw_nine_slice(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
-                10, 10, 8.0f, 400, render->size.y - 20, 0, 0, -1, -1, 0xffffffef);
-        fsl_ui_stop();
-    }
-    fsl_ui_start(NULL, TRUE, FALSE);
-    fsl_ui_draw_nine_slice(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
-            10, 10, 8.0f, 400, render->size.y - 20, 0, 0, -1, -1, 0xffffffef);
-    fsl_ui_stop();
 
     /* ---- draw debug info ------------------------------------------------- */
 
     fsl_text_start(font[FONT_MONO_BOLD], settings.font_size, 0, NULL, TRUE);
 
     fsl_text_push(fsl_stringf("FPS         [%u]\n", settings.fps),
-            SET_MARGIN, SET_MARGIN, 0, 0,
+            SET_MARGIN, SET_MARGIN, 0, 0, 0,
             settings.fps > 60 ? COLOR_TEXT_MOSS : COLOR_DIAGNOSTIC_ERROR);
 
     fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
 
     if (core.flag.hud && core.flag.debug)
     {
-        fsl_text_push(fsl_stringf("\n\n"
+        fsl_text_push(fsl_stringf("\n"
                     "TIME        [%.2lf]\n"
                     "CLOCK       [%02"PRIu64":%02"PRIu64"]\n"
                     "DAYS        [%"PRIu64"]\n",
@@ -1052,7 +1034,7 @@ static void draw_everything(void)
                     (world.tick % SET_DAY_TICKS_MAX) / 1000,
                     ((world.tick * 60) / 1000) % 60,
                     world.days),
-                SET_MARGIN, SET_MARGIN, 0, 0,
+                SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 COLOR_TEXT_MOSS);
 
         fsl_text_push(fsl_stringf(
@@ -1076,7 +1058,7 @@ static void draw_everything(void)
                     _player.acceleration.x, _player.acceleration.y, _player.acceleration.z,
                     _player.velocity.x, _player.velocity.y, _player.velocity.z,
                     _player.speed),
-                SET_MARGIN, SET_MARGIN, 0, 0,
+                SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 COLOR_TEXT_DEFAULT);
 
         fsl_text_push(fsl_stringf(
@@ -1090,7 +1072,7 @@ static void draw_everything(void)
                     (_player.flag & FLAG_PLAYER_OVERFLOW_Z) ?
                     (_player.flag & FLAG_PLAYER_OVERFLOW_PZ) ?
                     "        " : "        " : "NONE"),
-                SET_MARGIN, SET_MARGIN, 0, 0,
+                SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 COLOR_DIAGNOSTIC_NONE);
 
         fsl_text_push(fsl_stringf(
@@ -1101,7 +1083,7 @@ static void draw_everything(void)
                     (_player.flag & FLAG_PLAYER_OVERFLOW_PY) ? "POSITIVE" : "    ",
                     (_player.flag & FLAG_PLAYER_OVERFLOW_Z) &&
                     (_player.flag & FLAG_PLAYER_OVERFLOW_PZ) ? "POSITIVE" : "    "),
-                SET_MARGIN, SET_MARGIN, 0, 0,
+                SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 FSL_DIAGNOSTIC_COLOR_SUCCESS);
 
         fsl_text_push(fsl_stringf(
@@ -1112,7 +1094,7 @@ static void draw_everything(void)
                     !(_player.flag & FLAG_PLAYER_OVERFLOW_PY) ? "NEGATIVE" : "    ",
                     (_player.flag & FLAG_PLAYER_OVERFLOW_Z) &&
                     !(_player.flag & FLAG_PLAYER_OVERFLOW_PZ) ? "NEGATIVE" : "    "),
-                SET_MARGIN, SET_MARGIN, 0, 0,
+                SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 FSL_DIAGNOSTIC_COLOR_ERROR);
 
         fsl_text_push(fsl_stringf(
@@ -1128,7 +1110,7 @@ static void draw_everything(void)
                     skybox_data.sun_rotation.x,
                     skybox_data.sun_rotation.y,
                     skybox_data.sun_rotation.z),
-                SET_MARGIN, SET_MARGIN, 0, 0,
+                SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 COLOR_DIAGNOSTIC_INFO);
 
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
@@ -1143,7 +1125,7 @@ static void draw_everything(void)
                     CHUNK_QUEUE[2].count, CHUNK_QUEUE[2].size,
                     CHUNKS_MAX[settings.render_distance]),
                 render->size.x - SET_MARGIN, SET_MARGIN,
-                FSL_TEXT_ALIGN_RIGHT, 0,
+                FSL_TEXT_ALIGN_RIGHT, 0, 0,
                 COLOR_TEXT_DEFAULT);
 
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
@@ -1166,7 +1148,8 @@ static void draw_everything(void)
                     glGetString(GL_VENDOR),
                     glGetString(GL_RENDERER)),
                 render->size.x - SET_MARGIN, render->size.y - SET_MARGIN,
-                FSL_TEXT_ALIGN_RIGHT, FSL_TEXT_ALIGN_BOTTOM, FSL_DIAGNOSTIC_COLOR_TRACE);
+                FSL_TEXT_ALIGN_RIGHT, FSL_TEXT_ALIGN_BOTTOM, render->size.x,
+                FSL_DIAGNOSTIC_COLOR_TRACE);
 
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
     }
@@ -1180,19 +1163,29 @@ static void draw_everything(void)
         fsl_text_start(font[FONT_MONO_BOLD], settings.font_size, 0, NULL, FALSE);
         i32 i = 0;
         u32 index = 0;
+        f32 logger_panel_height = 0.0f;
         for (i = 24; i > 0; --i)
         {
             index = fsl_mod_i32(fsl_logger_tab_index - i - scrool, FSL_LOGGER_HISTORY_MAX);
             fsl_text_push(fsl_stringf("%s\n", fsl_logger_tab[index]),
-                    SET_MARGIN, render->size.y - SET_MARGIN,
-                    0, 0,
+                    SET_MARGIN * 2, render->size.y - SET_MARGIN * 2,
+                    0, 0, render->size.x - 40,
                     fsl_logger_color[index]);
         }
 
+        logger_panel_height = fsl_get_text_height();
+
         /* align once after all the strings' heights in text batch have accumulated into total text height */
-        fsl_text_push("", 0, 0, 0, FSL_TEXT_ALIGN_BOTTOM, 0x00000000);
+        fsl_text_push("", 0, 0, 0, FSL_TEXT_ALIGN_BOTTOM, 0, 0x00000000);
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
         fsl_text_stop();
+
+        fsl_ui_start(NULL, TRUE, FALSE);
+        fsl_ui_draw_nine_slice(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_INACTIVE],
+                10, render->size.y - logger_panel_height - 30,
+                render->size.x - 20, logger_panel_height + 20, 8, 0xffffff5f);
+
+        fsl_ui_stop();
     }
 
     /* ---- post processing ------------------------------------------------- */
@@ -1264,9 +1257,6 @@ int main(int argc, char **argv)
 
     /* ---- set callbacks --------------------------------------------------- */
 
-    glfwSetFramebufferSizeCallback(render->window, callback_framebuffer_size);
-    callback_framebuffer_size(render->window, render->size.x, render->size.y);
-
     glfwSetKeyCallback(render->window, callback_key);
     callback_key(render->window, 0, 0, 0, 0);
 
@@ -1324,21 +1314,15 @@ section_world_loaded:
 
     generate_standard_meshes();
 
-    while (fsl_engine_running())
+    while (fsl_engine_running(callback_framebuffer_size))
     {
-        glfwPollEvents();
-        fsl_update_mouse_movement();
-        fsl_update_key_states();
-
         input_update(&_player);
         settings_update();
         world_update(&_player);
         draw_everything();
 
-        glfwSwapBuffers(render->window);
-        fsl_limit_framerate(settings.target_fps, render->time);
-
         fsl_process_screenshot_request(GAME_DIR_NAME_SCREENSHOTS, world.name);
+        fsl_limit_framerate(settings.target_fps, render->time);
 
         if (!core.flag.world_loaded)
             goto section_menu_title;

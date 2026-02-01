@@ -4,7 +4,7 @@
 
 ## Dependencies (already bundled)
 
-- [buildtool](https://github.com/awertnex/buildtool): build tool used to build the engine
+- [buildtool v1.8.1-beta](https://github.com/awertnex/buildtool): build tool used to build the engine
 - [glfw v3.4](https://github.com/glfw/glfw/releases): platform-independent windowing (headers modified)
     - modifications: remove `__cplusplus` support guard, just to keep it completely C
 - [glad v0.1.36](https://github.com/dav1dde/glad-web): OpenGL function loader (modified)

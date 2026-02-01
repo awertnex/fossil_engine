@@ -33,38 +33,6 @@
 #include <windows.h>
 #include <direct.h>
 
-u32 fsl_make_dir(const str *path)
-{
-    if (mkdir(path) == 0)
-    {
-        _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                "Directory Created '%s'\n", path);
-
-        fsl_err = FSL_ERR_SUCCESS;
-        return fsl_err;
-    }
-
-    switch (errno)
-    {
-        case EEXIST:
-            fsl_err = FSL_ERR_DIR_EXISTS;
-            break;
-
-        default:
-            _LOGERROR(FSL_ERR_DIR_CREATE_FAIL, 0,
-                    "Failed to Create Directory '%s'\n", path);
-    }
-
-    return fsl_err;
-}
-
-int fsl_change_dir(const str *path)
-{
-    int success = _chdir(path);
-    LOGTRACE(0, "Working Directory Changed to '%s'\n", path);
-    return success;
-}
-
 u32 _fsl_get_path_absolute(const str *name, str *dst)
 {
     if (!GetFullPathNameA(name, PATH_MAX, dst, NULL))

@@ -1,11 +1,11 @@
 #version 430 core
 
 uniform sampler2D texture_font_atlas;
-in vec2 tex_coords;
-in vec4 gs_color;
+in vec2 vs_tex_coords;
+in vec4 vs_color;
 out vec4 color;
 
 void main()
 {
-    color = gs_color * texture(texture_font_atlas, tex_coords).r;
+    color = vs_color * texture(texture_font_atlas, vs_tex_coords).r;
 }

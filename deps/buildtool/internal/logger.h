@@ -30,7 +30,7 @@
 
 /* ---- section: definitions ------------------------------------------------ */
 
-enum /* log_level */
+enum log_level
 {
     LOGLEVEL_FATAL,
     LOGLEVEL_ERROR,

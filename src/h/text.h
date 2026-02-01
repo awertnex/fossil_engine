@@ -135,6 +135,8 @@ FSLAPI void fsl_text_start(fsl_font *font, f32 size, u64 length, fsl_fbo *fbo, b
  *      FSL_TEXT_ALIGN_CENTER.
  *      FSL_TEXT_ALIGN_BOTTOM.
  *
+ *  @param window_x restrict text width to specified window size.
+ *
  *  @param color text color, format: 0xrrggbbaa.
  *
  *  @remark default alignment is top left (0, 0).
@@ -144,7 +146,8 @@ FSLAPI void fsl_text_start(fsl_font *font, f32 size, u64 length, fsl_fbo *fbo, b
  *
  *  @remark can be called multiple times within a text rendering batch.
  */
-FSLAPI void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y, u32 color);
+FSLAPI void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y,
+        i32 window_x, u32 color);
 
 /*! @brief render text to framebuffer.
  *
@@ -169,5 +172,11 @@ FSLAPI void fsl_text_stop(void);
 FSLAPI void fsl_text_fbo_blit(GLuint fbo);
 
 FSLAPI void fsl_text_free(void);
+
+/*! @brief get total string height of current rendering batch.
+ *
+ *  @remark call before @ref fsl_text_render.
+ */
+FSLAPI f32 fsl_get_text_height(void);
 
 #endif /* FSL_TEXT_H */

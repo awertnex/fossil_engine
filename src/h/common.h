@@ -30,7 +30,7 @@
 #define FSL_ENGINE_VERSION_MAJOR    0
 #define FSL_ENGINE_VERSION_MINOR    4
 #define FSL_ENGINE_VERSION_PATCH    0
-#define FSL_ENGINE_VERSION_BUILD    FSL_ENGINE_VERSION_BETA
+#define FSL_ENGINE_VERSION_BUILD    FSL_ENGINE_VERSION_DEV
 
 #if defined(__linux__) || defined(__linux)
 #   define _GNU_SOURCE
@@ -43,6 +43,10 @@
 #   define FSL_RUNTIME_PATH         "$ORIGIN"
 #   define FSL_SLASH_NATIVE         '/'
 #   define FSL_SLASH_NON_NATIVE     '\\'
+#   define fsl_mkdir(name)          mkdir(name, 0755)
+#   define fsl_chdir(name)          chdir(name)
+#   define fsl_stat(name, st)       lstat(name, st)
+#   define fsl_chmod(name, n)       lchmod(name, n)
 #elif defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 #   define FSL_PLATFORM_WIN         1
 #   define FSL_PLATFORM             "win"
@@ -52,6 +56,10 @@
 #   define FSL_RUNTIME_PATH         "%CD%"
 #   define FSL_SLASH_NATIVE         '\\'
 #   define FSL_SLASH_NON_NATIVE     '/'
+#   define fsl_mkdir(name)          _mkdir(name)
+#   define fsl_chdir(name)          _chdir(name)
+#   define fsl_stat(name, st)       _lstat(name, st)
+#   define fsl_chmod(name, n)       _chmod(name, n)
 #endif /* FSL_PLATFORM */
 
 #if FSL_PLATFORM_WIN
@@ -98,7 +106,6 @@
 #define FSL_FONT_RESOLUTION_DEFAULT 64
 #define FSL_FONT_SIZE_DEFAULT 22.0f
 #define FSL_TEXT_TAB_SIZE 4
-#define FSL_TEXT_CHAR_STRIDE 5
 #define FSL_TEXT_COLOR_SHADOW 0x00000060
 #define FSL_TEXT_OFFSET_SHADOW 2.0f
 #define FSL_TARGET_FPS_DEFAULT 60
@@ -175,6 +182,7 @@ enum fsl_texture_index
 {
     FSL_TEXTURE_INDEX_PANEL_ACTIVE,
     FSL_TEXTURE_INDEX_PANEL_INACTIVE,
+    FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE,
     FSL_TEXTURE_INDEX_COUNT,
 }; /* fsl_texture_index */
 

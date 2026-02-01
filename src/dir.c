@@ -34,18 +34,7 @@
 #include <unistd.h>
 #include <inttypes.h>
 #include <fcntl.h>
-
-/* TODO: fix `fsl_get_file_type()`: handle file types other than 'reg' and 'dir' */
-u64 fsl_get_file_type(const str *name)
-{
-    struct stat stats = {0};
-    if (stat(name, &stats) == 0)
-        return S_ISREG(stats.st_mode) | (S_ISDIR(stats.st_mode) * 2);
-
-    _LOGERROR(FSL_ERR_FILE_NOT_FOUND, 0,
-            "File '%s' Not Found\n", name);
-    return 0;
-}
+#include <errno.h>
 
 u32 fsl_is_file(const str *name)
 {
@@ -53,40 +42,44 @@ u32 fsl_is_file(const str *name)
         return fsl_err;
 
     struct stat stats;
-    if (stat(name, &stats) == 0 && S_ISREG(stats.st_mode))
+    if (fsl_stat(name, &stats) == 0)
     {
-        fsl_err = FSL_ERR_SUCCESS;
-        return fsl_err;
+        if (S_ISREG(stats.st_mode))
+            fsl_err = FSL_ERR_SUCCESS;
+        else
+            fsl_err = FSL_ERR_IS_NOT_FILE;
     }
+    else
+        fsl_err = FSL_ERR_FILE_NOT_FOUND;
 
-    fsl_err = FSL_ERR_IS_NOT_FILE;
     return fsl_err;
 }
 
 u32 fsl_is_file_exists(const str *name, b8 log)
 {
     struct stat stats = {0};
-    if (stat(name, &stats) == 0)
+    if (fsl_stat(name, &stats) == 0)
     {
-        if (S_ISREG(stats.st_mode))
-        {
+        if (S_ISREG(stats.st_mode) || S_ISLNK(stats.st_mode))
             fsl_err = FSL_ERR_SUCCESS;
-            return fsl_err;
-        }
         else
         {
             if (log)
                 _LOGERROR(FSL_ERR_IS_NOT_FILE, 0,
-                        "'%s' is Not a Regular File\n", name);
-            else fsl_err = FSL_ERR_IS_NOT_FILE;
-            return fsl_err;
+                        "'%s' is Not a File\n", name);
+            else
+                fsl_err = FSL_ERR_IS_NOT_FILE;
         }
     }
-    if (log)
-        _LOGERROR(FSL_ERR_FILE_NOT_FOUND, 0,
-                "File '%s' Not Found\n", name);
+    else
+    {
+        if (log)
+            _LOGERROR(FSL_ERR_FILE_NOT_FOUND, 0,
+                    "File '%s' Not Found\n", name);
+        else
+            fsl_err = FSL_ERR_FILE_NOT_FOUND;
+    }
 
-    fsl_err = FSL_ERR_FILE_NOT_FOUND;
     return fsl_err;
 }
 
@@ -95,40 +88,101 @@ u32 fsl_is_dir(const str *name)
     if (fsl_is_dir_exists(name, FALSE) != FSL_ERR_SUCCESS)
         return fsl_err;
     struct stat stats;
-    if (stat(name, &stats) == 0 && S_ISDIR(stats.st_mode))
+    if (fsl_stat(name, &stats) == 0)
     {
-        fsl_err = FSL_ERR_SUCCESS;
-        return fsl_err;
+        if (S_ISDIR(stats.st_mode))
+            fsl_err = FSL_ERR_SUCCESS;
+        else fsl_err = FSL_ERR_IS_NOT_DIR;
     }
+    else
+        fsl_err = FSL_ERR_DIR_NOT_FOUND;
 
-    fsl_err = FSL_ERR_IS_NOT_DIR;
     return fsl_err;
 }
 
 u32 fsl_is_dir_exists(const str *name, b8 log)
 {
     struct stat stats = {0};
-    if (stat(name, &stats) == 0)
+    if (fsl_stat(name, &stats) == 0)
     {
         if (S_ISDIR(stats.st_mode))
-        {
             fsl_err = FSL_ERR_SUCCESS;
-            return fsl_err;
-        }
         else
         {
             if (log)
                 _LOGERROR(FSL_ERR_IS_NOT_DIR, 0,
                         "'%s' is Not a Directory\n", name);
-            else fsl_err = FSL_ERR_IS_NOT_DIR;
-            return fsl_err;
+            else
+                fsl_err = FSL_ERR_IS_NOT_DIR;
         }
     }
-    if (log)
-        _LOGERROR(FSL_ERR_DIR_NOT_FOUND, 0,
-                "Directory '%s' Not Found\n", name);
+    else
+    {
+        if (log)
+            _LOGERROR(FSL_ERR_DIR_NOT_FOUND, 0,
+                    "Directory '%s' Not Found\n", name);
+        else
+            fsl_err = FSL_ERR_DIR_NOT_FOUND;
+    }
 
-    fsl_err = FSL_ERR_DIR_NOT_FOUND;
+    return fsl_err;
+}
+
+u32 fsl_make_dir(const str *path)
+{
+    if (fsl_mkdir(path) == 0)
+    {
+        _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+                "Directory Created '%s'\n", path);
+
+        fsl_err = FSL_ERR_SUCCESS;
+        return fsl_err;
+    }
+
+    switch (errno)
+    {
+        case EEXIST:
+            fsl_err = FSL_ERR_DIR_EXISTS;
+            break;
+
+        default:
+            _LOGERROR(FSL_ERR_DIR_CREATE_FAIL, 0,
+                    "Failed to Create Directory '%s'\n", path);
+    }
+
+    return fsl_err;
+}
+
+int fsl_change_dir(const str *path)
+{
+    int success = chdir(path);
+    _LOGTRACE(0, "Working Directory Changed to '%s'\n", path);
+    return success;
+}
+
+u32 fsl_get_file_type(const str *name, u32 *type)
+{
+    struct stat stats = {0};
+    if (fsl_stat(name, &stats) == 0)
+    {
+        if (S_ISREG(stats.st_mode))
+            *type = FSL_FILE_TYPE_REG;
+        else if (S_ISLNK(stats.st_mode))
+            *type = FSL_FILE_TYPE_LNK;
+        else if (S_ISDIR(stats.st_mode))
+            *type = FSL_FILE_TYPE_DIR;
+        else if (S_ISCHR(stats.st_mode))
+            *type = FSL_FILE_TYPE_CHR;
+        else if (S_ISBLK(stats.st_mode))
+            *type = FSL_FILE_TYPE_BLK;
+        else if (S_ISFIFO(stats.st_mode))
+            *type = FSL_FILE_TYPE_FIFO;
+
+        return FSL_ERR_SUCCESS;
+    }
+
+    _LOGERROR(FSL_ERR_FILE_NOT_FOUND, 0,
+            "File '%s' Not Found\n", name);
     return fsl_err;
 }
 
@@ -279,9 +333,11 @@ u64 fsl_get_dir_entry_count(const str *name)
 u32 fsl_copy_file(const str *src, const str *dst)
 {
     str str_dst[PATH_MAX] = {0};
+    str str_lnk[PATH_MAX] = {0}; /* if is symlink, store symlink's link in this buffer */
     str *in_file = NULL;
     FILE *out_file = NULL;
     u64 len = 0;
+    u32 file_type = 0;
     struct stat stats = {0};
     struct timespec ts[2] = {0};
 
@@ -297,34 +353,75 @@ u32 fsl_copy_file(const str *src, const str *dst)
         fsl_posix_slash(str_dst);
     }
 
-    if ((out_file = fopen(str_dst, "wb")) == NULL)
-    {
-        _LOGERROR(FSL_ERR_FILE_OPEN_FAIL,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                "Failed to Copy File '%s' -> '%s'\n", src, str_dst);
+    if (fsl_get_file_type(src, &file_type) != FSL_ERR_SUCCESS)
         return fsl_err;
-    }
 
-    len = fsl_get_file_contents(src, (void*)&in_file, 1, FALSE);
-    if (fsl_err != FSL_ERR_SUCCESS || !in_file)
+    switch (file_type)
     {
-        fclose(out_file);
-        return fsl_err;
+        case FSL_FILE_TYPE_REG:
+            if ((out_file = fopen(str_dst, "wb")) == NULL)
+            {
+                _LOGERROR(FSL_ERR_FILE_OPEN_FAIL, 0,
+                        "Failed to Copy File '%s' -> '%s'\n", src, str_dst);
+                return fsl_err;
+            }
+
+            len = fsl_get_file_contents(src, (void*)&in_file, 1, FALSE);
+            if (fsl_err != FSL_ERR_SUCCESS || !in_file)
+            {
+                fclose(out_file);
+                return fsl_err;
+            }
+
+            fwrite(in_file, 1, len, out_file);
+
+            _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+                    "File Copied '%s' -> '%s'\n", src, str_dst);
+
+            fclose(out_file);
+            fsl_mem_free((void*)&in_file, strlen(in_file), "fsl_copy_file().in_file");
+
+            if (fsl_stat(src, &stats) == 0)
+                fsl_chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
+            else
+            {
+                _LOGWARNING(FSL_ERR_FILE_STAT_FAIL,
+                        FSL_FLAG_LOG_NO_VERBOSE,
+                        "Failed to Copy File Permissions '%s' -> '%s', 'fsl_stat()' Failed\n",
+                        src, str_dst);
+                return fsl_err;
+            }
+            break;
+
+        case FSL_FILE_TYPE_LNK:
+            if (readlink(src, str_lnk, PATH_MAX - 1) < 1)
+            {
+                _LOGERROR(FSL_ERR_FILE_OPEN_FAIL, 0,
+                        "Failed to Copy Symlink '%s' -> '%s'\n", src, str_dst);
+                return fsl_err;
+            }
+
+            if (fsl_is_file_exists(str_dst, FALSE) == FSL_ERR_SUCCESS)
+                remove(str_dst);
+
+            str_lnk[strnlen(str_lnk, PATH_MAX - 1)] = '\0';
+            symlink(str_lnk, str_dst);
+
+            _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+                    "Symlink Copied '%s' -> '%s'\n", src, str_dst);
+
+            if (fsl_stat(src, &stats) == 0)
+                fsl_chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
+            else
+            {
+                _LOGWARNING(FSL_ERR_FILE_STAT_FAIL,
+                        FSL_FLAG_LOG_NO_VERBOSE,
+                        "Failed to Copy File Permissions '%s' -> '%s', 'fsl_stat()' Failed\n",
+                        src, str_dst);
+                return fsl_err;
+            }
+            break;
     }
-
-    fwrite(in_file, 1, len, out_file);
-    fclose(out_file);
-
-    _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            "File Copied '%s' -> '%s'\n", src, str_dst);
-
-    if (stat(src, &stats) == 0)
-        chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
-    else
-        _LOGWARNING(FSL_ERR_FILE_STAT_FAIL,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                "Failed to Copy File Permissions '%s' -> '%s', 'stat()' Failed\n",
-                src, str_dst);
 
     if (stats.st_atim.tv_nsec == 0)
         stats.st_atim.tv_nsec = 1;
@@ -338,7 +435,7 @@ u32 fsl_copy_file(const str *src, const str *dst)
 
     ts[0] = stats.st_atim;
     ts[1] = stats.st_mtim;
-    utimensat(AT_FDCWD, str_dst, ts, 0);
+    utimensat(AT_FDCWD, str_dst, ts, AT_SYMLINK_NOFOLLOW);
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -395,12 +492,12 @@ u32 fsl_copy_dir(const str *src, const str *dst, b8 contents_only)
     _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             "Directory Copied '%s' -> '%s'\n", src, str_dst);
 
-    if (stat(str_src, &stats) == 0)
-        chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
+    if (fsl_stat(str_src, &stats) == 0)
+        fsl_chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
     else
         _LOGWARNING(FSL_ERR_FILE_STAT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "Failed to Copy Directory Permissions '%s' -> '%s', 'stat()' Failed\n",
+                "Failed to Copy Directory Permissions '%s' -> '%s', 'fsl_stat()' Failed\n",
                 str_src, str_dst);
 
     if (stats.st_atim.tv_nsec == 0)
