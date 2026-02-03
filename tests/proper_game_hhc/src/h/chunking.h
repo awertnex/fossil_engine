@@ -4,8 +4,8 @@
 #include "assets.h"
 #include "main.h"
 
-#include <src/h/common.h>
-#include <src/h/types.h>
+#include "src/h/common.h"
+#include "src/h/types.h"
 
 #define CHUNK_DIAMETER  16
 #define CHUNK_LAYER     (CHUNK_DIAMETER * CHUNK_DIAMETER)

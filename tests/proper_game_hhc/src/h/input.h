@@ -4,8 +4,8 @@
 #include "main.h"
 #include "player.h"
 
-#include <src/h/core.h>
-#include <src/h/types.h>
+#include "src/h/core.h"
+#include "src/h/types.h"
 
 /* ---- movement ------------------------------------------------------------ */
 

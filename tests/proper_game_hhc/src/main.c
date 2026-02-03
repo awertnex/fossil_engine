@@ -11,7 +11,7 @@
 #include "h/terrain.h"
 #include "h/world.h"
 
-#include <src/h/fossil_engine.h>
+#include "src/h/fossil_engine.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -127,7 +127,7 @@ static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset)
     }
 
     if (core.flag.super_debug)
-        scrool = fsl_clamp_i32(scrool + (i32)yoffset * SET_CONSOLE_SCROLL_SPEED, 0, fsl_logger_tab_index);
+        scrool = fsl_clamp_i32(scrool + (i32)yoffset * SET_CONSOLE_SCROLL_SPEED, 0, logger_core.cursor);
 }
 
 static u32 settings_init(void)
@@ -994,7 +994,8 @@ static void draw_everything(void)
 
     /* ---- draw ui --------------------------------------------------------- */
 
-    fsl_ui_start(NULL, FALSE, TRUE); /* clear ui buffer */
+    /* clear ui buffer */
+    fsl_ui_start(NULL, FALSE, TRUE);
     fsl_ui_stop();
 
     if (core.flag.hud)
@@ -1163,17 +1164,18 @@ static void draw_everything(void)
         fsl_text_start(font[FONT_MONO_BOLD], settings.font_size, 0, NULL, FALSE);
         i32 i = 0;
         u32 index = 0;
-        f32 logger_panel_height = 0.0f;
-        for (i = 24; i > 0; --i)
+        i32 logger_panel_height = 400;
+        for (i = 20; i > 0; --i)
         {
-            index = fsl_mod_i32(fsl_logger_tab_index - i - scrool, FSL_LOGGER_HISTORY_MAX);
-            fsl_text_push(fsl_stringf("%s\n", fsl_logger_tab[index]),
+            index = fsl_mod_i32(logger_core.cursor - i - scrool, FSL_LOGGER_HISTORY_MAX);
+            fsl_text_push(fsl_stringf("%s\n", logger_core.i[index]),
                     SET_MARGIN * 2, render->size.y - SET_MARGIN * 2,
-                    0, 0, render->size.x - 40,
-                    fsl_logger_color[index]);
-        }
+                    0, 0, render->size.x - SET_MARGIN * 4,
+                    logger_core.color[index]);
 
-        logger_panel_height = fsl_get_text_height();
+            if ((i32)fsl_get_text_height() + SET_MARGIN * 2 >= logger_panel_height)
+                break;
+        }
 
         /* align once after all the strings' heights in text batch have accumulated into total text height */
         fsl_text_push("", 0, 0, 0, FSL_TEXT_ALIGN_BOTTOM, 0, 0x00000000);
@@ -1313,7 +1315,7 @@ section_world_loaded:
 
     generate_standard_meshes();
 
-    while (fsl_engine_running(callback_framebuffer_size))
+    while (fsl_engine_running(&callback_framebuffer_size))
     {
         input_update(&_player);
         settings_update();

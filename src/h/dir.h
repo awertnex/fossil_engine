@@ -1,4 +1,8 @@
-/*  Copyright 2026 Lily Awertnex
+/*  @file dir.h
+ *
+ *  @brief directory and file parsing, writing, copying and path resolution.
+ *
+ *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -11,9 +15,6 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.OFTWARE.
- */
-
-/*  dir.h - directory and file parsing, writing, copying and path resolution
  */
 
 #ifndef FSL_DIR_H
@@ -122,7 +123,7 @@ FSLAPI u32 fsl_copy_dir(const str *src, const str *dst, b8 contents_only);
 
 /*! @brief overwrite contents of file at `name` with contents of `buf`, and create
  *  new file if it doesn't exist.
- *  
+ *
  *  @param log enable/disable logging.
  *  @param text enable/disable newline (`\n`) termination of file.
  *
@@ -157,7 +158,7 @@ FSLAPI u32 fsl_get_path_absolute(const str *name, str **dst);
  *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
  *  @brief get real path.
- * 
+ *
  *  @param name relative path.
  *  @param dst result/canonical `path`, ending with slash (`/`).
  *

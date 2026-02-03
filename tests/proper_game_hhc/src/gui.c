@@ -3,11 +3,11 @@
 #include "h/gui.h"
 #include "h/dir.h"
 
-#include <src/h/core.h>
-#include <src/h/diagnostics.h>
-#include <src/h/logger.h>
-#include <src/h/memory.h>
-#include <src/h/string.h>
+#include "src/h/core.h"
+#include "src/h/diagnostics.h"
+#include "src/h/logger.h"
+#include "src/h/memory.h"
+#include "src/h/string.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -31,7 +31,7 @@ u32 gui_init(void)
 
 #ifdef FUCK /* TODO: undef FUCK */
 /*jump*/
-/* 
+/*
  * scale = (source.scale * scl);
  */
 void draw_texture_a(Texture2D texture, Rectangle source, Rectangle dest, v2i16 pos, v2i16 scl, Color tint)
@@ -39,26 +39,26 @@ void draw_texture_a(Texture2D texture, Rectangle source, Rectangle dest, v2i16 p
     if ((texture.id <= 0) || (scl.x <= 0.0f) || (scl.y <= 0.0f)
             || (source.width == 0.0f) || (source.height == 0.0f))
         return;
- 
+
     rlSetTexture(texture.id);
     rlColor4ub(tint.r, tint.g, tint.b, tint.a);
     rlNormal3f(0.0f, 0.0f, 1.0f);
- 
+
     i32 tile_width = source.width * scl.x;
     i32 tile_height = source.height * scl.y;
- 
+
     /* top left */
     rlTexCoord2f(source.x / texture.width, source.y / texture.height);
     rlVertex2f(pos.x, pos.y);
- 
+
     /* bottom left */
     rlTexCoord2f(source.x / texture.width, (source.y + source.height) / texture.height);
     rlVertex2f(pos.x, pos.y + tile_height);
- 
+
     /* bottom right */
     rlTexCoord2f((source.x + source.width) / texture.width, (source.y + source.height) / texture.height);
     rlVertex2f(pos.x + tile_width, pos.y + tile_height);
- 
+
     /* top right */
     rlTexCoord2f((source.x + source.width) / texture.width, source.y / texture.height);
     rlVertex2f(pos.x + tile_width, pos.y);
@@ -249,13 +249,13 @@ void draw_hud()
     draw_texture(texture_hud_widgets, hotbar_offhand,
             (v2i16){
             hotbar_pos.x - ((hotbar.width / 2) * setting.gui_scale) - (hotbar.height * 2 * setting.gui_scale),
-            hotbar_pos.y + setting.gui_scale}, 
+            hotbar_pos.y + setting.gui_scale},
             (v2i16){setting.gui_scale, setting.gui_scale},
             0, 2, COL_TEXTURE_DEFAULT);
 
     if (!(flag & FLAG_DEBUG))
         draw_texture(texture_hud_widgets, crosshair,
-                crosshair_pos, 
+                crosshair_pos,
                 (v2i16){setting.gui_scale, setting.gui_scale},
                 0, 0, COL_TEXTURE_DEFAULT);
 
@@ -294,7 +294,7 @@ float get_str_width(Font font, const str* str, f32 font_size, f32 spacing)
     return result + 4;
 }
 
-/* 
+/*
  * raylib/rtextures.c/DrawTexturePro refactored;
  * scale = (source.scale * scl);
  * align_x = (0 = left, 1 = center, 2 = right);
@@ -354,7 +354,7 @@ void draw_texture(Texture2D texture, Rectangle source, v2i16 pos, v2i16 scl, u8 
 
 /*jump*/
 /* TODO: make draw_texture_tiled() */
-/* 
+/*
  * raylib/examples/textures/textures_draw_tiled.c/DrawTextureTiled refactored;
  */
 void draw_texture_tiled(Texture2D texture, Rectangle source, Rectangle dest, v2i16 pos, v2i16 scl, Color tint)
@@ -377,7 +377,7 @@ void draw_texture_tiled(Texture2D texture, Rectangle source, Rectangle dest, v2i
     // bottom left
     rlTexCoord2f(source.x/texture.width, (source.y + source.height)/texture.height);
     rlVertex2f(pos.x, pos.y + tile_height);
-    
+
     // bottom right
     rlTexCoord2f((source.x + source.width)/texture.width, (source.y + source.height)/texture.height);
     rlVertex2f(pos.x + tile_width, pos.y + tile_height);
@@ -517,7 +517,7 @@ void draw_button(Texture2D texture, Rectangle button, v2i16 pos, u8 align_x, u8 
                 func();
         }
         else
-            draw_texture(texture, button, pos, 
+            draw_texture(texture, button, pos,
                     (v2i16){setting.gui_scale, setting.gui_scale},
                     0, 0, COL_TEXTURE_DEFAULT);
 
@@ -526,7 +526,7 @@ void draw_button(Texture2D texture, Rectangle button, v2i16 pos, u8 align_x, u8 
                     (v2i16){pos.x + ((button.width * setting.gui_scale) / 2), pos.y + ((button.height * setting.gui_scale) / 2)},
                     FONT_SIZE_DEFAULT, 1, align_x, align_y, COL_TEXT_DEFAULT);
 
-    } else draw_texture(texture, button_inactive, pos, 
+    } else draw_texture(texture, button_inactive, pos,
             (v2i16){setting.gui_scale, setting.gui_scale},
             0, 0, COL_TEXTURE_DEFAULT);
 }

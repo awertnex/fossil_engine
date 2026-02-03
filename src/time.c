@@ -1,4 +1,8 @@
-/*  Copyright 2026 Lily Awertnex
+/*  @file time.h
+ *
+ *  @brief get time, limit framerate, set timer and get time window.
+ *
+ *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -11,9 +15,6 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.OFTWARE.
- */
-
-/*  time.h - get time, limit framerate, set timer and get time window
  */
 
 #include "h/common.h"

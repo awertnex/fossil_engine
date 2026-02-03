@@ -1,4 +1,8 @@
-/*  Copyright 2026 Lily Awertnex
+/*  @file ui.c
+ *
+ *  @brief everything about drawing ui elements.
+ *
+ *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -11,9 +15,6 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.OFTWARE.
- */
-
-/*  ui.c - everything about drawing ui elements
  */
 
 #include "h/common.h"
@@ -40,6 +41,12 @@ static struct fsl_ui_core
     GLuint vbo_nine_slice;
     b8 vao_loaded;
     fsl_fbo fbo;
+
+    /*! @brief panel buffer, raw panel data.
+     */
+    fsl_panel_nine_slice *panel_buf;
+
+    u64 panel_count;
 
     struct /* uniform */
     {
@@ -77,7 +84,19 @@ u32 fsl_ui_init(b8 multisample)
 
             fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE], (v2i32){128, 128},
                 GL_RGB, GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE,
-                FSL_DIR_NAME_TEXTURES"panel_debug_nine_slice.png") != FSL_ERR_SUCCESS)
+                FSL_DIR_NAME_TEXTURES"panel_debug_nine_slice.png") != FSL_ERR_SUCCESS ||
+
+            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_SELECTED], (v2i32){16, 16},
+                GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
+                FSL_DIR_NAME_TEXTURES"button_selected.png") != FSL_ERR_SUCCESS ||
+
+            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_ACTIVE], (v2i32){16, 16},
+                GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
+                FSL_DIR_NAME_TEXTURES"button_active.png") != FSL_ERR_SUCCESS ||
+
+            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_INACTIVE], (v2i32){16, 16},
+                GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
+                FSL_DIR_NAME_TEXTURES"button_inactive.png") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     for (i = 0; i < FSL_TEXTURE_INDEX_COUNT; ++i)
@@ -191,8 +210,16 @@ void fsl_ui_start(fsl_fbo *fbo, b8 nine_slice, b8 clear)
         glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void fsl_ui_push_panel()
+void fsl_ui_push_panel(i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, u32 tint)
 {
+    fsl_panel_nine_slice _panel = fsl_get_nine_slice(
+            fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE].size,
+            pos_x, pos_y, size_x, size_y, FSL_UI_SLICE_SIZE_DEFAULT);
+
+    glBindBuffer(GL_ARRAY_BUFFER, fsl_ui_core.vbo_nine_slice);
+    glBufferData(GL_ARRAY_BUFFER, fsl_ui_core.panel_count * sizeof(fsl_panel_nine_slice),
+            fsl_ui_core.panel_buf, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,

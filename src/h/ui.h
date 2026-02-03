@@ -1,4 +1,8 @@
-/*  Copyright 2026 Lily Awertnex
+/*  @file ui.h
+ *
+ *  @brief everything about drawing ui elements.
+ *
+ *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,9 +17,6 @@
  *  limitations under the License.OFTWARE.
  */
 
-/*  ui.h - everything about drawing ui elements
- */
-
 #ifndef FSL_UI_H
 #define FSL_UI_H
 
@@ -23,8 +24,9 @@
 #include "core.h"
 #include "types.h"
 
-#define FSL_PANEL_GAP_DEFAULT 10
-#define FSL_PANEL_PADDING_DEFAULT 10
+#define FSL_UI_PANEL_GAP_DEFAULT 10
+#define FSL_UI_PANEL_PADDING_DEFAULT 10
+#define FSL_UI_SLICE_SIZE_DEFAULT 8
 
 /*! @brief one slice in a 9-slice panel.
  */
@@ -67,6 +69,10 @@ FSLAPI u32 fsl_ui_init(b8 multisample);
  *  @remark can re-allocate `fbo` with `multisample` setting used in @ref fsl_ui_init().
  */
 FSLAPI void fsl_ui_start(fsl_fbo *fbo, b8 nine_slice, b8 clear);
+
+/*! @brief push default engine panel onto internal panel buffer.
+ */
+FSLAPI void fsl_ui_push_panel(i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, u32 tint);
 
 FSLAPI void fsl_ui_render(void);
 FSLAPI void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,

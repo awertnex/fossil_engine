@@ -4,7 +4,7 @@
 #include "common.h"
 #include "main.h"
 
-#include <src/h/collision.h>
+#include "src/h/collision.h"
 
 #define PLAYER_REACH_DISTANCE_MAX   5.0f
 #define PLAYER_HOTBAR_SLOTS_MAX     10

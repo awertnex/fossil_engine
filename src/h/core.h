@@ -1,4 +1,8 @@
-/*  Copyright 2026 Lily Awertnex
+/*  @file core.h
+ *
+ *  @brief engine init, running, close, windowing, opengl loading.
+ *
+ *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -11,9 +15,6 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.OFTWARE.
- */
-
-/*  core.h - engine init, running, close, windowing, opengl loading
  */
 
 #ifndef FSL_CORE_H
@@ -222,7 +223,7 @@ FSLAPI void fsl_engine_close(void);
 /*! @brief get engine-specific string no longer than @ref NAME_MAX bytes.
  *
  *  @param dst pointer to buffer to store string.
- *  
+ *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_engine_get_string(str *dst, enum fsl_string_index type);
@@ -271,7 +272,7 @@ FSLAPI u32 fsl_change_render(fsl_render *_render);
 FSLAPI void fsl_request_screenshot(void);
 
 /*! @remark take screenshot requested by @ref fsl_request_screenshot() and save into dir at `dir_screenshots`.
- *  
+ *
  *  @param dir_screenshots directory to save screenshot to.
  *  @param special_text string appended to file name before extension.
  *
@@ -377,7 +378,7 @@ FSLAPI void fsl_update_camera_movement(fsl_camera *camera, b8 roll);
 FSLAPI void fsl_update_projection_perspective(fsl_camera camera, fsl_projection *projection, b8 roll);
 
 /*! @brief get camera look-at angles from camera position and target position.
- *  
+ *
  *  assign vertical angle to `pitch` and horizontal angle to `yaw`.
  */
 FSLAPI void fsl_get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f64 *yaw);

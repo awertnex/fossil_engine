@@ -7,7 +7,14 @@
    first version of the engine as standalone in this repo
 
 - - -
-## v0.4.0-dev (current)
+## v0.5.0-beta (2026 02 01)
+
+#### changes
+- (2026 02 02): Group logger globals into one struct `fsl_logger_core`
+- (2026 02 02): Add FPS string to function `fsl_engine_get_string()`
+
+- - -
+## v0.5.0-beta (2026 02 01)
 
 #### changes
 - (2026 01 31): Add text window restriction
@@ -423,7 +430,7 @@
 ## Heaven-Hell Continuum - v0.1.3 (03 Apr 2025)
 
 #### changes
-- fixed segfault while placing or breaking blocks in non-allocated chunk area 
+- fixed segfault while placing or breaking blocks in non-allocated chunk area
 - switched to C99 standard
 - changed original resources to avoid copyright
 - made build system more difficult to read but easier to use (not tested on windows)

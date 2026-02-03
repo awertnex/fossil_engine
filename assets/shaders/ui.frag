@@ -6,6 +6,6 @@ in vec2 vs_tex_coords;
 out vec4 color;
 
 void main()
-{ 
+{
     color = texture(texture_image, vs_tex_coords) * tint;
 }

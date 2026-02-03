@@ -4,10 +4,10 @@
 #include "common.h"
 #include "dir.h"
 
-#include <src/h/core.h>
-#include <src/h/limits.h>
-#include <src/h/shaders.h>
-#include <src/h/types.h>
+#include "src/h/core.h"
+#include "src/h/limits.h"
+#include "src/h/shaders.h"
+#include "src/h/types.h"
 
 #define FRICTION_BLOCK_SLIPPERY 0.02f
 #define FRICTION_BLOCK_WET      0.1f

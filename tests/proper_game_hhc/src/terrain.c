@@ -4,8 +4,8 @@
 #include "h/terrain.h"
 #include "h/world.h"
 
-#include <src/h/math.h>
-#include <src/h/memory.h>
+#include "src/h/math.h"
+#include "src/h/memory.h"
 
 #include <stdio.h>
 #include <math.h>

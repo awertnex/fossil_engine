@@ -3,7 +3,7 @@
 
 #include "diagnostics.h"
 
-#include <src/h/types.h>
+#include "src/h/types.h"
 
 #define GAME_VERSION_STABLE "-stable"
 #define GAME_VERSION_BETA   "-beta"

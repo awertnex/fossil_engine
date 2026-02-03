@@ -1,8 +1,8 @@
 #include "h/main.h"
 
-#include <src/h/dir.h>
-#include <src/h/limits.h>
-#include <src/h/memory.h>
+#include "src/h/dir.h"
+#include "src/h/limits.h"
+#include "src/h/memory.h"
 
 #include <string.h>
 

@@ -3,10 +3,10 @@
 #include "h/logger.h"
 #include "h/main.h"
 
-#include <src/h/core.h>
-#include <src/h/memory.h>
-#include <src/h/shaders.h>
-#include <src/h/string.h>
+#include "src/h/core.h"
+#include "src/h/memory.h"
+#include "src/h/shaders.h"
+#include "src/h/string.h"
 
 #include <stdio.h>
 

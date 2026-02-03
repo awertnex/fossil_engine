@@ -7,12 +7,12 @@
 #include "h/terrain.h"
 #include "h/world.h"
 
-#include <src/h/diagnostics.h>
-#include <src/h/dir.h>
-#include <src/h/input.h>
-#include <src/h/memory.h>
-#include <src/h/math.h>
-#include <src/h/string.h>
+#include "src/h/diagnostics.h"
+#include "src/h/dir.h"
+#include "src/h/input.h"
+#include "src/h/memory.h"
+#include "src/h/math.h"
+#include "src/h/string.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,13 +50,13 @@ GLuint chunk_gizmo_render_vbo = 0;
 /*! -- INTERNAL USE ONLY --;
  */
 static void _block_place(chunk *ch,
-        chunk *px, chunk *nx, chunk *py, chunk *ny, chunk *pz, chunk *nz, 
+        chunk *px, chunk *nx, chunk *py, chunk *ny, chunk *pz, chunk *nz,
         v3u32 chunk_tab_coordinates, i32 x, i32 y, i32 z, enum block_id block_id);
 
 /*! -- INTERNAL USE ONLY --;
  */
 static void _block_break(chunk *ch,
-        chunk *px, chunk *nx, chunk *py, chunk *ny, chunk *pz, chunk *nz, 
+        chunk *px, chunk *nx, chunk *py, chunk *ny, chunk *pz, chunk *nz,
         v3u32 chunk_tab_coordinates, i32 x, i32 y, i32 z);
 
 /*! -- INTERNAL USE ONLY --;
@@ -714,7 +714,7 @@ void block_place(u32 index, i32 x, i32 y, i32 z, v3f64 normal, enum block_id blo
 }
 
 static void _block_place(chunk *ch,
-        chunk *px, chunk *nx, chunk *py, chunk *ny, chunk *pz, chunk *nz, 
+        chunk *px, chunk *nx, chunk *py, chunk *ny, chunk *pz, chunk *nz,
         v3u32 chunk_tab_coordinates, i32 x, i32 y, i32 z, enum block_id block_id)
 {
     x = fsl_mod_i32(x, CHUNK_DIAMETER);
@@ -792,7 +792,7 @@ static void _block_place(chunk *ch,
     else if (ch->block[z + 1][y][x])
         ch->block[z + 1][y][x] &= ~FLAG_BLOCK_FACE_NZ;
     else ch->block[z][y][x] |= FLAG_BLOCK_FACE_PZ;
-    
+
     if (z == 0)
     {
         if (chunk_tab_coordinates.z != 0 &&
@@ -847,7 +847,7 @@ void block_break(u32 index, i32 x, i32 y, i32 z)
 }
 
 static void _block_break(chunk *ch,
-        chunk *px, chunk *nx, chunk *py, chunk *ny, chunk *pz, chunk *nz, 
+        chunk *px, chunk *nx, chunk *py, chunk *ny, chunk *pz, chunk *nz,
         v3u32 chunk_tab_coordinates, i32 x, i32 y, i32 z)
 {
     x = fsl_mod_i32(x, CHUNK_DIAMETER);

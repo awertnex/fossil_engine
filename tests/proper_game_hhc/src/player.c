@@ -4,9 +4,9 @@
 #include "h/player.h"
 #include "h/world.h"
 
-#include <src/h/collision.h>
-#include <src/h/math.h>
-#include <src/h/time.h>
+#include "src/h/collision.h"
+#include "src/h/math.h"
+#include "src/h/time.h"
 
 #include <math.h>
 

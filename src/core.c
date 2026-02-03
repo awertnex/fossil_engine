@@ -1,4 +1,8 @@
-/*  Copyright 2026 Lily Awertnex
+/*  @file core.c
+ *
+ *  @brief engine init, running, close, windowing, opengl loading.
+ *
+ *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -11,9 +15,6 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.OFTWARE.
- */
-
-/*  core.c - engine init, running, close, windowing, opengl loading
  */
 
 #include "h/common.h"
@@ -93,7 +94,7 @@ static void glfw_callback_error(int error, const char* message)
 /*! -- INTERNAL USE ONLY --;
  *
  *  @brief take screenshot and save it into dir at `dir_screenshots`.
- *  
+ *
  *  save pixel data as RGB into @ref fsl_render.screen_buf.
  *
  *  @param dir_screenshots directory to save screenshot to.
@@ -427,7 +428,7 @@ u32 fsl_change_render(fsl_render *_render)
                 "%s\n", "No Window Found for the Currently Bound Render");
         return fsl_err;
     }
-    
+
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }

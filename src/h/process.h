@@ -1,4 +1,8 @@
-/*  Copyright 2026 Lily Awertnex
+/*  @file process.h
+ *
+ *  @brief identify current process, execute commands, fork.
+ *
+ *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -11,9 +15,6 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.OFTWARE.
- */
-
-/*  process.h - identify current process, execute commands, fork
  */
 
 #ifndef FSL_PROCESS_H
@@ -40,7 +41,7 @@ FSLAPI u32 fsl_get_path_bin_root(str **dst);
 u32 _fsl_get_path_bin_root(str *dst);
 
 /*! @brief execute command in a separate child process (based on @ref execvp()).
- * 
+ *
  *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
  *  @param cmd command and args to execute.

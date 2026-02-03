@@ -1,4 +1,8 @@
-/*  Copyright 2026 Lily Awertnex
+/*  @file common.h
+ *
+ *  @brief engine info and commonly shared values.
+ *
+ *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -11,9 +15,6 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.OFTWARE.
- */
-
-/*  common.h - engine info and commonly shared values
  */
 
 #ifndef FSL_COMMON_H
@@ -32,7 +33,20 @@
 #define FSL_ENGINE_VERSION_PATCH    0
 #define FSL_ENGINE_VERSION_BUILD    FSL_ENGINE_VERSION_DEV
 
-#if defined(__linux__) || defined(__linux)
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__) || defined(__MINGW32__)
+#   define FSL_PLATFORM_WIN         1
+#   define FSL_PLATFORM             "win"
+#   define FSL_FILE_NAME_LIB        "fossil.dll"
+#   define FSL_FILE_NAME_PLATFORM   "platform_win.c"
+#   define FSL_EXE                  ".exe"
+#   define FSL_RUNTIME_PATH         "%CD%"
+#   define FSL_SLASH_NATIVE         '\\'
+#   define FSL_SLASH_NON_NATIVE     '/'
+#   define fsl_mkdir(name)          _mkdir(name)
+#   define fsl_chdir(name)          _chdir(name)
+#   define fsl_stat(name, st)       _lstat(name, st)
+#   define fsl_chmod(name, n)       _chmod(name, n)
+#elif defined(__linux__) || defined(__linux)
 #   define _GNU_SOURCE
 
 #   define FSL_PLATFORM_LINUX       1
@@ -47,19 +61,6 @@
 #   define fsl_chdir(name)          chdir(name)
 #   define fsl_stat(name, st)       lstat(name, st)
 #   define fsl_chmod(name, n)       lchmod(name, n)
-#elif defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
-#   define FSL_PLATFORM_WIN         1
-#   define FSL_PLATFORM             "win"
-#   define FSL_FILE_NAME_LIB        "fossil.dll"
-#   define FSL_FILE_NAME_PLATFORM   "platform_win.c"
-#   define FSL_EXE                  ".exe"
-#   define FSL_RUNTIME_PATH         "%CD%"
-#   define FSL_SLASH_NATIVE         '\\'
-#   define FSL_SLASH_NON_NATIVE     '/'
-#   define fsl_mkdir(name)          _mkdir(name)
-#   define fsl_chdir(name)          _chdir(name)
-#   define fsl_stat(name, st)       _lstat(name, st)
-#   define fsl_chmod(name, n)       _chmod(name, n)
 #endif /* FSL_PLATFORM */
 
 #if FSL_PLATFORM_WIN
@@ -183,6 +184,9 @@ enum fsl_texture_index
     FSL_TEXTURE_INDEX_PANEL_ACTIVE,
     FSL_TEXTURE_INDEX_PANEL_INACTIVE,
     FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE,
+    FSL_TEXTURE_INDEX_BUTTON_SELECTED,
+    FSL_TEXTURE_INDEX_BUTTON_ACTIVE,
+    FSL_TEXTURE_INDEX_BUTTON_INACTIVE,
     FSL_TEXTURE_INDEX_COUNT,
 }; /* fsl_texture_index */
 
@@ -193,7 +197,7 @@ enum fsl_texture_index
 extern u64 fsl_init_time;
 
 /*! @brief project root directory.
- *  
+ *
  *  @remark called from @ref fsl_init() and @ref fsl_logger_init() to change current working dirctory.
  *
  *  @remark declared internally.

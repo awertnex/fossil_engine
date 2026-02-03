@@ -3,7 +3,7 @@
 
 #include "gui.h"
 
-#include <src/h/types.h>
+#include "src/h/types.h"
 
 #define SDB_ROW_HEIGHT  22
 #define SDB_BASE_SIZE   5

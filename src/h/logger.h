@@ -1,4 +1,8 @@
-/*  Copyright 2026 Lily Awertnex
+/*  @file logger.h
+ *
+ *  @brief logger.
+ *
+ *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -11,9 +15,6 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.OFTWARE.
- */
-
-/*  logger.h - logger
  */
 
 #ifndef FSL_LOGGER_H
@@ -64,29 +65,42 @@ enum fsl_log_level
     FSL_LOG_LEVEL_COUNT,
 }; /* fsl_log_level */
 
+typedef struct fsl_logger_core
+{
+    u64 flag;
+    u32 log_level_max;
+    str log_dir[PATH_MAX];
+
+    fsl_mem_arena arena;    /* logger arena, raw logger memory data */
+    str **i;                /* pointers to strings in `buf` */
+    str *buf;               /* logger strings */
+    u32 *color;             /* string colors */
+    i32 cursor;             /* current position in `i` */
+} fsl_logger_core;
+
 /* ---- external-use macros ------------------------------------------------- */
 
 #define LOGFATAL(err, flags, format, ...) \
-    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_FATAL, fsl_log_dir, format, ##__VA_ARGS__)
+    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_FATAL, logger_core.log_dir, format, ##__VA_ARGS__)
 
 #define LOGERROR(err, flags, format, ...) \
-    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_ERROR, fsl_log_dir, format, ##__VA_ARGS__)
+    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_ERROR, logger_core.log_dir, format, ##__VA_ARGS__)
 
 #define LOGWARNING(err, flags, format, ...) \
-    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_WARNING, fsl_log_dir, format, ##__VA_ARGS__)
+    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_WARNING, logger_core.log_dir, format, ##__VA_ARGS__)
 
 #define LOGINFO(flags, format, ...) \
-    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_INFO, fsl_log_dir, format, ##__VA_ARGS__)
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_INFO, logger_core.log_dir, format, ##__VA_ARGS__)
 
 #ifdef FOSSIL_RELEASE_BUILD
 #   define LOGDEBUG(flags, format, ...)
 #   define LOGTRACE(flags, format, ...)
 #else
 #   define LOGDEBUG(flags, format, ...) \
-    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_DEBUG, fsl_log_dir, format, ##__VA_ARGS__)
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_DEBUG, logger_core.log_dir, format, ##__VA_ARGS__)
 
 #   define LOGTRACE(flags, format, ...) \
-    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_TRACE, fsl_log_dir, format, ##__VA_ARGS__)
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_TRACE, logger_core.log_dir, format, ##__VA_ARGS__)
 #endif /* FOSSIL_RELEASE_BUILD */
 
 #define LOG_MESH_GENERATE(err, mesh_name) \
@@ -142,26 +156,11 @@ enum fsl_log_level
     _fsl_log_output(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_TRACE, FSL_DIR_NAME_LOGS, format, ##__VA_ARGS__)
 #endif /* FOSSIL_RELEASE_BUILD */
 
-extern u32 fsl_log_level_max;
-FSLAPI extern str fsl_log_dir[PATH_MAX];
-
-/*! @brief logger pointer look-up table that points to `fsl_logger_buf` addresses.
+/*! @brief logger core, all logger data.
  *
  *  @remark read-only, initialized internally in @ref fsl_logger_init().
  */
-FSLAPI extern str **fsl_logger_tab;
-
-/*! @brief logger color look-up table for @ref logger_tab entries.
- *
- *  @remark read-only, initialized internally in @ref fsl_logger_init().
- */
-FSLAPI extern u32 *fsl_logger_color;
-
-/*! @brief current position in @ref fsl_logger_tab.
- *
- *  @remark read-only, updated internally in @ref _fsl_log_output().
- */
-FSLAPI extern i32 fsl_logger_tab_index;
+FSLAPI extern fsl_logger_core logger_core;
 
 /*! @brief initialize logger.
  *

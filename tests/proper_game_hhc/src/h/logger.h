@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-#include <src/h/logger.h>
+#include "src/h/logger.h"
 
 #define HHC_LOGFATAL(err, flags, format, ...) \
     _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_FATAL, GAME_DIR_NAME_LOGS, format, ##__VA_ARGS__)
