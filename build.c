@@ -50,7 +50,7 @@ int main(int argc, char **argv)
             cmd_fail(NULL);
     }
 
-    cmd_exec(40,
+    cmd_exec(39,
             COMPILER,
             "-shared",
             FSL_C_STD,
@@ -86,7 +86,6 @@ int main(int argc, char **argv)
             DIR_SRC FSL_FILE_NAME_PLATFORM,
             DIR_SRC"shaders.c",
             DIR_SRC"string.c",
-            DIR_SRC"text.c",
             DIR_SRC"time.c",
             DIR_SRC"ui.c",
             "-o",

@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     /* if error, will fail and exit */
     build_init(argc, argv, "build.c", "build"EXE);
 
-    if (find_token("proper_game_hhc", argc, argv))
+    if (find_token("proper_game_hhc", argc, argv) || find_token("hhc", argc, argv))
         return build_proper_game(argc, argv);
     else if (find_token("text_rendering", argc, argv))
         return build_text_rendering(argc, argv);

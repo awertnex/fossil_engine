@@ -16,11 +16,10 @@ static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset)
 
 int main(int argc, char **argv)
 {
-    if (fsl_engine_init(argc, argv, NULL, NULL, 1920, 1080, NULL,
-                FSL_FLAG_LOAD_DEFAULT_SHADERS) != FSL_ERR_SUCCESS)
+    if (fsl_engine_init(argc, argv, NULL, NULL, 1920, 1080, NULL, 0) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    fsl_text_init(FSL_FONT_RESOLUTION_DEFAULT, FALSE);
+    fsl_ui_init(FALSE);
 
     glfwSetScrollCallback(render->window, callback_scroll);
 
@@ -84,7 +83,7 @@ page_2:
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
         fsl_text_stop();
 
-        fsl_text_fbo_blit(0);
+        fsl_ui_fbo_blit(0);
 
         if (fsl_is_key_press(FSL_KEY_ENTER))
             goto page_1;

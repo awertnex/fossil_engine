@@ -24,6 +24,8 @@
 #include "limits.h"
 #include "types.h"
 
+/* ---- section: definitions ------------------------------------------------ */
+
 typedef struct fsl_mem_arena
 {
     void ***i;      /* members of `buf` */
@@ -87,6 +89,8 @@ typedef struct fsl_mem_arena
 #define fsl_mem_unmap_arena(x, name) \
     _fsl_mem_unmap_arena(x, name, __BASE_FILE__, __LINE__)
 
+/* ---- section: declarations ----------------------------------------------- */
+
 /*! -- INTERNAL USE ONLY --;
  *
  *  @brief global page size variable.
@@ -100,6 +104,17 @@ typedef struct fsl_mem_arena
  *      @ref _fsl_mem_push_arena().
  */
 extern u64 FSL_PAGE_SIZE;
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief global memory arena, used to manage all heap memory inside and optionally
+ *  outside the engine.
+ *
+ *  initialized once in @ref fsl_engine_init().
+ */
+extern fsl_mem_arena _fsl_memory_arena_internal;
+
+/* ---- section: signatures ------------------------------------------------- */
 
 /*! @brief like @ref fsl_round_up_u64() but only works on powers of two for `size`.
  */

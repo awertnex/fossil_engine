@@ -7,11 +7,24 @@
    first version of the engine as standalone in this repo
 
 - - -
-## v0.5.0-beta (2026 02 01)
+## v0.5.0-dev (current)
 
 #### changes
-- (2026 02 02): Group logger globals into one struct `fsl_logger_core`
-- (2026 02 02): Add FPS string to function `fsl_engine_get_string()`
+- (2026 02 04): change `fsl_ui_fbo_blit()` and `fsl_text_fbo_blit()` to
+                `fsl_fbo_blit()` and move from `text.h` and `ui.h` to `core.h`
+- (2026 02 04): hide function `fsl_text_init()` and move inside function
+                `fsl_ui_init()`
+- (2026 02 04): remove parameter `*fbo` from function `fsl_ui_start()`
+- (2026 02 04): change flag `FSL_FLAG_LOAD_DEFAULT_SHADERS` to
+                `FSL_FLAG_NO_DEFAULT_SHADERS` to make loading default shaders
+                the default choice
+- (2026 02 04): merge `src/h/text.h` into `src/h/ui.h` and use single fbo for
+                both
+- (2026 02 03): make multisampled text rendering
+- (2026 02 03): remove `fbo` parameter from function `fsl_text_start()`
+- (2026 02 03): optimize text rendering: change texture atlas to texture array
+- (2026 02 02): group logger globals into one struct `fsl_logger_core`
+- (2026 02 02): add FPS string to function `fsl_engine_get_string()`
 
 - - -
 ## v0.5.0-beta (2026 02 01)

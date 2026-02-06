@@ -165,21 +165,21 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 lo
                 "%s\n", "Log Directory Not Set");
 
     if (
-            fsl_mem_map_arena(&logger_core.arena,
+            fsl_mem_map_arena(&_fsl_memory_arena_internal,
                 FSL_LOGGER_HISTORY_MAX * sizeof(u32) +
                 FSL_LOGGER_HISTORY_MAX * sizeof(str*) +
                 FSL_LOGGER_HISTORY_MAX * FSL_LOGGER_STRING_MAX,
-                "fsl_logger_init().logger_core.arena") != FSL_ERR_SUCCESS ||
+                "fsl_logger_init()._fsl_memory_arena_internal") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&logger_core.arena, (void*)&logger_core.color,
+            fsl_mem_push_arena(&_fsl_memory_arena_internal, (void*)&logger_core.color,
                 FSL_LOGGER_HISTORY_MAX * sizeof(u32),
                 "fsl_logger_init().logger_core.color") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&logger_core.arena, (void*)&logger_core.i,
+            fsl_mem_push_arena(&_fsl_memory_arena_internal, (void*)&logger_core.i,
                 FSL_LOGGER_HISTORY_MAX * sizeof(str*),
                 "fsl_logger_init().logger_core.i") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&logger_core.arena, (void*)&logger_core.buf,
+            fsl_mem_push_arena(&_fsl_memory_arena_internal, (void*)&logger_core.buf,
                 FSL_LOGGER_HISTORY_MAX * FSL_LOGGER_STRING_MAX,
                 "fsl_logger_init().logger_core.buf") != FSL_ERR_SUCCESS)
     {
@@ -203,7 +203,6 @@ void fsl_logger_close(void)
     _LOGTRACE(0, "%s\n", "Closing Logger..");
 
     logger_core.flag &= ~FSL_FLAG_LOGGER_GUI_OPEN;
-    fsl_mem_unmap_arena(&logger_core.arena, "logger_close().logger_core.arena");
 }
 
 void _fsl_log_output(u32 error_code, u32 flags, const str *file, u64 line, u8 level,

@@ -5,7 +5,7 @@
 
 #include "src/h/core.h"
 #include "src/h/diagnostics.h"
-#include "src/h/text.h"
+#include "src/h/ui.h"
 #include "src/h/types.h"
 
 struct hhc_core

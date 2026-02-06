@@ -32,6 +32,8 @@
 #include <deps/stb_image.h>
 #include <deps/stb_image_write.h>
 
+/* ---- section: definitions ------------------------------------------------ */
+
 typedef struct fsl_render
 {
     GLFWwindow *window;
@@ -71,6 +73,7 @@ typedef struct fsl_fbo
     GLuint fbo;
     GLuint color_buf;
     GLuint rbo;
+    b8 loaded;
 } fsl_fbo;
 
 typedef struct fsl_texture
@@ -127,6 +130,52 @@ typedef struct fsl_projection
     m4f32 perspective;
 } fsl_projection;
 
+typedef struct fsl_core
+{
+    struct /* flag */
+    {
+        u64 active: 1;
+        u64 glfw_initialized: 1;
+        u64 request_screenshot: 1;
+    } flag;
+
+    struct /* ubo */
+    {
+        GLuint ndc_scale;
+    } ubo;
+
+    /*! @brief global fbo for rendering mostly ui elements.
+     *
+     *  @remark initialized in @ref fsl_engine_init().
+     */
+    fsl_fbo fbo;
+
+    /*! @brief global fbo for rendering mostly ui elements, multisampled.
+     *
+     *  @remark initialized in @ref fsl_engine_init().
+     */
+    fsl_fbo fbo_msaa;
+
+    /*! @remark initialized in @ref fsl_engine_init().
+     */
+    void (*fbo_bind)(void);
+
+    /*! @remark initialized in @ref fsl_engine_init().
+     */
+    void (*fbo_blit)(GLuint);
+
+} fsl_core;
+
+/* ---- section: declarations ----------------------------------------------- */
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief global core module.
+ *
+ *  @remark declared and initialized internally.
+ */
+extern fsl_core _fsl_core;
+
 /*! -- INTERNAL USE ONLY --;
  *
  *  @brief default render.
@@ -146,6 +195,8 @@ FSLAPI extern fsl_texture fsl_texture_buf[FSL_TEXTURE_INDEX_COUNT];
  *  @remark declared and initialized internally.
  */
 FSLAPI extern fsl_mesh fsl_mesh_unit_quad;
+
+/* ---- section: signatures ------------------------------------------------- */
 
 /*! @brief initialize engine stuff.
  *
@@ -310,6 +361,10 @@ FSLAPI u32 fsl_fbo_init(fsl_fbo *fbo, fsl_mesh *mesh_fbo, b8 multisample, u32 sa
 /*! @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_fbo_realloc(fsl_fbo *fbo, b8 multisample, u32 samples);
+
+/*! @brief blit rendered internal fbo (e.g. text, ui elements) onto `fbo`.
+ */
+FSLAPI void fsl_fbo_blit(GLuint fbo);
 
 FSLAPI void fsl_fbo_free(fsl_fbo *fbo);
 

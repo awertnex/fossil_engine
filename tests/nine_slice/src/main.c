@@ -213,8 +213,7 @@ void draw_nine_slice(void)
 
 int main(int argc, char **argv)
 {
-    if (fsl_engine_init(argc, argv, NULL, NULL, 1280, 720, NULL,
-                FSL_FLAG_LOAD_DEFAULT_SHADERS) != FSL_ERR_SUCCESS)
+    if (fsl_engine_init(argc, argv, NULL, NULL, 1280, 720, NULL, 0) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     if (

@@ -133,3 +133,905 @@
 [1769999393278354][2026-02-02 05:29:53] [DEBUG] Mesh 'Gizmo' Generated
 [1769999393278354][2026-02-02 05:29:56] [DEBUG] Flashlight Toggled On
 [1769999393278354][2026-02-02 05:29:56] [DEBUG] Flashlight Toggled Off
+[1770145792553915][2026-02-03 22:09:52] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770145792553915][2026-02-03 22:09:52] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770145792553915][2026-02-03 22:09:52] [DEBUG] DEBUG BUILD
+[1770145792553915][2026-02-03 22:09:52] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770145792553915][2026-02-03 22:09:52] [DEBUG] Mesh 'Skybox' Generated
+[1770145792553915][2026-02-03 22:09:52] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770145792553915][2026-02-03 22:09:52] [DEBUG] Mesh 'Player' Generated
+[1770145792553915][2026-02-03 22:09:52] [DEBUG] Mesh 'Gizmo' Generated
+[1770145795911650][2026-02-03 22:09:56] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770145795911650][2026-02-03 22:09:56] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770145795911650][2026-02-03 22:09:56] [DEBUG] DEBUG BUILD
+[1770145795911650][2026-02-03 22:09:56] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770145795911650][2026-02-03 22:09:56] [DEBUG] Mesh 'Skybox' Generated
+[1770145795911650][2026-02-03 22:09:56] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770145795911650][2026-02-03 22:09:56] [DEBUG] Mesh 'Player' Generated
+[1770145795911650][2026-02-03 22:09:56] [DEBUG] Mesh 'Gizmo' Generated
+[1770146291863133][2026-02-03 22:18:11] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770146291863133][2026-02-03 22:18:11] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770146291863133][2026-02-03 22:18:11] [DEBUG] DEBUG BUILD
+[1770146291863133][2026-02-03 22:18:12] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770146291863133][2026-02-03 22:18:12] [DEBUG] Mesh 'Skybox' Generated
+[1770146291863133][2026-02-03 22:18:12] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770146291863133][2026-02-03 22:18:12] [DEBUG] Mesh 'Player' Generated
+[1770146291863133][2026-02-03 22:18:12] [DEBUG] Mesh 'Gizmo' Generated
+[1770146312649087][2026-02-03 22:18:32] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770146312649087][2026-02-03 22:18:32] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770146312649087][2026-02-03 22:18:32] [DEBUG] DEBUG BUILD
+[1770146312649087][2026-02-03 22:18:32] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770146312649087][2026-02-03 22:18:32] [DEBUG] Mesh 'Skybox' Generated
+[1770146312649087][2026-02-03 22:18:32] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770146312649087][2026-02-03 22:18:32] [DEBUG] Mesh 'Player' Generated
+[1770146312649087][2026-02-03 22:18:32] [DEBUG] Mesh 'Gizmo' Generated
+[1770147977827646][2026-02-03 22:46:17] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770147977827646][2026-02-03 22:46:17] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770147977827646][2026-02-03 22:46:17] [DEBUG] DEBUG BUILD
+[1770147977827646][2026-02-03 22:46:17] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770148018058758][2026-02-03 22:46:58] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770148018058758][2026-02-03 22:46:58] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770148018058758][2026-02-03 22:46:58] [DEBUG] DEBUG BUILD
+[1770148018058758][2026-02-03 22:46:58] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770148092351612][2026-02-03 22:48:12] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770148092351612][2026-02-03 22:48:12] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770148092351612][2026-02-03 22:48:12] [DEBUG] DEBUG BUILD
+[1770148092351612][2026-02-03 22:48:12] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770148142739819][2026-02-03 22:49:02] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770148142739819][2026-02-03 22:49:02] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770148142739819][2026-02-03 22:49:02] [DEBUG] DEBUG BUILD
+[1770148142739819][2026-02-03 22:49:02] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770148206199651][2026-02-03 22:50:06] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770148206199651][2026-02-03 22:50:06] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770148206199651][2026-02-03 22:50:06] [DEBUG] DEBUG BUILD
+[1770148206199651][2026-02-03 22:50:06] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770148255703187][2026-02-03 22:50:55] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770148255703187][2026-02-03 22:50:55] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770148255703187][2026-02-03 22:50:55] [DEBUG] DEBUG BUILD
+[1770148255703187][2026-02-03 22:50:55] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770148255703187][2026-02-03 22:50:55] [DEBUG] Mesh 'Skybox' Generated
+[1770148255703187][2026-02-03 22:50:55] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770148255703187][2026-02-03 22:50:55] [DEBUG] Mesh 'Player' Generated
+[1770148255703187][2026-02-03 22:50:55] [DEBUG] Mesh 'Gizmo' Generated
+[1770148768571517][2026-02-03 22:59:28] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770148768571517][2026-02-03 22:59:28] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770148768571517][2026-02-03 22:59:28] [DEBUG] DEBUG BUILD
+[1770148768571517][2026-02-03 22:59:28] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770148768571517][2026-02-03 22:59:28] [DEBUG] Mesh 'Skybox' Generated
+[1770148768571517][2026-02-03 22:59:28] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770148768571517][2026-02-03 22:59:28] [DEBUG] Mesh 'Player' Generated
+[1770148768571517][2026-02-03 22:59:28] [DEBUG] Mesh 'Gizmo' Generated
+[1770148946683482][2026-02-03 23:02:26] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770148946683482][2026-02-03 23:02:26] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770148946683482][2026-02-03 23:02:26] [DEBUG] DEBUG BUILD
+[1770148946683482][2026-02-03 23:02:26] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770148946683482][2026-02-03 23:02:26] [DEBUG] Mesh 'Skybox' Generated
+[1770148946683482][2026-02-03 23:02:26] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770148946683482][2026-02-03 23:02:26] [DEBUG] Mesh 'Player' Generated
+[1770148946683482][2026-02-03 23:02:26] [DEBUG] Mesh 'Gizmo' Generated
+[1770149040334932][2026-02-03 23:04:00] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770149040334932][2026-02-03 23:04:00] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770149040334932][2026-02-03 23:04:00] [DEBUG] DEBUG BUILD
+[1770149040334932][2026-02-03 23:04:00] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770149040334932][2026-02-03 23:04:00] [DEBUG] Mesh 'Skybox' Generated
+[1770149040334932][2026-02-03 23:04:00] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770149040334932][2026-02-03 23:04:00] [DEBUG] Mesh 'Player' Generated
+[1770149040334932][2026-02-03 23:04:00] [DEBUG] Mesh 'Gizmo' Generated
+[1770149060752454][2026-02-03 23:04:20] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770149060752454][2026-02-03 23:04:20] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770149060752454][2026-02-03 23:04:20] [DEBUG] DEBUG BUILD
+[1770149060752454][2026-02-03 23:04:20] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770149060752454][2026-02-03 23:04:20] [DEBUG] Mesh 'Skybox' Generated
+[1770149060752454][2026-02-03 23:04:20] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770149060752454][2026-02-03 23:04:20] [DEBUG] Mesh 'Player' Generated
+[1770149060752454][2026-02-03 23:04:20] [DEBUG] Mesh 'Gizmo' Generated
+[1770149263904230][2026-02-03 23:07:44] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770149263904230][2026-02-03 23:07:44] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770149263904230][2026-02-03 23:07:44] [DEBUG] DEBUG BUILD
+[1770149263904230][2026-02-03 23:07:44] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770149263904230][2026-02-03 23:07:44] [DEBUG] Mesh 'Skybox' Generated
+[1770149263904230][2026-02-03 23:07:44] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770149263904230][2026-02-03 23:07:44] [DEBUG] Mesh 'Player' Generated
+[1770149263904230][2026-02-03 23:07:44] [DEBUG] Mesh 'Gizmo' Generated
+[1770149263904230][2026-02-03 23:07:57] [DEBUG] Flashlight Toggled On
+[1770149536702391][2026-02-03 23:12:16] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770149536702391][2026-02-03 23:12:16] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770149536702391][2026-02-03 23:12:16] [DEBUG] DEBUG BUILD
+[1770149536702391][2026-02-03 23:12:16] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770149536702391][2026-02-03 23:12:16] [DEBUG] Mesh 'Skybox' Generated
+[1770149536702391][2026-02-03 23:12:16] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770149536702391][2026-02-03 23:12:16] [DEBUG] Mesh 'Player' Generated
+[1770149536702391][2026-02-03 23:12:16] [DEBUG] Mesh 'Gizmo' Generated
+[1770150039218874][2026-02-03 23:20:39] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770150039218874][2026-02-03 23:20:39] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770150039218874][2026-02-03 23:20:39] [DEBUG] DEBUG BUILD
+[1770150039218874][2026-02-03 23:20:39] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770150039218874][2026-02-03 23:20:39] [DEBUG] Mesh 'Skybox' Generated
+[1770150039218874][2026-02-03 23:20:39] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770150039218874][2026-02-03 23:20:39] [DEBUG] Mesh 'Player' Generated
+[1770150039218874][2026-02-03 23:20:39] [DEBUG] Mesh 'Gizmo' Generated
+[1770150095249922][2026-02-03 23:21:35] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770150095249922][2026-02-03 23:21:35] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770150095249922][2026-02-03 23:21:35] [DEBUG] DEBUG BUILD
+[1770150095249922][2026-02-03 23:21:35] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770150095249922][2026-02-03 23:21:35] [DEBUG] Mesh 'Skybox' Generated
+[1770150095249922][2026-02-03 23:21:35] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770150095249922][2026-02-03 23:21:35] [DEBUG] Mesh 'Player' Generated
+[1770150095249922][2026-02-03 23:21:35] [DEBUG] Mesh 'Gizmo' Generated
+[1770150095249922][2026-02-03 23:21:43] [DEBUG] Flashlight Toggled On
+[1770150271501576][2026-02-03 23:24:31] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770150271501576][2026-02-03 23:24:31] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770150271501576][2026-02-03 23:24:31] [DEBUG] DEBUG BUILD
+[1770150271501576][2026-02-03 23:24:31] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770150271501576][2026-02-03 23:24:31] [DEBUG] Mesh 'Skybox' Generated
+[1770150271501576][2026-02-03 23:24:31] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770150271501576][2026-02-03 23:24:31] [DEBUG] Mesh 'Player' Generated
+[1770150271501576][2026-02-03 23:24:31] [DEBUG] Mesh 'Gizmo' Generated
+[1770150281231060][2026-02-03 23:24:41] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770150281231060][2026-02-03 23:24:41] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770150281231060][2026-02-03 23:24:41] [DEBUG] DEBUG BUILD
+[1770150281231060][2026-02-03 23:24:41] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770150281231060][2026-02-03 23:24:41] [DEBUG] Mesh 'Skybox' Generated
+[1770150281231060][2026-02-03 23:24:41] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770150281231060][2026-02-03 23:24:41] [DEBUG] Mesh 'Player' Generated
+[1770150281231060][2026-02-03 23:24:41] [DEBUG] Mesh 'Gizmo' Generated
+[1770150891099175][2026-02-03 23:34:51] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770150891099175][2026-02-03 23:34:51] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770150891099175][2026-02-03 23:34:51] [DEBUG] DEBUG BUILD
+[1770150891099175][2026-02-03 23:34:51] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770150891099175][2026-02-03 23:34:51] [DEBUG] Mesh 'Skybox' Generated
+[1770150891099175][2026-02-03 23:34:51] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770150891099175][2026-02-03 23:34:51] [DEBUG] Mesh 'Player' Generated
+[1770150891099175][2026-02-03 23:34:51] [DEBUG] Mesh 'Gizmo' Generated
+[1770150978832674][2026-02-03 23:36:18] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770150978832674][2026-02-03 23:36:18] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770150978832674][2026-02-03 23:36:18] [DEBUG] DEBUG BUILD
+[1770150978832674][2026-02-03 23:36:18] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770150978832674][2026-02-03 23:36:18] [DEBUG] Mesh 'Skybox' Generated
+[1770150978832674][2026-02-03 23:36:18] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770150978832674][2026-02-03 23:36:18] [DEBUG] Mesh 'Player' Generated
+[1770150978832674][2026-02-03 23:36:18] [DEBUG] Mesh 'Gizmo' Generated
+[1770151038543752][2026-02-03 23:37:18] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770151038543752][2026-02-03 23:37:18] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770151038543752][2026-02-03 23:37:18] [DEBUG] DEBUG BUILD
+[1770151038543752][2026-02-03 23:37:18] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770151038543752][2026-02-03 23:37:18] [DEBUG] Mesh 'Skybox' Generated
+[1770151038543752][2026-02-03 23:37:18] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770151038543752][2026-02-03 23:37:18] [DEBUG] Mesh 'Player' Generated
+[1770151038543752][2026-02-03 23:37:18] [DEBUG] Mesh 'Gizmo' Generated
+[1770151068586570][2026-02-03 23:38:00] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770151068586570][2026-02-03 23:38:00] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770151068586570][2026-02-03 23:38:00] [DEBUG] DEBUG BUILD
+[1770151068586570][2026-02-03 23:38:00] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770151068586570][2026-02-03 23:38:00] [DEBUG] Mesh 'Skybox' Generated
+[1770151068586570][2026-02-03 23:38:00] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770151068586570][2026-02-03 23:38:00] [DEBUG] Mesh 'Player' Generated
+[1770151068586570][2026-02-03 23:38:00] [DEBUG] Mesh 'Gizmo' Generated
+[1770151274705736][2026-02-03 23:41:14] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770151274705736][2026-02-03 23:41:14] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770151274705736][2026-02-03 23:41:14] [DEBUG] DEBUG BUILD
+[1770151274705736][2026-02-03 23:41:14] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770151274705736][2026-02-03 23:41:14] [DEBUG] Mesh 'Skybox' Generated
+[1770151274705736][2026-02-03 23:41:14] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770151274705736][2026-02-03 23:41:14] [DEBUG] Mesh 'Player' Generated
+[1770151274705736][2026-02-03 23:41:14] [DEBUG] Mesh 'Gizmo' Generated
+[1770151291548548][2026-02-03 23:41:31] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770151291548548][2026-02-03 23:41:31] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770151291548548][2026-02-03 23:41:31] [DEBUG] DEBUG BUILD
+[1770151291548548][2026-02-03 23:41:31] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770151291548548][2026-02-03 23:41:31] [DEBUG] Mesh 'Skybox' Generated
+[1770151291548548][2026-02-03 23:41:31] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770151291548548][2026-02-03 23:41:31] [DEBUG] Mesh 'Player' Generated
+[1770151291548548][2026-02-03 23:41:31] [DEBUG] Mesh 'Gizmo' Generated
+[1770151377310216][2026-02-03 23:42:57] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770151377310216][2026-02-03 23:42:57] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770151377310216][2026-02-03 23:42:57] [DEBUG] DEBUG BUILD
+[1770151377310216][2026-02-03 23:42:57] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770151377310216][2026-02-03 23:42:57] [DEBUG] Mesh 'Skybox' Generated
+[1770151377310216][2026-02-03 23:42:57] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770151377310216][2026-02-03 23:42:57] [DEBUG] Mesh 'Player' Generated
+[1770151377310216][2026-02-03 23:42:57] [DEBUG] Mesh 'Gizmo' Generated
+[1770151472459157][2026-02-03 23:44:32] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770151472459157][2026-02-03 23:44:32] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770151472459157][2026-02-03 23:44:32] [DEBUG] DEBUG BUILD
+[1770151472459157][2026-02-03 23:44:32] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770151472459157][2026-02-03 23:44:32] [DEBUG] Mesh 'Skybox' Generated
+[1770151472459157][2026-02-03 23:44:32] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770151472459157][2026-02-03 23:44:32] [DEBUG] Mesh 'Player' Generated
+[1770151472459157][2026-02-03 23:44:32] [DEBUG] Mesh 'Gizmo' Generated
+[1770151472459157][2026-02-03 23:44:38] [DEBUG] Flashlight Toggled On
+[1770151531666271][2026-02-03 23:45:31] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770151531666271][2026-02-03 23:45:31] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770151531666271][2026-02-03 23:45:31] [DEBUG] DEBUG BUILD
+[1770151531666271][2026-02-03 23:45:31] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770151531666271][2026-02-03 23:45:31] [DEBUG] Mesh 'Skybox' Generated
+[1770151531666271][2026-02-03 23:45:31] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770151531666271][2026-02-03 23:45:31] [DEBUG] Mesh 'Player' Generated
+[1770151531666271][2026-02-03 23:45:31] [DEBUG] Mesh 'Gizmo' Generated
+[1770151578404702][2026-02-03 23:46:18] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770151578404702][2026-02-03 23:46:18] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770151578404702][2026-02-03 23:46:18] [DEBUG] DEBUG BUILD
+[1770151578404702][2026-02-03 23:46:18] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770151578404702][2026-02-03 23:46:18] [DEBUG] Mesh 'Skybox' Generated
+[1770151578404702][2026-02-03 23:46:18] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770151578404702][2026-02-03 23:46:18] [DEBUG] Mesh 'Player' Generated
+[1770151578404702][2026-02-03 23:46:18] [DEBUG] Mesh 'Gizmo' Generated
+[1770151608798399][2026-02-03 23:46:48] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770151608798399][2026-02-03 23:46:48] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770151608798399][2026-02-03 23:46:48] [DEBUG] DEBUG BUILD
+[1770151608798399][2026-02-03 23:46:48] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770151608798399][2026-02-03 23:46:48] [DEBUG] Mesh 'Skybox' Generated
+[1770151608798399][2026-02-03 23:46:48] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770151608798399][2026-02-03 23:46:48] [DEBUG] Mesh 'Player' Generated
+[1770151608798399][2026-02-03 23:46:48] [DEBUG] Mesh 'Gizmo' Generated
+[1770151608798399][2026-02-03 23:46:51] [DEBUG] Flashlight Toggled On
+[1770151608798399][2026-02-03 23:46:53] [DEBUG] Flashlight Toggled Off
+[1770151764757981][2026-02-03 23:49:24] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770151764757981][2026-02-03 23:49:24] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770151764757981][2026-02-03 23:49:24] [DEBUG] DEBUG BUILD
+[1770151764757981][2026-02-03 23:49:24] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770151764757981][2026-02-03 23:49:24] [DEBUG] Mesh 'Skybox' Generated
+[1770151764757981][2026-02-03 23:49:24] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770151764757981][2026-02-03 23:49:24] [DEBUG] Mesh 'Player' Generated
+[1770151764757981][2026-02-03 23:49:24] [DEBUG] Mesh 'Gizmo' Generated
+[1770155714659794][2026-02-04 00:55:14] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770155714659794][2026-02-04 00:55:14] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770155714659794][2026-02-04 00:55:14] [DEBUG] DEBUG BUILD
+[1770155714659794][2026-02-04 00:55:14] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770155714659794][2026-02-04 00:55:14] [DEBUG] Mesh 'Skybox' Generated
+[1770155714659794][2026-02-04 00:55:14] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770155714659794][2026-02-04 00:55:14] [DEBUG] Mesh 'Player' Generated
+[1770155714659794][2026-02-04 00:55:14] [DEBUG] Mesh 'Gizmo' Generated
+[1770156544951912][2026-02-04 01:09:05] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770156544951912][2026-02-04 01:09:05] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770156544951912][2026-02-04 01:09:05] [DEBUG] DEBUG BUILD
+[1770156544951912][2026-02-04 01:09:05] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770156544951912][2026-02-04 01:09:05] [DEBUG] Mesh 'Skybox' Generated
+[1770156544951912][2026-02-04 01:09:05] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770156544951912][2026-02-04 01:09:05] [DEBUG] Mesh 'Player' Generated
+[1770156544951912][2026-02-04 01:09:05] [DEBUG] Mesh 'Gizmo' Generated
+[1770156567831932][2026-02-04 01:09:27] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770156567831932][2026-02-04 01:09:27] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770156567831932][2026-02-04 01:09:27] [DEBUG] DEBUG BUILD
+[1770156567831932][2026-02-04 01:09:27] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770156567831932][2026-02-04 01:09:27] [DEBUG] Mesh 'Skybox' Generated
+[1770156567831932][2026-02-04 01:09:27] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770156567831932][2026-02-04 01:09:27] [DEBUG] Mesh 'Player' Generated
+[1770156567831932][2026-02-04 01:09:27] [DEBUG] Mesh 'Gizmo' Generated
+[1770156628409227][2026-02-04 01:10:28] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770156628409227][2026-02-04 01:10:28] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770156628409227][2026-02-04 01:10:28] [DEBUG] DEBUG BUILD
+[1770156628409227][2026-02-04 01:10:28] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770156628409227][2026-02-04 01:10:28] [DEBUG] Mesh 'Skybox' Generated
+[1770156628409227][2026-02-04 01:10:28] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770156628409227][2026-02-04 01:10:28] [DEBUG] Mesh 'Player' Generated
+[1770156628409227][2026-02-04 01:10:28] [DEBUG] Mesh 'Gizmo' Generated
+[1770156673255645][2026-02-04 01:11:13] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770156673255645][2026-02-04 01:11:13] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770156673255645][2026-02-04 01:11:13] [DEBUG] DEBUG BUILD
+[1770156673255645][2026-02-04 01:11:13] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770156673255645][2026-02-04 01:11:13] [DEBUG] Mesh 'Skybox' Generated
+[1770156673255645][2026-02-04 01:11:13] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770156673255645][2026-02-04 01:11:13] [DEBUG] Mesh 'Player' Generated
+[1770156673255645][2026-02-04 01:11:13] [DEBUG] Mesh 'Gizmo' Generated
+[1770156960981834][2026-02-04 01:16:01] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770156960981834][2026-02-04 01:16:01] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770156960981834][2026-02-04 01:16:01] [DEBUG] DEBUG BUILD
+[1770156960981834][2026-02-04 01:16:01] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770156960981834][2026-02-04 01:16:01] [DEBUG] Mesh 'Skybox' Generated
+[1770156960981834][2026-02-04 01:16:01] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770156960981834][2026-02-04 01:16:01] [DEBUG] Mesh 'Player' Generated
+[1770156960981834][2026-02-04 01:16:01] [DEBUG] Mesh 'Gizmo' Generated
+[1770156989861525][2026-02-04 01:16:29] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770156989861525][2026-02-04 01:16:29] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770156989861525][2026-02-04 01:16:29] [DEBUG] DEBUG BUILD
+[1770156989861525][2026-02-04 01:16:29] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770156989861525][2026-02-04 01:16:30] [DEBUG] Mesh 'Skybox' Generated
+[1770156989861525][2026-02-04 01:16:30] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770156989861525][2026-02-04 01:16:30] [DEBUG] Mesh 'Player' Generated
+[1770156989861525][2026-02-04 01:16:30] [DEBUG] Mesh 'Gizmo' Generated
+[1770158134019776][2026-02-04 01:35:34] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770158134019776][2026-02-04 01:35:34] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770158134019776][2026-02-04 01:35:34] [DEBUG] DEBUG BUILD
+[1770158134019776][2026-02-04 01:35:34] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770158134019776][2026-02-04 01:35:34] [DEBUG] Mesh 'Skybox' Generated
+[1770158134019776][2026-02-04 01:35:34] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770158134019776][2026-02-04 01:35:34] [DEBUG] Mesh 'Player' Generated
+[1770158134019776][2026-02-04 01:35:34] [DEBUG] Mesh 'Gizmo' Generated
+[1770158198307381][2026-02-04 01:36:38] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770158198307381][2026-02-04 01:36:38] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770158198307381][2026-02-04 01:36:38] [DEBUG] DEBUG BUILD
+[1770158198307381][2026-02-04 01:36:38] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770158198307381][2026-02-04 01:36:38] [DEBUG] Mesh 'Skybox' Generated
+[1770158198307381][2026-02-04 01:36:38] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770158198307381][2026-02-04 01:36:38] [DEBUG] Mesh 'Player' Generated
+[1770158198307381][2026-02-04 01:36:38] [DEBUG] Mesh 'Gizmo' Generated
+[1770158239838413][2026-02-04 01:37:19] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770158239838413][2026-02-04 01:37:19] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770158239838413][2026-02-04 01:37:19] [DEBUG] DEBUG BUILD
+[1770158239838413][2026-02-04 01:37:19] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770158239838413][2026-02-04 01:37:20] [DEBUG] Mesh 'Skybox' Generated
+[1770158239838413][2026-02-04 01:37:20] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770158239838413][2026-02-04 01:37:20] [DEBUG] Mesh 'Player' Generated
+[1770158239838413][2026-02-04 01:37:20] [DEBUG] Mesh 'Gizmo' Generated
+[1770158239838413][2026-02-04 01:38:05] [DEBUG] Flashlight Toggled On
+[1770167803367110][2026-02-04 04:16:43] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770167803367110][2026-02-04 04:16:43] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770167803367110][2026-02-04 04:16:43] [DEBUG] DEBUG BUILD
+[1770167803367110][2026-02-04 04:16:43] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770167803367110][2026-02-04 04:16:43] [DEBUG] Mesh 'Skybox' Generated
+[1770167803367110][2026-02-04 04:16:43] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770167803367110][2026-02-04 04:16:43] [DEBUG] Mesh 'Player' Generated
+[1770167803367110][2026-02-04 04:16:43] [DEBUG] Mesh 'Gizmo' Generated
+[1770167919975889][2026-02-04 04:18:40] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770167919975889][2026-02-04 04:18:40] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770167919975889][2026-02-04 04:18:40] [DEBUG] DEBUG BUILD
+[1770167919975889][2026-02-04 04:18:40] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770167919975889][2026-02-04 04:18:40] [DEBUG] Mesh 'Skybox' Generated
+[1770167919975889][2026-02-04 04:18:40] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770167919975889][2026-02-04 04:18:40] [DEBUG] Mesh 'Player' Generated
+[1770167919975889][2026-02-04 04:18:40] [DEBUG] Mesh 'Gizmo' Generated
+[1770168217803988][2026-02-04 04:23:37] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770168217803988][2026-02-04 04:23:37] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770168217803988][2026-02-04 04:23:37] [DEBUG] DEBUG BUILD
+[1770168217803988][2026-02-04 04:23:37] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770168217803988][2026-02-04 04:23:37] [DEBUG] Mesh 'Skybox' Generated
+[1770168217803988][2026-02-04 04:23:37] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770168217803988][2026-02-04 04:23:37] [DEBUG] Mesh 'Player' Generated
+[1770168217803988][2026-02-04 04:23:37] [DEBUG] Mesh 'Gizmo' Generated
+[1770168232895541][2026-02-04 04:23:53] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770168232895541][2026-02-04 04:23:53] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770168232895541][2026-02-04 04:23:53] [DEBUG] DEBUG BUILD
+[1770168232895541][2026-02-04 04:23:53] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770168232895541][2026-02-04 04:23:53] [DEBUG] Mesh 'Skybox' Generated
+[1770168232895541][2026-02-04 04:23:53] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770168232895541][2026-02-04 04:23:53] [DEBUG] Mesh 'Player' Generated
+[1770168232895541][2026-02-04 04:23:53] [DEBUG] Mesh 'Gizmo' Generated
+[1770173807830222][2026-02-04 05:56:47] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770173807830222][2026-02-04 05:56:47] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770173807830222][2026-02-04 05:56:47] [DEBUG] DEBUG BUILD
+[1770173807830222][2026-02-04 05:56:47] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770173807830222][2026-02-04 05:56:47] [DEBUG] Mesh 'Skybox' Generated
+[1770173807830222][2026-02-04 05:56:47] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770173807830222][2026-02-04 05:56:47] [DEBUG] Mesh 'Player' Generated
+[1770173807830222][2026-02-04 05:56:47] [DEBUG] Mesh 'Gizmo' Generated
+[1770176855388518][2026-02-04 06:47:35] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770176855388518][2026-02-04 06:47:35] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770176855388518][2026-02-04 06:47:35] [DEBUG] DEBUG BUILD
+[1770176855388518][2026-02-04 06:47:35] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770176855388518][2026-02-04 06:47:35] [DEBUG] Mesh 'Skybox' Generated
+[1770176855388518][2026-02-04 06:47:35] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770176855388518][2026-02-04 06:47:35] [DEBUG] Mesh 'Player' Generated
+[1770176855388518][2026-02-04 06:47:35] [DEBUG] Mesh 'Gizmo' Generated
+[1770176876248495][2026-02-04 06:47:56] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770176876248495][2026-02-04 06:47:56] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770176876248495][2026-02-04 06:47:56] [DEBUG] DEBUG BUILD
+[1770176876248495][2026-02-04 06:47:56] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770176876248495][2026-02-04 06:47:56] [DEBUG] Mesh 'Skybox' Generated
+[1770176876248495][2026-02-04 06:47:56] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770176876248495][2026-02-04 06:47:56] [DEBUG] Mesh 'Player' Generated
+[1770176876248495][2026-02-04 06:47:56] [DEBUG] Mesh 'Gizmo' Generated
+[1770179752944847][2026-02-04 07:35:53] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770179752944847][2026-02-04 07:35:53] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770179752944847][2026-02-04 07:35:53] [DEBUG] DEBUG BUILD
+[1770179752944847][2026-02-04 07:35:53] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770179752944847][2026-02-04 07:35:53] [DEBUG] Mesh 'Skybox' Generated
+[1770179752944847][2026-02-04 07:35:53] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770179752944847][2026-02-04 07:35:53] [DEBUG] Mesh 'Player' Generated
+[1770179752944847][2026-02-04 07:35:53] [DEBUG] Mesh 'Gizmo' Generated
+[1770179822828045][2026-02-04 07:37:02] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770179822828045][2026-02-04 07:37:02] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770179822828045][2026-02-04 07:37:02] [DEBUG] DEBUG BUILD
+[1770179822828045][2026-02-04 07:37:02] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770179822828045][2026-02-04 07:37:02] [DEBUG] Mesh 'Skybox' Generated
+[1770179822828045][2026-02-04 07:37:02] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770179822828045][2026-02-04 07:37:02] [DEBUG] Mesh 'Player' Generated
+[1770179822828045][2026-02-04 07:37:02] [DEBUG] Mesh 'Gizmo' Generated
+[1770179865289518][2026-02-04 07:37:45] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770179865289518][2026-02-04 07:37:45] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770179865289518][2026-02-04 07:37:45] [DEBUG] DEBUG BUILD
+[1770179865289518][2026-02-04 07:37:45] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770179865289518][2026-02-04 07:37:45] [DEBUG] Mesh 'Skybox' Generated
+[1770179865289518][2026-02-04 07:37:45] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770179865289518][2026-02-04 07:37:45] [DEBUG] Mesh 'Player' Generated
+[1770179865289518][2026-02-04 07:37:45] [DEBUG] Mesh 'Gizmo' Generated
+[1770179865289518][2026-02-04 07:38:00] [DEBUG] Flashlight Toggled On
+[1770179865289518][2026-02-04 07:38:01] [DEBUG] Flashlight Toggled Off
+[1770179968476693][2026-02-04 07:39:28] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770179968476693][2026-02-04 07:39:28] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770179968476693][2026-02-04 07:39:28] [DEBUG] DEBUG BUILD
+[1770179968476693][2026-02-04 07:39:28] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770179968476693][2026-02-04 07:39:28] [DEBUG] Mesh 'Skybox' Generated
+[1770179968476693][2026-02-04 07:39:28] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770179968476693][2026-02-04 07:39:28] [DEBUG] Mesh 'Player' Generated
+[1770179968476693][2026-02-04 07:39:28] [DEBUG] Mesh 'Gizmo' Generated
+[1770179988953966][2026-02-04 07:39:49] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770179988953966][2026-02-04 07:39:49] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770179988953966][2026-02-04 07:39:49] [DEBUG] DEBUG BUILD
+[1770179988953966][2026-02-04 07:39:49] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770179988953966][2026-02-04 07:39:49] [DEBUG] Mesh 'Skybox' Generated
+[1770179988953966][2026-02-04 07:39:49] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770179988953966][2026-02-04 07:39:49] [DEBUG] Mesh 'Player' Generated
+[1770179988953966][2026-02-04 07:39:49] [DEBUG] Mesh 'Gizmo' Generated
+[1770179988953966][2026-02-04 07:39:56] [DEBUG] Flashlight Toggled On
+[1770179988953966][2026-02-04 07:39:56] [DEBUG] Flashlight Toggled Off
+[1770179988953966][2026-02-04 07:39:57] [DEBUG] Flashlight Toggled On
+[1770180022704648][2026-02-04 07:40:22] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770180022704648][2026-02-04 07:40:22] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770180022704648][2026-02-04 07:40:22] [DEBUG] DEBUG BUILD
+[1770180022704648][2026-02-04 07:40:22] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770180022704648][2026-02-04 07:40:22] [DEBUG] Mesh 'Skybox' Generated
+[1770180022704648][2026-02-04 07:40:22] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770180022704648][2026-02-04 07:40:22] [DEBUG] Mesh 'Player' Generated
+[1770180022704648][2026-02-04 07:40:22] [DEBUG] Mesh 'Gizmo' Generated
+[1770180022704648][2026-02-04 07:40:25] [DEBUG] Flashlight Toggled On
+[1770180022704648][2026-02-04 07:40:26] [DEBUG] Flashlight Toggled Off
+[1770180087272048][2026-02-04 07:41:27] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770180087272048][2026-02-04 07:41:27] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770180087272048][2026-02-04 07:41:27] [DEBUG] DEBUG BUILD
+[1770180087272048][2026-02-04 07:41:27] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770180087272048][2026-02-04 07:41:27] [DEBUG] Mesh 'Skybox' Generated
+[1770180087272048][2026-02-04 07:41:27] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770180087272048][2026-02-04 07:41:27] [DEBUG] Mesh 'Player' Generated
+[1770180087272048][2026-02-04 07:41:27] [DEBUG] Mesh 'Gizmo' Generated
+[1770180087272048][2026-02-04 07:41:33] [DEBUG] Flashlight Toggled On
+[1770180087272048][2026-02-04 07:41:33] [DEBUG] Flashlight Toggled Off
+[1770180087272048][2026-02-04 07:41:33] [DEBUG] Flashlight Toggled On
+[1770180087272048][2026-02-04 07:41:34] [DEBUG] Flashlight Toggled Off
+[1770180087272048][2026-02-04 07:41:34] [DEBUG] Flashlight Toggled On
+[1770180106000299][2026-02-04 07:41:46] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770180106000299][2026-02-04 07:41:46] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770180106000299][2026-02-04 07:41:46] [DEBUG] DEBUG BUILD
+[1770180106000299][2026-02-04 07:41:46] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770180106000299][2026-02-04 07:41:46] [DEBUG] Mesh 'Skybox' Generated
+[1770180106000299][2026-02-04 07:41:46] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770180106000299][2026-02-04 07:41:46] [DEBUG] Mesh 'Player' Generated
+[1770180106000299][2026-02-04 07:41:46] [DEBUG] Mesh 'Gizmo' Generated
+[1770180289299598][2026-02-04 07:44:49] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770180289299598][2026-02-04 07:44:49] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770180289299598][2026-02-04 07:44:49] [DEBUG] DEBUG BUILD
+[1770180289299598][2026-02-04 07:44:49] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770180289299598][2026-02-04 07:44:49] [DEBUG] Mesh 'Skybox' Generated
+[1770180289299598][2026-02-04 07:44:49] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770180289299598][2026-02-04 07:44:49] [DEBUG] Mesh 'Player' Generated
+[1770180289299598][2026-02-04 07:44:49] [DEBUG] Mesh 'Gizmo' Generated
+[1770180366043213][2026-02-04 07:46:06] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770180366043213][2026-02-04 07:46:06] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770180366043213][2026-02-04 07:46:06] [DEBUG] DEBUG BUILD
+[1770180366043213][2026-02-04 07:46:06] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770180366043213][2026-02-04 07:46:06] [DEBUG] Mesh 'Skybox' Generated
+[1770180366043213][2026-02-04 07:46:06] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770180366043213][2026-02-04 07:46:06] [DEBUG] Mesh 'Player' Generated
+[1770180366043213][2026-02-04 07:46:06] [DEBUG] Mesh 'Gizmo' Generated
+[1770180366043213][2026-02-04 07:46:16] [DEBUG] Flashlight Toggled On
+[1770180430556077][2026-02-04 07:47:10] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770180430556077][2026-02-04 07:47:10] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770180430556077][2026-02-04 07:47:10] [DEBUG] DEBUG BUILD
+[1770180430556077][2026-02-04 07:47:10] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770180430556077][2026-02-04 07:47:10] [DEBUG] Mesh 'Skybox' Generated
+[1770180430556077][2026-02-04 07:47:10] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770180430556077][2026-02-04 07:47:10] [DEBUG] Mesh 'Player' Generated
+[1770180430556077][2026-02-04 07:47:10] [DEBUG] Mesh 'Gizmo' Generated
+[1770180430556077][2026-02-04 07:47:15] [DEBUG] Flashlight Toggled On
+[1770180444772151][2026-02-04 07:47:24] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770180444772151][2026-02-04 07:47:24] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770180444772151][2026-02-04 07:47:24] [DEBUG] DEBUG BUILD
+[1770180444772151][2026-02-04 07:47:24] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770180444772151][2026-02-04 07:47:24] [DEBUG] Mesh 'Skybox' Generated
+[1770180444772151][2026-02-04 07:47:24] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770180444772151][2026-02-04 07:47:24] [DEBUG] Mesh 'Player' Generated
+[1770180444772151][2026-02-04 07:47:24] [DEBUG] Mesh 'Gizmo' Generated
+[1770180444772151][2026-02-04 07:47:25] [DEBUG] Flashlight Toggled On
+[1770180480148549][2026-02-04 07:48:00] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770180480148549][2026-02-04 07:48:00] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770180480148549][2026-02-04 07:48:00] [DEBUG] DEBUG BUILD
+[1770180480148549][2026-02-04 07:48:00] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770180480148549][2026-02-04 07:48:00] [DEBUG] Mesh 'Skybox' Generated
+[1770180480148549][2026-02-04 07:48:00] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770180480148549][2026-02-04 07:48:00] [DEBUG] Mesh 'Player' Generated
+[1770180480148549][2026-02-04 07:48:00] [DEBUG] Mesh 'Gizmo' Generated
+[1770180480148549][2026-02-04 07:48:03] [DEBUG] Flashlight Toggled On
+[1770180631978977][2026-02-04 07:50:32] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770180631978977][2026-02-04 07:50:32] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770180631978977][2026-02-04 07:50:32] [DEBUG] DEBUG BUILD
+[1770180631978977][2026-02-04 07:50:32] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770180631978977][2026-02-04 07:50:32] [DEBUG] Mesh 'Skybox' Generated
+[1770180631978977][2026-02-04 07:50:32] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770180631978977][2026-02-04 07:50:32] [DEBUG] Mesh 'Player' Generated
+[1770180631978977][2026-02-04 07:50:32] [DEBUG] Mesh 'Gizmo' Generated
+[1770180631978977][2026-02-04 07:50:44] [DEBUG] Flashlight Toggled On
+[1770180631978977][2026-02-04 07:50:44] [DEBUG] Flashlight Toggled Off
+[1770180631978977][2026-02-04 07:50:44] [DEBUG] Flashlight Toggled On
+[1770180631978977][2026-02-04 07:50:45] [DEBUG] Flashlight Toggled Off
+[1770180631978977][2026-02-04 07:50:45] [DEBUG] Flashlight Toggled On
+[1770180631978977][2026-02-04 07:50:45] [DEBUG] Flashlight Toggled Off
+[1770180631978977][2026-02-04 07:50:45] [DEBUG] Flashlight Toggled On
+[1770180631978977][2026-02-04 07:50:45] [DEBUG] Flashlight Toggled Off
+[1770180631978977][2026-02-04 07:50:48] [DEBUG] Flashlight Toggled On
+[1770180631978977][2026-02-04 07:50:48] [DEBUG] Flashlight Toggled Off
+[1770180631978977][2026-02-04 07:50:48] [DEBUG] Flashlight Toggled On
+[1770180631978977][2026-02-04 07:50:48] [DEBUG] Flashlight Toggled Off
+[1770180631978977][2026-02-04 07:50:49] [DEBUG] Flashlight Toggled On
+[1770180631978977][2026-02-04 07:50:49] [DEBUG] Flashlight Toggled Off
+[1770180872636660][2026-02-04 07:54:32] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770180872636660][2026-02-04 07:54:32] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770180872636660][2026-02-04 07:54:32] [DEBUG] DEBUG BUILD
+[1770180872636660][2026-02-04 07:54:32] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770180872636660][2026-02-04 07:54:32] [DEBUG] Mesh 'Skybox' Generated
+[1770180872636660][2026-02-04 07:54:32] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770180872636660][2026-02-04 07:54:32] [DEBUG] Mesh 'Player' Generated
+[1770180872636660][2026-02-04 07:54:32] [DEBUG] Mesh 'Gizmo' Generated
+[1770180872636660][2026-02-04 07:54:35] [DEBUG] Flashlight Toggled On
+[1770180872636660][2026-02-04 07:54:36] [DEBUG] Flashlight Toggled Off
+[1770180940568617][2026-02-04 07:55:40] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770180940568617][2026-02-04 07:55:40] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770180940568617][2026-02-04 07:55:40] [DEBUG] DEBUG BUILD
+[1770180940568617][2026-02-04 07:55:40] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770180940568617][2026-02-04 07:55:40] [DEBUG] Mesh 'Skybox' Generated
+[1770180940568617][2026-02-04 07:55:40] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770180940568617][2026-02-04 07:55:40] [DEBUG] Mesh 'Player' Generated
+[1770180940568617][2026-02-04 07:55:40] [DEBUG] Mesh 'Gizmo' Generated
+[1770181096703243][2026-02-04 07:58:16] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770181096703243][2026-02-04 07:58:16] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770181096703243][2026-02-04 07:58:16] [DEBUG] DEBUG BUILD
+[1770181096703243][2026-02-04 07:58:16] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770181096703243][2026-02-04 07:58:16] [DEBUG] Mesh 'Skybox' Generated
+[1770181096703243][2026-02-04 07:58:16] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770181096703243][2026-02-04 07:58:16] [DEBUG] Mesh 'Player' Generated
+[1770181096703243][2026-02-04 07:58:16] [DEBUG] Mesh 'Gizmo' Generated
+[1770181134745812][2026-02-04 07:58:54] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770181134745812][2026-02-04 07:58:54] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770181134745812][2026-02-04 07:58:54] [DEBUG] DEBUG BUILD
+[1770181134745812][2026-02-04 07:58:54] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770181134745812][2026-02-04 07:58:54] [DEBUG] Mesh 'Skybox' Generated
+[1770181134745812][2026-02-04 07:58:54] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770181134745812][2026-02-04 07:58:54] [DEBUG] Mesh 'Player' Generated
+[1770181134745812][2026-02-04 07:58:54] [DEBUG] Mesh 'Gizmo' Generated
+[1770181268293857][2026-02-04 08:01:08] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770181268293857][2026-02-04 08:01:08] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770181268293857][2026-02-04 08:01:08] [DEBUG] DEBUG BUILD
+[1770181268293857][2026-02-04 08:01:08] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770181268293857][2026-02-04 08:01:08] [DEBUG] Mesh 'Skybox' Generated
+[1770181268293857][2026-02-04 08:01:08] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770181268293857][2026-02-04 08:01:08] [DEBUG] Mesh 'Player' Generated
+[1770181268293857][2026-02-04 08:01:08] [DEBUG] Mesh 'Gizmo' Generated
+[1770181311235591][2026-02-04 08:01:51] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770181311235591][2026-02-04 08:01:51] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770181311235591][2026-02-04 08:01:51] [DEBUG] DEBUG BUILD
+[1770181311235591][2026-02-04 08:01:51] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770181311235591][2026-02-04 08:01:51] [DEBUG] Mesh 'Skybox' Generated
+[1770181311235591][2026-02-04 08:01:51] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770181311235591][2026-02-04 08:01:51] [DEBUG] Mesh 'Player' Generated
+[1770181311235591][2026-02-04 08:01:51] [DEBUG] Mesh 'Gizmo' Generated
+[1770181338687042][2026-02-04 08:02:18] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770181338687042][2026-02-04 08:02:18] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770181338687042][2026-02-04 08:02:18] [DEBUG] DEBUG BUILD
+[1770181338687042][2026-02-04 08:02:18] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770181338687042][2026-02-04 08:02:18] [DEBUG] Mesh 'Skybox' Generated
+[1770181338687042][2026-02-04 08:02:18] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770181338687042][2026-02-04 08:02:18] [DEBUG] Mesh 'Player' Generated
+[1770181338687042][2026-02-04 08:02:18] [DEBUG] Mesh 'Gizmo' Generated
+[1770183502685914][2026-02-04 08:38:22] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770183502685914][2026-02-04 08:38:22] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770183502685914][2026-02-04 08:38:22] [DEBUG] DEBUG BUILD
+[1770183502685914][2026-02-04 08:38:22] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770183502685914][2026-02-04 08:38:22] [DEBUG] Mesh 'Skybox' Generated
+[1770183502685914][2026-02-04 08:38:22] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770183502685914][2026-02-04 08:38:22] [DEBUG] Mesh 'Player' Generated
+[1770183502685914][2026-02-04 08:38:22] [DEBUG] Mesh 'Gizmo' Generated
+[1770183502685914][2026-02-04 08:38:28] [DEBUG] Flashlight Toggled On
+[1770183612794915][2026-02-04 08:40:12] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770183612794915][2026-02-04 08:40:12] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770183612794915][2026-02-04 08:40:12] [DEBUG] DEBUG BUILD
+[1770183612794915][2026-02-04 08:40:12] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770183612794915][2026-02-04 08:40:12] [DEBUG] Mesh 'Skybox' Generated
+[1770183612794915][2026-02-04 08:40:12] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770183612794915][2026-02-04 08:40:12] [DEBUG] Mesh 'Player' Generated
+[1770183612794915][2026-02-04 08:40:12] [DEBUG] Mesh 'Gizmo' Generated
+[1770183612794915][2026-02-04 08:40:16] [DEBUG] Flashlight Toggled On
+[1770183612794915][2026-02-04 08:40:16] [DEBUG] Flashlight Toggled Off
+[1770186992262084][2026-02-04 09:36:32] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770186992262084][2026-02-04 09:36:32] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770186992262084][2026-02-04 09:36:32] [DEBUG] DEBUG BUILD
+[1770186992262084][2026-02-04 09:36:32] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770186992262084][2026-02-04 09:36:32] [DEBUG] Mesh 'Skybox' Generated
+[1770186992262084][2026-02-04 09:36:32] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770186992262084][2026-02-04 09:36:32] [DEBUG] Mesh 'Player' Generated
+[1770186992262084][2026-02-04 09:36:32] [DEBUG] Mesh 'Gizmo' Generated
+[1770187957846291][2026-02-04 09:52:37] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770187957846291][2026-02-04 09:52:37] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770187957846291][2026-02-04 09:52:37] [DEBUG] DEBUG BUILD
+[1770187957846291][2026-02-04 09:52:37] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770187957846291][2026-02-04 09:52:38] [DEBUG] Mesh 'Skybox' Generated
+[1770187957846291][2026-02-04 09:52:38] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770187957846291][2026-02-04 09:52:38] [DEBUG] Mesh 'Player' Generated
+[1770187957846291][2026-02-04 09:52:38] [DEBUG] Mesh 'Gizmo' Generated
+[1770188053321290][2026-02-04 09:54:13] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770188053321290][2026-02-04 09:54:13] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770188053321290][2026-02-04 09:54:13] [DEBUG] DEBUG BUILD
+[1770188053321290][2026-02-04 09:54:13] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770188053321290][2026-02-04 09:54:13] [DEBUG] Mesh 'Skybox' Generated
+[1770188053321290][2026-02-04 09:54:13] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770188053321290][2026-02-04 09:54:13] [DEBUG] Mesh 'Player' Generated
+[1770188053321290][2026-02-04 09:54:13] [DEBUG] Mesh 'Gizmo' Generated
+[1770188149355647][2026-02-04 09:55:49] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770188149355647][2026-02-04 09:55:49] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770188149355647][2026-02-04 09:55:49] [DEBUG] DEBUG BUILD
+[1770188149355647][2026-02-04 09:55:49] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770188149355647][2026-02-04 09:55:49] [DEBUG] Mesh 'Skybox' Generated
+[1770188149355647][2026-02-04 09:55:49] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770188149355647][2026-02-04 09:55:49] [DEBUG] Mesh 'Player' Generated
+[1770188149355647][2026-02-04 09:55:49] [DEBUG] Mesh 'Gizmo' Generated
+[1770188216369440][2026-02-04 09:56:56] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770188216369440][2026-02-04 09:56:56] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770188216369440][2026-02-04 09:56:56] [DEBUG] DEBUG BUILD
+[1770188216369440][2026-02-04 09:56:56] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770188216369440][2026-02-04 09:56:56] [DEBUG] Mesh 'Skybox' Generated
+[1770188216369440][2026-02-04 09:56:56] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770188216369440][2026-02-04 09:56:56] [DEBUG] Mesh 'Player' Generated
+[1770188216369440][2026-02-04 09:56:56] [DEBUG] Mesh 'Gizmo' Generated
+[1770188291166729][2026-02-04 09:58:11] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770188291166729][2026-02-04 09:58:11] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770188291166729][2026-02-04 09:58:11] [DEBUG] DEBUG BUILD
+[1770188291166729][2026-02-04 09:58:11] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770188291166729][2026-02-04 09:58:11] [DEBUG] Mesh 'Skybox' Generated
+[1770188291166729][2026-02-04 09:58:11] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770188291166729][2026-02-04 09:58:11] [DEBUG] Mesh 'Player' Generated
+[1770188291166729][2026-02-04 09:58:11] [DEBUG] Mesh 'Gizmo' Generated
+[1770188459692294][2026-02-04 10:00:59] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770188459692294][2026-02-04 10:00:59] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770188459692294][2026-02-04 10:00:59] [DEBUG] DEBUG BUILD
+[1770188459692294][2026-02-04 10:00:59] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770188459692294][2026-02-04 10:00:59] [DEBUG] Mesh 'Skybox' Generated
+[1770188459692294][2026-02-04 10:00:59] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770188459692294][2026-02-04 10:00:59] [DEBUG] Mesh 'Player' Generated
+[1770188459692294][2026-02-04 10:00:59] [DEBUG] Mesh 'Gizmo' Generated
+[1770188515381785][2026-02-04 10:01:55] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770188515381785][2026-02-04 10:01:55] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770188515381785][2026-02-04 10:01:55] [DEBUG] DEBUG BUILD
+[1770188515381785][2026-02-04 10:01:55] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770188515381785][2026-02-04 10:01:55] [DEBUG] Mesh 'Skybox' Generated
+[1770188515381785][2026-02-04 10:01:55] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770188515381785][2026-02-04 10:01:55] [DEBUG] Mesh 'Player' Generated
+[1770188515381785][2026-02-04 10:01:55] [DEBUG] Mesh 'Gizmo' Generated
+[1770188619706459][2026-02-04 10:03:39] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770188619706459][2026-02-04 10:03:39] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770188619706459][2026-02-04 10:03:39] [DEBUG] DEBUG BUILD
+[1770188619706459][2026-02-04 10:03:39] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770188619706459][2026-02-04 10:03:39] [DEBUG] Mesh 'Skybox' Generated
+[1770188619706459][2026-02-04 10:03:39] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770188619706459][2026-02-04 10:03:39] [DEBUG] Mesh 'Player' Generated
+[1770188619706459][2026-02-04 10:03:39] [DEBUG] Mesh 'Gizmo' Generated
+[1770188643713268][2026-02-04 10:04:03] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770188643713268][2026-02-04 10:04:03] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770188643713268][2026-02-04 10:04:03] [DEBUG] DEBUG BUILD
+[1770188643713268][2026-02-04 10:04:03] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770188643713268][2026-02-04 10:04:03] [DEBUG] Mesh 'Skybox' Generated
+[1770188643713268][2026-02-04 10:04:03] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770188643713268][2026-02-04 10:04:03] [DEBUG] Mesh 'Player' Generated
+[1770188643713268][2026-02-04 10:04:03] [DEBUG] Mesh 'Gizmo' Generated
+[1770188742094867][2026-02-04 10:05:42] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770188742094867][2026-02-04 10:05:42] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770188742094867][2026-02-04 10:05:42] [DEBUG] DEBUG BUILD
+[1770188742094867][2026-02-04 10:05:42] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770188742094867][2026-02-04 10:05:42] [DEBUG] Mesh 'Skybox' Generated
+[1770188742094867][2026-02-04 10:05:42] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770188742094867][2026-02-04 10:05:42] [DEBUG] Mesh 'Player' Generated
+[1770188742094867][2026-02-04 10:05:42] [DEBUG] Mesh 'Gizmo' Generated
+[1770188761842377][2026-02-04 10:06:01] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770188761842377][2026-02-04 10:06:01] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770188761842377][2026-02-04 10:06:01] [DEBUG] DEBUG BUILD
+[1770188761842377][2026-02-04 10:06:01] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770188761842377][2026-02-04 10:06:01] [DEBUG] Mesh 'Skybox' Generated
+[1770188761842377][2026-02-04 10:06:01] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770188761842377][2026-02-04 10:06:01] [DEBUG] Mesh 'Player' Generated
+[1770188761842377][2026-02-04 10:06:01] [DEBUG] Mesh 'Gizmo' Generated
+[1770188795898389][2026-02-04 10:06:36] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770188795898389][2026-02-04 10:06:36] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770188795898389][2026-02-04 10:06:36] [DEBUG] DEBUG BUILD
+[1770188795898389][2026-02-04 10:06:36] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770188795898389][2026-02-04 10:06:36] [DEBUG] Mesh 'Skybox' Generated
+[1770188795898389][2026-02-04 10:06:36] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770188795898389][2026-02-04 10:06:36] [DEBUG] Mesh 'Player' Generated
+[1770188795898389][2026-02-04 10:06:36] [DEBUG] Mesh 'Gizmo' Generated
+[1770188823595739][2026-02-04 10:07:03] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770188823595739][2026-02-04 10:07:03] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770188823595739][2026-02-04 10:07:03] [DEBUG] DEBUG BUILD
+[1770188823595739][2026-02-04 10:07:03] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770188823595739][2026-02-04 10:07:03] [DEBUG] Mesh 'Skybox' Generated
+[1770188823595739][2026-02-04 10:07:03] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770188823595739][2026-02-04 10:07:03] [DEBUG] Mesh 'Player' Generated
+[1770188823595739][2026-02-04 10:07:03] [DEBUG] Mesh 'Gizmo' Generated
+[1770188894036993][2026-02-04 10:08:14] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770188894036993][2026-02-04 10:08:14] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770188894036993][2026-02-04 10:08:14] [DEBUG] DEBUG BUILD
+[1770188894036993][2026-02-04 10:08:14] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770188894036993][2026-02-04 10:08:14] [DEBUG] Mesh 'Skybox' Generated
+[1770188894036993][2026-02-04 10:08:14] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770188894036993][2026-02-04 10:08:14] [DEBUG] Mesh 'Player' Generated
+[1770188894036993][2026-02-04 10:08:14] [DEBUG] Mesh 'Gizmo' Generated
+[1770189056694926][2026-02-04 10:10:56] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770189056694926][2026-02-04 10:10:56] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770189056694926][2026-02-04 10:10:56] [DEBUG] DEBUG BUILD
+[1770189056694926][2026-02-04 10:10:56] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770189056694926][2026-02-04 10:10:56] [DEBUG] Mesh 'Skybox' Generated
+[1770189056694926][2026-02-04 10:10:56] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770189056694926][2026-02-04 10:10:56] [DEBUG] Mesh 'Player' Generated
+[1770189056694926][2026-02-04 10:10:56] [DEBUG] Mesh 'Gizmo' Generated
+[1770218866315806][2026-02-04 18:27:46] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770218866315806][2026-02-04 18:27:46] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770218866315806][2026-02-04 18:27:46] [DEBUG] DEBUG BUILD
+[1770218866315806][2026-02-04 18:27:46] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770218866315806][2026-02-04 18:27:46] [DEBUG] Mesh 'Skybox' Generated
+[1770218866315806][2026-02-04 18:27:46] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770218866315806][2026-02-04 18:27:46] [DEBUG] Mesh 'Player' Generated
+[1770218866315806][2026-02-04 18:27:46] [DEBUG] Mesh 'Gizmo' Generated
+[1770218904704098][2026-02-04 18:28:24] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770218904704098][2026-02-04 18:28:24] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770218904704098][2026-02-04 18:28:24] [DEBUG] DEBUG BUILD
+[1770218904704098][2026-02-04 18:28:24] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770218904704098][2026-02-04 18:28:24] [DEBUG] Mesh 'Skybox' Generated
+[1770218904704098][2026-02-04 18:28:24] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770218904704098][2026-02-04 18:28:24] [DEBUG] Mesh 'Player' Generated
+[1770218904704098][2026-02-04 18:28:24] [DEBUG] Mesh 'Gizmo' Generated
+[1770218904704098][2026-02-04 18:28:45] [DEBUG] Flashlight Toggled On
+[1770218904704098][2026-02-04 18:29:41] [DEBUG] Flashlight Toggled Off
+[1770218904704098][2026-02-04 18:29:45] [DEBUG] Flashlight Toggled On
+[1770218904704098][2026-02-04 18:29:49] [DEBUG] Flashlight Toggled Off
+[1770218904704098][2026-02-04 18:29:50] [DEBUG] Flashlight Toggled On
+[1770218904704098][2026-02-04 18:29:52] [DEBUG] Flashlight Toggled Off
+[1770218904704098][2026-02-04 18:29:54] [DEBUG] Flashlight Toggled On
+[1770221705207165][2026-02-04 19:15:05] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770221705207165][2026-02-04 19:15:05] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770221705207165][2026-02-04 19:15:05] [DEBUG] DEBUG BUILD
+[1770221705207165][2026-02-04 19:15:05] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770221705207165][2026-02-04 19:15:05] [DEBUG] Mesh 'Skybox' Generated
+[1770221705207165][2026-02-04 19:15:05] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770221705207165][2026-02-04 19:15:05] [DEBUG] Mesh 'Player' Generated
+[1770221705207165][2026-02-04 19:15:05] [DEBUG] Mesh 'Gizmo' Generated
+[1770221962535844][2026-02-04 19:19:22] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770221962535844][2026-02-04 19:19:22] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770221962535844][2026-02-04 19:19:22] [DEBUG] DEBUG BUILD
+[1770221962535844][2026-02-04 19:19:22] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770221962535844][2026-02-04 19:19:22] [DEBUG] Mesh 'Skybox' Generated
+[1770221962535844][2026-02-04 19:19:22] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770221962535844][2026-02-04 19:19:22] [DEBUG] Mesh 'Player' Generated
+[1770221962535844][2026-02-04 19:19:22] [DEBUG] Mesh 'Gizmo' Generated
+[1770222075020177][2026-02-04 19:21:15] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770222075020177][2026-02-04 19:21:15] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770222075020177][2026-02-04 19:21:15] [DEBUG] DEBUG BUILD
+[1770222075020177][2026-02-04 19:21:15] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770222075020177][2026-02-04 19:21:15] [DEBUG] Mesh 'Skybox' Generated
+[1770222075020177][2026-02-04 19:21:15] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770222075020177][2026-02-04 19:21:15] [DEBUG] Mesh 'Player' Generated
+[1770222075020177][2026-02-04 19:21:15] [DEBUG] Mesh 'Gizmo' Generated
+[1770222245491597][2026-02-04 19:24:05] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770222245491597][2026-02-04 19:24:05] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770222245491597][2026-02-04 19:24:05] [DEBUG] DEBUG BUILD
+[1770222245491597][2026-02-04 19:24:05] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770222245491597][2026-02-04 19:24:05] [DEBUG] Mesh 'Skybox' Generated
+[1770222245491597][2026-02-04 19:24:05] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770222245491597][2026-02-04 19:24:05] [DEBUG] Mesh 'Player' Generated
+[1770222245491597][2026-02-04 19:24:05] [DEBUG] Mesh 'Gizmo' Generated
+[1770222264191324][2026-02-04 19:24:24] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770222264191324][2026-02-04 19:24:24] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770222264191324][2026-02-04 19:24:24] [DEBUG] DEBUG BUILD
+[1770222264191324][2026-02-04 19:24:24] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770222264191324][2026-02-04 19:24:24] [DEBUG] Mesh 'Skybox' Generated
+[1770222264191324][2026-02-04 19:24:24] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770222264191324][2026-02-04 19:24:24] [DEBUG] Mesh 'Player' Generated
+[1770222264191324][2026-02-04 19:24:24] [DEBUG] Mesh 'Gizmo' Generated
+[1770222264191324][2026-02-04 19:24:53] [DEBUG] View Chunk Boundaries On
+[1770222264191324][2026-02-04 19:24:56] [DEBUG] View Chunk Boundaries Off
+[1770222264191324][2026-02-04 19:24:58] [DEBUG] View Chunk Boundaries On
+[1770222264191324][2026-02-04 19:25:11] [DEBUG] Flashlight Toggled On
+[1770222264191324][2026-02-04 19:25:12] [DEBUG] Flashlight Toggled Off
+[1770222264191324][2026-02-04 19:25:21] [DEBUG] Flashlight Toggled On
+[1770222333447963][2026-02-04 19:25:33] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770222333447963][2026-02-04 19:25:33] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770222333447963][2026-02-04 19:25:33] [DEBUG] DEBUG BUILD
+[1770222333447963][2026-02-04 19:25:33] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770222333447963][2026-02-04 19:25:33] [DEBUG] Mesh 'Skybox' Generated
+[1770222333447963][2026-02-04 19:25:33] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770222333447963][2026-02-04 19:25:33] [DEBUG] Mesh 'Player' Generated
+[1770222333447963][2026-02-04 19:25:33] [DEBUG] Mesh 'Gizmo' Generated
+[1770222333447963][2026-02-04 19:26:04] [DEBUG] Flashlight Toggled On
+[1770222560857687][2026-02-04 19:29:20] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770222560857687][2026-02-04 19:29:20] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770222560857687][2026-02-04 19:29:20] [DEBUG] DEBUG BUILD
+[1770222560857687][2026-02-04 19:29:20] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770222560857687][2026-02-04 19:29:21] [DEBUG] Mesh 'Skybox' Generated
+[1770222560857687][2026-02-04 19:29:21] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770222560857687][2026-02-04 19:29:21] [DEBUG] Mesh 'Player' Generated
+[1770222560857687][2026-02-04 19:29:21] [DEBUG] Mesh 'Gizmo' Generated
+[1770222737252926][2026-02-04 19:32:17] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770222737252926][2026-02-04 19:32:17] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770222737252926][2026-02-04 19:32:17] [DEBUG] DEBUG BUILD
+[1770222737252926][2026-02-04 19:32:17] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770222737252926][2026-02-04 19:32:17] [DEBUG] Mesh 'Skybox' Generated
+[1770222737252926][2026-02-04 19:32:17] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770222737252926][2026-02-04 19:32:17] [DEBUG] Mesh 'Player' Generated
+[1770222737252926][2026-02-04 19:32:17] [DEBUG] Mesh 'Gizmo' Generated
+[1770222771353964][2026-02-04 19:32:51] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770222771353964][2026-02-04 19:32:51] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770222771353964][2026-02-04 19:32:51] [DEBUG] DEBUG BUILD
+[1770222771353964][2026-02-04 19:32:51] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770222771353964][2026-02-04 19:32:51] [DEBUG] Mesh 'Skybox' Generated
+[1770222771353964][2026-02-04 19:32:51] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770222771353964][2026-02-04 19:32:51] [DEBUG] Mesh 'Player' Generated
+[1770222771353964][2026-02-04 19:32:51] [DEBUG] Mesh 'Gizmo' Generated
+[1770222793044769][2026-02-04 19:33:13] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770222793044769][2026-02-04 19:33:13] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770222793044769][2026-02-04 19:33:13] [DEBUG] DEBUG BUILD
+[1770222793044769][2026-02-04 19:33:13] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770222793044769][2026-02-04 19:33:13] [DEBUG] Mesh 'Skybox' Generated
+[1770222793044769][2026-02-04 19:33:13] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770222793044769][2026-02-04 19:33:13] [DEBUG] Mesh 'Player' Generated
+[1770222793044769][2026-02-04 19:33:13] [DEBUG] Mesh 'Gizmo' Generated
+[1770222804454547][2026-02-04 19:33:24] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770222804454547][2026-02-04 19:33:24] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770222804454547][2026-02-04 19:33:24] [DEBUG] DEBUG BUILD
+[1770222804454547][2026-02-04 19:33:24] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770222804454547][2026-02-04 19:33:24] [DEBUG] Mesh 'Skybox' Generated
+[1770222804454547][2026-02-04 19:33:24] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770222804454547][2026-02-04 19:33:24] [DEBUG] Mesh 'Player' Generated
+[1770222804454547][2026-02-04 19:33:24] [DEBUG] Mesh 'Gizmo' Generated
+[1770222804454547][2026-02-04 19:34:06] [DEBUG] Flashlight Toggled On
+[1770222804454547][2026-02-04 19:34:06] [DEBUG] Flashlight Toggled Off
+[1770222886430722][2026-02-04 19:34:46] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770222886430722][2026-02-04 19:34:46] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770222886430722][2026-02-04 19:34:46] [DEBUG] DEBUG BUILD
+[1770222886430722][2026-02-04 19:34:46] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770222886430722][2026-02-04 19:34:46] [DEBUG] Mesh 'Skybox' Generated
+[1770222886430722][2026-02-04 19:34:46] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770222886430722][2026-02-04 19:34:46] [DEBUG] Mesh 'Player' Generated
+[1770222886430722][2026-02-04 19:34:46] [DEBUG] Mesh 'Gizmo' Generated
+[1770222897945476][2026-02-04 19:34:58] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770222897945476][2026-02-04 19:34:58] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770222897945476][2026-02-04 19:34:58] [DEBUG] DEBUG BUILD
+[1770222897945476][2026-02-04 19:34:58] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770222897945476][2026-02-04 19:34:58] [DEBUG] Mesh 'Skybox' Generated
+[1770222897945476][2026-02-04 19:34:58] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770222897945476][2026-02-04 19:34:58] [DEBUG] Mesh 'Player' Generated
+[1770222897945476][2026-02-04 19:34:58] [DEBUG] Mesh 'Gizmo' Generated
+[1770223254157741][2026-02-04 19:40:54] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770223254157741][2026-02-04 19:40:54] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770223254157741][2026-02-04 19:40:54] [DEBUG] DEBUG BUILD
+[1770223254157741][2026-02-04 19:40:54] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770223254157741][2026-02-04 19:40:54] [DEBUG] Mesh 'Skybox' Generated
+[1770223254157741][2026-02-04 19:40:54] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770223254157741][2026-02-04 19:40:54] [DEBUG] Mesh 'Player' Generated
+[1770223254157741][2026-02-04 19:40:54] [DEBUG] Mesh 'Gizmo' Generated
+[1770223281513765][2026-02-04 19:41:21] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770223281513765][2026-02-04 19:41:21] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770223281513765][2026-02-04 19:41:21] [DEBUG] DEBUG BUILD
+[1770223281513765][2026-02-04 19:41:21] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770223281513765][2026-02-04 19:41:21] [DEBUG] Mesh 'Skybox' Generated
+[1770223281513765][2026-02-04 19:41:21] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770223281513765][2026-02-04 19:41:21] [DEBUG] Mesh 'Player' Generated
+[1770223281513765][2026-02-04 19:41:21] [DEBUG] Mesh 'Gizmo' Generated
+[1770223281513765][2026-02-04 19:41:31] [DEBUG] Flashlight Toggled On
+[1770223281513765][2026-02-04 19:41:36] [DEBUG] Flashlight Toggled Off
+[1770223281513765][2026-02-04 19:41:38] [DEBUG] Flashlight Toggled On
+[1770224048836371][2026-02-04 19:54:08] [TRACE] [proper_game_hhc/src/dir.c:51] Creating Main Directories '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'..
+[1770224048836371][2026-02-04 19:54:08] [TRACE] [proper_game_hhc/src/dir.c:62] Main Directory Created '/mnt/data/programming/fossil_engine.c/fossil_engine/tests/proper_game_hhc/out/'
+[1770224048836371][2026-02-04 19:54:08] [DEBUG] DEBUG BUILD
+[1770224048836371][2026-02-04 19:54:08] [DEBUG] GLFW: Raw Mouse Motion Enabled
+[1770224048836371][2026-02-04 19:54:08] [DEBUG] Mesh 'Skybox' Generated
+[1770224048836371][2026-02-04 19:54:08] [DEBUG] Mesh 'Cube of Happiness' Generated
+[1770224048836371][2026-02-04 19:54:08] [DEBUG] Mesh 'Player' Generated
+[1770224048836371][2026-02-04 19:54:08] [DEBUG] Mesh 'Gizmo' Generated
+[1770224048836371][2026-02-04 19:54:16] [DEBUG] Flashlight Toggled On
+[1770224048836371][2026-02-04 19:54:18] [DEBUG] Zoom Toggled On
+[1770224048836371][2026-02-04 19:54:18] [DEBUG] Zoom Toggled Off
+[1770224048836371][2026-02-04 19:54:19] [DEBUG] Zoom Toggled On
+[1770224048836371][2026-02-04 19:54:37] [DEBUG] Zoom Toggled Off
+[1770224048836371][2026-02-04 19:54:38] [DEBUG] Flashlight Toggled Off
+[1770224048836371][2026-02-04 19:54:39] [DEBUG] Zoom Toggled On
+[1770224048836371][2026-02-04 19:54:40] [DEBUG] Zoom Toggled Off
+[1770224048836371][2026-02-04 19:54:41] [DEBUG] Zoom Toggled On
+[1770224048836371][2026-02-04 19:54:42] [DEBUG] Zoom Toggled Off
+[1770224048836371][2026-02-04 19:54:42] [DEBUG] Zoom Toggled On
+[1770224048836371][2026-02-04 19:54:45] [DEBUG] Zoom Toggled Off
+[1770224048836371][2026-02-04 19:54:53] [DEBUG] Zoom Toggled On
+[1770224048836371][2026-02-04 19:54:54] [DEBUG] Zoom Toggled Off

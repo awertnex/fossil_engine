@@ -33,6 +33,7 @@
 #include <inttypes.h>
 
 u64 FSL_PAGE_SIZE = 0;
+fsl_mem_arena _fsl_memory_arena_internal = {0};
 
 u64 fsl_align_up_u64(u64 n, u64 size)
 {
@@ -354,6 +355,13 @@ u32 _fsl_mem_map_arena(fsl_mem_arena *x, u64 size, const str *name, const str *f
     }
 
     fsl_mem_request_page_size();
+
+    if (x->buf)
+        return FSL_ERR_SUCCESS;
+
+    if (size == 0)
+        size = 1;
+
     memb_aligned = fsl_align_up_u64(sizeof(void*), FSL_PAGE_SIZE);
     size_aligned = fsl_align_up_u64(size, FSL_PAGE_SIZE);
 

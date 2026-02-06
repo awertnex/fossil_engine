@@ -141,7 +141,7 @@
 enum fsl_flag
 {
     FSL_FLAG_RELEASE_BUILD =        0x0001, /* output `TRACE` and `DEBUG` logs to console */
-    FSL_FLAG_LOAD_DEFAULT_SHADERS = 0x0002, /* initialize default shaders (like 'text' and 'ui') */
+    FSL_FLAG_NO_DEFAULT_SHADERS =   0x0002, /* don't initialize default shaders (like 'text' and 'ui') */
     FSL_FLAG_MULTISAMPLE =          0x0004, /* use `GLFW` multisampling */
 }; /* fsl_flag */
 

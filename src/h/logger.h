@@ -65,13 +65,14 @@ enum fsl_log_level
     FSL_LOG_LEVEL_COUNT,
 }; /* fsl_log_level */
 
+/*! @remark buffer mapped onto @ref _fsl_memory_arena_internal.
+ */
 typedef struct fsl_logger_core
 {
     u64 flag;
     u32 log_level_max;
     str log_dir[PATH_MAX];
 
-    fsl_mem_arena arena;    /* logger arena, raw logger memory data */
     str **i;                /* pointers to strings in `buf` */
     str *buf;               /* logger strings */
     u32 *color;             /* string colors */
