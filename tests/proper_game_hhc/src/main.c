@@ -1017,7 +1017,7 @@ static void draw_everything(void)
 
     /* ---- draw debug info ------------------------------------------------- */
 
-    fsl_text_start(font[FONT_MONO_BOLD], settings.font_size, 0, TRUE);
+    fsl_text_start(font[FONT_MONO_BOLD], settings.font_size, 0, FALSE);
 
     fsl_text_push(fsl_stringf("FPS         [%u]\n", settings.fps),
             SET_MARGIN, SET_MARGIN, 0, 0, 0,

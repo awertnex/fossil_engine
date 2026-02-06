@@ -128,8 +128,8 @@ cleanup:
 u64 _fsl_mem_request_page_size(void)
 {
     static SYSTEM_INFO _si;
-    GetSystemInfo(&si);
-    return (u64)si.dwPageSize;
+    GetSystemInfo(&_si);
+    return (u64)_si.dwPageSize;
 }
 
 u32 _fsl_mem_map(void **x, u64 size, const str *name, const str *file, u64 line)

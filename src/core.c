@@ -202,11 +202,6 @@ b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32))
     if (glfwWindowShouldClose(render->window) || !_fsl_core.flag.active)
         return FALSE;
 
-    glfwSwapBuffers(render->window);
-    glfwPollEvents();
-    fsl_update_mouse_movement();
-    fsl_update_key_states();
-
     if (fsl_update_render_settings(callback_framebuffer_size) != FSL_ERR_SUCCESS)
         _LOGWARNING(fsl_err, 0,
                 "%s\n", "Something Went Wrong While Updating Render Settings");
@@ -215,6 +210,11 @@ b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32))
     if (!time_last) time_last = render->time;
     render->time_delta = render->time - time_last;
     time_last = render->time;
+
+    glfwSwapBuffers(render->window);
+    glfwPollEvents();
+    fsl_update_mouse_movement();
+    fsl_update_key_states();
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     return TRUE;

@@ -120,7 +120,7 @@ u32 fsl_exec(fsl_buf *cmd, str *cmd_name)
 
 u64 _fsl_mem_request_page_size(void)
 {
-    return sysconf(_SC_PAGESIZE);
+    return (u64)sysconf(_SC_PAGESIZE);
 }
 
 u32 _fsl_mem_map(void **x, u64 size, const str *name, const str *file, u64 line)

@@ -162,7 +162,7 @@ typedef struct fsl_core
 
     /*! @remark initialized in @ref fsl_engine_init().
      */
-    void (*fbo_blit)(GLuint);
+    void (*fbo_blit)(GLuint fbo);
 
 } fsl_core;
 

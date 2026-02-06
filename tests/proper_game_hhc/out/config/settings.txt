@@ -1,5 +1,0 @@
-mouse_sensitivity = 100
-field_of_view = 70
-render_distance = 6
-target_fps = 60
-
