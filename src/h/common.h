@@ -29,9 +29,9 @@
 #define FSL_ENGINE_VERSION_DEV      "-dev"
 
 #define FSL_ENGINE_VERSION_MAJOR    0
-#define FSL_ENGINE_VERSION_MINOR    5
+#define FSL_ENGINE_VERSION_MINOR    6
 #define FSL_ENGINE_VERSION_PATCH    0
-#define FSL_ENGINE_VERSION_BUILD    FSL_ENGINE_VERSION_DEV
+#define FSL_ENGINE_VERSION_BUILD    FSL_ENGINE_VERSION_BETA
 
 #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__) || defined(__MINGW32__)
 #   define FSL_PLATFORM_WIN         1

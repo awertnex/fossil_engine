@@ -7,7 +7,7 @@
    first version of the engine as standalone in this repo
 
 - - -
-## v0.5.0-dev (current)
+## v0.6.0-beta (2026 02 06)
 
 #### changes
 - (2026 02 04): change `fsl_ui_fbo_blit()` and `fsl_text_fbo_blit()` to
