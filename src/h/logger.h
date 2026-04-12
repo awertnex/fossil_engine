@@ -33,14 +33,14 @@
 
 enum fsl_logger_flag
 {
-    FSL_FLAG_LOGGER_GUI_OPEN = 0x0001,
+    FSL_FLAG_LOGGER_GUI_OPEN = 0x0001
 }; /* LoggerFlag */
 
 enum fsl_log_output_flag
 {
     FSL_FLAG_LOG_NO_VERBOSE =   0x0001, /* don't log file and line */
     FSL_FLAG_LOG_CMD =          0x0002, /* log a command (e.g. "Gravity Toggled On" and nothing else) */
-    FSL_FLAG_LOG_NO_FILE =      0x0004, /* don't write to log file */
+    FSL_FLAG_LOG_NO_FILE =      0x0004  /* don't write to log file */
 }; /* fsl_log_output_flag */
 
 enum fsl_log_message_flag
@@ -51,7 +51,7 @@ enum fsl_log_message_flag
     FSL_FLAG_LOG_DATE_TIME =    0x0006,
     FSL_FLAG_LOG_FULL_TIME =    0x0007,
     FSL_FLAG_LOG_TAG =          0x0008,
-    FSL_FLAG_LOG_TERM_COLOR =   0x0010,
+    FSL_FLAG_LOG_TERM_COLOR =   0x0010
 }; /* fsl_log_message_flag */
 
 enum fsl_log_level
@@ -62,7 +62,7 @@ enum fsl_log_level
     FSL_LOG_LEVEL_INFO,
     FSL_LOG_LEVEL_DEBUG,
     FSL_LOG_LEVEL_TRACE,
-    FSL_LOG_LEVEL_COUNT,
+    FSL_LOG_LEVEL_COUNT
 }; /* fsl_log_level */
 
 /*! @remark buffer mapped onto @ref _fsl_memory_arena_internal.

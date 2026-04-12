@@ -1,5 +1,5 @@
-#ifndef BUILD_LOGGER_H
-#define BUILD_LOGGER_H
+#ifndef BUILDTOOL_LOGGER_H
+#define BUILDTOOL_LOGGER_H
 
 /* ---- section: license ---------------------------------------------------- */
 
@@ -38,7 +38,7 @@ enum log_level
     LOGLEVEL_INFO,
     LOGLEVEL_DEBUG,
     LOGLEVEL_TRACE,
-    LOGLEVEL_COUNT,
+    LOGLEVEL_COUNT
 }; /* log_level */
 
 #define LOGFATAL(err, verbose, format, ...) \
@@ -164,4 +164,4 @@ void _get_log_str(const str *str_in, str *str_out, b8 verbose,
     }
 }
 
-#endif /* BUILD_LOGGER_H */
+#endif /* BUILDTOOL_LOGGER_H */

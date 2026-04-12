@@ -36,7 +36,7 @@ enum fsl_keyboard_key_state
     FSL_STATE_KEY_LISTEN_DOUBLE,
     FSL_STATE_KEY_PRESS_DOUBLE,
     FSL_STATE_KEY_HOLD_DOUBLE,
-    FSL_STATE_KEY_RELEASE_DOUBLE,
+    FSL_STATE_KEY_RELEASE_DOUBLE
 }; /* fsl_keyboard_key_state */
 
 enum fsl_keyboard_key
@@ -161,7 +161,7 @@ enum fsl_keyboard_key
     FSL_KEY_RIGHT_CONTROL,
     FSL_KEY_RIGHT_ALT,
     FSL_KEY_RIGHT_SUPER,
-    FSL_KEY_MENU,
+    FSL_KEY_MENU
 }; /* fsl_keyboard_key */
 
 FSLAPI b8 fsl_is_mouse_press(const u32 button);

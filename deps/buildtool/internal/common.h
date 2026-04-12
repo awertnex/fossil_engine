@@ -135,7 +135,7 @@ enum file_type_index
     FILE_TYPE_DIR,
     FILE_TYPE_CHR,
     FILE_TYPE_BLK,
-    FILE_TYPE_FIFO,
+    FILE_TYPE_FIFO
 }; /* file_type_index */
 
 /* ---- section: signatures ------------------------------------------------- */
@@ -198,9 +198,10 @@ u64 find_token(str *arg, int argc, char **argv)
 
 void get_time_str(str *dst, const str *format)
 {
-    struct timespec ts;
+    struct timespec ts = {0};
+    struct tm *_tm = {0};
     clock_gettime(CLOCK_REALTIME, &ts);
-    struct tm *_tm = localtime(&ts.tv_sec);
+    _tm = localtime(&ts.tv_sec);
     strftime(dst, TIME_STRING_MAX, format, _tm);
 }
 

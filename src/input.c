@@ -145,7 +145,7 @@ static u32 fsl_keyboard_tab[FSL_KEYBOARD_KEYS_MAX] =
     GLFW_KEY_RIGHT_CONTROL,
     GLFW_KEY_RIGHT_ALT,
     GLFW_KEY_RIGHT_SUPER,
-    GLFW_KEY_MENU,
+    GLFW_KEY_MENU
 }; /* fsl_keyboard_tab */
 
 b8 fsl_is_mouse_press(const u32 button)
@@ -190,10 +190,8 @@ void fsl_update_mouse_movement(void)
 {
     static v2f64 mouse_last = {0};
     glfwGetCursorPos(render->window, &render->mouse_pos.x, &render->mouse_pos.y);
-    render->mouse_delta = (v2f64){
-        render->mouse_pos.x - mouse_last.x,
-        render->mouse_pos.y - mouse_last.y,
-    };
+    render->mouse_delta.x = render->mouse_pos.x - mouse_last.x;
+    render->mouse_delta.y = render->mouse_pos.y - mouse_last.y;
     mouse_last = render->mouse_pos;
 }
 
@@ -203,9 +201,11 @@ void fsl_update_key_states(void)
     u64 _time = render->time;
     static u64 double_press_time_interval = (u64)(FSL_DOUBLE_PRESS_TIME_INTERVAL * FSL_SEC2NSEC);
     static u64 key_press_start_time[FSL_KEYBOARD_KEYS_MAX] = {0};
-    b8 key_press = FALSE, key_release = FALSE,
-       mouse_press = FALSE, mouse_release = FALSE;
-    u32 i;
+    b8 key_press = FALSE;
+    b8 key_release = FALSE;
+    b8 mouse_press = FALSE;
+    b8 mouse_release = FALSE;
+    u32 i = 0;
 
     for (i = 0; i < FSL_MOUSE_BUTTONS_MAX; ++i)
     {

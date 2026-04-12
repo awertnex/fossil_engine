@@ -31,7 +31,7 @@ enum fsl_file_type_index
     FSL_FILE_TYPE_DIR,
     FSL_FILE_TYPE_CHR,
     FSL_FILE_TYPE_BLK,
-    FSL_FILE_TYPE_FIFO,
+    FSL_FILE_TYPE_FIFO
 }; /* fsl_file_type_index */
 
 /*! @return non-zero on failure and @ref fsl_err is set accordingly.

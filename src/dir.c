@@ -39,10 +39,11 @@
 
 u32 fsl_is_file(const str *name)
 {
+    struct stat stats = {0};
+
     if (fsl_is_file_exists(name, FALSE) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    struct stat stats;
     if (fsl_stat(name, &stats) == 0)
     {
         if (S_ISREG(stats.st_mode))
@@ -59,6 +60,7 @@ u32 fsl_is_file(const str *name)
 u32 fsl_is_file_exists(const str *name, b8 log)
 {
     struct stat stats = {0};
+
     if (fsl_stat(name, &stats) == 0)
     {
         if (S_ISREG(stats.st_mode) || S_ISLNK(stats.st_mode))
@@ -86,9 +88,10 @@ u32 fsl_is_file_exists(const str *name, b8 log)
 
 u32 fsl_is_dir(const str *name)
 {
+    struct stat stats = {0};
+
     if (fsl_is_dir_exists(name, FALSE) != FSL_ERR_SUCCESS)
         return fsl_err;
-    struct stat stats;
     if (fsl_stat(name, &stats) == 0)
     {
         if (S_ISDIR(stats.st_mode))
@@ -104,6 +107,7 @@ u32 fsl_is_dir(const str *name)
 u32 fsl_is_dir_exists(const str *name, b8 log)
 {
     struct stat stats = {0};
+
     if (fsl_stat(name, &stats) == 0)
     {
         if (S_ISDIR(stats.st_mode))
@@ -156,7 +160,8 @@ u32 fsl_make_dir(const str *path)
 
 int fsl_change_dir(const str *path)
 {
-    int success = chdir(path);
+    int success = 0;
+    success = fsl_chdir(path);
     _LOGTRACE(0, "Working Directory Changed to '%s'\n", path);
     return success;
 }
@@ -164,6 +169,7 @@ int fsl_change_dir(const str *path)
 u32 fsl_get_file_type(const str *name, u32 *type)
 {
     struct stat stats = {0};
+
     if (fsl_stat(name, &stats) == 0)
     {
         if (S_ISREG(stats.st_mode))
@@ -191,6 +197,7 @@ u64 fsl_get_file_contents(const str *name, void **dst, u64 size, b8 terminate)
 {
     FILE *file = NULL;
     u64 cursor = 0;
+    u64 len = 0;
 
     if (fsl_is_file_exists(name, TRUE) != FSL_ERR_SUCCESS)
             return 0;
@@ -203,7 +210,7 @@ u64 fsl_get_file_contents(const str *name, void **dst, u64 size, b8 terminate)
     }
 
     fseek(file, 0, SEEK_END);
-    u64 len = ftell(file);
+    len = ftell(file);
     fseek(file, 0, SEEK_SET);
 
     if (fsl_mem_alloc(dst, len + (terminate ? 1 : 0),
@@ -213,13 +220,18 @@ u64 fsl_get_file_contents(const str *name, void **dst, u64 size, b8 terminate)
     cursor = fread(*dst, size, len, file);
 
     fclose(file);
-    if (terminate) ((u8*)(*dst))[len] = 0;
+
+    if (terminate)
+        ((u8*)(*dst))[len] = 0;
+
     fsl_err = FSL_ERR_SUCCESS;
     return cursor;
 
 cleanup:
 
-    if (file) fclose(file);
+    if (file)
+        fclose(file);
+
     return 0;
 }
 
@@ -230,17 +242,18 @@ fsl_buf fsl_get_dir_contents(const str *name)
     str entry_name_full[PATH_MAX] = {0};
     DIR *dir = NULL;
     struct dirent *entry = {0};
+    fsl_buf nobuf = {0};
     fsl_buf contents = {0};
     u64 i = 0;
 
     if (!name)
     {
         fsl_err = FSL_ERR_POINTER_NULL;
-        return (fsl_buf){0};
+        return nobuf;
     }
 
     if (fsl_is_dir_exists(name, TRUE) != FSL_ERR_SUCCESS)
-        return (fsl_buf){0};
+        return nobuf;
 
     if (fsl_get_path_absolute(name, &dir_name_absolute) != FSL_ERR_SUCCESS)
         goto cleanup;
@@ -272,7 +285,7 @@ fsl_buf fsl_get_dir_contents(const str *name)
                 !strncmp(entry->d_name, "..\0", 3))
             continue;
 
-        contents.i[i] = contents.buf + (i * NAME_MAX);
+        contents.i[i] = (u8*)contents.buf + i * NAME_MAX;
         memcpy(contents.i[i], entry->d_name, NAME_MAX - 1);
         snprintf(entry_name_full, PATH_MAX, "%s%s", dir_name_absolute_usable, entry->d_name);
 
@@ -290,11 +303,13 @@ fsl_buf fsl_get_dir_contents(const str *name)
 
 cleanup:
 
-    if (dir) closedir(dir);
+    if (dir)
+        closedir(dir);
+
     fsl_mem_free((void*)&dir_name_absolute, strlen(dir_name_absolute),
             "fsl_get_dir_contents().dir_name_absolute");
-    fsl_mem_free_buf((void*)&contents, "fsl_get_dir_contents().contents");
-    return (fsl_buf){0};
+    fsl_mem_free_buf(&contents, "fsl_get_dir_contents().contents");
+    return nobuf;
 }
 
 u64 fsl_get_dir_entry_count(const str *name)

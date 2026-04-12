@@ -45,25 +45,20 @@ enum fsl_log_file_index
     FSL_LOG_FILE_INDEX_INFO = 1,
     FSL_LOG_FILE_INDEX_DEBUG = 2,
     FSL_LOG_FILE_INDEX_TRACE = 2,
-    FSL_LOG_FILE_INDEX_COUNT,
+    FSL_LOG_FILE_INDEX_COUNT
 }; /* fsl_log_file_index */
 
 /* ---- section: declarations ----------------------------------------------- */
 
-fsl_logger_core logger_core =
-{
-    .log_level_max = FSL_LOG_LEVEL_TRACE,
-};
+/*! @remark initialized in @ref fsl_logger_init().
+ */
+fsl_logger_core logger_core = {0};
 
-static const str FSL_LOG_FILE_NAME[FSL_LOG_LEVEL_COUNT][NAME_MAX] =
-{
-    [FSL_LOG_LEVEL_FATAL] = FSL_FILE_NAME_LOG_ERROR,
-    [FSL_LOG_LEVEL_ERROR] = FSL_FILE_NAME_LOG_ERROR,
-    [FSL_LOG_LEVEL_WARNING] = FSL_FILE_NAME_LOG_ERROR,
-    [FSL_LOG_LEVEL_INFO] = FSL_FILE_NAME_LOG_INFO,
-    [FSL_LOG_LEVEL_DEBUG] = FSL_FILE_NAME_LOG_EXTRA,
-    [FSL_LOG_LEVEL_TRACE] = FSL_FILE_NAME_LOG_EXTRA,
-};
+/*! @brief each log level's log file name.
+ *
+ *  @remark initialized in @ref fsl_logger_init().
+ */
+static const str FSL_LOG_FILE_NAME[FSL_LOG_LEVEL_COUNT][NAME_MAX] = {0};
 
 static u32 fsl_logger_color_tab[FSL_LOG_LEVEL_COUNT + 1] =
 {
@@ -129,6 +124,15 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 lo
 {
     u32 i = 0;
 
+    logger_core.log_level_max = FSL_LOG_LEVEL_TRACE;
+
+    snprintf(FSL_LOG_FILE_NAME[FSL_LOG_LEVEL_FATAL], NAME_MAX, "%s", FSL_FILE_NAME_LOG_ERROR);
+    snprintf(FSL_LOG_FILE_NAME[FSL_LOG_LEVEL_ERROR], NAME_MAX, "%s", FSL_FILE_NAME_LOG_ERROR);
+    snprintf(FSL_LOG_FILE_NAME[FSL_LOG_LEVEL_WARNING], NAME_MAX, "%s", FSL_FILE_NAME_LOG_ERROR);
+    snprintf(FSL_LOG_FILE_NAME[FSL_LOG_LEVEL_INFO], NAME_MAX, "%s", FSL_FILE_NAME_LOG_INFO);
+    snprintf(FSL_LOG_FILE_NAME[FSL_LOG_LEVEL_DEBUG], NAME_MAX, "%s", FSL_FILE_NAME_LOG_EXTRA);
+    snprintf(FSL_LOG_FILE_NAME[FSL_LOG_LEVEL_TRACE], NAME_MAX, "%s", FSL_FILE_NAME_LOG_EXTRA);
+
     if (flags & FSL_FLAG_RELEASE_BUILD)
         logger_core.log_level_max = FSL_LOG_LEVEL_INFO;
 
@@ -164,8 +168,7 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 lo
                 FSL_FLAG_LOG_NO_VERBOSE,
                 "%s\n", "Log Directory Not Set");
 
-    if (
-            fsl_mem_map_arena(&_fsl_memory_arena_internal,
+    if (fsl_mem_map_arena(&_fsl_memory_arena_internal,
                 FSL_LOGGER_HISTORY_MAX * sizeof(u32) +
                 FSL_LOGGER_HISTORY_MAX * sizeof(str*) +
                 FSL_LOGGER_HISTORY_MAX * FSL_LOGGER_STRING_MAX,
@@ -218,7 +221,8 @@ void _fsl_log_output(u32 error_code, u32 flags, const str *file, u64 line, u8 le
 
     fsl_err = error_code;
 
-    if (level > logger_core.log_level_max) return;
+    if (level > logger_core.log_level_max)
+        return;
 
     va_start(args, format);
     vsnprintf(str_in, FSL_STRING_MAX, format, args);

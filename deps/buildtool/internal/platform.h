@@ -1,8 +1,3 @@
-#ifndef BUILD_PLATFORM_H
-#define BUILD_PLATFORM_H
-
-/* ---- section: license ---------------------------------------------------- */
-
 /*  MIT License
  *
  *  Copyright (c) 2026 Lily Awertnex
@@ -26,6 +21,9 @@
  *  SOFTWARE.
  */
 
+#ifndef BUILDTOOL_PLATFORM_H
+#define BUILDTOOL_PLATFORM_H
+
 #include "common.h"
 #include "diagnostics.h"
 #include "logger.h"
@@ -38,17 +36,6 @@
 #endif /* PLATFORM */
 
 /* ---- section: signatures ------------------------------------------------- */
-
-/*! @brief get file type of `name` and store in `type`.
- *
- *  @param type pointer to u32 to store file type,
- *  can be one of the enum values at @ref file_type_index.
- *
- *  @remark does not follow symlinks, reports symlinks themselves.
- *
- *  @return non-zero on failure and @ref build_err is set accordingly.
- */
-extern u32 get_file_type(const str *name, u32 *type);
 
 /*! @param log enable/disable logging.
  *
@@ -77,6 +64,17 @@ extern u32 make_dir(const str *path);
 /*! @brief change current working directory.
  */
 extern int change_dir(const str *path);
+
+/*! @brief get file type of `name` and store in `type`.
+ *
+ *  @param type pointer to u32 to store file type,
+ *  can be one of the enum values at @ref file_type_index.
+ *
+ *  @remark does not follow symlinks, reports symlinks themselves.
+ *
+ *  @return non-zero on failure and @ref build_err is set accordingly.
+ */
+extern u32 get_file_type(const str *name, u32 *type);
 
 /*! @param dst pointer to `NULL` buffer to store file contents.
  *  @remark `dst` is allocated file size, + 1 if `terminate` is `TRUE`.
@@ -126,7 +124,7 @@ extern str *get_path_absolute(const str *name);
  *  -- IMPLEMENTATION: platform_<PLATFORM>.h --;
  *
  *  @brief get real path.
- * 
+ *
  *  @param path relative path.
  *  @param path_real result/canonical `path`, ending with slash (`/`).
  *
@@ -151,7 +149,7 @@ extern str *get_path_bin_root(void);
 extern u32 _get_path_bin_root(str *path);
 
 /*! @brief execute command in a separate child process (based on @ref execvp()).
- * 
+ *
  *  -- IMPLEMENTATION: platform_<PLATFORM>.h --;
  *
  *  @param cmd command and args to execute.
@@ -183,32 +181,6 @@ extern u32 get_base_name(const str *path, str *dst, u64 size);
 
 /* ---- section: implementation --------------------------------------------- */
 
-u32 get_file_type(const str *name, u32 *type)
-{
-    struct stat stats = {0};
-    if (bt_stat(name, &stats) == 0)
-    {
-        if (S_ISREG(stats.st_mode))
-            *type = FILE_TYPE_REG;
-        else if (S_ISLNK(stats.st_mode))
-            *type = FILE_TYPE_LNK;
-        else if (S_ISDIR(stats.st_mode))
-            *type = FILE_TYPE_DIR;
-        else if (S_ISCHR(stats.st_mode))
-            *type = FILE_TYPE_CHR;
-        else if (S_ISBLK(stats.st_mode))
-            *type = FILE_TYPE_BLK;
-        else if (S_ISFIFO(stats.st_mode))
-            *type = FILE_TYPE_FIFO;
-
-        return ERR_SUCCESS;
-    }
-
-    LOGERROR(ERR_FILE_NOT_FOUND, FALSE,
-            "File '%s' Not Found\n", name);
-    return build_err;
-}
-
 u32 is_file_exists(const str *name, b8 log)
 {
     struct stat stats = {0};
@@ -239,10 +211,11 @@ u32 is_file_exists(const str *name, b8 log)
 
 u32 is_dir(const str *name)
 {
+    struct stat stats = {0};
+
     if (is_dir_exists(name, FALSE) != ERR_SUCCESS)
         return build_err;
 
-    struct stat stats = {0};
     if (bt_stat(name, &stats) == 0)
     {
         if (S_ISDIR(stats.st_mode))
@@ -315,10 +288,36 @@ int change_dir(const str *path)
     return success;
 }
 
+u32 get_file_type(const str *name, u32 *type)
+{
+    struct stat stats = {0};
+    if (bt_stat(name, &stats) == 0)
+    {
+        if (S_ISREG(stats.st_mode))
+            *type = FILE_TYPE_REG;
+        else if (S_ISLNK(stats.st_mode))
+            *type = FILE_TYPE_LNK;
+        else if (S_ISDIR(stats.st_mode))
+            *type = FILE_TYPE_DIR;
+        else if (S_ISCHR(stats.st_mode))
+            *type = FILE_TYPE_CHR;
+        else if (S_ISBLK(stats.st_mode))
+            *type = FILE_TYPE_BLK;
+        else if (S_ISFIFO(stats.st_mode))
+            *type = FILE_TYPE_FIFO;
+
+        return ERR_SUCCESS;
+    }
+
+    LOGERROR(ERR_FILE_NOT_FOUND, FALSE,
+            "File '%s' Not Found\n", name);
+    return build_err;
+}
+
 u64 get_file_contents(const str *name, void **dst, u64 size, b8 terminate)
 {
     FILE *file = NULL;
-    u64 cursor = 0;
+    u64 cursor = 0, len = 0;
 
     if (is_file_exists(name, TRUE) != ERR_SUCCESS)
             return 0;
@@ -331,7 +330,7 @@ u64 get_file_contents(const str *name, void **dst, u64 size, b8 terminate)
     }
 
     fseek(file, 0, SEEK_END);
-    u64 len = ftell(file);
+    len = ftell(file);
     fseek(file, 0, SEEK_SET);
 
     if (mem_alloc(dst, len + (terminate ? 1 : 0),
@@ -364,11 +363,11 @@ _buf get_dir_contents(const str *name)
     if (!name)
     {
         build_err = ERR_POINTER_NULL;
-        return (_buf){0};
+        return contents;
     }
 
     if (is_dir_exists(name, TRUE) != ERR_SUCCESS)
-        return (_buf){0};
+        return contents;
 
     dir_name_absolute = get_path_absolute(name);
     if (!dir_name_absolute)
@@ -401,7 +400,7 @@ _buf get_dir_contents(const str *name)
                 !strncmp(entry->d_name, "..\0", 3))
             continue;
 
-        contents.i[i] = contents.buf + (i * NAME_MAX);
+        contents.i[i] = (u8*)contents.buf + i * NAME_MAX;
         memcpy(contents.i[i], entry->d_name, NAME_MAX - 1);
         snprintf(entry_name_full, PATH_MAX, "%s%s", dir_name_absolute_usable, entry->d_name);
 
@@ -423,7 +422,7 @@ cleanup:
     mem_free((void*)&dir_name_absolute, strlen(dir_name_absolute),
             "get_dir_contents().dir_name_absolute");
     mem_free_buf((void*)&contents, "get_dir_contents().dir_contents");
-    return (_buf){0};
+    return contents;
 }
 
 u32 copy_file(const str *src, const str *dst)
@@ -780,4 +779,4 @@ u32 get_base_name(const str *path, str *dst, u64 size)
     return build_err;
 }
 
-#endif /* BUILD_PLATFORM_H */
+#endif /* BUILDTOOL_PLATFORM_H */

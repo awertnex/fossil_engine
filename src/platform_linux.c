@@ -246,6 +246,8 @@ void _fsl_mem_unmap(void **x, u64 size, const str *name, const str *file, u64 li
 void _fsl_mem_unmap_arena(fsl_mem_arena *x, const str *name, const str *file, u64 line)
 {
     u64 i = 0;
+    fsl_mem_arena nomem_arena = {0};
+
     if (!x || !x->buf) return;
 
     _LOGTRACEEX(0,
@@ -258,5 +260,5 @@ void _fsl_mem_unmap_arena(fsl_mem_arena *x, const str *name, const str *file, u6
     munmap(x->i, x->size_i);
     munmap(x->buf, x->size_buf);
 
-    *x = (fsl_mem_arena){0};
+    *x = nomem_arena;
 }

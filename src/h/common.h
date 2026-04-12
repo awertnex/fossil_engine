@@ -31,7 +31,7 @@
 #define FSL_ENGINE_VERSION_MAJOR    0
 #define FSL_ENGINE_VERSION_MINOR    6
 #define FSL_ENGINE_VERSION_PATCH    0
-#define FSL_ENGINE_VERSION_BUILD    FSL_ENGINE_VERSION_BETA
+#define FSL_ENGINE_VERSION_BUILD    FSL_ENGINE_VERSION_DEV
 
 #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__) || defined(__MINGW32__)
 #   define FSL_PLATFORM_WIN         1
@@ -88,10 +88,10 @@
 #define FSL_COLOR_CHANNELS_RGB 3
 #define FSL_COLOR_CHANNELS_GRAY 1
 
-#define FSL_RENDER_WIDTH_DEFAULT 1280
+#define FSL_RENDER_WIDTH_DEFAULT 800
 #define FSL_RENDER_WIDTH_MIN 512
 #define FSL_RENDER_WIDTH_MAX 3840
-#define FSL_RENDER_HEIGHT_DEFAULT 720
+#define FSL_RENDER_HEIGHT_DEFAULT 800
 #define FSL_RENDER_HEIGHT_MIN 288
 #define FSL_RENDER_HEIGHT_MAX 2160
 #define FSL_CAMERA_CLIP_FAR_DEFAULT GL_CLIP_DISTANCE0
@@ -142,14 +142,14 @@ enum fsl_flag
 {
     FSL_FLAG_RELEASE_BUILD =        0x0001, /* output `TRACE` and `DEBUG` logs to console */
     FSL_FLAG_NO_DEFAULT_SHADERS =   0x0002, /* don't initialize default shaders (like 'text' and 'ui') */
-    FSL_FLAG_MULTISAMPLE =          0x0004, /* use `GLFW` multisampling */
+    FSL_FLAG_MULTISAMPLE =          0x0004  /* use `GLFW` multisampling */
 }; /* fsl_flag */
 
 enum fsl_string_index
 {
     FSL_STR_INDEX_ENGINE_TITLE, /* ENGINE_NAME: ENGINE_VERSION */
     FSL_STR_INDEX_ENGINE_VERSION,
-    FSL_STR_INDEX_COUNT,
+    FSL_STR_INDEX_COUNT
 }; /* fsl_string_index */
 
 enum fsl_shader_index
@@ -158,7 +158,7 @@ enum fsl_shader_index
     FSL_SHADER_INDEX_TEXT,
     FSL_SHADER_INDEX_UI,
     FSL_SHADER_INDEX_UI_9_SLICE,
-    FSL_SHADER_INDEX_COUNT,
+    FSL_SHADER_INDEX_COUNT
 }; /* fsl_shader_index */
 
 enum fsl_font_index
@@ -167,7 +167,7 @@ enum fsl_font_index
     FSL_FONT_INDEX_DEJAVU_SANS_BOLD,
     FSL_FONT_INDEX_DEJAVU_SANS_MONO,
     FSL_FONT_INDEX_DEJAVU_SANS_MONO_BOLD,
-    FSL_FONT_INDEX_COUNT,
+    FSL_FONT_INDEX_COUNT
 }; /* fsl_font_index */
 
 enum fsl_text_alignment
@@ -176,7 +176,7 @@ enum fsl_text_alignment
     FSL_TEXT_ALIGN_CENTER = 1,
     FSL_TEXT_ALIGN_RIGHT = 2,
     FSL_TEXT_ALIGN_TOP = 0,
-    FSL_TEXT_ALIGN_BOTTOM = 2,
+    FSL_TEXT_ALIGN_BOTTOM = 2
 }; /* fsl_text_alignment */
 
 enum fsl_texture_index
@@ -187,7 +187,7 @@ enum fsl_texture_index
     FSL_TEXTURE_INDEX_BUTTON_SELECTED,
     FSL_TEXTURE_INDEX_BUTTON_ACTIVE,
     FSL_TEXTURE_INDEX_BUTTON_INACTIVE,
-    FSL_TEXTURE_INDEX_COUNT,
+    FSL_TEXTURE_INDEX_COUNT
 }; /* fsl_texture_index */
 
 /*! -- INTERNAL USE ONLY --;

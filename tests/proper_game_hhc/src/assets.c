@@ -93,9 +93,12 @@ u32 assets_init(void)
     u32 i = 0, j = 0;
 
     if (
-            fsl_mem_map((void*)&block_textures, TEXTURE_BLOCK_COUNT * sizeof(fsl_texture),
+            fsl_mem_push_arena(&_memory_arena_internal, (void*)&block_textures,
+                TEXTURE_BLOCK_COUNT * sizeof(fsl_texture),
                 "assets_init().block_textures") != FSL_ERR_SUCCESS ||
-            fsl_mem_map((void*)&blocks, BLOCK_COUNT * sizeof(block),
+
+            fsl_mem_push_arena(&_memory_arena_internal, (void*)&blocks,
+                BLOCK_COUNT * sizeof(block),
                 "assets_init().blocks") != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -114,31 +117,31 @@ u32 assets_init(void)
     /* ---- textures -------------------------------------------------------- */
 
     if (
-            fsl_texture_init(&texture[TEXTURE_CROSSHAIR], (v2i32){16, 16},
+            fsl_texture_init(&texture[TEXTURE_CROSSHAIR],
                 GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
                 GAME_DIR_NAME_GUI"crosshair.png") != FSL_ERR_SUCCESS ||
 
-            fsl_texture_init(&texture[TEXTURE_ITEM_BAR], (v2i32){256, 256},
+            fsl_texture_init(&texture[TEXTURE_ITEM_BAR],
                 GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
                 GAME_DIR_NAME_GUI"item_bar.png") != FSL_ERR_SUCCESS ||
 
-            fsl_texture_init(&texture[TEXTURE_SKYBOX_VAL], (v2i32){512, 512},
+            fsl_texture_init(&texture[TEXTURE_SKYBOX_VAL],
                 GL_RED, GL_RED, GL_NEAREST, FSL_COLOR_CHANNELS_GRAY, FALSE,
                 GAME_DIR_NAME_ENV"skybox_val.png") != FSL_ERR_SUCCESS ||
 
-            fsl_texture_init(&texture[TEXTURE_SKYBOX_HORIZON], (v2i32){512, 512},
+            fsl_texture_init(&texture[TEXTURE_SKYBOX_HORIZON],
                 GL_RED, GL_RED, GL_NEAREST, FSL_COLOR_CHANNELS_GRAY, FALSE,
                 GAME_DIR_NAME_ENV"skybox_horizon.png") != FSL_ERR_SUCCESS ||
 
-            fsl_texture_init(&texture[TEXTURE_SKYBOX_STARS], (v2i32){512, 512},
+            fsl_texture_init(&texture[TEXTURE_SKYBOX_STARS],
                 GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
                 GAME_DIR_NAME_ENV"skybox_stars.png") != FSL_ERR_SUCCESS ||
 
-            fsl_texture_init(&texture[TEXTURE_SUN], (v2i32){128, 128},
+            fsl_texture_init(&texture[TEXTURE_SUN],
                     GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
                     GAME_DIR_NAME_ENV"sun.png") != FSL_ERR_SUCCESS ||
 
-            fsl_texture_init(&texture[TEXTURE_MOON], (v2i32){128, 128},
+            fsl_texture_init(&texture[TEXTURE_MOON],
                     GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
                     GAME_DIR_NAME_ENV"moon.png") != FSL_ERR_SUCCESS)
         goto cleanup;
@@ -150,55 +153,55 @@ u32 assets_init(void)
     /* ---- block textures -------------------------------------------------- */
 
     if (
-            block_texture_init(TEXTURE_BLOCK_GRASS_SIDE, (v2i32){16, 16},
+            block_texture_init(TEXTURE_BLOCK_GRASS_SIDE,
                 "grass_side.png") != FSL_ERR_SUCCESS ||
 
-            block_texture_init(TEXTURE_BLOCK_GRASS_TOP, (v2i32){16, 16},
+            block_texture_init(TEXTURE_BLOCK_GRASS_TOP,
                 "grass_top.png") != FSL_ERR_SUCCESS ||
 
-            block_texture_init(TEXTURE_BLOCK_DIRT, (v2i32){16, 16},
+            block_texture_init(TEXTURE_BLOCK_DIRT,
                 "dirt.png") != FSL_ERR_SUCCESS ||
 
-            block_texture_init(TEXTURE_BLOCK_DIRTUP, (v2i32){16, 16},
+            block_texture_init(TEXTURE_BLOCK_DIRTUP,
                 "dirtup.png") != FSL_ERR_SUCCESS ||
 
-            block_texture_init(TEXTURE_BLOCK_STONE, (v2i32){16, 16},
+            block_texture_init(TEXTURE_BLOCK_STONE,
                 "stone.png") != FSL_ERR_SUCCESS ||
 
-            block_texture_init(TEXTURE_BLOCK_SAND, (v2i32){16, 16},
+            block_texture_init(TEXTURE_BLOCK_SAND,
                 "sand.png") != FSL_ERR_SUCCESS ||
 
-            block_texture_init(TEXTURE_BLOCK_GLASS, (v2i32){16, 16},
+            block_texture_init(TEXTURE_BLOCK_GLASS,
                 "glass.png") != FSL_ERR_SUCCESS ||
 
-            block_texture_init(TEXTURE_BLOCK_WOOD_BIRCH_LOG_SIDE, (v2i32){16, 16},
+            block_texture_init(TEXTURE_BLOCK_WOOD_BIRCH_LOG_SIDE,
                     "wood_birch_log_side.png") != FSL_ERR_SUCCESS ||
 
-            block_texture_init(TEXTURE_BLOCK_WOOD_BIRCH_LOG_TOP, (v2i32){16, 16},
+            block_texture_init(TEXTURE_BLOCK_WOOD_BIRCH_LOG_TOP,
                     "wood_birch_log_top.png") != FSL_ERR_SUCCESS ||
 
-            block_texture_init(TEXTURE_BLOCK_WOOD_BIRCH_PLANKS, (v2i32){16, 16},
+            block_texture_init(TEXTURE_BLOCK_WOOD_BIRCH_PLANKS,
                     "wood_birch_planks.png") != FSL_ERR_SUCCESS ||
 
-            block_texture_init(TEXTURE_BLOCK_WOOD_CHERRY_LOG_SIDE, (v2i32){16, 16},
+            block_texture_init(TEXTURE_BLOCK_WOOD_CHERRY_LOG_SIDE,
                     "wood_cherry_log_side.png") != FSL_ERR_SUCCESS ||
 
-            block_texture_init(TEXTURE_BLOCK_WOOD_CHERRY_LOG_TOP, (v2i32){16, 16},
+            block_texture_init(TEXTURE_BLOCK_WOOD_CHERRY_LOG_TOP,
                     "wood_cherry_log_top.png") != FSL_ERR_SUCCESS ||
 
-            block_texture_init(TEXTURE_BLOCK_WOOD_CHERRY_PLANKS, (v2i32){16, 16},
+            block_texture_init(TEXTURE_BLOCK_WOOD_CHERRY_PLANKS,
                     "wood_cherry_planks.png") != FSL_ERR_SUCCESS ||
 
-            block_texture_init(TEXTURE_BLOCK_WOOD_OAK_LOG_SIDE, (v2i32){16, 16},
+            block_texture_init(TEXTURE_BLOCK_WOOD_OAK_LOG_SIDE,
                     "wood_oak_log_side.png") != FSL_ERR_SUCCESS ||
 
-            block_texture_init(TEXTURE_BLOCK_WOOD_OAK_LOG_TOP, (v2i32){16, 16},
+            block_texture_init(TEXTURE_BLOCK_WOOD_OAK_LOG_TOP,
                     "wood_oak_log_top.png") != FSL_ERR_SUCCESS ||
 
-            block_texture_init(TEXTURE_BLOCK_WOOD_OAK_PLANKS, (v2i32){16, 16},
+            block_texture_init(TEXTURE_BLOCK_WOOD_OAK_PLANKS,
                     "wood_oak_planks.png") != FSL_ERR_SUCCESS ||
 
-            block_texture_init(TEXTURE_BLOCK_BLOOD, (v2i32){16, 16},
+            block_texture_init(TEXTURE_BLOCK_BLOOD,
                 "block_blood.png") != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -249,15 +252,8 @@ void assets_free(void)
         for (i = 0; i < TEXTURE_BLOCK_COUNT; ++i)
             fsl_texture_free(&block_textures[i]);
 
-    if (texture)
-        for (i = 0; i < TEXTURE_COUNT; ++i)
-            fsl_texture_free(&texture[i]);
-
-    fsl_mem_unmap((void*)&block_textures, TEXTURE_BLOCK_COUNT * sizeof(fsl_texture),
-            "assets_free().block_textures");
-
-    fsl_mem_unmap((void*)&blocks, BLOCK_COUNT * sizeof(block),
-            "assets_free().blocks");
+    for (i = 0; i < TEXTURE_COUNT; ++i)
+        fsl_texture_free(&texture[i]);
 
     if (ssbo_texture_indices_id)
         glDeleteBuffers(1, &ssbo_texture_indices_id);
@@ -266,7 +262,7 @@ void assets_free(void)
         glDeleteBuffers(1, &ssbo_texture_handles_id);
 }
 
-u32 block_texture_init(u32 index, v2i32 size, str *name)
+u32 block_texture_init(u32 index, str *name)
 {
     if (!name)
     {
@@ -277,10 +273,7 @@ u32 block_texture_init(u32 index, v2i32 size, str *name)
         goto cleanup;
     }
 
-    block_textures[index].size = size;
-
-    if (
-            fsl_texture_init(&block_textures[index], block_textures[index].size,
+    if (fsl_texture_init(&block_textures[index],
                 GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
                 fsl_stringf("%s%s", DIR_ROOT[DIR_BLOCKS], name)) != FSL_ERR_SUCCESS ||
 

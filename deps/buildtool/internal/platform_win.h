@@ -1,5 +1,5 @@
-#ifndef BUILD_PLATFORM_WIN_H
-#define BUILD_PLATFORM_WIN_H
+#ifndef BUILDTOOL_PLATFORM_WIN_H
+#define BUILDTOOL_PLATFORM_WIN_H
 
 /* ---- section: license ---------------------------------------------------- */
 
@@ -128,4 +128,4 @@ cleanup:
     return build_err;
 }
 
-#endif /* BUILD_PLATFORM_WIN_H */
+#endif /* BUILDTOOL_PLATFORM_WIN_H */

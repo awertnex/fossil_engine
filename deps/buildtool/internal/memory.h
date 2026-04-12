@@ -1,5 +1,5 @@
-#ifndef BUILD_MEMORY_H
-#define BUILD_MEMORY_H
+#ifndef BUILDTOOL_MEMORY_H
+#define BUILDTOOL_MEMORY_H
 
 /* ---- section: license ---------------------------------------------------- */
 
@@ -192,7 +192,7 @@ u32 _mem_alloc_buf(_buf *x, u64 memb, u64 size, const str *name, const str *file
     }
 
     for (i = 0; i < memb; ++i)
-        x->i[i] = x->buf + i * size;
+        x->i[i] = (u8*)x->buf + i * size;
 
     x->memb = memb;
     x->size = size;
@@ -220,6 +220,7 @@ void _mem_free_buf(_buf *x, const str *name, const str *file, u64 line)
         free(x->i);
         LOGTRACEEX(TRUE, file, line,
                 "%s[%p] Memory Unloaded\n", name_i, temp);
+        x->i = NULL;
     }
 
     if (x->buf)
@@ -229,9 +230,13 @@ void _mem_free_buf(_buf *x, const str *name, const str *file, u64 line)
         free(x->buf);
         LOGTRACEEX(TRUE, file, line,
                 "%s[%p] Memory Unloaded\n", name_buf, temp);
+        x->buf = NULL;
     }
 
-    *x = (_buf){0};
+    x->loaded = FALSE;
+    x->memb = 0;
+    x->size = 0;
+    x->cursor = 0;
 }
 
 u32 _mem_clear(void **x, u64 size, const str *name, const str *file, u64 line)
@@ -250,4 +255,4 @@ u32 _mem_clear(void **x, u64 size, const str *name, const str *file, u64 line)
     return build_err;
 }
 
-#endif /* BUILD_MEMORY_H */
+#endif /* BUILDTOOL_MEMORY_H */

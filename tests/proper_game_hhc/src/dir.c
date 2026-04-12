@@ -62,14 +62,9 @@ u32 game_init(void)
     HHC_LOGTRACE(FSL_FLAG_LOG_CMD,
             "Main Directory Created '%s'\n", FSL_DIR_PROC_ROOT);
 
-    glfwSwapInterval(MODE_INTERNAL_VSYNC);
-    glfwWindowHint(GLFW_DEPTH_BITS, 24);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_FRONT);
-    glFrontFace(GL_CCW);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_MULTISAMPLE);
+    if (fsl_mem_map_arena(&_memory_arena_internal, 1,
+                "engine_init()._fsl_memory_arena_internal") != FSL_ERR_SUCCESS)
+        return *GAME_ERR;
 
     *GAME_ERR = FSL_ERR_SUCCESS;
     return *GAME_ERR;

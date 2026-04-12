@@ -20,6 +20,7 @@ static str str_cflags[][CMD_SIZE] =
 {
     "-Wall",
     "-Wextra",
+    "-Wpedantic",
     "-Wformat-truncation=0",
     "-ggdb",
 };
@@ -36,11 +37,13 @@ int main(int argc, char **argv)
 
     if (find_token("release", argc, argv))
     {
+        LOGINFO(FALSE, "%s\n", "Building For Release..");
         token_release = 1;
         str_cflags[0][0] = 0;
         str_cflags[1][0] = 0;
         str_cflags[2][0] = 0;
         str_cflags[3][0] = 0;
+        str_cflags[4][0] = 0;
     }
 
     for (i = 0; i < arr_len(str_dir); ++i)
@@ -50,7 +53,7 @@ int main(int argc, char **argv)
             cmd_fail(NULL);
     }
 
-    cmd_exec(39,
+    cmd_exec(0,
             COMPILER,
             "-shared",
             FSL_C_STD,
@@ -62,6 +65,7 @@ int main(int argc, char **argv)
             str_cflags[1],
             str_cflags[2],
             str_cflags[3],
+            str_cflags[4],
             fsl_str_libs_internal[0],
             fsl_str_libs_internal[1],
             fsl_str_libs_internal[2],
@@ -89,7 +93,8 @@ int main(int argc, char **argv)
             DIR_SRC"time.c",
             DIR_SRC"ui.c",
             "-o",
-            "lib/"PLATFORM"/"FSL_FILE_NAME_LIB);
+            "lib/"PLATFORM"/"FSL_FILE_NAME_LIB,
+            NULL);
 
     if (
             copy_dir(DIR_DEPS,          DIR_OUT, FALSE) != ERR_SUCCESS ||

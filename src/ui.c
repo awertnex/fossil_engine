@@ -125,32 +125,7 @@ static f32 vbo_data_unit_quad[] =
     1.0f, -1.0f, 1.0f, 1.0f,
 };
 
-fsl_font fsl_font_buf[FSL_FONT_INDEX_COUNT] =
-{
-    [FSL_FONT_INDEX_DEJAVU_SANS] =
-    {
-        .name = "DejaVu Sans (ANSI)",
-        .path = FSL_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_ansi.ttf",
-    },
-
-    [FSL_FONT_INDEX_DEJAVU_SANS_BOLD]
-    {
-        .name = "DejaVu Sans Bold (ANSI)",
-        .path = FSL_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_bold_ansi.ttf",
-    },
-
-    [FSL_FONT_INDEX_DEJAVU_SANS_MONO]
-    {
-        .name = "DejaVu Sans Mono (ANSI)",
-        .path = FSL_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_mono_ansi.ttf",
-    },
-
-    [FSL_FONT_INDEX_DEJAVU_SANS_MONO_BOLD]
-    {
-        .name = "DejaVu Sans Mono Bold (ANSI)",
-        .path = FSL_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_mono_bold_ansi.ttf",
-    },
-};
+fsl_font fsl_font_buf[FSL_FONT_INDEX_COUNT] = {0};
 
 /* ---- section: signatures ------------------------------------------------- */
 
@@ -258,6 +233,7 @@ u32 fsl_font_init(fsl_font *font, u32 resolution, const str *name, const str *fi
 
     fsl_mem_free((void*)&font->bitmap, FSL_GLYPH_MAX * resolution * resolution, font->name);
 
+    font->loaded = TRUE;
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 
@@ -269,11 +245,18 @@ cleanup:
 
 void fsl_font_free(fsl_font *font)
 {
-    if (!font) return;
-    glDeleteTextures(1, &font->id);
+    fsl_font nofont = {0};
+    if (!font)
+        return;
+
+    if (font->loaded)
+    {
+        glDeleteTextures(1, &font->id);
+        font->loaded = FALSE;
+    }
     fsl_mem_free((void*)&font->buf, font->buf_len, font->name);
     fsl_mem_free((void*)&font->bitmap, FSL_GLYPH_MAX * font->resolution * font->resolution, font->name);
-    *font = (fsl_font){0};
+    *font = nofont;
 }
 
 /* ---- section: text ------------------------------------------------------- */
@@ -381,7 +364,7 @@ void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear)
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    if (fsl_text_core.font == NULL || font->id != fsl_text_core.font->id || 
+    if (fsl_text_core.font == NULL || font->id != fsl_text_core.font->id ||
             render_size.x != render->size.x || render_size.y != render->size.y)
     {
         fsl_text_core.font = font;
@@ -616,15 +599,6 @@ void fsl_text_render(b8 shadow, u32 shadow_color)
     fsl_text_core.advance = 0.0f;
 }
 
-void fsl_text_stop(void)
-{
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glEnable(GL_DEPTH_TEST);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
 f32 fsl_get_text_height(void)
 {
     return fsl_text_core.line_height_total * fsl_text_core.text_scale.y;
@@ -634,41 +608,58 @@ f32 fsl_get_text_height(void)
 
 u32 fsl_ui_init(void)
 {
-    u32 i = 0;
+    u64 i = 0;
 
     _fsl_text_init();
 
     /* ---- mandatory engine fonts ------------------------------------------ */
 
-    for (i = 0; i < FSL_FONT_INDEX_COUNT; ++i)
-        if (fsl_font_init(&fsl_font_buf[i], FSL_FONT_RESOLUTION_DEFAULT,
-                    NULL, fsl_font_buf[i].path) != FSL_ERR_SUCCESS)
-            goto cleanup;
+    if (
+            fsl_font_init(&fsl_font_buf[0], FSL_FONT_RESOLUTION_DEFAULT,
+                "DejaVu Sans (ANSI)",
+                FSL_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_ansi.ttf")
+            != FSL_ERR_SUCCESS ||
+
+            fsl_font_init(&fsl_font_buf[1], FSL_FONT_RESOLUTION_DEFAULT,
+                "DejaVu Sans Bold (ANSI)",
+                FSL_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_bold_ansi.ttf")
+            != FSL_ERR_SUCCESS ||
+
+            fsl_font_init(&fsl_font_buf[2], FSL_FONT_RESOLUTION_DEFAULT,
+                "DejaVu Sans Mono (ANSI)",
+                FSL_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_mono_ansi.ttf")
+            != FSL_ERR_SUCCESS ||
+
+            fsl_font_init(&fsl_font_buf[3], FSL_FONT_RESOLUTION_DEFAULT,
+                "DejaVu Sans Mono Bold (ANSI)",
+                FSL_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_mono_bold_ansi.ttf")
+            != FSL_ERR_SUCCESS)
+        goto cleanup;
 
     /* ---- mandatory engine textures --------------------------------------- */
 
     if (
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE], (v2i32){16, 16},
+            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
                 GL_RGB, GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE,
                 FSL_DIR_NAME_TEXTURES"panel_active.png") != FSL_ERR_SUCCESS ||
 
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_INACTIVE], (v2i32){16, 16},
+            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_INACTIVE],
                 GL_RGB, GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE,
                 FSL_DIR_NAME_TEXTURES"panel_inactive.png") != FSL_ERR_SUCCESS ||
 
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE], (v2i32){128, 128},
+            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE],
                 GL_RGB, GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE,
                 FSL_DIR_NAME_TEXTURES"panel_debug_nine_slice.png") != FSL_ERR_SUCCESS ||
 
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_SELECTED], (v2i32){16, 16},
+            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_SELECTED],
                 GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
                 FSL_DIR_NAME_TEXTURES"button_selected.png") != FSL_ERR_SUCCESS ||
 
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_ACTIVE], (v2i32){16, 16},
+            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_ACTIVE],
                 GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
                 FSL_DIR_NAME_TEXTURES"button_active.png") != FSL_ERR_SUCCESS ||
 
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_INACTIVE], (v2i32){16, 16},
+            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_INACTIVE],
                 GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
                 FSL_DIR_NAME_TEXTURES"button_inactive.png") != FSL_ERR_SUCCESS)
         goto cleanup;
@@ -860,152 +851,61 @@ void fsl_ui_free(void)
 fsl_panel_nine_slice fsl_get_nine_slice(v2i32 texture_size, i32 pos_x, i32 pos_y,
         i32 size_x, i32 size_y, i32 slice_size)
 {
+    fsl_panel_nine_slice _panel = {0};
+    u32 i = 0;
     f32 _pos_x = (f32)pos_x;
     f32 _pos_y = (f32)pos_y;
     f32 _size_x = (f32)size_x;
     f32 _size_y = (f32)size_y;
     f32 _slice_size = (f32)slice_size;
-    v2f32 _texture_scale =
+    v2f32 _texture_scale = {0};
+    v2f32 _pos[3] = {0};
+    v2f32 _size[3] = {0};
+    v2f32 _tex_coords_pos[3] = {0};
+    v2f32 _tex_coords_size[3] = {0};
+
+    _texture_scale.x = 1.0f / (f32)texture_size.x;
+    _texture_scale.y = 1.0f / (f32)texture_size.y;
+
+    _pos[0].x = _pos_x;
+    _pos[0].y = _pos_y;
+    _pos[1].x = _pos_x + _slice_size;
+    _pos[1].y = _pos_y + _slice_size;
+    _pos[2].x = _pos_x + _size_x - _slice_size;
+    _pos[2].y = _pos_y + _size_y - _slice_size;
+
+    _size[0].x = _slice_size;
+    _size[0].y = _slice_size;
+    _size[1].x = _size_x - _slice_size * 2;
+    _size[1].y = _size_y - _slice_size * 2;
+    _size[2].x = _slice_size;
+    _size[2].y = _slice_size;
+
+    _tex_coords_pos[0].x = 0.0f;
+    _tex_coords_pos[0].y = 0.0f;
+    _tex_coords_pos[1].x = _texture_scale.x * _slice_size;
+    _tex_coords_pos[1].y = _texture_scale.y * _slice_size;
+    _tex_coords_pos[2].x = 1.0f - _texture_scale.x * _slice_size;
+    _tex_coords_pos[2].y = 1.0f - _texture_scale.y * _slice_size;
+
+    _tex_coords_size[0].x = _texture_scale.x * _slice_size;
+    _tex_coords_size[0].y = _texture_scale.y * _slice_size;
+    _tex_coords_size[1].x = 1.0f - _texture_scale.x * _slice_size * 2.0f;
+    _tex_coords_size[1].y = 1.0f - _texture_scale.y * _slice_size * 2.0f;
+    _tex_coords_size[2].x = _texture_scale.x * _slice_size;
+    _tex_coords_size[2].y = _texture_scale.y * _slice_size;
+
+    for (; i < 9; ++i)
     {
-        1.0f / (f32)texture_size.x,
-        1.0f / (f32)texture_size.y,
-    };
+        _panel.slice[i].pos.x = _pos[i % 3].x;
+        _panel.slice[i].pos.y = _pos[i / 3].y;
+        _panel.slice[i].size.x = _size[i % 3].x;
+        _panel.slice[i].size.y = _size[i / 3].y;
+        _panel.slice[i].tex_coords_pos.x = _tex_coords_pos[i % 3].x;
+        _panel.slice[i].tex_coords_pos.y = _tex_coords_pos[i / 3].y;
+        _panel.slice[i].tex_coords_size.x = _tex_coords_size[i % 3].x;
+        _panel.slice[i].tex_coords_size.y = _tex_coords_size[i / 3].y;
+    }
 
-    v2f32 _pos[3] =
-    {
-        [0] = {_pos_x, _pos_y},
-        [1] = {_pos_x + _slice_size, _pos_y + _slice_size},
-        [2] = {_pos_x + _size_x - _slice_size, _pos_y + _size_y - _slice_size},
-    };
-
-    v2f32 _size[3] =
-    {
-        [0] = {_slice_size, _slice_size},
-        [1] = {_size_x - _slice_size * 2, _size_y - _slice_size * 2},
-        [2] = {_slice_size, _slice_size},
-    };
-
-    v2f32 _tex_coords_pos[3] =
-    {
-        [0] = {0.0f, 0.0f},
-        [1] = {_texture_scale.x * _slice_size, _texture_scale.y * _slice_size},
-        [2] = {1.0f - _texture_scale.x * _slice_size, 1.0f - _texture_scale.y * _slice_size},
-    };
-
-    v2f32 _tex_coords_size[3] =
-    {
-        [0] = {_texture_scale.x * _slice_size, _texture_scale.y * _slice_size},
-        [1] = {1.0f - _texture_scale.x * _slice_size * 2.0f, 1.0f - _texture_scale.y * _slice_size * 2.0f},
-        [2] = {_texture_scale.x * _slice_size, _texture_scale.y * _slice_size},
-    };
-
-    return (fsl_panel_nine_slice){
-        .slice[0] =
-        {
-            .pos.x = _pos[0].x,
-            .pos.y = _pos[0].y,
-            .size.x = _size[0].x,
-            .size.y = _size[0].y,
-            .tex_coords_pos.x = _tex_coords_pos[0].x,
-            .tex_coords_pos.y = _tex_coords_pos[0].y,
-            .tex_coords_size.x = _tex_coords_size[0].x,
-            .tex_coords_size.y = _tex_coords_size[0].y,
-        },
-
-        .slice[1] =
-        {
-            .pos.x = _pos[1].x,
-            .pos.y = _pos[0].y,
-            .size.x = _size[1].x,
-            .size.y = _size[0].y,
-            .tex_coords_pos.x = _tex_coords_pos[1].x,
-            .tex_coords_pos.y = _tex_coords_pos[0].y,
-            .tex_coords_size.x = _tex_coords_size[1].x,
-            .tex_coords_size.y = _tex_coords_size[0].y,
-        },
-
-        .slice[2] =
-        {
-            .pos.x = _pos[2].x,
-            .pos.y = _pos[0].y,
-            .size.x = _size[2].x,
-            .size.y = _size[0].y,
-            .tex_coords_pos.x = _tex_coords_pos[2].x,
-            .tex_coords_pos.y = _tex_coords_pos[0].y,
-            .tex_coords_size.x = _tex_coords_size[2].x,
-            .tex_coords_size.y = _tex_coords_size[0].y,
-        },
-
-        .slice[3] =
-        {
-            .pos.x = _pos[0].x,
-            .pos.y = _pos[1].y,
-            .size.x = _size[0].x,
-            .size.y = _size[1].y,
-            .tex_coords_pos.x = _tex_coords_pos[0].x,
-            .tex_coords_pos.y = _tex_coords_pos[1].y,
-            .tex_coords_size.x = _tex_coords_size[0].x,
-            .tex_coords_size.y = _tex_coords_size[1].y,
-        },
-
-        .slice[4] =
-        {
-            .pos.x = _pos[1].x,
-            .pos.y = _pos[1].y,
-            .size.x = _size[1].x,
-            .size.y = _size[1].y,
-            .tex_coords_pos.x = _tex_coords_pos[1].x,
-            .tex_coords_pos.y = _tex_coords_pos[1].y,
-            .tex_coords_size.x = _tex_coords_size[1].x,
-            .tex_coords_size.y = _tex_coords_size[1].y,
-        },
-
-        .slice[5] =
-        {
-            .pos.x = _pos[2].x,
-            .pos.y = _pos[1].y,
-            .size.x = _size[2].x,
-            .size.y = _size[1].y,
-            .tex_coords_pos.x = _tex_coords_pos[2].x,
-            .tex_coords_pos.y = _tex_coords_pos[1].y,
-            .tex_coords_size.x = _tex_coords_size[2].x,
-            .tex_coords_size.y = _tex_coords_size[1].y,
-        },
-
-        .slice[6] =
-        {
-            .pos.x = _pos[0].x,
-            .pos.y = _pos[2].y,
-            .size.x = _size[0].x,
-            .size.y = _size[2].y,
-            .tex_coords_pos.x = _tex_coords_pos[0].x,
-            .tex_coords_pos.y = _tex_coords_pos[2].y,
-            .tex_coords_size.x = _tex_coords_size[0].x,
-            .tex_coords_size.y = _tex_coords_size[2].y,
-        },
-
-        .slice[7] =
-        {
-            .pos.x = _pos[1].x,
-            .pos.y = _pos[2].y,
-            .size.x = _size[1].x,
-            .size.y = _size[2].y,
-            .tex_coords_pos.x = _tex_coords_pos[1].x,
-            .tex_coords_pos.y = _tex_coords_pos[2].y,
-            .tex_coords_size.x = _tex_coords_size[1].x,
-            .tex_coords_size.y = _tex_coords_size[2].y,
-        },
-
-        .slice[8] =
-        {
-            .pos.x = _pos[2].x,
-            .pos.y = _pos[2].y,
-            .size.x = _size[2].x,
-            .size.y = _size[2].y,
-            .tex_coords_pos.x = _tex_coords_pos[2].x,
-            .tex_coords_pos.y = _tex_coords_pos[2].y,
-            .tex_coords_size.x = _tex_coords_size[2].x,
-            .tex_coords_size.y = _tex_coords_size[2].y,
-        },
-    };
+    return _panel;
 }

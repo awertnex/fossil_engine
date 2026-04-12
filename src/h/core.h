@@ -37,7 +37,7 @@
 typedef struct fsl_render
 {
     GLFWwindow *window;
-    char title[128];
+    char title[NAME_MAX];
     v2i32 size;
 
     /*! @brief conversion from world-space to screen-space.
@@ -66,6 +66,7 @@ typedef struct fsl_mesh
     GLuint ebo_len;
     GLfloat *vbo_data;
     GLfloat *ebo_data;
+    b8 loaded;
 } fsl_mesh;
 
 typedef struct fsl_fbo
@@ -95,14 +96,10 @@ typedef struct fsl_texture
     int channels;
 
     u8 *buf;
-
-    struct /* flag */
-    {
-        b8 grayscale: 1;
-        b8 loaded: 1;
-        b8 generated: 1;
-        b8 bindless: 1;
-    }; /* flag */
+    b8 grayscale;
+    b8 loaded;
+    b8 generated;
+    b8 bindless;
 } fsl_texture;
 
 typedef struct fsl_camera
@@ -134,9 +131,9 @@ typedef struct fsl_core
 {
     struct /* flag */
     {
-        u64 active: 1;
-        u64 glfw_initialized: 1;
-        u64 request_screenshot: 1;
+        b8 active;
+        b8 glfw_initialized;
+        b8 request_screenshot;
     } flag;
 
     struct /* ubo */
@@ -372,7 +369,7 @@ FSLAPI void fsl_fbo_free(fsl_fbo *fbo);
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_texture_init(fsl_texture *texture, v2i32 size, const GLint format_internal, const GLint format,
+FSLAPI u32 fsl_texture_init(fsl_texture *texture, const GLint format_internal, const GLint format,
         GLint filter, int channels, b8 grayscale, const str *file_name);
 
 /*! @brief generate texture for `OpenGL` from image loaded by 'texture_init()'.
@@ -397,7 +394,7 @@ FSLAPI u32 fsl_texture_generate(fsl_texture *texture, b8 bindless);
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 u32 _fsl_texture_generate(GLuint *id, const GLint format_internal,  const GLint format,
-        GLint filter, u32 width, u32 height, void *buf, b8 grayscale);
+        GLint filter, v2i32 size, void *buf, b8 grayscale);
 
 FSLAPI void fsl_texture_free(fsl_texture *texture);
 

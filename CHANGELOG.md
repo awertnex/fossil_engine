@@ -7,6 +7,16 @@
    first version of the engine as standalone in this repo
 
 - - -
+## v0.6.0-dev (current)
+
+#### changes
+- (2026 02 07): remove parameter `size` from function `fsl_texture_init()`
+                because not needed
+- (2026 02 07): add cflag `-Wpedantic` to engine build and fix all pedantic
+                warnings
+- (2026 02 06): remove function `fsl_text_stop()`, use `fsl_ui_stop()` instead
+
+- - -
 ## v0.6.0-beta (2026 02 06)
 
 #### changes

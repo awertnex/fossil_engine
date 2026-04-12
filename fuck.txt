@@ -1,0 +1,127 @@
+src/assets.c:29:5: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   29 |     [FSL_SHADER_INDEX_UNIT_QUAD] =
+      |     ^
+src/assets.c:31:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   31 |         .name = "unit_quad",
+      |         ^
+src/assets.c:32:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   32 |         .vertex.file_name = "unit_quad.vert",
+      |         ^
+src/assets.c:33:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   33 |         .vertex.type = GL_VERTEX_SHADER,
+      |         ^
+src/assets.c:34:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   34 |         .fragment.file_name = "unit_quad.frag",
+      |         ^
+src/assets.c:35:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   35 |         .fragment.type = GL_FRAGMENT_SHADER,
+      |         ^
+src/assets.c:38:5: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   38 |     [FSL_SHADER_INDEX_TEXT] =
+      |     ^
+src/assets.c:40:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   40 |         .name = "text",
+      |         ^
+src/assets.c:41:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   41 |         .vertex.file_name = "text.vert",
+      |         ^
+src/assets.c:42:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   42 |         .vertex.type = GL_VERTEX_SHADER,
+      |         ^
+src/assets.c:43:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   43 |         .fragment.file_name = "text.frag",
+      |         ^
+src/assets.c:44:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   44 |         .fragment.type = GL_FRAGMENT_SHADER,
+      |         ^
+src/assets.c:47:5: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   47 |     [FSL_SHADER_INDEX_UI] =
+      |     ^
+src/assets.c:49:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   49 |         .name = "ui",
+      |         ^
+src/assets.c:50:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   50 |         .vertex.file_name = "ui.vert",
+      |         ^
+src/assets.c:51:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   51 |         .vertex.type = GL_VERTEX_SHADER,
+      |         ^
+src/assets.c:52:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   52 |         .fragment.file_name = "ui.frag",
+      |         ^
+src/assets.c:53:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   53 |         .fragment.type = GL_FRAGMENT_SHADER,
+      |         ^
+src/assets.c:56:5: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   56 |     [FSL_SHADER_INDEX_UI_9_SLICE] =
+      |     ^
+src/assets.c:58:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   58 |         .name = "ui_9_slice",
+      |         ^
+src/assets.c:59:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   59 |         .vertex.file_name = "ui_9_slice.vert",
+      |         ^
+src/assets.c:60:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   60 |         .vertex.type = GL_VERTEX_SHADER,
+      |         ^
+src/assets.c:61:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   61 |         .fragment.file_name = "ui_9_slice.frag",
+      |         ^
+src/assets.c:62:9: warning: ISO C90 forbids specifying subobject to initialize [-Wpedantic]
+   62 |         .fragment.type = GL_FRAGMENT_SHADER,
+      |         ^
+In file included from src/logger.c:25:
+src/h/logger.h:84:38: warning: anonymous variadic macros were introduced in C99 [-Wvariadic-macros]
+   84 | #define LOGFATAL(err, flags, format, ...) \
+      |                                      ^~~
+src/h/logger.h:87:38: warning: anonymous variadic macros were introduced in C99 [-Wvariadic-macros]
+   87 | #define LOGERROR(err, flags, format, ...) \
+      |                                      ^~~
+src/h/logger.h:90:40: warning: anonymous variadic macros were introduced in C99 [-Wvariadic-macros]
+   90 | #define LOGWARNING(err, flags, format, ...) \
+      |                                        ^~~
+src/h/logger.h:93:32: warning: anonymous variadic macros were introduced in C99 [-Wvariadic-macros]
+   93 | #define LOGINFO(flags, format, ...) \
+      |                                ^~~
+src/h/logger.h:100:36: warning: anonymous variadic macros were introduced in C99 [-Wvariadic-macros]
+  100 | #   define LOGDEBUG(flags, format, ...) \
+      |                                    ^~~
+src/h/logger.h:103:36: warning: anonymous variadic macros were introduced in C99 [-Wvariadic-macros]
+  103 | #   define LOGTRACE(flags, format, ...) \
+      |                                    ^~~
+src/h/logger.h:117:39: warning: anonymous variadic macros were introduced in C99 [-Wvariadic-macros]
+  117 | #define _LOGFATAL(err, flags, format, ...) \
+      |                                       ^~~
+src/h/logger.h:120:39: warning: anonymous variadic macros were introduced in C99 [-Wvariadic-macros]
+  120 | #define _LOGERROR(err, flags, format, ...) \
+      |                                       ^~~
+src/h/logger.h:123:41: warning: anonymous variadic macros were introduced in C99 [-Wvariadic-macros]
+  123 | #define _LOGWARNING(err, flags, format, ...) \
+      |                                         ^~~
+src/h/logger.h:126:33: warning: anonymous variadic macros were introduced in C99 [-Wvariadic-macros]
+  126 | #define _LOGINFO(flags, format, ...) \
+      |                                 ^~~
+src/h/logger.h:129:53: warning: anonymous variadic macros were introduced in C99 [-Wvariadic-macros]
+  129 | #define _LOGFATALEX(err, flags, file, line, format, ...); \
+      |                                                     ^~~
+src/h/logger.h:132:53: warning: anonymous variadic macros were introduced in C99 [-Wvariadic-macros]
+  132 | #define _LOGERROREX(err, flags, file, line, format, ...); \
+      |                                                     ^~~
+src/h/logger.h:135:55: warning: anonymous variadic macros were introduced in C99 [-Wvariadic-macros]
+  135 | #define _LOGWARNINGEX(err, flags, file, line, format, ...) \
+      |                                                       ^~~
+src/h/logger.h:138:47: warning: anonymous variadic macros were introduced in C99 [-Wvariadic-macros]
+  138 | #define _LOGINFOEX(flags, file, line, format, ...) \
+      |                                               ^~~
+src/h/logger.h:147:37: warning: anonymous variadic macros were introduced in C99 [-Wvariadic-macros]
+  147 | #   define _LOGDEBUG(flags, format, ...) \
+      |                                     ^~~
+src/h/logger.h:150:37: warning: anonymous variadic macros were introduced in C99 [-Wvariadic-macros]
+  150 | #   define _LOGTRACE(flags, format, ...) \
+      |                                     ^~~
+src/h/logger.h:153:51: warning: anonymous variadic macros were introduced in C99 [-Wvariadic-macros]
+  153 | #   define _LOGDEBUGEX(flags, file, line, format, ...) \
+      |                                                   ^~~
+src/h/logger.h:156:51: warning: anonymous variadic macros were introduced in C99 [-Wvariadic-macros]
+  156 | #   define _LOGTRACEEX(flags, file, line, format, ...) \
+      |                                                   ^~~
