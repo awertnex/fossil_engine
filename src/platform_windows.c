@@ -54,7 +54,7 @@ u32 _fsl_get_path_bin_root(str *dst)
     {
         _LOGFATAL(FSL_ERR_GET_PATH_BIN_ROOT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "%s\n", "Failed 'get_path_bin_root()', Process Aborted");
+                fsl_logger_stringf("%s\n", "Failed 'get_path_bin_root()', Process Aborted"));
         return fsl_err;
     }
     strncpy(dst, _pgmptr, PATH_MAX);
@@ -79,7 +79,7 @@ u32 fsl_exec(fsl_buf *cmd, str *cmd_name)
     if (!cmd->loaded || !cmd->buf)
     {
         _LOGERROR(FSL_ERR_BUFFER_EMPTY, 0,
-                "Failed to Execute '%s', cmd Empty\n", cmd_name);
+                fsl_logger_stringf("Failed to Execute '%s', cmd Empty\n", cmd_name));
         return fsl_err;
     }
 
@@ -94,7 +94,7 @@ u32 fsl_exec(fsl_buf *cmd, str *cmd_name)
                 &startup_info, &process_info))
     {
         _LOGFATAL(FSL_ERR_EXEC_FAIL, 0,
-                "Failed to Fork '%s', Process Aborted\n", cmd_name);
+                fsl_logger_stringf("Failed to Fork '%s', Process Aborted\n", cmd_name));
         goto cleanup;
     }
 
@@ -105,11 +105,11 @@ u32 fsl_exec(fsl_buf *cmd, str *cmd_name)
 
     if (exit_code == 0)
         _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
-                "'%s' Success, Exit Code: %d\n", cmd_name, exit_code);
+                fsl_logger_stringf("'%s' Success, Exit Code: %d\n", cmd_name, exit_code));
     else
     {
         _LOGDEBUG(0,
-                "'%s' Exit Code: %d\n", cmd_name, exit_code);
+                fsl_logger_stringf("'%s' Exit Code: %d\n", cmd_name, exit_code));
         fsl_err = FSL_ERR_EXEC_PROCESS_NON_ZERO;
         goto cleanup;
     }
@@ -156,11 +156,12 @@ u32 _fsl_mem_map(void **x, u64 size, const str *name, const str *file, u64 line)
     {
         _LOGFATALEX(FSL_ERR_MEM_MAP_FAIL, 0,
                 file, line,
-                "%s[%p] Failed to Map Memory, Process Aborted\n", name, *x);
+                fsl_logger_stringf("%s[%p] Failed to Map Memory, Process Aborted\n", name, *x));
         return fsl_err;
     }
     _LOGTRACEEX(0,
-            file, line, "%s[%p] Memory Mapped [%"PRIu64"B]\n", name, temp, size_aligned);
+            file, line,
+            fsl_logger_stringf("%s[%p] Memory Mapped [%"PRIu64"B]\n", name, temp, size_aligned));
 
     *x = temp;
 
@@ -176,8 +177,8 @@ u32 _fsl_mem_commit(void **x, void *offset, u64 size, const str *name, const str
     {
         _LOGERROREX(FSL_ERR_POINTER_NULL, 0,
                 file, line,
-                "%s[%p][%p] Failed to Commit Memory [%"PRIu64"B], Pointer NULL\n",
-                name, x, offset, size);
+                fsl_logger_stringf("%s[%p][%p] Failed to Commit Memory [%"PRIu64"B], Pointer NULL\n",
+                name, x, offset, size));
         return fsl_err;
     }
 
@@ -188,13 +189,14 @@ u32 _fsl_mem_commit(void **x, void *offset, u64 size, const str *name, const str
     {
         _LOGFATALEX(FSL_ERR_MEM_COMMIT_FAIL, 0,
                 file, line,
-                "%s[%p][%p] Failed to Commit Memory [%"PRIu64"B], Process Aborted\n",
-                name, *x, offset, size_aligned);
+                fsl_logger_stringf("%s[%p][%p] Failed to Commit Memory [%"PRIu64"B], Process Aborted\n",
+                name, *x, offset, size_aligned));
         return fsl_err;
     }
     _LOGTRACEEX(0,
-            file, line, "%s[%p][%p] Memory Committed [%"PRIu64"B]\n",
-            name, *x, offset, size_aligned);
+            file, line,
+            fsl_logger_stringf("%s[%p][%p] Memory Committed [%"PRIu64"B]\n",
+            name, *x, offset, size_aligned));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -211,7 +213,7 @@ u32 _fsl_mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const 
     {
         _LOGERROREX(FSL_ERR_POINTER_NULL, 0,
                 file, line,
-                "%s[%p] Failed to Remap Memory, Pointer NULL\n", name, NULL);
+                fsl_logger_stringf("%s[%p] Failed to Remap Memory, Pointer NULL\n", name, NULL));
         return fsl_err;
     }
 
@@ -224,12 +226,13 @@ u32 _fsl_mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const 
     {
         _LOGERROREX(FSL_ERR_MEM_REMAP_FAIL, 0,
                 file, line,
-                "%s[%p] Failed to Remap Memory\n", name, *x);
+                fsl_logger_stringf("%s[%p] Failed to Remap Memory\n", name, *x));
         return fsl_err;
     }
     _LOGTRACEEX(0,
-            file, line, "%s[%p] Memory Remapped [%"PRIu64"B] -> [%"PRIu64"B]\n",
-            name, *x, size_old_aligned, size_new_aligned);
+            file, line,
+            fsl_logger_stringf("%s[%p] Memory Remapped [%"PRIu64"B] -> [%"PRIu64"B]\n",
+            name, *x, size_old_aligned, size_new_aligned));
 
     *x = temp;
 
@@ -242,7 +245,8 @@ void _fsl_mem_unmap(void **x, u64 size, const str *name, const str *file, u64 li
     if (!x || !*x) return;
 
     _LOGTRACEEX(0,
-            file, line, "%s[%p] Memory Unmapped [%"PRIu64"B]\n", name, *x, size);
+            file, line,
+            fsl_logger_stringf("%s[%p] Memory Unmapped [%"PRIu64"B]\n", name, *x, size));
 
     VirtualFree(x, 0, MEM_RELEASE);
     *x = NULL;
@@ -256,8 +260,9 @@ void _fsl_mem_unmap_arena(fsl_mem_arena *x, const str *name, const str *file, u6
     if (!x || !x->buf) return;
 
     _LOGTRACEEX(0,
-            file, line, "%s[%p] Memory Arena Unmapped [%"PRIu64"B] Memb Total [%"PRIu64"][%"PRIu64"B]\n",
-            name, x->buf, x->size_buf, x->memb, x->size_i);
+            file, line,
+            fsl_logger_stringf("%s[%p] Memory Arena Unmapped [%"PRIu64"B] Memb Total [%"PRIu64"][%"PRIu64"B]\n",
+            name, x->buf, x->size_buf, x->memb, x->size_i));
 
     for (i = 0; i < x->memb; ++i)
         *x->i[i] = NULL;

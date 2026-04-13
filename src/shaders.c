@@ -61,7 +61,7 @@ u32 fsl_shader_init(const str *shaders_dir, fsl_shader *shader)
     {
         _LOGERROR(FSL_ERR_POINTER_NULL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "Shader Source '%s' NULL\n", shader->file_name);
+                fsl_logger_stringf("Shader Source '%s' NULL\n", shader->file_name));
         return fsl_err;
     }
 
@@ -80,11 +80,11 @@ u32 fsl_shader_init(const str *shaders_dir, fsl_shader *shader)
         glGetShaderInfoLog(shader->id, FSL_STRING_MAX, NULL, log);
         _LOGERROR(FSL_ERR_SHADER_COMPILE_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "Shader '%s':\n%s\n", shader->file_name, log);
+                fsl_logger_stringf("Shader '%s':\n%s\n", shader->file_name, log));
         return fsl_err;
     }
     else _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            "Shader %s[%u] Loaded\n", shader->file_name, shader->id);
+            fsl_logger_stringf("Shader %s[%u] Loaded\n", shader->file_name, shader->id));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -115,7 +115,7 @@ static str *_fsl_shader_pre_process(const str *path, u64 *file_len, u64 recursio
     {
         _LOGERROR(FSL_ERR_INCLUDE_RECURSION_LIMIT,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "Failed to Pre-Process Shader, Include Recursion Limit Exceeded '%s'\n", path);
+                fsl_logger_stringf("Failed to Pre-Process Shader, Include Recursion Limit Exceeded '%s'\n", path));
         return NULL;
     }
 
@@ -151,7 +151,7 @@ static str *_fsl_shader_pre_process(const str *path, u64 *file_len, u64 recursio
             {
                 _LOGERROR(FSL_ERR_SELF_INCLUDE,
                         FSL_FLAG_LOG_NO_VERBOSE,
-                        "Failed to Pre-Process Shader, Self Include Detected '%s'\n", path);
+                        fsl_logger_stringf("Failed to Pre-Process Shader, Self Include Detected '%s'\n", path));
                 goto cleanup;
             }
 
@@ -203,7 +203,7 @@ void fsl_shader_free(fsl_shader *shader)
     shader->loaded = FALSE;
 
     _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            "Shader %s[%u] Unloaded\n", shader->file_name, shader->id);
+            fsl_logger_stringf("Shader %s[%u] Unloaded\n", shader->file_name, shader->id));
 }
 
 u32 fsl_shader_program_init(const str *shaders_dir, fsl_shader_program *program)
@@ -238,11 +238,11 @@ u32 fsl_shader_program_init(const str *shaders_dir, fsl_shader_program *program)
         glGetProgramInfoLog(program->id, FSL_STRING_MAX, NULL, log);
         _LOGERROR(FSL_ERR_SHADER_PROGRAM_LINK_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "Shader Program '%s':\n%s\n", program->name, log);
+                fsl_logger_stringf("Shader Program '%s':\n%s\n", program->name, log));
         return fsl_err;
     }
     else _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            "Shader Program %s[%u] Loaded\n", program->name, program->id);
+            fsl_logger_stringf("Shader Program %s[%u] Loaded\n", program->name, program->id));
 
     if (program->vertex.loaded)
         glDeleteShader(program->vertex.id);
@@ -269,5 +269,5 @@ void fsl_shader_program_free(fsl_shader_program *program)
     program->loaded = FALSE;
 
     _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            "Shader Program %s[%u] Unloaded\n", program->name, program->id);
+            fsl_logger_stringf("Shader Program %s[%u] Unloaded\n", program->name, program->id));
 }

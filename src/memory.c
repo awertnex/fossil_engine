@@ -58,11 +58,12 @@ u32 _fsl_mem_alloc(void **x, u64 size, const str *name, const str *file, u64 lin
     {
         _LOGFATALEX(FSL_ERR_MEM_ALLOC_FAIL, 0,
                 file, line,
-                "%s[%p] Failed to Allocate Memory, Process Aborted\n", name, NULL);
+                fsl_logger_stringf("%s[%p] Failed to Allocate Memory, Process Aborted\n", name, NULL));
         return fsl_err;
     }
     _LOGTRACEEX(0,
-            file, line, "%s[%p] Memory Allocated [%"PRIu64"B]\n", name, *x, size);
+            file, line,
+            fsl_logger_stringf("%s[%p] Memory Allocated [%"PRIu64"B]\n", name, *x, size));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -78,11 +79,12 @@ u32 _fsl_mem_alloc_memb(void **x, u64 memb, u64 size, const str *name, const str
     {
         _LOGFATALEX(FSL_ERR_MEM_ALLOC_FAIL, 0,
                 file, line,
-                "%s[%p] Failed to Allocate Memory, Process Aborted\n", name, NULL);
+                fsl_logger_stringf("%s[%p] Failed to Allocate Memory, Process Aborted\n", name, NULL));
         return fsl_err;
     }
     _LOGTRACEEX(0,
-            file, line, "%s[%p] Memory Allocated [%"PRIu64"B]\n", name, *x, memb * size);
+            file, line,
+            fsl_logger_stringf("%s[%p] Memory Allocated [%"PRIu64"B]\n", name, *x, memb * size));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -98,7 +100,7 @@ u32 _fsl_mem_alloc_buf(fsl_buf *x, u64 memb, u64 size, const str *name, const st
     {
         _LOGERROREX(FSL_ERR_POINTER_NULL, 0,
                 file, line,
-                "%s[%p] Failed to Allocate Memory, Pointer NULL\n", name, NULL);
+                fsl_logger_stringf("%s[%p] Failed to Allocate Memory, Pointer NULL\n", name, NULL));
         return fsl_err;
     }
 
@@ -142,7 +144,7 @@ u32 _fsl_mem_alloc_key_val(fsl_key_value *x, u64 memb, u64 size_key, u64 size_va
     {
         _LOGERROREX(FSL_ERR_POINTER_NULL, 0,
                 file, line,
-                "%s[%p] Failed to Allocate Memory, Pointer NULL\n", name, NULL);
+                fsl_logger_stringf("%s[%p] Failed to Allocate Memory, Pointer NULL\n", name, NULL));
         return fsl_err;
     }
 
@@ -191,7 +193,7 @@ u32 _fsl_mem_realloc(void **x, u64 size, const str *name, const str *file, u64 l
     {
         _LOGERROREX(FSL_ERR_POINTER_NULL, 0,
                 file, line,
-                "%s[%p] Failed to Reallocate Memory, Pointer NULL\n", name, NULL);
+                fsl_logger_stringf("%s[%p] Failed to Reallocate Memory, Pointer NULL\n", name, NULL));
         return fsl_err;
     }
 
@@ -200,13 +202,14 @@ u32 _fsl_mem_realloc(void **x, u64 size, const str *name, const str *file, u64 l
     {
         _LOGFATALEX(FSL_ERR_MEM_REALLOC_FAIL, 0,
                 file, line,
-                "%s[%p] Failed to Reallocate Memory, Process Aborted\n", name, *x);
+                fsl_logger_stringf("%s[%p] Failed to Reallocate Memory, Process Aborted\n", name, *x));
         return fsl_err;
     }
 
     *x = temp;
     _LOGTRACEEX(0,
-            file, line, "%s[%p] Memory Reallocated [%"PRIu64"B]\n", name, *x, size);
+            file, line,
+            fsl_logger_stringf("%s[%p] Memory Reallocated [%"PRIu64"B]\n", name, *x, size));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -220,7 +223,7 @@ u32 _fsl_mem_realloc_memb(void **x, u64 memb, u64 size, const str *name, const s
     {
         _LOGERROREX(FSL_ERR_POINTER_NULL, 0,
                 file, line,
-                "%s[%p] Failed to Reallocate Memory, Pointer NULL\n", name, NULL);
+                fsl_logger_stringf("%s[%p] Failed to Reallocate Memory, Pointer NULL\n", name, NULL));
         return fsl_err;
     }
 
@@ -229,13 +232,14 @@ u32 _fsl_mem_realloc_memb(void **x, u64 memb, u64 size, const str *name, const s
     {
         _LOGFATALEX(FSL_ERR_MEM_REALLOC_FAIL, 0,
                 file, line,
-                "%s[%p] Failed to Reallocate Memory, Process Aborted\n", name, *x);
+                fsl_logger_stringf("%s[%p] Failed to Reallocate Memory, Process Aborted\n", name, *x));
         return fsl_err;
     }
 
     *x = temp;
     _LOGTRACEEX(0,
-            file, line, "%s[%p] Memory Reallocated [%"PRIu64"B]\n", name, *x, memb * size);
+            file, line,
+            fsl_logger_stringf("%s[%p] Memory Reallocated [%"PRIu64"B]\n", name, *x, memb * size));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -252,7 +256,8 @@ void _fsl_mem_free(void **x, u64 size, const str *name, const str *file, u64 lin
     free(*x);
     *x = NULL;
     _LOGTRACEEX(0,
-            file, line, "%s[%p] Memory Unloaded\n", name, temp);
+            file, line,
+            fsl_logger_stringf("%s[%p] Memory Unloaded\n", name, temp));
 }
 
 void _fsl_mem_free_buf(fsl_buf *x, const str *name, const str *file, u64 line)
@@ -273,7 +278,8 @@ void _fsl_mem_free_buf(fsl_buf *x, const str *name, const str *file, u64 line)
         _fsl_mem_clear((void*)&x->i, x->memb * sizeof(str*), name_i, file, line);
         free(x->i);
         _LOGTRACEEX(0,
-                file, line, "%s[%p] Memory Unloaded\n", name_i, temp);
+                file, line,
+                fsl_logger_stringf("%s[%p] Memory Unloaded\n", name_i, temp));
     }
 
     if (x->buf)
@@ -282,7 +288,8 @@ void _fsl_mem_free_buf(fsl_buf *x, const str *name, const str *file, u64 line)
         _fsl_mem_clear((void*)&x->buf, x->memb * x->size, name_buf, file, line);
         free(x->buf);
         _LOGTRACEEX(0,
-                file, line, "%s[%p] Memory Unloaded\n", name_buf, temp);
+                file, line,
+                fsl_logger_stringf("%s[%p] Memory Unloaded\n", name_buf, temp));
     }
 
     *x = nobuf;
@@ -310,7 +317,8 @@ void _fsl_mem_free_key_val(fsl_key_value *x, const str *name, const str *file, u
         _fsl_mem_clear((void*)&x->key, x->memb * sizeof(str*), name_key, file, line);
         free(x->key);
         _LOGTRACEEX(0,
-                file, line, "%s[%p] Memory Unloaded\n", name_key, temp);
+                file, line,
+                fsl_logger_stringf("%s[%p] Memory Unloaded\n", name_key, temp));
     }
 
     if (x->val)
@@ -319,7 +327,8 @@ void _fsl_mem_free_key_val(fsl_key_value *x, const str *name, const str *file, u
         _fsl_mem_clear((void*)&x->val, x->memb * sizeof(str*), name_val, file, line);
         free(x->val);
         _LOGTRACEEX(0,
-                file, line, "%s[%p] Memory Unloaded\n", name_val, temp);
+                file, line,
+                fsl_logger_stringf("%s[%p] Memory Unloaded\n", name_val, temp));
     }
 
     if (x->buf_key)
@@ -328,7 +337,8 @@ void _fsl_mem_free_key_val(fsl_key_value *x, const str *name, const str *file, u
         _fsl_mem_clear((void*)&x->buf_key, x->memb * x->size_key, name_buf_key, file, line);
         free(x->buf_key);
         _LOGTRACEEX(0,
-                file, line, "%s[%p] Memory Unloaded\n", name_buf_key, temp);
+                file, line,
+                fsl_logger_stringf("%s[%p] Memory Unloaded\n", name_buf_key, temp));
     }
 
     if (x->buf_val)
@@ -337,7 +347,8 @@ void _fsl_mem_free_key_val(fsl_key_value *x, const str *name, const str *file, u
         _fsl_mem_clear((void*)&x->buf_val, x->memb * x->size_val, name_buf_val, file, line);
         free(x->buf_val);
         _LOGTRACEEX(0,
-                file, line, "%s[%p] Memory Unloaded\n", name_buf_val, temp);
+                file, line,
+                fsl_logger_stringf("%s[%p] Memory Unloaded\n", name_buf_val, temp));
     }
 
     *x = nokey_value;
@@ -352,7 +363,7 @@ u32 _fsl_mem_map_arena(fsl_mem_arena *x, u64 size, const str *name, const str *f
     {
         _LOGERROREX(FSL_ERR_POINTER_NULL, 0,
                 file, line,
-                "%s[%p] Failed to Map Memory Arena, Pointer NULL\n", name, NULL);
+                fsl_logger_stringf("%s[%p] Failed to Map Memory Arena, Pointer NULL\n", name, NULL));
         return fsl_err;
     }
 
@@ -365,7 +376,7 @@ u32 _fsl_mem_map_arena(fsl_mem_arena *x, u64 size, const str *name, const str *f
     {
         _LOGERROREX(FSL_ERR_SIZE_TOO_SMALL, 0,
                 file, line,
-                "%s[%p] Failed to Map Memory Arena, Size Too Small\n", name, x);
+                fsl_logger_stringf("%s[%p] Failed to Map Memory Arena, Size Too Small\n", name, x));
         return fsl_err;
 
     }
@@ -379,13 +390,14 @@ u32 _fsl_mem_map_arena(fsl_mem_arena *x, u64 size, const str *name, const str *f
     {
         _LOGFATALEX(FSL_ERR_MEM_ARENA_MAP_FAIL, 0,
                 file, line,
-                "%s[%p] Failed to Map Memory Arena, Process Aborted\n", name, x);
+                fsl_logger_stringf("%s[%p] Failed to Map Memory Arena, Process Aborted\n", name, x));
         return fsl_err;
     }
 
     _LOGTRACEEX(0,
-            file, line, "%s[%p] Memory Arena Mapped [%"PRIu64"B] Memb [%"PRIu64"B]\n",
-            name, x->buf, size_aligned, memb_aligned);
+            file, line,
+            fsl_logger_stringf("%s[%p] Memory Arena Mapped [%"PRIu64"B] Memb [%"PRIu64"B]\n",
+            name, x->buf, size_aligned, memb_aligned));
 
     x->memb = 0;
     x->size_i = memb_aligned;
@@ -411,7 +423,7 @@ u32 _fsl_mem_push_arena(fsl_mem_arena *x, void **p, u64 size, const str *name, c
     {
         _LOGERROREX(FSL_ERR_POINTER_NULL, 0,
                 file, line,
-                "%s[%p] Failed to Push Memory Arena, Pointer NULL\n", name, NULL);
+                fsl_logger_stringf("%s[%p] Failed to Push Memory Arena, Pointer NULL\n", name, NULL));
         return fsl_err;
     }
 
@@ -419,7 +431,7 @@ u32 _fsl_mem_push_arena(fsl_mem_arena *x, void **p, u64 size, const str *name, c
     {
         _LOGERROREX(FSL_ERR_POINTER_NULL, 0,
                 file, line,
-                "%s[%p] Failed to Push Memory Arena, Arena Pointer NULL\n", name, NULL);
+                fsl_logger_stringf("%s[%p] Failed to Push Memory Arena, Arena Pointer NULL\n", name, NULL));
         return fsl_err;
     }
 
@@ -427,7 +439,7 @@ u32 _fsl_mem_push_arena(fsl_mem_arena *x, void **p, u64 size, const str *name, c
     {
         _LOGERROREX(FSL_ERR_POINTER_NULL, 0,
                 file, line,
-                "%s[%p] Failed to Push Memory Arena, Arena Buf Pointer NULL\n", name, NULL);
+                fsl_logger_stringf("%s[%p] Failed to Push Memory Arena, Arena Buf Pointer NULL\n", name, NULL));
         return fsl_err;
     }
 
@@ -435,7 +447,7 @@ u32 _fsl_mem_push_arena(fsl_mem_arena *x, void **p, u64 size, const str *name, c
     {
         _LOGERROREX(FSL_ERR_POINTER_NULL, 0,
                 file, line,
-                "%s[%p] Failed to Push Memory Arena, Arena Memb Pointer NULL\n", name, NULL);
+                fsl_logger_stringf("%s[%p] Failed to Push Memory Arena, Arena Memb Pointer NULL\n", name, NULL));
         return fsl_err;
     }
 
@@ -443,8 +455,8 @@ u32 _fsl_mem_push_arena(fsl_mem_arena *x, void **p, u64 size, const str *name, c
     {
         _LOGERROREX(FSL_ERR_SIZE_TOO_SMALL, 0,
                 file, line,
-                "%s[%p] Failed to Push Memory Arena, Size Too Small\n",
-                name, (u8*)x->buf + x->cursor);
+                fsl_logger_stringf("%s[%p] Failed to Push Memory Arena, Size Too Small\n",
+                name, (u8*)x->buf + x->cursor));
         return fsl_err;
     }
 
@@ -468,8 +480,8 @@ u32 _fsl_mem_push_arena(fsl_mem_arena *x, void **p, u64 size, const str *name, c
         {
             _LOGERROREX(FSL_ERR_SIZE_TOO_SMALL, 0,
                     file, line,
-                    "%s[%p] Failed to Push Memory Arena, Memory Remap Failed\n",
-                    name, (u8*)x->buf + cursor_pos);
+                    fsl_logger_stringf("%s[%p] Failed to Push Memory Arena, Memory Remap Failed\n",
+                    name, (u8*)x->buf + cursor_pos));
             return fsl_err;
         }
 
@@ -484,14 +496,15 @@ u32 _fsl_mem_push_arena(fsl_mem_arena *x, void **p, u64 size, const str *name, c
     {
         _LOGERROREX(FSL_ERR_SIZE_TOO_SMALL, 0,
                 file, line,
-                "%s[%p] Failed to Push Memory Arena, Memory Remap Failed\n",
-                name, (u8*)x->i + sizeof(void*));
+                fsl_logger_stringf("%s[%p] Failed to Push Memory Arena, Memory Remap Failed\n",
+                name, (u8*)x->i + sizeof(void*)));
         return fsl_err;
     }
 
-    _LOGTRACEEX(0, file, line,
-            "%s[%p] Memory Arena Pushed [%p][%"PRIu64"B] Memb %"PRIu64"[%"PRIu64"B]\n",
-            name, x->buf, (u8*)x->buf + cursor_pos, size_aligned, x->memb, memb_aligned);
+    _LOGTRACEEX(0,
+            file, line,
+            fsl_logger_stringf("%s[%p] Memory Arena Pushed [%p][%"PRIu64"B] Memb %"PRIu64"[%"PRIu64"B]\n",
+            name, x->buf, (u8*)x->buf + cursor_pos, size_aligned, x->memb, memb_aligned));
 
     *p = (u8*)x->buf + cursor_pos;
     x->cursor = cursor_pos_new;
@@ -513,8 +526,9 @@ u32 _fsl_mem_clear(void **x, u64 size, const str *name, const str *file, u64 lin
     }
 
     memset(*x, '\0', size);
-    _LOGTRACEEX(0, file, line,
-            "%s[%p] Memory Cleared [%"PRIu64"B]\n", name, *x, size);
+    _LOGTRACEEX(0,
+            file, line,
+            fsl_logger_stringf("%s[%p] Memory Cleared [%"PRIu64"B]\n", name, *x, size));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;

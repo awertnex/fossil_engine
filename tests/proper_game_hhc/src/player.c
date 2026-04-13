@@ -673,7 +673,7 @@ void player_kill(player *p)
     p->flag |= FLAG_PLAYER_DEAD;
 
     HHC_LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-            "%s %s\n", p->name, get_death_str(p));
+            fsl_logger_stringf("%s %s\n", p->name, get_death_str(p)));
 }
 
 str *get_death_str(player *p)

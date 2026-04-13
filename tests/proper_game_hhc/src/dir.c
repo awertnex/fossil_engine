@@ -49,7 +49,7 @@ u32 game_init(void)
     u32 i = 0;
 
     HHC_LOGTRACE(FSL_FLAG_LOG_CMD,
-            "Creating Main Directories '%s'..\n", FSL_DIR_PROC_ROOT);
+            fsl_logger_stringf("Creating Main Directories '%s'..\n", FSL_DIR_PROC_ROOT));
 
     for (i = 0; i < DIR_ROOT_COUNT; ++i)
         if (fsl_is_dir_exists(DIR_ROOT[i], FALSE) != FSL_ERR_SUCCESS)
@@ -60,7 +60,7 @@ u32 game_init(void)
         }
 
     HHC_LOGTRACE(FSL_FLAG_LOG_CMD,
-            "Main Directory Created '%s'\n", FSL_DIR_PROC_ROOT);
+            fsl_logger_stringf("Main Directory Created '%s'\n", FSL_DIR_PROC_ROOT));
 
     if (fsl_mem_map_arena(&_memory_arena_internal, 1,
                 "engine_init()._fsl_memory_arena_internal") != FSL_ERR_SUCCESS)

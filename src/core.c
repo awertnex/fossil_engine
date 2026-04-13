@@ -32,11 +32,14 @@
 #include "h/time.h"
 #include "h/ui.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <deps/stb_image.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#   define STB_IMAGE_IMPLEMENTATION
+#   include <deps/stb_image.h>
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <deps/stb_image_write.h>
+#   define STB_IMAGE_WRITE_IMPLEMENTATION
+#   include <deps/stb_image_write.h>
+#pragma GCC diagnostic pop
 
 #include <stdio.h>
 #include <string.h>
@@ -73,7 +76,7 @@ static f32 vbo_data_unit_quad[] =
 static void glfw_callback_error(int error, const char* message)
 {
     (void)error;
-    _LOGERROR(FSL_ERR_GLFW, 0, "GLFW: %s\n", message);
+    _LOGERROR(FSL_ERR_GLFW, 0, fsl_logger_stringf("GLFW: %s\n", message));
 }
 
 /*! -- INTERNAL USE ONLY --;
@@ -206,7 +209,7 @@ b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32))
 
     if (fsl_update_render_settings(callback_framebuffer_size) != FSL_ERR_SUCCESS)
         _LOGWARNING(fsl_err, 0,
-                "%s\n", "Something Went Wrong While Updating Render Settings");
+                fsl_logger_stringf("%s\n", "Something Went Wrong While Updating Render Settings"));
 
     render->time = fsl_get_time_nsec();
     if (!time_last) time_last = render->time;
@@ -311,7 +314,7 @@ u32 fsl_engine_get_string(str *dst, enum fsl_string_index type)
     if (!dst)
     {
         _LOGERROR(FSL_ERR_POINTER_NULL, 0,
-                "%s\n", "Failed to Get String, Pointer NULL");
+                fsl_logger_stringf("%s\n", "Failed to Get String, Pointer NULL"));
         return fsl_err;
     }
 
@@ -348,7 +351,7 @@ u32 fsl_glfw_init(b8 multisample)
     {
         _LOGFATAL(FSL_ERR_GLFW_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "%s\n", "Failed to Initialize GLFW, Process Aborted");
+                fsl_logger_stringf("%s\n", "Failed to Initialize GLFW, Process Aborted"));
         return fsl_err;
     }
 
@@ -376,7 +379,7 @@ u32 fsl_window_init(const str *title, i32 size_x, i32 size_y)
     {
         _LOGFATAL(FSL_ERR_WINDOW_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "%s\n", "Failed to Initialize Window or OpenGL Context, Process Aborted");
+                fsl_logger_stringf("%s\n", "Failed to Initialize Window or OpenGL Context, Process Aborted"));
         return fsl_err;
     }
 
@@ -405,7 +408,7 @@ u32 fsl_glad_init(void)
     {
         _LOGFATAL(FSL_ERR_GLAD_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "%s\n", "Failed to Initialize GLAD, Process Aborted");
+                fsl_logger_stringf("%s\n", "Failed to Initialize GLAD, Process Aborted"));
         return fsl_err;
     }
 
@@ -413,22 +416,22 @@ u32 fsl_glad_init(void)
     {
         _LOGFATAL(FSL_ERR_GL_VERSION_NOT_SUPPORT,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "OpenGL 4.3+ Required, Current Version '%d.%d', Process Aborted\n",
-                GLVersion.major, GLVersion.minor);
+                fsl_logger_stringf("OpenGL 4.3+ Required, Current Version '%d.%d', Process Aborted\n",
+                GLVersion.major, GLVersion.minor));
         return fsl_err;
     }
 
     _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
-            "OpenGL:    %s\n", glGetString(GL_VERSION));
+            fsl_logger_stringf("OpenGL:    %s\n", glGetString(GL_VERSION)));
 
     _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
-            "GLSL:      %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+            fsl_logger_stringf("GLSL:      %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION)));
 
     _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
-            "Vendor:    %s\n", glGetString(GL_VENDOR));
+            fsl_logger_stringf("Vendor:    %s\n", glGetString(GL_VENDOR)));
 
     _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
-            "Renderer:  %s\n", glGetString(GL_RENDERER));
+            fsl_logger_stringf("Renderer:  %s\n", glGetString(GL_RENDERER)));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -439,7 +442,7 @@ u32 fsl_change_render(fsl_render *_render)
     if (_render == NULL)
     {
         _LOGERROR(FSL_ERR_POINTER_NULL, 0,
-                "%s\n", "Failed to Change Render, Pointer NULL");
+                fsl_logger_stringf("%s\n", "Failed to Change Render, Pointer NULL"));
         return fsl_err;
     }
 
@@ -450,7 +453,7 @@ u32 fsl_change_render(fsl_render *_render)
     else
     {
         _LOGWARNING(FSL_ERR_WINDOW_NOT_FOUND, 0,
-                "%s\n", "No Window Found for the Currently Bound Render");
+                fsl_logger_stringf("%s\n", "No Window Found for the Currently Bound Render"));
         return fsl_err;
     }
 
@@ -486,7 +489,7 @@ static u32 _fsl_take_screenshot(const str *dir_screenshots, const str *special_t
     {
         _LOGERROR(FSL_ERR_SCREENSHOT_FAIL,
                 FSL_FLAG_LOG_CMD,
-                "Failed to Take Screenshot, Directory '%s' Not Found\n", dir_screenshots);
+                fsl_logger_stringf("Failed to Take Screenshot, Directory '%s' Not Found\n", dir_screenshots));
         return fsl_err;
     }
 
@@ -511,7 +514,7 @@ static u32 _fsl_take_screenshot(const str *dir_screenshots, const str *special_t
 
             stbi_flip_vertically_on_write(TRUE);
             _LOGINFO(FSL_FLAG_LOG_CMD,
-                    "Screenshot: %s\n", file_name_full);
+                    fsl_logger_stringf("Screenshot: %s\n", file_name_full));
             stbi_write_png(file_name_full, render->size.x, render->size.y, FSL_COLOR_CHANNELS_RGB,
                     render->screen_buf, render->size.x * FSL_COLOR_CHANNELS_RGB);
 
@@ -522,7 +525,7 @@ static u32 _fsl_take_screenshot(const str *dir_screenshots, const str *special_t
 
     _LOGERROR(FSL_ERR_SCREENSHOT_FAIL,
             FSL_FLAG_LOG_CMD,
-            "%s\n", "Failed to Take Screenshot, Screenshot Rate Limit Exceeded");
+            fsl_logger_stringf("%s\n", "Failed to Take Screenshot, Screenshot Rate Limit Exceeded"));
     return fsl_err;
 }
 
@@ -634,8 +637,8 @@ u32 fsl_fbo_init(fsl_fbo *fbo, fsl_mesh *mesh_fbo, b8 multisample, u32 samples)
     {
         _LOGFATAL(FSL_ERR_FBO_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "FBO '%u': Status '%u' Not Complete, Process Aborted\n",
-                fbo->fbo, status);
+                fsl_logger_stringf("FBO '%u': Status '%u' Not Complete, Process Aborted\n",
+                fbo->fbo, status));
         return fsl_err;
     }
 
@@ -730,7 +733,7 @@ u32 fsl_fbo_realloc(fsl_fbo *fbo, b8 multisample, u32 samples)
     {
         _LOGFATAL(FSL_ERR_FBO_REALLOC_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "FBO '%u': Status '%u' Not Complete, Process Aborted\n", fbo->fbo, status);
+                fsl_logger_stringf("FBO '%u': Status '%u' Not Complete, Process Aborted\n", fbo->fbo, status));
 
         fsl_fbo_free(fbo);
         return fsl_err;
@@ -809,7 +812,7 @@ u32 fsl_texture_init(fsl_texture *texture, const GLint format_internal, const GL
     {
         _LOGERROR(FSL_ERR_PATH_TOO_LONG,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "Failed to Initialize Texture '%s', File Path Too Long\n", file_name);
+                fsl_logger_stringf("Failed to Initialize Texture '%s', File Path Too Long\n", file_name));
         return fsl_err;
     }
 
@@ -822,7 +825,7 @@ u32 fsl_texture_init(fsl_texture *texture, const GLint format_internal, const GL
     {
         _LOGERROR(FSL_ERR_IMAGE_LOAD_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "Failed to Initialize Texture '%s', 'stbi_load()' Failed\n", file_name);
+                fsl_logger_stringf("Failed to Initialize Texture '%s', 'stbi_load()' Failed\n", file_name));
         return fsl_err;
     }
 
@@ -848,7 +851,7 @@ u32 fsl_texture_generate(fsl_texture *texture, b8 bindless)
         texture->handle = glGetTextureHandleARB(texture->id);
         glMakeTextureHandleResidentARB(texture->handle);
         _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                "Handle[%"PRIu64"] for Texture[%u] Created\n", texture->handle, texture->id);
+                fsl_logger_stringf("Handle[%"PRIu64"] for Texture[%u] Created\n", texture->handle, texture->id));
         texture->bindless = TRUE;
     }
 
@@ -889,8 +892,8 @@ void fsl_texture_free(fsl_texture *texture)
     {
         glMakeTextureHandleNonResidentARB(texture->handle);
         _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                "Handle[%"PRIu64"] for Texture[%u] Destroyed\n",
-                texture->handle, texture->id);
+                fsl_logger_stringf("Handle[%"PRIu64"] for Texture[%u] Destroyed\n",
+                texture->handle, texture->id));
         texture->bindless = FALSE;
     }
 
@@ -898,7 +901,7 @@ void fsl_texture_free(fsl_texture *texture)
     {
         glDeleteTextures(1, &texture->id);
         _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                "Texture[%u] Unloaded\n", texture->id);
+                fsl_logger_stringf("Texture[%u] Unloaded\n", texture->id));
         texture->generated = FALSE;
     }
 

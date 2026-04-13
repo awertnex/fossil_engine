@@ -81,27 +81,27 @@ typedef struct fsl_logger_core
 
 /* ---- external-use macros ------------------------------------------------- */
 
-#define LOGFATAL(err, flags, format, ...) \
-    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_FATAL, logger_core.log_dir, format, ##__VA_ARGS__)
+#define LOGFATAL(err, flags, message) \
+    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_FATAL, logger_core.log_dir, message)
 
-#define LOGERROR(err, flags, format, ...) \
-    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_ERROR, logger_core.log_dir, format, ##__VA_ARGS__)
+#define LOGERROR(err, flags, message) \
+    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_ERROR, logger_core.log_dir, message)
 
-#define LOGWARNING(err, flags, format, ...) \
-    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_WARNING, logger_core.log_dir, format, ##__VA_ARGS__)
+#define LOGWARNING(err, flags, message) \
+    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_WARNING, logger_core.log_dir, message)
 
-#define LOGINFO(flags, format, ...) \
-    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_INFO, logger_core.log_dir, format, ##__VA_ARGS__)
+#define LOGINFO(flags, message) \
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_INFO, logger_core.log_dir, message)
 
 #ifdef FOSSIL_RELEASE_BUILD
-#   define LOGDEBUG(flags, format, ...)
-#   define LOGTRACE(flags, format, ...)
+#   define LOGDEBUG(flags, message)
+#   define LOGTRACE(flags, message)
 #else
-#   define LOGDEBUG(flags, format, ...) \
-    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_DEBUG, logger_core.log_dir, format, ##__VA_ARGS__)
+#   define LOGDEBUG(flags, message) \
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_DEBUG, logger_core.log_dir, message)
 
-#   define LOGTRACE(flags, format, ...) \
-    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_TRACE, logger_core.log_dir, format, ##__VA_ARGS__)
+#   define LOGTRACE(flags, message) \
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_TRACE, logger_core.log_dir, message)
 #endif /* FOSSIL_RELEASE_BUILD */
 
 #define LOG_MESH_GENERATE(err, mesh_name) \
@@ -114,47 +114,47 @@ typedef struct fsl_logger_core
 
 /* ---- internal-use macros ------------------------------------------------- */
 
-#define _LOGFATAL(err, flags, format, ...) \
-    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_FATAL, FSL_DIR_NAME_LOGS, format, ##__VA_ARGS__)
+#define _LOGFATAL(err, flags, message) \
+    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_FATAL, FSL_DIR_NAME_LOGS, message)
 
-#define _LOGERROR(err, flags, format, ...) \
-    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_ERROR, FSL_DIR_NAME_LOGS, format, ##__VA_ARGS__)
+#define _LOGERROR(err, flags, message) \
+    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_ERROR, FSL_DIR_NAME_LOGS, message)
 
-#define _LOGWARNING(err, flags, format, ...) \
-    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_WARNING, FSL_DIR_NAME_LOGS, format, ##__VA_ARGS__)
+#define _LOGWARNING(err, flags, message) \
+    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_WARNING, FSL_DIR_NAME_LOGS, message)
 
-#define _LOGINFO(flags, format, ...) \
-    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_INFO, FSL_DIR_NAME_LOGS, format, ##__VA_ARGS__)
+#define _LOGINFO(flags, message) \
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_INFO, FSL_DIR_NAME_LOGS, message)
 
-#define _LOGFATALEX(err, flags, file, line, format, ...); \
-    _fsl_log_output(err, flags, file, line, FSL_LOG_LEVEL_FATAL, FSL_DIR_NAME_LOGS, format, ##__VA_ARGS__)
+#define _LOGFATALEX(err, flags, file, line, message); \
+    _fsl_log_output(err, flags, file, line, FSL_LOG_LEVEL_FATAL, FSL_DIR_NAME_LOGS, message)
 
-#define _LOGERROREX(err, flags, file, line, format, ...); \
-    _fsl_log_output(err, flags, file, line, FSL_LOG_LEVEL_ERROR, FSL_DIR_NAME_LOGS, format, ##__VA_ARGS__)
+#define _LOGERROREX(err, flags, file, line, message); \
+    _fsl_log_output(err, flags, file, line, FSL_LOG_LEVEL_ERROR, FSL_DIR_NAME_LOGS, message)
 
-#define _LOGWARNINGEX(err, flags, file, line, format, ...) \
-    _fsl_log_output(err, flags, file, line, FSL_LOG_LEVEL_WARNING, FSL_DIR_NAME_LOGS, format, ##__VA_ARGS__)
+#define _LOGWARNINGEX(err, flags, file, line, message) \
+    _fsl_log_output(err, flags, file, line, FSL_LOG_LEVEL_WARNING, FSL_DIR_NAME_LOGS, message)
 
-#define _LOGINFOEX(flags, file, line, format, ...) \
-    _fsl_log_output(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_INFO, FSL_DIR_NAME_LOGS, format, ##__VA_ARGS__)
+#define _LOGINFOEX(flags, file, line, message) \
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_INFO, FSL_DIR_NAME_LOGS, message)
 
 #ifdef FOSSIL_RELEASE_BUILD
-#   define _LOGDEBUG(flags, format, ...)
-#   define _LOGTRACE(flags, format, ...)
-#   define _LOGDEBUGEX(flags, file, line, format, ...)
-#   define _LOGTRACEEX(flags, file, line, format, ...)
+#   define _LOGDEBUG(flags, message)
+#   define _LOGTRACE(flags, message)
+#   define _LOGDEBUGEX(flags, file, line, message)
+#   define _LOGTRACEEX(flags, file, line, message)
 #else
-#   define _LOGDEBUG(flags, format, ...) \
-    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_DEBUG, FSL_DIR_NAME_LOGS, format, ##__VA_ARGS__)
+#   define _LOGDEBUG(flags, message) \
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_DEBUG, FSL_DIR_NAME_LOGS, message)
 
-#   define _LOGTRACE(flags, format, ...) \
-    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_TRACE, FSL_DIR_NAME_LOGS, format, ##__VA_ARGS__)
+#   define _LOGTRACE(flags, message) \
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_TRACE, FSL_DIR_NAME_LOGS, message)
 
-#   define _LOGDEBUGEX(flags, file, line, format, ...) \
-    _fsl_log_output(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_DEBUG, FSL_DIR_NAME_LOGS, format, ##__VA_ARGS__)
+#   define _LOGDEBUGEX(flags, file, line, message) \
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_DEBUG, FSL_DIR_NAME_LOGS, message)
 
-#   define _LOGTRACEEX(flags, file, line, format, ...) \
-    _fsl_log_output(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_TRACE, FSL_DIR_NAME_LOGS, format, ##__VA_ARGS__)
+#   define _LOGTRACEEX(flags, file, line, message) \
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_TRACE, FSL_DIR_NAME_LOGS, message)
 #endif /* FOSSIL_RELEASE_BUILD */
 
 /*! @brief logger core, all logger data.
@@ -196,8 +196,23 @@ FSLAPI void fsl_logger_close(void);
  *
  *  @param flags enum: @ref fsl_log_output_flag.
  *  @param _log_dir directory to write log files into, if `NULL`, logs won't be written to disk.
+ *
+ *  @param message @ref fsl_logger_stringf() can be used to create a temporary
+ *  static formatted string for the log message.
  */
 FSLAPI void _fsl_log_output(u32 error_code, u32 flags, const str *file, u64 line, u8 level,
-        const str *_log_dir, const str *format, ...);
+        const str *_log_dir, const str *message);
+
+/*! @brief like @ref fsl_stringf(), but used for the logger, since @ref fsl_stringf()
+ *  uses features like buffer truncation with `...`, the logger needs the raw string.
+ *
+ *  @note the use of @ref fsl_logger_stringf more than once in a single expression is not advised.
+ *
+ *  @remark use temporary static buffers internally.
+ *  @remark inspired by Raylib: `github.com/raysan5/raylib`: `raylib/src/rtext.c/TextFormat()`.
+ *
+ *  @return static formatted string.
+ */
+FSLAPI str *fsl_logger_stringf(const str *format, ...);
 
 #endif /* FSL_LOGGER_H */

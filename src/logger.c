@@ -166,7 +166,7 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 lo
     else if (log_dir_not_found)
         _LOGWARNING(FSL_ERR_DIR_NOT_FOUND,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "%s\n", "Log Directory Not Set");
+                fsl_logger_stringf("%s\n", "Log Directory Not Set"));
 
     if (fsl_mem_map_arena(&_fsl_memory_arena_internal,
                 FSL_LOGGER_HISTORY_MAX * sizeof(u32) +
@@ -188,7 +188,7 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 lo
     {
         _LOGFATAL(FSL_ERR_LOGGER_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "%s\n", "Failed to Initialize Logger, Process Aborted");
+                fsl_logger_stringf("%s\n", "Failed to Initialize Logger, Process Aborted"));
         return fsl_err;
     }
 
@@ -203,15 +203,14 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags, const str *_log_dir, b8 lo
 
 void fsl_logger_close(void)
 {
-    _LOGTRACE(0, "%s\n", "Closing Logger..");
+    _LOGTRACE(0, fsl_logger_stringf("%s\n", "Closing Logger.."));
 
     logger_core.flag &= ~FSL_FLAG_LOGGER_GUI_OPEN;
 }
 
 void _fsl_log_output(u32 error_code, u32 flags, const str *file, u64 line, u8 level,
-        const str *_log_dir, const str *format, ...)
+        const str *_log_dir, const str *message)
 {
-    __builtin_va_list args;
     str str_in[FSL_STRING_MAX] = {0};
     str str_out[FSL_LOGGER_STRING_MAX] = {0};
     str temp[PATH_MAX] = {0};
@@ -224,10 +223,7 @@ void _fsl_log_output(u32 error_code, u32 flags, const str *file, u64 line, u8 le
     if (level > logger_core.log_level_max)
         return;
 
-    va_start(args, format);
-    vsnprintf(str_in, FSL_STRING_MAX, format, args);
-    va_end(args);
-
+    snprintf(str_in, FSL_STRING_MAX, "%s", message);
     _fsl_get_log_str(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_TERM_COLOR,
             verbose, level, error_code, file, line);
     fprintf(stderr, "%s", str_out);
@@ -303,6 +299,21 @@ static void _fsl_get_log_str(const str *str_in, str *str_out, u32 flags, b8 verb
         trunc = str_out + FSL_LOGGER_STRING_MAX - 4;
         snprintf(trunc, 4, "...");
     }
+}
+
+str *fsl_logger_stringf(const str *format, ...)
+{
+    static str buf[FSL_STRINGF_BUFFERS_MAX][FSL_STRING_MAX] = {0};
+    static u64 index = 0;
+    str *string = buf[index];
+    __builtin_va_list args;
+
+    va_start(args, format);
+    vsnprintf(string, FSL_STRING_MAX, format, args);
+    va_end(args);
+
+    index = (index + 1) % FSL_STRINGF_BUFFERS_MAX;
+    return string;
 }
 
 u32 fsl_logger_is_dir_exists(const str *name)

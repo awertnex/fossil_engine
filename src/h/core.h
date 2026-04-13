@@ -24,13 +24,16 @@
 #include "limits.h"
 #include "types.h"
 
-#include <deps/glad/glad.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#   include <deps/glad/glad.h>
 
-#define GLFW_INCLUDE_NONE
-#include <deps/glfw3.h>
+#   define GLFW_INCLUDE_NONE
+#   include <deps/glfw3.h>
 
-#include <deps/stb_image.h>
-#include <deps/stb_image_write.h>
+#   include <deps/stb_image.h>
+#   include <deps/stb_image_write.h>
+#pragma GCC diagnostic pop
 
 /* ---- section: definitions ------------------------------------------------ */
 

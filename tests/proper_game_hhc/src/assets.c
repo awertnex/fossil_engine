@@ -268,8 +268,8 @@ u32 block_texture_init(u32 index, str *name)
     {
         HHC_LOGERROR(FSL_ERR_POINTER_NULL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "Failed to Initialize Texture [%p], 'name' NULL\n",
-                &block_textures[index]);
+                fsl_logger_stringf("Failed to Initialize Texture [%p], 'name' NULL\n",
+                &block_textures[index]));
         goto cleanup;
     }
 
