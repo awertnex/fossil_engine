@@ -35,6 +35,8 @@ FSLAPI void fsl_swap_string_char(str *string, char c1, char c2);
 
 /*! @brief write temporary formatted string.
  *
+ *  @note the use of @ref fsl_stringf more than once in a single expression is not advised.
+ *
  *  @remark use temporary static buffers internally.
  *  @remark inspired by Raylib: `github.com/raysan5/raylib`: `raylib/src/rtext.c/TextFormat()`.
  *

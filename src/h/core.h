@@ -199,7 +199,8 @@ FSLAPI extern fsl_mesh fsl_mesh_unit_quad;
  *
  *  - set 'GLFW' error callback.
  *  - call @ref fsl_change_dir() to change working directory to the running process'.
- *  - call @ref fsl_logger_init(), @ref fsl_glfw_init(), @ref fsl_window_init() and @ref fsl_glad_init().
+ *  - call @ref fsl_logger_init(), @ref fsl_assets_init(), @ref fsl_glfw_init(),
+ *    @ref fsl_window_init() and @ref fsl_glad_init().
  *  - initialize default shaders if requested.
  *
  *  @param argc number of arguments in `argv` if `argv` provided.
@@ -280,7 +281,7 @@ FSLAPI u32 fsl_engine_get_string(str *dst, enum fsl_string_index type);
  *
  *  @param multisample = turn on multisampling.
  *
- *  @remark called automatically from @ref fsl_init().
+ *  @remark called automatically from @ref fsl_engine_init().
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -292,7 +293,7 @@ FSLAPI u32 fsl_glfw_init(b8 multisample);
  *  @param size_x window width, if 0, @ref FSL_RENDER_WIDTH_DEFAULT is used.
  *  @param size_y window height, if 0, @ref FSL_RENDER_HEIGHT_DEFAULT is used.
  *
- *  @remark called automatically from @ref fsl_init().
+ *  @remark called automatically from @ref fsl_engine_init().
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -300,11 +301,17 @@ FSLAPI u32 fsl_window_init(const str *title, i32 size_x, i32 size_y);
 
 /*! @brief initialize 'OpenGL' function loader 'GLAD'.
  *
- *  @remark called automatically from @ref fsl_init().
+ *  @remark called automatically from @ref fsl_engine_init().
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_glad_init(void);
+
+/*! @brief initialize engine's internal assets.
+ *
+ *  @remark called automatically from @ref fsl_engine_init().
+ */
+FSLAPI void fsl_assets_init(void);
 
 /*! @brief switch engine's current bound `fsl_render` to `_render`.
  *

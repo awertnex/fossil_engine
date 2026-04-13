@@ -93,6 +93,7 @@
 #define FSL_ERR_MEM_REMAP_FAIL              4152
 #define FSL_ERR_FILE_STAT_FAIL              4153
 #define FSL_ERR_READ_LINK_FAIL              4154
+#define FSL_ERR_OUT_OF_BOUNDS               4155
 
 /*! @brief global variable for engine-specific error codes.
  *

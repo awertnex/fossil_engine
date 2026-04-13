@@ -364,6 +364,7 @@ u32 _fsl_mem_map_arena(fsl_mem_arena *x, u64 size, const str *name, const str *f
     if (size == 0)
     {
         _LOGERROREX(FSL_ERR_SIZE_TOO_SMALL, 0,
+                file, line,
                 "%s[%p] Failed to Map Memory Arena, Size Too Small\n", name, x);
         return fsl_err;
 

@@ -58,7 +58,7 @@ fsl_logger_core logger_core = {0};
  *
  *  @remark initialized in @ref fsl_logger_init().
  */
-static const str FSL_LOG_FILE_NAME[FSL_LOG_LEVEL_COUNT][NAME_MAX] = {0};
+static str FSL_LOG_FILE_NAME[FSL_LOG_LEVEL_COUNT][NAME_MAX] = {0};
 
 static u32 fsl_logger_color_tab[FSL_LOG_LEVEL_COUNT + 1] =
 {

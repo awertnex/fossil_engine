@@ -135,6 +135,8 @@ u32 fsl_engine_init(int argc, char **argv, const str *_log_dir, const str *title
 
     glfwSetErrorCallback(glfw_callback_error);
 
+    fsl_assets_init();
+
     if (_render && fsl_change_render(_render) != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -332,7 +334,7 @@ u32 fsl_engine_get_string(str *dst, enum fsl_string_index type)
             break;
 
         default:
-            fsl_err = FSL_ERR_RANGE_INVALID;
+            fsl_err = FSL_ERR_OUT_OF_BOUNDS;
             break;
     }
 
