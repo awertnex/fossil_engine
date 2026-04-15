@@ -10,6 +10,9 @@
 ## v0.6.0-dev (current)
 
 #### changes
+- (2026 04 15): many small bug fixes
+- (2026 04 13): change function `fsl_log_output()` to take a string instead of
+                variadic arguments
 - (2026 02 07): remove parameter `size` from function `fsl_texture_init()`
                 because not needed
 - (2026 02 07): add cflag `-Wpedantic` to engine build and fix all pedantic

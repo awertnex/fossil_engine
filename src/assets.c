@@ -23,7 +23,6 @@
 
 fsl_mesh fsl_mesh_unit_quad = {0};
 fsl_texture fsl_texture_buf[FSL_TEXTURE_INDEX_COUNT] = {0};
-
 fsl_shader_program fsl_shader_buf[FSL_SHADER_INDEX_COUNT] = {0};
 
 void fsl_assets_init(void)

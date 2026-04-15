@@ -1061,7 +1061,7 @@ static void draw_everything(void)
                 COLOR_TEXT_DEFAULT);
 
         fsl_text_push(fsl_stringf(
-                    "OVERFLOW    [%s %s %s]",
+                    "OVERFLOW    [%s %s %s]\r",
                     (_player.flag & FLAG_PLAYER_OVERFLOW_X) ?
                     (_player.flag & FLAG_PLAYER_OVERFLOW_PX) ?
                     "        " : "        " : "NONE",
@@ -1075,7 +1075,7 @@ static void draw_everything(void)
                 COLOR_DIAGNOSTIC_NONE);
 
         fsl_text_push(fsl_stringf(
-                    "             %s %s %s",
+                    "             %s %s %s\r",
                     (_player.flag & FLAG_PLAYER_OVERFLOW_X) &&
                     (_player.flag & FLAG_PLAYER_OVERFLOW_PX) ? "POSITIVE" : "    ",
                     (_player.flag & FLAG_PLAYER_OVERFLOW_Y) &&

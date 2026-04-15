@@ -50,14 +50,15 @@ u32 _fsl_get_path_absolute(const str *name, str *dst)
 
 u32 _fsl_get_path_bin_root(str *dst)
 {
-    if (strlen(_pgmptr) + 1 >= PATH_MAX)
+    /* here, "PATH_MAX - 2" to leave space for a slash (`/`) and a null (`\0`) terminator */
+    if (strlen(_pgmptr) > PATH_MAX - 2)
     {
         _LOGFATAL(FSL_ERR_GET_PATH_BIN_ROOT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
                 fsl_logger_stringf("%s\n", "Failed 'get_path_bin_root()', Process Aborted"));
         return fsl_err;
     }
-    strncpy(dst, _pgmptr, PATH_MAX);
+    memcpy(dst, _pgmptr, PATH_MAX - 2);
     fsl_retract_path(dst);
     fsl_posix_slash(dst);
 
@@ -67,7 +68,7 @@ u32 _fsl_get_path_bin_root(str *dst)
 
 u32 fsl_exec(fsl_buf *cmd, str *cmd_name)
 {
-    STARTUPINFOA        startup_info = {0};
+    STARTUPINFOA startup_info = {0};
     PROCESS_INFORMATION process_info = {0};
     DWORD exit_code = 0;
     str *cmd_cat = NULL;

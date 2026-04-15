@@ -3,9 +3,9 @@
 
 #define DIR_ROOT "../"
 
-#define DIR_PROPER_GAME         "proper_game_hhc/"
-#define DIR_SRC_PROPER_GAME     DIR_PROPER_GAME"src/"
-#define DIR_OUT_PROPER_GAME     DIR_PROPER_GAME"out/"
+#define DIR_GAME                "game_hhc/"
+#define DIR_SRC_GAME            DIR_GAME"src/"
+#define DIR_OUT_GAME            DIR_GAME"out/"
 
 #define DIR_TEXT_RENDERING      "text_rendering/"
 #define DIR_SRC_TEXT_RENDERING  DIR_TEXT_RENDERING"src/"
@@ -19,41 +19,93 @@
 #define DIR_SRC_COMPOSABLE_UI   DIR_COMPOSABLE_UI"src/"
 #define DIR_OUT_COMPOSABLE_UI   DIR_COMPOSABLE_UI"out/"
 
-u32 build_proper_game(int argc, char **argv);
+#define TEST_NAME_WIDTH 32
+#define TEST_NAME_WIDTH_FULL 64
+
+typedef struct fsl_test_info
+{
+    str *name;      /* test name (e.g. composable_ui) */
+    str *abbrev;    /* test name abbreviation (e.g. ui) */
+    u32 (*build_func)(int argc, char **argv);
+} fsl_test_info;
+
+_buf cmd = {0}; /* build cmd */
+
+test_info_t test_list[] =
+{
+    /* name             abbreviation    build function */
+    {"game_hhc",        "hhc",          &build_game},
+    {"text_rendering",  "txt",          &build_text_rendering},
+    {"nine_slice",      "9s",           &build_nine_slice},
+    {"composable_ui",   "ui",           &build_composable_ui},
+};
+
+u32 build_game(int argc, char **argv);
 u32 build_text_rendering(int argc, char **argv);
 u32 build_nine_slice(int argc, char **argv);
 u32 build_composable_ui(int argc, char **argv);
 
 int main(int argc, char **argv)
 {
+    u64 i = 0;
+    u64 cursor = 0;
+
+    if (find_token("help", argc, argv))
+    {
+        printf("%s",
+                "Usage: ./build [options]...\n"
+                "Options:\n"
+                "    help       print this help\n"
+                "    list       list available tests\n"
+                "    show       show build command in list format\n"
+                "    raw        show build command in raw format\n"
+                "    self       build build source\n");
+        _exit(ERR_SUCCESS);
+    }
+
     /* if error, will fail and exit */
     build_init(argc, argv, "build.c", "build"EXE);
 
-    if (find_token("proper_game_hhc", argc, argv) || find_token("hhc", argc, argv))
-        return build_proper_game(argc, argv);
-    else if (find_token("text_rendering", argc, argv))
-        return build_text_rendering(argc, argv);
-    else if (find_token("nine_slice", argc, argv) || find_token("9s", argc, argv))
-        return build_nine_slice(argc, argv);
-    else if (find_token("composable_ui", argc, argv) || find_token("ui", argc, argv))
-        return build_composable_ui(argc, argv);
-    else
-    {
-        LOGWARNING(ERR_BUILD_FUNCTION_NOT_FOUND, FALSE,
-                "%s\n", "No Test Specified, Pass Test Directory Name As Argument");
-        cmd_fail(NULL);
+    if (find_token("list", argc, argv))
+        printf("%s", "available tests:\n");
+        cursor = printf("%s", "    id      name");
+        for (; cursor < TEST_NAME_WIDTH; ++cursor)
+            putchar(' ');
+        printf("%s\n", "abbreviation");
+        for (cursor = 0; cursor < TEST_NAME_WIDTH_FULL; ++cursor)
+            putchar('-');
+        putchar('\n');
+        for (i = 0; i < arr_len(test_list); ++i)
+        {
+            cursor = printf("    %04"PRIu64"    %s", i, test_list[i].name);
+            for (; cursor < TEST_NAME_WIDTH; ++cursor)
+                putchar(' ');
+            printf("%s\n", test_list[i].abbrev);
+        }
+        _exit(ERR_SUCCESS);
     }
+
+    for (i = 0; i < arr_len(test_list); ++i)
+    {
+        if (find_token(test_list[i].name, argc, argv) || find_token(test_list[i].abbrev, argc, argv))
+            return test_list[i].build_func(argc, argv);
+    }
+
+    LOGWARNING(ERR_BUILD_FUNCTION_NOT_FOUND, FALSE,
+            "%s\n", "No Test Specified, Pass Test Directory Name As Argument");
+    cmd_fail(NULL);
+
 
     build_err = ERR_SUCCESS;
     return build_err;
 }
 
-u32 build_proper_game(int argc, char **argv)
+u32 build_game(int argc, char **argv)
 {
-    if (is_dir_exists(DIR_SRC_PROPER_GAME, TRUE) != ERR_SUCCESS)
+    if (is_dir_exists(DIR_SRC_GAME, TRUE) != ERR_SUCCESS)
         return build_err;
 
-    make_dir(DIR_OUT_PROPER_GAME);
+    make_dir(DIR_OUT_GAME);
 
     cmd_push(NULL, COMPILER);
 
@@ -67,16 +119,16 @@ u32 build_proper_game(int argc, char **argv)
         cmd_push(NULL, "-ggdb");
     }
 
-    cmd_push(NULL, DIR_SRC_PROPER_GAME"main.c");
-    cmd_push(NULL, DIR_SRC_PROPER_GAME"assets.c");
-    cmd_push(NULL, DIR_SRC_PROPER_GAME"chunking.c");
-    cmd_push(NULL, DIR_SRC_PROPER_GAME"common.c");
-    cmd_push(NULL, DIR_SRC_PROPER_GAME"dir.c");
-    cmd_push(NULL, DIR_SRC_PROPER_GAME"gui.c");
-    cmd_push(NULL, DIR_SRC_PROPER_GAME"input.c");
-    cmd_push(NULL, DIR_SRC_PROPER_GAME"player.c");
-    cmd_push(NULL, DIR_SRC_PROPER_GAME"terrain.c");
-    cmd_push(NULL, DIR_SRC_PROPER_GAME"world.c");
+    cmd_push(NULL, DIR_SRC_GAME"main.c");
+    cmd_push(NULL, DIR_SRC_GAME"assets.c");
+    cmd_push(NULL, DIR_SRC_GAME"chunking.c");
+    cmd_push(NULL, DIR_SRC_GAME"common.c");
+    cmd_push(NULL, DIR_SRC_GAME"dir.c");
+    cmd_push(NULL, DIR_SRC_GAME"gui.c");
+    cmd_push(NULL, DIR_SRC_GAME"input.c");
+    cmd_push(NULL, DIR_SRC_GAME"player.c");
+    cmd_push(NULL, DIR_SRC_GAME"terrain.c");
+    cmd_push(NULL, DIR_SRC_GAME"world.c");
     cmd_push(NULL, "-I"DIR_ROOT);
     cmd_push(NULL, "-std=c99");
     cmd_push(NULL, "-Ofast");
@@ -84,16 +136,16 @@ u32 build_proper_game(int argc, char **argv)
     fsl_engine_link_libs(NULL);
     fsl_engine_set_runtime_path(NULL);
     cmd_push(NULL, "-o");
-    cmd_push(NULL, DIR_OUT_PROPER_GAME"hhc");
+    cmd_push(NULL, DIR_OUT_GAME"hhc");
     cmd_ready(NULL);
 
-    if (exec(&_cmd, "build_proper_game().cmd") != ERR_SUCCESS)
-        cmd_fail(&_cmd);
+    if (exec(&cmd, "build_game().cmd") != ERR_SUCCESS)
+        cmd_fail(&cmd);
 
     if (
-            copy_dir(DIR_ROOT"fossil/fossil/", DIR_OUT_PROPER_GAME, TRUE) != ERR_SUCCESS ||
-            copy_dir(DIR_PROPER_GAME"assets/", DIR_OUT_PROPER_GAME, FALSE) != ERR_SUCCESS)
-        cmd_fail(&_cmd);
+            copy_dir(DIR_ROOT"fossil/fossil/", DIR_OUT_GAME, TRUE) != ERR_SUCCESS ||
+            copy_dir(DIR_GAME"assets/", DIR_OUT_GAME, FALSE) != ERR_SUCCESS)
+        cmd_fail(&cmd);
 
     build_err = ERR_SUCCESS;
     return build_err;
@@ -122,11 +174,11 @@ u32 build_text_rendering(int argc, char **argv)
     cmd_push(NULL, DIR_OUT_TEXT_RENDERING"text_rendering");
     cmd_ready(NULL);
 
-    if (exec(&_cmd, "build_text_rendering().cmd") != ERR_SUCCESS)
-        cmd_fail(&_cmd);
+    if (exec(&cmd, "build_text_rendering().cmd") != ERR_SUCCESS)
+        cmd_fail(&cmd);
 
     if (copy_dir(DIR_ROOT"fossil/fossil/", DIR_OUT_TEXT_RENDERING, TRUE) != ERR_SUCCESS)
-        cmd_fail(&_cmd);
+        cmd_fail(&cmd);
 
     build_err = ERR_SUCCESS;
     return build_err;
@@ -155,13 +207,13 @@ u32 build_nine_slice(int argc, char **argv)
     cmd_push(NULL, DIR_OUT_NINE_SLICE"9s");
     cmd_ready(NULL);
 
-    if (exec(&_cmd, "build_nine_slice().cmd") != ERR_SUCCESS)
-        cmd_fail(&_cmd);
+    if (exec(&cmd, "build_nine_slice().cmd") != ERR_SUCCESS)
+        cmd_fail(&cmd);
 
     if (
             copy_dir(DIR_ROOT"fossil/fossil/", DIR_OUT_NINE_SLICE, TRUE) != ERR_SUCCESS ||
             copy_dir(DIR_NINE_SLICE"shaders/", DIR_OUT_NINE_SLICE, TRUE) != ERR_SUCCESS)
-        cmd_fail(&_cmd);
+        cmd_fail(&cmd);
 
     build_err = ERR_SUCCESS;
     return build_err;
@@ -190,11 +242,11 @@ u32 build_composable_ui(int argc, char **argv)
     cmd_push(NULL, DIR_OUT_COMPOSABLE_UI"ui");
     cmd_ready(NULL);
 
-    if (exec(&_cmd, "build_composable_ui().cmd") != ERR_SUCCESS)
-        cmd_fail(&_cmd);
+    if (exec(&cmd, "build_composable_ui().cmd") != ERR_SUCCESS)
+        cmd_fail(&cmd);
 
     if (copy_dir(DIR_ROOT"fossil/fossil/", DIR_OUT_COMPOSABLE_UI, TRUE) != ERR_SUCCESS)
-        cmd_fail(&_cmd);
+        cmd_fail(&cmd);
 
     build_err = ERR_SUCCESS;
     return build_err;

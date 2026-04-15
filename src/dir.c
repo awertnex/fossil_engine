@@ -589,7 +589,7 @@ u32 fsl_get_path_absolute(const str *name, str **dst)
     str path_absolute[PATH_MAX] = {0};
     u64 len = 0;
 
-    if (strlen(name) >= PATH_MAX - 1)
+    if (strlen(name) > PATH_MAX - 2)
     {
         _LOGERROR(FSL_ERR_GET_PATH_ABSOLUTE_FAIL, 0,
                 fsl_logger_stringf("%s\n", "Failed to Get Absolute Path, Path Too Long"));
@@ -602,13 +602,13 @@ u32 fsl_get_path_absolute(const str *name, str **dst)
     if (_fsl_get_path_absolute(name, path_absolute) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    len = strlen(path_absolute) + 1;
+    len = strlen(path_absolute);
 
-    if (!*dst && fsl_mem_alloc((void*)dst, sizeof(str*) * (len + 1),
+    if (!*dst && fsl_mem_alloc((void*)dst, len + 1,
                 "fsl_get_path_absolute().dst") != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    strncpy(*dst, path_absolute, len);
+    memcpy(*dst, path_absolute, len);
     fsl_check_slash(*dst);
 
     fsl_err = FSL_ERR_SUCCESS;
@@ -624,8 +624,8 @@ u32 fsl_get_path_bin_root(str **dst)
     if (_fsl_get_path_bin_root(path_bin_root) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    len = strlen(path_bin_root) + 1;
-    if (len >= PATH_MAX - 1)
+    len = strlen(path_bin_root);
+    if (len > PATH_MAX - 1)
     {
         _LOGFATAL(FSL_ERR_PATH_TOO_LONG, 0,
                 fsl_logger_stringf("Path Too Long '%s', Process Aborted\n", path_bin_root));
@@ -637,7 +637,7 @@ u32 fsl_get_path_bin_root(str **dst)
                 "fsl_get_path_bin_root().dst") != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    strncpy(*dst, path_bin_root, len);
+    memcpy(*dst, path_bin_root, PATH_MAX - 1);
 
     last_slash = strrchr(*dst, '/');
     if (last_slash)
@@ -660,7 +660,7 @@ void fsl_check_slash(str *path)
     }
 
     len = strlen(path);
-    if (len >= PATH_MAX - 1)
+    if (len > PATH_MAX - 2)
     {
         fsl_err = FSL_ERR_PATH_TOO_LONG;
         return;
@@ -775,7 +775,7 @@ u32 fsl_get_base_name(const str *path, str *dst, u64 size)
     }
 
     len = strlen(path);
-    if (len >= PATH_MAX - 1)
+    if (len > PATH_MAX - 2)
     {
         _LOGERROR(FSL_ERR_PATH_TOO_LONG, 0,
                 fsl_logger_stringf("Failed to Get Base Name of '%s', Path Too Long\n", path));

@@ -632,7 +632,6 @@ void player_target_update(player *p)
         core.flag.parse_target = 0;
         p->target_normal = (v3f64){0};
     }
-
 }
 
 void set_player_pos(player *p, f64 x, f64 y, f64 z)
