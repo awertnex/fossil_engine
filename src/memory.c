@@ -411,13 +411,13 @@ u32 _fsl_mem_map_arena(fsl_mem_arena *x, u64 size, const str *name, const str *f
 u32 _fsl_mem_push_arena(fsl_mem_arena *x, void **p, u64 size, const str *name, const str *file, u64 line)
 {
     u64 i = 0;
-    u64 diff = 0;
+    u64 diff = 0; /* distance between old arena pointer and new arena pointer in bytes if remapping */
     u64 memb_aligned = 0;
     u64 size_aligned = 0;
     u64 cursor_aligned = 0;
     u64 cursor_pos = 0;
     u64 cursor_pos_new = 0;
-    void *buf_old = NULL;
+    void *buf_old = NULL; /* saving previous arena pointer position for if remapping */
 
     if (!p)
     {
@@ -459,6 +459,8 @@ u32 _fsl_mem_push_arena(fsl_mem_arena *x, void **p, u64 size, const str *name, c
                 name, (u8*)x->buf + x->cursor));
         return fsl_err;
     }
+
+    /* setup parameters */
 
     fsl_mem_request_page_size();
     memb_aligned = fsl_align_up_u64(x->size_i + sizeof(void*), FSL_PAGE_SIZE);

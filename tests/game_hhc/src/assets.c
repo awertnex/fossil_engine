@@ -36,51 +36,51 @@ u32 assets_init(void)
 
     /* ---- shaders --------------------------------------------------------- */
 
-    shader.[SHADER_DEFAULT].name = "default";
-    shader.[SHADER_DEFAULT].vertex.file_name = "default.vert";
-    shader.[SHADER_DEFAULT].vertex.type = GL_VERTEX_SHADER;
-    shader.[SHADER_DEFAULT].fragment.file_name = "default.frag";
-    shader.[SHADER_DEFAULT].fragment.type = GL_FRAGMENT_SHADER;
+    shader[SHADER_DEFAULT].name = "default";
+    shader[SHADER_DEFAULT].vertex.file_name = "default.vert";
+    shader[SHADER_DEFAULT].vertex.type = GL_VERTEX_SHADER;
+    shader[SHADER_DEFAULT].fragment.file_name = "default.frag";
+    shader[SHADER_DEFAULT].fragment.type = GL_FRAGMENT_SHADER;
 
-    shader.[SHADER_SKYBOX].name = "skybox";
-    shader.[SHADER_SKYBOX].vertex.file_name = "skybox.vert";
-    shader.[SHADER_SKYBOX].vertex.type = GL_VERTEX_SHADER;
-    shader.[SHADER_SKYBOX].fragment.file_name = "skybox.frag";
-    shader.[SHADER_SKYBOX].fragment.type = GL_FRAGMENT_SHADER;
+    shader[SHADER_SKYBOX].name = "skybox";
+    shader[SHADER_SKYBOX].vertex.file_name = "skybox.vert";
+    shader[SHADER_SKYBOX].vertex.type = GL_VERTEX_SHADER;
+    shader[SHADER_SKYBOX].fragment.file_name = "skybox.frag";
+    shader[SHADER_SKYBOX].fragment.type = GL_FRAGMENT_SHADER;
 
-    shader.[SHADER_GIZMO].name = "gizmo";
-    shader.[SHADER_GIZMO].vertex.file_name = "gizmo.vert";
-    shader.[SHADER_GIZMO].vertex.type = GL_VERTEX_SHADER;
-    shader.[SHADER_GIZMO].fragment.file_name = "gizmo.frag";
-    shader.[SHADER_GIZMO].fragment.type = GL_FRAGMENT_SHADER;
+    shader[SHADER_GIZMO].name = "gizmo";
+    shader[SHADER_GIZMO].vertex.file_name = "gizmo.vert";
+    shader[SHADER_GIZMO].vertex.type = GL_VERTEX_SHADER;
+    shader[SHADER_GIZMO].fragment.file_name = "gizmo.frag";
+    shader[SHADER_GIZMO].fragment.type = GL_FRAGMENT_SHADER;
 
-    shader.[SHADER_GIZMO_CHUNK].name = "gizmo_chunk";
-    shader.[SHADER_GIZMO_CHUNK].vertex.file_name = "gizmo_chunk.vert";
-    shader.[SHADER_GIZMO_CHUNK].vertex.type = GL_VERTEX_SHADER;
-    shader.[SHADER_GIZMO_CHUNK].geometry.file_name = "gizmo_chunk.geom";
-    shader.[SHADER_GIZMO_CHUNK].geometry.type = GL_GEOMETRY_SHADER;
-    shader.[SHADER_GIZMO_CHUNK].fragment.file_name = "gizmo_chunk.frag";
-    shader.[SHADER_GIZMO_CHUNK].fragment.type = GL_FRAGMENT_SHADER;
+    shader[SHADER_GIZMO_CHUNK].name = "gizmo_chunk";
+    shader[SHADER_GIZMO_CHUNK].vertex.file_name = "gizmo_chunk.vert";
+    shader[SHADER_GIZMO_CHUNK].vertex.type = GL_VERTEX_SHADER;
+    shader[SHADER_GIZMO_CHUNK].geometry.file_name = "gizmo_chunk.geom";
+    shader[SHADER_GIZMO_CHUNK].geometry.type = GL_GEOMETRY_SHADER;
+    shader[SHADER_GIZMO_CHUNK].fragment.file_name = "gizmo_chunk.frag";
+    shader[SHADER_GIZMO_CHUNK].fragment.type = GL_FRAGMENT_SHADER;
 
-    shader.[SHADER_POST_PROCESSING].name = "post_processing";
-    shader.[SHADER_POST_PROCESSING].vertex.file_name = "post_processing.vert";
-    shader.[SHADER_POST_PROCESSING].vertex.type = GL_VERTEX_SHADER;
-    shader.[SHADER_POST_PROCESSING].fragment.file_name = "post_processing.frag";
-    shader.[SHADER_POST_PROCESSING].fragment.type = GL_FRAGMENT_SHADER;
+    shader[SHADER_POST_PROCESSING].name = "post_processing";
+    shader[SHADER_POST_PROCESSING].vertex.file_name = "post_processing.vert";
+    shader[SHADER_POST_PROCESSING].vertex.type = GL_VERTEX_SHADER;
+    shader[SHADER_POST_PROCESSING].fragment.file_name = "post_processing.frag";
+    shader[SHADER_POST_PROCESSING].fragment.type = GL_FRAGMENT_SHADER;
 
-    shader.[SHADER_VOXEL].name = "voxel";
-    shader.[SHADER_VOXEL].vertex.file_name = "voxel.vert";
-    shader.[SHADER_VOXEL].vertex.type = GL_VERTEX_SHADER;
-    shader.[SHADER_VOXEL].geometry.file_name = "voxel.geom";
-    shader.[SHADER_VOXEL].geometry.type = GL_GEOMETRY_SHADER;
-    shader.[SHADER_VOXEL].fragment.file_name = "voxel.frag";
-    shader.[SHADER_VOXEL].fragment.type = GL_FRAGMENT_SHADER;
+    shader[SHADER_VOXEL].name = "voxel";
+    shader[SHADER_VOXEL].vertex.file_name = "voxel.vert";
+    shader[SHADER_VOXEL].vertex.type = GL_VERTEX_SHADER;
+    shader[SHADER_VOXEL].geometry.file_name = "voxel.geom";
+    shader[SHADER_VOXEL].geometry.type = GL_GEOMETRY_SHADER;
+    shader[SHADER_VOXEL].fragment.file_name = "voxel.frag";
+    shader[SHADER_VOXEL].fragment.type = GL_FRAGMENT_SHADER;
 
-    shader.[SHADER_BOUNDING_BOX].name = "bounding_box";
-    shader.[SHADER_BOUNDING_BOX].vertex.file_name = "bounding_box.vert";
-    shader.[SHADER_BOUNDING_BOX].vertex.type = GL_VERTEX_SHADER;
-    shader.[SHADER_BOUNDING_BOX].fragment.file_name = "bounding_box.frag";
-    shader.[SHADER_BOUNDING_BOX].fragment.type = GL_FRAGMENT_SHADER;
+    shader[SHADER_BOUNDING_BOX].name = "bounding_box";
+    shader[SHADER_BOUNDING_BOX].vertex.file_name = "bounding_box.vert";
+    shader[SHADER_BOUNDING_BOX].vertex.type = GL_VERTEX_SHADER;
+    shader[SHADER_BOUNDING_BOX].fragment.file_name = "bounding_box.frag";
+    shader[SHADER_BOUNDING_BOX].fragment.type = GL_FRAGMENT_SHADER;
 
     if (
             fsl_shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_DEFAULT]) != FSL_ERR_SUCCESS ||

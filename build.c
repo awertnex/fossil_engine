@@ -4,16 +4,16 @@
 
 #define DIR_SRC "src/"
 #define DIR_DEPS "deps/"
-#define DIR_OUT "fossil/" /* your project name */
+#define DIR_DST "fossil/" /* your project name */
 
 static str str_dir[][CMD_SIZE] =
 {
-    DIR_OUT,
-    DIR_OUT"deps/",
-    DIR_OUT"deps/fossil/",
-    DIR_OUT DIR_OUT,
-    DIR_OUT DIR_OUT DIR_OUT,
-    DIR_OUT DIR_OUT DIR_OUT"logs/",
+    DIR_DST,
+    DIR_DST"deps/",
+    DIR_DST"deps/fossil/",
+    DIR_DST DIR_DST,
+    DIR_DST DIR_DST DIR_DST,
+    DIR_DST DIR_DST DIR_DST"logs/",
 };
 
 static str str_cflags[][CMD_SIZE] =
@@ -97,15 +97,15 @@ int main(int argc, char **argv)
             NULL);
 
     if (
-            copy_dir(DIR_DEPS,          DIR_OUT, FALSE) != ERR_SUCCESS ||
-            copy_dir(DIR_SRC"h/",       DIR_OUT DIR_DEPS DIR_OUT, TRUE) != ERR_SUCCESS ||
-            copy_file("LICENSE",        DIR_OUT DIR_DEPS DIR_OUT) != ERR_SUCCESS ||
+            copy_dir(DIR_DEPS,          DIR_DST, FALSE) != ERR_SUCCESS ||
+            copy_dir(DIR_SRC"h/",       DIR_DST DIR_DEPS DIR_DST, TRUE) != ERR_SUCCESS ||
+            copy_file("LICENSE",        DIR_DST DIR_DEPS DIR_DST) != ERR_SUCCESS ||
 
-            copy_dir("lib/",            DIR_OUT, FALSE) != ERR_SUCCESS ||
-            copy_dir("lib/"PLATFORM,    DIR_OUT DIR_OUT, TRUE) != ERR_SUCCESS ||
+            copy_dir("lib/",            DIR_DST, FALSE) != ERR_SUCCESS ||
+            copy_dir("lib/"PLATFORM,    DIR_DST DIR_DST, TRUE) != ERR_SUCCESS ||
 
-            copy_dir("assets/",         DIR_OUT DIR_OUT DIR_OUT, FALSE) != ERR_SUCCESS ||
-            copy_file("LICENSE",        DIR_OUT DIR_OUT DIR_OUT) != ERR_SUCCESS)
+            copy_dir("assets/",         DIR_DST DIR_DST DIR_DST, FALSE) != ERR_SUCCESS ||
+            copy_file("LICENSE",        DIR_DST DIR_DST DIR_DST) != ERR_SUCCESS)
         cmd_fail(NULL);
 
     return ERR_SUCCESS;

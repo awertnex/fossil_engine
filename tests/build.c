@@ -31,7 +31,12 @@ typedef struct fsl_test_info
 
 _buf cmd = {0}; /* build cmd */
 
-test_info_t test_list[] =
+u32 build_game(int argc, char **argv);
+u32 build_text_rendering(int argc, char **argv);
+u32 build_nine_slice(int argc, char **argv);
+u32 build_composable_ui(int argc, char **argv);
+
+fsl_test_info test_list[] =
 {
     /* name             abbreviation    build function */
     {"game_hhc",        "hhc",          &build_game},
@@ -39,11 +44,6 @@ test_info_t test_list[] =
     {"nine_slice",      "9s",           &build_nine_slice},
     {"composable_ui",   "ui",           &build_composable_ui},
 };
-
-u32 build_game(int argc, char **argv);
-u32 build_text_rendering(int argc, char **argv);
-u32 build_nine_slice(int argc, char **argv);
-u32 build_composable_ui(int argc, char **argv);
 
 int main(int argc, char **argv)
 {
@@ -67,6 +67,7 @@ int main(int argc, char **argv)
     build_init(argc, argv, "build.c", "build"EXE);
 
     if (find_token("list", argc, argv))
+    {
         printf("%s", "available tests:\n");
         cursor = printf("%s", "    id      name");
         for (; cursor < TEST_NAME_WIDTH; ++cursor)
@@ -95,7 +96,6 @@ int main(int argc, char **argv)
             "%s\n", "No Test Specified, Pass Test Directory Name As Argument");
     cmd_fail(NULL);
 
-
     build_err = ERR_SUCCESS;
     return build_err;
 }
@@ -107,37 +107,37 @@ u32 build_game(int argc, char **argv)
 
     make_dir(DIR_OUT_GAME);
 
-    cmd_push(NULL, COMPILER);
+    cmd_push(&cmd, COMPILER);
 
     if (find_token("release", argc, argv))
-        cmd_push(NULL, "-DHHC_RELEASE_BUILD");
+        cmd_push(&cmd, "-DHHC_RELEASE_BUILD");
     else
     {
-        cmd_push(NULL, "-Wall");
-        cmd_push(NULL, "-Wextra");
-        cmd_push(NULL, "-Wformat-truncation=0");
-        cmd_push(NULL, "-ggdb");
+        cmd_push(&cmd, "-Wall");
+        cmd_push(&cmd, "-Wextra");
+        cmd_push(&cmd, "-Wformat-truncation=0");
+        cmd_push(&cmd, "-ggdb");
     }
 
-    cmd_push(NULL, DIR_SRC_GAME"main.c");
-    cmd_push(NULL, DIR_SRC_GAME"assets.c");
-    cmd_push(NULL, DIR_SRC_GAME"chunking.c");
-    cmd_push(NULL, DIR_SRC_GAME"common.c");
-    cmd_push(NULL, DIR_SRC_GAME"dir.c");
-    cmd_push(NULL, DIR_SRC_GAME"gui.c");
-    cmd_push(NULL, DIR_SRC_GAME"input.c");
-    cmd_push(NULL, DIR_SRC_GAME"player.c");
-    cmd_push(NULL, DIR_SRC_GAME"terrain.c");
-    cmd_push(NULL, DIR_SRC_GAME"world.c");
-    cmd_push(NULL, "-I"DIR_ROOT);
-    cmd_push(NULL, "-std=c99");
-    cmd_push(NULL, "-Ofast");
-    cmd_push(NULL, "-L"DIR_ROOT"lib/"PLATFORM);
-    fsl_engine_link_libs(NULL);
-    fsl_engine_set_runtime_path(NULL);
-    cmd_push(NULL, "-o");
-    cmd_push(NULL, DIR_OUT_GAME"hhc");
-    cmd_ready(NULL);
+    cmd_push(&cmd, DIR_SRC_GAME"main.c");
+    cmd_push(&cmd, DIR_SRC_GAME"assets.c");
+    cmd_push(&cmd, DIR_SRC_GAME"chunking.c");
+    cmd_push(&cmd, DIR_SRC_GAME"common.c");
+    cmd_push(&cmd, DIR_SRC_GAME"dir.c");
+    cmd_push(&cmd, DIR_SRC_GAME"gui.c");
+    cmd_push(&cmd, DIR_SRC_GAME"input.c");
+    cmd_push(&cmd, DIR_SRC_GAME"player.c");
+    cmd_push(&cmd, DIR_SRC_GAME"terrain.c");
+    cmd_push(&cmd, DIR_SRC_GAME"world.c");
+    cmd_push(&cmd, "-I"DIR_ROOT);
+    cmd_push(&cmd, "-std=c99");
+    cmd_push(&cmd, "-Ofast");
+    cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
+    fsl_engine_link_libs(&cmd);
+    fsl_engine_set_runtime_path(&cmd);
+    cmd_push(&cmd, "-o");
+    cmd_push(&cmd, DIR_OUT_GAME"hhc");
+    cmd_ready(&cmd);
 
     if (exec(&cmd, "build_game().cmd") != ERR_SUCCESS)
         cmd_fail(&cmd);
@@ -158,21 +158,21 @@ u32 build_text_rendering(int argc, char **argv)
 
     make_dir(DIR_OUT_TEXT_RENDERING);
 
-    cmd_push(NULL, COMPILER);
-    cmd_push(NULL, "-Wall");
-    cmd_push(NULL, "-Wextra");
-    cmd_push(NULL, "-Wformat-truncation=0");
-    cmd_push(NULL, "-ggdb");
-    cmd_push(NULL, DIR_SRC_TEXT_RENDERING"main.c");
-    cmd_push(NULL, "-I"DIR_ROOT);
-    cmd_push(NULL, "-std=c89");
-    cmd_push(NULL, "-Ofast");
-    cmd_push(NULL, "-L"DIR_ROOT"lib/"PLATFORM);
-    fsl_engine_link_libs(NULL);
-    fsl_engine_set_runtime_path(NULL);
-    cmd_push(NULL, "-o");
-    cmd_push(NULL, DIR_OUT_TEXT_RENDERING"text_rendering");
-    cmd_ready(NULL);
+    cmd_push(&cmd, COMPILER);
+    cmd_push(&cmd, "-Wall");
+    cmd_push(&cmd, "-Wextra");
+    cmd_push(&cmd, "-Wformat-truncation=0");
+    cmd_push(&cmd, "-ggdb");
+    cmd_push(&cmd, DIR_SRC_TEXT_RENDERING"main.c");
+    cmd_push(&cmd, "-I"DIR_ROOT);
+    cmd_push(&cmd, "-std=c89");
+    cmd_push(&cmd, "-Ofast");
+    cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
+    fsl_engine_link_libs(&cmd);
+    fsl_engine_set_runtime_path(&cmd);
+    cmd_push(&cmd, "-o");
+    cmd_push(&cmd, DIR_OUT_TEXT_RENDERING"text_rendering");
+    cmd_ready(&cmd);
 
     if (exec(&cmd, "build_text_rendering().cmd") != ERR_SUCCESS)
         cmd_fail(&cmd);
@@ -191,21 +191,21 @@ u32 build_nine_slice(int argc, char **argv)
 
     make_dir(DIR_OUT_NINE_SLICE);
 
-    cmd_push(NULL, COMPILER);
-    cmd_push(NULL, "-Wall");
-    cmd_push(NULL, "-Wextra");
-    cmd_push(NULL, "-Wformat-truncation=0");
-    cmd_push(NULL, "-ggdb");
-    cmd_push(NULL, DIR_SRC_NINE_SLICE"main.c");
-    cmd_push(NULL, "-I"DIR_ROOT);
-    cmd_push(NULL, "-std=c89");
-    cmd_push(NULL, "-Ofast");
-    cmd_push(NULL, "-L"DIR_ROOT"lib/"PLATFORM);
-    fsl_engine_link_libs(NULL);
-    fsl_engine_set_runtime_path(NULL);
-    cmd_push(NULL, "-o");
-    cmd_push(NULL, DIR_OUT_NINE_SLICE"9s");
-    cmd_ready(NULL);
+    cmd_push(&cmd, COMPILER);
+    cmd_push(&cmd, "-Wall");
+    cmd_push(&cmd, "-Wextra");
+    cmd_push(&cmd, "-Wformat-truncation=0");
+    cmd_push(&cmd, "-ggdb");
+    cmd_push(&cmd, DIR_SRC_NINE_SLICE"main.c");
+    cmd_push(&cmd, "-I"DIR_ROOT);
+    cmd_push(&cmd, "-std=c89");
+    cmd_push(&cmd, "-Ofast");
+    cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
+    fsl_engine_link_libs(&cmd);
+    fsl_engine_set_runtime_path(&cmd);
+    cmd_push(&cmd, "-o");
+    cmd_push(&cmd, DIR_OUT_NINE_SLICE"9s");
+    cmd_ready(&cmd);
 
     if (exec(&cmd, "build_nine_slice().cmd") != ERR_SUCCESS)
         cmd_fail(&cmd);
@@ -226,21 +226,21 @@ u32 build_composable_ui(int argc, char **argv)
 
     make_dir(DIR_OUT_COMPOSABLE_UI);
 
-    cmd_push(NULL, COMPILER);
-    cmd_push(NULL, "-Wall");
-    cmd_push(NULL, "-Wextra");
-    cmd_push(NULL, "-Wformat-truncation=0");
-    cmd_push(NULL, "-ggdb");
-    cmd_push(NULL, DIR_SRC_COMPOSABLE_UI"main.c");
-    cmd_push(NULL, "-I"DIR_ROOT);
-    cmd_push(NULL, "-std=c89");
-    cmd_push(NULL, "-Ofast");
-    cmd_push(NULL, "-L"DIR_ROOT"lib/"PLATFORM);
-    fsl_engine_link_libs(NULL);
-    fsl_engine_set_runtime_path(NULL);
-    cmd_push(NULL, "-o");
-    cmd_push(NULL, DIR_OUT_COMPOSABLE_UI"ui");
-    cmd_ready(NULL);
+    cmd_push(&cmd, COMPILER);
+    cmd_push(&cmd, "-Wall");
+    cmd_push(&cmd, "-Wextra");
+    cmd_push(&cmd, "-Wformat-truncation=0");
+    cmd_push(&cmd, "-ggdb");
+    cmd_push(&cmd, DIR_SRC_COMPOSABLE_UI"main.c");
+    cmd_push(&cmd, "-I"DIR_ROOT);
+    cmd_push(&cmd, "-std=c89");
+    cmd_push(&cmd, "-Ofast");
+    cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
+    fsl_engine_link_libs(&cmd);
+    fsl_engine_set_runtime_path(&cmd);
+    cmd_push(&cmd, "-o");
+    cmd_push(&cmd, DIR_OUT_COMPOSABLE_UI"ui");
+    cmd_ready(&cmd);
 
     if (exec(&cmd, "build_composable_ui().cmd") != ERR_SUCCESS)
         cmd_fail(&cmd);
