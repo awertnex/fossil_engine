@@ -225,13 +225,13 @@ void input_update(player *p)
 
         if (fsl_is_key_press(bind_zoom))
             HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                    "%s\n", "Zoom Toggled On");
+                    fsl_logger_stringf("%s\n", "Zoom Toggled On"));
         if (fsl_is_key_hold(bind_zoom))
             p->flag |= FLAG_PLAYER_ZOOMER;
         if (fsl_is_key_release(bind_zoom))
         {
             HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                    "%s\n", "Zoom Toggled Off");
+                    fsl_logger_stringf("%s\n", "Zoom Toggled Off"));
             p->flag &= ~FLAG_PLAYER_ZOOMER;
         }
 
@@ -241,10 +241,10 @@ void input_update(player *p)
 
             if (p->flag & FLAG_PLAYER_FLASHLIGHT)
                 HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "%s\n", "Flashlight Toggled On");
+                        fsl_logger_stringf("%s\n", "Flashlight Toggled On"));
             else
                 HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "%s\n", "Flashlight Toggled Off");
+                        fsl_logger_stringf("%s\n", "Flashlight Toggled Off"));
         }
 
         if (fsl_is_key_press(bind_toggle_cinematic_motion))
@@ -253,10 +253,10 @@ void input_update(player *p)
 
             if (p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
                 HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "%s\n", "Cinematic Motion On");
+                        fsl_logger_stringf("%s\n", "Cinematic Motion On"));
             else
                 HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "%s\n", "Cinematic Motion Off");
+                        fsl_logger_stringf("%s\n", "Cinematic Motion Off"));
         }
     }
 
@@ -275,10 +275,10 @@ void input_update(player *p)
 
             if (core.debug.trans_blocks)
                 HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "%s\n", "View Transparent Blocks On");
+                        fsl_logger_stringf("%s\n", "View Transparent Blocks On"));
             else
                 HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "%s\n", "View Transparent Blocks Off");
+                        fsl_logger_stringf("%s\n", "View Transparent Blocks Off"));
         }
 
         if (fsl_is_key_press(bind_toggle_chunk_bounds))
@@ -287,10 +287,10 @@ void input_update(player *p)
 
             if (core.debug.chunk_bounds)
                 HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "%s\n", "View Chunk Boundaries On");
+                        fsl_logger_stringf("%s\n", "View Chunk Boundaries On"));
             else
                 HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "%s\n", "View Chunk Boundaries Off");
+                        fsl_logger_stringf("%s\n", "View Chunk Boundaries Off"));
         }
 
         if (fsl_is_key_press(bind_toggle_bounding_boxes))
@@ -299,10 +299,10 @@ void input_update(player *p)
 
             if (core.debug.bounding_boxes)
                 HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "%s\n", "View Bounding Boxes On");
+                        fsl_logger_stringf("%s\n", "View Bounding Boxes On"));
             else
                 HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "%s\n", "View Bounding Boxes Off");
+                        fsl_logger_stringf("%s\n", "View Bounding Boxes Off"));
         }
 
         if (fsl_is_key_press(bind_toggle_chunk_gizmo))
@@ -314,10 +314,10 @@ void input_update(player *p)
 
             if (core.debug.chunk_queue_visualizer)
                 HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "%s\n", "View Chunk Queue Visualizer On");
+                        fsl_logger_stringf("%s\n", "View Chunk Queue Visualizer On"));
             else
                 HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "%s\n", "View Chunk Queue Visualizer Off");
+                        fsl_logger_stringf("%s\n", "View Chunk Queue Visualizer Off"));
         }
     }
 }

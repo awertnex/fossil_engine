@@ -79,8 +79,9 @@ u64 fsl_get_time_delta_nsec(void)
 void fsl_get_time_str(str *dst, const str *format)
 {
     struct timespec ts;
+    struct tm *_tm = {0};
     clock_gettime(CLOCK_REALTIME, &ts);
-    struct tm *_tm = localtime(&ts.tv_sec);
+    _tm = localtime(&ts.tv_sec);
     strftime(dst, FSL_TIME_STRING_MAX, format, _tm);
 }
 
@@ -116,7 +117,9 @@ b8 fsl_on_time_interval(u64 *_time, u64 interval, u64 _curr)
 void fsl_sleep_nsec(u64 nsec)
 {
     u64 sec = nsec * FSL_NSEC2SEC;
-    struct timespec ts = {.tv_sec = sec, .tv_nsec = nsec - sec * FSL_SEC2NSEC};
+    struct timespec ts = {0};
+    ts.tv_sec = sec;
+    ts.tv_nsec = nsec - sec * FSL_SEC2NSEC;
     clock_nanosleep(CLOCK_MONOTONIC, 0, &ts, NULL);
 }
 

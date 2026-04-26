@@ -32,11 +32,14 @@
 #include "h/time.h"
 #include "h/ui.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <deps/stb_image.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#   define STB_IMAGE_IMPLEMENTATION
+#   include <deps/stb_image.h>
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <deps/stb_image_write.h>
+#   define STB_IMAGE_WRITE_IMPLEMENTATION
+#   include <deps/stb_image_write.h>
+#pragma GCC diagnostic pop
 
 #include <stdio.h>
 #include <string.h>
@@ -50,10 +53,9 @@ str *FSL_DIR_PROC_ROOT = NULL;
 u32 fsl_err = FSL_ERR_SUCCESS;
 fsl_core _fsl_core = {0};
 
-static fsl_render fsl_render_internal =
-{
-    .size = (v2i32){FSL_RENDER_WIDTH_DEFAULT, FSL_RENDER_HEIGHT_DEFAULT},
-};
+/*! @remark initialized in @ref fsl_engine_init().
+ */
+static fsl_render fsl_render_internal = {0};
 
 fsl_render *render = &fsl_render_internal;
 
@@ -74,7 +76,7 @@ static f32 vbo_data_unit_quad[] =
 static void glfw_callback_error(int error, const char* message)
 {
     (void)error;
-    _LOGERROR(FSL_ERR_GLFW, 0, "GLFW: %s\n", message);
+    _LOGERROR(FSL_ERR_GLFW, 0, fsl_logger_stringf("GLFW: %s\n", message));
 }
 
 /*! -- INTERNAL USE ONLY --;
@@ -110,9 +112,10 @@ u32 fsl_engine_init(int argc, char **argv, const str *_log_dir, const str *title
     _fsl_core.flag.active = 1;
 
     fsl_engine_get_string(render->title, FSL_STR_INDEX_ENGINE_TITLE);
+    render->size.x = FSL_RENDER_WIDTH_DEFAULT;
+    render->size.y = FSL_RENDER_HEIGHT_DEFAULT;
 
-    if (
-            fsl_mem_map_arena(&_fsl_memory_arena_internal, FSL_PAGE_SIZE,
+    if (fsl_mem_map_arena(&_fsl_memory_arena_internal, 1,
                 "engine_init()._fsl_memory_arena_internal") ||
 
             fsl_logger_init(argc, argv, flags & FSL_FLAG_RELEASE_BUILD, _log_dir,
@@ -134,6 +137,8 @@ u32 fsl_engine_init(int argc, char **argv, const str *_log_dir, const str *title
     }
 
     glfwSetErrorCallback(glfw_callback_error);
+
+    fsl_assets_init();
 
     if (_render && fsl_change_render(_render) != FSL_ERR_SUCCESS)
         goto cleanup;
@@ -204,7 +209,7 @@ b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32))
 
     if (fsl_update_render_settings(callback_framebuffer_size) != FSL_ERR_SUCCESS)
         _LOGWARNING(fsl_err, 0,
-                "%s\n", "Something Went Wrong While Updating Render Settings");
+                fsl_logger_stringf("%s\n", "Something Went Wrong While Updating Render Settings"));
 
     render->time = fsl_get_time_nsec();
     if (!time_last) time_last = render->time;
@@ -309,7 +314,7 @@ u32 fsl_engine_get_string(str *dst, enum fsl_string_index type)
     if (!dst)
     {
         _LOGERROR(FSL_ERR_POINTER_NULL, 0,
-                "Failed to Get String, Pointer NULL\n");
+                fsl_logger_stringf("%s\n", "Failed to Get String, Pointer NULL"));
         return fsl_err;
     }
 
@@ -330,6 +335,10 @@ u32 fsl_engine_get_string(str *dst, enum fsl_string_index type)
                     FSL_ENGINE_VERSION_PATCH,
                     FSL_ENGINE_VERSION_BUILD);
             break;
+
+        default:
+            fsl_err = FSL_ERR_OUT_OF_BOUNDS;
+            break;
     }
 
     fsl_err = FSL_ERR_SUCCESS;
@@ -342,7 +351,7 @@ u32 fsl_glfw_init(b8 multisample)
     {
         _LOGFATAL(FSL_ERR_GLFW_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "%s\n", "Failed to Initialize GLFW, Process Aborted");
+                fsl_logger_stringf("%s\n", "Failed to Initialize GLFW, Process Aborted"));
         return fsl_err;
     }
 
@@ -370,7 +379,7 @@ u32 fsl_window_init(const str *title, i32 size_x, i32 size_y)
     {
         _LOGFATAL(FSL_ERR_WINDOW_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "%s\n", "Failed to Initialize Window or OpenGL Context, Process Aborted");
+                fsl_logger_stringf("%s\n", "Failed to Initialize Window or OpenGL Context, Process Aborted"));
         return fsl_err;
     }
 
@@ -395,11 +404,15 @@ u32 fsl_window_init(const str *title, i32 size_x, i32 size_y)
 
 u32 fsl_glad_init(void)
 {
+    str str_engine_version[NAME_MAX] = {0};
+
+    fsl_engine_get_string(str_engine_version, FSL_STR_INDEX_ENGINE_VERSION);
+
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         _LOGFATAL(FSL_ERR_GLAD_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "%s\n", "Failed to Initialize GLAD, Process Aborted");
+                fsl_logger_stringf("%s\n", "Failed to Initialize GLAD, Process Aborted"));
         return fsl_err;
     }
 
@@ -407,22 +420,25 @@ u32 fsl_glad_init(void)
     {
         _LOGFATAL(FSL_ERR_GL_VERSION_NOT_SUPPORT,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "OpenGL 4.3+ Required, Current Version '%d.%d', Process Aborted\n",
-                GLVersion.major, GLVersion.minor);
+                fsl_logger_stringf("OpenGL 4.3+ Required, Current Version '%d.%d', Process Aborted\n",
+                GLVersion.major, GLVersion.minor));
         return fsl_err;
     }
 
     _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
-            "OpenGL:    %s\n", glGetString(GL_VERSION));
+            fsl_logger_stringf(FSL_ENGINE_NAME ":  %s\n", str_engine_version));
 
     _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
-            "GLSL:      %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+            fsl_logger_stringf("OpenGL:         %s\n", glGetString(GL_VERSION)));
 
     _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
-            "Vendor:    %s\n", glGetString(GL_VENDOR));
+            fsl_logger_stringf("GLSL:           %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION)));
 
     _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
-            "Renderer:  %s\n", glGetString(GL_RENDERER));
+            fsl_logger_stringf("Vendor:         %s\n", glGetString(GL_VENDOR)));
+
+    _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+            fsl_logger_stringf("Renderer:       %s\n", glGetString(GL_RENDERER)));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -433,7 +449,7 @@ u32 fsl_change_render(fsl_render *_render)
     if (_render == NULL)
     {
         _LOGERROR(FSL_ERR_POINTER_NULL, 0,
-                "%s\n", "Failed to Change Render, Pointer NULL");
+                fsl_logger_stringf("%s\n", "Failed to Change Render, Pointer NULL"));
         return fsl_err;
     }
 
@@ -444,7 +460,7 @@ u32 fsl_change_render(fsl_render *_render)
     else
     {
         _LOGWARNING(FSL_ERR_WINDOW_NOT_FOUND, 0,
-                "%s\n", "No Window Found for the Currently Bound Render");
+                fsl_logger_stringf("%s\n", "No Window Found for the Currently Bound Render"));
         return fsl_err;
     }
 
@@ -478,9 +494,9 @@ static u32 _fsl_take_screenshot(const str *dir_screenshots, const str *special_t
 
     if (fsl_is_dir_exists(dir_screenshots, TRUE) != FSL_ERR_SUCCESS)
     {
-        LOGERROR(FSL_ERR_SCREENSHOT_FAIL,
+        _LOGERROR(FSL_ERR_SCREENSHOT_FAIL,
                 FSL_FLAG_LOG_CMD,
-                "Failed to Take Screenshot, '%s' Directory Not Found\n", dir_screenshots);
+                fsl_logger_stringf("Failed to Take Screenshot, Directory '%s' Not Found\n", dir_screenshots));
         return fsl_err;
     }
 
@@ -504,8 +520,8 @@ static u32 _fsl_take_screenshot(const str *dir_screenshots, const str *special_t
             glReadPixels(0, 0, render->size.x, render->size.y, GL_RGB, GL_UNSIGNED_BYTE, render->screen_buf);
 
             stbi_flip_vertically_on_write(TRUE);
-            LOGDEBUG(FSL_FLAG_LOG_CMD,
-                    "Screenshot: %s\n", file_name_full);
+            _LOGINFO(FSL_FLAG_LOG_CMD,
+                    fsl_logger_stringf("Screenshot: %s\n", file_name_full));
             stbi_write_png(file_name_full, render->size.x, render->size.y, FSL_COLOR_CHANNELS_RGB,
                     render->screen_buf, render->size.x * FSL_COLOR_CHANNELS_RGB);
 
@@ -514,9 +530,9 @@ static u32 _fsl_take_screenshot(const str *dir_screenshots, const str *special_t
         }
     }
 
-    LOGERROR(FSL_ERR_SCREENSHOT_FAIL,
+    _LOGERROR(FSL_ERR_SCREENSHOT_FAIL,
             FSL_FLAG_LOG_CMD,
-            "%s\n", "Failed to Take Screenshot, Screenshot Rate Limit Exceeded");
+            fsl_logger_stringf("%s\n", "Failed to Take Screenshot, Screenshot Rate Limit Exceeded"));
     return fsl_err;
 }
 
@@ -557,6 +573,8 @@ void fsl_attrib_vec3_vec4(void)
 
 u32 fsl_fbo_init(fsl_fbo *fbo, fsl_mesh *mesh_fbo, b8 multisample, u32 samples)
 {
+    GLuint status = 0;
+
     if (fbo == NULL)
         goto mesh_fbo_init;
 
@@ -621,13 +639,13 @@ u32 fsl_fbo_init(fsl_fbo *fbo, fsl_mesh *mesh_fbo, b8 multisample, u32 samples)
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, fbo->rbo);
     }
 
-    GLuint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE)
     {
         _LOGFATAL(FSL_ERR_FBO_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "FBO '%u': Status '%u' Not Complete, Process Aborted\n",
-                fbo->fbo, status);
+                fsl_logger_stringf("FBO '%u': Status '%u' Not Complete, Process Aborted\n",
+                fbo->fbo, status));
         return fsl_err;
     }
 
@@ -667,6 +685,8 @@ mesh_fbo_init:
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    mesh_fbo->loaded = TRUE;
+
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 
@@ -679,6 +699,8 @@ cleanup:
 
 u32 fsl_fbo_realloc(fsl_fbo *fbo, b8 multisample, u32 samples)
 {
+    GLuint status = 0;
+
     glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
 
     if (multisample)
@@ -713,12 +735,12 @@ u32 fsl_fbo_realloc(fsl_fbo *fbo, b8 multisample, u32 samples)
                 render->size.x, render->size.y);
     }
 
-    GLuint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE)
     {
         _LOGFATAL(FSL_ERR_FBO_REALLOC_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "FBO '%u': Status '%u' Not Complete, Process Aborted\n", fbo->fbo, status);
+                fsl_logger_stringf("FBO '%u': Status '%u' Not Complete, Process Aborted\n", fbo->fbo, status));
 
         fsl_fbo_free(fbo);
         return fsl_err;
@@ -774,32 +796,30 @@ static void _fsl_fbo_blit_msaa_internal(GLuint fbo)
 
 void fsl_fbo_free(fsl_fbo *fbo)
 {
-    if (!fbo) return;
+    fsl_fbo nofbo = {0};
+
+    if (!fbo)
+        return;
+
     if (fbo->loaded)
     {
         glDeleteFramebuffers(1, &fbo->rbo);
         glDeleteTextures(1, &fbo->color_buf);
         glDeleteFramebuffers(1, &fbo->fbo);
+        fbo->loaded = FALSE;
     }
-    *fbo = (fsl_fbo){0};
-};
 
-u32 fsl_texture_init(fsl_texture *texture, v2i32 size, const GLint format_internal, const GLint format,
+    *fbo = nofbo;
+}
+
+u32 fsl_texture_init(fsl_texture *texture, const GLint format_internal, const GLint format,
         GLint filter, int channels, b8 grayscale, const str *file_name)
 {
-    if (!size.x || !size.y)
-    {
-        _LOGERROR(FSL_ERR_IMAGE_SIZE_TOO_SMALL,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                "Failed to Initialize Texture '%s', Image Size Too Small\n", file_name);
-        return fsl_err;
-    }
-
     if (strlen(file_name) >= PATH_MAX)
     {
         _LOGERROR(FSL_ERR_PATH_TOO_LONG,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "Failed to Initialize Texture '%s', File Path Too Long\n", file_name);
+                fsl_logger_stringf("Failed to Initialize Texture '%s', File Path Too Long\n", file_name));
         return fsl_err;
     }
 
@@ -808,11 +828,11 @@ u32 fsl_texture_init(fsl_texture *texture, v2i32 size, const GLint format_intern
 
     texture->buf = (u8*)stbi_load(file_name, &texture->size.x, &texture->size.y,
             &texture->channels, channels);
-    if (!texture->buf)
+    if (texture->buf == NULL)
     {
         _LOGERROR(FSL_ERR_IMAGE_LOAD_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "Failed to Initialize Texture '%s', 'stbi_load()' Failed\n", file_name);
+                fsl_logger_stringf("Failed to Initialize Texture '%s', 'stbi_load()' Failed\n", file_name));
         return fsl_err;
     }
 
@@ -829,8 +849,8 @@ u32 fsl_texture_init(fsl_texture *texture, v2i32 size, const GLint format_intern
 u32 fsl_texture_generate(fsl_texture *texture, b8 bindless)
 {
     _fsl_texture_generate(&texture->id, texture->format_internal, texture->format,
-            texture->filter, texture->size.x, texture->size.y,
-            texture->buf, texture->grayscale);
+            texture->filter, texture->size, texture->buf, texture->grayscale);
+
     texture->generated = TRUE;
 
     if (fsl_err == FSL_ERR_SUCCESS && bindless)
@@ -838,7 +858,7 @@ u32 fsl_texture_generate(fsl_texture *texture, b8 bindless)
         texture->handle = glGetTextureHandleARB(texture->id);
         glMakeTextureHandleResidentARB(texture->handle);
         _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                "Handle[%"PRIu64"] for Texture[%u] Created\n", texture->handle, texture->id);
+                fsl_logger_stringf("Handle[%"PRIu64"] for Texture[%u] Created\n", texture->handle, texture->id));
         texture->bindless = TRUE;
     }
 
@@ -849,20 +869,12 @@ u32 fsl_texture_generate(fsl_texture *texture, b8 bindless)
 }
 
 u32 _fsl_texture_generate(GLuint *id, const GLint format_internal,  const GLint format,
-        GLint filter, u32 width, u32 height, void *buf, b8 grayscale)
+        GLint filter, v2i32 size, void *buf, b8 grayscale)
 {
-    if (!width || !height)
-    {
-        _LOGERROR(FSL_ERR_IMAGE_SIZE_TOO_SMALL,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                "Failed to Generate Texture [%u], Texture Size Too Small\n", *id);
-        return fsl_err;
-    }
-
     glGenTextures(1, id);
     glBindTexture(GL_TEXTURE_2D, *id);
     glTexImage2D(GL_TEXTURE_2D, 0, format_internal,
-            width, height, 0, format, GL_UNSIGNED_BYTE, buf);
+            size.x, size.y, 0, format, GL_UNSIGNED_BYTE, buf);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -878,14 +890,17 @@ u32 _fsl_texture_generate(GLuint *id, const GLint format_internal,  const GLint 
 
 void fsl_texture_free(fsl_texture *texture)
 {
-    if (!texture) return;
+    fsl_texture notexture = {0};
+
+    if (!texture)
+        return;
 
     if (texture->bindless)
     {
         glMakeTextureHandleNonResidentARB(texture->handle);
         _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                "Handle[%"PRIu64"] for Texture[%u] Destroyed\n",
-                texture->handle, texture->id);
+                fsl_logger_stringf("Handle[%"PRIu64"] for Texture[%u] Destroyed\n",
+                texture->handle, texture->id));
         texture->bindless = FALSE;
     }
 
@@ -893,11 +908,13 @@ void fsl_texture_free(fsl_texture *texture)
     {
         glDeleteTextures(1, &texture->id);
         _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                "Texture[%u] Unloaded\n", texture->id);
+                fsl_logger_stringf("Texture[%u] Unloaded\n", texture->id));
         texture->generated = FALSE;
     }
 
     texture->loaded = FALSE;
+
+    *texture = notexture;
 }
 
 u32 fsl_mesh_generate(fsl_mesh *mesh, void (*attrib)(), GLenum usage,
@@ -937,6 +954,8 @@ u32 fsl_mesh_generate(fsl_mesh *mesh, void (*attrib)(), GLenum usage,
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    mesh->loaded = TRUE;
+
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 
@@ -949,16 +968,22 @@ cleanup:
 
 void fsl_mesh_free(fsl_mesh *mesh)
 {
-    if (!mesh)
+    fsl_mesh nomesh = {0};
+
+    if (mesh == NULL)
         return;
 
-    mesh->ebo ? glDeleteBuffers(1, &mesh->ebo) : 0;
-    mesh->vbo ? glDeleteBuffers(1, &mesh->vbo) : 0;
-    mesh->vao ? glDeleteVertexArrays(1, &mesh->vao) : 0;
+    if (mesh->loaded)
+    {
+        glDeleteBuffers(1, &mesh->ebo);
+        glDeleteBuffers(1, &mesh->vbo);
+        glDeleteVertexArrays(1, &mesh->vao);
+        mesh->loaded = FALSE;
+    }
 
     fsl_mem_free((void*)&mesh->vbo_data, sizeof(GLfloat) * mesh->vbo_len, "fsl_mesh_free().mesh.vbo_data");
     fsl_mem_free((void*)&mesh->ebo_data, sizeof(GLuint) * mesh->ebo_len, "fsl_mesh_free().mesh.vbo_data");
-    *mesh = (fsl_mesh){0};
+    *mesh = nomesh;
 }
 
 /* ---- section: camera ----------------------------------------------------- */
@@ -992,70 +1017,86 @@ void fsl_update_projection_perspective(fsl_camera camera, fsl_projection *projec
     const f32 CPCH = camera.cos_pitch;
     const f32 SYAW = camera.sin_yaw;
     const f32 CYAW = camera.cos_yaw;
+    f32 ratio = 0.0f;
+    f32 fovy = 0.0f;
+    f32 far = 0.0f;
+    f32 near = 0.0f;
+    f32 clip = 0.0f;
+    f32 offset = 0.0f;
+    fsl_projection noprojection = {0};
+    m4f32 mat_roll = {0};
+    m4f32 mat_pitch = {0};
+    m4f32 mat_yaw = {0};
 
-    f32 ratio = camera.ratio;
-    f32 fovy = 1.0f / tanf((camera.fovy_smooth / 2.0f) * FSL_DEG2RAD);
-    f32 far = camera.far;
-    f32 near = camera.near;
-    f32 clip = -(far + near) / (far - near);
-    f32 offset = -(2.0f * far * near) / (far - near);
+    *projection = noprojection;
+
+    ratio = camera.ratio;
+    fovy = 1.0f / tanf((camera.fovy_smooth / 2.0f) * FSL_DEG2RAD);
+    far = camera.far;
+    near = camera.near;
+    clip = -(far + near) / (far - near);
+    offset = -(2.0f * far * near) / (far - near);
 
     /* ---- target ---------------------------------------------------------- */
 
-    projection->target = (m4f32){
-        1.0f,           0.0f,           0.0f,   0.0f,
-        0.0f,           1.0f,           0.0f,   0.0f,
-        0.0f,           0.0f,           1.0f,   0.0f,
-        -CYAW * -CPCH,  SYAW * -CPCH,   -SPCH,  1.0f,
-    };
+    projection->target.a11 = 1.0f;
+    projection->target.a22 = 1.0f;
+    projection->target.a33 = 1.0f;
+    projection->target.a41 = -CYAW * -CPCH;
+    projection->target.a42 = SYAW * -CPCH;
+    projection->target.a43 = -SPCH;
+    projection->target.a44 = 1.0f;
 
     /* ---- translation ----------------------------------------------------- */
 
-    projection->translation = (m4f32){
-        1.0f,           0.0f,           0.0f,           0.0f,
-        0.0f,           1.0f,           0.0f,           0.0f,
-        0.0f,           0.0f,           1.0f,           0.0f,
-        -camera.pos.x,  -camera.pos.y,  -camera.pos.z,  1.0f,
-    };
+    projection->translation.a11 = 1.0f;
+    projection->translation.a22 = 1.0f;
+    projection->translation.a33 = 1.0f;
+    projection->translation.a41 = -camera.pos.x;
+    projection->translation.a42 = -camera.pos.y;
+    projection->translation.a43 = -camera.pos.z;
+    projection->translation.a44 = 1.0f;
 
     /* ---- rotation: yaw --------------------------------------------------- */
 
-    projection->rotation = (m4f32){
-            CYAW,   SYAW, 0.0f, 0.0f,
-            -SYAW,  CYAW, 0.0f, 0.0f,
-            0.0f,   0.0f, 1.0f, 0.0f,
-            0.0f,   0.0f, 0.0f, 1.0f,
-        };
+    mat_yaw.a11 = CYAW;
+    mat_yaw.a12 = SYAW;
+    mat_yaw.a21 = -SYAW;
+    mat_yaw.a22 = CYAW;
+    mat_yaw.a33 = 1.0f;
+    mat_yaw.a44 = 1.0f;
 
     /* ---- rotation: pitch ------------------------------------------------- */
 
-    projection->rotation = fsl_matrix_multiply(projection->rotation,
-            (m4f32){
-            CPCH,   0.0f, SPCH, 0.0f,
-            0.0f,   1.0f, 0.0f, 0.0f,
-            -SPCH,  0.0f, CPCH, 0.0f,
-            0.0f,   0.0f, 0.0f, 1.0f,
-            });
+    mat_pitch.a11 = CPCH;
+    mat_pitch.a13 = SPCH;
+    mat_pitch.a22 = 1.0f;
+    mat_pitch.a31 = -SPCH;
+    mat_pitch.a33 = CPCH;
+    mat_pitch.a44 = 1.0f;
+
+    projection->rotation = fsl_matrix_multiply(mat_yaw, mat_pitch);
 
     /* ---- rotation: roll -------------------------------------------------- */
 
     if (roll)
-        projection->rotation = fsl_matrix_multiply(projection->rotation,
-                (m4f32){
-                1.0f,   0.0f,   0.0f, 0.0f,
-                0.0f,   CROL,   SROL, 0.0f,
-                0.0f,   -SROL,  CROL, 0.0f,
-                0.0f,   0.0f,   0.0f, 1.0f,
-                });
+    {
+        mat_roll.a11 = 1.0f;
+        mat_roll.a22 = CROL;
+        mat_roll.a23 = SROL;
+        mat_roll.a32 = -SROL;
+        mat_roll.a33 = CROL;
+        mat_roll.a44 = 1.0f;
+
+        projection->rotation = fsl_matrix_multiply(projection->rotation, mat_roll);
+    }
 
     /* ---- orientation: z-up ----------------------------------------------- */
 
-    projection->orientation = (m4f32){
-        0.0f,   0.0f, -1.0f,    0.0f,
-        -1.0f,  0.0f, 0.0f,     0.0f,
-        0.0f,   1.0f, 0.0f,     0.0f,
-        0.0f,   0.0f, 0.0f,     1.0f,
-    };
+    projection->orientation.a13 = -1.0f;
+    projection->orientation.a21 = -1.0f;
+    projection->orientation.a32 = 1.0f;
+    projection->orientation.a44 = 1.0f;
 
     /* ---- view ------------------------------------------------------------ */
 
@@ -1064,23 +1105,25 @@ void fsl_update_projection_perspective(fsl_camera camera, fsl_projection *projec
 
     /* ---- projection ------------------------------------------------------ */
 
-    projection->projection = (m4f32){
-        fovy / ratio,   0.0f,   0.0f,   0.0f,
-        0.0f,           fovy,   0.0f,   0.0f,
-        0.0f,           0.0f,   clip,  -1.0f,
-        0.0f,           0.0f,   offset, 0.0f,
-    };
+    projection->projection.a11 = fovy / ratio;
+    projection->projection.a22 = fovy;
+    projection->projection.a33 = clip;
+    projection->projection.a34 = -1.0f;
+    projection->projection.a43 = offset;
 
     projection->perspective = fsl_matrix_multiply(projection->view, projection->projection);
 }
 
 void fsl_get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f64 *yaw)
 {
-    v3f64 direction = fsl_normalize_v3f64((v3f64){
-            camera_pos.x - target.x,
-            camera_pos.y - target.y,
-            camera_pos.z - target.z,
-            });
+    v3f64 direction = {0};
+
+    camera_pos.x -= target.x;
+    camera_pos.y -= target.y;
+    camera_pos.z -= target.z;
+
+    direction = fsl_normalize_v3f64(camera_pos);
+
     *pitch = atan2(direction.z, sqrt(direction.x * direction.x + direction.y * direction.y));
     *yaw = atan2(-direction.y, direction.x);
 }

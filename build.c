@@ -4,22 +4,23 @@
 
 #define DIR_SRC "src/"
 #define DIR_DEPS "deps/"
-#define DIR_OUT "fossil/" /* your project name */
+#define DIR_DST "fossil/" /* your project name */
 
 static str str_dir[][CMD_SIZE] =
 {
-    DIR_OUT,
-    DIR_OUT"deps/",
-    DIR_OUT"deps/fossil/",
-    DIR_OUT DIR_OUT,
-    DIR_OUT DIR_OUT DIR_OUT,
-    DIR_OUT DIR_OUT DIR_OUT"logs/",
+    DIR_DST,
+    DIR_DST"deps/",
+    DIR_DST"deps/fossil/",
+    DIR_DST DIR_DST,
+    DIR_DST DIR_DST DIR_DST,
+    DIR_DST DIR_DST DIR_DST"logs/",
 };
 
 static str str_cflags[][CMD_SIZE] =
 {
     "-Wall",
     "-Wextra",
+    "-Wpedantic",
     "-Wformat-truncation=0",
     "-ggdb",
 };
@@ -36,11 +37,13 @@ int main(int argc, char **argv)
 
     if (find_token("release", argc, argv))
     {
+        LOGINFO(FALSE, "%s\n", "Building For Release..");
         token_release = 1;
         str_cflags[0][0] = 0;
         str_cflags[1][0] = 0;
         str_cflags[2][0] = 0;
         str_cflags[3][0] = 0;
+        str_cflags[4][0] = 0;
     }
 
     for (i = 0; i < arr_len(str_dir); ++i)
@@ -50,7 +53,7 @@ int main(int argc, char **argv)
             cmd_fail(NULL);
     }
 
-    cmd_exec(39,
+    cmd_exec(0,
             COMPILER,
             "-shared",
             FSL_C_STD,
@@ -62,6 +65,7 @@ int main(int argc, char **argv)
             str_cflags[1],
             str_cflags[2],
             str_cflags[3],
+            str_cflags[4],
             fsl_str_libs_internal[0],
             fsl_str_libs_internal[1],
             fsl_str_libs_internal[2],
@@ -89,18 +93,19 @@ int main(int argc, char **argv)
             DIR_SRC"time.c",
             DIR_SRC"ui.c",
             "-o",
-            "lib/"PLATFORM"/"FSL_FILE_NAME_LIB);
+            "lib/"PLATFORM"/"FSL_FILE_NAME_LIB,
+            NULL);
 
     if (
-            copy_dir(DIR_DEPS,          DIR_OUT, FALSE) != ERR_SUCCESS ||
-            copy_dir(DIR_SRC"h/",       DIR_OUT DIR_DEPS DIR_OUT, TRUE) != ERR_SUCCESS ||
-            copy_file("LICENSE",        DIR_OUT DIR_DEPS DIR_OUT) != ERR_SUCCESS ||
+            copy_dir(DIR_DEPS,          DIR_DST, FALSE) != ERR_SUCCESS ||
+            copy_dir(DIR_SRC"h/",       DIR_DST DIR_DEPS DIR_DST, TRUE) != ERR_SUCCESS ||
+            copy_file("LICENSE",        DIR_DST DIR_DEPS DIR_DST) != ERR_SUCCESS ||
 
-            copy_dir("lib/",            DIR_OUT, FALSE) != ERR_SUCCESS ||
-            copy_dir("lib/"PLATFORM,    DIR_OUT DIR_OUT, TRUE) != ERR_SUCCESS ||
+            copy_dir("lib/",            DIR_DST, FALSE) != ERR_SUCCESS ||
+            copy_dir("lib/"PLATFORM,    DIR_DST DIR_DST, TRUE) != ERR_SUCCESS ||
 
-            copy_dir("assets/",         DIR_OUT DIR_OUT DIR_OUT, FALSE) != ERR_SUCCESS ||
-            copy_file("LICENSE",        DIR_OUT DIR_OUT DIR_OUT) != ERR_SUCCESS)
+            copy_dir("assets/",         DIR_DST DIR_DST DIR_DST, FALSE) != ERR_SUCCESS ||
+            copy_file("LICENSE",        DIR_DST DIR_DST DIR_DST) != ERR_SUCCESS)
         cmd_fail(NULL);
 
     return ERR_SUCCESS;

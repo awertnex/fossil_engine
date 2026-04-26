@@ -14,7 +14,7 @@
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
- *  limitations under the License.OFTWARE.
+ *  limitations under the License.
  */
 
 #ifndef FSL_DIR_H
@@ -31,7 +31,7 @@ enum fsl_file_type_index
     FSL_FILE_TYPE_DIR,
     FSL_FILE_TYPE_CHR,
     FSL_FILE_TYPE_BLK,
-    FSL_FILE_TYPE_FIFO,
+    FSL_FILE_TYPE_FIFO
 }; /* fsl_file_type_index */
 
 /*! @return non-zero on failure and @ref fsl_err is set accordingly.

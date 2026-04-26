@@ -14,7 +14,7 @@
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
- *  limitations under the License.OFTWARE.
+ *  limitations under the License.
  */
 
 #ifndef FSL_MEMORY_H
@@ -110,7 +110,7 @@ extern u64 FSL_PAGE_SIZE;
  *  @brief global memory arena, used to manage all heap memory inside and optionally
  *  outside the engine.
  *
- *  initialized once in @ref fsl_engine_init().
+ *  initialized in @ref fsl_engine_init() and/or @ref fsl_logger_init().
  */
 extern fsl_mem_arena _fsl_memory_arena_internal;
 

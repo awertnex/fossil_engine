@@ -1,5 +1,5 @@
-#ifndef BUILD_DIAGNOSTICS_H
-#define BUILD_DIAGNOSTICS_H
+#ifndef BUILDTOOL_DIAGNOSTICS_H
+#define BUILDTOOL_DIAGNOSTICS_H
 
 /* ---- section: license ---------------------------------------------------- */
 
@@ -95,4 +95,4 @@
  */
 extern u32 build_err;
 
-#endif /* BUILD_DIAGNOSTICS_H */
+#endif /* BUILDTOOL_DIAGNOSTICS_H */

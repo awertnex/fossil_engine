@@ -14,7 +14,7 @@
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
- *  limitations under the License.OFTWARE.
+ *  limitations under the License.
  */
 
 #ifndef FSL_LIMITS_H
@@ -46,12 +46,12 @@
 #define FSL_I64_MIN (-FSL_I64_MAX - 1)
 
 #define FSL_STRING_MAX              2048
-#define FSL_STRING_TOKEN_MAX        128
-#define FSL_STRINGF_BUFFERS_MAX     4
-#define FSL_TIME_STRING_MAX         128
 #define FSL_OUT_STRING_MAX          (FSL_STRING_MAX + 256)
 #define FSL_LOGGER_STRING_MAX       FSL_OUT_STRING_MAX
 #define FSL_LOGGER_HISTORY_MAX      2048
+#define FSL_TIME_STRING_MAX         128
+#define FSL_STRING_TOKEN_MAX        128
+#define FSL_STRINGF_BUFFERS_MAX     8
 #define FSL_GLYPH_MAX               256
 #define FSL_INCLUDE_RECURSION_MAX   512
 #define FSL_SCREENSHOT_RATE_MAX     128

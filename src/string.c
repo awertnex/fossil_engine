@@ -56,7 +56,7 @@ str *fsl_stringf(const str *format, ...)
     str *string = buf[index];
     str *trunc = NULL;
     int cursor = 0;
-    va_list args;
+    __builtin_va_list args;
 
     va_start(args, format);
     cursor = vsnprintf(string, FSL_OUT_STRING_MAX, format, args);
@@ -89,7 +89,7 @@ u32 fsl_convert_i32_to_str(str *dst, i32 size, i32 n)
     {
         _LOGERROR(FSL_ERR_SIZE_TOO_SMALL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "%s\n", "Failed to Convert i32 to str, 'size' Too Small");
+                fsl_logger_stringf("%s\n", "Failed to Convert i32 to str, 'size' Too Small"));
         return fsl_err;
     }
 
@@ -132,7 +132,7 @@ u32 fsl_convert_u64_to_str(str *dst, u64 size, u64 n)
     {
         _LOGERROR(FSL_ERR_SIZE_TOO_SMALL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                "%s\n", "Failed to Convert u64 to str, 'size' Too Small");
+                fsl_logger_stringf("%s\n", "Failed to Convert u64 to str, 'size' Too Small"));
         return fsl_err;
     }
 

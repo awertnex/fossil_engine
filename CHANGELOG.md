@@ -7,6 +7,26 @@
    first version of the engine as standalone in this repo
 
 - - -
+## v0.6.0-dev (current)
+
+#### changes
+- (2026 04 23): add engine version to the stdout info on engine start
+- (2026 04 15): many small bug fixes
+- (2026 04 13): officially compile the engine in C89
+- (2026 04 13): change function `fsl_log_output()` to take a string instead of
+                variadic arguments
+- (2026 02 07): remove parameter `size` from function `fsl_texture_init()`
+                because not needed
+- (2026 02 07): add cflag `-Wpedantic` to engine build and fix all pedantic
+                warnings
+- (2026 02 06): remove function `fsl_text_stop()`, use `fsl_ui_stop()` instead
+
+#### bugs and flaws
+- floating point exception when flying too fast horizontally at a dense area of
+  objects (yes, I broke it again, but this time it's weirdly stable at fast
+  vertical collisions)
+
+- - -
 ## v0.6.0-beta (2026 02 06)
 
 #### changes

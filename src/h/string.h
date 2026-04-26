@@ -14,7 +14,7 @@
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
- *  limitations under the License.OFTWARE.
+ *  limitations under the License.
  */
 
 #ifndef FSL_STRING_H
@@ -34,6 +34,8 @@ FSLAPI void fsl_swap_strings(str *s1, str *s2);
 FSLAPI void fsl_swap_string_char(str *string, char c1, char c2);
 
 /*! @brief write temporary formatted string.
+ *
+ *  @note the use of @ref fsl_stringf more than once in a single expression is not advised.
  *
  *  @remark use temporary static buffers internally.
  *  @remark inspired by Raylib: `github.com/raysan5/raylib`: `raylib/src/rtext.c/TextFormat()`.

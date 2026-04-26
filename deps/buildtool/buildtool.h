@@ -26,6 +26,14 @@
 
 /* ---- section: changelog -------------------------------------------------- */
 
+/*  v1.8.2-beta (2026 02 06):
+ *      - (2026 02 06): Add cflag `-Wpedantic` in function `self_rebuild()`
+ *      - (2026 02 06): Add `NULL` termination to function `cmd_exec()`:
+ *          - if `NULL` encountered, no further arguments will be processed
+ *          - if parameter `n` is 0, the function will run till `NULL` is
+ *            encountered
+ */
+
 /*  v1.8.1-beta (2026 01 30):
  *      - (2026 01 30): Patch dumb error at `copy_file()`: passing
  *                      `strlen(in_file)` instead of `len`, which made things
@@ -131,11 +139,12 @@
  *          if (build_init(argc, argv, "build.c", "build") != 0)
  *              cmd_fail(NULL); // free resources and return error code
  *
- *          cmd_exec(4, // number of arguments, excluding this number
+ *          cmd_exec(4, // number of arguments, excluding this number (can be 0, but then the final argument must be NULL)
  *                  "gcc",
  *                  "examples/example1.c",
  *                  "-o",
- *                  "example1");
+ *                  "example1",
+ *                  NULL);
  *
  *          cmd_free(NULL); // (NULL to free internal resources)
  *          return 0;
@@ -253,7 +262,7 @@
 
 #define BUILDTOOL_VERSION_MAJOR 1
 #define BUILDTOOL_VERSION_MINOR 8
-#define BUILDTOOL_VERSION_PATCH 1
+#define BUILDTOOL_VERSION_PATCH 2
 #define BUILDTOOL_VERSION_BUILD BUILDTOOL_VERSION_BETA
 
 #define COMPILER "cc"EXE
@@ -266,13 +275,13 @@ enum build_flag
 {
     FLAG_CMD_SHOW =     0x0001,
     FLAG_CMD_RAW =      0x0002,
-    FLAG_BUILD_SELF =   0x0004,
+    FLAG_BUILD_SELF =   0x0004
 }; /* build_flag */
 
 /* ---- section: declarations ----------------------------------------------- */
 
 /*! @brief project root directory.
- *  
+ *
  *  @remark called from @ref build_init() to change current working dirctory.
  */
 static str *DIR_BUILDTOOL_BIN_ROOT = NULL;
@@ -325,7 +334,9 @@ static void self_rebuild(char **argv);
  *  @param n number of arguments passed.
  *  @param ... strings to pass into build command.
  *
- *  @remark return non-zero on failure and @ref build_err is set accordingly.
+ *  @renark must either have `NULL` as the last argument or `n` be non-zero.
+ *
+ *  @return non-zero on failure and @ref build_err is set accordingly.
  */
 static u32 cmd_exec(u64 n, ...);
 
@@ -385,7 +396,7 @@ u32 build_init(int argc, char **argv, const str *build_src_name, const str *buil
 
     if (find_token("help", argc, argv)) help();
 
-    if (    
+    if (
             find_token("-v", argc, argv) ||
             find_token("--version", argc, argv))
         print_version();
@@ -475,6 +486,7 @@ void self_rebuild(char **argv)
     cmd_push(&_cmd, stringf("-ffile-prefix-map=%s=", DIR_BUILDTOOL_BIN_ROOT));
     cmd_push(&_cmd, "-Wall");
     cmd_push(&_cmd, "-Wextra");
+    cmd_push(&_cmd, "-Wpedantic");
     cmd_push(&_cmd, "-Wformat-truncation=0");
     cmd_push(&_cmd, str_build_src);
     cmd_push(&_cmd, "-o");
@@ -505,16 +517,25 @@ u32 cmd_exec(u64 n, ...)
     _buf cmd = {0};
     __builtin_va_list va;
     u64 i = 0;
-    str temp[CMD_SIZE] = {0};
+    str *temp = NULL;
 
     cmd_init(&cmd);
 
     va_start(va, n);
-    for (i = 0; i < n; ++i)
-    {
-        vsnprintf(temp, CMD_SIZE, "%s", va);
-        cmd_push(&cmd, temp);
-    }
+    if (n)
+        for (i = 0; i < n; ++i)
+        {
+            temp = va_arg(va, str *);
+            if (temp == NULL) break;
+            cmd_push(&cmd, temp);
+        }
+    else
+        for (;;)
+        {
+            temp = va_arg(va, str *);
+            if (temp == NULL) break;
+            cmd_push(&cmd, temp);
+        }
     va_end(va);
 
     cmd_ready(&cmd);
@@ -632,6 +653,7 @@ void cmd_fail(_buf *cmd)
 
 void cmd_show(_buf *cmd)
 {
+    u32 i = 0;
     _buf *_cmdp = cmd;
     if (!cmd)
         _cmdp = &_cmd;
@@ -639,8 +661,7 @@ void cmd_show(_buf *cmd)
     flag &= ~FLAG_CMD_SHOW;
 
     printf("\nCMD:\n");
-    u32 i = 0;
-    for (; i < CMD_MEMB; ++i)
+    for (i = 0; i < CMD_MEMB; ++i)
     {
         if (!_cmdp->i[i]) break;
         printf("    %.3d: %s\n", i, (str*)_cmdp->i[i]);
@@ -652,6 +673,7 @@ void cmd_show(_buf *cmd)
 
 void cmd_raw(_buf *cmd)
 {
+    u32 i = 0;
     _buf *_cmdp = cmd;
     if (!cmd)
         _cmdp = &_cmd;
@@ -659,8 +681,7 @@ void cmd_raw(_buf *cmd)
     flag &= ~FLAG_CMD_RAW;
 
     printf("\nCMD RAW:\n");
-    u32 i = 0;
-    for (; i < CMD_MEMB; ++i)
+    for (i = 0; i < CMD_MEMB; ++i)
     {
         if (!_cmdp->i[i]) break;
         printf("%s ", (str*)_cmdp->i[i]);

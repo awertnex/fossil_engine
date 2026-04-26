@@ -32,8 +32,16 @@ b8 fsl_is_intersect_aabb(fsl_bounding_box a, fsl_bounding_box b)
 
 f32 fsl_get_swept_aabb(fsl_bounding_box a, fsl_bounding_box b, v3f32 displacement, v3f32 *normal)
 {
-    v3f32 entry, exit, entry_distance, exit_distance;
-    f32 entry_time, exit_time;
+    v3f32 entry = {0};
+    v3f32 exit = {0};
+    v3f32 entry_distance = {0};
+    v3f32 exit_distance = {0};
+    f32 entry_time = 0;
+    f32 exit_time = 0;
+
+    normal->x = 0.0f;
+    normal->y = 0.0f;
+    normal->z = 0.0f;
 
     /* ---- entry and exit distance ----------------------------------------- */
 
@@ -109,11 +117,9 @@ f32 fsl_get_swept_aabb(fsl_bounding_box a, fsl_bounding_box b, v3f32 displacemen
     exit_time = fsl_min_v3f32(exit);
 
     if (entry_time > exit_time || exit_time < 0.0f || entry_time > 1.0f)
-        goto cleanup;
+        return 1.0f;
 
     /* ---- normals --------------------------------------------------------- */
-
-    *normal = (v3f32){0};
 
     switch (fsl_max_axis_v3f32(entry))
     {
@@ -131,9 +137,4 @@ f32 fsl_get_swept_aabb(fsl_bounding_box a, fsl_bounding_box b, v3f32 displacemen
     }
 
     return entry_time;
-
-cleanup:
-
-    *normal = (v3f32){0};
-    return 1.0f;
 }

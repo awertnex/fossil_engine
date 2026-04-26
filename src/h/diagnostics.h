@@ -14,7 +14,7 @@
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
- *  limitations under the License.OFTWARE.
+ *  limitations under the License.
  */
 
 #ifndef FSL_DIAGNOSTICS_H
@@ -93,6 +93,7 @@
 #define FSL_ERR_MEM_REMAP_FAIL              4152
 #define FSL_ERR_FILE_STAT_FAIL              4153
 #define FSL_ERR_READ_LINK_FAIL              4154
+#define FSL_ERR_OUT_OF_BOUNDS               4155
 
 /*! @brief global variable for engine-specific error codes.
  *

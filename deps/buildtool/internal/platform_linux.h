@@ -1,5 +1,5 @@
-#ifndef BUILD_PLATFORM_LINUX_H
-#define BUILD_PLATFORM_LINUX_H
+#ifndef BUILDTOOL_PLATFORM_LINUX_H
+#define BUILDTOOL_PLATFORM_LINUX_H
 
 /* ---- section: license ---------------------------------------------------- */
 
@@ -124,4 +124,4 @@ u32 exec(_buf *cmd, str *cmd_name)
     return build_err;
 }
 
-#endif /* BUILD_PLATFORM_LINUX_H */
+#endif /* BUILDTOOL_PLATFORM_LINUX_H */

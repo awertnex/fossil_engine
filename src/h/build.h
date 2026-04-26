@@ -14,7 +14,7 @@
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
- *  limitations under the License.OFTWARE.
+ *  limitations under the License.
  */
 
 #ifndef FSL_BUILD_H
@@ -50,6 +50,7 @@
         "-lgdi32",
         "-lwinmm",
     };
+
 #else
 
     /*! @brief for the engine itself.
@@ -76,6 +77,7 @@
         "", /* empty slots for alignment across different platforms */
         "",
     };
+
 #endif /* FSL_PLATFORM */
 
 /* ---- section: signatures ------------------------------------------------- */

@@ -14,7 +14,7 @@
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
- *  limitations under the License.OFTWARE.
+ *  limitations under the License.
  */
 
 #ifndef FSL_UI_H
@@ -46,10 +46,6 @@ typedef struct fsl_font
      */
     str name[NAME_MAX];
 
-    /*! @brief font file name, initialized in @ref fsl_font_init() if `NULL`.
-     */
-    str *path;
-
     u32 resolution; /* glyph bitmap diameter in bytes */
     i32 ascent; /* glyphs highest points' deviation from baseline */
     i32 descent; /* glyphs lowest points' deviation from baseline */
@@ -71,6 +67,8 @@ typedef struct fsl_font
 
     GLuint id; /* used by @ref glGenTextures() */
     fsl_glyph glyph[FSL_GLYPH_MAX];
+
+    b8 loaded;
 } fsl_font;
 
 /*! @brief one slice in a 9-slice panel.
@@ -165,12 +163,6 @@ FSLAPI void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 
  *  @remark can be called multiple times within a text rendering batch.
  */
 FSLAPI void fsl_text_render(b8 shadow, u32 shadow_color);
-
-/*! @brief stop text rendering batch.
- *
- *  @remark enables @ref GL_DEPTH_TEST.
- */
-FSLAPI void fsl_text_stop(void);
 
 /*! @brief get total string height of current rendering batch.
  *

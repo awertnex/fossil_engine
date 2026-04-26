@@ -20,6 +20,7 @@
 
 i32 scrool = 0;
 u32 *const GAME_ERR = (u32*)&fsl_err;
+fsl_mem_arena _memory_arena_internal = {0};
 struct hhc_core core = {0};
 struct hhc_settings settings = {0};
 static struct hhc_uniform uniform = {0};
@@ -994,9 +995,7 @@ static void draw_everything(void)
 
     /* ---- draw ui --------------------------------------------------------- */
 
-    /* clear ui buffer */
     fsl_ui_start(FALSE, TRUE);
-    fsl_ui_stop();
 
     if (core.flag.hud)
     {
@@ -1012,7 +1011,6 @@ static void draw_everything(void)
                 texture[TEXTURE_ITEM_BAR].size.x * 2,
                 texture[TEXTURE_ITEM_BAR].size.y * 2,
                 84.5f, 18.0f, 0, 0, 0xffffffff);
-        fsl_ui_stop();
     }
 
     /* ---- draw debug info ------------------------------------------------- */
@@ -1063,7 +1061,7 @@ static void draw_everything(void)
                 COLOR_TEXT_DEFAULT);
 
         fsl_text_push(fsl_stringf(
-                    "OVERFLOW    [%s %s %s]",
+                    "OVERFLOW    [%s %s %s]\r",
                     (_player.flag & FLAG_PLAYER_OVERFLOW_X) ?
                     (_player.flag & FLAG_PLAYER_OVERFLOW_PX) ?
                     "        " : "        " : "NONE",
@@ -1077,7 +1075,7 @@ static void draw_everything(void)
                 COLOR_DIAGNOSTIC_NONE);
 
         fsl_text_push(fsl_stringf(
-                    "             %s %s %s",
+                    "             %s %s %s\r",
                     (_player.flag & FLAG_PLAYER_OVERFLOW_X) &&
                     (_player.flag & FLAG_PLAYER_OVERFLOW_PX) ? "POSITIVE" : "    ",
                     (_player.flag & FLAG_PLAYER_OVERFLOW_Y) &&
@@ -1135,8 +1133,8 @@ static void draw_everything(void)
         static str temp[NAME_MAX] = {0};
         fsl_engine_get_string(temp, FSL_STR_INDEX_ENGINE_VERSION);
         fsl_text_push(fsl_stringf(
-                    "Game:     %s v%s\n"
-                    "Engine:   %s v%s\n"
+                    "Game:     %s %s\n"
+                    "Engine:   %s %s\n"
                     "Author:   %s\n"
                     "OpenGL:   %s\n"
                     "GLSL:     %s\n"
@@ -1155,8 +1153,6 @@ static void draw_everything(void)
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
     }
 
-    fsl_text_stop();
-
     /* ---- draw logger strings --------------------------------------------- */
 
     if (core.flag.super_debug)
@@ -1169,7 +1165,6 @@ static void draw_everything(void)
         fsl_ui_draw_nine_slice(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_INACTIVE],
                 10, render->size.y - logger_panel_height - 30,
                 render->size.x - 20, logger_panel_height + 20, 8, 0xffffff5f);
-        fsl_ui_stop();
 
         fsl_text_start(font[FONT_MONO_BOLD], settings.font_size, 0, FALSE);
 
@@ -1185,11 +1180,12 @@ static void draw_everything(void)
                 break;
         }
 
-        /* align once after all the strings' heights in text batch have accumulated into total text height */
-        fsl_text_push("", 0, 0, 0, FSL_TEXT_ALIGN_BOTTOM, 0, 0x00000000);
+        /* align once after accumulating all string heights */
+        fsl_text_push("", 0, 0, 0, FSL_TEXT_ALIGN_BOTTOM, 0, 0);
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
-        fsl_text_stop();
     }
+
+    fsl_ui_stop();
 
     /* ---- post processing ------------------------------------------------- */
 
@@ -1228,7 +1224,7 @@ int main(int argc, char **argv)
 
 #ifndef HHC_RELEASE_BUILD
     HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-            "%s\n", "DEBUG BUILD");
+            fsl_logger_stringf("%s\n", "DEBUG BUILD"));
 
     glfwSetWindowPos(render->window, 1920 - render->size.x, 24);
 #endif /* HHC_RELEASE_BUILD */
@@ -1237,7 +1233,7 @@ int main(int argc, char **argv)
     {
         HHC_LOGWARNING(HHC_ERR_COLLISIONS_DISABLED,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                "%s\n", "'MODE_INTERNAL_COLLIDE' Disabled");
+                fsl_logger_stringf("%s\n", "'MODE_INTERNAL_COLLIDE' Disabled"));
     }
 
     if (rand_init() != FSL_ERR_SUCCESS ||
@@ -1251,11 +1247,11 @@ int main(int argc, char **argv)
     {
         glfwSetInputMode(render->window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
         HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                "%s\n", "GLFW: Raw Mouse Motion Enabled");
+                fsl_logger_stringf("%s\n", "GLFW: Raw Mouse Motion Enabled"));
     }
     else HHC_LOGERROR(FSL_ERR_GLFW,
             FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-            "%s\n", "GLFW: Raw Mouse Motion Not Supported");
+            fsl_logger_stringf("%s\n", "GLFW: Raw Mouse Motion Not Supported"));
 
     /* ---- set callbacks --------------------------------------------------- */
 
@@ -1342,6 +1338,9 @@ cleanup:
     for (i = 0; i < SHADER_COUNT; ++i)
         fsl_shader_program_free(&shader[i]);
     rand_free();
+
+    fsl_mem_unmap_arena(&_memory_arena_internal, "main()._memory_arena_internal");
+
     fsl_engine_close();
     return *GAME_ERR;
 }

@@ -23,12 +23,20 @@
 
 v3f32 fsl_add_v3f32(v3f32 a, v3f32 b)
 {
-    return (v3f32){a.x + b.x, a.y + b.y, a.z + b.z};
+    v3f32 v = {0};
+    v.x = a.x + b.x;
+    v.y = a.y + b.y;
+    v.z = a.z + b.z;
+    return v;
 }
 
 v3f32 fsl_sub_v3f32(v3f32 a, v3f32 b)
 {
-    return (v3f32){a.x - b.x, a.y - b.y, a.z - b.z};
+    v3f32 v = {0};
+    v.x = a.x - b.x;
+    v.y = a.y - b.y;
+    v.z = a.z - b.z;
+    return v;
 }
 
 i32 fsl_clamp_i32(i32 n, i32 min, i32 max)
@@ -118,20 +126,26 @@ f64 fsl_len_v3f64(v3f64 v)
 
 v3f32 fsl_normalize_v3f32(v3f32 v)
 {
+    v3f32 nov3f32 = {0};
     f32 len = sqrtf(fsl_len_v3f32(v));
     if (len < FSL_EPSILON)
-        return (v3f32){0};
-
-    return (v3f32){v.x / len, v.y / len, v.z / len};
+        return nov3f32;
+    v.x /= len;
+    v.y /= len;
+    v.z /= len;
+    return v;
 }
 
 v3f64 fsl_normalize_v3f64(v3f64 v)
 {
+    v3f64 nov3f64 = {0};
     f64 len = sqrt(fsl_len_v3f64(v));
     if (len < FSL_EPSILON)
-        return (v3f64){0};
-
-    return (v3f64){v.x / len, v.y / len, v.z / len};
+        return nov3f64;
+    v.x /= len;
+    v.y /= len;
+    v.z /= len;
+    return v;
 }
 
 f32 fsl_dot_v3f32(v3f32 a, v3f32 b)
@@ -260,57 +274,78 @@ b8 fsl_is_in_volume_f64(v3f64 v, v3f64 min, v3f64 max)
 
 m4f32 fsl_matrix_add(m4f32 a, m4f32 b)
 {
-    return (m4f32){
-        a.a11 + b.a11, a.a12 + b.a12, a.a13 + b.a13, a.a14 + b.a14,
-        a.a21 + b.a21, a.a22 + b.a22, a.a23 + b.a23, a.a24 + b.a24,
-        a.a31 + b.a31, a.a32 + b.a32, a.a33 + b.a33, a.a34 + b.a34,
-        a.a41 + b.a41, a.a42 + b.a42, a.a43 + b.a43, a.a44 + b.a44,
-    };
+    m4f32 m = {0};
+    m.a11 = a.a11 + b.a11;
+    m.a12 = a.a12 + b.a12;
+    m.a13 = a.a13 + b.a13;
+    m.a14 = a.a14 + b.a14;
+    m.a21 = a.a21 + b.a21;
+    m.a22 = a.a22 + b.a22;
+    m.a23 = a.a23 + b.a23;
+    m.a24 = a.a24 + b.a24;
+    m.a31 = a.a31 + b.a31;
+    m.a32 = a.a32 + b.a32;
+    m.a33 = a.a33 + b.a33;
+    m.a34 = a.a34 + b.a34;
+    m.a41 = a.a41 + b.a41;
+    m.a42 = a.a42 + b.a42;
+    m.a43 = a.a43 + b.a43;
+    m.a44 = a.a44 + b.a44;
+    return m;
 }
 
 m4f32 fsl_matrix_subtract(m4f32 a, m4f32 b)
 {
-    return (m4f32){
-        a.a11 - b.a11, a.a12 - b.a12, a.a13 - b.a13, a.a14 - b.a14,
-        a.a21 - b.a21, a.a22 - b.a22, a.a23 - b.a23, a.a24 - b.a24,
-        a.a31 - b.a31, a.a32 - b.a32, a.a33 - b.a33, a.a34 - b.a34,
-        a.a41 - b.a41, a.a42 - b.a42, a.a43 - b.a43, a.a44 - b.a44,
-    };
+    m4f32 m = {0};
+    m.a11 = a.a11 - b.a11;
+    m.a12 = a.a12 - b.a12;
+    m.a13 = a.a13 - b.a13;
+    m.a14 = a.a14 - b.a14;
+    m.a21 = a.a21 - b.a21;
+    m.a22 = a.a22 - b.a22;
+    m.a23 = a.a23 - b.a23;
+    m.a24 = a.a24 - b.a24;
+    m.a31 = a.a31 - b.a31;
+    m.a32 = a.a32 - b.a32;
+    m.a33 = a.a33 - b.a33;
+    m.a34 = a.a34 - b.a34;
+    m.a41 = a.a41 - b.a41;
+    m.a42 = a.a42 - b.a42;
+    m.a43 = a.a43 - b.a43;
+    m.a44 = a.a44 - b.a44;
+    return m;
 }
 
 m4f32 fsl_matrix_multiply(m4f32 a, m4f32 b)
 {
-    return (m4f32){
-        a.a11 * b.a11 + a.a12 * b.a21 + a.a13 * b.a31 + a.a14 * b.a41,
-        a.a11 * b.a12 + a.a12 * b.a22 + a.a13 * b.a32 + a.a14 * b.a42,
-        a.a11 * b.a13 + a.a12 * b.a23 + a.a13 * b.a33 + a.a14 * b.a43,
-        a.a11 * b.a14 + a.a12 * b.a24 + a.a13 * b.a34 + a.a14 * b.a44,
-
-        a.a21 * b.a11 + a.a22 * b.a21 + a.a23 * b.a31 + a.a24 * b.a41,
-        a.a21 * b.a12 + a.a22 * b.a22 + a.a23 * b.a32 + a.a24 * b.a42,
-        a.a21 * b.a13 + a.a22 * b.a23 + a.a23 * b.a33 + a.a24 * b.a43,
-        a.a21 * b.a14 + a.a22 * b.a24 + a.a23 * b.a34 + a.a24 * b.a44,
-
-        a.a31 * b.a11 + a.a32 * b.a21 + a.a33 * b.a31 + a.a34 * b.a41,
-        a.a31 * b.a12 + a.a32 * b.a22 + a.a33 * b.a32 + a.a34 * b.a42,
-        a.a31 * b.a13 + a.a32 * b.a23 + a.a33 * b.a33 + a.a34 * b.a43,
-        a.a31 * b.a14 + a.a32 * b.a24 + a.a33 * b.a34 + a.a34 * b.a44,
-
-        a.a41 * b.a11 + a.a42 * b.a21 + a.a43 * b.a31 + a.a44 * b.a41,
-        a.a41 * b.a12 + a.a42 * b.a22 + a.a43 * b.a32 + a.a44 * b.a42,
-        a.a41 * b.a13 + a.a42 * b.a23 + a.a43 * b.a33 + a.a44 * b.a43,
-        a.a41 * b.a14 + a.a42 * b.a24 + a.a43 * b.a34 + a.a44 * b.a44,
-    };
+    m4f32 m = {0};
+    m.a11 = a.a11 * b.a11 + a.a12 * b.a21 + a.a13 * b.a31 + a.a14 * b.a41;
+    m.a12 = a.a11 * b.a12 + a.a12 * b.a22 + a.a13 * b.a32 + a.a14 * b.a42;
+    m.a13 = a.a11 * b.a13 + a.a12 * b.a23 + a.a13 * b.a33 + a.a14 * b.a43;
+    m.a14 = a.a11 * b.a14 + a.a12 * b.a24 + a.a13 * b.a34 + a.a14 * b.a44;
+    m.a21 = a.a21 * b.a11 + a.a22 * b.a21 + a.a23 * b.a31 + a.a24 * b.a41;
+    m.a22 = a.a21 * b.a12 + a.a22 * b.a22 + a.a23 * b.a32 + a.a24 * b.a42;
+    m.a23 = a.a21 * b.a13 + a.a22 * b.a23 + a.a23 * b.a33 + a.a24 * b.a43;
+    m.a24 = a.a21 * b.a14 + a.a22 * b.a24 + a.a23 * b.a34 + a.a24 * b.a44;
+    m.a31 = a.a31 * b.a11 + a.a32 * b.a21 + a.a33 * b.a31 + a.a34 * b.a41;
+    m.a32 = a.a31 * b.a12 + a.a32 * b.a22 + a.a33 * b.a32 + a.a34 * b.a42;
+    m.a33 = a.a31 * b.a13 + a.a32 * b.a23 + a.a33 * b.a33 + a.a34 * b.a43;
+    m.a34 = a.a31 * b.a14 + a.a32 * b.a24 + a.a33 * b.a34 + a.a34 * b.a44;
+    m.a41 = a.a41 * b.a11 + a.a42 * b.a21 + a.a43 * b.a31 + a.a44 * b.a41;
+    m.a42 = a.a41 * b.a12 + a.a42 * b.a22 + a.a43 * b.a32 + a.a44 * b.a42;
+    m.a43 = a.a41 * b.a13 + a.a42 * b.a23 + a.a43 * b.a33 + a.a44 * b.a43;
+    m.a44 = a.a41 * b.a14 + a.a42 * b.a24 + a.a43 * b.a34 + a.a44 * b.a44;
+    return m;
 }
 
 v4f32 fsl_matrix_multiply_vector(m4f32 a, v4f32 b)
 {
-    return (v4f32){
-        a.a11 * b.x + a.a12 * b.x + a.a13 * b.x + a.a14 * b.x,
-        a.a21 * b.y + a.a22 * b.y + a.a23 * b.y + a.a24 * b.y,
-        a.a31 * b.z + a.a32 * b.z + a.a33 * b.z + a.a34 * b.z,
-        a.a41 * b.w + a.a42 * b.w + a.a43 * b.w + a.a44 * b.w,
-    };
+    v4f32 v = {0};
+    v.x = a.a11 * b.x + a.a12 * b.x + a.a13 * b.x + a.a14 * b.x;
+    v.y = a.a21 * b.y + a.a22 * b.y + a.a23 * b.y + a.a24 * b.y;
+    v.z = a.a31 * b.z + a.a32 * b.z + a.a33 * b.z + a.a34 * b.z;
+    v.w = a.a41 * b.w + a.a42 * b.w + a.a43 * b.w + a.a44 * b.w;
+    return v;
 }
 
 f32 fsl_lerp_f32(f32 a, f32 b, f64 t)
@@ -330,11 +365,11 @@ f32 fsl_lerp_cubic_f32(f32 a, f32 b, f32 t)
 
 v3f64 fsl_lerp_v3f64(v3f64 a, v3f64 b, f32 t)
 {
-    return (v3f64){
-        a.x + (b.x - a.x) * t,
-        a.y + (b.y - a.y) * t,
-        a.z + (b.z - a.z) * t,
-    };
+    v3f64 v = {0};
+    v.x = a.x + (b.x - a.x) * t;
+    v.y = a.y + (b.y - a.y) * t;
+    v.z = a.z + (b.z - a.z) * t;
+    return v;
 }
 
 f32 fsl_easein_f32(f32 a, f32 b, f32 t)

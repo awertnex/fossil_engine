@@ -632,7 +632,6 @@ void player_target_update(player *p)
         core.flag.parse_target = 0;
         p->target_normal = (v3f64){0};
     }
-
 }
 
 void set_player_pos(player *p, f64 x, f64 y, f64 z)
@@ -673,7 +672,7 @@ void player_kill(player *p)
     p->flag |= FLAG_PLAYER_DEAD;
 
     HHC_LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-            "%s %s\n", p->name, get_death_str(p));
+            fsl_logger_stringf("%s %s\n", p->name, get_death_str(p)));
 }
 
 str *get_death_str(player *p)

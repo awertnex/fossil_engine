@@ -22,10 +22,6 @@
 
 u64 CHUNKS_MAX[SET_RENDER_DISTANCE_MAX + 1] = {0};
 
-/*! @brief chunk arena, raw chunk memory data.
- */
-static fsl_mem_arena chunk_arena = {0};
-
 /*! @brief chunk buffer, raw chunk data.
  */
 static chunk *chunk_buf = NULL;
@@ -140,46 +136,38 @@ u32 chunking_init(void)
     u64 chunk_buf_diameter = 0;
     u64 chunk_buf_volume = 0;
     u64 chunks_max = 0;
-    u64 chunk_arena_size_init = 0;
-
-    chunk_arena_size_init += CHUNK_BUF_VOLUME_MAX * sizeof(chunk**);    /* 'CHUNK_ORDER' slice */
-    chunk_arena_size_init += CHUNK_BUF_VOLUME_MAX * sizeof(chunk*);     /* 'chunk_tab' slice */
-    chunk_arena_size_init += CHUNK_BUF_VOLUME_MAX * sizeof(chunk);      /* 'chunk_buf' slice */
-    chunk_arena_size_init += CHUNK_QUEUE_1ST_MAX * sizeof(chunk**);     /* 'CHUNK_QUEUE[0].queue' slice */
-    chunk_arena_size_init += CHUNK_QUEUE_2ND_MAX * sizeof(chunk**);     /* 'CHUNK_QUEUE[1].queue' slice */
-    chunk_arena_size_init += CHUNK_QUEUE_3RD_MAX * sizeof(chunk**);     /* 'CHUNK_QUEUE[2].queue' slice */
-    chunk_arena_size_init += CHUNK_BUF_VOLUME_MAX * sizeof(v2u32);      /* 'chunk_gizmo_loaded' slice */
-    chunk_arena_size_init += CHUNK_BUF_VOLUME_MAX * sizeof(v2u32);      /* 'chunk_gizmo_render' slice */
 
     if (
-            fsl_mem_map_arena(&chunk_arena, chunk_arena_size_init,
-                "chunking_init().chunk_arena") != FSL_ERR_SUCCESS ||
-
-            fsl_mem_push_arena(&chunk_arena, (void*)&CHUNK_ORDER, CHUNK_BUF_VOLUME_MAX * sizeof(chunk**),
+            fsl_mem_push_arena(&_memory_arena_internal, (void*)&CHUNK_ORDER,
+                CHUNK_BUF_VOLUME_MAX * sizeof(chunk**),
                 "chunking_init().CHUNK_ORDER") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&chunk_arena, (void*)&chunk_tab, CHUNK_BUF_VOLUME_MAX * sizeof(chunk*),
+            fsl_mem_push_arena(&_memory_arena_internal, (void*)&chunk_tab,
+                CHUNK_BUF_VOLUME_MAX * sizeof(chunk*),
                 "chunking_init().chunk_tab") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&chunk_arena, (void*)&chunk_buf, CHUNK_BUF_VOLUME_MAX * sizeof(chunk),
+            fsl_mem_push_arena(&_memory_arena_internal, (void*)&chunk_buf,
+                CHUNK_BUF_VOLUME_MAX * sizeof(chunk),
                 "chunking_init().chunk_buf") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&chunk_arena, (void*)&CHUNK_QUEUE[0].queue,
+            fsl_mem_push_arena(&_memory_arena_internal, (void*)&CHUNK_QUEUE[0].queue,
                 CHUNK_QUEUE_1ST_MAX * sizeof(chunk**),
                 "chunking_init().CHUNK_QUEUE[0].queue") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&chunk_arena, (void*)&CHUNK_QUEUE[1].queue,
+            fsl_mem_push_arena(&_memory_arena_internal, (void*)&CHUNK_QUEUE[1].queue,
                 CHUNK_QUEUE_2ND_MAX * sizeof(chunk**),
                 "chunking_init().CHUNK_QUEUE[1].queue") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&chunk_arena, (void*)&CHUNK_QUEUE[2].queue,
+            fsl_mem_push_arena(&_memory_arena_internal, (void*)&CHUNK_QUEUE[2].queue,
                 CHUNK_QUEUE_3RD_MAX * sizeof(chunk**),
                 "chunking_init().CHUNK_QUEUE[2].queue") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&chunk_arena, (void*)&chunk_gizmo_loaded, CHUNK_BUF_VOLUME_MAX * sizeof(v2u32),
+            fsl_mem_push_arena(&_memory_arena_internal, (void*)&chunk_gizmo_loaded,
+                    CHUNK_BUF_VOLUME_MAX * sizeof(v2u32),
                 "chunking_init().chunk_gizmo_loaded") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&chunk_arena, (void*)&chunk_gizmo_render, CHUNK_BUF_VOLUME_MAX * sizeof(v2u32),
+            fsl_mem_push_arena(&_memory_arena_internal, (void*)&chunk_gizmo_render,
+                    CHUNK_BUF_VOLUME_MAX * sizeof(v2u32),
                 "chunking_init().chunk_gizmo_render") != FSL_ERR_SUCCESS ||
 
             fsl_mem_map((void*)&distance, CHUNK_BUF_VOLUME_MAX * sizeof(u32),
@@ -208,8 +196,8 @@ u32 chunking_init(void)
             for (j = 0; j < chunk_buf_volume; ++j)
             {
                 HHC_LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "Building CHUNK_ORDER Distance Lookup [0x%02"PRIx64"/0x%02x] Progress [%"PRIu64"/%"PRIu64"]..\n",
-                        i, SET_RENDER_DISTANCE_MAX, j, chunk_buf_volume);
+                        fsl_logger_stringf("Building CHUNK_ORDER Distance Lookup [0x%02"PRIx64"/0x%02x] Progress [%"PRIu64"/%"PRIu64"]..\n",
+                        i, SET_RENDER_DISTANCE_MAX, j, chunk_buf_volume));
 
                 coordinates =
                     (v3i32){
@@ -222,8 +210,8 @@ u32 chunking_init(void)
             }
 
             HHC_LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                    "Sorting CHUNK_ORDER Distance Lookup [0x%02"PRIx64"/0x%02x]..\n",
-                    i, SET_RENDER_DISTANCE_MAX);
+                    fsl_logger_stringf("Sorting CHUNK_ORDER Distance Lookup [0x%02"PRIx64"/0x%02x]..\n",
+                    i, SET_RENDER_DISTANCE_MAX));
 
             for (j = 0; j < chunk_buf_volume; ++j)
                 for (k = 0; k < chunk_buf_volume; ++k)
@@ -234,8 +222,8 @@ u32 chunking_init(void)
                     }
 
             HHC_LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                    "Writing CHUNK_ORDER Distance Lookup [0x%02"PRIx64"/0x%02x] To File..\n",
-                    i, SET_RENDER_DISTANCE_MAX);
+                    fsl_logger_stringf("Writing CHUNK_ORDER Distance Lookup [0x%02"PRIx64"/0x%02x] To File..\n",
+                    i, SET_RENDER_DISTANCE_MAX));
 
             if (fsl_write_file(CHUNK_ORDER_lookup_file_name, sizeof(u32),
                         chunk_buf_volume, index, TRUE, FALSE) != FSL_ERR_SUCCESS)
@@ -269,8 +257,8 @@ u32 chunking_init(void)
         for (i = 0; i <= SET_RENDER_DISTANCE_MAX; ++i)
         {
             HHC_LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                    "Building CHUNKS_MAX Lookup, Progress [%"PRIu64"/%d]..\n",
-                    i, SET_RENDER_DISTANCE_MAX);
+                    fsl_logger_stringf("Building CHUNKS_MAX Lookup, Progress [%"PRIu64"/%d]..\n",
+                    i, SET_RENDER_DISTANCE_MAX));
             chunk_buf_diameter = (i * 2) + 1;
             chunk_buf_volume =
                 chunk_buf_diameter * chunk_buf_diameter * chunk_buf_diameter;
@@ -294,7 +282,7 @@ u32 chunking_init(void)
         }
 
         HHC_LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                "%s\n", "Writing CHUNKS_MAX Lookup To File..\n");
+                fsl_logger_stringf("%s\n", "Writing CHUNKS_MAX Lookup To File..\n"));
 
         if (fsl_write_file(CHUNKS_MAX_lookup_file_name,
                 sizeof(u64), SET_RENDER_DISTANCE_MAX + 1,
@@ -659,8 +647,6 @@ void chunking_free(void)
             if (chunk_tab[i])
                 _chunk_buf_pop(i);
     }
-
-    fsl_mem_unmap_arena(&chunk_arena, "chunking_free().chunk_arena");
 
     if (chunk_gizmo_loaded_vao) glDeleteVertexArrays(1, &chunk_gizmo_loaded_vao);
     if (chunk_gizmo_loaded_vbo) glDeleteBuffers(1, &chunk_gizmo_loaded_vbo);
@@ -1242,7 +1228,7 @@ static void _chunk_buf_push(u32 index, v3i32 player_chunk_delta)
 
     HHC_LOGERROR(FSL_ERR_BUFFER_FULL,
             FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-            "'%s'\n", "'chunk_buf' Full");
+            fsl_logger_stringf("'%s'\n", "'chunk_buf' Full"));
 }
 
 static void _chunk_buf_pop(u32 index)
