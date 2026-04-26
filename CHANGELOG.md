@@ -7,7 +7,12 @@
    first version of the engine as standalone in this repo
 
 - - -
-## v0.6.0-dev (current)
+## v0.7.0-dev (current)
+
+#### changes
+
+- - -
+## v0.7.0-beta (2026 04 27)
 
 #### changes
 - (2026 04 23): add engine version to the stdout info on engine start
