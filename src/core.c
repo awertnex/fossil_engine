@@ -404,6 +404,10 @@ u32 fsl_window_init(const str *title, i32 size_x, i32 size_y)
 
 u32 fsl_glad_init(void)
 {
+    str str_engine_version[NAME_MAX] = {0};
+
+    fsl_engine_get_string(str_engine_version, FSL_STR_INDEX_ENGINE_VERSION);
+
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         _LOGFATAL(FSL_ERR_GLAD_INIT_FAIL,
@@ -422,16 +426,19 @@ u32 fsl_glad_init(void)
     }
 
     _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
-            fsl_logger_stringf("OpenGL:    %s\n", glGetString(GL_VERSION)));
+            fsl_logger_stringf(FSL_ENGINE_NAME ":  %s\n", str_engine_version));
 
     _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
-            fsl_logger_stringf("GLSL:      %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION)));
+            fsl_logger_stringf("OpenGL:         %s\n", glGetString(GL_VERSION)));
 
     _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
-            fsl_logger_stringf("Vendor:    %s\n", glGetString(GL_VENDOR)));
+            fsl_logger_stringf("GLSL:           %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION)));
 
     _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
-            fsl_logger_stringf("Renderer:  %s\n", glGetString(GL_RENDERER)));
+            fsl_logger_stringf("Vendor:         %s\n", glGetString(GL_VENDOR)));
+
+    _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+            fsl_logger_stringf("Renderer:       %s\n", glGetString(GL_RENDERER)));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
