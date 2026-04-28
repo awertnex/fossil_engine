@@ -47,6 +47,7 @@ fsl_key_bind bind_zoom = {0};
 fsl_key_bind bind_toggle_flashlight = {0};
 fsl_key_bind bind_pause = {0};
 fsl_key_bind bind_chat_or_command = {0};
+fsl_key_bind bind_reload_shaders = {0};
 
 /* ---- debug & menu -------------------------------------------------------- */
 
@@ -135,6 +136,7 @@ void input_init(void)
     bind_toggle_bounding_boxes = fsl_key_bind_init(FSL_KEY_B, 0, 0, bind_debug_mod, 0);
     bind_toggle_chunk_gizmo = fsl_key_bind_init(FSL_KEY_G, 0, 0, bind_debug_mod, 0);
     bind_toggle_chunk_queue_visualizer = fsl_key_bind_init(FSL_KEY_V, 0, 0, bind_debug_mod, 0);
+    bind_reload_shaders = fsl_key_bind_init(FSL_KEY_L, 0, FSL_CONTROL_LEFT, 0, 0);
 }
 
 void input_update(player *p)
@@ -380,5 +382,12 @@ void input_update(player *p)
         else
             HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     fsl_logger_stringf("%s\n", "View Chunk Queue Visualizer Off"));
+    }
+
+    if (fsl_is_key_press(bind_reload_shaders))
+    {
+        if (fsl_shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_SKYBOX]) == FSL_ERR_SUCCESS)
+            HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                    fsl_logger_stringf("%s\n", "Shaders Reloaded!"));
     }
 }

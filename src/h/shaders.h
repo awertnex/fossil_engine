@@ -54,9 +54,12 @@ FSLAPI extern fsl_shader_program fsl_shader_buf[FSL_SHADER_INDEX_COUNT];
  *
  *  - call @ref fsl_shader_pre_process() on `shader->file_name` before compiling shader and compile shader.
  *
+ *  @param shader_created destination for whether an OpenGL shader was successfully created,
+ *  used by function @ref fsl_shader_program_init() to take care of dangling shader handles.
+ *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_shader_init(const str *shaders_dir, fsl_shader *shader);
+FSLAPI u32 fsl_shader_init(const str *shaders_dir, fsl_shader *shader, b8 *shader_created);
 
 FSLAPI void fsl_shader_free(fsl_shader *shader);
 

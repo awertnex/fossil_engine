@@ -1132,8 +1132,8 @@ static void draw_everything(void)
         fsl_engine_get_string(temp, FSL_STR_INDEX_ENGINE_VERSION);
         fsl_text_push(fsl_stringf(
                     "Game:     %s %s\n"
-                    "Engine:   %s %s\n"
                     "Author:   %s\n"
+                    "Engine:   %s %s\n"
                     "OpenGL:   %s\n"
                     "GLSL:     %s\n"
                     "Vendor:   %s\n"

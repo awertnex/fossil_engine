@@ -10,6 +10,9 @@
 ## v0.7.0-dev (current)
 
 #### changes
+- (2026 04 28): add shader hot reloading support (just call the function
+                `fsl_shader_program_init()` again on the same
+                `fsl_shader_program` struct) with fallback support
 - (2026 04 28): add struct `fsl_key_bind` to define key combinations more easily
 
 - - -

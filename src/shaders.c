@@ -40,7 +40,7 @@
  */
 static str *_fsl_shader_pre_process(const str *path, u64 *file_len, u64 recursion_limit);
 
-u32 fsl_shader_init(const str *shaders_dir, fsl_shader *shader)
+u32 fsl_shader_init(const str *shaders_dir, fsl_shader *shader, b8 *shader_created)
 {
     str temp[PATH_MAX] = {0};
     char log[FSL_STRING_MAX] = {0};
@@ -62,29 +62,29 @@ u32 fsl_shader_init(const str *shaders_dir, fsl_shader *shader)
         _LOGERROR(FSL_ERR_POINTER_NULL,
                 FSL_FLAG_LOG_NO_VERBOSE,
                 fsl_logger_stringf("Shader Source '%s' NULL\n", shader->file_name));
+        *shader_created = FALSE;
         return fsl_err;
     }
 
-    if (shader->id)
-        glDeleteShader(shader->id);
-
     shader->id = glCreateShader(shader->type);
+    *shader_created = TRUE;
+
     glShaderSource(shader->id, 1, (const GLchar**)&shader->source, NULL);
     glCompileShader(shader->id);
-    fsl_mem_free((void*)&shader->source, strlen(shader->source), "fsl_shader_init().shader.source");
-    shader->source = NULL;
-
     glGetShaderiv(shader->id, GL_COMPILE_STATUS, &shader->loaded);
     if (!shader->loaded)
     {
         glGetShaderInfoLog(shader->id, FSL_STRING_MAX, NULL, log);
         _LOGERROR(FSL_ERR_SHADER_COMPILE_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("Shader '%s':\n%s\n", shader->file_name, log));
+                fsl_logger_stringf("Shader '%s':\n%s", shader->file_name, log));
         return fsl_err;
     }
-    else _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            fsl_logger_stringf("Shader %s[%u] Loaded\n", shader->file_name, shader->id));
+    else
+    {
+        _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+                fsl_logger_stringf("Shader %s[%u] Loaded\n", shader->file_name, shader->id));
+    }
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -196,11 +196,10 @@ void fsl_shader_free(fsl_shader *shader)
     if (!shader || !shader->type || !shader->loaded)
         return;
 
+    shader->loaded = 0;
     if (shader->source)
         fsl_mem_free((void*)&shader->source, strlen(shader->source),
-                "fsl_shader_free().shader.source");
-
-    shader->loaded = FALSE;
+                "fsl_shader_free().shader->source");
 
     _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             fsl_logger_stringf("Shader %s[%u] Unloaded\n", shader->file_name, shader->id));
@@ -209,41 +208,58 @@ void fsl_shader_free(fsl_shader *shader)
 u32 fsl_shader_program_init(const str *shaders_dir, fsl_shader_program *program)
 {
     char log[FSL_STRING_MAX] = {0};
+    fsl_shader_program program_temp = *program;
+    b8 vertex_created = FALSE;
+    b8 geometry_created = FALSE;
+    b8 fragment_created = FALSE;
+    b8 program_created = FALSE;
 
-    fsl_shader_init(shaders_dir, &program->vertex);
+    program_temp.vertex.source = NULL;
+    program_temp.geometry.source = NULL;
+    program_temp.fragment.source = NULL;
+
+    fsl_shader_init(shaders_dir, &program_temp.vertex, &vertex_created);
+    if (fsl_err != FSL_ERR_SUCCESS)
+        goto cleanup;
+    fsl_shader_init(shaders_dir, &program_temp.geometry, &geometry_created);
     if (fsl_err != FSL_ERR_SUCCESS && fsl_err != FSL_ERR_SHADER_TYPE_NULL)
-        return fsl_err;
-    fsl_shader_init(shaders_dir, &program->geometry);
-    if (fsl_err != FSL_ERR_SUCCESS && fsl_err != FSL_ERR_SHADER_TYPE_NULL)
-        return fsl_err;
-    fsl_shader_init(shaders_dir, &program->fragment);
-    if (fsl_err != FSL_ERR_SUCCESS && fsl_err != FSL_ERR_SHADER_TYPE_NULL)
-        return fsl_err;
+        goto cleanup;
+    fsl_shader_init(shaders_dir, &program_temp.fragment, &fragment_created);
+    if (fsl_err != FSL_ERR_SUCCESS)
+        goto cleanup;
 
-    if (program->id)
-        glDeleteProgram(program->id);
+    program_temp.id = glCreateProgram();
+    program_created = TRUE;
 
-    program->id = glCreateProgram();
-    if (program->vertex.id)
-        glAttachShader(program->id, program->vertex.id);
-    if (program->geometry.id)
-        glAttachShader(program->id, program->geometry.id);
-    if (program->fragment.id)
-        glAttachShader(program->id, program->fragment.id);
-    glLinkProgram(program->id);
+    glAttachShader(program_temp.id, program_temp.vertex.id);
+    glAttachShader(program_temp.id, program_temp.geometry.id);
+    glAttachShader(program_temp.id, program_temp.fragment.id);
+    glLinkProgram(program_temp.id);
 
-    glGetProgramiv(program->id, GL_LINK_STATUS, &program->loaded);
-    if (!program->loaded)
+    glGetProgramiv(program_temp.id, GL_LINK_STATUS, &program_temp.loaded);
+    if (!program_temp.loaded)
     {
-        glGetProgramInfoLog(program->id, FSL_STRING_MAX, NULL, log);
+        glGetProgramInfoLog(program_temp.id, FSL_STRING_MAX, NULL, log);
         _LOGERROR(FSL_ERR_SHADER_PROGRAM_LINK_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("Shader Program '%s':\n%s\n", program->name, log));
-        return fsl_err;
+                fsl_logger_stringf("Shader Program '%s':\n%s", program_temp.name, log));
+        goto cleanup;
     }
-    else _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            fsl_logger_stringf("Shader Program %s[%u] Loaded\n", program->name, program->id));
+    else
+    {
+        _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+                fsl_logger_stringf("Shader Program %s[%u] Loaded\n", program_temp.name, program->id));
+    }
 
+    if (program_temp.vertex.loaded)
+        glDeleteShader(program_temp.vertex.id);
+    if (program_temp.geometry.loaded)
+        glDeleteShader(program_temp.geometry.id);
+    if (program_temp.fragment.loaded)
+        glDeleteShader(program_temp.fragment.id);
+
+    if (program->loaded)
+        glDeleteProgram(program->id);
     if (program->vertex.loaded)
         glDeleteShader(program->vertex.id);
     if (program->geometry.loaded)
@@ -251,7 +267,35 @@ u32 fsl_shader_program_init(const str *shaders_dir, fsl_shader_program *program)
     if (program->fragment.loaded)
         glDeleteShader(program->fragment.id);
 
+    if (program->vertex.source) /* we make this check so we don't pass `NULL` into `strlen` */
+        fsl_mem_free((void*)&program->vertex.source, strlen(program->vertex.source), "fsl_shader_program_init().program->vertex.source");
+    if (program->geometry.source) /* we make this check so we don't pass `NULL` into `strlen` */
+        fsl_mem_free((void*)&program->geometry.source, strlen(program->geometry.source), "fsl_shader_program_init().program->geometry.source");
+    if (program->fragment.source) /* we make this check so we don't pass `NULL` into `strlen` */
+        fsl_mem_free((void*)&program->fragment.source, strlen(program->fragment.source), "fsl_shader_program_init().program->fragment.source");
+
+    *program = program_temp;
+
     fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+
+cleanup:
+
+    if (program_created)
+        glDeleteProgram(program_temp.id);
+    if (vertex_created)
+        glDeleteShader(program_temp.vertex.id);
+    if (geometry_created)
+        glDeleteShader(program_temp.geometry.id);
+    if (fragment_created)
+        glDeleteShader(program_temp.fragment.id);
+
+    if (program_temp.vertex.loaded)
+        fsl_shader_free(&program_temp.vertex);
+    if (program_temp.geometry.loaded)
+        fsl_shader_free(&program_temp.geometry);
+    if (program_temp.fragment.loaded)
+        fsl_shader_free(&program_temp.fragment);
     return fsl_err;
 }
 
@@ -260,13 +304,12 @@ void fsl_shader_program_free(fsl_shader_program *program)
     if (program == NULL || !program->loaded)
         return;
 
+    program->loaded = 0;
     glDeleteProgram(program->id);
 
     fsl_shader_free(&program->vertex);
     fsl_shader_free(&program->geometry);
     fsl_shader_free(&program->fragment);
-
-    program->loaded = FALSE;
 
     _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             fsl_logger_stringf("Shader Program %s[%u] Unloaded\n", program->name, program->id));

@@ -61,6 +61,7 @@ extern fsl_key_bind bind_toggle_chunk_bounds;
 extern fsl_key_bind bind_toggle_bounding_boxes;
 extern fsl_key_bind bind_toggle_chunk_gizmo;
 extern fsl_key_bind bind_toggle_chunk_queue_visualizer;
+extern fsl_key_bind bind_reload_shaders;
 
 /*! @brief setup all key binding values and rules.
  */

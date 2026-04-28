@@ -248,7 +248,7 @@ u32 _fsl_mem_realloc_memb(void **x, u64 memb, u64 size, const str *name, const s
 void _fsl_mem_free(void **x, u64 size, const str *name, const str *file, u64 line)
 {
     void *temp = NULL;
-    if (!x || !*x)
+    if (!x || !*x || !size)
         return;
 
     temp = *x;

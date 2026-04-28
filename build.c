@@ -13,7 +13,7 @@ static str str_dir[][CMD_SIZE] =
     DIR_DST"deps/fossil/",
     DIR_DST DIR_DST,
     DIR_DST DIR_DST DIR_DST,
-    DIR_DST DIR_DST DIR_DST"logs/",
+    DIR_DST DIR_DST DIR_DST"logs/"
 };
 
 static str str_cflags[][CMD_SIZE] =
@@ -22,7 +22,7 @@ static str str_cflags[][CMD_SIZE] =
     "-Wextra",
     "-Wpedantic",
     "-Wformat-truncation=0",
-    "-ggdb",
+    "-ggdb"
 };
 
 int main(int argc, char **argv)
