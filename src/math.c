@@ -89,7 +89,17 @@ f32 fsl_min_v3f32(v3f32 v)
     return v.x < v.y ? v.x < v.z ? v.x : v.z : v.y < v.z ? v.y : v.z;
 }
 
+f64 fsl_min_v3f64(v3f64 v)
+{
+    return v.x < v.y ? v.x < v.z ? v.x : v.z : v.y < v.z ? v.y : v.z;
+}
+
 f32 fsl_max_v3f32(v3f32 v)
+{
+    return v.x > v.y ? v.x > v.z ? v.x : v.z : v.y > v.z ? v.y : v.z;
+}
+
+f64 fsl_max_v3f64(v3f64 v)
 {
     return v.x > v.y ? v.x > v.z ? v.x : v.z : v.y > v.z ? v.y : v.z;
 }
@@ -99,7 +109,17 @@ u32 fsl_min_axis_v3f32(v3f32 v)
     return v.x < v.y ? v.x < v.z ? 1 : 3 : v.y < v.z ? 2 : 3;
 }
 
+u64 fsl_min_axis_v3f64(v3f64 v)
+{
+    return v.x < v.y ? v.x < v.z ? 1 : 3 : v.y < v.z ? 2 : 3;
+}
+
 u32 fsl_max_axis_v3f32(v3f32 v)
+{
+    return v.x > v.y ? v.x > v.z ? 1 : 3 : v.y > v.z ? 2 : 3;
+}
+
+u64 fsl_max_axis_v3f64(v3f64 v)
 {
     return v.x > v.y ? v.x > v.z ? 1 : 3 : v.y > v.z ? 2 : 3;
 }

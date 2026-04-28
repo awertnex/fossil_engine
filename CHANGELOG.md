@@ -10,9 +10,16 @@
 ## v0.7.0-dev (current)
 
 #### changes
+- (2026 04 28): add math functions:
+                `fsl_min_v3f64(v3f64 v)`,
+                `fsl_max_v3f64(v3f64 v)`,
+                `fsl_min_axis_v3f64(v3f64 v)` and
+                `fsl_max_axis_v3f64(v3f64 v)`
 - (2026 04 28): add shader hot reloading support (just call the function
                 `fsl_shader_program_init()` again on the same
-                `fsl_shader_program` struct) with fallback support
+                `fsl_shader_program` struct) with fallback support (hot
+                reloading and fallback won't work for the function
+                `fsl_shader_init()`)
 - (2026 04 28): add struct `fsl_key_bind` to define key combinations more easily
 
 - - -
