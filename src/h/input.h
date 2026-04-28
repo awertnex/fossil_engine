@@ -27,18 +27,6 @@
 #define FSL_KEYBOARD_KEYS_MAX 120
 #define FSL_DOUBLE_PRESS_TIME_INTERVAL 0.5f
 
-enum fsl_keyboard_key_state
-{
-    FSL_STATE_KEY_IDLE,
-    FSL_STATE_KEY_PRESS,
-    FSL_STATE_KEY_HOLD,
-    FSL_STATE_KEY_RELEASE,
-    FSL_STATE_KEY_LISTEN_DOUBLE,
-    FSL_STATE_KEY_PRESS_DOUBLE,
-    FSL_STATE_KEY_HOLD_DOUBLE,
-    FSL_STATE_KEY_RELEASE_DOUBLE
-}; /* fsl_keyboard_key_state */
-
 enum fsl_keyboard_key
 {
     FSL_KEY_SPACE,
@@ -164,13 +152,40 @@ enum fsl_keyboard_key
     FSL_KEY_MENU
 }; /* fsl_keyboard_key */
 
-FSLAPI b8 fsl_is_mouse_press(const u32 button);
-FSLAPI b8 fsl_is_mouse_hold(const u32 button);
-FSLAPI b8 fsl_is_mouse_release(const u32 button);
-FSLAPI b8 fsl_is_key_press(const u32 key);
-FSLAPI b8 fsl_is_key_press_double(const u32 key);
-FSLAPI b8 fsl_is_key_hold(const u32 key);
-FSLAPI b8 fsl_is_key_release(const u32 key);
+enum fsl_mod_key
+{
+    FSL_SHIFT_LEFT = 1,
+    FSL_SHIFT_RIGHT,
+    FSL_CONTROL_LEFT = 1,
+    FSL_CONTROL_RIGHT,
+    FSL_ALT_LEFT = 1,
+    FSL_ALT_RIGHT,
+    FSL_SUPER_LEFT = 1,
+    FSL_SUPER_RIGHT
+}; /* fsl_mod_key */
+
+struct key_bind
+{
+    u32 key;
+    u32 mod; /* enum: fsl_mod_key_flag */
+};
+typedef struct key_bind fsl_key_bind;
+
+/*! @brief setup a key binding (key combination).
+ *
+ *  @param key a keyboard key or mouse button.
+ */
+FSLAPI fsl_key_bind fsl_key_bind_init(const u32 key,
+        enum fsl_mod_key shift, enum fsl_mod_key ctrl,
+        enum fsl_mod_key alt, enum fsl_mod_key super);
+
+FSLAPI b8 fsl_is_mouse_press(const fsl_key_bind button);
+FSLAPI b8 fsl_is_mouse_hold(const fsl_key_bind button);
+FSLAPI b8 fsl_is_mouse_release(const fsl_key_bind button);
+FSLAPI b8 fsl_is_key_press(const fsl_key_bind key);
+FSLAPI b8 fsl_is_key_press_double(const fsl_key_bind key);
+FSLAPI b8 fsl_is_key_hold(const fsl_key_bind key);
+FSLAPI b8 fsl_is_key_release(const fsl_key_bind key);
 
 /*! @brief update internal mouse movement.
  *

@@ -10,6 +10,7 @@
 ## v0.7.0-dev (current)
 
 #### changes
+- (2026 04 28): add struct `fsl_key_bind` to define key combinations more easily
 
 - - -
 ## v0.7.0-beta (2026 04 27)

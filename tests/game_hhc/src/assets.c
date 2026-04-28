@@ -131,56 +131,23 @@ u32 assets_init(void)
     /* ---- block textures -------------------------------------------------- */
 
     if (
-            block_texture_init(TEXTURE_BLOCK_GRASS_SIDE,
-                "grass_side.png") != FSL_ERR_SUCCESS ||
-
-            block_texture_init(TEXTURE_BLOCK_GRASS_TOP,
-                "grass_top.png") != FSL_ERR_SUCCESS ||
-
-            block_texture_init(TEXTURE_BLOCK_DIRT,
-                "dirt.png") != FSL_ERR_SUCCESS ||
-
-            block_texture_init(TEXTURE_BLOCK_DIRTUP,
-                "dirtup.png") != FSL_ERR_SUCCESS ||
-
-            block_texture_init(TEXTURE_BLOCK_STONE,
-                "stone.png") != FSL_ERR_SUCCESS ||
-
-            block_texture_init(TEXTURE_BLOCK_SAND,
-                "sand.png") != FSL_ERR_SUCCESS ||
-
-            block_texture_init(TEXTURE_BLOCK_GLASS,
-                "glass.png") != FSL_ERR_SUCCESS ||
-
-            block_texture_init(TEXTURE_BLOCK_WOOD_BIRCH_LOG_SIDE,
-                    "wood_birch_log_side.png") != FSL_ERR_SUCCESS ||
-
-            block_texture_init(TEXTURE_BLOCK_WOOD_BIRCH_LOG_TOP,
-                    "wood_birch_log_top.png") != FSL_ERR_SUCCESS ||
-
-            block_texture_init(TEXTURE_BLOCK_WOOD_BIRCH_PLANKS,
-                    "wood_birch_planks.png") != FSL_ERR_SUCCESS ||
-
-            block_texture_init(TEXTURE_BLOCK_WOOD_CHERRY_LOG_SIDE,
-                    "wood_cherry_log_side.png") != FSL_ERR_SUCCESS ||
-
-            block_texture_init(TEXTURE_BLOCK_WOOD_CHERRY_LOG_TOP,
-                    "wood_cherry_log_top.png") != FSL_ERR_SUCCESS ||
-
-            block_texture_init(TEXTURE_BLOCK_WOOD_CHERRY_PLANKS,
-                    "wood_cherry_planks.png") != FSL_ERR_SUCCESS ||
-
-            block_texture_init(TEXTURE_BLOCK_WOOD_OAK_LOG_SIDE,
-                    "wood_oak_log_side.png") != FSL_ERR_SUCCESS ||
-
-            block_texture_init(TEXTURE_BLOCK_WOOD_OAK_LOG_TOP,
-                    "wood_oak_log_top.png") != FSL_ERR_SUCCESS ||
-
-            block_texture_init(TEXTURE_BLOCK_WOOD_OAK_PLANKS,
-                    "wood_oak_planks.png") != FSL_ERR_SUCCESS ||
-
-            block_texture_init(TEXTURE_BLOCK_BLOOD,
-                "block_blood.png") != FSL_ERR_SUCCESS)
+            block_texture_init(TEXTURE_BLOCK_GRASS_SIDE, "grass_side.png") != FSL_ERR_SUCCESS ||
+            block_texture_init(TEXTURE_BLOCK_GRASS_TOP, "grass_top.png") != FSL_ERR_SUCCESS ||
+            block_texture_init(TEXTURE_BLOCK_DIRT, "dirt.png") != FSL_ERR_SUCCESS ||
+            block_texture_init(TEXTURE_BLOCK_DIRTUP, "dirtup.png") != FSL_ERR_SUCCESS ||
+            block_texture_init(TEXTURE_BLOCK_STONE, "stone.png") != FSL_ERR_SUCCESS ||
+            block_texture_init(TEXTURE_BLOCK_SAND, "sand.png") != FSL_ERR_SUCCESS ||
+            block_texture_init(TEXTURE_BLOCK_GLASS, "glass.png") != FSL_ERR_SUCCESS ||
+            block_texture_init(TEXTURE_BLOCK_WOOD_BIRCH_LOG_SIDE, "wood_birch_log_side.png") != FSL_ERR_SUCCESS ||
+            block_texture_init(TEXTURE_BLOCK_WOOD_BIRCH_LOG_TOP, "wood_birch_log_top.png") != FSL_ERR_SUCCESS ||
+            block_texture_init(TEXTURE_BLOCK_WOOD_BIRCH_PLANKS, "wood_birch_planks.png") != FSL_ERR_SUCCESS ||
+            block_texture_init(TEXTURE_BLOCK_WOOD_CHERRY_LOG_SIDE, "wood_cherry_log_side.png") != FSL_ERR_SUCCESS ||
+            block_texture_init(TEXTURE_BLOCK_WOOD_CHERRY_LOG_TOP, "wood_cherry_log_top.png") != FSL_ERR_SUCCESS ||
+            block_texture_init(TEXTURE_BLOCK_WOOD_CHERRY_PLANKS, "wood_cherry_planks.png") != FSL_ERR_SUCCESS ||
+            block_texture_init(TEXTURE_BLOCK_WOOD_OAK_LOG_SIDE, "wood_oak_log_side.png") != FSL_ERR_SUCCESS ||
+            block_texture_init(TEXTURE_BLOCK_WOOD_OAK_LOG_TOP, "wood_oak_log_top.png") != FSL_ERR_SUCCESS ||
+            block_texture_init(TEXTURE_BLOCK_WOOD_OAK_PLANKS, "wood_oak_planks.png") != FSL_ERR_SUCCESS ||
+            block_texture_init(TEXTURE_BLOCK_BLOOD, "block_blood.png") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     for (i = 0; i < TEXTURE_BLOCK_COUNT; ++i)
@@ -226,6 +193,7 @@ cleanup:
 void assets_free(void)
 {
     u32 i = 0;
+
     if (block_textures)
         for (i = 0; i < TEXTURE_BLOCK_COUNT; ++i)
             fsl_texture_free(&block_textures[i]);

@@ -1,2 +1,3 @@
 fossil/
 test.sh
+tests/*/out/

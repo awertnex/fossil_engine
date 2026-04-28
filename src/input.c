@@ -21,8 +21,35 @@
 #include "h/input.h"
 #include "h/time.h"
 
+enum mod_key_flag
+{
+    FLAG_MOD_KEY_LEFT_SHIFT = 0x01,
+    FLAG_MOD_KEY_LEFT_CONTROL = 0x02,
+    FLAG_MOD_KEY_LEFT_ALT = 0x04,
+    FLAG_MOD_KEY_LEFT_SUPER = 0x08,
+    FLAG_MOD_KEY_RIGHT_SHIFT = 0x10,
+    FLAG_MOD_KEY_RIGHT_CONTROL = 0x20,
+    FLAG_MOD_KEY_RIGHT_ALT = 0x40,
+    FLAG_MOD_KEY_RIGHT_SUPER = 0x80
+}; /* mod_key_flag */
+
+enum keyboard_key_state
+{
+    STATE_KEY_IDLE,
+    STATE_KEY_PRESS,
+    STATE_KEY_HOLD,
+    STATE_KEY_RELEASE,
+    STATE_KEY_LISTEN_DOUBLE,
+    STATE_KEY_PRESS_DOUBLE,
+    STATE_KEY_HOLD_DOUBLE,
+    STATE_KEY_RELEASE_DOUBLE
+}; /* keyboard_key_state */
+
 static u32 fsl_mouse_button[FSL_MOUSE_BUTTONS_MAX] = {0};
 static u32 fsl_keyboard_key[FSL_KEYBOARD_KEYS_MAX] = {0};
+
+/*! @brief translation table to communicate engine conventions to GLFW.
+ */
 static u32 fsl_keyboard_tab[FSL_KEYBOARD_KEYS_MAX] =
 {
     GLFW_KEY_SPACE,
@@ -148,42 +175,173 @@ static u32 fsl_keyboard_tab[FSL_KEYBOARD_KEYS_MAX] =
     GLFW_KEY_MENU
 }; /* fsl_keyboard_tab */
 
-b8 fsl_is_mouse_press(const u32 button)
+fsl_key_bind fsl_key_bind_init(const u32 key,
+        enum fsl_mod_key shift, enum fsl_mod_key ctrl,
+        enum fsl_mod_key alt, enum fsl_mod_key super)
 {
-    return fsl_mouse_button[button] == FSL_STATE_KEY_PRESS;
+    fsl_key_bind bind = {0};
+    bind.key = key;
+
+    bind.mod |=
+        (shift == FSL_SHIFT_LEFT) ? FLAG_MOD_KEY_LEFT_SHIFT :
+        (shift == FSL_SHIFT_RIGHT) ? FLAG_MOD_KEY_RIGHT_SHIFT : 0;
+    bind.mod |=
+        (ctrl == FSL_CONTROL_LEFT) ? FLAG_MOD_KEY_LEFT_CONTROL :
+        (shift == FSL_CONTROL_RIGHT) ? FLAG_MOD_KEY_RIGHT_CONTROL : 0;
+    bind.mod |=
+        (alt == FSL_ALT_LEFT) ? FLAG_MOD_KEY_LEFT_ALT :
+        (shift == FSL_ALT_RIGHT) ? FLAG_MOD_KEY_RIGHT_ALT : 0;
+    bind.mod |=
+        (super == FSL_SUPER_LEFT) ? FLAG_MOD_KEY_LEFT_SUPER :
+        (shift == FSL_SUPER_RIGHT) ? FLAG_MOD_KEY_RIGHT_SUPER : 0;
+    return bind;
 }
 
-b8 fsl_is_mouse_hold(const u32 button)
+b8 fsl_is_mouse_press(const fsl_key_bind button)
 {
-    return fsl_mouse_button[button] == FSL_STATE_KEY_HOLD;
+    return fsl_mouse_button[button.key] == STATE_KEY_PRESS;
 }
 
-b8 fsl_is_mouse_release(const u32 button)
+b8 fsl_is_mouse_hold(const fsl_key_bind button)
 {
-    return fsl_mouse_button[button] == FSL_STATE_KEY_RELEASE;
+    return fsl_mouse_button[button.key] == STATE_KEY_HOLD;
 }
 
-b8 fsl_is_key_press(const u32 key)
+b8 fsl_is_mouse_release(const fsl_key_bind button)
 {
-    return fsl_keyboard_key[key] == FSL_STATE_KEY_PRESS ||
-        fsl_keyboard_key[key] == FSL_STATE_KEY_PRESS_DOUBLE;
+    return fsl_mouse_button[button.key] == STATE_KEY_RELEASE;
 }
 
-b8 fsl_is_key_press_double(const u32 key)
+b8 fsl_is_key_press(const fsl_key_bind key)
 {
-    return fsl_keyboard_key[key] == FSL_STATE_KEY_PRESS_DOUBLE;
+    b8 result = TRUE;
+
+    if (
+            fsl_keyboard_key[key.key] != STATE_KEY_PRESS &&
+            fsl_keyboard_key[key.key] != STATE_KEY_PRESS_DOUBLE)
+        result = FALSE;
+
+    if (
+            (key.mod & FLAG_MOD_KEY_LEFT_SHIFT) &&
+            fsl_keyboard_key[FSL_KEY_LEFT_SHIFT] != STATE_KEY_HOLD &&
+            fsl_keyboard_key[FSL_KEY_LEFT_SHIFT] != STATE_KEY_HOLD_DOUBLE)
+        result = FALSE;
+
+    if (
+            (key.mod & FLAG_MOD_KEY_LEFT_CONTROL) &&
+            fsl_keyboard_key[FSL_KEY_LEFT_CONTROL] != STATE_KEY_HOLD &&
+            fsl_keyboard_key[FSL_KEY_LEFT_CONTROL] != STATE_KEY_HOLD_DOUBLE)
+        result = FALSE;
+
+    if (
+            (key.mod & FLAG_MOD_KEY_LEFT_ALT) &&
+            fsl_keyboard_key[FSL_KEY_LEFT_ALT] != STATE_KEY_HOLD &&
+            fsl_keyboard_key[FSL_KEY_LEFT_ALT] != STATE_KEY_HOLD_DOUBLE)
+        result = FALSE;
+
+    if (
+            (key.mod & FLAG_MOD_KEY_LEFT_SUPER) &&
+            fsl_keyboard_key[FSL_KEY_LEFT_SUPER] != STATE_KEY_HOLD &&
+            fsl_keyboard_key[FSL_KEY_LEFT_SUPER] != STATE_KEY_HOLD_DOUBLE)
+        result = FALSE;
+
+    if (
+            (key.mod & FLAG_MOD_KEY_RIGHT_SHIFT) &&
+            fsl_keyboard_key[FSL_KEY_RIGHT_SHIFT] != STATE_KEY_HOLD &&
+            fsl_keyboard_key[FSL_KEY_RIGHT_SHIFT] != STATE_KEY_HOLD_DOUBLE)
+        result = FALSE;
+
+    if (
+            (key.mod & FLAG_MOD_KEY_RIGHT_CONTROL) &&
+            fsl_keyboard_key[FSL_KEY_RIGHT_CONTROL] != STATE_KEY_HOLD &&
+            fsl_keyboard_key[FSL_KEY_RIGHT_CONTROL] != STATE_KEY_HOLD_DOUBLE)
+        result = FALSE;
+
+    if (
+            (key.mod & FLAG_MOD_KEY_RIGHT_ALT) &&
+            fsl_keyboard_key[FSL_KEY_RIGHT_ALT] != STATE_KEY_HOLD &&
+            fsl_keyboard_key[FSL_KEY_RIGHT_ALT] != STATE_KEY_HOLD_DOUBLE)
+        result = FALSE;
+
+    if (
+            (key.mod & FLAG_MOD_KEY_RIGHT_SUPER) &&
+            fsl_keyboard_key[FSL_KEY_RIGHT_SUPER] != STATE_KEY_HOLD &&
+            fsl_keyboard_key[FSL_KEY_RIGHT_SUPER] != STATE_KEY_HOLD_DOUBLE)
+        result = FALSE;
+
+    return result;
 }
 
-b8 fsl_is_key_hold(const u32 key)
+b8 fsl_is_key_press_double(const fsl_key_bind key)
 {
-    return fsl_keyboard_key[key] == FSL_STATE_KEY_HOLD ||
-        fsl_keyboard_key[key] == FSL_STATE_KEY_HOLD_DOUBLE;
+    return fsl_keyboard_key[key.key] == STATE_KEY_PRESS_DOUBLE;
 }
 
-b8 fsl_is_key_release(const u32 key)
+b8 fsl_is_key_hold(const fsl_key_bind key)
 {
-    return fsl_keyboard_key[key] == FSL_STATE_KEY_RELEASE ||
-        fsl_keyboard_key[key] == FSL_STATE_KEY_RELEASE_DOUBLE;
+    b8 result = TRUE;
+
+    if (
+            fsl_keyboard_key[key.key] != STATE_KEY_HOLD &&
+            fsl_keyboard_key[key.key] != STATE_KEY_HOLD_DOUBLE)
+        result = FALSE;
+
+    if (
+            (key.mod & FLAG_MOD_KEY_LEFT_SHIFT) &&
+            fsl_keyboard_key[FSL_KEY_LEFT_SHIFT] != STATE_KEY_HOLD &&
+            fsl_keyboard_key[FSL_KEY_LEFT_SHIFT] != STATE_KEY_HOLD_DOUBLE)
+        result = FALSE;
+
+    if (
+            (key.mod & FLAG_MOD_KEY_LEFT_CONTROL) &&
+            fsl_keyboard_key[FSL_KEY_LEFT_CONTROL] != STATE_KEY_HOLD &&
+            fsl_keyboard_key[FSL_KEY_LEFT_CONTROL] != STATE_KEY_HOLD_DOUBLE)
+        result = FALSE;
+
+    if (
+            (key.mod & FLAG_MOD_KEY_LEFT_ALT) &&
+            fsl_keyboard_key[FSL_KEY_LEFT_ALT] != STATE_KEY_HOLD &&
+            fsl_keyboard_key[FSL_KEY_LEFT_ALT] != STATE_KEY_HOLD_DOUBLE)
+        result = FALSE;
+
+    if (
+            (key.mod & FLAG_MOD_KEY_LEFT_SUPER) &&
+            fsl_keyboard_key[FSL_KEY_LEFT_SUPER] != STATE_KEY_HOLD &&
+            fsl_keyboard_key[FSL_KEY_LEFT_SUPER] != STATE_KEY_HOLD_DOUBLE)
+        result = FALSE;
+
+    if (
+            (key.mod & FLAG_MOD_KEY_RIGHT_SHIFT) &&
+            fsl_keyboard_key[FSL_KEY_RIGHT_SHIFT] != STATE_KEY_HOLD &&
+            fsl_keyboard_key[FSL_KEY_RIGHT_SHIFT] != STATE_KEY_HOLD_DOUBLE)
+        result = FALSE;
+
+    if (
+            (key.mod & FLAG_MOD_KEY_RIGHT_CONTROL) &&
+            fsl_keyboard_key[FSL_KEY_RIGHT_CONTROL] != STATE_KEY_HOLD &&
+            fsl_keyboard_key[FSL_KEY_RIGHT_CONTROL] != STATE_KEY_HOLD_DOUBLE)
+        result = FALSE;
+
+    if (
+            (key.mod & FLAG_MOD_KEY_RIGHT_ALT) &&
+            fsl_keyboard_key[FSL_KEY_RIGHT_ALT] != STATE_KEY_HOLD &&
+            fsl_keyboard_key[FSL_KEY_RIGHT_ALT] != STATE_KEY_HOLD_DOUBLE)
+        result = FALSE;
+
+    if (
+            (key.mod & FLAG_MOD_KEY_RIGHT_SUPER) &&
+            fsl_keyboard_key[FSL_KEY_RIGHT_SUPER] != STATE_KEY_HOLD &&
+            fsl_keyboard_key[FSL_KEY_RIGHT_SUPER] != STATE_KEY_HOLD_DOUBLE)
+        result = FALSE;
+
+    return result;
+}
+
+b8 fsl_is_key_release(const fsl_key_bind key)
+{
+    return 
+        fsl_keyboard_key[key.key] == STATE_KEY_RELEASE ||
+        fsl_keyboard_key[key.key] == STATE_KEY_RELEASE_DOUBLE;
 }
 
 void fsl_update_mouse_movement(void)
@@ -213,20 +371,20 @@ void fsl_update_key_states(void)
         mouse_release = glfwGetMouseButton(_window, i) == GLFW_RELEASE;
 
         if (mouse_press &&
-                (fsl_mouse_button[i] == FSL_STATE_KEY_IDLE))
+                (fsl_mouse_button[i] == STATE_KEY_IDLE))
         {
-            fsl_mouse_button[i] = FSL_STATE_KEY_PRESS;
+            fsl_mouse_button[i] = STATE_KEY_PRESS;
             continue;
         }
         else if (mouse_release &&
-                (fsl_mouse_button[i] == FSL_STATE_KEY_PRESS || fsl_mouse_button[i] == FSL_STATE_KEY_HOLD))
+                (fsl_mouse_button[i] == STATE_KEY_PRESS || fsl_mouse_button[i] == STATE_KEY_HOLD))
         {
-            fsl_mouse_button[i] = FSL_STATE_KEY_RELEASE;
+            fsl_mouse_button[i] = STATE_KEY_RELEASE;
             continue;
         }
 
-        if (fsl_mouse_button[i] == FSL_STATE_KEY_PRESS)         fsl_mouse_button[i] = FSL_STATE_KEY_HOLD;
-        else if (fsl_mouse_button[i] == FSL_STATE_KEY_RELEASE)  fsl_mouse_button[i] = FSL_STATE_KEY_IDLE;
+        if (fsl_mouse_button[i] == STATE_KEY_PRESS)         fsl_mouse_button[i] = STATE_KEY_HOLD;
+        else if (fsl_mouse_button[i] == STATE_KEY_RELEASE)  fsl_mouse_button[i] = STATE_KEY_IDLE;
     }
 
     for (i = 0; i < FSL_KEYBOARD_KEYS_MAX; ++i)
@@ -236,19 +394,19 @@ void fsl_update_key_states(void)
 
         if (key_press)
         {
-            if (fsl_keyboard_key[i] == FSL_STATE_KEY_IDLE)
+            if (fsl_keyboard_key[i] == STATE_KEY_IDLE)
             {
-                fsl_keyboard_key[i] = FSL_STATE_KEY_PRESS;
+                fsl_keyboard_key[i] = STATE_KEY_PRESS;
                 key_press_start_time[i] = _time;
                 continue;
             }
-            else if (fsl_keyboard_key[i] == FSL_STATE_KEY_LISTEN_DOUBLE)
+            else if (fsl_keyboard_key[i] == STATE_KEY_LISTEN_DOUBLE)
             {
                 if (_time - key_press_start_time[i] <= double_press_time_interval)
-                    fsl_keyboard_key[i] = FSL_STATE_KEY_PRESS_DOUBLE;
+                    fsl_keyboard_key[i] = STATE_KEY_PRESS_DOUBLE;
                 else
                 {
-                    fsl_keyboard_key[i] = FSL_STATE_KEY_PRESS;
+                    fsl_keyboard_key[i] = STATE_KEY_PRESS;
                     key_press_start_time[i] = _time;
                 }
                 continue;
@@ -256,23 +414,23 @@ void fsl_update_key_states(void)
         }
         else if (key_release)
         {
-            if (fsl_keyboard_key[i] == FSL_STATE_KEY_PRESS ||
-                    fsl_keyboard_key[i] == FSL_STATE_KEY_HOLD)
+            if (fsl_keyboard_key[i] == STATE_KEY_PRESS ||
+                    fsl_keyboard_key[i] == STATE_KEY_HOLD)
             {
-                fsl_keyboard_key[i] = FSL_STATE_KEY_RELEASE;
+                fsl_keyboard_key[i] = STATE_KEY_RELEASE;
                 continue;
             }
-            else if (fsl_keyboard_key[i] == FSL_STATE_KEY_PRESS_DOUBLE ||
-                    fsl_keyboard_key[i] == FSL_STATE_KEY_HOLD_DOUBLE)
+            else if (fsl_keyboard_key[i] == STATE_KEY_PRESS_DOUBLE ||
+                    fsl_keyboard_key[i] == STATE_KEY_HOLD_DOUBLE)
             {
-                fsl_keyboard_key[i] = FSL_STATE_KEY_RELEASE_DOUBLE;
+                fsl_keyboard_key[i] = STATE_KEY_RELEASE_DOUBLE;
                 continue;
             }
         }
 
-        if (fsl_keyboard_key[i] == FSL_STATE_KEY_PRESS)                 fsl_keyboard_key[i] = FSL_STATE_KEY_HOLD;
-        else if (fsl_keyboard_key[i] == FSL_STATE_KEY_RELEASE)          fsl_keyboard_key[i] = FSL_STATE_KEY_LISTEN_DOUBLE;
-        if (fsl_keyboard_key[i] == FSL_STATE_KEY_PRESS_DOUBLE)          fsl_keyboard_key[i] = FSL_STATE_KEY_HOLD_DOUBLE;
-        else if (fsl_keyboard_key[i] == FSL_STATE_KEY_RELEASE_DOUBLE)   fsl_keyboard_key[i] = FSL_STATE_KEY_IDLE;
+        if (fsl_keyboard_key[i] == STATE_KEY_PRESS)                 fsl_keyboard_key[i] = STATE_KEY_HOLD;
+        else if (fsl_keyboard_key[i] == STATE_KEY_RELEASE)          fsl_keyboard_key[i] = STATE_KEY_LISTEN_DOUBLE;
+        if (fsl_keyboard_key[i] == STATE_KEY_PRESS_DOUBLE)          fsl_keyboard_key[i] = STATE_KEY_HOLD_DOUBLE;
+        else if (fsl_keyboard_key[i] == STATE_KEY_RELEASE_DOUBLE)   fsl_keyboard_key[i] = STATE_KEY_IDLE;
     }
 }

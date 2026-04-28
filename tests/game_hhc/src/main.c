@@ -64,12 +64,12 @@ static struct /* skybox_data */
     v3f32 horizon_color;
     v3f32 sky_light;
     v3f32 moon_light;
-} skybox_data;
+} skybox_data = {0};
 
 static struct /* refresh_interval */
 {
     u64 fps_string;
-} refresh_interval;
+} refresh_interval = {0};
 
 static void callback_framebuffer_size(i32 size_x, i32 size_y);
 static void callback_key(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -999,8 +999,6 @@ static void draw_everything(void)
 
     if (core.flag.hud)
     {
-        fsl_ui_start(FALSE, FALSE);
-
         if (!core.flag.debug)
             fsl_ui_draw(&texture[TEXTURE_CROSSHAIR], render->size.x / 2, render->size.y / 2,
                     texture[TEXTURE_CROSSHAIR].size.x,
@@ -1146,8 +1144,8 @@ static void draw_everything(void)
                     glGetString(GL_SHADING_LANGUAGE_VERSION),
                     glGetString(GL_VENDOR),
                     glGetString(GL_RENDERER)),
-                render->size.x - SET_MARGIN, render->size.y - SET_MARGIN,
-                FSL_TEXT_ALIGN_RIGHT, FSL_TEXT_ALIGN_BOTTOM, render->size.x,
+                SET_MARGIN, render->size.y - SET_MARGIN,
+                0, FSL_TEXT_ALIGN_BOTTOM, render->size.x,
                 FSL_DIAGNOSTIC_COLOR_TRACE);
 
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
@@ -1217,6 +1215,8 @@ static void draw_everything(void)
 
 int main(int argc, char **argv)
 {
+    u32 i = 0;
+
     if (fsl_engine_init(argc, argv, GAME_DIR_NAME_LOGS, GAME_TITLE, 1280, 1054, NULL,
                 GAME_RELEASE_BUILD | FSL_FLAG_MULTISAMPLE) != FSL_ERR_SUCCESS ||
             game_init() != FSL_ERR_SUCCESS)
@@ -1295,6 +1295,7 @@ int main(int argc, char **argv)
         .near = FSL_CAMERA_CLIP_NEAR_DEFAULT,
     };
 
+    input_init();
     bind_shader_uniforms();
 
 section_menu_title:
@@ -1330,7 +1331,6 @@ cleanup:
 
     assets_free();
     chunking_free();
-    u32 i = 0;
     for (i = 0; i < MESH_COUNT; ++i)
         fsl_mesh_free(&mesh[i]);
     for (i = 0; i < FBO_COUNT; ++i)
