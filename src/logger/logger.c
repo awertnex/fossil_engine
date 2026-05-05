@@ -109,9 +109,11 @@ static u32 _append_file(const str *name, u64 size, u64 length, void *buf);
 
 /* ---- section: implementation --------------------------------------------- */
 
-u32 _fsl_logger_init(int argc, char **argv, u64 flags)
+u32 fsl_logger_init(int argc, char **argv, u64 flags)
 {
     u32 i = 0;
+    str str_in[FSL_STRING_MAX] = {0};
+    str str_out[FSL_LOGGER_STRING_MAX] = {0};
 
     logger_core.log_level_max = FSL_LOG_LEVEL_TRACE;
     snprintf(logger_core.log_dir, PATH_MAX, "%s", FSL_DIR_NAME_LOGS);
@@ -138,27 +140,28 @@ u32 _fsl_logger_init(int argc, char **argv, u64 flags)
         else if (strncmp(argv[2], "logtrace", 8ul) == 0)    logger_core.log_level_max = FSL_LOG_LEVEL_TRACE;
     }
 
-    if (fsl_mem_map_arena(&_fsl_memory_arena_internal,
+    if (fsl_mem_map_arena(&logger_core.arena,
                 FSL_LOGGER_HISTORY_MAX * sizeof(u32) +
                 FSL_LOGGER_HISTORY_MAX * sizeof(str*) +
                 FSL_LOGGER_HISTORY_MAX * FSL_LOGGER_STRING_MAX,
-                "fsl_logger_init()._fsl_memory_arena_internal") != FSL_ERR_SUCCESS ||
+                "fsl_logger_init().logger_core.arena") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&_fsl_memory_arena_internal, (void*)&logger_core.color,
+            fsl_mem_push_arena(&logger_core.arena, (void*)&logger_core.color,
                 FSL_LOGGER_HISTORY_MAX * sizeof(u32),
                 "fsl_logger_init().logger_core.color") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&_fsl_memory_arena_internal, (void*)&logger_core.i,
+            fsl_mem_push_arena(&logger_core.arena, (void*)&logger_core.i,
                 FSL_LOGGER_HISTORY_MAX * sizeof(str*),
                 "fsl_logger_init().logger_core.i") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&_fsl_memory_arena_internal, (void*)&logger_core.buf,
+            fsl_mem_push_arena(&logger_core.arena, (void*)&logger_core.buf,
                 FSL_LOGGER_HISTORY_MAX * FSL_LOGGER_STRING_MAX,
                 "fsl_logger_init().logger_core.buf") != FSL_ERR_SUCCESS)
     {
-        LOGFATAL(FSL_ERR_LOGGER_INIT_FAIL,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("%s\n", "Failed to Initialize Logger, Process Aborted"));
+        fsl_err = FSL_ERR_LOGGER_INIT_FAIL;
+        _get_log_str(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_TERM_COLOR,
+                TRUE, FSL_LOG_LEVEL_FATAL, FSL_ERR_LOGGER_INIT_FAIL, __BASE_FILE__, __LINE__);
+        fprintf(stderr, "%s", str_out);
         return fsl_err;
     }
 
@@ -176,6 +179,7 @@ void fsl_logger_close(void)
     LOGTRACE(0, fsl_logger_stringf("%s\n", "Closing Logger.."));
 
     logger_core.flag &= ~FSL_FLAG_LOGGER_GUI_OPEN;
+    fsl_mem_unmap_arena(&logger_core.arena, "fsl_logger_close().logger_core.arena");
 }
 
 void _fsl_log_output(u32 error_code, u32 flags, const str *file, u64 line,

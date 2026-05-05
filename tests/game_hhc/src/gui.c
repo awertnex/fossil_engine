@@ -1,13 +1,13 @@
-#include "h/common.h"
-#include "h/main.h"
-#include "h/gui.h"
-#include "h/dir.h"
-
 #include "src/h/core.h"
 #include "src/h/diagnostics.h"
 #include "src/logger/log.h"
 #include "src/h/memory.h"
 #include "src/h/string.h"
+
+#include "h/common.h"
+#include "h/main.h"
+#include "h/gui.h"
+#include "h/dir.h"
 
 #include <stdio.h>
 #include <string.h>

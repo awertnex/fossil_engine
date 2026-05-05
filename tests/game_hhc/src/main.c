@@ -26,8 +26,6 @@ static struct hhc_uniform uniform = {0};
 fsl_projection projection_world = {0};
 fsl_projection projection_hud = {0};
 
-fsl_font *font[FONT_COUNT] = {0};
-
 static player _player =
 {
     .name = "Lily",
@@ -1203,9 +1201,7 @@ static void draw_everything(void)
 
 int main(int argc, char **argv)
 {
-    u32 i = 0;
-
-    if (fsl_engine_init(argc, argv, GAME_TITLE, 1280, 1054, NULL,
+    if (fsl_engine_init(argc, argv, GAME_TITLE, 1280, 1054,
                 GAME_RELEASE_BUILD | FSL_FLAG_MULTISAMPLE) != FSL_ERR_SUCCESS ||
             game_init() != FSL_ERR_SUCCESS)
         goto cleanup;
@@ -1250,11 +1246,6 @@ int main(int argc, char **argv)
     callback_scroll(render->window, 0.0f, 0.0f);
 
     /* ---- set graphics ---------------------------------------------------- */
-
-    font[FONT_REG] =        &fsl_font_buf[FSL_FONT_INDEX_DEJAVU_SANS];
-    font[FONT_REG_BOLD] =   &fsl_font_buf[FSL_FONT_INDEX_DEJAVU_SANS_BOLD];
-    font[FONT_MONO] =       &fsl_font_buf[FSL_FONT_INDEX_DEJAVU_SANS_MONO];
-    font[FONT_MONO_BOLD] =  &fsl_font_buf[FSL_FONT_INDEX_DEJAVU_SANS_MONO_BOLD];
 
     if (assets_init() != FSL_ERR_SUCCESS)
         goto cleanup;
@@ -1311,12 +1302,6 @@ cleanup:
 
     assets_free();
     chunking_free();
-    for (i = 0; i < MESH_COUNT; ++i)
-        fsl_mesh_free(&mesh[i]);
-    for (i = 0; i < FBO_COUNT; ++i)
-        fsl_fbo_free(&fbo[i]);
-    for (i = 0; i < SHADER_COUNT; ++i)
-        fsl_shader_program_free(&shader[i]);
     rand_free();
 
     fsl_mem_unmap_arena(&_memory_arena_internal, "main()._memory_arena_internal");

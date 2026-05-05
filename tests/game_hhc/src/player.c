@@ -1,12 +1,12 @@
-#include "h/chunking.h"
-#include "h/common.h"
-#include "h/player.h"
-#include "h/world.h"
-
 #include "src/h/collision.h"
 #include "src/logger/log.h"
 #include "src/h/math.h"
 #include "src/h/time.h"
+
+#include "h/chunking.h"
+#include "h/common.h"
+#include "h/player.h"
+#include "h/world.h"
 
 #include <math.h>
 

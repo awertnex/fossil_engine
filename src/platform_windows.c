@@ -140,12 +140,16 @@ u32 _fsl_mem_map(void **x, u64 size, const str *name, const str *file, u64 line)
 
     if (!x)
     {
-        fsl_err = FSL_ERR_POINTER_NULL;
+        LOGERROREX(FSL_ERR_POINTER_NULL, 0,
+                file, line,
+                MSG_MEM_MAP_REASON_FAIL(name, *x, size, "Pointer `NULL`"));
         return fsl_err;
     }
     if (*x)
     {
-        fsl_err = FSL_ERR_POINTER_NOT_NULL;
+        LOGERROREX(FSL_ERR_POINTER_NOT_NULL, 0,
+                file, line,
+                MSG_MEM_MAP_REASON_FAIL(name, *x, size, "Memory Already Mapped"));
         return fsl_err;
     }
 
@@ -157,7 +161,7 @@ u32 _fsl_mem_map(void **x, u64 size, const str *name, const str *file, u64 line)
     {
         LOGERROREX(FSL_ERR_MEM_MAP_FAIL, 0,
                 file, line,
-                MSG_MEM_MAP_FAIL(name, *x, size));
+                MSG_MEM_MAP_REASON_FAIL(name, *x, size, "`VirtualAlloc()` Failed"));
         return fsl_err;
     }
 

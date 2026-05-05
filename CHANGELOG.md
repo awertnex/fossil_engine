@@ -10,6 +10,13 @@
 ## v0.7.0-dev (current)
 
 #### changes
+- (2026 05 05): removed parameter `_render` from function `fsl_engine_init()`
+- (2026 05 05): added parameter `bindless` to function `fsl_texture_init()`
+                and combined `fsl_texture_generate()` with `fsl_texture_init()`
+- (2026 05 05): removed member `format_internal` and `buf` from struct
+                `fsl_texture`
+- (2026 05 05): removed parameter `format_internal` from functions
+                `fsl_texture_init()` and `fsl_texture_generate()`
 - (2026 05 04): added parameters `name`, `file` and `path` to functions:
                 - `fsl_texture_init()`
                 - `fsl_mesh_generate()`

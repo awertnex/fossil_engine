@@ -99,7 +99,7 @@
 #define MSG_MEM_REALLOC_FAIL(name, address)                 fsl_logger_stringf("Failed to Reallocate Memory %s[%p]\n", name, address)
 #define MSG_MEM_REALLOC_POINTER_NULL_FAIL(name)             fsl_logger_stringf("Failed to Reallocate Memory %s[%p], Pointer `NULL`\n", name, NULL)
 #define MSG_MEM_REALLOC(name, address_old, address_new, size) fsl_logger_stringf("Memory Reallocated %s[%p -> %p][%"PRIu64"B]\n", name, address_old, address_new, size)
-#define MSG_MEM_MAP_FAIL(name, address, size)               fsl_logger_stringf("Failed to Map Memory %s[%p][%"PRIu64"B]\n", name, address, size)
+#define MSG_MEM_MAP_REASON_FAIL(name, address, size, reason) fsl_logger_stringf("Failed to Map Memory %s[%p][%"PRIu64"B], %s\n", name, address, size, reason)
 #define MSG_MEM_MAP(name, address, size)                    fsl_logger_stringf("Memory Mapped %s[%p][%"PRIu64"B]\n", name, address, size)
 #define MSG_MEM_COMMIT_REASON_FAIL(name, address_base, address_committed, size, reason) fsl_logger_stringf("Failed to Commit Memory %s[base: %p][commit: %p][%"PRIu64"B], %s\n", name, address_base, address_committed, size, reason)
 #define MSG_MEM_COMMIT(name, address_base, address_committed, size) fsl_logger_stringf("Memory Committed %s[base: %p][commit: %p][%"PRIu64"B]\n", name, address_base, address_committed, size)
@@ -110,7 +110,7 @@
 #define MSG_MEM_FREE(name, address, size)                   fsl_logger_stringf("Memory Unloaded %s[%p][%"PRIu64"B]\n", name, address, size)
 #define MSG_MEM_CLEAR(name, address, size)                  fsl_logger_stringf("Memory Cleared %s[%p][%"PRIu64"B]\n", name, address, size)
 #define MSG_MEM_MAP_ARENA_POINTER_NULL_FAIL(name, size)     fsl_logger_stringf("Failed to Map Memory Arena %s[%p][%"PRIu64"B], Pointer `NULL`\n", name, NULL, size)
-#define MSG_MEM_MAP_ARENA_SIZE_TOO_SMALL_FAIL(name, address) fsl_logger_stringf("Failed to Map Memory Arena %s[%p], Size Too Small\n", name, address)
+#define MSG_MEM_MAP_ARENA_REASON_FAIL(name, address, size, reason) fsl_logger_stringf("Failed to Map Memory Arena %s[%p][%"PRIu64"], %s\n", name, address, size, reason)
 #define MSG_MEM_MAP_ARENA_FAIL(name, address, size)         fsl_logger_stringf("Failed to Map Memory Arena %s[%p][%"PRIu64"], `_fsl_mem_map()` Failed\n", name, address, size)
 #define MSG_MEM_MAP_ARENA(name, address, size_arena, size_memb) fsl_logger_stringf("Memory Arena Mapped %s[%p][%"PRIu64"B], Memb [%"PRIu64"B]\n", name, address, size_arena, size_memb)
 #define MSG_MEM_PUSH_ARENA_REASON_FAIL(name, address, size, reason) fsl_logger_stringf("Failed to Push Memory Arena %s[%p][%"PRIu64"B], %s\n", name, address, size, reason)
@@ -132,20 +132,12 @@
 
 /* ---- section: data_and_assets -------------------------------------------- */
 
-#define MSG_SHADER_INIT(name, id)                           fsl_logger_stringf("Shader %s[%u] Loaded\n", name, id)
-#define MSG_SHADER_UNLOAD(name, id)                         fsl_logger_stringf("Shader %s[%u] Unloaded\n", name, id)
-#define MSG_SHADER_PROGRAM_LOAD(name, id)                   fsl_logger_stringf("Shader Program %s[%u] Loaded\n", name, id)
-#define MSG_SHADER_PROGRAM_UNLOAD(name, id)                 fsl_logger_stringf("Shader Program %s[%u] Unloaded\n", name, id)
 #define MSG_FBO_INIT_FAIL(id, status)                       fsl_logger_stringf("Failed to Initialize FBO[%u], Status[%d]\n", id, status)
-#define MSG_TEXTURE_LOAD_FAIL(name)                         MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Texture", name, "`stbi_load()` Failed")
-#define MSG_TEXTURE_GENERATE(name, id)                      fsl_logger_stringf("Texture %s[%u] Generated\n", name, id)
+#define MSG_TEXTURE_LOAD_REASON_FAIL(name, reason)          MSG_ACTION_SUBJECT_REASON_ERROR("Load Texture", name, reason)
+#define MSG_TEXTURE_LOAD(name, id)                          fsl_logger_stringf("Texture %s[%u] Loaded\n", name, id)
 #define MSG_TEXTURE_UNLOAD(name, id)                        fsl_logger_stringf("Texture %s[%u] Unloaded\n", name, id)
 #define MSG_TEXTURE_HANDLE_CREATE(texture_id, handle_id)    fsl_logger_stringf("Handle[%"PRIu64"] for Texture[%u] Created\n", handle_id, texture_id)
 #define MSG_TEXTURE_HANDLE_DESTROY(texture_id, handle_id)   fsl_logger_stringf("Handle[%"PRIu64"] for Texture[%u] Destroyed\n", handle_id, texture_id)
-#define MSG_FONT_UNLOAD(name)                               fsl_logger_stringf("Font '%s' Unloaded\n", name)
-#define MSG_FONT_LOAD(name)                                 fsl_logger_stringf("Font '%s' Loaded\n", name)
-#define MSG_UPDATE_RENDER_SETTINGS_FAIL                     "Something Went Wrong While Updating Render Settings\n"
-
 #define LOG_MESH_GENERATE(name) \
 { \
     if (fsl_err == FSL_ERR_SUCCESS) \
@@ -153,5 +145,12 @@
     else if (fsl_err == FSL_ERR_MESH_GENERATION_FAIL) \
         LOGERROR(FSL_ERR_MESH_GENERATION_FAIL, 0, fsl_logger_stringf("Failed to Generate Mesh '%s'\n", name)); \
 }
+#define MSG_SHADER_INIT(name, id)                           fsl_logger_stringf("Shader %s[%u] Loaded\n", name, id)
+#define MSG_SHADER_UNLOAD(name, id)                         fsl_logger_stringf("Shader %s[%u] Unloaded\n", name, id)
+#define MSG_SHADER_PROGRAM_LOAD(name, id)                   fsl_logger_stringf("Shader Program %s[%u] Loaded\n", name, id)
+#define MSG_SHADER_PROGRAM_UNLOAD(name, id)                 fsl_logger_stringf("Shader Program %s[%u] Unloaded\n", name, id)
+#define MSG_FONT_UNLOAD(name)                               fsl_logger_stringf("Font '%s' Unloaded\n", name)
+#define MSG_FONT_LOAD(name)                                 fsl_logger_stringf("Font '%s' Loaded\n", name)
+#define MSG_UPDATE_RENDER_SETTINGS_FAIL                     "Something Went Wrong While Updating Render Settings\n"
 
 #endif /* FSL_LOG_H */

@@ -1,14 +1,14 @@
+#include "src/h/input.h"
+#include "src/logger/log.h"
+#include "src/h/math.h"
+#include "src/h/time.h"
+
 #include "h/assets.h"
 #include "h/chunking.h"
 #include "h/gui.h"
 #include "h/input.h"
 #include "h/player.h"
 #include "h/world.h"
-
-#include "src/h/input.h"
-#include "src/logger/log.h"
-#include "src/h/math.h"
-#include "src/h/time.h"
 
 #include <math.h>
 

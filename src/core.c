@@ -93,7 +93,7 @@ static void fbo_blit_msaa_internal(GLuint fbo);
 /* ---- section: init ------------------------------------------------------- */
 
 u32 fsl_engine_init(int argc, char **argv, const str *title,
-        i32 size_x, i32 size_y, fsl_render *_render, u64 flags)
+        i32 size_x, i32 size_y, u64 flags)
 {
     u32 i = 0;
     b8 is_release = flags & FSL_FLAG_RELEASE_BUILD;
@@ -107,6 +107,16 @@ u32 fsl_engine_init(int argc, char **argv, const str *title,
         fsl_get_time_nsecf(); /* initialize start time */
     }
 
+    if (fsl_logger_init(argc, argv, is_release) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    if (
+            fsl_mem_map_arena(&_fsl_memory_arena_internal, 1,
+                "fsl_engine_init()._fsl_memory_arena_internal") != FSL_ERR_SUCCESS ||
+            fsl_mem_map_arena(&_fsl_memory_arena_debug_internal, 1,
+                "fsl_engine_init()._fsl_memory_arena_debug_internal") != FSL_ERR_SUCCESS)
+        goto cleanup;
+
     if (!FSL_DIR_PROC_ROOT)
     {
         if (fsl_get_path_bin_root(&FSL_DIR_PROC_ROOT) != FSL_ERR_SUCCESS)
@@ -115,27 +125,13 @@ u32 fsl_engine_init(int argc, char **argv, const str *title,
     }
 
     fsl_engine_get_string(render->title, FSL_STR_INDEX_ENGINE_TITLE);
-    render->size.x = FSL_RENDER_WIDTH_DEFAULT;
-    render->size.y = FSL_RENDER_HEIGHT_DEFAULT;
-
-    if (
-            fsl_mem_map_arena(&_fsl_memory_arena_internal, 1,
-                "fsl_engine_init()._fsl_memory_arena_internal") != FSL_ERR_SUCCESS ||
-            fsl_mem_map_arena(&_fsl_memory_arena_debug_internal, 1,
-                "fsl_engine_init()._fsl_memory_arena_debug_internal") != FSL_ERR_SUCCESS ||
-
-            _fsl_logger_init(argc, argv, is_release) != FSL_ERR_SUCCESS)
-        goto cleanup;
-
     glfwSetErrorCallback(glfw_callback_error);
-
-    if (_render && fsl_change_render(_render) != FSL_ERR_SUCCESS)
-        goto cleanup;
 
     if (
             fsl_glfw_init(flags & FSL_FLAG_MULTISAMPLE) != FSL_ERR_SUCCESS ||
             fsl_window_init(title, size_x, size_y) != FSL_ERR_SUCCESS ||
-            fsl_glad_init() != FSL_ERR_SUCCESS)
+            fsl_glad_init() != FSL_ERR_SUCCESS ||
+            fsl_assets_init() != FSL_ERR_SUCCESS)
         goto cleanup;
 
     glfwSwapInterval(0);
@@ -146,8 +142,6 @@ u32 fsl_engine_init(int argc, char **argv, const str *title,
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_MULTISAMPLE);
-
-    fsl_assets_init();
 
     if (flags & FSL_FLAG_MULTISAMPLE)
     {
@@ -360,7 +354,9 @@ u32 fsl_window_init(const str *title, i32 size_x, i32 size_y)
 {
     if (title) snprintf(render->title, NAME_MAX, "%s", title);
     if (size_x) render->size.x = fsl_clamp_i32(size_x, FSL_RENDER_WIDTH_MIN, FSL_RENDER_WIDTH_MAX);
+    else render->size.x = FSL_RENDER_WIDTH_DEFAULT;
     if (size_y) render->size.y = fsl_clamp_i32(size_y, FSL_RENDER_HEIGHT_MIN, FSL_RENDER_HEIGHT_MAX);
+    else render->size.y = FSL_RENDER_HEIGHT_DEFAULT;
 
     render->window = glfwCreateWindow(render->size.x, render->size.y, render->title, NULL, NULL);
 

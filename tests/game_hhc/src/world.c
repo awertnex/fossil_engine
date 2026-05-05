@@ -1,11 +1,3 @@
-#include "h/chunking.h"
-#include "h/common.h"
-#include "h/diagnostics.h"
-#include "h/dir.h"
-#include "h/gui.h"
-#include "h/main.h"
-#include "h/world.h"
-
 #include "src/h/common.h"
 #include "src/h/dir.h"
 #include "src/h/limits.h"
@@ -13,6 +5,14 @@
 #include "src/h/math.h"
 #include "src/h/string.h"
 #include "src/h/time.h"
+
+#include "h/chunking.h"
+#include "h/common.h"
+#include "h/diagnostics.h"
+#include "h/dir.h"
+#include "h/gui.h"
+#include "h/main.h"
+#include "h/world.h"
 
 #include <stdio.h>
 #include <string.h>

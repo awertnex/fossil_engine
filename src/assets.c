@@ -47,69 +47,62 @@ static f32 vbo_data_unit_quad_internal[] =
     -1.0f, -1.0f, 0.0f, 0.0f,
     -1.0f, 1.0f, 0.0f, 1.0f,
     1.0f, 1.0f, 1.0f, 1.0f,
-    1.0f, -1.0f, 1.0f, 0.0f,
+    1.0f, -1.0f, 1.0f, 0.0f
 };
-
-/* ---- section: signatures ------------------------------------------------- */
-
-/*! -- INTERNAL USE ONLY --;
- *
- *  @brief generate texture for `OpenGL` and upload to `GPU` memory.
- *
- *  @param id where to store texture ID.
- *  @param buf texture data to upload to `gpu` memory.
- *
- *  @remark called automatically from @ref fsl_texture_generate() if texture data is
- *  already loaded into a texture by calling @ref fsl_texture_init().
- *
- *  @return non-zero on failure and @ref fsl_err is set accordingly.
- */
-static u32 _fsl_texture_generate(GLuint *id, const GLint format_internal,  const GLint format,
-        GLint filter, v2i32 size, void *buf, b8 grayscale);
 
 /* ---- section: asset ------------------------------------------------------ */
 
-u32 fsl_asset_init(fsl_asset *asset, enum fsl_asset_type type, const str *name, const str *file, const str *path)
+u32 fsl_asset_init(fsl_asset *asset, enum fsl_asset_type type,
+        const str *name, const str *file, const str *path)
 {
-    if (!asset)
+    if (asset == NULL)
     {
         LOGERROR(FSL_ERR_POINTER_NULL, 0,
-                MSG_ACTION_REASON_ERROR("Initialize Asset", "Pointer `NULL`"));
+                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Asset", name, "Pointer `NULL`"));
         return fsl_err;
     }
 
+    asset->type = type;
+
     if (name && name[0])
     {
-        if (!asset->name && fsl_mem_push_arena(&_fsl_memory_arena_debug_internal, (void*)&asset->name,
-                    NAME_MAX, "fsl_asset_init().asset->name") != FSL_ERR_SUCCESS)
+        if (asset->name == NULL && fsl_mem_push_arena(&_fsl_memory_arena_debug_internal,
+                    (void*)&asset->name, NAME_MAX, "fsl_asset_init().asset->name") != FSL_ERR_SUCCESS)
             goto cleanup;
-        if (!asset->name[0])
+        if (asset->name[0] == 0)
             snprintf(asset->name, NAME_MAX, "%s", name);
+    }
+
+    if (0)
+    {
+        if (asset->name_internal == NULL && fsl_mem_push_arena(&_fsl_memory_arena_debug_internal,
+                    (void*)&asset->name_internal, NAME_MAX, "fsl_asset_init().asset->name_internal") != FSL_ERR_SUCCESS)
+            goto cleanup;
+        if (asset->name_internal[0] == 0)
+            snprintf(asset->name_internal, NAME_MAX, "%s", name);
     }
 
     if (file && file[0])
     {
-        if (!asset->file && fsl_mem_push_arena(&_fsl_memory_arena_debug_internal, (void*)&asset->file,
-                    NAME_MAX, "fsl_asset_init().asset->file") != FSL_ERR_SUCCESS)
+        if (asset->file == NULL && fsl_mem_push_arena(&_fsl_memory_arena_debug_internal,
+                    (void*)&asset->file, NAME_MAX, "fsl_asset_init().asset->file") != FSL_ERR_SUCCESS)
             goto cleanup;
-        if (!asset->file[0])
-        snprintf(asset->file, NAME_MAX, "%s", file);
+        if (asset->file[0] == 0)
+            snprintf(asset->file, NAME_MAX, "%s", file);
     }
 
     if (path && path[0])
     {
-        if (!asset->path && fsl_mem_push_arena(&_fsl_memory_arena_debug_internal, (void*)&asset->path,
-                    PATH_MAX, "fsl_asset_init().asset->path") != FSL_ERR_SUCCESS)
+        if (asset->path == NULL && fsl_mem_push_arena(&_fsl_memory_arena_debug_internal,
+                    (void*)&asset->path, PATH_MAX, "fsl_asset_init().asset->path") != FSL_ERR_SUCCESS)
             goto cleanup;
-        if (!asset->path[0])
+        if (asset->path[0] == 0)
         {
             snprintf(asset->path, PATH_MAX, "%s", path);
             fsl_check_slash(asset->path);
             fsl_posix_slash(asset->path);
         }
     }
-
-    asset->type = type;
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -122,8 +115,6 @@ cleanup:
 
 u32 fsl_assets_init(void)
 {
-    i32 i = 0;
-
     /* ---- engine framebuffers --------------------------------------------- */
 
     if (
@@ -140,32 +131,28 @@ u32 fsl_assets_init(void)
     if (
             fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
                 "Panel Active", "panel_active.png", FSL_DIR_NAME_TEXTURES,
-                GL_RGB, GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE) != FSL_ERR_SUCCESS ||
+                GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS ||
 
             fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_INACTIVE],
                 "Panel Inactive", "panel_inactive.png", FSL_DIR_NAME_TEXTURES,
-                GL_RGB, GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE) != FSL_ERR_SUCCESS ||
+                GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS ||
 
             fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE],
                 "Panel Debug 9-Slice", "panel_debug_nine_slice.png", FSL_DIR_NAME_TEXTURES,
-                GL_RGB, GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE) != FSL_ERR_SUCCESS ||
+                GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS ||
 
             fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_SELECTED],
                 "Button Selected", "button_selected.png", FSL_DIR_NAME_TEXTURES,
-                GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE) != FSL_ERR_SUCCESS ||
+                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS ||
 
             fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_ACTIVE],
                 "Button Active", "button_active.png", FSL_DIR_NAME_TEXTURES,
-                GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE) != FSL_ERR_SUCCESS ||
+                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS ||
 
             fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_INACTIVE],
                     "Button Inactive", "button_inactive.png", FSL_DIR_NAME_TEXTURES,
-                    GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE) != FSL_ERR_SUCCESS)
+                    GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
                         return fsl_err;
-
-    for (i = 0; i < FSL_TEXTURE_INDEX_COUNT; ++i)
-        if (fsl_texture_generate(&fsl_texture_buf[i], FALSE) != FSL_ERR_SUCCESS)
-            return fsl_err;
 
     /* ---- engine meshes --------------------------------------------------- */
 
@@ -335,7 +322,7 @@ mesh_fbo_init:
 
     mesh_fbo->vbo_len = fsl_arr_len(vbo_data_unit_quad_internal);
     if (fsl_mem_push_arena(&_fsl_memory_arena_internal, (void*)&mesh_fbo->vbo_data, sizeof(GLfloat) * mesh_fbo->vbo_len,
-                "fbo_init().mesh_fbo.vbo_data") != FSL_ERR_SUCCESS)
+                "fsl_fbo_init().mesh_fbo->vbo_data") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     memcpy(mesh_fbo->vbo_data, vbo_data_unit_quad_internal, sizeof(GLfloat) * mesh_fbo->vbo_len);
@@ -449,44 +436,42 @@ void fsl_fbo_free(fsl_fbo *fbo)
 
 /* ---- section: texture ---------------------------------------------------- */
 
-u32 fsl_texture_init(fsl_texture *texture, const str *name, const str *file, const str *path,
-        const GLint format_internal, const GLint format, GLint filter, int channels, b8 grayscale)
+u32 fsl_texture_init(fsl_texture *texture,
+        const str *name, const str *file, const str *path,
+        const GLint format, GLint filter, int channels, b8 grayscale, b8 bindless)
 {
-    str temp[PATH_MAX] = {0};
+    str path_temp[PATH_MAX] = {0};
+    u8 *buf = NULL;
 
-    snprintf(temp, PATH_MAX, "%s%s", path, file);
-    if (fsl_is_file_exists(temp, TRUE) != FSL_ERR_SUCCESS)
-        return fsl_err;
+    if (fsl_asset_init(&texture->asset, FSL_ASSET_TEXTURE, name, file, path) != FSL_ERR_SUCCESS)
+        goto cleanup;
 
-    fsl_asset_init(&texture->asset, FSL_ASSET_TEXTURE, name, file, path);
+    snprintf(path_temp, PATH_MAX, "%s%s", texture->asset.path, texture->asset.file);
+    if (fsl_is_file_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
+        goto cleanup;
 
-    texture->buf = (u8*)stbi_load(temp, &texture->size.x, &texture->size.y, &texture->channels, channels);
-    if (texture->buf == NULL)
+    buf = (u8*)stbi_load(path_temp, &texture->size.x, &texture->size.y, &texture->channels, channels);
+    if (buf == NULL)
     {
         LOGERROR(FSL_ERR_IMAGE_LOAD_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_TEXTURE_LOAD_FAIL(texture->asset.name));
-        return fsl_err;
+                MSG_TEXTURE_LOAD_REASON_FAIL(texture->asset.name, "`stbi_load()` Failed"));
+        goto cleanup;
     }
 
-    texture->format = format;
-    texture->format_internal = format_internal;
-    texture->filter = filter;
-    texture->grayscale = grayscale;
-    texture->asset.loaded = TRUE;
+    glGenTextures(1, &texture->asset.id);
+    glBindTexture(GL_TEXTURE_2D, texture->asset.id);
+    glTexImage2D(GL_TEXTURE_2D, 0, format,
+            texture->size.x, texture->size.y, 0, format, GL_UNSIGNED_BYTE, buf);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    if (grayscale)
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
-    fsl_err = FSL_ERR_SUCCESS;
-    return fsl_err;
-}
-
-u32 fsl_texture_generate(fsl_texture *texture, b8 bindless)
-{
-    _fsl_texture_generate(&texture->asset.id, texture->format_internal, texture->format,
-            texture->filter, texture->size, texture->buf, texture->grayscale);
-
-    texture->generated = TRUE;
-
-    if (fsl_err == FSL_ERR_SUCCESS && bindless)
+    if (bindless)
     {
         texture->bindless = TRUE;
         texture->handle = glGetTextureHandleARB(texture->asset.id);
@@ -495,32 +480,25 @@ u32 fsl_texture_generate(fsl_texture *texture, b8 bindless)
                 MSG_TEXTURE_HANDLE_CREATE(texture->handle, texture->asset.id));
     }
 
-    if (texture->buf)
-        stbi_image_free(texture->buf);
+    if (buf)
+        stbi_image_free(buf);
+
+    texture->asset.loaded = TRUE;
+    texture->format = format;
+    texture->filter = filter;
+    texture->grayscale = grayscale;
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_TEXTURE_GENERATE(texture->asset.name, texture->asset.id));
-
-    return fsl_err;
-}
-
-static u32 _fsl_texture_generate(GLuint *id, const GLint format_internal,  const GLint format,
-        GLint filter, v2i32 size, void *buf, b8 grayscale)
-{
-    glGenTextures(1, id);
-    glBindTexture(GL_TEXTURE_2D, *id);
-    glTexImage2D(GL_TEXTURE_2D, 0, format_internal,
-            size.x, size.y, 0, format, GL_UNSIGNED_BYTE, buf);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    if (grayscale)
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
+            MSG_TEXTURE_LOAD(texture->asset.name, texture->asset.id));
 
     fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+
+cleanup:
+
+    if (buf)
+        stbi_image_free(buf);
+    fsl_texture_free(texture);
     return fsl_err;
 }
 
@@ -528,7 +506,7 @@ void fsl_texture_free(fsl_texture *texture)
 {
     fsl_texture notexture = {0};
 
-    if (!texture)
+    if (texture == NULL)
         return;
 
     if (texture->bindless)
@@ -539,9 +517,9 @@ void fsl_texture_free(fsl_texture *texture)
                 MSG_TEXTURE_HANDLE_DESTROY(texture->handle, texture->asset.id));
     }
 
-    if (texture->generated)
+    if (texture->asset.loaded)
     {
-        texture->generated = FALSE;
+        texture->asset.loaded = FALSE;
         glDeleteTextures(1, &texture->asset.id);
         LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
                 MSG_TEXTURE_UNLOAD(texture->asset.name, texture->asset.id));
@@ -630,13 +608,16 @@ void fsl_mesh_free(fsl_mesh *mesh)
 u32 fsl_font_init(fsl_font *font, u32 resolution,
         const str *name, const str *file, const str *path)
 {
-    f32 scale = 0.0f;
     u32 i = 0;
+    str path_temp[PATH_MAX] = {0};
+    unsigned char *buf = NULL;
+    u64 buf_len = 0;
+    u8 *bitmap = NULL;
+    f32 scale = 0.0f;
+    int glyph_index = 0;
     fsl_glyph *g = NULL;
     i32 x0 = 0, y0 = 0;
     i32 x1 = 0, y1 = 0;
-    int glyph_index = 0;
-    str path_temp[PATH_MAX] = {0};
 
     if (fsl_asset_init(&font->asset, FSL_ASSET_FONT, name, file, path) != FSL_ERR_SUCCESS)
         return fsl_err;
@@ -650,22 +631,14 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     }
 
     snprintf(path_temp, PATH_MAX, "%s%s", font->asset.path, font->asset.file);
-    if (strlen(path_temp) >= PATH_MAX)
-    {
-        LOGERROR(FSL_ERR_PATH_TOO_LONG,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Font", font->asset.name, "Path Too Long"));
-        return fsl_err;
-    }
-
     if (fsl_is_file_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    font->buf_len = fsl_get_file_contents(path_temp, (void*)&font->buf, 1, TRUE);
-    if (!font->buf)
+    buf_len = fsl_get_file_contents(path_temp, (void*)&buf, 1, TRUE);
+    if (buf == NULL)
         return fsl_err;
 
-    if (!stbtt_InitFont(&font->info, (const unsigned char*)font->buf, 0))
+    if (!stbtt_InitFont(&font->info, buf, 0))
     {
         LOGERROR(FSL_ERR_FONT_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
@@ -673,7 +646,7 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
         goto cleanup;
     }
 
-    if (fsl_mem_alloc((void*)&font->bitmap, FSL_GLYPH_MAX * resolution * resolution,
+    if (fsl_mem_alloc((void*)&bitmap, FSL_GLYPH_MAX * resolution * resolution,
                 fsl_stringf("fsl_font_init().%s", font->asset.name)) != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -702,7 +675,7 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
         g->loaded = TRUE;
 
         if (!stbtt_IsGlyphEmpty(&font->info, glyph_index))
-            stbtt_MakeGlyphBitmapSubpixel(&font->info, font->bitmap + i * resolution * resolution,
+            stbtt_MakeGlyphBitmapSubpixel(&font->info, bitmap + i * resolution * resolution,
                     resolution, resolution, resolution, scale, scale, 0.0f, 0.0f, glyph_index);
     }
 
@@ -711,14 +684,16 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     glGenTextures(1, &font->asset.id);
     glBindTexture(GL_TEXTURE_2D_ARRAY, font->asset.id);
     glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RED, resolution, resolution, FSL_GLYPH_MAX);
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RED, resolution, resolution, FSL_GLYPH_MAX, 0, GL_RED, GL_UNSIGNED_BYTE, font->bitmap);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RED, resolution, resolution, FSL_GLYPH_MAX, 0, GL_RED, GL_UNSIGNED_BYTE, bitmap);
 
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    fsl_mem_free((void*)&font->bitmap, FSL_GLYPH_MAX * resolution * resolution,
+    fsl_mem_free((void*)&buf, buf_len,
+            fsl_stringf("fsl_font_init().%s", font->asset.name));
+    fsl_mem_free((void*)&bitmap, FSL_GLYPH_MAX * resolution * resolution,
             fsl_stringf("fsl_font_init().%s", font->asset.name));
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
@@ -730,6 +705,10 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
 
 cleanup:
 
+    fsl_mem_free((void*)&buf, buf_len,
+            fsl_stringf("fsl_font_init().%s", font->asset.name));
+    fsl_mem_free((void*)&bitmap, FSL_GLYPH_MAX * resolution * resolution,
+            fsl_stringf("fsl_font_init().%s", font->asset.name));
     fsl_font_free(font);
     return fsl_err;
 }
@@ -745,8 +724,6 @@ void fsl_font_free(fsl_font *font)
         font->asset.loaded = FALSE;
         glDeleteTextures(1, &font->asset.id);
     }
-    fsl_mem_free((void*)&font->buf, font->buf_len, font->asset.name);
-    fsl_mem_free((void*)&font->bitmap, FSL_GLYPH_MAX * font->resolution * font->resolution, font->asset.name);
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             MSG_FONT_UNLOAD(font->asset.name));

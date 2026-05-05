@@ -22,7 +22,7 @@ enum /* shader_index */
     SHADER_POST_PROCESSING,
     SHADER_VOXEL,
     SHADER_BOUNDING_BOX,
-    SHADER_COUNT,
+    SHADER_COUNT
 }; /* shader_index */
 
 enum /* texture_index */
@@ -34,7 +34,7 @@ enum /* texture_index */
     TEXTURE_SKYBOX_STARS,
     TEXTURE_SUN,
     TEXTURE_MOON,
-    TEXTURE_COUNT,
+    TEXTURE_COUNT
 }; /* texture_index */
 
 enum /* texture_block_index */
@@ -56,7 +56,7 @@ enum /* texture_block_index */
     TEXTURE_BLOCK_WOOD_OAK_LOG_TOP,
     TEXTURE_BLOCK_WOOD_OAK_PLANKS,
     TEXTURE_BLOCK_BLOOD,
-    TEXTURE_BLOCK_COUNT,
+    TEXTURE_BLOCK_COUNT
 }; /* texture_block_index */
 
 enum block_id
@@ -75,7 +75,7 @@ enum block_id
     BLOCK_WOOD_OAK_LOG,
     BLOCK_WOOD_OAK_PLANKS,
     BLOCK_BLOOD,
-    BLOCK_COUNT,
+    BLOCK_COUNT
 }; /* block_id */
 
 enum block_state
@@ -85,16 +85,16 @@ enum block_state
 
 typedef struct block
 {
-    str name[NAME_MAX];
-    enum block_state state;
+    fsl_asset asset;
     u32 texture_index[6]; /* px, nx, py, ny, pz, nz */
+    enum block_state state;
     f32 friction;
 } block;
 
-extern fsl_mesh *mesh;
+extern fsl_texture *texture;
 extern fsl_fbo *fbo;
-extern fsl_shader_program shader[SHADER_COUNT];
-extern fsl_texture texture[TEXTURE_COUNT];
+extern fsl_mesh *mesh;
+extern fsl_shader_program *shader;
 
 extern block *blocks;
 
@@ -108,7 +108,7 @@ void assets_free(void);
  *
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
-u32 block_texture_init(u32 index, str *name);
+u32 block_texture_init(u32 index, const str *name, const str *file);
 
 /*! @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */

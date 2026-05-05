@@ -368,6 +368,14 @@ u32 _fsl_mem_map_arena(fsl_mem_arena *x, u64 size, const str *name, const str *f
         return fsl_err;
     }
 
+    if (size == 0)
+    {
+        LOGERROREX(FSL_ERR_SIZE_TOO_SMALL, 0,
+                file, line,
+                MSG_MEM_MAP_ARENA_REASON_FAIL(name, x, size, "Size Too Small"));
+        return fsl_err;
+    }
+
     fsl_mem_request_page_size();
 
     if (x->buf)
@@ -404,8 +412,8 @@ u32 _fsl_mem_map_arena(fsl_mem_arena *x, u64 size, const str *name, const str *f
 
 u32 _fsl_mem_push_arena(fsl_mem_arena *x, void **p, u64 size, const str *name, const str *file, u64 line)
 {
-    u64 i = 0;
-    u64 diff = 0; /* distance between old arena pointer and new arena pointer in bytes if remapping */
+    i64 i = 0;
+    i64 diff = 0; /* distance between old arena pointer and new arena pointer in bytes if remapping */
     u64 memb_aligned = 0;
     u64 size_aligned = 0;
     u64 cursor_aligned = 0;
@@ -467,23 +475,11 @@ u32 _fsl_mem_push_arena(fsl_mem_arena *x, void **p, u64 size, const str *name, c
     cursor_pos_new = cursor_pos + size;
     size_aligned = fsl_align_up_u64(cursor_pos_new, FSL_PAGE_SIZE);
 
-    /* expand members array if needed */
-
-    if (memb_aligned > x->size_i &&
-            _fsl_mem_remap((void*)&x->i, x->size_i, memb_aligned, name, file, line) != FSL_ERR_SUCCESS)
-    {
-        LOGERROREX(FSL_ERR_SIZE_TOO_SMALL, 0,
-                file, line,
-                MSG_MEM_PUSH_ARENA_REASON_FAIL(name, (u8*)x->i + sizeof(void*), x->size_i, "`_fsl_mem_remap()` Failed"));
-        return fsl_err;
-    }
-
     /* expand arena if needed */
 
     if (size_aligned > x->size_buf)
     {
         buf_old = x->buf;
-        size_aligned = fsl_align_up_u64(cursor_pos_new + x->size_buf, FSL_PAGE_SIZE);
         if (_fsl_mem_remap((void*)&x->buf, x->size_buf, size_aligned, name, file, line) != FSL_ERR_SUCCESS)
         {
             LOGERROREX(FSL_ERR_SIZE_TOO_SMALL, 0,
@@ -494,8 +490,19 @@ u32 _fsl_mem_push_arena(fsl_mem_arena *x, void **p, u64 size, const str *name, c
 
         diff = (u8*)x->buf - (u8*)buf_old;
         i = x->memb;
-        while (i--)
+        while (i-- > 0)
             *x->i[i] = (u8*)*x->i[i] + diff;
+    }
+
+    /* expand members array if needed */
+
+    if (memb_aligned > x->size_i &&
+            _fsl_mem_remap((void*)&x->i, x->size_i, memb_aligned, name, file, line) != FSL_ERR_SUCCESS)
+    {
+        LOGERROREX(FSL_ERR_SIZE_TOO_SMALL, 0,
+                file, line,
+                MSG_MEM_PUSH_ARENA_REASON_FAIL(name, (u8*)x->i + sizeof(void*), x->size_i, "`_fsl_mem_remap()` Failed"));
+        return fsl_err;
     }
 
     /* assign new parameters */

@@ -1,8 +1,3 @@
-#include "h/common.h"
-#include "h/diagnostics.h"
-#include "h/dir.h"
-#include "h/main.h"
-
 #include "src/h/common.h"
 #include "src/h/core.h"
 #include "src/h/dir.h"
@@ -10,6 +5,11 @@
 #include "src/h/math.h"
 #include "src/h/memory.h"
 #include "src/h/string.h"
+
+#include "h/common.h"
+#include "h/diagnostics.h"
+#include "h/dir.h"
+#include "h/main.h"
 
 #include <stdio.h>
 #include <string.h>

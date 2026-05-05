@@ -32,7 +32,7 @@
 
 enum fsl_asset_type
 {
-    FSL_ASSET_NONE,
+    FSL_ASSET_CUSTOM, /* user defined asset type */
     FSL_ASSET_FBO,
     FSL_ASSET_TEXTURE,
     FSL_ASSET_MESH,
@@ -48,11 +48,12 @@ typedef struct fsl_asset
      */
     GLuint id;
 
-    str *name; /* display name (can be used in asset-search) */
-    str *name_internal; /* internal name (for logging, also used in asset-search) */
-    str *file; /* base file name */
-    str *path; /* path to asset file without file name */
+
     enum fsl_asset_type type;
+    str *name;          /* display name (can be used in asset-search) */
+    str *name_internal; /* internal name (for logging, also used in asset-search) */
+    str *file;          /* base file name */
+    str *path;          /* path to asset file without file name */
 
     /*! @remark `TRUE` does not mean `name`, `file` and `path` are filled out,
      *  it means whatever the asset requires to be fully initialized and usable
@@ -73,23 +74,19 @@ typedef struct fsl_texture
 {
     fsl_asset asset;
     v2i32 size;
-    u64 data_len;
 
     /*! @brief used by `OpenGL` extension @ref GL_ARB_bindless_texture.
      */
     u64 handle;
 
     GLint format;           /* used by @ref glTexImage2D() */
-    GLint format_internal;  /* used by @ref glTexImage2D() */
     GLint filter;           /* used by @ref glTexParameteri() */
 
     /*! @brief number of color channels, used by @ref stbi_load().
      */
     int channels;
 
-    u8 *buf;
     b8 grayscale;
-    b8 generated;
     b8 bindless;
 } fsl_texture;
 
@@ -132,25 +129,14 @@ typedef struct fsl_glyph
 typedef struct fsl_font
 {
     fsl_asset asset;
-    u32 resolution; /* glyph bitmap diameter in bytes */
-    i32 ascent; /* glyphs highest points' deviation from baseline */
-    i32 descent; /* glyphs lowest points' deviation from baseline */
+    u32 resolution;         /* glyph bitmap diameter in bytes */
+    i32 ascent;             /* glyphs highest points' deviation from baseline */
+    i32 descent;            /* glyphs lowest points' deviation from baseline */
     i32 line_gap;
     i32 line_height;
-    f32 size; /* global font size, for text uniformity */
-    v2i32 scale; /* biggest glyph bounding box size in font units */
-
-    stbtt_fontinfo info; /* used by @ref stbtt_InitFont() */
-
-    /*! @brief font file contents.
-     *
-     *  used by @ref stbtt_InitFont().
-     */
-    u8 *buf;
-
-    u64 buf_len; /* `buf` size in bytes */
-    u8 *bitmap; /* memory block for all font glyph bitmaps */
-
+    f32 size;               /* global font size, for text uniformity */
+    v2i32 scale;            /* biggest glyph bounding box size in font units */
+    stbtt_fontinfo info;    /* used by @ref stbtt_InitFont() */
     fsl_glyph glyph[FSL_GLYPH_MAX];
 } fsl_font;
 
@@ -193,7 +179,8 @@ FSLAPI extern fsl_font *fsl_font_buf;
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_asset_init(fsl_asset *asset, enum fsl_asset_type type, const str *name, const str *file, const str *path);
+FSLAPI u32 fsl_asset_init(fsl_asset *asset, enum fsl_asset_type type, const
+        str *name, const str *file, const str *path);
 
 /*! @brief initialize engine's internal assets.
  *
@@ -219,19 +206,14 @@ FSLAPI void fsl_fbo_free(fsl_fbo *fbo);
  *  @param file base file name (`fsl_asset_init()` parameter).
  *  @param path path to asset file without file name (`fsl_asset_init()` parameter).
  *
- *  @return non-zero on failure and @ref fsl_err is set accordingly.
- */
-FSLAPI u32 fsl_texture_init(fsl_texture *texture, const str *name, const str *file, const str *path,
-    const GLint format_internal, const GLint format, GLint filter, int channels, b8 grayscale);
-
-/*! @brief generate texture for 'OpenGL' from image loaded by @ref fsl_texture_init().
- *
  *  @param bindless use 'OpenGL' extension 'GL_ARB_bindless_texture'
  *  (handle is in @ref texture->handle).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_texture_generate(fsl_texture *texture, b8 bindless);
+FSLAPI u32 fsl_texture_init(fsl_texture *texture,
+        const str *name, const str *file, const str *path,
+        const GLint format, GLint filter, int channels, b8 grayscale, b8 bindless);
 
 FSLAPI void fsl_texture_free(fsl_texture *texture);
 

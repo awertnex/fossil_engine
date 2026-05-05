@@ -157,9 +157,6 @@ FSLAPI extern fsl_render *render;
  *  @param argc number of arguments in `argv` if `argv` provided.
  *  @param argv used for logger log level if args provided.
  *
- *  @param _render `fsl_render` to use for engine,
- *  if `NULL`, @ref render is defined as default, declared and used internally.
- *
  *  @param flags enum: @ref fsl_flag.
  *
  *  @param title = window/application title, if `NULL`, default title is used
@@ -184,7 +181,7 @@ FSLAPI extern fsl_render *render;
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_engine_init(int argc, char **argv, const str *title,
-        i32 size_x, i32 size_y, fsl_render *_render, u64 flags);
+        i32 size_x, i32 size_y, u64 flags);
 
 /*! @brief engine main loop check.
  *

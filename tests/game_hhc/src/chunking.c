@@ -1,11 +1,3 @@
-#include "h/assets.h"
-#include "h/chunking.h"
-#include "h/common.h"
-#include "h/dir.h"
-#include "h/main.h"
-#include "h/terrain.h"
-#include "h/world.h"
-
 #include "src/h/diagnostics.h"
 #include "src/h/dir.h"
 #include "src/h/input.h"
@@ -13,6 +5,14 @@
 #include "src/h/memory.h"
 #include "src/h/math.h"
 #include "src/h/string.h"
+
+#include "h/assets.h"
+#include "h/chunking.h"
+#include "h/common.h"
+#include "h/dir.h"
+#include "h/main.h"
+#include "h/terrain.h"
+#include "h/world.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -127,7 +127,10 @@ u32 chunking_init(void)
     str CHUNKS_MAX_lookup_file_name[PATH_MAX] = {0};
     u32 *CHUNK_ORDER_lookup_file_contents = NULL;
     u64 *CHUNKS_MAX_lookup_file_contents = NULL;
-    u64 i, j, k, file_len;
+    u64 i = 0;
+    u64 j = 0;
+    u64 k = 0;
+    u64 file_len = 0;
     u32 render_distance = 0;
     v3i32 center = {0};
     v3i32 coordinates = {0};
@@ -163,13 +166,15 @@ u32 chunking_init(void)
                 "chunking_init().CHUNK_QUEUE[2].queue") != FSL_ERR_SUCCESS ||
 
             fsl_mem_push_arena(&_memory_arena_internal, (void*)&chunk_gizmo_loaded,
-                    CHUNK_BUF_VOLUME_MAX * sizeof(v2u32),
+                CHUNK_BUF_VOLUME_MAX * sizeof(v2u32),
                 "chunking_init().chunk_gizmo_loaded") != FSL_ERR_SUCCESS ||
 
             fsl_mem_push_arena(&_memory_arena_internal, (void*)&chunk_gizmo_render,
-                    CHUNK_BUF_VOLUME_MAX * sizeof(v2u32),
-                "chunking_init().chunk_gizmo_render") != FSL_ERR_SUCCESS ||
+                CHUNK_BUF_VOLUME_MAX * sizeof(v2u32),
+                "chunking_init().chunk_gizmo_render") != FSL_ERR_SUCCESS)
+        goto cleanup;
 
+    if (
             fsl_mem_map((void*)&distance, CHUNK_BUF_VOLUME_MAX * sizeof(u32),
                 "chunking_init().distance") != FSL_ERR_SUCCESS ||
 

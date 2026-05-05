@@ -130,7 +130,7 @@ u32 build_game(int argc, char **argv)
     cmd_push(&cmd, DIR_SRC_GAME"terrain.c");
     cmd_push(&cmd, DIR_SRC_GAME"world.c");
     cmd_push(&cmd, "-I"DIR_ROOT);
-    cmd_push(&cmd, "-std=c99");
+    cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
     cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
     fsl_engine_link_libs(&cmd);

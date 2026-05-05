@@ -76,12 +76,14 @@ u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created)
         LOGERROR(FSL_ERR_POINTER_NULL,
                 FSL_FLAG_LOG_NO_VERBOSE,
                 MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Shader", shader->asset.file, "`fsl_shader_pre_process()` Failed"));
-        *shader_created = FALSE;
+        if (shader_created)
+            *shader_created = FALSE;
         return fsl_err;
     }
 
     shader->asset.id = glCreateShader(type);
-    *shader_created = TRUE;
+    if (shader_created)
+        *shader_created = TRUE;
 
     glShaderSource(shader->asset.id, 1, (const GLchar**)&shader->source, NULL);
     glCompileShader(shader->asset.id);

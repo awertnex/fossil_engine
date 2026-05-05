@@ -33,7 +33,7 @@
 
 enum fsl_logger_flag
 {
-    FSL_FLAG_LOGGER_GUI_OPEN = 0x0001
+    FSL_FLAG_LOGGER_GUI_OPEN =  0x0001
 }; /* LoggerFlag */
 
 enum fsl_log_output_flag
@@ -72,14 +72,15 @@ enum fsl_log_level
  */
 typedef struct fsl_logger_core
 {
-    u64 flag;
+    u64 flag;               /* enum @ref fsl_logger_flag */
     u32 log_level_max;
     str log_dir[PATH_MAX];
 
     str **i;                /* pointers to strings in `buf` */
     str *buf;               /* logger strings */
-    u32 *color;             /* string colors */
+    u32 *color;             /* string colors in hex format */
     i32 cursor;             /* current position in `i` */
+    fsl_mem_arena arena;    /* arena to manage all logger heap memory */
 } fsl_logger_core;
 
 /* ---- internal-use macros ------------------------------------------------- */
@@ -156,7 +157,7 @@ FSLAPI extern fsl_logger_core logger_core;
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 _fsl_logger_init(int argc, char **argv, u64 flags);
+FSLAPI u32 fsl_logger_init(int argc, char **argv, u64 flags);
 
 FSLAPI void fsl_logger_close(void);
 
