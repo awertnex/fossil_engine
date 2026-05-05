@@ -21,34 +21,10 @@
 #define FSL_SHADERS_H
 
 #include "common.h"
+#include "assets.h"
 #include "types.h"
 
 #include <deps/glad/glad.h>
-
-typedef struct fsl_shader
-{
-    str *file_name;
-    GLuint id;          /* used by @ref glCreateShader() */
-    GLuint type;        /* `GL_<x>_SHADER` */
-    GLchar *source;     /* shader file source code */
-    GLint loaded;       /* used by @ref glGetShaderiv() */
-} fsl_shader;
-
-typedef struct fsl_shader_program
-{
-    str *name;          /* for debugging */
-    GLuint id;          /* used by @ref glCreateProgram() */
-    GLint loaded;       /* used by @ref glGetProgramiv() */
-    fsl_shader vertex;
-    fsl_shader geometry;
-    fsl_shader fragment;
-} fsl_shader_program;
-
-/*! @brief default shaders.
- *
- *  @remark read-only, declared and initialized internally in @ref fsl_init().
- */
-FSLAPI extern fsl_shader_program fsl_shader_buf[FSL_SHADER_INDEX_COUNT];
 
 /*! @brief initialize single shader.
  *
@@ -59,7 +35,7 @@ FSLAPI extern fsl_shader_program fsl_shader_buf[FSL_SHADER_INDEX_COUNT];
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_shader_init(const str *shaders_dir, fsl_shader *shader, b8 *shader_created);
+FSLAPI u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created);
 
 FSLAPI void fsl_shader_free(fsl_shader *shader);
 
@@ -67,13 +43,29 @@ FSLAPI void fsl_shader_free(fsl_shader *shader);
  *
  *  - call @ref fsl_shader_init() on all shaders in `program` if `shader->type` is set.
  *
- *  @param shaders_dir path to shader files of `program`,
- *  shader file names must be pre-defined in `program->shader.file_name`.
+ *  @remark function @ref fsl_asset_init() must be used to initialize paths
+ *  and file names for each shader within the program before calling this function.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_shader_program_init(const str *shaders_dir, fsl_shader_program *program);
+FSLAPI u32 fsl_shader_program_init(fsl_shader_program *program);
 
 FSLAPI void fsl_shader_program_free(fsl_shader_program *program);
+
+/*! @brief set a `vec3` attribute array for a `vao`.
+ */
+FSLAPI void fsl_attrib_vec3(void);
+
+/*! @brief set a `vec3` and a `vec2` attribute arrays for a `vao`.
+ */
+FSLAPI void fsl_attrib_vec3_vec2(void);
+
+/*! @brief set a `vec3` and a `vec3` attribute arrays for a `vao`.
+ */
+FSLAPI void fsl_attrib_vec3_vec3(void);
+
+/*! @brief set a `vec3` and a `vec4` attribute arrays for a `vao`.
+ */
+FSLAPI void fsl_attrib_vec3_vec4(void);
 
 #endif /* FSL_SHADERS_H */

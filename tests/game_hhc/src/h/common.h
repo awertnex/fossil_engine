@@ -85,7 +85,6 @@
 #define GAME_DIR_NAME_ITEMS         "assets/textures/items/"
 #define GAME_DIR_NAME_LOGO          "assets/textures/logo/"
 #define GAME_DIR_NAME_CONFIG        "config/"
-#define GAME_DIR_NAME_LOGS          "logs/"
 #define GAME_DIR_NAME_SCREENSHOTS   "screenshots/"
 #define GAME_DIR_NAME_TEXT          "text/"
 #define GAME_DIR_NAME_WORLDS        "worlds/"
@@ -126,7 +125,7 @@ enum /* mesh_index */
     MESH_CUBE_OF_HAPPINESS,
     MESH_PLAYER,
     MESH_GIZMO,
-    MESH_COUNT,
+    MESH_COUNT
 }; /* mesh_index */
 
 enum /* fbo_index */
@@ -137,7 +136,7 @@ enum /* fbo_index */
     FBO_HUD,
     FBO_HUD_MSAA,
     FBO_POST_PROCESSING,
-    FBO_COUNT,
+    FBO_COUNT
 }; /* fbo_index */
 
 enum /* font_index */
@@ -146,7 +145,7 @@ enum /* font_index */
     FONT_REG_BOLD,
     FONT_MONO,
     FONT_MONO_BOLD,
-    FONT_COUNT,
+    FONT_COUNT
 }; /* font_index */
 
 enum player_death_reason_index
@@ -154,13 +153,12 @@ enum player_death_reason_index
     PLAYER_DEATH_REASON_COLLISION_WALL = 1,
     PLAYER_DEATH_REASON_COLLISION_FLOOR,
     PLAYER_DEATH_REASON_COLLISION_CEILING,
-    PLAYER_DEATH_REASON_COUNT,
+    PLAYER_DEATH_REASON_COUNT
 }; /* player_death_reason_index */
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief global memory arena, used to manage all heap memory inside and optionally
- *  outside the engine.
+ *  @brief global memory arena, used to manage all heap memory that belongs to the game.
  *
  *  initialized once in @ref game_init().
  */

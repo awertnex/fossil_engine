@@ -47,7 +47,9 @@
 #   define fsl_stat(name, st)       _lstat(name, st)
 #   define fsl_chmod(name, n)       _chmod(name, n)
 #elif defined(__linux__) || defined(__linux)
-#   define _GNU_SOURCE
+#   ifndef _GNU_SOURCE
+#       define _GNU_SOURCE
+#   endif /* _GNU_SOURCE */
 
 #   define FSL_PLATFORM_LINUX       1
 #   define FSL_PLATFORM             "linux"

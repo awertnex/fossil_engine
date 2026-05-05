@@ -30,7 +30,7 @@
      */
     static const str fsl_str_libs_internal[][CMD_SIZE] =
     {
-        "-Llib/"PLATFORM,
+        "-Llib/" PLATFORM,
         "-lm",
         "-lmvec",
         "-lglfw3",
@@ -43,7 +43,7 @@
      */
     static const str fsl_str_libs[][CMD_SIZE] =
     {
-        "-Lfossil/lib"PLATFORM,
+        "-Lfossil/lib" PLATFORM,
         "-lm",
         "-lglfw3",
         "-lfossil",
@@ -57,7 +57,7 @@
      */
     static const str fsl_str_libs_internal[][CMD_SIZE] =
     {
-        "-Llib/"PLATFORM,
+        "-Llib/" PLATFORM,
         "-lm",
         "-lmvec",
         "-lglfw",
@@ -70,7 +70,7 @@
      */
     static const str fsl_str_libs[][CMD_SIZE] =
     {
-        "-Lfossil/lib/"PLATFORM,
+        "-Lfossil/lib/" PLATFORM,
         "-lm",
         "-lglfw",
         "-lfossil",
@@ -113,7 +113,7 @@ void fsl_engine_set_runtime_path(_buf *cmd)
     if (!cmd)
         _cmdp = &_cmd;
 
-    cmd_push(_cmdp, "-Wl,-rpath="RUNTIME_PATH);
+    cmd_push(_cmdp, "-Wl,-rpath=" RUNTIME_PATH);
 }
 
 #endif /* FSL_BUILD_H */

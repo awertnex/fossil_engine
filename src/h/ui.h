@@ -21,55 +21,15 @@
 #define FSL_UI_H
 
 #include "common.h"
+#include "assets.h"
 #include "core.h"
 #include "types.h"
-
-#include <deps/stb_truetype.h>
 
 /* ---- section: definitions ------------------------------------------------ */
 
 #define FSL_UI_PANEL_GAP_DEFAULT 10
 #define FSL_UI_PANEL_PADDING_DEFAULT 10
 #define FSL_UI_SLICE_SIZE_DEFAULT 8
-
-typedef struct fsl_glyph
-{
-    v2i32 scale;
-    v2i32 bearing;
-    i32 advance;
-    b8 loaded;
-} fsl_glyph;
-
-typedef struct fsl_font
-{
-    /*! @brief font name, initialized in @ref fsl_font_init() if empty.
-     */
-    str name[NAME_MAX];
-
-    u32 resolution; /* glyph bitmap diameter in bytes */
-    i32 ascent; /* glyphs highest points' deviation from baseline */
-    i32 descent; /* glyphs lowest points' deviation from baseline */
-    i32 line_gap;
-    i32 line_height;
-    f32 size; /* global font size, for text uniformity */
-    v2i32 scale; /* biggest glyph bounding box size in font units */
-
-    stbtt_fontinfo info; /* used by @ref stbtt_InitFont() */
-
-    /*! @brief font file contents.
-     *
-     *  used by @ref stbtt_InitFont().
-     */
-    u8 *buf;
-
-    u64 buf_len; /* `buf` size in bytes */
-    u8 *bitmap; /* memory block for all font glyph bitmaps */
-
-    GLuint id; /* used by @ref glGenTextures() */
-    fsl_glyph glyph[FSL_GLYPH_MAX];
-
-    b8 loaded;
-} fsl_font;
 
 /*! @brief one slice in a 9-slice panel.
  */
@@ -88,31 +48,7 @@ typedef struct fsl_panel_nine_slice
     struct fsl_panel_slice slice[9];
 } fsl_panel_nine_slice;
 
-/* ---- section: declarations ----------------------------------------------- */
-
-/*! @brief default fonts.
- *
- *  @remark declared internally in @ref fsl_text_init().
- */
-FSLAPI extern fsl_font fsl_font_buf[FSL_FONT_INDEX_COUNT];
-
 /* ---- section: signatures ------------------------------------------------- */
-
-/*! @brief load font from file at `file_name` or at `font->path`.
- *
- *  1. allocate memory for `font->buf` and load file contents into it in binary format.
- *  2. allocate memory for `font->bitmap` and render glyphs onto it.
- *  3. generate square texture of diameter `resolution` * 16 and bake bitmap onto it.
- *
- *  @param resolution font size (font atlas cell diameter).
- *  @param name font name.
- *  @param file_name font file name.
- *
- *  @return non-zero on failure and @ref fsl_err is set accordingly.
- */
-FSLAPI u32 fsl_font_init(fsl_font *font, u32 resolution, const str *name, const str *file_name);
-
-FSLAPI void fsl_font_free(fsl_font *font);
 
 /*! @brief start text rendering batch.
  *

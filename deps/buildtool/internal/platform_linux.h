@@ -54,7 +54,7 @@ u32 _get_path_bin_root(str *path)
     if (readlink("/proc/self/exe", path, PATH_MAX) < 1)
     {
         LOGFATAL(ERR_GET_PATH_BIN_ROOT_FAIL, FALSE,
-                "%s\n", "Failed 'get_path_bin_root()', Process Aborted");
+                logger_stringf("%s\n", "Failed 'get_path_bin_root()', Process Aborted"));
         return build_err;
     }
 
@@ -72,21 +72,21 @@ u32 exec(_buf *cmd, str *cmd_name)
     if (pid < 0)
     {
         LOGERROR(ERR_PROCESS_FORK_FAIL, TRUE,
-                "Failed to Fork '%s'\n", cmd_name);
+                logger_stringf("Failed to Fork '%s'\n", cmd_name));
         return build_err;
     }
     else if (pid == 0)
     {
         execvp((const str*)cmd->i[0], (str *const *)cmd->i);
         LOGERROR(ERR_EXEC_FAIL, TRUE,
-                "Failed '%s'\n", cmd_name);
+                logger_stringf("Failed '%s'\n", cmd_name));
         return build_err;
     }
 
     if (waitpid(pid, &status, 0) == -1)
     {
         LOGERROR(ERR_WAITPID_FAIL, TRUE,
-                "Failed to Waitpid '%s'\n", cmd_name);
+                logger_stringf("Failed to Waitpid '%s'\n", cmd_name));
         return build_err;
     }
 
@@ -95,13 +95,13 @@ u32 exec(_buf *cmd, str *cmd_name)
         exit_code = WEXITSTATUS(status);
         if (exit_code == 0)
         {
-            LOGINFO(FALSE,
-                    "'%s' Success, Exit Code: %d\n", cmd_name, exit_code);
+            LOGSUCCESS(FALSE,
+                    logger_stringf("'%s' Exit Code: %d\n", cmd_name, exit_code));
         }
         else
         {
             LOGINFO(TRUE,
-                    "'%s' Exit Code: %d\n", cmd_name, exit_code);
+                    logger_stringf("'%s' Exit Code: %d\n", cmd_name, exit_code));
             build_err = ERR_EXEC_PROCESS_NON_ZERO;
             return build_err;
         }
@@ -110,13 +110,13 @@ u32 exec(_buf *cmd, str *cmd_name)
     {
         sig = WTERMSIG(status);
         LOGFATAL(ERR_EXEC_TERMINATE_BY_SIGNAL, TRUE,
-                "'%s' Terminated by Signal: %d, Process Aborted\n", cmd_name, sig);
+                logger_stringf("'%s' Terminated by Signal: %d, Process Aborted\n", cmd_name, sig));
         return build_err;
     }
     else
     {
         LOGERROR(ERR_EXEC_ABNORMAL_EXIT, TRUE,
-                "'%s' Exited Abnormally\n", cmd_name);
+                logger_stringf("'%s' Exited Abnormally\n", cmd_name));
         return build_err;
     }
 

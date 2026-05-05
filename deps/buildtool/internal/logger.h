@@ -35,47 +35,54 @@ enum log_level
     LOGLEVEL_FATAL,
     LOGLEVEL_ERROR,
     LOGLEVEL_WARNING,
+    LOGLEVEL_SUCCESS,
     LOGLEVEL_INFO,
     LOGLEVEL_DEBUG,
     LOGLEVEL_TRACE,
     LOGLEVEL_COUNT
 }; /* log_level */
 
-#define LOGFATAL(err, verbose, format, ...) \
-    _log_output(err, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_FATAL, format, ##__VA_ARGS__)
+#define LOGFATAL(err, verbose, message) \
+    _log_output(err, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_FATAL, message)
 
-#define LOGERROR(err, verbose, format, ...) \
-    _log_output(err, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_ERROR, format, ##__VA_ARGS__)
+#define LOGERROR(err, verbose, message) \
+    _log_output(err, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_ERROR, message)
 
-#define LOGWARNING(err, verbose, format, ...) \
-    _log_output(err, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_WARNING, format, ##__VA_ARGS__)
+#define LOGWARNING(err, verbose, message) \
+    _log_output(err, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_WARNING, message)
 
-#define LOGINFO(verbose, format, ...) \
-    _log_output(ERR_SUCCESS, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_INFO, format, ##__VA_ARGS__)
+#define LOGSUCCESS(verbose, message) \
+    _log_output(ERR_SUCCESS, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_SUCCESS, message)
 
-#define LOGDEBUG(verbose, format, ...) \
-    _log_output(ERR_SUCCESS, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_DEBUG, format, ##__VA_ARGS__)
+#define LOGINFO(verbose, message) \
+    _log_output(ERR_SUCCESS, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_INFO, message)
 
-#define LOGTRACE(verbose, format, ...) \
-    _log_output(ERR_SUCCESS, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_TRACE, format, ##__VA_ARGS__)
+#define LOGDEBUG(verbose, message) \
+    _log_output(ERR_SUCCESS, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_DEBUG, message)
 
-#define LOGFATALEX(err, verbose, file, line, format, ...) \
-    _log_output(err, verbose, file, line, LOGLEVEL_FATAL, format, ##__VA_ARGS__)
+#define LOGTRACE(verbose, message) \
+    _log_output(ERR_SUCCESS, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_TRACE, message)
 
-#define LOGERROREX(err, verbose, file, line, format, ...) \
-    _log_output(err, verbose, file, line, LOGLEVEL_ERROR, format, ##__VA_ARGS__)
+#define LOGFATALEX(err, verbose, file, line, message) \
+    _log_output(err, verbose, file, line, LOGLEVEL_FATAL, message)
 
-#define LOGWARNINGEX(err, verbose, file, line, format, ...) \
-    _log_output(err, verbose, file, line, LOGLEVEL_WARNING, format, ##__VA_ARGS__)
+#define LOGERROREX(err, verbose, file, line, message) \
+    _log_output(err, verbose, file, line, LOGLEVEL_ERROR, message)
 
-#define LOGINFOEX(verbose, file, line, format, ...) \
-    _log_output(ERR_SUCCESS, verbose, file, line, LOGLEVEL_INFO, format, ##__VA_ARGS__)
+#define LOGWARNINGEX(err, verbose, file, line, message) \
+    _log_output(err, verbose, file, line, LOGLEVEL_WARNING, message)
 
-#define LOGDEBUGEX(verbose, file, line, format, ...) \
-    _log_output(ERR_SUCCESS, verbose, file, line, LOGLEVEL_DEBUG, format, ##__VA_ARGS__)
+#define LOGSUCCESSEX(verbose, file, line, message) \
+    _log_output(ERR_SUCCESS, verbose, file, line, LOGLEVEL_SUCCESS, message)
 
-#define LOGTRACEEX(verbose, file, line, format, ...) \
-    _log_output(ERR_SUCCESS, verbose, file, line, LOGLEVEL_TRACE, format, ##__VA_ARGS__)
+#define LOGINFOEX(verbose, file, line, message) \
+    _log_output(ERR_SUCCESS, verbose, file, line, LOGLEVEL_INFO, message)
+
+#define LOGDEBUGEX(verbose, file, line, message) \
+    _log_output(ERR_SUCCESS, verbose, file, line, LOGLEVEL_DEBUG, message)
+
+#define LOGTRACEEX(verbose, file, line, message) \
+    _log_output(ERR_SUCCESS, verbose, file, line, LOGLEVEL_TRACE, message)
 
 /* ---- section: declarations ----------------------------------------------- */
 
@@ -86,9 +93,10 @@ static str log_tag[][16] =
     "FATAL",
     "ERROR",
     "WARNING",
+    "SUCCESS",
     "INFO",
     "DEBUG",
-    "TRACE",
+    "TRACE"
 };
 
 static str *esc_code_nocolor = "\033[0m";
@@ -97,27 +105,29 @@ static str *esc_code_color[LOGLEVEL_COUNT] =
     "\033[31m",
     "\033[91m",
     "\033[95m",
+    "\033[32m",
     "\033[0m",
     "\033[0m",
-    "\033[33m",
+    "\033[33m"
 };
 
 /* ---- section: signatures ------------------------------------------------- */
 
 /*! -- INTERNAL USE ONLY --;
  */
-extern void _log_output(u32 error_code, b8 verbose, const str *file, u64 line, u8 level, const str *format, ...);
+extern void _log_output(u32 error_code, b8 verbose, const str *file, u64 line, u8 level, const str *message);
 
 /*! -- INTERNAL USE ONLY --;
  */
 extern void _get_log_str(const str *str_in, str *str_out, b8 verbose,
         u8 level, u32 error_code, const str *file, u64 line);
 
+extern str *logger_stringf(const str *format, ...);
+
 /* ---- section: implementation --------------------------------------------- */
 
-void _log_output(u32 error_code, b8 verbose, const str *file, u64 line, u8 level, const str *format, ...)
+void _log_output(u32 error_code, b8 verbose, const str *file, u64 line, u8 level, const str *message)
 {
-    __builtin_va_list args;
     str str_in[STRING_MAX] = {0};
     str str_out[OUT_STRING_MAX] = {0};
 
@@ -125,10 +135,7 @@ void _log_output(u32 error_code, b8 verbose, const str *file, u64 line, u8 level
 
     if (level > log_level_max) return;
 
-    va_start(args, format);
-    vsnprintf(str_in, STRING_MAX, format, args);
-    va_end(args);
-
+    snprintf(str_in, STRING_MAX, "%s", message);
     _get_log_str(str_in, str_out, verbose, level, error_code, file, line);
     fprintf(stderr, "%s", str_out);
 }
@@ -143,10 +150,11 @@ void _get_log_str(const str *str_in, str *str_out, b8 verbose,
     str *str_nocolor = esc_code_nocolor;
     str *trunc = NULL;
     int cursor = 0;
+    b8 is_error = level <= LOGLEVEL_WARNING;
 
     get_time_str(str_time, "[%F %T] ");
 
-    if (level <= LOGLEVEL_WARNING)
+    if (is_error)
         snprintf(str_tag, 32, "[%s][%"PRIu32"] ", log_tag[level], error_code);
     else
         snprintf(str_tag, 32, "[%s] ", log_tag[level]);
@@ -162,6 +170,21 @@ void _get_log_str(const str *str_in, str *str_out, b8 verbose,
         trunc = str_out + OUT_STRING_MAX - 4;
         snprintf(trunc, 4, "...");
     }
+}
+
+str *logger_stringf(const str *format, ...)
+{
+    static str buf[STRINGF_BUFFERS_MAX][STRING_MAX] = {0};
+    static u64 index = 0;
+    str *string = buf[index];
+    __builtin_va_list args;
+
+    va_start(args, format);
+    vsnprintf(string, OUT_STRING_MAX, format, args);
+    va_end(args);
+
+    index = (index + 1) % STRINGF_BUFFERS_MAX;
+    return string;
 }
 
 #endif /* BUILDTOOL_LOGGER_H */

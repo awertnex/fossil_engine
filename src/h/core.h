@@ -21,6 +21,7 @@
 #define FSL_CORE_H
 
 #include "common.h"
+#include "assets.h"
 #include "limits.h"
 #include "types.h"
 
@@ -59,51 +60,6 @@ typedef struct fsl_render
      */
     u8 *screen_buf;
 } fsl_render;
-
-typedef struct fsl_mesh
-{
-    GLuint vao;
-    GLuint vbo;
-    GLuint ebo;
-    GLuint vbo_len;
-    GLuint ebo_len;
-    GLfloat *vbo_data;
-    GLfloat *ebo_data;
-    b8 loaded;
-} fsl_mesh;
-
-typedef struct fsl_fbo
-{
-    GLuint fbo;
-    GLuint color_buf;
-    GLuint rbo;
-    b8 loaded;
-} fsl_fbo;
-
-typedef struct fsl_texture
-{
-    v2i32 size;
-    u64 data_len;
-    GLuint id;              /* used by @ref glGenTextures() */
-
-    /*! @brief used by `OpenGL` extension @ref GL_ARB_bindless_texture.
-     */
-    u64 handle;
-
-    GLint format;           /* used by @ref glTexImage2D() */
-    GLint format_internal;  /* used by @ref glTexImage2D() */
-    GLint filter;           /* used by @ref glTexParameteri() */
-
-    /*! @brief number of color channels, used by @ref stbi_load().
-     */
-    int channels;
-
-    u8 *buf;
-    b8 grayscale;
-    b8 loaded;
-    b8 generated;
-    b8 bindless;
-} fsl_texture;
 
 typedef struct fsl_camera
 {
@@ -156,11 +112,15 @@ typedef struct fsl_core
      */
     fsl_fbo fbo_msaa;
 
-    /*! @remark initialized in @ref fsl_engine_init().
+    /*! @brief function to bind a final framebuffer to draw to based on anti-aliasing setting.
+     *
+     *  @remark initialized in @ref fsl_engine_init().
      */
     void (*fbo_bind)(void);
 
-    /*! @remark initialized in @ref fsl_engine_init().
+    /*! @brief function to draw onto a final framebuffer based on anti-aliasing setting.
+     *
+     * @remark initialized in @ref fsl_engine_init().
      */
     void (*fbo_blit)(GLuint fbo);
 
@@ -184,18 +144,6 @@ extern fsl_core _fsl_core;
  */
 FSLAPI extern fsl_render *render;
 
-/*! @brief default textures.
- *
- *  @remark declared and initialized internally.
- */
-FSLAPI extern fsl_texture fsl_texture_buf[FSL_TEXTURE_INDEX_COUNT];
-
-/*! @brief default unit quad, with texture coordinates.
- *
- *  @remark declared and initialized internally.
- */
-FSLAPI extern fsl_mesh fsl_mesh_unit_quad;
-
 /* ---- section: signatures ------------------------------------------------- */
 
 /*! @brief initialize engine stuff.
@@ -208,9 +156,6 @@ FSLAPI extern fsl_mesh fsl_mesh_unit_quad;
  *
  *  @param argc number of arguments in `argv` if `argv` provided.
  *  @param argv used for logger log level if args provided.
- *
- *  @param _log_dir directory to write log files into for the lifetime of the process,
- *  if `NULL`, logs won't be written to disk.
  *
  *  @param _render `fsl_render` to use for engine,
  *  if `NULL`, @ref render is defined as default, declared and used internally.
@@ -238,7 +183,7 @@ FSLAPI extern fsl_mesh fsl_mesh_unit_quad;
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_engine_init(int argc, char **argv, const str *_log_dir, const str *title,
+FSLAPI u32 fsl_engine_init(int argc, char **argv, const str *title,
         i32 size_x, i32 size_y, fsl_render *_render, u64 flags);
 
 /*! @brief engine main loop check.
@@ -310,12 +255,6 @@ FSLAPI u32 fsl_window_init(const str *title, i32 size_x, i32 size_y);
  */
 FSLAPI u32 fsl_glad_init(void);
 
-/*! @brief initialize engine's internal assets.
- *
- *  @remark called automatically from @ref fsl_engine_init().
- */
-FSLAPI void fsl_assets_init(void);
-
 /*! @brief switch engine's current bound `fsl_render` to `_render`.
  *
  *  @remark only if you know what you're doing.
@@ -345,80 +284,9 @@ FSLAPI void fsl_request_screenshot(void);
  */
 FSLAPI u32 fsl_process_screenshot_request(const str *dir_screenshots, const str *special_text);
 
-/*! @brief set a `vec3` attribute array for a `vao`.
- */
-FSLAPI void fsl_attrib_vec3(void);
-
-/*! @brief set a `vec3` and a `vec2` attribute arrays for a `vao`.
- */
-FSLAPI void fsl_attrib_vec3_vec2(void);
-
-/*! @brief set a `vec3` and a `vec3` attribute arrays for a `vao`.
- */
-FSLAPI void fsl_attrib_vec3_vec3(void);
-
-/*! @brief set a `vec3` and a `vec4` attribute arrays for a `vao`.
- */
-FSLAPI void fsl_attrib_vec3_vec4(void);
-
-/*! @return non-zero on failure and @ref fsl_err is set accordingly.
- */
-FSLAPI u32 fsl_fbo_init(fsl_fbo *fbo, fsl_mesh *mesh_fbo, b8 multisample, u32 samples);
-
-/*! @return non-zero on failure and @ref fsl_err is set accordingly.
- */
-FSLAPI u32 fsl_fbo_realloc(fsl_fbo *fbo, b8 multisample, u32 samples);
-
 /*! @brief blit rendered internal fbo (e.g. text, ui elements) onto `fbo`.
  */
 FSLAPI void fsl_fbo_blit(GLuint fbo);
-
-FSLAPI void fsl_fbo_free(fsl_fbo *fbo);
-
-/*! @brief load image data from disk into `texture->buf` and set texture info.
- *
- *  @return non-zero on failure and @ref fsl_err is set accordingly.
- */
-FSLAPI u32 fsl_texture_init(fsl_texture *texture, const GLint format_internal, const GLint format,
-        GLint filter, int channels, b8 grayscale, const str *file_name);
-
-/*! @brief generate texture for `OpenGL` from image loaded by 'texture_init()'.
- *
- *  @param bindless use `OpenGL` extension `GL_ARB_bindless_texture`
- *  (handle is in `texture->handle`).
- *
- *  @return non-zero on failure and @ref fsl_err is set accordingly.
- */
-FSLAPI u32 fsl_texture_generate(fsl_texture *texture, b8 bindless);
-
-/*! -- INTERNAL USE ONLY --;
- *
- *  @brief generate texture for `OpenGL` and upload to `GPU` memory.
- *
- *  @param id where to store texture ID.
- *  @param buf texture data to upload to `gpu` memory.
- *
- *  @remark called automatically from @ref fsl_texture_generate() if texture data is
- *  already loaded into a texture by calling @ref fsl_texture_init().
- *
- *  @return non-zero on failure and @ref fsl_err is set accordingly.
- */
-u32 _fsl_texture_generate(GLuint *id, const GLint format_internal,  const GLint format,
-        GLint filter, v2i32 size, void *buf, b8 grayscale);
-
-FSLAPI void fsl_texture_free(fsl_texture *texture);
-
-/*! @param attrib pointer to a function to set attribute arrays for `mesh->vao`
- *  (e.g. &attrib_vec3, set a single vec3 attribute array).
- *
- *  @param usage `GL_<x>_DRAW`.
- *
- *  @return non-zero on failure and @ref fsl_err is set accordingly.
- */
-FSLAPI u32 fsl_mesh_generate(fsl_mesh *mesh, void (*attrib)(), GLenum usage,
-        GLuint vbo_len, GLuint ebo_len, GLfloat *vbo_data, GLuint *ebo_data);
-
-FSLAPI void fsl_mesh_free(fsl_mesh *mesh);
 
 /*! @brief update `sine` and `cosine` of camera roll, pitch and yaw.
  *

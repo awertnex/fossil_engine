@@ -114,6 +114,15 @@ extern u64 FSL_PAGE_SIZE;
  */
 extern fsl_mem_arena _fsl_memory_arena_internal;
 
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief global debug memory arena, used to manage all runtime debug data
+ *  (e.g. asset names, asset paths, etc..)
+ *
+ *  initialized in @ref fsl_engine_init() and/or @ref fsl_asset_init().
+ */
+extern fsl_mem_arena _fsl_memory_arena_debug_internal;
+
 /* ---- section: signatures ------------------------------------------------- */
 
 /*! @brief like @ref fsl_round_up_u64() but only works on powers of two for `size`.

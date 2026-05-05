@@ -24,7 +24,6 @@ enum directory_index
     DIR_ITEMS,
     DIR_LOGO,
     DIR_CONFIG,
-    DIR_LOGS,
     DIR_SCREENSHOTS,
     DIR_TEXT,
     DIR_WORLDS,
@@ -35,7 +34,7 @@ enum directory_index
     DIR_WORLD_CHUNKS = 0,
     DIR_WORLD_ENTITIES,
     DIR_WORLD_PLAYER,
-    DIR_WORLD_COUNT,
+    DIR_WORLD_COUNT
 }; /* directory_index */
 
 extern str DIR_ROOT[DIR_ROOT_COUNT][NAME_MAX];

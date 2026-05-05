@@ -5,7 +5,7 @@
 
 #include "src/h/core.h"
 #include "src/h/diagnostics.h"
-#include "src/h/logger.h"
+#include "src/logger/log.h"
 #include "src/h/memory.h"
 #include "src/h/string.h"
 

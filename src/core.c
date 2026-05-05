@@ -23,7 +23,7 @@
 #include "h/diagnostics.h"
 #include "h/dir.h"
 #include "h/input.h"
-#include "h/logger.h"
+#include "logger/log.h"
 #include "h/math.h"
 #include "h/memory.h"
 #include "h/process.h"
@@ -34,15 +34,11 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
-#   define STB_IMAGE_IMPLEMENTATION
-#   include <deps/stb_image.h>
-
 #   define STB_IMAGE_WRITE_IMPLEMENTATION
 #   include <deps/stb_image_write.h>
-#pragma GCC diagnostic pop
+#pragma GCC diagnostic pop /* ignored "-Wpedantic" */
 
 #include <stdio.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <inttypes.h>
 
@@ -59,14 +55,6 @@ static fsl_render fsl_render_internal = {0};
 
 fsl_render *render = &fsl_render_internal;
 
-static f32 vbo_data_unit_quad[] =
-{
-    -1.0f, -1.0f, 0.0f, 0.0f,
-    -1.0f, 1.0f, 0.0f, 1.0f,
-    1.0f, 1.0f, 1.0f, 1.0f,
-    1.0f, -1.0f, 1.0f, 0.0f,
-};
-
 /* ---- section: signatures ------------------------------------------------- */
 
 /*! -- INTERNAL USE ONLY --;
@@ -76,7 +64,7 @@ static f32 vbo_data_unit_quad[] =
 static void glfw_callback_error(int error, const char* message)
 {
     (void)error;
-    _LOGERROR(FSL_ERR_GLFW, 0, fsl_logger_stringf("GLFW: %s\n", message));
+    LOGERROR(FSL_ERR_GLFW, 0, fsl_logger_stringf("GLFW: %s\n", message));
 }
 
 /*! -- INTERNAL USE ONLY --;
@@ -95,32 +83,22 @@ static void glfw_callback_error(int error, const char* message)
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-static u32 _fsl_take_screenshot(const str *dir_screenshots, const str *special_text);
+static u32 take_screenshot_internal(const str *dir_screenshots, const str *special_text);
 
-static void _fsl_fbo_bind_internal(void);
-static void _fsl_fbo_bind_msaa_internal(void);
-static void _fsl_fbo_blit_internal(GLuint fbo);
-static void _fsl_fbo_blit_msaa_internal(GLuint fbo);
+static void fbo_bind_internal(void);
+static void fbo_bind_msaa_internal(void);
+static void fbo_blit_internal(GLuint fbo);
+static void fbo_blit_msaa_internal(GLuint fbo);
 
 /* ---- section: init ------------------------------------------------------- */
 
-u32 fsl_engine_init(int argc, char **argv, const str *_log_dir, const str *title,
+u32 fsl_engine_init(int argc, char **argv, const str *title,
         i32 size_x, i32 size_y, fsl_render *_render, u64 flags)
 {
     u32 i = 0;
+    b8 is_release = flags & FSL_FLAG_RELEASE_BUILD;
 
     _fsl_core.flag.active = 1;
-
-    fsl_engine_get_string(render->title, FSL_STR_INDEX_ENGINE_TITLE);
-    render->size.x = FSL_RENDER_WIDTH_DEFAULT;
-    render->size.y = FSL_RENDER_HEIGHT_DEFAULT;
-
-    if (fsl_mem_map_arena(&_fsl_memory_arena_internal, 1,
-                "engine_init()._fsl_memory_arena_internal") ||
-
-            fsl_logger_init(argc, argv, flags & FSL_FLAG_RELEASE_BUILD, _log_dir,
-                TRUE) != FSL_ERR_SUCCESS)
-        goto cleanup;
 
     if (!fsl_init_time)
     {
@@ -136,9 +114,20 @@ u32 fsl_engine_init(int argc, char **argv, const str *_log_dir, const str *title
         fsl_change_dir(FSL_DIR_PROC_ROOT);
     }
 
-    glfwSetErrorCallback(glfw_callback_error);
+    fsl_engine_get_string(render->title, FSL_STR_INDEX_ENGINE_TITLE);
+    render->size.x = FSL_RENDER_WIDTH_DEFAULT;
+    render->size.y = FSL_RENDER_HEIGHT_DEFAULT;
 
-    fsl_assets_init();
+    if (
+            fsl_mem_map_arena(&_fsl_memory_arena_internal, 1,
+                "fsl_engine_init()._fsl_memory_arena_internal") != FSL_ERR_SUCCESS ||
+            fsl_mem_map_arena(&_fsl_memory_arena_debug_internal, 1,
+                "fsl_engine_init()._fsl_memory_arena_debug_internal") != FSL_ERR_SUCCESS ||
+
+            _fsl_logger_init(argc, argv, is_release) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    glfwSetErrorCallback(glfw_callback_error);
 
     if (_render && fsl_change_render(_render) != FSL_ERR_SUCCESS)
         goto cleanup;
@@ -158,26 +147,23 @@ u32 fsl_engine_init(int argc, char **argv, const str *_log_dir, const str *title
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_MULTISAMPLE);
 
-    if (
-            fsl_fbo_init(&_fsl_core.fbo, &fsl_mesh_unit_quad, FALSE, 4) != FSL_ERR_SUCCESS ||
-            fsl_fbo_init(&_fsl_core.fbo_msaa, NULL, TRUE, 4) != FSL_ERR_SUCCESS)
-        goto cleanup;
+    fsl_assets_init();
 
     if (flags & FSL_FLAG_MULTISAMPLE)
     {
-        _fsl_core.fbo_bind = &_fsl_fbo_bind_msaa_internal;
-        _fsl_core.fbo_blit = &_fsl_fbo_blit_msaa_internal;
+        _fsl_core.fbo_bind = &fbo_bind_msaa_internal;
+        _fsl_core.fbo_blit = &fbo_blit_msaa_internal;
     }
     else
     {
-        _fsl_core.fbo_bind = &_fsl_fbo_bind_internal;
-        _fsl_core.fbo_blit = &_fsl_fbo_blit_internal;
+        _fsl_core.fbo_bind = &fbo_bind_internal;
+        _fsl_core.fbo_blit = &fbo_blit_internal;
     }
 
     if (!(flags & FSL_FLAG_NO_DEFAULT_SHADERS))
     {
         for (i = 0; i < FSL_SHADER_INDEX_COUNT; ++i)
-            if (fsl_shader_program_init(FSL_DIR_NAME_SHADERS, &fsl_shader_buf[i]) != FSL_ERR_SUCCESS)
+            if (fsl_shader_program_init(&fsl_shader_buf[i]) != FSL_ERR_SUCCESS)
                 goto cleanup;
 
         glGenBuffers(1, &_fsl_core.ubo.ndc_scale);
@@ -208,8 +194,10 @@ b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32))
         return FALSE;
 
     if (fsl_update_render_settings(callback_framebuffer_size) != FSL_ERR_SUCCESS)
-        _LOGWARNING(fsl_err, 0,
-                fsl_logger_stringf("%s\n", "Something Went Wrong While Updating Render Settings"));
+    {
+        LOGWARNING(fsl_err, 0,
+                MSG_UPDATE_RENDER_SETTINGS_FAIL);
+    }
 
     render->time = fsl_get_time_nsec();
     if (!time_last) time_last = render->time;
@@ -306,6 +294,7 @@ void fsl_engine_close(void)
 
     fsl_logger_close();
     fsl_mem_unmap_arena(&_fsl_memory_arena_internal, "fsl_engine_close()._fsl_memory_arena_internal");
+    fsl_mem_unmap_arena(&_fsl_memory_arena_debug_internal, "fsl_engine_close()._fsl_memory_arena_debug_internal");
     fsl_err = fsl_err_temp;
 }
 
@@ -313,8 +302,8 @@ u32 fsl_engine_get_string(str *dst, enum fsl_string_index type)
 {
     if (!dst)
     {
-        _LOGERROR(FSL_ERR_POINTER_NULL, 0,
-                fsl_logger_stringf("%s\n", "Failed to Get String, Pointer NULL"));
+        LOGERROR(FSL_ERR_POINTER_NULL, 0,
+                MSG_POINTER_NULL_ACTION("Get String"));
         return fsl_err;
     }
 
@@ -349,9 +338,9 @@ u32 fsl_glfw_init(b8 multisample)
 {
     if (!glfwInit())
     {
-        _LOGFATAL(FSL_ERR_GLFW_INIT_FAIL,
+        LOGFATAL(FSL_ERR_GLFW_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("%s\n", "Failed to Initialize GLFW, Process Aborted"));
+                MSG_ACTION_FATAL("Initialize GLFW"));
         return fsl_err;
     }
 
@@ -377,9 +366,9 @@ u32 fsl_window_init(const str *title, i32 size_x, i32 size_y)
 
     if (!render->window)
     {
-        _LOGFATAL(FSL_ERR_WINDOW_INIT_FAIL,
+        LOGFATAL(FSL_ERR_WINDOW_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("%s\n", "Failed to Initialize Window or OpenGL Context, Process Aborted"));
+                MSG_ACTION_FATAL("Initialize Window or OpenGL Context"));
         return fsl_err;
     }
 
@@ -410,34 +399,33 @@ u32 fsl_glad_init(void)
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        _LOGFATAL(FSL_ERR_GLAD_INIT_FAIL,
+        LOGFATAL(FSL_ERR_GLAD_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("%s\n", "Failed to Initialize GLAD, Process Aborted"));
+                MSG_ACTION_FATAL("Initialize GLAD"));
         return fsl_err;
     }
 
     if (GLVersion.major < 4 || (GLVersion.major == 4 && GLVersion.minor < 3))
     {
-        _LOGFATAL(FSL_ERR_GL_VERSION_NOT_SUPPORT,
+        LOGFATAL(FSL_ERR_GL_VERSION_NOT_SUPPORT,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("OpenGL 4.3+ Required, Current Version '%d.%d', Process Aborted\n",
-                GLVersion.major, GLVersion.minor));
+                MSG_GL_VERSION_NOT_SUPPORT(GLVersion.major, GLVersion.minor));
         return fsl_err;
     }
 
-    _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+    LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
             fsl_logger_stringf(FSL_ENGINE_NAME ":  %s\n", str_engine_version));
 
-    _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+    LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
             fsl_logger_stringf("OpenGL:         %s\n", glGetString(GL_VERSION)));
 
-    _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+    LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
             fsl_logger_stringf("GLSL:           %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION)));
 
-    _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+    LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
             fsl_logger_stringf("Vendor:         %s\n", glGetString(GL_VENDOR)));
 
-    _LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
+    LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE,
             fsl_logger_stringf("Renderer:       %s\n", glGetString(GL_RENDERER)));
 
     fsl_err = FSL_ERR_SUCCESS;
@@ -448,8 +436,8 @@ u32 fsl_change_render(fsl_render *_render)
 {
     if (_render == NULL)
     {
-        _LOGERROR(FSL_ERR_POINTER_NULL, 0,
-                fsl_logger_stringf("%s\n", "Failed to Change Render, Pointer NULL"));
+        LOGERROR(FSL_ERR_POINTER_NULL, 0,
+                MSG_POINTER_NULL_ACTION("Change Render"));
         return fsl_err;
     }
 
@@ -459,8 +447,8 @@ u32 fsl_change_render(fsl_render *_render)
         glfwMakeContextCurrent(render->window);
     else
     {
-        _LOGWARNING(FSL_ERR_WINDOW_NOT_FOUND, 0,
-                fsl_logger_stringf("%s\n", "No Window Found for the Currently Bound Render"));
+        LOGWARNING(FSL_ERR_WINDOW_NOT_FOUND, 0,
+                MSG_WINDOW_NOT_FOUND_WARNING);
         return fsl_err;
     }
 
@@ -478,12 +466,12 @@ u32 fsl_process_screenshot_request(const str *dir_screenshots, const str *specia
     if (_fsl_core.flag.request_screenshot)
     {
         _fsl_core.flag.request_screenshot = 0;
-        return _fsl_take_screenshot(dir_screenshots, special_text);
+        return take_screenshot_internal(dir_screenshots, special_text);
     }
     return FSL_ERR_SUCCESS;
 }
 
-static u32 _fsl_take_screenshot(const str *dir_screenshots, const str *special_text)
+static u32 take_screenshot_internal(const str *dir_screenshots, const str *special_text)
 {
     u64 i = 0;
     str str_time[FSL_TIME_STRING_MAX] = {0};
@@ -492,11 +480,11 @@ static u32 _fsl_take_screenshot(const str *dir_screenshots, const str *special_t
     str file_name_full[PATH_MAX] = {0};
     str str_dir_screenshots[PATH_MAX] = {0};
 
-    if (fsl_is_dir_exists(dir_screenshots, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_is_dir_exists(dir_screenshots, FALSE) != FSL_ERR_SUCCESS)
     {
-        _LOGERROR(FSL_ERR_SCREENSHOT_FAIL,
+        LOGERROR(FSL_ERR_SCREENSHOT_FAIL,
                 FSL_FLAG_LOG_CMD,
-                fsl_logger_stringf("Failed to Take Screenshot, Directory '%s' Not Found\n", dir_screenshots));
+                MSG_DIR_NOT_FOUND_ACTION("Take Screenshot", dir_screenshots));
         return fsl_err;
     }
 
@@ -520,8 +508,9 @@ static u32 _fsl_take_screenshot(const str *dir_screenshots, const str *special_t
             glReadPixels(0, 0, render->size.x, render->size.y, GL_RGB, GL_UNSIGNED_BYTE, render->screen_buf);
 
             stbi_flip_vertically_on_write(TRUE);
-            _LOGINFO(FSL_FLAG_LOG_CMD,
+            LOGINFO(FSL_FLAG_LOG_CMD,
                     fsl_logger_stringf("Screenshot: %s\n", file_name_full));
+
             stbi_write_png(file_name_full, render->size.x, render->size.y, FSL_COLOR_CHANNELS_RGB,
                     render->screen_buf, render->size.x * FSL_COLOR_CHANNELS_RGB);
 
@@ -530,236 +519,18 @@ static u32 _fsl_take_screenshot(const str *dir_screenshots, const str *special_t
         }
     }
 
-    _LOGERROR(FSL_ERR_SCREENSHOT_FAIL,
+    LOGERROR(FSL_ERR_SCREENSHOT_FAIL,
             FSL_FLAG_LOG_CMD,
-            fsl_logger_stringf("%s\n", "Failed to Take Screenshot, Screenshot Rate Limit Exceeded"));
+            MSG_RATE_LIMIT_EXCEED_ACTION("Take Screenshot"));
     return fsl_err;
 }
 
-/* ---- section: meat ------------------------------------------------------- */
-
-void fsl_attrib_vec3(void)
-{
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
-}
-
-void fsl_attrib_vec3_vec2(void)
-{
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-}
-
-void fsl_attrib_vec3_vec3(void)
-{
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-}
-
-void fsl_attrib_vec3_vec4(void)
-{
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void*)0);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-}
-
-u32 fsl_fbo_init(fsl_fbo *fbo, fsl_mesh *mesh_fbo, b8 multisample, u32 samples)
-{
-    GLuint status = 0;
-
-    if (fbo == NULL)
-        goto mesh_fbo_init;
-
-    fsl_fbo_free(fbo);
-
-    glGenFramebuffers(1, &fbo->fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
-
-    if (multisample)
-    {
-        /* ---- color buffer ------------------------------------------------ */
-
-        glGenTextures(1, &fbo->color_buf);
-        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, fbo->color_buf);
-        glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGBA,
-                render->size.x, render->size.y, GL_TRUE);
-
-        glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE,
-                GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-        glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE,
-                GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE,
-                GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-
-        glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE,
-                GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                GL_TEXTURE_2D_MULTISAMPLE, fbo->color_buf, 0);
-
-        /* ---- render buffer ----------------------------------------------- */
-
-        glGenRenderbuffers(1, &fbo->rbo);
-        glBindRenderbuffer(GL_RENDERBUFFER, fbo->rbo);
-        glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples,
-                GL_DEPTH_COMPONENT24, render->size.x, render->size.y);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, fbo->rbo);
-    }
-    else
-    {
-        /* ---- color buffer ------------------------------------------------ */
-
-        glGenTextures(1, &fbo->color_buf);
-        glBindTexture(GL_TEXTURE_2D, fbo->color_buf);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                render->size.x, render->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                GL_TEXTURE_2D, fbo->color_buf, 0);
-
-        /* ---- render buffer ----------------------------------------------- */
-
-        glGenRenderbuffers(1, &fbo->rbo);
-        glBindRenderbuffer(GL_RENDERBUFFER, fbo->rbo);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, render->size.x, render->size.y);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, fbo->rbo);
-    }
-
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE)
-    {
-        _LOGFATAL(FSL_ERR_FBO_INIT_FAIL,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("FBO '%u': Status '%u' Not Complete, Process Aborted\n",
-                fbo->fbo, status));
-        return fsl_err;
-    }
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    fbo->loaded = TRUE;
-
-mesh_fbo_init:
-
-    if (mesh_fbo == NULL || mesh_fbo->vbo_data != NULL)
-        return FSL_ERR_SUCCESS;
-
-    mesh_fbo->vbo_len = fsl_arr_len(vbo_data_unit_quad);
-    if (fsl_mem_alloc((void*)&mesh_fbo->vbo_data, sizeof(GLfloat) * mesh_fbo->vbo_len,
-                "fbo_init().mesh_fbo.vbo_data") != FSL_ERR_SUCCESS)
-        goto cleanup;
-
-    memcpy(mesh_fbo->vbo_data, vbo_data_unit_quad, sizeof(GLfloat) * mesh_fbo->vbo_len);
-
-    /* ---- bind mesh ------------------------------------------------------- */
-
-    glGenVertexArrays(1, &mesh_fbo->vao);
-    glGenBuffers(1, &mesh_fbo->vbo);
-
-    glBindVertexArray(mesh_fbo->vao);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh_fbo->vbo);
-    glBufferData(GL_ARRAY_BUFFER, mesh_fbo->vbo_len * sizeof(GLfloat),
-            mesh_fbo->vbo_data, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)0);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
-
-    glBindVertexArray(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    mesh_fbo->loaded = TRUE;
-
-    fsl_err = FSL_ERR_SUCCESS;
-    return fsl_err;
-
-cleanup:
-
-    fsl_fbo_free(fbo);
-    fsl_mesh_free(mesh_fbo);
-    return fsl_err;
-}
-
-u32 fsl_fbo_realloc(fsl_fbo *fbo, b8 multisample, u32 samples)
-{
-    GLuint status = 0;
-
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
-
-    if (multisample)
-    {
-        /* ---- color buffer ------------------------------------------------ */
-
-        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, fbo->color_buf);
-        glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGBA,
-                render->size.x, render->size.y, GL_TRUE);
-
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                GL_TEXTURE_2D_MULTISAMPLE, fbo->color_buf, 0);
-
-        /* ---- render buffer ----------------------------------------------- */
-
-        glBindRenderbuffer(GL_RENDERBUFFER, fbo->rbo);
-        glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples,
-                GL_DEPTH_COMPONENT24, render->size.x, render->size.y);
-    }
-    else
-    {
-        /* ---- color buffer ------------------------------------------------ */
-
-        glBindTexture(GL_TEXTURE_2D, fbo->color_buf);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                render->size.x, render->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-        /* ---- render buffer ----------------------------------------------- */
-
-        glBindRenderbuffer(GL_RENDERBUFFER, fbo->rbo);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24,
-                render->size.x, render->size.y);
-    }
-
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE)
-    {
-        _LOGFATAL(FSL_ERR_FBO_REALLOC_FAIL,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("FBO '%u': Status '%u' Not Complete, Process Aborted\n", fbo->fbo, status));
-
-        fsl_fbo_free(fbo);
-        return fsl_err;
-    }
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    fbo->loaded = TRUE;
-
-    fsl_err = FSL_ERR_SUCCESS;
-    return fsl_err;
-}
-
-static void _fsl_fbo_bind_internal(void)
+static void fbo_bind_internal(void)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, _fsl_core.fbo.fbo);
 }
 
-static void _fsl_fbo_bind_msaa_internal(void)
+static void fbo_bind_msaa_internal(void)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, _fsl_core.fbo_msaa.fbo);
 }
@@ -769,9 +540,9 @@ void fsl_fbo_blit(GLuint fbo)
     _fsl_core.fbo_blit(fbo);
 }
 
-static void _fsl_fbo_blit_internal(GLuint fbo)
+static void fbo_blit_internal(GLuint fbo)
 {
-    glUseProgram(fsl_shader_buf[FSL_SHADER_INDEX_UNIT_QUAD].id);
+    glUseProgram(fsl_shader_buf[FSL_SHADER_INDEX_UNIT_QUAD].asset.id);
     glBindVertexArray(fsl_mesh_unit_quad.vao);
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -779,211 +550,19 @@ static void _fsl_fbo_blit_internal(GLuint fbo)
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
-static void _fsl_fbo_blit_msaa_internal(GLuint fbo)
+static void fbo_blit_msaa_internal(GLuint fbo)
 {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, _fsl_core.fbo_msaa.fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fsl_core.fbo.fbo);
     glBlitFramebuffer(0, 0, render->size.x, render->size.y, 0, 0,
             render->size.x, render->size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-    glUseProgram(fsl_shader_buf[FSL_SHADER_INDEX_UNIT_QUAD].id);
+    glUseProgram(fsl_shader_buf[FSL_SHADER_INDEX_UNIT_QUAD].asset.id);
     glBindVertexArray(fsl_mesh_unit_quad.vao);
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glBindTexture(GL_TEXTURE_2D, _fsl_core.fbo.color_buf);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-}
-
-void fsl_fbo_free(fsl_fbo *fbo)
-{
-    fsl_fbo nofbo = {0};
-
-    if (!fbo)
-        return;
-
-    if (fbo->loaded)
-    {
-        glDeleteFramebuffers(1, &fbo->rbo);
-        glDeleteTextures(1, &fbo->color_buf);
-        glDeleteFramebuffers(1, &fbo->fbo);
-        fbo->loaded = FALSE;
-    }
-
-    *fbo = nofbo;
-}
-
-u32 fsl_texture_init(fsl_texture *texture, const GLint format_internal, const GLint format,
-        GLint filter, int channels, b8 grayscale, const str *file_name)
-{
-    if (strlen(file_name) >= PATH_MAX)
-    {
-        _LOGERROR(FSL_ERR_PATH_TOO_LONG,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("Failed to Initialize Texture '%s', File Path Too Long\n", file_name));
-        return fsl_err;
-    }
-
-    if (fsl_is_file_exists(file_name, TRUE) != FSL_ERR_SUCCESS)
-        return fsl_err;
-
-    texture->buf = (u8*)stbi_load(file_name, &texture->size.x, &texture->size.y,
-            &texture->channels, channels);
-    if (texture->buf == NULL)
-    {
-        _LOGERROR(FSL_ERR_IMAGE_LOAD_FAIL,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("Failed to Initialize Texture '%s', 'stbi_load()' Failed\n", file_name));
-        return fsl_err;
-    }
-
-    texture->format = format;
-    texture->format_internal = format_internal;
-    texture->filter = filter;
-    texture->grayscale = grayscale;
-    texture->loaded = TRUE;
-
-    fsl_err = FSL_ERR_SUCCESS;
-    return fsl_err;
-}
-
-u32 fsl_texture_generate(fsl_texture *texture, b8 bindless)
-{
-    _fsl_texture_generate(&texture->id, texture->format_internal, texture->format,
-            texture->filter, texture->size, texture->buf, texture->grayscale);
-
-    texture->generated = TRUE;
-
-    if (fsl_err == FSL_ERR_SUCCESS && bindless)
-    {
-        texture->handle = glGetTextureHandleARB(texture->id);
-        glMakeTextureHandleResidentARB(texture->handle);
-        _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("Handle[%"PRIu64"] for Texture[%u] Created\n", texture->handle, texture->id));
-        texture->bindless = TRUE;
-    }
-
-    if (texture->buf)
-        stbi_image_free(texture->buf);
-
-    return fsl_err;
-}
-
-u32 _fsl_texture_generate(GLuint *id, const GLint format_internal,  const GLint format,
-        GLint filter, v2i32 size, void *buf, b8 grayscale)
-{
-    glGenTextures(1, id);
-    glBindTexture(GL_TEXTURE_2D, *id);
-    glTexImage2D(GL_TEXTURE_2D, 0, format_internal,
-            size.x, size.y, 0, format, GL_UNSIGNED_BYTE, buf);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    if (grayscale)
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    fsl_err = FSL_ERR_SUCCESS;
-    return fsl_err;
-}
-
-void fsl_texture_free(fsl_texture *texture)
-{
-    fsl_texture notexture = {0};
-
-    if (!texture)
-        return;
-
-    if (texture->bindless)
-    {
-        glMakeTextureHandleNonResidentARB(texture->handle);
-        _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("Handle[%"PRIu64"] for Texture[%u] Destroyed\n",
-                texture->handle, texture->id));
-        texture->bindless = FALSE;
-    }
-
-    if (texture->generated)
-    {
-        glDeleteTextures(1, &texture->id);
-        _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("Texture[%u] Unloaded\n", texture->id));
-        texture->generated = FALSE;
-    }
-
-    texture->loaded = FALSE;
-
-    *texture = notexture;
-}
-
-u32 fsl_mesh_generate(fsl_mesh *mesh, void (*attrib)(), GLenum usage,
-        GLuint vbo_len, GLuint ebo_len, GLfloat *vbo_data, GLuint *ebo_data)
-{
-    if (fsl_mem_alloc((void*)&mesh->vbo_data, sizeof(GLfloat) * vbo_len,
-                "mesh_generate().mesh.vbo_data") != FSL_ERR_SUCCESS)
-        goto cleanup;
-
-    if (ebo_data)
-        if (fsl_mem_alloc((void*)&mesh->ebo_data, sizeof(GLuint) * ebo_len,
-                    "mesh_generate().mesh.vbo_data") != FSL_ERR_SUCCESS)
-            goto cleanup;
-
-    mesh->vbo_len = vbo_len;
-    mesh->ebo_len = ebo_len;
-
-    memcpy(mesh->vbo_data, vbo_data, sizeof(GLfloat) * vbo_len);
-    memcpy(mesh->ebo_data, ebo_data, sizeof(GLuint) * ebo_len);
-
-    /* ---- bind mesh ------------------------------------------------------- */
-
-    glGenVertexArrays(1, &mesh->vao);
-    glGenBuffers(1, &mesh->vbo);
-    glGenBuffers(1, &mesh->ebo);
-
-    glBindVertexArray(mesh->vao);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
-
-    glBufferData(GL_ARRAY_BUFFER, mesh->vbo_len * sizeof(GLfloat), mesh->vbo_data, usage);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo_len * sizeof(GLuint), mesh->ebo_data, usage);
-
-    if (attrib) attrib();
-
-    glBindVertexArray(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    mesh->loaded = TRUE;
-
-    fsl_err = FSL_ERR_SUCCESS;
-    return fsl_err;
-
-cleanup:
-
-    fsl_mesh_free(mesh);
-    fsl_err = FSL_ERR_MESH_GENERATION_FAIL;
-    return fsl_err;
-}
-
-void fsl_mesh_free(fsl_mesh *mesh)
-{
-    fsl_mesh nomesh = {0};
-
-    if (mesh == NULL)
-        return;
-
-    if (mesh->loaded)
-    {
-        glDeleteBuffers(1, &mesh->ebo);
-        glDeleteBuffers(1, &mesh->vbo);
-        glDeleteVertexArrays(1, &mesh->vao);
-        mesh->loaded = FALSE;
-    }
-
-    fsl_mem_free((void*)&mesh->vbo_data, sizeof(GLfloat) * mesh->vbo_len, "fsl_mesh_free().mesh.vbo_data");
-    fsl_mem_free((void*)&mesh->ebo_data, sizeof(GLuint) * mesh->ebo_len, "fsl_mesh_free().mesh.vbo_data");
-    *mesh = nomesh;
 }
 
 /* ---- section: camera ----------------------------------------------------- */

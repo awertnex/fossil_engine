@@ -22,7 +22,7 @@
 #include "h/diagnostics.h"
 #include "h/dir.h"
 #include "h/limits.h"
-#include "h/logger.h"
+#include "logger/log.h"
 #include "h/memory.h"
 #include "h/process.h"
 #include "h/time.h"
@@ -68,8 +68,8 @@ u32 fsl_is_file_exists(const str *name, b8 log)
         else
         {
             if (log)
-                _LOGERROR(FSL_ERR_IS_NOT_FILE, 0,
-                        fsl_logger_stringf("'%s' is Not a File\n", name));
+                LOGERROR(FSL_ERR_IS_NOT_FILE, 0,
+                        MSG_IS_NOT_FILE(name));
             else
                 fsl_err = FSL_ERR_IS_NOT_FILE;
         }
@@ -77,8 +77,8 @@ u32 fsl_is_file_exists(const str *name, b8 log)
     else
     {
         if (log)
-            _LOGERROR(FSL_ERR_FILE_NOT_FOUND, 0,
-                    fsl_logger_stringf("File '%s' Not Found\n", name));
+            LOGERROR(FSL_ERR_FILE_NOT_FOUND, 0,
+                    MSG_FILE_NOT_FOUND(name));
         else
             fsl_err = FSL_ERR_FILE_NOT_FOUND;
     }
@@ -115,8 +115,8 @@ u32 fsl_is_dir_exists(const str *name, b8 log)
         else
         {
             if (log)
-                _LOGERROR(FSL_ERR_IS_NOT_DIR, 0,
-                        fsl_logger_stringf("'%s' is Not a Directory\n", name));
+                LOGERROR(FSL_ERR_IS_NOT_DIR, 0,
+                        MSG_IS_NOT_DIR(name));
             else
                 fsl_err = FSL_ERR_IS_NOT_DIR;
         }
@@ -124,8 +124,8 @@ u32 fsl_is_dir_exists(const str *name, b8 log)
     else
     {
         if (log)
-            _LOGERROR(FSL_ERR_DIR_NOT_FOUND, 0,
-                    fsl_logger_stringf("Directory '%s' Not Found\n", name));
+            LOGERROR(FSL_ERR_DIR_NOT_FOUND, 0,
+                    MSG_DIR_NOT_FOUND(name));
         else
             fsl_err = FSL_ERR_DIR_NOT_FOUND;
     }
@@ -137,8 +137,8 @@ u32 fsl_make_dir(const str *path)
 {
     if (fsl_mkdir(path) == 0)
     {
-        _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("Directory Created '%s'\n", path));
+        LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+                MSG_DIR_CREATE(path));
 
         fsl_err = FSL_ERR_SUCCESS;
         return fsl_err;
@@ -151,8 +151,8 @@ u32 fsl_make_dir(const str *path)
             break;
 
         default:
-            _LOGERROR(FSL_ERR_DIR_CREATE_FAIL, 0,
-                    fsl_logger_stringf("Failed to Create Directory '%s'\n", path));
+            LOGERROR(FSL_ERR_DIR_CREATE_FAIL, 0,
+                    MSG_DIR_CREATE_FAIL(path));
     }
 
     return fsl_err;
@@ -162,7 +162,8 @@ int fsl_change_dir(const str *path)
 {
     int success = 0;
     success = fsl_chdir(path);
-    _LOGTRACE(0, fsl_logger_stringf("Working Directory Changed to '%s'\n", path));
+    LOGTRACE(0,
+            MSG_DIR_CHANGE(path));
     return success;
 }
 
@@ -188,8 +189,8 @@ u32 fsl_get_file_type(const str *name, u32 *type)
         return FSL_ERR_SUCCESS;
     }
 
-    _LOGERROR(FSL_ERR_FILE_NOT_FOUND, 0,
-            fsl_logger_stringf("File '%s' Not Found\n", name));
+    LOGERROR(FSL_ERR_FILE_NOT_FOUND, 0,
+            MSG_FILE_NOT_FOUND(name));
     return fsl_err;
 }
 
@@ -204,8 +205,8 @@ u64 fsl_get_file_contents(const str *name, void **dst, u64 size, b8 terminate)
 
     if ((file = fopen(name, "rb")) == NULL)
     {
-        _LOGERROR(FSL_ERR_FILE_OPEN_FAIL, 0,
-                fsl_logger_stringf("Failed to Open File '%s'\n", name));
+        LOGERROR(FSL_ERR_FILE_OPEN_FAIL, 0,
+                MSG_FILE_OPEN_FAIL(name));
         return 0;
     }
 
@@ -377,8 +378,8 @@ u32 fsl_copy_file(const str *src, const str *dst)
         case FSL_FILE_TYPE_REG:
             if ((out_file = fopen(str_dst, "wb")) == NULL)
             {
-                _LOGERROR(FSL_ERR_FILE_OPEN_FAIL, 0,
-                        fsl_logger_stringf("Failed to Copy File '%s' -> '%s'\n", src, str_dst));
+                LOGERROR(FSL_ERR_FILE_OPEN_FAIL, 0,
+                        MSG_FILE_COPY_FAIL(src, str_dst));
                 return fsl_err;
             }
 
@@ -391,8 +392,8 @@ u32 fsl_copy_file(const str *src, const str *dst)
 
             fwrite(in_file, 1, len, out_file);
 
-            _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                    fsl_logger_stringf("File Copied '%s' -> '%s'\n", src, str_dst));
+            LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+                    MSG_FILE_COPY(src, str_dst));
 
             fclose(out_file);
             fsl_mem_free((void*)&in_file, strlen(in_file), "fsl_copy_file().in_file");
@@ -401,10 +402,9 @@ u32 fsl_copy_file(const str *src, const str *dst)
                 fsl_chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
             else
             {
-                _LOGWARNING(FSL_ERR_FILE_STAT_FAIL,
+                LOGWARNING(FSL_ERR_FILE_STAT_FAIL,
                         FSL_FLAG_LOG_NO_VERBOSE,
-                        fsl_logger_stringf("Failed to Copy File Permissions '%s' -> '%s', 'fsl_stat()' Failed\n",
-                        src, str_dst));
+                        MSG_FILE_PERMISSION_COPY_FAIL(src, str_dst));
                 return fsl_err;
             }
             break;
@@ -412,8 +412,8 @@ u32 fsl_copy_file(const str *src, const str *dst)
         case FSL_FILE_TYPE_LNK:
             if (readlink(src, str_lnk, PATH_MAX - 1) < 1)
             {
-                _LOGERROR(FSL_ERR_FILE_OPEN_FAIL, 0,
-                        fsl_logger_stringf("Failed to Copy Symlink '%s' -> '%s'\n", src, str_dst));
+                LOGERROR(FSL_ERR_FILE_OPEN_FAIL, 0,
+                        MSG_FILE_SYMLINK_COPY_FAIL(src, str_dst));
                 return fsl_err;
             }
 
@@ -423,17 +423,16 @@ u32 fsl_copy_file(const str *src, const str *dst)
             str_lnk[strnlen(str_lnk, PATH_MAX - 1)] = '\0';
             symlink(str_lnk, str_dst);
 
-            _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                    fsl_logger_stringf("Symlink Copied '%s' -> '%s'\n", src, str_dst));
+            LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+                    MSG_FILE_SYMLINK_COPY(src, str_dst));
 
             if (fsl_stat(src, &stats) == 0)
                 fsl_chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
             else
             {
-                _LOGWARNING(FSL_ERR_FILE_STAT_FAIL,
+                LOGWARNING(FSL_ERR_FILE_STAT_FAIL,
                         FSL_FLAG_LOG_NO_VERBOSE,
-                        fsl_logger_stringf("Failed to Copy File Permissions '%s' -> '%s', 'fsl_stat()' Failed\n",
-                        src, str_dst));
+                        MSG_FILE_PERMISSION_COPY_FAIL(src, str_dst));
                 return fsl_err;
             }
             break;
@@ -505,16 +504,15 @@ u32 fsl_copy_dir(const str *src, const str *dst, b8 contents_only)
         fsl_copy_file(in_dir, out_dir);
     }
 
-    _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            fsl_logger_stringf("Directory Copied '%s' -> '%s'\n", src, str_dst));
+    LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+            MSG_DIR_COPY(src, str_dst));
 
     if (fsl_stat(str_src, &stats) == 0)
         fsl_chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
     else
-        _LOGWARNING(FSL_ERR_FILE_STAT_FAIL,
+        LOGWARNING(FSL_ERR_FILE_STAT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("Failed to Copy Directory Permissions '%s' -> '%s', 'fsl_stat()' Failed\n",
-                str_src, str_dst));
+                MSG_DIR_PERMISSION_COPY_FAIL(str_src, str_dst));
 
     if (stats.st_atim.tv_nsec == 0)
         stats.st_atim.tv_nsec = 1;
@@ -540,8 +538,8 @@ u32 fsl_write_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 
     if ((file = fopen(name, "wb")) == NULL)
     {
         if (log)
-            _LOGERROR(FSL_ERR_FILE_OPEN_FAIL, 0,
-                    fsl_logger_stringf("Failed to Write File '%s'\n", name));
+            LOGERROR(FSL_ERR_FILE_OPEN_FAIL, 0,
+                    MSG_FILE_WRITE_FAIL(name));
 
         fsl_err = FSL_ERR_FILE_OPEN_FAIL;
         return fsl_err;
@@ -551,8 +549,8 @@ u32 fsl_write_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 
     if (text) fprintf(file, "%c", '\n');
     fclose(file);
 
-    _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            fsl_logger_stringf("File Written '%s'\n", name));
+    LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+            MSG_FILE_WRITE(name));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -564,8 +562,8 @@ u32 fsl_append_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8
     if ((file = fopen(name, "ab")) == NULL)
     {
         if (log)
-            _LOGERROR(FSL_ERR_FILE_OPEN_FAIL, 0,
-                    fsl_logger_stringf("Failed to Append File '%s'\n", name));
+            LOGERROR(FSL_ERR_FILE_OPEN_FAIL, 0,
+                    MSG_FILE_APPEND_FAIL(name));
         else
         {
             fsl_err = FSL_ERR_FILE_OPEN_FAIL;
@@ -577,8 +575,8 @@ u32 fsl_append_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8
     if (text) fprintf(file, "%c", '\n');
     fclose(file);
 
-    _LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            fsl_logger_stringf("File Appended '%s'\n", name));
+    LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+            MSG_FILE_APPEND(name));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -591,8 +589,8 @@ u32 fsl_get_path_absolute(const str *name, str **dst)
 
     if (strlen(name) > PATH_MAX - 2)
     {
-        _LOGERROR(FSL_ERR_GET_PATH_ABSOLUTE_FAIL, 0,
-                fsl_logger_stringf("%s\n", "Failed to Get Absolute Path, Path Too Long"));
+        LOGERROR(FSL_ERR_GET_PATH_ABSOLUTE_FAIL, 0,
+                MSG_ACTION_REASON_ERROR("Get Absolute Path", "Path Too Long"));
         return fsl_err;
     }
 
@@ -627,8 +625,8 @@ u32 fsl_get_path_bin_root(str **dst)
     len = strlen(path_bin_root);
     if (len > PATH_MAX - 1)
     {
-        _LOGFATAL(FSL_ERR_PATH_TOO_LONG, 0,
-                fsl_logger_stringf("Path Too Long '%s', Process Aborted\n", path_bin_root));
+        LOGFATAL(FSL_ERR_PATH_TOO_LONG, 0,
+                MSG_PATH_TOO_LONG_FATAL("Get Binary Root", path_bin_root));
         return fsl_err;
     }
 
@@ -639,11 +637,12 @@ u32 fsl_get_path_bin_root(str **dst)
 
     memcpy(*dst, path_bin_root, PATH_MAX - 1);
 
+    fsl_posix_slash(*dst);
     last_slash = strrchr(*dst, '/');
     if (last_slash)
         *last_slash = 0;
     fsl_check_slash(*dst);
-    fsl_normalize_slash(*dst);
+    fsl_posix_slash(*dst);
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -732,8 +731,8 @@ u32 fsl_retract_path(str *path)
     len = strlen(path);
     if (len <= 1)
     {
-        _LOGERROR(FSL_ERR_SIZE_TOO_SMALL, 0,
-                fsl_logger_stringf("%s\n", "Failed to Retract Path, Size Too Small"));
+        LOGERROR(FSL_ERR_SIZE_TOO_SMALL, 0,
+                MSG_ACTION_REASON_ERROR("Retract Path", "Size Too Small"));
         return fsl_err;
     }
 
@@ -762,23 +761,23 @@ u32 fsl_get_base_name(const str *path, str *dst, u64 size)
 
     if (size == 0)
     {
-        _LOGERROR(FSL_ERR_SIZE_TOO_SMALL, 0,
-                fsl_logger_stringf("Failed to Get Base Name of '%s', 'size' Too Small\n", path));
+        LOGERROR(FSL_ERR_SIZE_TOO_SMALL, 0,
+                MSG_GET_BASE_NAME_FAIL(path, "Size Too Small"));
         return fsl_err;
     }
 
     if (!path || !path[0] || !dst)
     {
-        _LOGERROR(FSL_ERR_POINTER_NULL, 0,
-                fsl_logger_stringf("%s\n", "Failed to Get Base Name, Pointer NULL"));
+        LOGERROR(FSL_ERR_POINTER_NULL, 0,
+                MSG_GET_BASE_NAME_FAIL(path, "Pointer `NULL`"));
         return fsl_err;
     }
 
     len = strlen(path);
     if (len > PATH_MAX - 2)
     {
-        _LOGERROR(FSL_ERR_PATH_TOO_LONG, 0,
-                fsl_logger_stringf("Failed to Get Base Name of '%s', Path Too Long\n", path));
+        LOGERROR(FSL_ERR_PATH_TOO_LONG, 0,
+                MSG_GET_BASE_NAME_FAIL(path, "Path Too Long"));
         return fsl_err;
     }
 

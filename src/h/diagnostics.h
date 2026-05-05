@@ -53,7 +53,7 @@
 #define FSL_ERR_PROCESS_FORK_FAIL           4112
 #define FSL_ERR_EXEC_FAIL                   4113
 #define FSL_ERR_EXEC_PROCESS_NON_ZERO       4114
-#define FSL_ERR_EXEC_TERMINATE_BY_SIGNAL    4115
+#define FSL_ERR_EXEC_SIGTERM                4115
 #define FSL_ERR_EXEC_ABNORMAL_EXIT          4116
 #define FSL_ERR_EXECVP_FAIL                 4117
 #define FSL_ERR_WAITPID_FAIL                4118

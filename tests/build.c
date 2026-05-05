@@ -93,7 +93,7 @@ int main(int argc, char **argv)
     }
 
     LOGWARNING(ERR_BUILD_FUNCTION_NOT_FOUND, FALSE,
-            "%s\n", "No Test Specified, Pass Test Directory Name As Argument");
+            logger_stringf("%s\n", "No Test Specified, Pass Test Directory Name As Argument"));
     cmd_fail(NULL);
 
     build_err = ERR_SUCCESS;

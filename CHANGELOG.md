@@ -10,6 +10,21 @@
 ## v0.7.0-dev (current)
 
 #### changes
+- (2026 05 04): added parameters `name`, `file` and `path` to functions:
+                - `fsl_texture_init()`
+                - `fsl_mesh_generate()`
+                - `fsl_font_init()`
+- (2026 05 04): added asset module
+- (2026 04 29): updated 'buildtool' version to 'v1.8.4-beta'
+- (2026 04 29): moved 'logger.c' and 'logger.h' into their own directory
+                'logger/'
+- (2026 04 29): hide function `fsl_logger_init()` and change name to
+                `_fsl_logger_init()` (automatically called from
+                `fsl_engine_init()`
+- (2026 04 29): remove param `log_dir_not_found` from function
+                `fsl_logger_init()`
+- (2026 04 29): remove param `_log_dir` from function `fsl_engine_init()` and
+                function `fsl_logger_init()`
 - (2026 04 28): add math functions:
                 `fsl_min_v3f64(v3f64 v)`,
                 `fsl_max_v3f64(v3f64 v)`,

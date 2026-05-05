@@ -19,7 +19,7 @@ u32 rand_init(void)
     u64 file_len = 0;
     i32 i;
 
-    if (fsl_mem_map((void*)&RAND_TAB, RAND_TAB_VOLUME * sizeof(f32),
+    if (fsl_mem_push_arena(&_memory_arena_internal, (void*)&RAND_TAB, RAND_TAB_VOLUME * sizeof(f32),
                 "rand_init().RAND_TAB") != FSL_ERR_SUCCESS)
         goto cleanup;
 

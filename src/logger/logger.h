@@ -1,0 +1,186 @@
+/*  @file logger.h
+ *
+ *  @brief logger.
+ *
+ *  Copyright 2026 Lily Awertnex
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+#ifndef FSL_LOGGER_H
+#define FSL_LOGGER_H
+
+/*  notes:
+ *      log macros beginning with an underscore (`_`) are used by the engine.
+ *      log macros ending in `EX` are used to pass `file` and `line` manually.
+ */
+
+#include "../h/common.h"
+#include "../h/diagnostics.h"
+#include "../h/limits.h"
+#include "../h/memory.h"
+#include "../h/types.h"
+
+enum fsl_logger_flag
+{
+    FSL_FLAG_LOGGER_GUI_OPEN = 0x0001
+}; /* LoggerFlag */
+
+enum fsl_log_output_flag
+{
+    FSL_FLAG_LOG_NO_VERBOSE =   0x0001, /* don't log file and line */
+    FSL_FLAG_LOG_CMD =          0x0002, /* log a command (e.g. "Gravity Toggled On" and nothing else) */
+    FSL_FLAG_LOG_NO_FILE =      0x0004  /* don't write to log file */
+}; /* fsl_log_output_flag */
+
+enum fsl_log_message_flag
+{
+    FSL_FLAG_LOG_TIMESTAMP =    0x0001,
+    FSL_FLAG_LOG_DATE =         0x0002,
+    FSL_FLAG_LOG_TIME =         0x0004,
+    FSL_FLAG_LOG_DATE_TIME =    0x0006,
+    FSL_FLAG_LOG_FULL_TIME =    0x0007,
+    FSL_FLAG_LOG_TAG =          0x0008,
+    FSL_FLAG_LOG_TERM_COLOR =   0x0010
+}; /* fsl_log_message_flag */
+
+enum fsl_log_level
+{
+    FSL_LOG_LEVEL_FATAL,
+    FSL_LOG_LEVEL_ERROR,
+    FSL_LOG_LEVEL_WARNING,
+    FSL_LOG_LEVEL_SUCCESS,
+    FSL_LOG_LEVEL_INFO,
+    FSL_LOG_LEVEL_DEBUG,
+    FSL_LOG_LEVEL_TRACE,
+    FSL_LOG_LEVEL_COUNT
+}; /* fsl_log_level */
+
+/*! @brief global logger buffer, raw log data.
+ *
+ *  @remark buffer mapped onto @ref _fsl_memory_arena_internal.
+ */
+typedef struct fsl_logger_core
+{
+    u64 flag;
+    u32 log_level_max;
+    str log_dir[PATH_MAX];
+
+    str **i;                /* pointers to strings in `buf` */
+    str *buf;               /* logger strings */
+    u32 *color;             /* string colors */
+    i32 cursor;             /* current position in `i` */
+} fsl_logger_core;
+
+/* ---- internal-use macros ------------------------------------------------- */
+
+#define LOGFATAL(err, flags, message) \
+    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_FATAL, message)
+
+#define LOGERROR(err, flags, message) \
+    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_ERROR, message)
+
+#define LOGWARNING(err, flags, message) \
+    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_WARNING, message)
+
+#define LOGSUCCESS(flags, message) \
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_SUCCESS, message)
+
+#define LOGINFO(flags, message) \
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_INFO, message)
+
+#define LOGFATALEX(err, flags, file, line, message); \
+    _fsl_log_output(err, flags, file, line, FSL_LOG_LEVEL_FATAL, message)
+
+#define LOGERROREX(err, flags, file, line, message); \
+    _fsl_log_output(err, flags, file, line, FSL_LOG_LEVEL_ERROR, message)
+
+#define LOGWARNINGEX(err, flags, file, line, message) \
+    _fsl_log_output(err, flags, file, line, FSL_LOG_LEVEL_WARNING, message)
+
+#define LOGINFOEX(flags, file, line, message) \
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_INFO, message)
+
+#ifdef FOSSIL_RELEASE_BUILD
+#   define LOGDEBUG(flags, message)
+#   define LOGTRACE(flags, message)
+#   define LOGDEBUGEX(flags, file, line, message)
+#   define LOGTRACEEX(flags, file, line, message)
+#else
+#   define LOGDEBUG(flags, message) \
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_DEBUG, message)
+
+#   define LOGTRACE(flags, message) \
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_TRACE, message)
+
+#   define LOGDEBUGEX(flags, file, line, message) \
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_DEBUG, message)
+
+#   define LOGTRACEEX(flags, file, line, message) \
+    _fsl_log_output(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_TRACE, message)
+#endif /* FOSSIL_RELEASE_BUILD */
+
+/*! @brief logger core, all logger data.
+ *
+ *  @remark read-only, initialized internally in @ref _fsl_logger_init().
+ */
+FSLAPI extern fsl_logger_core logger_core;
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief allocate logger resources.
+ *
+ *  @param argc number of arguments in `argv` if `argv` provided.
+ *  @param argv used for logger log level if args provided.
+ *  @param flags enum @ref fsl_flag.
+ *
+ *  @remark called automatically from @ref fsl_engine_init().
+ *
+ *  @remark args:
+ *      logfatal:   only output fatal logs (least verbose).
+ *      logerror:   only output <= error logs.
+ *      logwarn:    only output <= warning logs.
+ *      loginfo:    only output <= info logs (default).
+ *      logdebug:   only output <= debug logs.
+ *      logtrace:   only output <= trace logs (most verbose).
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+u32 _fsl_logger_init(int argc, char **argv, u64 flags);
+
+FSLAPI void fsl_logger_close(void);
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @param flags enum: @ref fsl_log_output_flag.
+ *  @param _log_dir directory to write log files into, if `NULL`, logs won't be written to disk.
+ *
+ *  @param message @ref fsl_logger_stringf() can be used to create a temporary
+ *  static formatted string for the log message.
+ */
+FSLAPI void _fsl_log_output(u32 error_code, u32 flags, const str *file, u64 line,
+        u8 level, const str *message);
+
+/*! @brief like @ref fsl_stringf(), but used for the logger, since @ref fsl_stringf()
+ *  uses features like buffer truncation with `...`, the logger needs the raw string.
+ *
+ *  @note the use of @ref fsl_logger_stringf more than once in a single expression is not advised.
+ *
+ *  @remark use temporary static buffers internally.
+ *  @remark inspired by Raylib: `github.com/raysan5/raylib`: `raylib/src/rtext.c/TextFormat()`.
+ *
+ *  @return static formatted string.
+ */
+FSLAPI str *fsl_logger_stringf(const str *format, ...);
+
+#endif /* FSL_LOGGER_H */

@@ -125,7 +125,7 @@ typedef struct _buf
 #define STRING_MAX      1024
 #define OUT_STRING_MAX  (STRING_MAX + 256)
 #define TIME_STRING_MAX 256
-#define STRINGF_BUFFERS_MAX 4
+#define STRINGF_BUFFERS_MAX 8
 
 enum file_type_index
 {
@@ -169,7 +169,7 @@ str *stringf(const str *format, ...)
     str *string = buf[index];
     str *trunc = NULL;
     int cursor = 0;
-    va_list args;
+    __builtin_va_list args;
 
     va_start(args, format);
     cursor = vsnprintf(string, OUT_STRING_MAX, format, args);

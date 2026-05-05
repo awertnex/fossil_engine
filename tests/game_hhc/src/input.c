@@ -2,11 +2,11 @@
 #include "h/chunking.h"
 #include "h/gui.h"
 #include "h/input.h"
-#include "h/logger.h"
 #include "h/player.h"
 #include "h/world.h"
 
 #include "src/h/input.h"
+#include "src/logger/log.h"
 #include "src/h/math.h"
 #include "src/h/time.h"
 
@@ -290,13 +290,13 @@ void input_update(player *p)
             p->camera_mode = (p->camera_mode + 1) % PLAYER_CAMERA_MODE_COUNT;
 
         if (fsl_is_key_press(bind_zoom))
-            HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     fsl_logger_stringf("%s\n", "Zoom Toggled On"));
         if (fsl_is_key_hold(bind_zoom))
             p->flag |= FLAG_PLAYER_ZOOMER;
         if (fsl_is_key_release(bind_zoom))
         {
-            HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     fsl_logger_stringf("%s\n", "Zoom Toggled Off"));
             p->flag &= ~FLAG_PLAYER_ZOOMER;
         }
@@ -306,10 +306,10 @@ void input_update(player *p)
             p->flag ^= FLAG_PLAYER_FLASHLIGHT;
 
             if (p->flag & FLAG_PLAYER_FLASHLIGHT)
-                HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                         fsl_logger_stringf("%s\n", "Flashlight Toggled On"));
             else
-                HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                         fsl_logger_stringf("%s\n", "Flashlight Toggled Off"));
         }
 
@@ -318,10 +318,10 @@ void input_update(player *p)
             p->flag ^= FLAG_PLAYER_CINEMATIC_MOTION;
 
             if (p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
-                HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                         fsl_logger_stringf("%s\n", "Cinematic Motion On"));
             else
-                HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                         fsl_logger_stringf("%s\n", "Cinematic Motion Off"));
         }
     }
@@ -338,10 +338,10 @@ void input_update(player *p)
         core.debug.trans_blocks ^= 1;
 
         if (core.debug.trans_blocks)
-            HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     fsl_logger_stringf("%s\n", "View Transparent Blocks On"));
         else
-            HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     fsl_logger_stringf("%s\n", "View Transparent Blocks Off"));
     }
 
@@ -350,10 +350,10 @@ void input_update(player *p)
         core.debug.chunk_bounds ^= 1;
 
         if (core.debug.chunk_bounds)
-            HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     fsl_logger_stringf("%s\n", "View Chunk Boundaries On"));
         else
-            HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     fsl_logger_stringf("%s\n", "View Chunk Boundaries Off"));
     }
 
@@ -362,10 +362,10 @@ void input_update(player *p)
         core.debug.bounding_boxes ^= 1;
 
         if (core.debug.bounding_boxes)
-            HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     fsl_logger_stringf("%s\n", "View Bounding Boxes On"));
         else
-            HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     fsl_logger_stringf("%s\n", "View Bounding Boxes Off"));
     }
 
@@ -377,17 +377,17 @@ void input_update(player *p)
         core.debug.chunk_queue_visualizer ^= 1;
 
         if (core.debug.chunk_queue_visualizer)
-            HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     fsl_logger_stringf("%s\n", "View Chunk Queue Visualizer On"));
         else
-            HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     fsl_logger_stringf("%s\n", "View Chunk Queue Visualizer Off"));
     }
 
     if (fsl_is_key_press(bind_reload_shaders))
     {
-        if (fsl_shader_program_init(GAME_DIR_NAME_SHADERS, &shader[SHADER_SKYBOX]) == FSL_ERR_SUCCESS)
-            HHC_LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+        if (fsl_shader_program_init(&shader[SHADER_SKYBOX]) == FSL_ERR_SUCCESS)
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     fsl_logger_stringf("%s\n", "Shaders Reloaded!"));
     }
 }

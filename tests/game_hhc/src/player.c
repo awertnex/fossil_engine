@@ -1,10 +1,10 @@
 #include "h/chunking.h"
 #include "h/common.h"
-#include "h/logger.h"
 #include "h/player.h"
 #include "h/world.h"
 
 #include "src/h/collision.h"
+#include "src/logger/log.h"
 #include "src/h/math.h"
 #include "src/h/time.h"
 
@@ -20,11 +20,14 @@ static void player_wrap_coordinates(player *p);
 
 void player_update(player *p, f64 dt)
 {
-    v3f32 gravity = {0}, drag = {0},
-          damping = {0}, air_control = {0};
+    v3f32 gravity = {0};
+    v3f32 drag = {0};
+    v3f32 damping = {0};
+    v3f32 air_control = {0};
+    v3f32 nov3f32 = {0};
 
     p->flag &= ~FLAG_PLAYER_CAN_JUMP;
-    p->acceleration = (v3f32){0};
+    p->acceleration = nov3f32;
     p->acceleration_rate = PLAYER_ACCELERATION_WALK;
     p->camera.fovy = settings.fov;
 
@@ -113,28 +116,32 @@ void player_update(player *p, f64 dt)
 
 void player_collision_update(player *p, f64 dt)
 {
-    if (!MODE_INTERNAL_COLLIDE) return;
-
     chunk *ch = NULL;
     u32 *block = NULL;
     f32 speed;
-    v3f32 displacement =
-    {
-        p->velocity.x * dt,
-        p->velocity.y * dt,
-        p->velocity.z * dt,
-    };
+    v3f32 displacement = {0};
     f32 time = 0.0f;
     v3f32 normal = {0};
     f32 dot = 0.0f;
     f32 friction = 0.0f;
     fsl_bounding_box block_box = {0};
-    fsl_bounding_box collision_capsule;
-    i32 i, x, y, z;
-    v3i32 MIN, MAX, START = {0}, INCREMENT = {1, 1, 1};
+    fsl_bounding_box collision_capsule = {0};
+    i32 i = 0;
+    i32 x = 0;
+    i32 y = 0;
+    i32 z = 0;
+    v3i32 MIN = {0};
+    v3i32 MAX = {0};
+    v3i32 START = {0};
+    v3i32 INCREMENT = {1, 1, 1};
     b8 resolved = TRUE;
     u32 max_axis = 0;
 
+    if (!MODE_INTERNAL_COLLIDE) return;
+
+    displacement.x = p->velocity.x * dt;
+    displacement.y = p->velocity.y * dt;
+    displacement.z = p->velocity.z * dt;
     collision_capsule = make_collision_capsule(p->bbox, p->ch, displacement);
     MIN.x = (i32)collision_capsule.pos.x;
     MIN.y = (i32)collision_capsule.pos.y;
@@ -168,7 +175,9 @@ void player_collision_update(player *p, f64 dt)
     {
         resolved = FALSE;
         for (z = START.z; z >= MIN.z && z < MAX.z; z += INCREMENT.z)
+        {
             for (y = START.y; y >= MIN.y && y < MAX.y; y += INCREMENT.y)
+            {
                 for (x = START.x; x >= MIN.x && x < MAX.x; x += INCREMENT.x)
                 {
                     ch = get_chunk_resolved(settings.chunk_tab_center, x, y, z);
@@ -249,6 +258,8 @@ void player_collision_update(player *p, f64 dt)
                         resolved = TRUE;
                     }
                 }
+            }
+        }
     }
 }
 
@@ -257,10 +268,10 @@ void player_bounding_box_update(player *p)
     if (p->flag & FLAG_PLAYER_FLYING && p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
     {
         p->bbox.pos.x = p->pos.x - p->size.x * 0.5f;
-        p->bbox.pos.y = p->pos.y - p->size.x * 0.5f;
+        p->bbox.pos.y = p->pos.y - p->size.x * 0.5f; /* `size.x` here to link 'x' and 'y' to one size */
         p->bbox.pos.z = p->pos.z + p->eye_height - p->size.x * 0.5f;
 
-        /* size for all axes is 'x' intentionally because we want cube bbox */
+        /* size for all axes is `size.x` intentionally because we want cube bbox */
         p->bbox.size.x = p->size.x;
         p->bbox.size.y = p->size.x;
         p->bbox.size.z = p->size.x;
@@ -282,6 +293,7 @@ fsl_bounding_box make_collision_capsule(fsl_bounding_box b, v3i32 ch, v3f32 velo
     v3f64 pos = {0};
     v3f64 size = {0};
     v3f32 delta = {0};
+    fsl_bounding_box result = {0};
 
     if (velocity.x > 0.0f)
     {
@@ -322,18 +334,13 @@ fsl_bounding_box make_collision_capsule(fsl_bounding_box b, v3i32 ch, v3f32 velo
         size.z = b.size.z - velocity.z + delta.z + PADDING * 2.0f + 1.0f;
     }
 
-    return (fsl_bounding_box){
-        .pos = (v3f64){
-            floor(pos.x) - ch.x * CHUNK_DIAMETER,
-            floor(pos.y) - ch.y * CHUNK_DIAMETER,
-            floor(pos.z) - ch.z * CHUNK_DIAMETER,
-        },
-        .size = (v3f64){
-            ceil(size.x),
-            ceil(size.y),
-            ceil(size.z),
-        },
-    };
+    result.pos.x = floor(pos.x) - ch.x * CHUNK_DIAMETER;
+    result.pos.y = floor(pos.y) - ch.y * CHUNK_DIAMETER;
+    result.pos.z = floor(pos.z) - ch.z * CHUNK_DIAMETER;
+    result.size.x = ceil(size.x);
+    result.size.y = ceil(size.y);
+    result.size.z = ceil(size.z);
+    return result;
 }
 
 void player_chunk_update(player *p)
@@ -526,41 +533,42 @@ void player_camera_movement_update(player *p, v2f64 mouse_delta, b8 use_mouse)
 
 void player_target_update(player *p)
 {
+    const v3i64 WORLD_VOLUME_MIN = {-WORLD_DIAMETER, -WORLD_DIAMETER, -WORLD_DIAMETER_VERTICAL};
+    const v3i64 WORLD_VOLUME_MAX = {WORLD_DIAMETER, WORLD_DIAMETER, WORLD_DIAMETER_VERTICAL};
     f64 SPCH = p->sin_pitch;
     f64 CPCH = p->cos_pitch;
     f64 SYAW = p->sin_yaw;
     f64 CYAW = p->cos_yaw;
-    v3f64 eye_pos =
-    {
-        p->pos.x,
-        p->pos.y,
-        p->pos.z + p->eye_height,
-    };
-    v3i64 block_pos =
-    {
-        (i64)floor(eye_pos.x),
-        (i64)floor(eye_pos.y),
-        (i64)floor(eye_pos.z),
-    };
-    v3f64 direction =
-    {
-        CYAW * CPCH,
-        -SYAW * CPCH,
-        -SPCH,
-    };
-    v3f64 delta =
-    {
-       direction.x == 0.0 ? INFINITY : fabs(1.0 / direction.x),
-       direction.y == 0.0 ? INFINITY : fabs(1.0 / direction.y),
-       direction.z == 0.0 ? INFINITY : fabs(1.0 / direction.z),
-    };
+    v3f64 eye_pos = {0};
+    v3i64 block_pos = {0};
+    v3i64 target = {0};
+    v3f64 direction = {0};
+    v3f64 delta = {0};
     v3f64 distance = {0};
     v3f64 normal = {0};
     v3i32 step = {1, 1, 1};
     b8 hit = FALSE;
     chunk *ch = NULL;
     u32 *block = NULL;
-    i32 x, y, z;
+    i32 x = 0;
+    i32 y = 0;
+    i32 z = 0;
+
+    eye_pos.x = p->pos.x;
+    eye_pos.y = p->pos.y;
+    eye_pos.z = p->pos.z + p->eye_height;
+    block_pos.x = (i64)floor(eye_pos.x);
+    block_pos.y = (i64)floor(eye_pos.y);
+    block_pos.z = (i64)floor(eye_pos.z);
+    target.x = (i64)p->target.x;
+    target.y = (i64)p->target.y;
+    target.z = (i64)p->target.z;
+    direction.x = CYAW * CPCH;
+    direction.y = -SYAW * CPCH;
+    direction.z = -SPCH;
+    delta.x = direction.x == 0.0 ? INFINITY : fabs(1.0 / direction.x);
+    delta.y = direction.y == 0.0 ? INFINITY : fabs(1.0 / direction.y);
+    delta.z = direction.z == 0.0 ? INFINITY : fabs(1.0 / direction.z);
 
     if (direction.x < 0.0f)
     {
@@ -583,26 +591,32 @@ void player_target_update(player *p)
     }
     else distance.z = (block_pos.z + 1.0 - eye_pos.z) * delta.z;
 
-    while (fsl_min_v3f32((v3f32){distance.x, distance.y, distance.z}) < settings.reach_distance)
+    while (fsl_min_v3f64(distance) < settings.reach_distance)
     {
-        switch (fsl_min_axis_v3f32((v3f32){distance.x, distance.y, distance.z}))
+        switch (fsl_min_axis_v3f64(distance))
         {
             case 1:
                 block_pos.x += step.x;
                 distance.x += delta.x;
-                normal = (v3f64){-step.x, 0.0, 0.0};
+                normal.x = -step.x;
+                normal.y = 0.0;
+                normal.z = 0.0;
                 break;
 
             case 2:
                 block_pos.y += step.y;
                 distance.y += delta.y;
-                normal = (v3f64){0.0, -step.y, 0.0};
+                normal.x = 0.0;
+                normal.y = -step.y;
+                normal.z = 0.0;
                 break;
 
             case 3:
                 block_pos.z += step.z;
                 distance.z += delta.z;
-                normal = (v3f64){0.0, 0.0, -step.z};
+                normal.x = 0.0;
+                normal.y = 0.0;
+                normal.z = -step.z;
                 break;
         }
 
@@ -617,9 +631,7 @@ void player_target_update(player *p)
         break;
     }
 
-    if (hit && fsl_is_in_volume_i64((v3i64){(i64)p->target.x, (i64)p->target.y, (i64)p->target.z},
-                (v3i64){-WORLD_DIAMETER, -WORLD_DIAMETER, -WORLD_DIAMETER_VERTICAL},
-                (v3i64){WORLD_DIAMETER, WORLD_DIAMETER, WORLD_DIAMETER_VERTICAL}))
+    if (hit && fsl_is_in_volume_i64(target, WORLD_VOLUME_MIN, WORLD_VOLUME_MAX))
     {
         core.flag.parse_target = 1;
         p->target.x = (f64)block_pos.x;
@@ -630,14 +642,20 @@ void player_target_update(player *p)
     else
     {
         core.flag.parse_target = 0;
-        p->target_normal = (v3f64){0};
+        p->target_normal.x = 0.0;
+        p->target_normal.y = 0.0;
+        p->target_normal.z = 0.0;
     }
 }
 
 void set_player_pos(player *p, f64 x, f64 y, f64 z)
 {
-    p->pos = (v3f64){x, y, z};
-    p->velocity = (v3f32){0};
+    p->pos.x = x;
+    p->pos.y = y;
+    p->pos.z = z;
+    p->velocity.x = 0.0;
+    p->velocity.y = 0.0;
+    p->velocity.z = 0.0;
     p->pos_last = p->pos;
 }
 
@@ -651,7 +669,9 @@ void set_player_block(player *p, i64 x, i64 y, i64 z)
 
 void set_player_spawn(player *p, i64 x, i64 y, i64 z)
 {
-    p->spawn = (v3i64){x, y, z};
+    p->spawn.x = x;
+    p->spawn.y = y;
+    p->spawn.z = z;
 }
 
 void player_spawn(player *p, b8 hard)
@@ -667,11 +687,13 @@ void player_spawn(player *p, b8 hard)
 
 void player_kill(player *p)
 {
-    p->velocity = (v3f32){0};
+    p->velocity.x = 0.0;
+    p->velocity.y = 0.0;
+    p->velocity.z = 0.0;
     p->health = 0.0f;
     p->flag |= FLAG_PLAYER_DEAD;
 
-    HHC_LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+    LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
             fsl_logger_stringf("%s %s\n", p->name, get_death_str(p)));
 }
 

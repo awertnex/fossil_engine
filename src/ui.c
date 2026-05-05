@@ -21,7 +21,7 @@
 #include "h/core.h"
 #include "h/diagnostics.h"
 #include "h/dir.h"
-#include "h/logger.h"
+#include "logger/log.h"
 #include "h/memory.h"
 #include "h/string.h"
 #include "h/shaders.h"
@@ -125,143 +125,24 @@ static f32 vbo_data_unit_quad[] =
     1.0f, -1.0f, 1.0f, 1.0f,
 };
 
-fsl_font fsl_font_buf[FSL_FONT_INDEX_COUNT] = {0};
-
 /* ---- section: signatures ------------------------------------------------- */
 
 /*! @brief init text rendering settings (and engine default fonts at @ref fsl_font_buf).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-static u32 _fsl_text_init(void);
+static u32 text_init_internal(void);
 
-static void _fsl_text_align_x_none(const str *text, i64 i, f32 advance);
-static void _fsl_text_align_x_center_internal(const str *text, i64 i, f32 advance);
-static void _fsl_text_align_x_right_internal(const str *text, i64 i, f32 advance);
-static void _fsl_text_align_y_none(u64 end, f32 height);
-static void _fsl_text_align_y_center_internal(u64 end, f32 height);
-static void _fsl_text_align_y_bottom_internal(u64 end, f32 height);
-
-/* ---- section: font ------------------------------------------------------- */
-
-u32 fsl_font_init(fsl_font *font, u32 resolution, const str *name, const str *file_name)
-{
-    f32 scale = 0.0f;
-    u32 i = 0;
-    fsl_glyph *g = NULL;
-    i32 x0 = 0, y0 = 0, x1 = 0, y1 = 0;
-    int glyph_index = 0;
-
-    if (resolution <= 2)
-    {
-        _LOGERROR(FSL_ERR_IMAGE_SIZE_TOO_SMALL,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("Failed to Initialize Font '%s', Font Size Too Small\n", file_name));
-        return fsl_err;
-    }
-
-    if (strlen(file_name) >= PATH_MAX)
-    {
-        _LOGERROR(FSL_ERR_PATH_TOO_LONG,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("Failed to Initialize Font '%s', File Path Too Long\n", file_name));
-        return fsl_err;
-    }
-
-    if (fsl_is_file_exists(file_name, TRUE) != FSL_ERR_SUCCESS)
-        return fsl_err;
-
-    font->buf_len = fsl_get_file_contents(file_name, (void*)&font->buf, 1, TRUE);
-    if (!font->buf)
-        return fsl_err;
-
-    if (!stbtt_InitFont(&font->info, (const unsigned char*)font->buf, 0))
-    {
-        _LOGERROR(FSL_ERR_FONT_INIT_FAIL,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("Failed to Initialize Font '%s', 'stbtt_InitFont()' Failed\n", file_name));
-        goto cleanup;
-    }
-
-    if (fsl_mem_alloc((void*)&font->bitmap, FSL_GLYPH_MAX * resolution * resolution,
-                fsl_stringf("fsl_font_init().%s", file_name)) != FSL_ERR_SUCCESS)
-        goto cleanup;
-
-    if (name && !font->name[0])
-        snprintf(font->name, NAME_MAX, "%s", name);
-
-    stbtt_GetFontVMetrics(&font->info, &font->ascent, &font->descent, &font->line_gap);
-    font->resolution = resolution;
-    font->line_height = font->ascent - font->descent + font->line_gap;
-    font->size = resolution;
-    scale = stbtt_ScaleForPixelHeight(&font->info, resolution);
-
-    for (i = 0; i < FSL_GLYPH_MAX; ++i)
-    {
-        glyph_index = stbtt_FindGlyphIndex(&font->info, i);
-        if (!glyph_index) continue;
-
-        g = &font->glyph[i];
-
-        stbtt_GetGlyphHMetrics(&font->info, glyph_index, &g->advance, &g->bearing.x);
-        stbtt_GetGlyphBitmapBoxSubpixel(&font->info, glyph_index,
-                1.0f, 1.0f, 0.0f, 0.0f, &x0, &y0, &x1, &y1);
-
-        g->bearing.y = y0;
-        g->scale.x = x1 - x0;
-        g->scale.y = y1 - y0;
-        g->scale.x > font->scale.x ? font->scale.x = g->scale.x : 0;
-        g->scale.y > font->scale.y ? font->scale.y = g->scale.y : 0;
-        g->loaded = TRUE;
-
-        if (!stbtt_IsGlyphEmpty(&font->info, glyph_index))
-            stbtt_MakeGlyphBitmapSubpixel(&font->info, font->bitmap + i * resolution * resolution,
-                    resolution, resolution, resolution, scale, scale, 0.0f, 0.0f, glyph_index);
-    }
-
-    /* ---- generate texture array ------------------------------------------ */
-
-    glGenTextures(1, &font->id);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, font->id);
-    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RED, resolution, resolution, FSL_GLYPH_MAX);
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RED, resolution, resolution, FSL_GLYPH_MAX, 0, GL_RED, GL_UNSIGNED_BYTE, font->bitmap);
-
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    fsl_mem_free((void*)&font->bitmap, FSL_GLYPH_MAX * resolution * resolution, font->name);
-
-    font->loaded = TRUE;
-    fsl_err = FSL_ERR_SUCCESS;
-    return fsl_err;
-
-cleanup:
-
-    fsl_font_free(font);
-    return fsl_err;
-}
-
-void fsl_font_free(fsl_font *font)
-{
-    fsl_font nofont = {0};
-    if (!font)
-        return;
-
-    if (font->loaded)
-    {
-        glDeleteTextures(1, &font->id);
-        font->loaded = FALSE;
-    }
-    fsl_mem_free((void*)&font->buf, font->buf_len, font->name);
-    fsl_mem_free((void*)&font->bitmap, FSL_GLYPH_MAX * font->resolution * font->resolution, font->name);
-    *font = nofont;
-}
+static void text_align_x_none_internal(const str *text, i64 i, f32 advance);
+static void text_align_x_center_internal(const str *text, i64 i, f32 advance);
+static void text_align_x_right_internal(const str *text, i64 i, f32 advance);
+static void text_align_y_none_internal(u64 end, f32 height);
+static void text_align_y_center_internal(u64 end, f32 height);
+static void text_align_y_bottom_internal(u64 end, f32 height);
 
 /* ---- section: text ------------------------------------------------------- */
 
-static u32 _fsl_text_init(void)
+static u32 text_init_internal(void)
 {
     if (fsl_mem_map((void*)&fsl_text_core.buf, FSL_STRING_MAX * sizeof(struct fsl_text_data),
                 "fsl_text_init().fsl_text_core.buf") != FSL_ERR_SUCCESS)
@@ -316,13 +197,13 @@ static u32 _fsl_text_init(void)
     }
 
     fsl_ui_core.uniform.text.font_size =
-        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_TEXT].id, "font_size");
+        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_TEXT].asset.id, "font_size");
     fsl_ui_core.uniform.text.draw_shadow =
-        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_TEXT].id, "draw_shadow");
+        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_TEXT].asset.id, "draw_shadow");
     fsl_ui_core.uniform.text.shadow_color =
-        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_TEXT].id, "shadow_color");
+        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_TEXT].asset.id, "shadow_color");
     fsl_ui_core.uniform.text.shadow_offset =
-        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_TEXT].id, "shadow_offset");
+        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_TEXT].asset.id, "shadow_offset");
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -330,9 +211,9 @@ static u32 _fsl_text_init(void)
 cleanup:
 
     fsl_ui_free();
-    _LOGFATAL(FSL_ERR_TEXT_INIT_FAIL,
+    LOGFATAL(FSL_ERR_TEXT_INIT_FAIL,
             FSL_FLAG_LOG_NO_VERBOSE,
-            fsl_logger_stringf("%s\n", "Failed to Initialize Text, Process Aborted"));
+            MSG_ACTION_FATAL("Initialize Text"));
     return fsl_err;
 }
 
@@ -364,7 +245,7 @@ void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear)
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    if (fsl_text_core.font == NULL || font->id != fsl_text_core.font->id ||
+    if (fsl_text_core.font == NULL || font->asset.id != fsl_text_core.font->asset.id ||
             render_size.x != render->size.x || render_size.y != render->size.y)
     {
         fsl_text_core.font = font;
@@ -390,23 +271,22 @@ void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear)
         }
     }
 
-    glUseProgram(fsl_shader_buf[FSL_SHADER_INDEX_TEXT].id);
+    glUseProgram(fsl_shader_buf[FSL_SHADER_INDEX_TEXT].asset.id);
     glUniform2f(fsl_ui_core.uniform.text.font_size,
             fsl_text_core.font_size * render->ndc_scale.x,
             fsl_text_core.font_size * render->ndc_scale.y);
 
-    glBindTexture(GL_TEXTURE_2D, fsl_text_core.font->id);
+    glBindTexture(GL_TEXTURE_2D, fsl_text_core.font->asset.id);
     glDisable(GL_DEPTH_TEST);
     if (clear)
         glClear(GL_COLOR_BUFFER_BIT);
-
     return;
 
 cleanup:
 
-    _LOGERROR(fsl_err,
+    LOGERROR(fsl_err,
             FSL_FLAG_LOG_NO_VERBOSE,
-            fsl_logger_stringf("%s\n", "Failed to Start Text"));
+            MSG_ACTION_ERROR("Start Text"));
 }
 
 void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y,
@@ -416,23 +296,23 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
     f32 descent = 0.0f, line_height = 0.0f;
     struct fsl_glyphf *g = NULL;
     f32 _window_x = (f32)window_x * render->ndc_scale.x;
-    void (*align_x_func)(const str *, i64, f32) = &_fsl_text_align_x_none;
-    void (*align_y_func)(u64, f32) = &_fsl_text_align_y_none;
+    void (*align_x_func)(const str *, i64, f32) = &text_align_x_none_internal;
+    void (*align_y_func)(u64, f32) = &text_align_y_none_internal;
 
     if (!fsl_text_core.buf)
     {
-        _LOGERROR(FSL_ERR_BUFFER_EMPTY,
+        LOGERROR(FSL_ERR_BUFFER_EMPTY,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("%s\n", "Failed to Push Text, 'fsl_text_core.buf' Null"));
+                MSG_ACTION_REASON_ERROR("Push Text", "`fsl_text_core.buf` `NULL`"));
         return;
     }
 
     len = strlen(text);
     if (len >= FSL_STRING_MAX)
     {
-        _LOGERROR(FSL_ERR_STRING_TOO_LONG,
+        LOGERROR(FSL_ERR_STRING_TOO_LONG,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("%s\n", "Failed to Push Text, Text Too Long"));
+                MSG_ACTION_REASON_ERROR("Push Text", "Text Too Long"));
         return;
     }
 
@@ -444,9 +324,9 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
                     (fsl_text_core.buf_len + FSL_STRING_MAX) * sizeof(struct fsl_text_data),
                     "fsl_text_push().fsl_text_core.buf") != FSL_ERR_SUCCESS)
         {
-            _LOGERROR(fsl_err,
+            LOGERROR(fsl_err,
                     FSL_FLAG_LOG_NO_VERBOSE,
-                    fsl_logger_stringf("%s\n", "Failed to Push Text"));
+                    MSG_ACTION_REASON_ERROR("Push Text", "`fsl_mem_remap()` Failed"));
             return;
         }
 
@@ -459,14 +339,14 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
     }
 
     if (align_x == FSL_TEXT_ALIGN_CENTER)
-        align_x_func = &_fsl_text_align_x_center_internal;
+        align_x_func = &text_align_x_center_internal;
     else if (align_x == FSL_TEXT_ALIGN_RIGHT)
-        align_x_func = &_fsl_text_align_x_right_internal;
+        align_x_func = &text_align_x_right_internal;
 
     if (align_y == FSL_TEXT_ALIGN_CENTER)
-        align_y_func = &_fsl_text_align_y_center_internal;
+        align_y_func = &text_align_y_center_internal;
     else if (align_y == FSL_TEXT_ALIGN_BOTTOM)
-        align_y_func = &_fsl_text_align_y_bottom_internal;
+        align_y_func = &text_align_y_bottom_internal;
 
     pos_x *= render->ndc_scale.x;
     pos_y *= render->ndc_scale.y;
@@ -518,7 +398,7 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
     align_y_func(fsl_text_core.cursor, fsl_text_core.line_height_total);
 }
 
-static void _fsl_text_align_x_center_internal(const str *text, i64 i, f32 advance)
+static void text_align_x_center_internal(const str *text, i64 i, f32 advance)
 {
     i64 j = 1;
     advance *= 0.5f;
@@ -526,14 +406,14 @@ static void _fsl_text_align_x_center_internal(const str *text, i64 i, f32 advanc
         fsl_text_core.buf[fsl_text_core.cursor - j].pos.x -= advance;
 }
 
-static void _fsl_text_align_x_right_internal(const str *text, i64 i, f32 advance)
+static void text_align_x_right_internal(const str *text, i64 i, f32 advance)
 {
     i64 j = 1;
     for (; i - j >= 0 && text[i - j] != '\n' && text[i - j] != '\r'; ++j)
         fsl_text_core.buf[fsl_text_core.cursor - j].pos.x -= advance;
 }
 
-static void _fsl_text_align_x_none(const str *text, i64 i, f32 advance)
+static void text_align_x_none_internal(const str *text, i64 i, f32 advance)
 {
     (void)text;
     (void)i;
@@ -541,7 +421,7 @@ static void _fsl_text_align_x_none(const str *text, i64 i, f32 advance)
     return;
 }
 
-static void _fsl_text_align_y_center_internal(u64 end, f32 height)
+static void text_align_y_center_internal(u64 end, f32 height)
 {
     u64 i = 0;
     height *= 0.5f;
@@ -549,14 +429,14 @@ static void _fsl_text_align_y_center_internal(u64 end, f32 height)
         fsl_text_core.buf[i].pos.y += height;
 }
 
-static void _fsl_text_align_y_bottom_internal(u64 end, f32 height)
+static void text_align_y_bottom_internal(u64 end, f32 height)
 {
     u64 i = 0;
     for (; i < end; ++i)
         fsl_text_core.buf[i].pos.y += height;
 }
 
-static void _fsl_text_align_y_none(u64 end, f32 height)
+static void text_align_y_none_internal(u64 end, f32 height)
 {
     (void)end;
     (void)height;
@@ -567,9 +447,9 @@ void fsl_text_render(b8 shadow, u32 shadow_color)
 {
     if (!fsl_text_core.buf)
     {
-        _LOGERROR(FSL_ERR_BUFFER_EMPTY,
+        LOGERROR(FSL_ERR_BUFFER_EMPTY,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("%s\n", "Failed to Render Text, 'fsl_text_core.buf' Null"));
+                MSG_ACTION_REASON_ERROR("Render Text", "`fsl_text_core.buf` `NULL`"));
         return;
     }
 
@@ -608,70 +488,8 @@ f32 fsl_get_text_height(void)
 
 u32 fsl_ui_init(void)
 {
-    u64 i = 0;
-
-    _fsl_text_init();
-
-    /* ---- mandatory engine fonts ------------------------------------------ */
-
-    if (
-            fsl_font_init(&fsl_font_buf[0], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans (ANSI)",
-                FSL_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_ansi.ttf")
-            != FSL_ERR_SUCCESS ||
-
-            fsl_font_init(&fsl_font_buf[1], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans Bold (ANSI)",
-                FSL_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_bold_ansi.ttf")
-            != FSL_ERR_SUCCESS ||
-
-            fsl_font_init(&fsl_font_buf[2], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans Mono (ANSI)",
-                FSL_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_mono_ansi.ttf")
-            != FSL_ERR_SUCCESS ||
-
-            fsl_font_init(&fsl_font_buf[3], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans Mono Bold (ANSI)",
-                FSL_DIR_NAME_FONTS"dejavu-fonts-ttf-2.37/dejavu_sans_mono_bold_ansi.ttf")
-            != FSL_ERR_SUCCESS)
-        goto cleanup;
-
-    /* ---- mandatory engine textures --------------------------------------- */
-
-    if (
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
-                GL_RGB, GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE,
-                FSL_DIR_NAME_TEXTURES"panel_active.png") != FSL_ERR_SUCCESS ||
-
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_INACTIVE],
-                GL_RGB, GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE,
-                FSL_DIR_NAME_TEXTURES"panel_inactive.png") != FSL_ERR_SUCCESS ||
-
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE],
-                GL_RGB, GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE,
-                FSL_DIR_NAME_TEXTURES"panel_debug_nine_slice.png") != FSL_ERR_SUCCESS ||
-
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_SELECTED],
-                GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
-                FSL_DIR_NAME_TEXTURES"button_selected.png") != FSL_ERR_SUCCESS ||
-
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_ACTIVE],
-                GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
-                FSL_DIR_NAME_TEXTURES"button_active.png") != FSL_ERR_SUCCESS ||
-
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_INACTIVE],
-                GL_RGBA, GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE,
-                FSL_DIR_NAME_TEXTURES"button_inactive.png") != FSL_ERR_SUCCESS)
-        goto cleanup;
-
-    for (i = 0; i < FSL_TEXTURE_INDEX_COUNT; ++i)
-        if (fsl_texture_generate(&fsl_texture_buf[i], FALSE) != FSL_ERR_SUCCESS)
-            goto cleanup;
-
-    if (
-            fsl_fbo_init(&_fsl_core.fbo, &fsl_mesh_unit_quad, FALSE, 4) != FSL_ERR_SUCCESS ||
-            fsl_fbo_init(&_fsl_core.fbo_msaa, NULL, TRUE, 4) != FSL_ERR_SUCCESS)
-        goto cleanup;
+    if (text_init_internal() != FSL_ERR_SUCCESS)
+        return fsl_err;
 
     if (!fsl_ui_core.vao_loaded)
     {
@@ -727,30 +545,22 @@ u32 fsl_ui_init(void)
     }
 
     fsl_ui_core.uniform.ui.position =
-        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI].id, "position");
+        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI].asset.id, "position");
     fsl_ui_core.uniform.ui.size =
-        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI].id, "size");
+        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI].asset.id, "size");
     fsl_ui_core.uniform.ui.texture_size =
-        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI].id, "texture_size");
+        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI].asset.id, "texture_size");
     fsl_ui_core.uniform.ui.offset =
-        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI].id, "offset");
+        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI].asset.id, "offset");
     fsl_ui_core.uniform.ui.alignment =
-        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI].id, "alignment");
+        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI].asset.id, "alignment");
     fsl_ui_core.uniform.ui.tint =
-        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI].id, "tint");
+        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI].asset.id, "tint");
 
     fsl_ui_core.uniform.nine_slice.tint =
-        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].id, "tint");
+        glGetUniformLocation(fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].asset.id, "tint");
 
     fsl_err = FSL_ERR_SUCCESS;
-    return fsl_err;
-
-cleanup:
-
-    fsl_ui_free();
-    _LOGFATAL(FSL_ERR_UI_INIT_FAIL,
-            FSL_FLAG_LOG_NO_VERBOSE,
-            fsl_logger_stringf("%s\n", "Failed to Initialize UI, Process Aborted"));
     return fsl_err;
 }
 
@@ -759,9 +569,9 @@ void fsl_ui_start(b8 nine_slice, b8 clear)
     _fsl_core.fbo_bind();
 
     if (nine_slice)
-        glUseProgram(fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].id);
+        glUseProgram(fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].asset.id);
     else
-        glUseProgram(fsl_shader_buf[FSL_SHADER_INDEX_UI].id);
+        glUseProgram(fsl_shader_buf[FSL_SHADER_INDEX_UI].asset.id);
 
     glDisable(GL_DEPTH_TEST);
     if (clear)
@@ -795,7 +605,7 @@ void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 siz
             (f32)((tint >> 0x00) & 0xff) / 0xff);
 
     glBindVertexArray(fsl_ui_core.vao);
-    glBindTexture(GL_TEXTURE_2D, texture->id);
+    glBindTexture(GL_TEXTURE_2D, texture->asset.id);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
@@ -816,7 +626,7 @@ void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glBindVertexArray(fsl_ui_core.vao);
-    glBindTexture(GL_TEXTURE_2D, texture->id);
+    glBindTexture(GL_TEXTURE_2D, texture->asset.id);
     glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, 9);
 }
 

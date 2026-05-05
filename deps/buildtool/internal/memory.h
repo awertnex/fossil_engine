@@ -119,11 +119,11 @@ u32 _mem_alloc(void **x, u64 size, const str *name, const str *file, u64 line)
     if (!x || !*x)
     {
         LOGFATALEX(ERR_MEM_ALLOC_FAIL, TRUE, file, line,
-                "%s[%p] Failed to Allocate Memory, Process Aborted\n", name, NULL);
+                logger_stringf("%s[%p] Failed to Allocate Memory, Process Aborted\n", name, NULL));
         return build_err;
     }
     LOGTRACEEX(TRUE, file, line,
-            "%s[%p] Memory Allocated [%"PRIu64"B]\n", name, *x, size);
+            logger_stringf("%s[%p] Memory Allocated [%"PRIu64"B]\n", name, *x, size));
 
     build_err = ERR_SUCCESS;
     return build_err;
@@ -138,11 +138,11 @@ u32 _mem_alloc_memb(void **x, u64 memb, u64 size, const str *name, const str *fi
     if (!x || !*x)
     {
         LOGFATALEX(ERR_MEM_ALLOC_FAIL, TRUE, file, line,
-                "%s[%p] Failed to Allocate Memory, Process Aborted\n", name, NULL);
+                logger_stringf("%s[%p] Failed to Allocate Memory, Process Aborted\n", name, NULL));
         return build_err;
     }
     LOGTRACEEX(TRUE, file, line,
-            "%s[%p] Memory Allocated [%"PRIu64"B]\n", name, *x, memb * size);
+            logger_stringf("%s[%p] Memory Allocated [%"PRIu64"B]\n", name, *x, memb * size));
 
     build_err = ERR_SUCCESS;
     return build_err;
@@ -159,7 +159,7 @@ void _mem_free(void **x, u64 size, const str *name, const str *file, u64 line)
     free(*x);
     *x = NULL;
     LOGTRACEEX(TRUE, file, line,
-            "%s[%p] Memory Unloaded\n", name, temp);
+            logger_stringf("%s[%p] Memory Unloaded\n", name, temp));
 }
 
 u32 _mem_alloc_buf(_buf *x, u64 memb, u64 size, const str *name, const str *file, u64 line)
@@ -171,7 +171,7 @@ u32 _mem_alloc_buf(_buf *x, u64 memb, u64 size, const str *name, const str *file
     if (!x)
     {
         LOGERROREX(ERR_POINTER_NULL, TRUE, file, line,
-                "%s[%p] Failed to Allocate Memory, Pointer NULL\n", name, NULL);
+                logger_stringf("%s[%p] Failed to Allocate Memory, Pointer NULL\n", name, NULL));
         return build_err;
     }
 
@@ -219,7 +219,7 @@ void _mem_free_buf(_buf *x, const str *name, const str *file, u64 line)
         _mem_clear((void*)&x->i, x->memb * sizeof(str*), name_i, file, line);
         free(x->i);
         LOGTRACEEX(TRUE, file, line,
-                "%s[%p] Memory Unloaded\n", name_i, temp);
+                logger_stringf("%s[%p] Memory Unloaded\n", name_i, temp));
         x->i = NULL;
     }
 
@@ -229,7 +229,7 @@ void _mem_free_buf(_buf *x, const str *name, const str *file, u64 line)
         _mem_clear((void*)&x->buf, x->memb * x->size, name_buf, file, line);
         free(x->buf);
         LOGTRACEEX(TRUE, file, line,
-                "%s[%p] Memory Unloaded\n", name_buf, temp);
+                logger_stringf("%s[%p] Memory Unloaded\n", name_buf, temp));
         x->buf = NULL;
     }
 
@@ -249,7 +249,7 @@ u32 _mem_clear(void **x, u64 size, const str *name, const str *file, u64 line)
 
     bzero(*x, size);
     LOGTRACEEX(TRUE, file, line,
-            "%s[%p] Memory Cleared [%"PRIu64"B]\n", name, *x, size);
+            logger_stringf("%s[%p] Memory Cleared [%"PRIu64"B]\n", name, *x, size));
 
     build_err = ERR_SUCCESS;
     return build_err;

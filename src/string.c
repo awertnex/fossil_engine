@@ -20,7 +20,7 @@
 #include "h/diagnostics.h"
 #include "h/dir.h"
 #include "h/limits.h"
-#include "h/logger.h"
+#include "logger/log.h"
 #include "h/memory.h"
 #include "h/string.h"
 
@@ -87,9 +87,9 @@ u32 fsl_convert_i32_to_str(str *dst, i32 size, i32 n)
 
     if (size <= 0)
     {
-        _LOGERROR(FSL_ERR_SIZE_TOO_SMALL,
+        LOGERROR(FSL_ERR_SIZE_TOO_SMALL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("%s\n", "Failed to Convert i32 to str, 'size' Too Small"));
+                MSG_ACTION_REASON_ERROR("Convert `i32` to `str`", "Size Too Small"));
         return fsl_err;
     }
 
@@ -130,9 +130,9 @@ u32 fsl_convert_u64_to_str(str *dst, u64 size, u64 n)
 
     if (size == 0)
     {
-        _LOGERROR(FSL_ERR_SIZE_TOO_SMALL,
+        LOGERROR(FSL_ERR_SIZE_TOO_SMALL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("%s\n", "Failed to Convert u64 to str, 'size' Too Small"));
+                MSG_ACTION_REASON_ERROR("Convert `u64` to `str`", "Size Too Small"));
         return fsl_err;
     }
 

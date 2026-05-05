@@ -91,6 +91,8 @@ typedef struct block
     f32 friction;
 } block;
 
+extern fsl_mesh *mesh;
+extern fsl_fbo *fbo;
 extern fsl_shader_program shader[SHADER_COUNT];
 extern fsl_texture texture[TEXTURE_COUNT];
 

@@ -6,107 +6,121 @@
 #define DIR_DEPS "deps/"
 #define DIR_DST "fossil/" /* your project name */
 
+_buf cmd = {0};
+
 static str str_dir[][CMD_SIZE] =
 {
     DIR_DST,
-    DIR_DST"deps/",
-    DIR_DST"deps/fossil/",
+    DIR_DST "deps/",
+    DIR_DST "deps/fossil/",
     DIR_DST DIR_DST,
     DIR_DST DIR_DST DIR_DST,
-    DIR_DST DIR_DST DIR_DST"logs/"
+    DIR_DST DIR_DST DIR_DST "logs/"
 };
 
 static str str_cflags[][CMD_SIZE] =
+{
+    "-shared",
+    "-fPIC",
+    "-fvisibility=hidden",
+    "-Ofast",
+    "-std=c89",
+    "-D_GNU_SOURCE",
+    "-DGLAD_GLAPI_EXPORT",
+    "-DGLAD_GLAPI_EXPORT_BUILD",
+    "-I."
+};
+
+static str str_cflags_debug[][CMD_SIZE] =
 {
     "-Wall",
     "-Wextra",
     "-Wpedantic",
     "-Wformat-truncation=0",
-    "-ggdb"
+    "-ggdb",
+};
+
+static str str_files[][CMD_SIZE] =
+{
+    DIR_DEPS "glad/glad.c",
+    DIR_SRC "assets.c",
+    DIR_SRC "collision.c",
+    DIR_SRC "core.c",
+    DIR_SRC "dir.c",
+    DIR_SRC "input.c",
+    DIR_SRC "logger/logger.c",
+    DIR_SRC "math.c",
+    DIR_SRC "memory.c",
+    DIR_SRC FSL_FILE_NAME_PLATFORM,
+    DIR_SRC "shaders.c",
+    DIR_SRC "string.c",
+    DIR_SRC "time.c",
+    DIR_SRC "ui.c"
 };
 
 int main(int argc, char **argv)
 {
-    u32 i = 0, token_release = 0;
+    u32 i = 0;
 
     /* if error, will fail and exit */
     build_init(argc, argv, "build.c", "build"EXE);
 
+    /* ---- building directories -------------------------------------------- */
+
     if (is_dir_exists(DIR_SRC, TRUE) != ERR_SUCCESS)
         return build_err;
-
-    if (find_token("release", argc, argv))
-    {
-        LOGINFO(FALSE, "%s\n", "Building For Release..");
-        token_release = 1;
-        str_cflags[0][0] = 0;
-        str_cflags[1][0] = 0;
-        str_cflags[2][0] = 0;
-        str_cflags[3][0] = 0;
-        str_cflags[4][0] = 0;
-    }
 
     for (i = 0; i < arr_len(str_dir); ++i)
     {
         make_dir(str_dir[i]);
         if (build_err != ERR_SUCCESS && build_err != ERR_DIR_EXISTS)
-            cmd_fail(NULL);
+            cmd_fail(&cmd);
     }
 
-    cmd_exec(0,
-            COMPILER,
-            "-shared",
-            FSL_C_STD,
-            "-fPIC",
-            "-fvisibility=hidden",
-            stringf("-ffile-prefix-map=%s=", DIR_BUILDTOOL_BIN_ROOT),
-            "-Ofast",
-            str_cflags[0],
-            str_cflags[1],
-            str_cflags[2],
-            str_cflags[3],
-            str_cflags[4],
-            fsl_str_libs_internal[0],
-            fsl_str_libs_internal[1],
-            fsl_str_libs_internal[2],
-            fsl_str_libs_internal[3],
-            fsl_str_libs_internal[4],
-            fsl_str_libs_internal[5],
-            fsl_str_libs_internal[6],
-            fsl_str_libs_internal[7],
-            "-I.",
-            "-DGLAD_GLAPI_EXPORT",
-            "-DGLAD_GLAPI_EXPORT_BUILD",
-            DIR_DEPS"glad/glad.c",
-            stringf("%s", token_release ? "-DFOSSIL_RELEASE_BUILD" : ""),
-            DIR_SRC"assets.c",
-            DIR_SRC"collision.c",
-            DIR_SRC"core.c",
-            DIR_SRC"dir.c",
-            DIR_SRC"input.c",
-            DIR_SRC"logger.c",
-            DIR_SRC"math.c",
-            DIR_SRC"memory.c",
-            DIR_SRC FSL_FILE_NAME_PLATFORM,
-            DIR_SRC"shaders.c",
-            DIR_SRC"string.c",
-            DIR_SRC"time.c",
-            DIR_SRC"ui.c",
-            "-o",
-            "lib/"PLATFORM"/"FSL_FILE_NAME_LIB,
-            NULL);
+    /* ---- building `cmd` -------------------------------------------------- */
+
+    cmd_push(&cmd, COMPILER);
+
+    if (!find_token("release", argc, argv))
+    {
+        LOGWARNING(0, FALSE, logger_stringf("%s\n", "Building in Debug Mode.."));
+        for (i = 0; i < arr_len(str_cflags_debug); ++i)
+            cmd_push(&cmd, str_cflags_debug[i]);
+    }
+    else
+    {
+        LOGINFO(FALSE, logger_stringf("%s\n", "Building For Release.."));
+        cmd_push(&cmd, "-DFOSSIL_RELEASE_BUILD");
+    }
+
+    cmd_push(&cmd, stringf("-ffile-prefix-map=%s=", DIR_BUILDTOOL_BIN_ROOT));
+    for (i = 0; i < arr_len(str_cflags); ++i)
+        cmd_push(&cmd, str_cflags[i]);
+
+    fsl_engine_set_runtime_path(&cmd);
+    fsl_engine_link_libs(&cmd);
+
+    for (i = 0; i < arr_len(str_files); ++i)
+        cmd_push(&cmd, str_files[i]);
+
+    cmd_push(&cmd, "-o");
+    cmd_push(&cmd, "lib/" PLATFORM "/" FSL_FILE_NAME_LIB);
+    cmd_ready(&cmd);
+
+    if (exec(&cmd, "build().cmd") != ERR_SUCCESS)
+        cmd_fail(&cmd);
 
     if (
             copy_dir(DIR_DEPS,          DIR_DST, FALSE) != ERR_SUCCESS ||
-            copy_dir(DIR_SRC"h/",       DIR_DST DIR_DEPS DIR_DST, TRUE) != ERR_SUCCESS ||
+            copy_dir(DIR_SRC "h/",      DIR_DST DIR_DEPS DIR_DST, TRUE) != ERR_SUCCESS ||
             copy_file("LICENSE",        DIR_DST DIR_DEPS DIR_DST) != ERR_SUCCESS ||
 
             copy_dir("lib/",            DIR_DST, FALSE) != ERR_SUCCESS ||
-            copy_dir("lib/"PLATFORM,    DIR_DST DIR_DST, TRUE) != ERR_SUCCESS ||
+            copy_dir("lib/" PLATFORM,   DIR_DST DIR_DST, TRUE) != ERR_SUCCESS ||
 
             copy_dir("assets/",         DIR_DST DIR_DST DIR_DST, FALSE) != ERR_SUCCESS ||
             copy_file("LICENSE",        DIR_DST DIR_DST DIR_DST) != ERR_SUCCESS)
-        cmd_fail(NULL);
+        cmd_fail(&cmd);
 
     return ERR_SUCCESS;
 }
