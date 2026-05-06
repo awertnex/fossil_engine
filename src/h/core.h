@@ -93,6 +93,7 @@ typedef struct fsl_core
         b8 active;
         b8 glfw_initialized;
         b8 request_screenshot;
+        b8 request_engine_close;
     } flag;
 
     struct /* ubo */

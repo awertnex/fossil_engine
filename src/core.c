@@ -111,10 +111,16 @@ u32 fsl_engine_init(int argc, char **argv, const str *title,
         goto cleanup;
 
     if (
-            fsl_mem_map_arena(&_fsl_memory_arena_internal, 1,
-                "fsl_engine_init()._fsl_memory_arena_internal") != FSL_ERR_SUCCESS ||
-            fsl_mem_map_arena(&_fsl_memory_arena_debug_internal, 1,
-                "fsl_engine_init()._fsl_memory_arena_debug_internal") != FSL_ERR_SUCCESS)
+            fsl_mem_map_arena(&mem_arena_internal, 1,
+                "fsl_engine_init().mem_arena_internal") != FSL_ERR_SUCCESS ||
+            fsl_mem_map_arena(&mem_arena_name_internal, 1,
+                "fsl_engine_init().mem_arena_name_internal") != FSL_ERR_SUCCESS ||
+            fsl_mem_map_arena(&mem_arena_name_internal_internal, 1,
+                "fsl_engine_init().mem_arena_name_internal_internal") != FSL_ERR_SUCCESS ||
+            fsl_mem_map_arena(&mem_arena_file_internal, 1,
+                "fsl_engine_init().mem_arena_file_internal") != FSL_ERR_SUCCESS ||
+            fsl_mem_map_arena(&mem_arena_path_internal, 1,
+                "fsl_engine_init().mem_arena_path_internal") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     if (FSL_DIR_PROC_ROOT == NULL)
@@ -181,7 +187,9 @@ cleanup:
 b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32))
 {
     static u64 time_last = 0;
-    if (glfwWindowShouldClose(render->window) || !_fsl_core.flag.active)
+    if (_fsl_core.flag.active == FALSE ||
+            _fsl_core.flag.request_engine_close == TRUE ||
+            glfwWindowShouldClose(render->window))
         return FALSE;
 
     if (fsl_update_render_settings(callback_framebuffer_size) != FSL_ERR_SUCCESS)
@@ -240,7 +248,7 @@ u32 fsl_update_render_settings(void (*callback_framebuffer_size)(i32, i32))
 
 void fsl_request_engine_close(void)
 {
-    _fsl_core.flag.active = 0;
+    _fsl_core.flag.request_engine_close = TRUE;
 
     if (render && render->window)
         glfwSetWindowShouldClose(render->window, GL_TRUE);
@@ -250,7 +258,7 @@ void fsl_engine_close(void)
 {
     u32 fsl_err_temp = fsl_err;
 
-    if (!_fsl_core.flag.active)
+    if (_fsl_core.flag.active == FALSE)
         return;
 
     _fsl_core.flag.active = FALSE;
@@ -271,8 +279,11 @@ void fsl_engine_close(void)
             "fsl_engine_close().render.screen_buf");
     fsl_mem_free((void*)&FSL_DIR_PROC_ROOT, PATH_MAX, "fsl_engine_close().FSL_DIR_PROC_ROOT");
 
-    fsl_mem_unmap_arena(&_fsl_memory_arena_debug_internal, "fsl_engine_close()._fsl_memory_arena_debug_internal");
-    fsl_mem_unmap_arena(&_fsl_memory_arena_internal, "fsl_engine_close()._fsl_memory_arena_internal");
+    fsl_mem_unmap_arena(&mem_arena_name_internal, "fsl_engine_close().mem_arena_name_internal");
+    fsl_mem_unmap_arena(&mem_arena_name_internal_internal, "fsl_engine_close().mem_arena_name_internal_internal");
+    fsl_mem_unmap_arena(&mem_arena_file_internal, "fsl_engine_close().mem_arena_file_internal");
+    fsl_mem_unmap_arena(&mem_arena_path_internal, "fsl_engine_close().mem_arena_path_internal");
+    fsl_mem_unmap_arena(&mem_arena_internal, "fsl_engine_close().mem_arena_internal");
     fsl_logger_close();
     fsl_err = fsl_err_temp;
 }

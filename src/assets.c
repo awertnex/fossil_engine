@@ -69,7 +69,7 @@ u32 fsl_asset_init(fsl_asset *asset, enum fsl_asset_type type,
 
     if (name && name[0])
     {
-        if (asset->name == NULL && fsl_mem_push_arena(&_fsl_memory_arena_debug_internal,
+        if (asset->name == NULL && fsl_mem_push_arena(&mem_arena_name_internal,
                     (void*)&asset->name, NAME_MAX, "fsl_asset_init().asset->name") != FSL_ERR_SUCCESS)
             goto cleanup;
         if (asset->name[0] == 0)
@@ -78,7 +78,7 @@ u32 fsl_asset_init(fsl_asset *asset, enum fsl_asset_type type,
 
     if (0)
     {
-        if (asset->name_internal == NULL && fsl_mem_push_arena(&_fsl_memory_arena_debug_internal,
+        if (asset->name_internal == NULL && fsl_mem_push_arena(&mem_arena_name_internal_internal,
                     (void*)&asset->name_internal, NAME_MAX, "fsl_asset_init().asset->name_internal") != FSL_ERR_SUCCESS)
             goto cleanup;
         if (asset->name_internal[0] == 0)
@@ -87,7 +87,7 @@ u32 fsl_asset_init(fsl_asset *asset, enum fsl_asset_type type,
 
     if (file && file[0])
     {
-        if (asset->file == NULL && fsl_mem_push_arena(&_fsl_memory_arena_debug_internal,
+        if (asset->file == NULL && fsl_mem_push_arena(&mem_arena_file_internal,
                     (void*)&asset->file, NAME_MAX, "fsl_asset_init().asset->file") != FSL_ERR_SUCCESS)
             goto cleanup;
         if (asset->file[0] == 0)
@@ -96,7 +96,7 @@ u32 fsl_asset_init(fsl_asset *asset, enum fsl_asset_type type,
 
     if (path && path[0])
     {
-        if (asset->path == NULL && fsl_mem_push_arena(&_fsl_memory_arena_debug_internal,
+        if (asset->path == NULL && fsl_mem_push_arena(&mem_arena_path_internal,
                     (void*)&asset->path, PATH_MAX, "fsl_asset_init().asset->path") != FSL_ERR_SUCCESS)
             goto cleanup;
         if (asset->path[0] == 0)
@@ -127,13 +127,13 @@ u32 fsl_assets_init(void)
 
     /* ---- engine textures ------------------------------------------------- */
 
-    if (fsl_mem_push_arena(&_fsl_memory_arena_internal, (void*)&fsl_texture_buf,
+    if (fsl_mem_push_arena(&mem_arena_internal, (void*)&fsl_texture_buf,
                 FSL_TEXTURE_INDEX_COUNT * sizeof(fsl_texture), "fsl_assets_init().fsl_texture_buf") != FSL_ERR_SUCCESS)
         return fsl_err;
-    if (fsl_mem_push_arena(&_fsl_memory_arena_internal, (void*)&fsl_shader_buf,
+    if (fsl_mem_push_arena(&mem_arena_internal, (void*)&fsl_shader_buf,
                 FSL_SHADER_INDEX_COUNT * sizeof(fsl_shader_program), "fsl_assets_init().fsl_shader_buf") != FSL_ERR_SUCCESS)
         return fsl_err;
-    if (fsl_mem_push_arena(&_fsl_memory_arena_internal, (void*)&fsl_font_buf,
+    if (fsl_mem_push_arena(&mem_arena_internal, (void*)&fsl_font_buf,
                 FSL_FONT_INDEX_COUNT * sizeof(fsl_font), "fsl_assets_init().fsl_font_buf") != FSL_ERR_SUCCESS)
         return fsl_err;
 
@@ -342,7 +342,7 @@ mesh_fbo_init:
         return FSL_ERR_SUCCESS;
 
     mesh_fbo->vbo_len = fsl_arr_len(vbo_data_unit_quad_internal);
-    if (fsl_mem_push_arena(&_fsl_memory_arena_internal, (void*)&mesh_fbo->vbo_data, sizeof(GLfloat) * mesh_fbo->vbo_len,
+    if (fsl_mem_push_arena(&mem_arena_internal, (void*)&mesh_fbo->vbo_data, sizeof(GLfloat) * mesh_fbo->vbo_len,
                 "fsl_fbo_init().mesh_fbo->vbo_data") != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -556,12 +556,12 @@ u32 fsl_mesh_generate(fsl_mesh *mesh,
         void (*attrib)(void), GLenum usage,
         GLuint vbo_len, GLuint ebo_len, GLfloat *vbo_data, GLuint *ebo_data)
 {
-    if (fsl_mem_push_arena(&_fsl_memory_arena_internal, (void*)&mesh->vbo_data, sizeof(GLfloat) * vbo_len,
+    if (fsl_mem_push_arena(&mem_arena_internal, (void*)&mesh->vbo_data, sizeof(GLfloat) * vbo_len,
                 "fsl_mesh_generate().mesh->vbo_data") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     if (ebo_data)
-        if (fsl_mem_push_arena(&_fsl_memory_arena_internal, (void*)&mesh->ebo_data, sizeof(GLuint) * ebo_len,
+        if (fsl_mem_push_arena(&mem_arena_internal, (void*)&mesh->ebo_data, sizeof(GLuint) * ebo_len,
                     "fsl_mesh_generate().mesh->ebo_data") != FSL_ERR_SUCCESS)
             goto cleanup;
 

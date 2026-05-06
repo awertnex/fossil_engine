@@ -26,6 +26,22 @@
 
 /* ---- section: definitions ------------------------------------------------ */
 
+/*! @brief offset into global memory arena @ref fsl_mem_arena_name.
+ */
+typedef u64 fsl_off_name;
+
+/*! @brief offset into global memory arena @ref fsl_mem_arena_name_internal.
+ */
+typedef u64 fsl_off_name_internal;
+
+/*! @brief offset into global memory arena @ref fsl_mem_arena_file.
+ */
+typedef u64 fsl_off_file;
+
+/*! @brief offset into global memory arena @ref fsl_mem_arena_path.
+ */
+typedef u64 fsl_off_path;
+
 typedef struct fsl_mem_arena
 {
     void ***i;      /* members of `buf` */
@@ -96,18 +112,41 @@ typedef struct fsl_mem_arena
  *  @brief global memory arena, used to manage all heap memory inside and optionally
  *  outside the engine.
  *
- *  initialized in @ref fsl_engine_init() and/or @ref fsl_logger_init().
+ *  initialized in @ref fsl_engine_init().
  */
-extern fsl_mem_arena _fsl_memory_arena_internal;
+extern fsl_mem_arena mem_arena_internal;
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief global debug memory arena, used to manage all runtime debug data
- *  (e.g. asset names, asset paths, etc..)
+ *  @brief global 'name' memory arena, for storing runtime asset names.
  *
- *  initialized in @ref fsl_engine_init() and/or @ref fsl_asset_init().
+ *  initialized in @ref fsl_engine_init().
  */
-extern fsl_mem_arena _fsl_memory_arena_debug_internal;
+extern fsl_mem_arena mem_arena_name_internal;
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief global 'name_internal' memory arena, for storing runtime asset internal names.
+ *
+ *  initialized in @ref fsl_engine_init().
+ */
+extern fsl_mem_arena mem_arena_name_internal_internal;
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief global 'file' memory arena, for storing runtime asset file names.
+ *
+ *  initialized in @ref fsl_engine_init().
+ */
+extern fsl_mem_arena mem_arena_file_internal;
+
+/*! -- INTERNAL USE ONLY --;
+ *
+ *  @brief global 'path' memory arena, for storing runtime asset parent directories.
+ *
+ *  initialized in @ref fsl_engine_init().
+ */
+extern fsl_mem_arena mem_arena_path_internal;
 
 /* ---- section: signatures ------------------------------------------------- */
 

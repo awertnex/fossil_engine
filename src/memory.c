@@ -32,8 +32,11 @@
 #include <stdarg.h>
 #include <inttypes.h>
 
-fsl_mem_arena _fsl_memory_arena_internal = {0};
-fsl_mem_arena _fsl_memory_arena_debug_internal = {0};
+fsl_mem_arena mem_arena_internal = {0};
+fsl_mem_arena mem_arena_name_internal = {0};
+fsl_mem_arena mem_arena_name_internal_internal = {0};
+fsl_mem_arena mem_arena_file_internal = {0};
+fsl_mem_arena mem_arena_path_internal = {0};
 
 u32 _fsl_mem_alloc(void **x, u64 size, const str *name, const str *file, u64 line)
 {
