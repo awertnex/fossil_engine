@@ -29,9 +29,6 @@
 
 #include <string.h>
 
-#define STB_TRUETYPE_IMPLEMENTATION
-#include <deps/stb_truetype.h>
-
 /* ---- section: definitions ------------------------------------------------ */
 
 struct fsl_glyphf
@@ -117,12 +114,12 @@ static struct fsl_ui_core
 
 /* ---- section: declarations ----------------------------------------------- */
 
-static f32 vbo_data_unit_quad[] =
+static f32 vbo_data_unit_quad_internal[] =
 {
     0.0f, -1.0f, 0.0f, 1.0f,
     0.0f, 0.0f, 0.0f, 0.0f,
     1.0f, 0.0f, 1.0f, 0.0f,
-    1.0f, -1.0f, 1.0f, 1.0f,
+    1.0f, -1.0f, 1.0f, 1.0f
 };
 
 /* ---- section: signatures ------------------------------------------------- */
@@ -159,8 +156,8 @@ static u32 text_init_internal(void)
 
         glGenBuffers(1, &fsl_text_core.vbo_unit_quad);
         glBindBuffer(GL_ARRAY_BUFFER, fsl_text_core.vbo_unit_quad);
-        glBufferData(GL_ARRAY_BUFFER, fsl_arr_len(vbo_data_unit_quad) * sizeof(f32),
-                &vbo_data_unit_quad, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, fsl_arr_len(vbo_data_unit_quad_internal) * sizeof(f32),
+                &vbo_data_unit_quad_internal, GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
@@ -500,8 +497,8 @@ u32 fsl_ui_init(void)
 
         glGenBuffers(1, &fsl_ui_core.vbo_unit_quad);
         glBindBuffer(GL_ARRAY_BUFFER, fsl_ui_core.vbo_unit_quad);
-        glBufferData(GL_ARRAY_BUFFER, fsl_arr_len(vbo_data_unit_quad) * sizeof(f32),
-                &vbo_data_unit_quad, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, fsl_arr_len(vbo_data_unit_quad_internal) * sizeof(f32),
+                &vbo_data_unit_quad_internal, GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,

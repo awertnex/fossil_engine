@@ -36,7 +36,7 @@
         "-lglfw3",
         "-lgdi32",
         "-lwinmm",
-        "-mwindows",
+        "-mwindows"
     };
 
     /*! @brief for the including software.
@@ -48,7 +48,7 @@
         "-lglfw3",
         "-lfossil",
         "-lgdi32",
-        "-lwinmm",
+        "-lwinmm"
     };
 
 #else
@@ -63,7 +63,7 @@
         "-lglfw",
         "", /* empty slots for alignment across different platforms */
         "",
-        "",
+        ""
     };
 
     /*! @brief for the including software.
@@ -75,7 +75,7 @@
         "-lglfw",
         "-lfossil",
         "", /* empty slots for alignment across different platforms */
-        "",
+        ""
     };
 
 #endif /* FSL_PLATFORM */

@@ -126,16 +126,8 @@ cleanup:
     return fsl_err;
 }
 
-u64 _fsl_mem_request_page_size(void)
-{
-    static SYSTEM_INFO _si;
-    GetSystemInfo(&_si);
-    return (u64)_si.dwPageSize;
-}
-
 u32 _fsl_mem_map(void **x, u64 size, const str *name, const str *file, u64 line)
 {
-    u64 size_aligned = 0;
     void *temp = NULL;
 
     if (!x)
@@ -153,10 +145,7 @@ u32 _fsl_mem_map(void **x, u64 size, const str *name, const str *file, u64 line)
         return fsl_err;
     }
 
-    fsl_mem_request_page_size();
-    size_aligned = fsl_align_up_u64(size, FSL_PAGE_SIZE);
-
-    temp = VirtualAlloc(NULL, size_aligned, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    temp = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     if (!temp)
     {
         LOGERROREX(FSL_ERR_MEM_MAP_FAIL, 0,
@@ -167,7 +156,7 @@ u32 _fsl_mem_map(void **x, u64 size, const str *name, const str *file, u64 line)
 
     LOGTRACEEX(0,
             file, line,
-            MSG_MEM_MAP(name, temp, size_aligned));
+            MSG_MEM_MAP(name, temp, size));
     *x = temp;
 
     fsl_err = FSL_ERR_SUCCESS;
@@ -176,8 +165,6 @@ u32 _fsl_mem_map(void **x, u64 size, const str *name, const str *file, u64 line)
 
 u32 _fsl_mem_commit(void **x, void *offset, u64 size, const str *name, const str *file, u64 line)
 {
-    u64 size_aligned = 0;
-
     if (!x || !*X || !offset)
     {
         LOGERROREX(FSL_ERR_POINTER_NULL, 0,
@@ -186,20 +173,17 @@ u32 _fsl_mem_commit(void **x, void *offset, u64 size, const str *name, const str
         return fsl_err;
     }
 
-    fsl_mem_request_page_size();
-    size_aligned = fsl_align_up_u64(size, FSL_PAGE_SIZE);
-
-    if (!VirtualAlloc((*(u8*)x + (u8*)offset), size_aligned, MEM_COMMIT, PAGE_READWRITE))
+    if (!VirtualAlloc((*(u8*)x + (u8*)offset), size, MEM_COMMIT, PAGE_READWRITE))
     {
         LOGERROREX(FSL_ERR_MEM_COMMIT_FAIL, 0,
                 file, line,
-                MSG_MEM_COMMIT_REASON_FAIL(name, *x, offset, size_aligned, "`VirtualAlloc()` Failed"));
+                MSG_MEM_COMMIT_REASON_FAIL(name, *x, offset, size, "`VirtualAlloc()` Failed"));
         return fsl_err;
     }
 
     LOGTRACEEX(0,
             file, line,
-            MSG_MEM_COMMIT(name, *x, offset, size_aligned));
+            MSG_MEM_COMMIT(name, *x, offset, size));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -208,7 +192,6 @@ u32 _fsl_mem_commit(void **x, void *offset, u64 size, const str *name, const str
 /* TODO: make '_fsl_mem_remap()' for windows */
 u32 _fsl_mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const str *file, u64 line)
 {
-    u64 size_new_aligned = 0;
     void *temp = NULL;
 
     if (!x || !*x)
@@ -219,10 +202,7 @@ u32 _fsl_mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const 
         return fsl_err;
     }
 
-    fsl_mem_request_page_size();
-    size_new_aligned = fsl_align_up_u64(size_new, FSL_PAGE_SIZE);
-
-    temp = mremap(*x, size_old, size_new_aligned, MREMAP_MAYMOVE);
+    temp = mremap(*x, size_old, size_new, MREMAP_MAYMOVE);
     if (temp == MAP_FAILED)
     {
         LOGERROREX(FSL_ERR_MEM_REMAP_FAIL, 0,
@@ -233,7 +213,8 @@ u32 _fsl_mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const 
 
     LOGTRACEEX(0,
             file, line,
-            MSG_MEM_REMAP(name, *x, temp, size_old, size_new_aligned));
+            MSG_MEM_REMAP(name, *x, temp, size_old, size_new));
+
     *x = temp;
 
     fsl_err = FSL_ERR_SUCCESS;

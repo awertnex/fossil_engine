@@ -24,7 +24,7 @@
 #include "types.h"
 
 /*! @brief get current path of binary/executable, slash (`/`) and null (`\0`) terminated,
- *  assign allocated path string to `dst`.
+ *  assign allocated path string (of size @ref PATH_MAX) to `dst`.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */

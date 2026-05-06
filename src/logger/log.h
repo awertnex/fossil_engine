@@ -139,12 +139,12 @@
 #define MSG_TEXTURE_HANDLE_CREATE(texture_id, handle_id)    fsl_logger_stringf("Handle[%"PRIu64"] for Texture[%u] Created\n", handle_id, texture_id)
 #define MSG_TEXTURE_HANDLE_DESTROY(texture_id, handle_id)   fsl_logger_stringf("Handle[%"PRIu64"] for Texture[%u] Destroyed\n", handle_id, texture_id)
 #define LOG_MESH_GENERATE(name) \
-{ \
-    if (fsl_err == FSL_ERR_SUCCESS) \
-        LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE, fsl_logger_stringf("Mesh '%s' Generated\n", name)); \
-    else if (fsl_err == FSL_ERR_MESH_GENERATION_FAIL) \
-        LOGERROR(FSL_ERR_MESH_GENERATION_FAIL, 0, fsl_logger_stringf("Failed to Generate Mesh '%s'\n", name)); \
-}
+    do { \
+        if (fsl_err == FSL_ERR_SUCCESS) \
+            LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE, fsl_logger_stringf("Mesh '%s' Generated\n", name)); \
+        else if (fsl_err == FSL_ERR_MESH_GENERATION_FAIL) \
+            LOGERROR(FSL_ERR_MESH_GENERATION_FAIL, 0, fsl_logger_stringf("Failed to Generate Mesh '%s'\n", name)); \
+    } while (0)
 #define MSG_SHADER_INIT(name, id)                           fsl_logger_stringf("Shader %s[%u] Loaded\n", name, id)
 #define MSG_SHADER_UNLOAD(name, id)                         fsl_logger_stringf("Shader %s[%u] Unloaded\n", name, id)
 #define MSG_SHADER_PROGRAM_LOAD(name, id)                   fsl_logger_stringf("Shader Program %s[%u] Loaded\n", name, id)

@@ -93,20 +93,6 @@ typedef struct fsl_mem_arena
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief global page size variable.
- *
- *  initialized once in any of:
- *      @ref _fsl_mem_map().
- *      @ref _fsl_mem_remap().
- *      @ref _fsl_mem_commit().
- *      @ref _fsl_mem_map_arena().
- *      @ref _fsl_mem_remap_arena().
- *      @ref _fsl_mem_push_arena().
- */
-extern u64 FSL_PAGE_SIZE;
-
-/*! -- INTERNAL USE ONLY --;
- *
  *  @brief global memory arena, used to manage all heap memory inside and optionally
  *  outside the engine.
  *
@@ -124,24 +110,6 @@ extern fsl_mem_arena _fsl_memory_arena_internal;
 extern fsl_mem_arena _fsl_memory_arena_debug_internal;
 
 /* ---- section: signatures ------------------------------------------------- */
-
-/*! @brief like @ref fsl_round_up_u64() but only works on powers of two for `size`.
- */
-FSLAPI u64 fsl_align_up_u64(u64 n, u64 size);
-
-/*! -- INTERNAL USE ONLY --;
- *
- *  @brief initialize @ref FSL_PAGE_SIZE if not initialized.
- */
-void fsl_mem_request_page_size(void);
-
-/*! -- INTERNAL USE ONLY --;
- *
- *  @brief request memory page size for platform.
- *
- *  @return page size in bytes.
- */
-u64 _fsl_mem_request_page_size(void);
 
 /*! -- INTERNAL USE ONLY --;
  *

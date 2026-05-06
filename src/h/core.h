@@ -208,9 +208,10 @@ FSLAPI u32 fsl_update_render_settings(void (*callback_framebuffer_size)(i32, i32
  */
 FSLAPI void fsl_request_engine_close(void);
 
-/*! @brief free engine resources.
+/*! @brief free all engine's internal resources.
  *
- *  free logger, destroy window (if not `NULL`) and terminate 'GLFW'.
+ *  free logger, assets, free internal memory arenas, destroy window (if not `NULL`)
+ *  and terminate 'GLFW'.
  */
 FSLAPI void fsl_engine_close(void);
 

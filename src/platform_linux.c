@@ -128,14 +128,8 @@ u32 fsl_exec(fsl_buf *cmd, str *cmd_name)
     return fsl_err;
 }
 
-u64 _fsl_mem_request_page_size(void)
-{
-    return (u64)sysconf(_SC_PAGESIZE);
-}
-
 u32 _fsl_mem_map(void **x, u64 size, const str *name, const str *file, u64 line)
 {
-    u64 size_aligned = 0;
     void *temp = NULL;
 
     if (!x)
@@ -161,10 +155,7 @@ u32 _fsl_mem_map(void **x, u64 size, const str *name, const str *file, u64 line)
         return fsl_err;
     }
 
-    fsl_mem_request_page_size();
-    size_aligned = fsl_align_up_u64(size, FSL_PAGE_SIZE);
-
-    temp = mmap(NULL, size_aligned,
+    temp = mmap(NULL, size,
             PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
     if (temp == MAP_FAILED)
     {
@@ -176,7 +167,7 @@ u32 _fsl_mem_map(void **x, u64 size, const str *name, const str *file, u64 line)
 
     LOGTRACEEX(0,
             file, line,
-            MSG_MEM_MAP(name, temp, size_aligned));
+            MSG_MEM_MAP(name, temp, size));
     *x = temp;
 
     fsl_err = FSL_ERR_SUCCESS;
@@ -185,8 +176,6 @@ u32 _fsl_mem_map(void **x, u64 size, const str *name, const str *file, u64 line)
 
 u32 _fsl_mem_commit(void **x, void *offset, u64 size, const str *name, const str *file, u64 line)
 {
-    u64 size_aligned = 0;
-
     if (!x || !*x || !offset)
     {
         LOGERROREX(FSL_ERR_POINTER_NULL, 0,
@@ -195,20 +184,17 @@ u32 _fsl_mem_commit(void **x, void *offset, u64 size, const str *name, const str
         return fsl_err;
     }
 
-    fsl_mem_request_page_size();
-    size_aligned = fsl_align_up_u64(size, FSL_PAGE_SIZE);
-
-    if (mprotect(offset, size_aligned, PROT_READ | PROT_WRITE) != 0)
+    if (mprotect(offset, size, PROT_READ | PROT_WRITE) != 0)
     {
         LOGERROREX(FSL_ERR_MEM_COMMIT_FAIL, 0,
                 file, line,
-                MSG_MEM_COMMIT_REASON_FAIL(name, *x, offset, size_aligned, "`mprotect()` Failed"));
+                MSG_MEM_COMMIT_REASON_FAIL(name, *x, offset, size, "`mprotect()` Failed"));
         return fsl_err;
     }
 
     LOGTRACEEX(0,
             file, line,
-            MSG_MEM_COMMIT(name, *x, offset, size_aligned));
+            MSG_MEM_COMMIT(name, *x, offset, size));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -216,7 +202,6 @@ u32 _fsl_mem_commit(void **x, void *offset, u64 size, const str *name, const str
 
 u32 _fsl_mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const str *file, u64 line)
 {
-    u64 size_new_aligned = 0;
     void *temp = NULL;
 
     if (!x || !*x)
@@ -227,10 +212,7 @@ u32 _fsl_mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const 
         return fsl_err;
     }
 
-    fsl_mem_request_page_size();
-    size_new_aligned = fsl_align_up_u64(size_new, FSL_PAGE_SIZE);
-
-    temp = mremap(*x, size_old, size_new_aligned, MREMAP_MAYMOVE);
+    temp = mremap(*x, size_old, size_new, MREMAP_MAYMOVE);
     if (temp == MAP_FAILED)
     {
         LOGERROREX(FSL_ERR_MEM_REMAP_FAIL, 0,
@@ -241,7 +223,8 @@ u32 _fsl_mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const 
 
     LOGTRACEEX(0,
             file, line,
-            MSG_MEM_REMAP(name, *x, temp, size_old, size_new_aligned));
+            MSG_MEM_REMAP(name, *x, temp, size_old, size_new));
+
     *x = temp;
 
     fsl_err = FSL_ERR_SUCCESS;
@@ -250,17 +233,13 @@ u32 _fsl_mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const 
 
 void _fsl_mem_unmap(void **x, u64 size, const str *name, const str *file, u64 line)
 {
-    u64 size_aligned = 0;
-
     if (!x || !*x) return;
 
     LOGTRACEEX(0,
             file, line,
             MSG_MEM_UNMAP(name, *x, size));
 
-    fsl_mem_request_page_size();
-    size_aligned = fsl_align_up_u64(size, FSL_PAGE_SIZE);
-    munmap(*x, size_aligned);
+    munmap(*x, size);
     *x = NULL;
 }
 

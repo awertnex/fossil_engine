@@ -117,15 +117,12 @@ u32 fsl_engine_init(int argc, char **argv, const str *title,
                 "fsl_engine_init()._fsl_memory_arena_debug_internal") != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    if (!FSL_DIR_PROC_ROOT)
+    if (FSL_DIR_PROC_ROOT == NULL)
     {
         if (fsl_get_path_bin_root(&FSL_DIR_PROC_ROOT) != FSL_ERR_SUCCESS)
             goto cleanup;
         fsl_change_dir(FSL_DIR_PROC_ROOT);
     }
-
-    fsl_engine_get_string(render->title, FSL_STR_INDEX_ENGINE_TITLE);
-    glfwSetErrorCallback(glfw_callback_error);
 
     if (
             fsl_glfw_init(flags & FSL_FLAG_MULTISAMPLE) != FSL_ERR_SUCCESS ||
@@ -251,7 +248,6 @@ void fsl_request_engine_close(void)
 
 void fsl_engine_close(void)
 {
-    u32 i = 0;
     u32 fsl_err_temp = fsl_err;
 
     if (!_fsl_core.flag.active)
@@ -259,18 +255,8 @@ void fsl_engine_close(void)
 
     _fsl_core.flag.active = FALSE;
 
-    for (i = 0; i < FSL_FONT_INDEX_COUNT; ++i)
-        fsl_font_free(&fsl_font_buf[i]);
-    for (i = 0; i < FSL_TEXTURE_INDEX_COUNT; ++i)
-        fsl_texture_free(&fsl_texture_buf[i]);
-    for (i = 0; i < FSL_SHADER_INDEX_COUNT; ++i)
-        fsl_shader_program_free(&fsl_shader_buf[i]);
-
-    fsl_mesh_free(&fsl_mesh_unit_quad);
     fsl_ui_free();
-
-    fsl_fbo_free(&_fsl_core.fbo);
-    fsl_fbo_free(&_fsl_core.fbo_msaa);
+    fsl_assets_free();
 
     if (render->window)
         glfwDestroyWindow(render->window);
@@ -283,12 +269,11 @@ void fsl_engine_close(void)
 
     fsl_mem_free((void*)&render->screen_buf, render->size.x * render->size.y * FSL_COLOR_CHANNELS_RGB,
             "fsl_engine_close().render.screen_buf");
-    fsl_mem_free((void*)&FSL_DIR_PROC_ROOT, strnlen(FSL_DIR_PROC_ROOT, PATH_MAX),
-            "fsl_engine_close().FSL_DIR_PROC_ROOT");
+    fsl_mem_free((void*)&FSL_DIR_PROC_ROOT, PATH_MAX, "fsl_engine_close().FSL_DIR_PROC_ROOT");
 
-    fsl_logger_close();
-    fsl_mem_unmap_arena(&_fsl_memory_arena_internal, "fsl_engine_close()._fsl_memory_arena_internal");
     fsl_mem_unmap_arena(&_fsl_memory_arena_debug_internal, "fsl_engine_close()._fsl_memory_arena_debug_internal");
+    fsl_mem_unmap_arena(&_fsl_memory_arena_internal, "fsl_engine_close()._fsl_memory_arena_internal");
+    fsl_logger_close();
     fsl_err = fsl_err_temp;
 }
 
@@ -330,6 +315,8 @@ u32 fsl_engine_get_string(str *dst, enum fsl_string_index type)
 
 u32 fsl_glfw_init(b8 multisample)
 {
+    glfwSetErrorCallback(glfw_callback_error);
+
     if (!glfwInit())
     {
         LOGFATAL(FSL_ERR_GLFW_INIT_FAIL,
@@ -353,6 +340,7 @@ u32 fsl_glfw_init(b8 multisample)
 u32 fsl_window_init(const str *title, i32 size_x, i32 size_y)
 {
     if (title) snprintf(render->title, NAME_MAX, "%s", title);
+    else fsl_engine_get_string(render->title, FSL_STR_INDEX_ENGINE_TITLE);
     if (size_x) render->size.x = fsl_clamp_i32(size_x, FSL_RENDER_WIDTH_MIN, FSL_RENDER_WIDTH_MAX);
     else render->size.x = FSL_RENDER_WIDTH_DEFAULT;
     if (size_y) render->size.y = fsl_clamp_i32(size_y, FSL_RENDER_HEIGHT_MIN, FSL_RENDER_HEIGHT_MAX);

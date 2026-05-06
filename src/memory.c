@@ -32,19 +32,8 @@
 #include <stdarg.h>
 #include <inttypes.h>
 
-u64 FSL_PAGE_SIZE = 0;
 fsl_mem_arena _fsl_memory_arena_internal = {0};
 fsl_mem_arena _fsl_memory_arena_debug_internal = {0};
-
-u64 fsl_align_up_u64(u64 n, u64 size)
-{
-    return (n + (size - 1)) & ~(size - 1);
-}
-
-void fsl_mem_request_page_size(void)
-{
-    if (!FSL_PAGE_SIZE) FSL_PAGE_SIZE = _fsl_mem_request_page_size();
-}
 
 u32 _fsl_mem_alloc(void **x, u64 size, const str *name, const str *file, u64 line)
 {
@@ -357,9 +346,6 @@ void _fsl_mem_free_key_val(fsl_key_value *x, const str *name, const str *file, u
 
 u32 _fsl_mem_map_arena(fsl_mem_arena *x, u64 size, const str *name, const str *file, u64 line)
 {
-    u64 memb_aligned = 0;
-    u64 size_aligned = 0;
-
     if (!x)
     {
         LOGERROREX(FSL_ERR_POINTER_NULL, 0,
@@ -367,6 +353,9 @@ u32 _fsl_mem_map_arena(fsl_mem_arena *x, u64 size, const str *name, const str *f
                 MSG_MEM_MAP_ARENA_POINTER_NULL_FAIL(name, size));
         return fsl_err;
     }
+
+    if (x->buf)
+        return FSL_ERR_SUCCESS;
 
     if (size == 0)
     {
@@ -376,20 +365,9 @@ u32 _fsl_mem_map_arena(fsl_mem_arena *x, u64 size, const str *name, const str *f
         return fsl_err;
     }
 
-    fsl_mem_request_page_size();
-
-    if (x->buf)
-        return FSL_ERR_SUCCESS;
-
-    if (size == 0)
-        size = 1;
-
-    memb_aligned = fsl_align_up_u64(sizeof(void*), FSL_PAGE_SIZE);
-    size_aligned = fsl_align_up_u64(size, FSL_PAGE_SIZE);
-
     if (
-            _fsl_mem_map((void*)&x->i, memb_aligned, name, file, line) != FSL_ERR_SUCCESS ||
-            _fsl_mem_map((void*)&x->buf, size_aligned, name, file, line) != FSL_ERR_SUCCESS)
+            _fsl_mem_map((void*)&x->i, sizeof(void*), name, file, line) != FSL_ERR_SUCCESS ||
+            _fsl_mem_map((void*)&x->buf, size, name, file, line) != FSL_ERR_SUCCESS)
     {
         LOGERROREX(FSL_ERR_MEM_ARENA_MAP_FAIL, 0,
                 file, line,
@@ -399,11 +377,11 @@ u32 _fsl_mem_map_arena(fsl_mem_arena *x, u64 size, const str *name, const str *f
 
     LOGTRACEEX(0,
             file, line,
-            MSG_MEM_MAP_ARENA(name, x->buf, size_aligned, memb_aligned));
+            MSG_MEM_MAP_ARENA(name, x->buf, size, sizeof(void*)));
 
     x->memb = 0;
-    x->size_i = memb_aligned;
-    x->size_buf = size_aligned;
+    x->size_i = sizeof(void*);
+    x->size_buf = size;
     x->cursor = 0;
 
     fsl_err = FSL_ERR_SUCCESS;
@@ -414,12 +392,8 @@ u32 _fsl_mem_push_arena(fsl_mem_arena *x, void **p, u64 size, const str *name, c
 {
     i64 i = 0;
     i64 diff = 0; /* distance between old arena pointer and new arena pointer in bytes if remapping */
-    u64 memb_aligned = 0;
-    u64 size_aligned = 0;
-    u64 cursor_aligned = 0;
-    u64 cursor_pos = 0;
-    u64 cursor_pos_new = 0;
     void *buf_old = NULL; /* saving previous arena pointer position for if remapping */
+    u64 size_old = 0;
 
     if (!p)
     {
@@ -461,57 +435,52 @@ u32 _fsl_mem_push_arena(fsl_mem_arena *x, void **p, u64 size, const str *name, c
         return fsl_err;
     }
 
-    /* setup parameters */
-
-    fsl_mem_request_page_size();
-    memb_aligned = fsl_align_up_u64(x->size_i + sizeof(void*), FSL_PAGE_SIZE);
-    cursor_aligned = fsl_align_up_u64(x->cursor, FSL_PAGE_SIZE);
-
-    if (size > cursor_aligned - x->cursor)
-        cursor_pos = cursor_aligned;
-    else
-        cursor_pos = x->cursor;
-
-    cursor_pos_new = cursor_pos + size;
-    size_aligned = fsl_align_up_u64(cursor_pos_new, FSL_PAGE_SIZE);
-
     /* expand arena if needed */
 
-    if (size_aligned > x->size_buf)
+    if (size > x->size_buf - x->cursor)
     {
         buf_old = x->buf;
-        if (_fsl_mem_remap((void*)&x->buf, x->size_buf, size_aligned, name, file, line) != FSL_ERR_SUCCESS)
+        size_old = x->size_buf;
+        x->size_buf = (x->size_buf + size) * 2;
+        if (_fsl_mem_remap((void*)&x->buf, size_old, x->size_buf, name, file, line) != FSL_ERR_SUCCESS)
         {
-            LOGERROREX(FSL_ERR_SIZE_TOO_SMALL, 0,
+            LOGERROREX(fsl_err, 0,
                     file, line,
-                    MSG_MEM_PUSH_ARENA_REASON_FAIL(name, (u8*)x->buf + cursor_pos, x->size_buf, "`_fsl_mem_remap()` Failed"));
+                    MSG_MEM_PUSH_ARENA_REASON_FAIL(name, (u8*)x->buf + x->cursor, x->size_buf, "`_fsl_mem_remap()` Failed"));
             return fsl_err;
         }
 
         diff = (u8*)x->buf - (u8*)buf_old;
-        i = x->memb;
-        while (i-- > 0)
-            *x->i[i] = (u8*)*x->i[i] + diff;
+        if (diff != 0)
+        {
+            i = x->memb;
+            while (i-- > 0)
+            {
+                if (*x->i[i])
+                    *x->i[i] = (u8*)*x->i[i] + diff;
+            }
+        }
     }
 
     /* expand members array if needed */
 
-    if (memb_aligned > x->size_i &&
-            _fsl_mem_remap((void*)&x->i, x->size_i, memb_aligned, name, file, line) != FSL_ERR_SUCCESS)
+    if ((x->memb + 1) * sizeof(void*) > x->size_i)
     {
-        LOGERROREX(FSL_ERR_SIZE_TOO_SMALL, 0,
-                file, line,
-                MSG_MEM_PUSH_ARENA_REASON_FAIL(name, (u8*)x->i + sizeof(void*), x->size_i, "`_fsl_mem_remap()` Failed"));
-        return fsl_err;
+        if (_fsl_mem_remap((void*)&x->i, x->size_i, x->size_i * 2, name, file, line) != FSL_ERR_SUCCESS)
+        {
+            LOGERROREX(fsl_err, 0,
+                    file, line,
+                    MSG_MEM_PUSH_ARENA_REASON_FAIL(name, (u8*)x->i[x->memb], x->size_i, "`_fsl_mem_remap()` Failed"));
+            return fsl_err;
+        }
+        x->size_i *= 2;
     }
 
     /* assign new parameters */
 
-    *p = (u8*)x->buf + cursor_pos;
-    x->cursor = cursor_pos_new;
+    *p = (u8*)x->buf + x->cursor;
+    x->cursor += size;
     x->i[x->memb] = &*p;
-    x->size_i = memb_aligned;
-    x->size_buf = size_aligned;
     ++x->memb;
 
     LOGTRACEEX(0,

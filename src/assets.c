@@ -26,6 +26,9 @@
 #include "h/shaders.h"
 #include "h/string.h"
 
+#define STB_TRUETYPE_IMPLEMENTATION
+#include <deps/stb_truetype.h>
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #   define STB_IMAGE_IMPLEMENTATION
@@ -127,6 +130,12 @@ u32 fsl_assets_init(void)
     if (fsl_mem_push_arena(&_fsl_memory_arena_internal, (void*)&fsl_texture_buf,
                 FSL_TEXTURE_INDEX_COUNT * sizeof(fsl_texture), "fsl_assets_init().fsl_texture_buf") != FSL_ERR_SUCCESS)
         return fsl_err;
+    if (fsl_mem_push_arena(&_fsl_memory_arena_internal, (void*)&fsl_shader_buf,
+                FSL_SHADER_INDEX_COUNT * sizeof(fsl_shader_program), "fsl_assets_init().fsl_shader_buf") != FSL_ERR_SUCCESS)
+        return fsl_err;
+    if (fsl_mem_push_arena(&_fsl_memory_arena_internal, (void*)&fsl_font_buf,
+                FSL_FONT_INDEX_COUNT * sizeof(fsl_font), "fsl_assets_init().fsl_font_buf") != FSL_ERR_SUCCESS)
+        return fsl_err;
 
     if (
             fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
@@ -160,10 +169,6 @@ u32 fsl_assets_init(void)
         return fsl_err;
 
     /* ---- engine shaders -------------------------------------------------- */
-
-    if (fsl_mem_push_arena(&_fsl_memory_arena_internal, (void*)&fsl_shader_buf,
-                FSL_SHADER_INDEX_COUNT * sizeof(fsl_shader_program), "fsl_assets_init().fsl_shader_buf") != FSL_ERR_SUCCESS)
-        return fsl_err;
 
     if (
             fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UNIT_QUAD].asset, FSL_ASSET_SHADER_PROGRAM,
@@ -211,10 +216,6 @@ u32 fsl_assets_init(void)
 
     /* ---- engine fonts ---------------------------------------------------- */
 
-    if (fsl_mem_push_arena(&_fsl_memory_arena_internal, (void*)&fsl_font_buf,
-                FSL_FONT_INDEX_COUNT * sizeof(fsl_font), "fsl_assets_init().fsl_font_buf") != FSL_ERR_SUCCESS)
-        return fsl_err;
-
     if (
             fsl_font_init(&fsl_font_buf[FSL_FONT_INDEX_DEJAVU_SANS], FSL_FONT_RESOLUTION_DEFAULT,
                 "DejaVu Sans (ANSI)", "dejavu-fonts-ttf/dejavu_sans_ansi.ttf", FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
@@ -230,6 +231,26 @@ u32 fsl_assets_init(void)
         return fsl_err;
 
     return fsl_err;
+}
+
+void fsl_assets_free(void)
+{
+    i32 i = 0;
+
+    fsl_fbo_free(&_fsl_core.fbo);
+    fsl_fbo_free(&_fsl_core.fbo_msaa);
+
+    fsl_mesh_free(&fsl_mesh_unit_quad);
+
+    if (fsl_texture_buf)
+        for (i = 0; i < FSL_TEXTURE_INDEX_COUNT; ++i)
+            fsl_texture_free(&fsl_texture_buf[i]);
+    if (fsl_shader_buf)
+        for (i = 0; i < FSL_SHADER_INDEX_COUNT; ++i)
+            fsl_shader_program_free(&fsl_shader_buf[i]);
+    if (fsl_font_buf)
+        for (i = 0; i < FSL_FONT_INDEX_COUNT; ++i)
+            fsl_font_free(&fsl_font_buf[i]);
 }
 
 /* ---- section: fbo -------------------------------------------------------- */
@@ -610,8 +631,6 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
 {
     u32 i = 0;
     str path_temp[PATH_MAX] = {0};
-    unsigned char *buf = NULL;
-    u64 buf_len = 0;
     u8 *bitmap = NULL;
     f32 scale = 0.0f;
     int glyph_index = 0;
@@ -634,11 +653,11 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     if (fsl_is_file_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    buf_len = fsl_get_file_contents(path_temp, (void*)&buf, 1, TRUE);
-    if (buf == NULL)
+    font->buf_len = fsl_get_file_contents(path_temp, (void*)&font->buf, 1, TRUE);
+    if (font->buf == NULL)
         return fsl_err;
 
-    if (!stbtt_InitFont(&font->info, buf, 0))
+    if (!stbtt_InitFont(&font->info, (const unsigned char*)font->buf, 0))
     {
         LOGERROR(FSL_ERR_FONT_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
@@ -691,8 +710,6 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    fsl_mem_free((void*)&buf, buf_len,
-            fsl_stringf("fsl_font_init().%s", font->asset.name));
     fsl_mem_free((void*)&bitmap, FSL_GLYPH_MAX * resolution * resolution,
             fsl_stringf("fsl_font_init().%s", font->asset.name));
 
@@ -705,7 +722,7 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
 
 cleanup:
 
-    fsl_mem_free((void*)&buf, buf_len,
+    fsl_mem_free((void*)&font->buf, font->buf_len,
             fsl_stringf("fsl_font_init().%s", font->asset.name));
     fsl_mem_free((void*)&bitmap, FSL_GLYPH_MAX * resolution * resolution,
             fsl_stringf("fsl_font_init().%s", font->asset.name));
@@ -725,6 +742,9 @@ void fsl_font_free(fsl_font *font)
         glDeleteTextures(1, &font->asset.id);
     }
 
+    if (font->buf)
+        fsl_mem_free((void*)&font->buf, font->buf_len,
+                fsl_stringf("fsl_font_free().%s", font->asset.name));
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             MSG_FONT_UNLOAD(font->asset.name));
     *font = nofont;

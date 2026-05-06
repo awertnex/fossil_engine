@@ -136,6 +136,8 @@ typedef struct fsl_font
     i32 line_height;
     f32 size;               /* global font size, for text uniformity */
     v2i32 scale;            /* biggest glyph bounding box size in font units */
+    u8 *buf;
+    u64 buf_len;
     stbtt_fontinfo info;    /* used by @ref stbtt_InitFont() */
     fsl_glyph glyph[FSL_GLYPH_MAX];
 } fsl_font;
@@ -189,6 +191,10 @@ FSLAPI u32 fsl_asset_init(fsl_asset *asset, enum fsl_asset_type type, const
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_assets_init(void);
+
+/*! @brief free all engine's internal assets.
+ */
+FSLAPI void fsl_assets_free(void);
 
 /*! @return non-zero on failure and @ref fsl_err is set accordingly.
  */

@@ -37,9 +37,8 @@
 
 /* ---- section: declarations ----------------------------------------------- */
 
-/*! @remark initialized in @ref fsl_logger_init().
- */
 fsl_logger_core logger_core = {0};
+u32 fsl_log_level_max = FSL_LOG_LEVEL_TRACE;
 
 /*! @brief each log level's log file name.
  *
@@ -96,7 +95,7 @@ static void _get_log_str(const str *str_in, str *str_out, u32 flags, b8 verbose,
  *
  *  @return non-zero on failure, error codes can be found in @ref diagnostics.h.
  */
-static u32 _is_dir_exists(const str *name);
+static u32 logger_is_dir_exists_internal(const str *name);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -105,7 +104,7 @@ static u32 _is_dir_exists(const str *name);
  *
  *  @return non-zero on failure, error codes can be found in @ref diagnostics.h.
  */
-static u32 _append_file(const str *name, u64 size, u64 length, void *buf);
+static u32 logger_append_file_internal(const str *name, u64 size, u64 length, void *buf);
 
 /* ---- section: implementation --------------------------------------------- */
 
@@ -115,7 +114,6 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags)
     str str_in[FSL_STRING_MAX] = {0};
     str str_out[FSL_LOGGER_STRING_MAX] = {0};
 
-    logger_core.log_level_max = FSL_LOG_LEVEL_TRACE;
     snprintf(logger_core.log_dir, PATH_MAX, "%s", FSL_DIR_NAME_LOGS);
 
     snprintf(LOG_FILE_NAME[FSL_LOG_LEVEL_FATAL], NAME_MAX, "%s", FSL_FILE_NAME_LOG_ERROR);
@@ -127,17 +125,17 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags)
     snprintf(LOG_FILE_NAME[FSL_LOG_LEVEL_TRACE], NAME_MAX, "%s", FSL_FILE_NAME_LOG_EXTRA);
 
     if (flags & FSL_FLAG_RELEASE_BUILD)
-        logger_core.log_level_max = FSL_LOG_LEVEL_INFO;
+        fsl_log_level_max = FSL_LOG_LEVEL_INFO;
 
     if (argc && argc > 2 && argv)
     {
-        if (strncmp(argv[2], "logfatal", 8ul) == 0)         logger_core.log_level_max = FSL_LOG_LEVEL_FATAL;
-        else if (strncmp(argv[2], "logerror", 8ul) == 0)    logger_core.log_level_max = FSL_LOG_LEVEL_ERROR;
-        else if (strncmp(argv[2], "logwarn", 7ul) == 0)     logger_core.log_level_max = FSL_LOG_LEVEL_WARNING;
-        else if (strncmp(argv[2], "logsuccess", 7ul) == 0)  logger_core.log_level_max = FSL_LOG_LEVEL_SUCCESS;
-        else if (strncmp(argv[2], "loginfo", 7ul) == 0)     logger_core.log_level_max = FSL_LOG_LEVEL_INFO;
-        else if (strncmp(argv[2], "logdebug", 8ul) == 0)    logger_core.log_level_max = FSL_LOG_LEVEL_DEBUG;
-        else if (strncmp(argv[2], "logtrace", 8ul) == 0)    logger_core.log_level_max = FSL_LOG_LEVEL_TRACE;
+        if (strncmp(argv[2], "logfatal", 8ul) == 0)         fsl_log_level_max = FSL_LOG_LEVEL_FATAL;
+        else if (strncmp(argv[2], "logerror", 8ul) == 0)    fsl_log_level_max = FSL_LOG_LEVEL_ERROR;
+        else if (strncmp(argv[2], "logwarn", 7ul) == 0)     fsl_log_level_max = FSL_LOG_LEVEL_WARNING;
+        else if (strncmp(argv[2], "logsuccess", 7ul) == 0)  fsl_log_level_max = FSL_LOG_LEVEL_SUCCESS;
+        else if (strncmp(argv[2], "loginfo", 7ul) == 0)     fsl_log_level_max = FSL_LOG_LEVEL_INFO;
+        else if (strncmp(argv[2], "logdebug", 8ul) == 0)    fsl_log_level_max = FSL_LOG_LEVEL_DEBUG;
+        else if (strncmp(argv[2], "logtrace", 8ul) == 0)    fsl_log_level_max = FSL_LOG_LEVEL_TRACE;
     }
 
     if (fsl_mem_map_arena(&logger_core.arena,
@@ -194,9 +192,6 @@ void _fsl_log_output(u32 error_code, u32 flags, const str *file, u64 line,
 
     fsl_err = error_code;
 
-    if (level > logger_core.log_level_max)
-        return;
-
     snprintf(str_in, FSL_STRING_MAX, "%s", message);
     _get_log_str(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_TERM_COLOR,
             verbose, level, error_code, file, line);
@@ -215,12 +210,12 @@ void _fsl_log_output(u32 error_code, u32 flags, const str *file, u64 line,
         logger_core.cursor = (logger_core.cursor + 1) % FSL_LOGGER_HISTORY_MAX;
     }
 
-    if (write_file && _is_dir_exists(FSL_DIR_NAME_LOGS) == FSL_ERR_SUCCESS)
+    if (write_file && logger_is_dir_exists_internal(FSL_DIR_NAME_LOGS) == FSL_ERR_SUCCESS)
     {
         _get_log_str(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_FULL_TIME,
                 verbose, level, error_code, file, line);
         snprintf(temp, PATH_MAX, "%s%s", FSL_DIR_NAME_LOGS, LOG_FILE_NAME[level]);
-        _append_file(temp, 1, strlen(str_out), str_out);
+        logger_append_file_internal(temp, 1, strnlen(str_out, FSL_LOGGER_STRING_MAX), str_out);
     }
 }
 
@@ -290,7 +285,7 @@ str *fsl_logger_stringf(const str *format, ...)
     return string;
 }
 
-u32 _is_dir_exists(const str *name)
+u32 logger_is_dir_exists_internal(const str *name)
 {
     struct stat stats;
     if (stat(name, &stats) == 0)
@@ -302,7 +297,7 @@ u32 _is_dir_exists(const str *name)
     return FSL_ERR_DIR_NOT_FOUND;
 }
 
-u32 _append_file(const str *name, u64 size, u64 length, void *buf)
+u32 logger_append_file_internal(const str *name, u64 size, u64 length, void *buf)
 {
     FILE *file = NULL;
     if ((file = fopen(name, "ab")) == NULL)

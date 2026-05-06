@@ -37,7 +37,7 @@ static str str_cflags_debug[][CMD_SIZE] =
     "-Wextra",
     "-Wpedantic",
     "-Wformat-truncation=0",
-    "-ggdb",
+    "-ggdb"
 };
 
 static str str_files[][CMD_SIZE] =
@@ -98,7 +98,8 @@ int main(int argc, char **argv)
         cmd_push(&cmd, str_cflags[i]);
 
     fsl_engine_set_runtime_path(&cmd);
-    fsl_engine_link_libs(&cmd);
+    for (i = 0; i < arr_len(fsl_str_libs_internal); ++i)
+        cmd_push(&cmd, fsl_str_libs_internal[i]);
 
     for (i = 0; i < arr_len(str_files); ++i)
         cmd_push(&cmd, str_files[i]);
