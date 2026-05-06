@@ -115,8 +115,8 @@ u32 fsl_engine_init(int argc, char **argv, const str *title,
                 "fsl_engine_init().mem_arena_internal") != FSL_ERR_SUCCESS ||
             fsl_mem_map_arena(&mem_arena_name_internal, 1,
                 "fsl_engine_init().mem_arena_name_internal") != FSL_ERR_SUCCESS ||
-            fsl_mem_map_arena(&mem_arena_name_internal_internal, 1,
-                "fsl_engine_init().mem_arena_name_internal_internal") != FSL_ERR_SUCCESS ||
+            fsl_mem_map_arena(&mem_arena_name_id_internal, 1,
+                "fsl_engine_init().mem_arena_name_id_internal") != FSL_ERR_SUCCESS ||
             fsl_mem_map_arena(&mem_arena_file_internal, 1,
                 "fsl_engine_init().mem_arena_file_internal") != FSL_ERR_SUCCESS ||
             fsl_mem_map_arena(&mem_arena_path_internal, 1,
@@ -280,7 +280,7 @@ void fsl_engine_close(void)
     fsl_mem_free((void*)&FSL_DIR_PROC_ROOT, PATH_MAX, "fsl_engine_close().FSL_DIR_PROC_ROOT");
 
     fsl_mem_unmap_arena(&mem_arena_name_internal, "fsl_engine_close().mem_arena_name_internal");
-    fsl_mem_unmap_arena(&mem_arena_name_internal_internal, "fsl_engine_close().mem_arena_name_internal_internal");
+    fsl_mem_unmap_arena(&mem_arena_name_id_internal, "fsl_engine_close().mem_arena_name_id_internal");
     fsl_mem_unmap_arena(&mem_arena_file_internal, "fsl_engine_close().mem_arena_file_internal");
     fsl_mem_unmap_arena(&mem_arena_path_internal, "fsl_engine_close().mem_arena_path_internal");
     fsl_mem_unmap_arena(&mem_arena_internal, "fsl_engine_close().mem_arena_internal");

@@ -56,7 +56,7 @@ static f32 vbo_data_unit_quad_internal[] =
 /* ---- section: asset ------------------------------------------------------ */
 
 u32 fsl_asset_init(fsl_asset *asset, enum fsl_asset_type type,
-        const str *name, const str *file, const str *path)
+        const str *name, const str *name_id, const str *file, const str *path)
 {
     if (asset == NULL)
     {
@@ -70,38 +70,38 @@ u32 fsl_asset_init(fsl_asset *asset, enum fsl_asset_type type,
     if (name && name[0])
     {
         if (asset->name == NULL && fsl_mem_push_arena(&mem_arena_name_internal,
-                    (void*)&asset->name, NAME_MAX, "fsl_asset_init().asset->name") != FSL_ERR_SUCCESS)
+                    (void*)&asset->name, FSL_ID_CAP, "fsl_asset_init().asset->name") != FSL_ERR_SUCCESS)
             goto cleanup;
         if (asset->name[0] == 0)
-            snprintf(asset->name, NAME_MAX, "%s", name);
+            snprintf(asset->name, FSL_ID_CAP, "%s", name);
     }
 
-    if (0)
+    if (name_id && name_id[0])
     {
-        if (asset->name_internal == NULL && fsl_mem_push_arena(&mem_arena_name_internal_internal,
-                    (void*)&asset->name_internal, NAME_MAX, "fsl_asset_init().asset->name_internal") != FSL_ERR_SUCCESS)
+        if (asset->name_id == NULL && fsl_mem_push_arena(&mem_arena_name_id_internal,
+                    (void*)&asset->name_id, FSL_ID_CAP, "fsl_asset_init().asset->name_id") != FSL_ERR_SUCCESS)
             goto cleanup;
-        if (asset->name_internal[0] == 0)
-            snprintf(asset->name_internal, NAME_MAX, "%s", name);
+        if (asset->name_id[0] == 0)
+            snprintf(asset->name_id, FSL_ID_CAP, "%s", name_id);
     }
 
     if (file && file[0])
     {
         if (asset->file == NULL && fsl_mem_push_arena(&mem_arena_file_internal,
-                    (void*)&asset->file, NAME_MAX, "fsl_asset_init().asset->file") != FSL_ERR_SUCCESS)
+                    (void*)&asset->file, FSL_ID_CAP, "fsl_asset_init().asset->file") != FSL_ERR_SUCCESS)
             goto cleanup;
         if (asset->file[0] == 0)
-            snprintf(asset->file, NAME_MAX, "%s", file);
+            snprintf(asset->file, FSL_ID_CAP, "%s", file);
     }
 
     if (path && path[0])
     {
         if (asset->path == NULL && fsl_mem_push_arena(&mem_arena_path_internal,
-                    (void*)&asset->path, PATH_MAX, "fsl_asset_init().asset->path") != FSL_ERR_SUCCESS)
+                    (void*)&asset->path, FSL_ID_CAP, "fsl_asset_init().asset->path") != FSL_ERR_SUCCESS)
             goto cleanup;
         if (asset->path[0] == 0)
         {
-            snprintf(asset->path, PATH_MAX, "%s", path);
+            snprintf(asset->path, FSL_ID_CAP, "%s", path);
             fsl_check_slash(asset->path);
             fsl_posix_slash(asset->path);
         }
@@ -139,95 +139,95 @@ u32 fsl_assets_init(void)
 
     if (
             fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
-                "Panel Active", "panel_active.png", FSL_DIR_NAME_TEXTURES,
+                "Panel Active", "panel_active", "panel_active.png", FSL_DIR_NAME_TEXTURES,
                 GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS ||
 
             fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_INACTIVE],
-                "Panel Inactive", "panel_inactive.png", FSL_DIR_NAME_TEXTURES,
+                "Panel Inactive", "panel_inactive", "panel_inactive.png", FSL_DIR_NAME_TEXTURES,
                 GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS ||
 
             fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE],
-                "Panel Debug 9-Slice", "panel_debug_nine_slice.png", FSL_DIR_NAME_TEXTURES,
+                "Panel Debug 9-Slice", "panel_debug_9_slice", "panel_debug_nine_slice.png", FSL_DIR_NAME_TEXTURES,
                 GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS ||
 
             fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_SELECTED],
-                "Button Selected", "button_selected.png", FSL_DIR_NAME_TEXTURES,
+                "Button Selected", "button_selected", "button_selected.png", FSL_DIR_NAME_TEXTURES,
                 GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS ||
 
             fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_ACTIVE],
-                "Button Active", "button_active.png", FSL_DIR_NAME_TEXTURES,
+                "Button Active", "button_active", "button_active.png", FSL_DIR_NAME_TEXTURES,
                 GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS ||
 
             fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_INACTIVE],
-                    "Button Inactive", "button_inactive.png", FSL_DIR_NAME_TEXTURES,
+                    "Button Inactive", "button_inactive", "button_inactive.png", FSL_DIR_NAME_TEXTURES,
                     GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
                         return fsl_err;
 
     /* ---- engine meshes --------------------------------------------------- */
 
-    if (fsl_asset_init(&fsl_mesh_unit_quad.asset, FSL_ASSET_MESH, "Unit Quad", NULL, NULL) != FSL_ERR_SUCCESS)
+    if (fsl_asset_init(&fsl_mesh_unit_quad.asset, FSL_ASSET_MESH, "Unit Quad", "unit_quad", NULL, NULL) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     /* ---- engine shaders -------------------------------------------------- */
 
     if (
             fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UNIT_QUAD].asset, FSL_ASSET_SHADER_PROGRAM,
-                "Unit Quad", NULL, NULL) != FSL_ERR_SUCCESS ||
+                "Unit Quad", "unit_quad", NULL, NULL) != FSL_ERR_SUCCESS ||
 
             fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UNIT_QUAD].vertex.asset, FSL_ASSET_SHADER,
-                "Unit Quad", "unit_quad.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+                "Unit Quad", "unit_quad", "unit_quad.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
 
             fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UNIT_QUAD].fragment.asset, FSL_ASSET_SHADER,
-                "Unit Quad", "unit_quad.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+                "Unit Quad", "unit_quad", "unit_quad.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     if (
             fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_TEXT].asset, FSL_ASSET_SHADER_PROGRAM,
-                "Text", NULL, NULL) != FSL_ERR_SUCCESS ||
+                "Text", "text", NULL, NULL) != FSL_ERR_SUCCESS ||
 
             fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_TEXT].vertex.asset, FSL_ASSET_SHADER,
-                "Text", "text.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+                "Text", "text", "text.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
 
             fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_TEXT].fragment.asset, FSL_ASSET_SHADER,
-                "Text", "text.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+                "Text", "text", "text.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     if (
             fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UI].asset, FSL_ASSET_SHADER_PROGRAM,
-                "UI", NULL, NULL) != FSL_ERR_SUCCESS ||
+                "UI", "ui", NULL, NULL) != FSL_ERR_SUCCESS ||
 
             fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UI].vertex.asset, FSL_ASSET_SHADER,
-                "UI", "ui.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+                "UI", "ui", "ui.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
 
             fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UI].fragment.asset, FSL_ASSET_SHADER,
-                "UI", "ui.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+                "UI", "ui", "ui.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     if (
             fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].asset, FSL_ASSET_SHADER_PROGRAM,
-                "UI 9-Slice", NULL, NULL) != FSL_ERR_SUCCESS ||
+                "UI 9-Slice", "ui_9_slice", NULL, NULL) != FSL_ERR_SUCCESS ||
 
             fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].vertex.asset, FSL_ASSET_SHADER,
-                "UI 9-Slice", "ui_9_slice.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+                "UI 9-Slice", "ui_9_slice", "ui_9_slice.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
 
             fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].fragment.asset, FSL_ASSET_SHADER,
-                "UI 9-Slice", "ui_9_slice.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+                "UI 9-Slice", "ui_9_slice", "ui_9_slice.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     /* ---- engine fonts ---------------------------------------------------- */
 
     if (
             fsl_font_init(&fsl_font_buf[FSL_FONT_INDEX_DEJAVU_SANS], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans (ANSI)", "dejavu-fonts-ttf/dejavu_sans_ansi.ttf", FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
+                "DejaVu Sans (ANSI)", "dejavu_sans_ansi", "dejavu-fonts-ttf/dejavu_sans_ansi.ttf", FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
 
             fsl_font_init(&fsl_font_buf[FSL_FONT_INDEX_DEJAVU_SANS_BOLD], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans Bold (ANSI)", "dejavu-fonts-ttf/dejavu_sans_bold_ansi.ttf", FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
+                "DejaVu Sans Bold (ANSI)", "dejavu_sans_bold_ansi", "dejavu-fonts-ttf/dejavu_sans_bold_ansi.ttf", FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
 
             fsl_font_init(&fsl_font_buf[FSL_FONT_INDEX_DEJAVU_SANS_MONO], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans Mono (ANSI)", "dejavu-fonts-ttf/dejavu_sans_mono_ansi.ttf", FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
+                "DejaVu Sans Mono (ANSI)", "dejavu_sans_mono_ansi", "dejavu-fonts-ttf/dejavu_sans_mono_ansi.ttf", FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
 
             fsl_font_init(&fsl_font_buf[FSL_FONT_INDEX_DEJAVU_SANS_MONO_BOLD], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans Mono Bold (ANSI)", "dejavu-fonts-ttf/dejavu_sans_mono_bold_ansi.ttf", FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS)
+                "DejaVu Sans Mono Bold (ANSI)", "dejavu_sans_mono_bold_ansi", "dejavu-fonts-ttf/dejavu_sans_mono_bold_ansi.ttf", FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     return fsl_err;
@@ -458,13 +458,13 @@ void fsl_fbo_free(fsl_fbo *fbo)
 /* ---- section: texture ---------------------------------------------------- */
 
 u32 fsl_texture_init(fsl_texture *texture,
-        const str *name, const str *file, const str *path,
+        const str *name, const str *name_id, const str *file, const str *path,
         const GLint format, GLint filter, int channels, b8 grayscale, b8 bindless)
 {
     str path_temp[PATH_MAX] = {0};
     u8 *buf = NULL;
 
-    if (fsl_asset_init(&texture->asset, FSL_ASSET_TEXTURE, name, file, path) != FSL_ERR_SUCCESS)
+    if (fsl_asset_init(&texture->asset, FSL_ASSET_TEXTURE, name, name_id, file, path) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     snprintf(path_temp, PATH_MAX, "%s%s", texture->asset.path, texture->asset.file);
@@ -476,7 +476,7 @@ u32 fsl_texture_init(fsl_texture *texture,
     {
         LOGERROR(FSL_ERR_IMAGE_LOAD_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_TEXTURE_LOAD_REASON_FAIL(texture->asset.name, "`stbi_load()` Failed"));
+                MSG_TEXTURE_LOAD_REASON_FAIL(texture->asset.name_id, "`stbi_load()` Failed"));
         goto cleanup;
     }
 
@@ -510,7 +510,7 @@ u32 fsl_texture_init(fsl_texture *texture,
     texture->grayscale = grayscale;
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_TEXTURE_LOAD(texture->asset.name, texture->asset.id));
+            MSG_TEXTURE_LOAD(texture->asset.name_id, texture->asset.id));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -543,7 +543,7 @@ void fsl_texture_free(fsl_texture *texture)
         texture->asset.loaded = FALSE;
         glDeleteTextures(1, &texture->asset.id);
         LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_TEXTURE_UNLOAD(texture->asset.name, texture->asset.id));
+                MSG_TEXTURE_UNLOAD(texture->asset.name_id, texture->asset.id));
     }
 
     *texture = notexture;
@@ -552,7 +552,7 @@ void fsl_texture_free(fsl_texture *texture)
 /* ---- section: mesh ------------------------------------------------------- */
 
 u32 fsl_mesh_generate(fsl_mesh *mesh,
-        const str *name, const str *file, const str *path,
+        const str *name, const str *name_id, const str *file, const str *path,
         void (*attrib)(void), GLenum usage,
         GLuint vbo_len, GLuint ebo_len, GLfloat *vbo_data, GLuint *ebo_data)
 {
@@ -565,7 +565,7 @@ u32 fsl_mesh_generate(fsl_mesh *mesh,
                     "fsl_mesh_generate().mesh->ebo_data") != FSL_ERR_SUCCESS)
             goto cleanup;
 
-    if (fsl_asset_init(&mesh->asset, FSL_ASSET_MESH, name, file, path) != FSL_ERR_SUCCESS)
+    if (fsl_asset_init(&mesh->asset, FSL_ASSET_MESH, name, name_id, file, path) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     mesh->vbo_len = vbo_len;
@@ -620,6 +620,9 @@ void fsl_mesh_free(fsl_mesh *mesh)
         glDeleteVertexArrays(1, &mesh->vao);
     }
 
+    LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+            MSG_MESH_UNLOAD(mesh->asset.name_id));
+
     /* TODO: use `fsl_mem_pop_arena()` when you make it */
     *mesh = nomesh;
 }
@@ -627,7 +630,7 @@ void fsl_mesh_free(fsl_mesh *mesh)
 /* ---- section: font ------------------------------------------------------- */
 
 u32 fsl_font_init(fsl_font *font, u32 resolution,
-        const str *name, const str *file, const str *path)
+        const str *name, const str *name_id, const str *file, const str *path)
 {
     u32 i = 0;
     str path_temp[PATH_MAX] = {0};
@@ -638,14 +641,14 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     i32 x0 = 0, y0 = 0;
     i32 x1 = 0, y1 = 0;
 
-    if (fsl_asset_init(&font->asset, FSL_ASSET_FONT, name, file, path) != FSL_ERR_SUCCESS)
+    if (fsl_asset_init(&font->asset, FSL_ASSET_FONT, name, name_id, file, path) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     if (resolution <= 2)
     {
         LOGERROR(FSL_ERR_IMAGE_SIZE_TOO_SMALL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Font", font->asset.name, "Size Too Small"));
+                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Font", font->asset.name_id, "Size Too Small"));
         return fsl_err;
     }
 
@@ -661,12 +664,12 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     {
         LOGERROR(FSL_ERR_FONT_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Font", font->asset.name, "`stbtt_InitFont()` Failed"));
+                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Font", font->asset.name_id, "`stbtt_InitFont()` Failed"));
         goto cleanup;
     }
 
     if (fsl_mem_alloc((void*)&bitmap, FSL_GLYPH_MAX * resolution * resolution,
-                fsl_stringf("fsl_font_init().%s", font->asset.name)) != FSL_ERR_SUCCESS)
+                fsl_stringf("fsl_font_init().%s", font->asset.name_id)) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     stbtt_GetFontVMetrics(&font->info, &font->ascent, &font->descent, &font->line_gap);
@@ -711,10 +714,10 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     fsl_mem_free((void*)&bitmap, FSL_GLYPH_MAX * resolution * resolution,
-            fsl_stringf("fsl_font_init().%s", font->asset.name));
+            fsl_stringf("fsl_font_init().%s", font->asset.name_id));
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_FONT_LOAD(font->asset.name));
+            MSG_FONT_LOAD(font->asset.name_id));
 
     font->asset.loaded = TRUE;
     fsl_err = FSL_ERR_SUCCESS;
@@ -723,9 +726,9 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
 cleanup:
 
     fsl_mem_free((void*)&font->buf, font->buf_len,
-            fsl_stringf("fsl_font_init().%s", font->asset.name));
+            fsl_stringf("fsl_font_init().%s", font->asset.name_id));
     fsl_mem_free((void*)&bitmap, FSL_GLYPH_MAX * resolution * resolution,
-            fsl_stringf("fsl_font_init().%s", font->asset.name));
+            fsl_stringf("fsl_font_init().%s", font->asset.name_id));
     fsl_font_free(font);
     return fsl_err;
 }
@@ -744,8 +747,8 @@ void fsl_font_free(fsl_font *font)
 
     if (font->buf)
         fsl_mem_free((void*)&font->buf, font->buf_len,
-                fsl_stringf("fsl_font_free().%s", font->asset.name));
+                fsl_stringf("fsl_font_free().%s", font->asset.name_id));
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_FONT_UNLOAD(font->asset.name));
+            MSG_FONT_UNLOAD(font->asset.name_id));
     *font = nofont;
 }

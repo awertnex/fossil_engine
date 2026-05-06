@@ -34,7 +34,7 @@
 
 fsl_mem_arena mem_arena_internal = {0};
 fsl_mem_arena mem_arena_name_internal = {0};
-fsl_mem_arena mem_arena_name_internal_internal = {0};
+fsl_mem_arena mem_arena_name_id_internal = {0};
 fsl_mem_arena mem_arena_file_internal = {0};
 fsl_mem_arena mem_arena_path_internal = {0};
 

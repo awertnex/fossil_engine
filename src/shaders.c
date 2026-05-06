@@ -268,7 +268,7 @@ void fsl_shader_free(fsl_shader *shader)
                 "fsl_shader_free().shader->source");
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_SHADER_UNLOAD(shader->asset.name, shader->asset.id));
+            MSG_SHADER_UNLOAD(shader->asset.name_id, shader->asset.id));
 
     *shader = noshader;
 }
@@ -312,14 +312,14 @@ u32 fsl_shader_program_init(fsl_shader_program *program)
         glGetProgramInfoLog(program_temp.asset.id, FSL_STRING_MAX, NULL, log);
         LOGERROR(FSL_ERR_SHADER_PROGRAM_LINK_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("Shader Program '%s':\n%s", program_temp.asset.name, log));
+                fsl_logger_stringf("Shader Program '%s':\n%s", program_temp.asset.name_id, log));
         goto cleanup;
     }
     else
     {
         program_temp.asset.loaded = TRUE;
         LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_SHADER_PROGRAM_LOAD(program_temp.asset.name, program_temp.asset.id));
+                MSG_SHADER_PROGRAM_LOAD(program_temp.asset.name_id, program_temp.asset.id));
     }
 
     if (program_temp.vertex.asset.loaded)
@@ -406,7 +406,7 @@ void fsl_shader_program_free(fsl_shader_program *program)
     fsl_shader_free(&program->fragment);
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_SHADER_PROGRAM_UNLOAD(program->asset.name, program->asset.id));
+            MSG_SHADER_PROGRAM_UNLOAD(program->asset.name_id, program->asset.id));
 
     *program = noprogram;
 }

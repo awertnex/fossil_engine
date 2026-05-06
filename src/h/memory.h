@@ -118,7 +118,7 @@ extern fsl_mem_arena mem_arena_internal;
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief global 'name' memory arena, for storing runtime asset names.
+ *  @brief global @ref fsl_asset.name memory arena, for storing runtime asset names.
  *
  *  initialized in @ref fsl_engine_init().
  */
@@ -126,15 +126,15 @@ extern fsl_mem_arena mem_arena_name_internal;
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief global 'name_internal' memory arena, for storing runtime asset internal names.
+ *  @brief global @ref fsl_asset.name_id memory arena, for storing runtime asset internal names.
  *
  *  initialized in @ref fsl_engine_init().
  */
-extern fsl_mem_arena mem_arena_name_internal_internal;
+extern fsl_mem_arena mem_arena_name_id_internal;
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief global 'file' memory arena, for storing runtime asset file names.
+ *  @brief global @ref fsl_asset.file memory arena, for storing runtime asset file names.
  *
  *  initialized in @ref fsl_engine_init().
  */
@@ -142,7 +142,7 @@ extern fsl_mem_arena mem_arena_file_internal;
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief global 'path' memory arena, for storing runtime asset parent directories.
+ *  @brief global @ref fsl_asset.path memory arena, for storing runtime asset parent directories.
  *
  *  initialized in @ref fsl_engine_init().
  */

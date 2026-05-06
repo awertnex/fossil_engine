@@ -108,7 +108,7 @@ void assets_free(void);
  *
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
-u32 block_texture_init(u32 index, const str *name, const str *file);
+u32 block_texture_init(u32 index, const str *name, const str *name_id, const str *file);
 
 /*! @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */

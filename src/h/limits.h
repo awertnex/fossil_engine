@@ -52,6 +52,7 @@
 #define FSL_TIME_STRING_MAX         128
 #define FSL_STRING_TOKEN_MAX        128
 #define FSL_STRINGF_BUFFERS_MAX     8
+#define FSL_ID_CAP                  256
 #define FSL_GLYPH_MAX               256
 #define FSL_INCLUDE_RECURSION_MAX   512
 #define FSL_SCREENSHOT_RATE_MAX     128

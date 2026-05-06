@@ -145,12 +145,13 @@
         else if (fsl_err == FSL_ERR_MESH_GENERATION_FAIL) \
             LOGERROR(FSL_ERR_MESH_GENERATION_FAIL, 0, fsl_logger_stringf("Failed to Generate Mesh '%s'\n", name)); \
     } while (0)
+#define MSG_MESH_UNLOAD(name)                               fsl_logger_stringf("Mesh '%s' Unloaded\n", name)
 #define MSG_SHADER_INIT(name, id)                           fsl_logger_stringf("Shader %s[%u] Loaded\n", name, id)
 #define MSG_SHADER_UNLOAD(name, id)                         fsl_logger_stringf("Shader %s[%u] Unloaded\n", name, id)
 #define MSG_SHADER_PROGRAM_LOAD(name, id)                   fsl_logger_stringf("Shader Program %s[%u] Loaded\n", name, id)
 #define MSG_SHADER_PROGRAM_UNLOAD(name, id)                 fsl_logger_stringf("Shader Program %s[%u] Unloaded\n", name, id)
-#define MSG_FONT_UNLOAD(name)                               fsl_logger_stringf("Font '%s' Unloaded\n", name)
 #define MSG_FONT_LOAD(name)                                 fsl_logger_stringf("Font '%s' Loaded\n", name)
+#define MSG_FONT_UNLOAD(name)                               fsl_logger_stringf("Font '%s' Unloaded\n", name)
 #define MSG_UPDATE_RENDER_SETTINGS_FAIL                     "Something Went Wrong While Updating Render Settings\n"
 
 #endif /* FSL_LOG_H */
