@@ -52,7 +52,7 @@ u32 world_init(str *name, u64 seed, player *p)
 u32 world_dir_init(const str *world_name)
 {
     str string[PATH_MAX] = {0};
-    u32 i;
+    u32 i = 0;
 
     if (!strlen(world_name))
     {

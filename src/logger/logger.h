@@ -28,13 +28,8 @@
 #include "../h/common.h"
 #include "../h/diagnostics.h"
 #include "../h/limits.h"
-#include "../h/memory.h"
+#include "../memory/memory.h"
 #include "../h/types.h"
-
-enum fsl_logger_flag
-{
-    FSL_FLAG_LOGGER_GUI_OPEN =  0x0001
-}; /* LoggerFlag */
 
 enum fsl_log_output_flag
 {
@@ -66,20 +61,27 @@ enum fsl_log_level
     FSL_LOG_LEVEL_COUNT
 }; /* fsl_log_level */
 
+struct log_entry
+{
+    u32 color;
+    str message[FSL_LOGGER_STRING_MAX];
+};
+typedef struct log_entry fsl_log_entry;
+
 /*! @brief global logger buffer, raw log data.
  *
- *  @remark buffer mapped onto @ref _fsl_memory_arena_internal.
+ *  @remark buffer mapped onto @ref mem_arena_internal.
  */
 typedef struct fsl_logger_core
 {
-    u64 flag;               /* enum @ref fsl_logger_flag */
-    str log_dir[PATH_MAX];
+    struct /* flag */
+    {
+        b8 gui_open;
+    } flag;
 
-    str **i;                /* pointers to strings in `buf` */
-    str *buf;               /* logger strings */
-    u32 *color;             /* string colors in hex format */
-    i32 cursor;             /* current position in `i` */
-    fsl_mem_arena arena;    /* arena to manage all logger heap memory */
+    str log_dir[PATH_MAX];
+    fsl_mem_handle buf;     /* logger strings */
+    i32 cursor;             /* current position in `memb` */
 } fsl_logger_core;
 
 /* ---- internal-use macros ------------------------------------------------- */

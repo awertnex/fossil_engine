@@ -1155,7 +1155,7 @@ static void draw_everything(void)
         for (i = 20; i > 0; --i)
         {
             index = fsl_mod_i32(logger_core.cursor - i - scrool, FSL_LOGGER_HISTORY_MAX);
-            fsl_text_push(fsl_stringf("%s\n", logger_core.i[index]),
+            fsl_text_push(fsl_stringf("%s\n", logger_core.memb[index]),
                     SET_MARGIN * 2, render->size.y - SET_MARGIN * 2,
                     0, 0, render->size.x - SET_MARGIN * 4,
                     logger_core.color[index]);
@@ -1164,7 +1164,8 @@ static void draw_everything(void)
                 break;
         }
 
-        /* align once after accumulating all string heights */
+        /* this "useless" function call aligns all the pushed strings correctly once at
+         * the end of the loop, do not touch it. */
         fsl_text_push("", 0, 0, 0, FSL_TEXT_ALIGN_BOTTOM, 0, 0);
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
     }
@@ -1279,7 +1280,37 @@ section_world_loaded:
             world_init("Poop Consistency Tester", 0, &_player) != FSL_ERR_SUCCESS)
             goto cleanup;
 
+    fbo = (fsl_fbo*)fsl_mem_arena_get_offset(&_memory_arena_internal, fbo_off);
+    texture = (fsl_texture*)fsl_mem_arena_get_offset(&_memory_arena_internal, texture_off);
+    mesh = (fsl_mesh*)fsl_mem_arena_get_offset(&_memory_arena_internal, mesh_off);
+    shader = (fsl_shader_program*)fsl_mem_arena_get_offset(&_memory_arena_internal, shader_off);
+    block_textures = (fsl_texture*)fsl_mem_arena_get_offset(&_memory_arena_internal, block_textures_off);
+    blocks = (block*)fsl_mem_arena_get_offset(&_memory_arena_internal, blocks_off);
+    CHUNK_ORDER = (chunk***)fsl_mem_arena_get_offset(&_memory_arena_internal, CHUNK_ORDER_OFF);
+    chunk_tab = (chunk**)fsl_mem_arena_get_offset(&_memory_arena_internal, chunk_tab_off);
+    chunk_buf = (chunk*)fsl_mem_arena_get_offset(&_memory_arena_internal, chunk_buf_off);
+    CHUNK_QUEUE[0].queue = (chunk***)fsl_mem_arena_get_offset(&_memory_arena_internal, CHUNK_QUEUE_0_OFF);
+    CHUNK_QUEUE[1].queue = (chunk***)fsl_mem_arena_get_offset(&_memory_arena_internal, CHUNK_QUEUE_1_OFF);
+    CHUNK_QUEUE[2].queue = (chunk***)fsl_mem_arena_get_offset(&_memory_arena_internal, CHUNK_QUEUE_2_OFF);
+    chunk_gizmo_loaded = (v2u32*)fsl_mem_arena_get_offset(&_memory_arena_internal, chunk_gizmo_loaded_off);
+    chunk_gizmo_render = (v2u32*)fsl_mem_arena_get_offset(&_memory_arena_internal, chunk_gizmo_render_off);
+
     generate_standard_meshes();
+
+    fbo = (fsl_fbo*)fsl_mem_arena_get_offset(&_memory_arena_internal, fbo_off);
+    texture = (fsl_texture*)fsl_mem_arena_get_offset(&_memory_arena_internal, texture_off);
+    mesh = (fsl_mesh*)fsl_mem_arena_get_offset(&_memory_arena_internal, mesh_off);
+    shader = (fsl_shader_program*)fsl_mem_arena_get_offset(&_memory_arena_internal, shader_off);
+    block_textures = (fsl_texture*)fsl_mem_arena_get_offset(&_memory_arena_internal, block_textures_off);
+    blocks = (block*)fsl_mem_arena_get_offset(&_memory_arena_internal, blocks_off);
+    CHUNK_ORDER = (chunk***)fsl_mem_arena_get_offset(&_memory_arena_internal, CHUNK_ORDER_OFF);
+    chunk_tab = (chunk**)fsl_mem_arena_get_offset(&_memory_arena_internal, chunk_tab_off);
+    chunk_buf = (chunk*)fsl_mem_arena_get_offset(&_memory_arena_internal, chunk_buf_off);
+    CHUNK_QUEUE[0].queue = (chunk***)fsl_mem_arena_get_offset(&_memory_arena_internal, CHUNK_QUEUE_0_OFF);
+    CHUNK_QUEUE[1].queue = (chunk***)fsl_mem_arena_get_offset(&_memory_arena_internal, CHUNK_QUEUE_1_OFF);
+    CHUNK_QUEUE[2].queue = (chunk***)fsl_mem_arena_get_offset(&_memory_arena_internal, CHUNK_QUEUE_2_OFF);
+    chunk_gizmo_loaded = (v2u32*)fsl_mem_arena_get_offset(&_memory_arena_internal, chunk_gizmo_loaded_off);
+    chunk_gizmo_render = (v2u32*)fsl_mem_arena_get_offset(&_memory_arena_internal, chunk_gizmo_render_off);
 
     while (fsl_engine_running(&callback_framebuffer_size))
     {

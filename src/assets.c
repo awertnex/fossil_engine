@@ -22,7 +22,7 @@
 #include "h/core.h"
 #include "h/dir.h"
 #include "logger/log.h"
-#include "h/memory.h"
+#include "memory/memory.h"
 #include "h/shaders.h"
 #include "h/string.h"
 
@@ -40,9 +40,9 @@
 
 /* ---- section: declarations ----------------------------------------------- */
 
-fsl_texture *fsl_texture_buf = NULL;
-fsl_shader_program *fsl_shader_buf = NULL;
-fsl_font *fsl_font_buf = NULL;
+fsl_mem_handle fsl_texture_buf = {0};
+fsl_mem_handle fsl_shader_buf = {0};
+fsl_mem_handle fsl_font_buf = {0};
 
 fsl_mesh fsl_mesh_unit_quad = {0};
 static f32 vbo_data_unit_quad_internal[] =
@@ -55,56 +55,64 @@ static f32 vbo_data_unit_quad_internal[] =
 
 /* ---- section: asset ------------------------------------------------------ */
 
-u32 fsl_asset_init(fsl_asset *asset, enum fsl_asset_type type,
+fsl_asset_metadata fsl_asset_get_metadata(const fsl_asset asset)
+{
+    fsl_asset_metadata metadata = {0};
+    if (asset.name.arena)
+        metadata.name = fsl_mem_handle_get(str, asset.name);
+    if (asset.name_id.arena)
+        metadata.name_id = fsl_mem_handle_get(str, asset.name_id);
+    if (asset.file.arena)
+        metadata.file = fsl_mem_handle_get(str, asset.file);
+    if (asset.path.arena)
+        metadata.path = fsl_mem_handle_get(str, asset.path);
+    return metadata;
+}
+
+u32 fsl_asset_set_metadata(fsl_asset *asset, enum fsl_asset_type type,
         const str *name, const str *name_id, const str *file, const str *path)
 {
     if (asset == NULL)
     {
         LOGERROR(FSL_ERR_POINTER_NULL, 0,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Asset", name, "Pointer `NULL`"));
+                MSG_ACTION_REASON_ERROR("Set Asset Metadata", "Pointer `NULL`"));
         return fsl_err;
     }
 
     asset->type = type;
 
-    if (name && name[0])
+    if (name)
     {
-        if (asset->name == NULL && fsl_mem_push_arena(&mem_arena_name_internal,
-                    (void*)&asset->name, FSL_ID_CAP, "fsl_asset_init().asset->name") != FSL_ERR_SUCCESS)
+        if (fsl_mem_arena_push(&mem_arena_name_internal, &asset->name, FSL_ID_CAP,
+                    "fsl_asset_set_metadata().asset->name") != FSL_ERR_SUCCESS)
             goto cleanup;
-        if (asset->name[0] == 0)
-            snprintf(asset->name, FSL_ID_CAP, "%s", name);
+        snprintf(fsl_mem_handle_get(str, asset->name), FSL_ID_CAP, "%s", name);
     }
 
-    if (name_id && name_id[0])
+    if (name_id)
     {
-        if (asset->name_id == NULL && fsl_mem_push_arena(&mem_arena_name_id_internal,
-                    (void*)&asset->name_id, FSL_ID_CAP, "fsl_asset_init().asset->name_id") != FSL_ERR_SUCCESS)
+        if (fsl_mem_arena_push(&mem_arena_name_id_internal, &asset->name_id, FSL_ID_CAP,
+                    "fsl_asset_set_metadata().asset->name_id") != FSL_ERR_SUCCESS)
             goto cleanup;
-        if (asset->name_id[0] == 0)
-            snprintf(asset->name_id, FSL_ID_CAP, "%s", name_id);
+        snprintf(fsl_mem_handle_get(str, asset->name_id), FSL_ID_CAP, "%s", name_id);
     }
 
-    if (file && file[0])
+    if (file)
     {
-        if (asset->file == NULL && fsl_mem_push_arena(&mem_arena_file_internal,
-                    (void*)&asset->file, FSL_ID_CAP, "fsl_asset_init().asset->file") != FSL_ERR_SUCCESS)
+        if (fsl_mem_arena_push(&mem_arena_file_internal, &asset->file, FSL_ID_CAP,
+                    "fsl_asset_set_metadata().asset->file") != FSL_ERR_SUCCESS)
             goto cleanup;
-        if (asset->file[0] == 0)
-            snprintf(asset->file, FSL_ID_CAP, "%s", file);
+        snprintf(fsl_mem_handle_get(str, asset->file), FSL_ID_CAP, "%s", file);
     }
 
-    if (path && path[0])
+    if (path)
     {
-        if (asset->path == NULL && fsl_mem_push_arena(&mem_arena_path_internal,
-                    (void*)&asset->path, FSL_ID_CAP, "fsl_asset_init().asset->path") != FSL_ERR_SUCCESS)
+        if (fsl_mem_arena_push(&mem_arena_path_internal, &asset->path, FSL_ID_CAP,
+                    "fsl_asset_set_metadata().asset->path") != FSL_ERR_SUCCESS)
             goto cleanup;
-        if (asset->path[0] == 0)
-        {
-            snprintf(asset->path, FSL_ID_CAP, "%s", path);
-            fsl_check_slash(asset->path);
-            fsl_posix_slash(asset->path);
-        }
+        snprintf(fsl_mem_handle_get(str, asset->path), FSL_ID_CAP, "%s", path);
+        fsl_check_slash(fsl_mem_handle_get(str, asset->path));
+        fsl_posix_slash(fsl_mem_handle_get(str, asset->path));
     }
 
     fsl_err = FSL_ERR_SUCCESS;
@@ -118,117 +126,150 @@ cleanup:
 
 u32 fsl_assets_init(void)
 {
+    i32 i = 0;
+    fsl_shader_program *shader_temp = NULL;
+
     /* ---- engine framebuffers --------------------------------------------- */
 
     if (
             fsl_fbo_init(&_fsl_core.fbo, &fsl_mesh_unit_quad, FALSE, 4) != FSL_ERR_SUCCESS ||
             fsl_fbo_init(&_fsl_core.fbo_msaa, NULL, TRUE, 4) != FSL_ERR_SUCCESS)
-        return fsl_err;
+        goto cleanup;
 
     /* ---- engine textures ------------------------------------------------- */
 
-    if (fsl_mem_push_arena(&mem_arena_internal, (void*)&fsl_texture_buf,
+    if (fsl_mem_arena_push(&mem_arena_internal, &fsl_texture_buf,
                 FSL_TEXTURE_INDEX_COUNT * sizeof(fsl_texture), "fsl_assets_init().fsl_texture_buf") != FSL_ERR_SUCCESS)
-        return fsl_err;
-    if (fsl_mem_push_arena(&mem_arena_internal, (void*)&fsl_shader_buf,
+        goto cleanup;
+    if (fsl_mem_arena_push(&mem_arena_internal, &fsl_shader_buf,
                 FSL_SHADER_INDEX_COUNT * sizeof(fsl_shader_program), "fsl_assets_init().fsl_shader_buf") != FSL_ERR_SUCCESS)
-        return fsl_err;
-    if (fsl_mem_push_arena(&mem_arena_internal, (void*)&fsl_font_buf,
+        goto cleanup;
+    if (fsl_mem_arena_push(&mem_arena_internal, &fsl_font_buf,
                 FSL_FONT_INDEX_COUNT * sizeof(fsl_font), "fsl_assets_init().fsl_font_buf") != FSL_ERR_SUCCESS)
-        return fsl_err;
+        goto cleanup;
 
-    if (
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
+    if (fsl_texture_init(fsl_mem_handle_get_i(fsl_texture, fsl_texture_buf, FSL_TEXTURE_INDEX_PANEL_ACTIVE),
                 "Panel Active", "panel_active", "panel_active.png", FSL_DIR_NAME_TEXTURES,
-                GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS ||
-
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_INACTIVE],
+                GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS)
+        goto cleanup;
+    if (fsl_texture_init(fsl_mem_handle_get_i(fsl_texture, fsl_texture_buf, FSL_TEXTURE_INDEX_PANEL_INACTIVE),
                 "Panel Inactive", "panel_inactive", "panel_inactive.png", FSL_DIR_NAME_TEXTURES,
-                GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS ||
-
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE],
+                GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS)
+        goto cleanup;
+    if (fsl_texture_init(fsl_mem_handle_get_i(fsl_texture, fsl_texture_buf, FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE),
                 "Panel Debug 9-Slice", "panel_debug_9_slice", "panel_debug_nine_slice.png", FSL_DIR_NAME_TEXTURES,
-                GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS ||
-
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_SELECTED],
+                GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS)
+        goto cleanup;
+    if (fsl_texture_init(fsl_mem_handle_get_i(fsl_texture, fsl_texture_buf, FSL_TEXTURE_INDEX_BUTTON_SELECTED),
                 "Button Selected", "button_selected", "button_selected.png", FSL_DIR_NAME_TEXTURES,
-                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS ||
-
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_ACTIVE],
+                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
+        goto cleanup;
+    if (fsl_texture_init(fsl_mem_handle_get_i(fsl_texture, fsl_texture_buf, FSL_TEXTURE_INDEX_BUTTON_ACTIVE),
                 "Button Active", "button_active", "button_active.png", FSL_DIR_NAME_TEXTURES,
-                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS ||
-
-            fsl_texture_init(&fsl_texture_buf[FSL_TEXTURE_INDEX_BUTTON_INACTIVE],
-                    "Button Inactive", "button_inactive", "button_inactive.png", FSL_DIR_NAME_TEXTURES,
-                    GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
-                        return fsl_err;
+                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
+        goto cleanup;
+    if (fsl_texture_init(fsl_mem_handle_get_i(fsl_texture, fsl_texture_buf, FSL_TEXTURE_INDEX_BUTTON_INACTIVE),
+                "Button Inactive", "button_inactive", "button_inactive.png", FSL_DIR_NAME_TEXTURES,
+                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
+        goto cleanup;
 
     /* ---- engine meshes --------------------------------------------------- */
 
-    if (fsl_asset_init(&fsl_mesh_unit_quad.asset, FSL_ASSET_MESH, "Unit Quad", "unit_quad", NULL, NULL) != FSL_ERR_SUCCESS)
+    if (fsl_asset_set_metadata(&fsl_mesh_unit_quad.asset, FSL_ASSET_MESH, "Unit Quad", "unit_quad", NULL, NULL) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     /* ---- engine shaders -------------------------------------------------- */
 
+    shader_temp = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UNIT_QUAD);
     if (
-            fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UNIT_QUAD].asset, FSL_ASSET_SHADER_PROGRAM,
+            fsl_asset_set_metadata(&shader_temp->asset, FSL_ASSET_SHADER_PROGRAM,
                 "Unit Quad", "unit_quad", NULL, NULL) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UNIT_QUAD].vertex.asset, FSL_ASSET_SHADER,
+            fsl_asset_set_metadata(&shader_temp->vertex.asset, FSL_ASSET_SHADER,
                 "Unit Quad", "unit_quad", "unit_quad.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UNIT_QUAD].fragment.asset, FSL_ASSET_SHADER,
-                "Unit Quad", "unit_quad", "unit_quad.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
-        return fsl_err;
+            fsl_asset_set_metadata(&shader_temp->geometry.asset, FSL_ASSET_SHADER,
+                NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
 
+            fsl_asset_set_metadata(&shader_temp->fragment.asset, FSL_ASSET_SHADER,
+                "Unit Quad", "unit_quad", "unit_quad.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    shader_temp = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_TEXT);
     if (
-            fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_TEXT].asset, FSL_ASSET_SHADER_PROGRAM,
+            fsl_asset_set_metadata(&shader_temp->asset, FSL_ASSET_SHADER_PROGRAM,
                 "Text", "text", NULL, NULL) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_TEXT].vertex.asset, FSL_ASSET_SHADER,
+            fsl_asset_set_metadata(&shader_temp->vertex.asset, FSL_ASSET_SHADER,
                 "Text", "text", "text.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_TEXT].fragment.asset, FSL_ASSET_SHADER,
-                "Text", "text", "text.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
-        return fsl_err;
+            fsl_asset_set_metadata(&shader_temp->geometry.asset, FSL_ASSET_SHADER,
+                NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
 
+            fsl_asset_set_metadata(&shader_temp->fragment.asset, FSL_ASSET_SHADER,
+                "Text", "text", "text.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    shader_temp = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UI);
     if (
-            fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UI].asset, FSL_ASSET_SHADER_PROGRAM,
+            fsl_asset_set_metadata(&shader_temp->asset, FSL_ASSET_SHADER_PROGRAM,
                 "UI", "ui", NULL, NULL) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UI].vertex.asset, FSL_ASSET_SHADER,
+            fsl_asset_set_metadata(&shader_temp->vertex.asset, FSL_ASSET_SHADER,
                 "UI", "ui", "ui.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UI].fragment.asset, FSL_ASSET_SHADER,
-                "UI", "ui", "ui.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
-        return fsl_err;
+            fsl_asset_set_metadata(&shader_temp->geometry.asset, FSL_ASSET_SHADER,
+                NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
 
+            fsl_asset_set_metadata(&shader_temp->fragment.asset, FSL_ASSET_SHADER,
+                "UI", "ui", "ui.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    shader_temp = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UI_9_SLICE);
     if (
-            fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].asset, FSL_ASSET_SHADER_PROGRAM,
+            fsl_asset_set_metadata(&shader_temp->asset, FSL_ASSET_SHADER_PROGRAM,
                 "UI 9-Slice", "ui_9_slice", NULL, NULL) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].vertex.asset, FSL_ASSET_SHADER,
+            fsl_asset_set_metadata(&shader_temp->vertex.asset, FSL_ASSET_SHADER,
                 "UI 9-Slice", "ui_9_slice", "ui_9_slice.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_init(&fsl_shader_buf[FSL_SHADER_INDEX_UI_9_SLICE].fragment.asset, FSL_ASSET_SHADER,
+            fsl_asset_set_metadata(&shader_temp->geometry.asset, FSL_ASSET_SHADER,
+                NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_temp->fragment.asset, FSL_ASSET_SHADER,
                 "UI 9-Slice", "ui_9_slice", "ui_9_slice.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
-        return fsl_err;
+        goto cleanup;
+
+    for (i = 0; i < FSL_SHADER_INDEX_COUNT; ++i)
+    {
+        shader_temp = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, i);
+        if (fsl_shader_program_init(shader_temp) != FSL_ERR_SUCCESS)
+            goto cleanup;
+    }
 
     /* ---- engine fonts ---------------------------------------------------- */
 
     if (
-            fsl_font_init(&fsl_font_buf[FSL_FONT_INDEX_DEJAVU_SANS], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans (ANSI)", "dejavu_sans_ansi", "dejavu-fonts-ttf/dejavu_sans_ansi.ttf", FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
+            fsl_font_init(fsl_mem_handle_get_i(fsl_font, fsl_font_buf, FSL_FONT_INDEX_DEJAVU_SANS), FSL_FONT_RESOLUTION_DEFAULT,
+                "DejaVu Sans (ANSI)", "dejavu_sans_ansi", "dejavu-fonts-ttf/dejavu_sans_ansi.ttf",
+                FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
 
-            fsl_font_init(&fsl_font_buf[FSL_FONT_INDEX_DEJAVU_SANS_BOLD], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans Bold (ANSI)", "dejavu_sans_bold_ansi", "dejavu-fonts-ttf/dejavu_sans_bold_ansi.ttf", FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
+            fsl_font_init(fsl_mem_handle_get_i(fsl_font, fsl_font_buf, FSL_FONT_INDEX_DEJAVU_SANS_BOLD), FSL_FONT_RESOLUTION_DEFAULT,
+                "DejaVu Sans Bold (ANSI)", "dejavu_sans_bold_ansi", "dejavu-fonts-ttf/dejavu_sans_bold_ansi.ttf",
+                FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
 
-            fsl_font_init(&fsl_font_buf[FSL_FONT_INDEX_DEJAVU_SANS_MONO], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans Mono (ANSI)", "dejavu_sans_mono_ansi", "dejavu-fonts-ttf/dejavu_sans_mono_ansi.ttf", FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
+            fsl_font_init(fsl_mem_handle_get_i(fsl_font, fsl_font_buf, FSL_FONT_INDEX_DEJAVU_SANS_MONO), FSL_FONT_RESOLUTION_DEFAULT,
+                "DejaVu Sans Mono (ANSI)", "dejavu_sans_mono_ansi", "dejavu-fonts-ttf/dejavu_sans_mono_ansi.ttf",
+                FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
 
-            fsl_font_init(&fsl_font_buf[FSL_FONT_INDEX_DEJAVU_SANS_MONO_BOLD], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans Mono Bold (ANSI)", "dejavu_sans_mono_bold_ansi", "dejavu-fonts-ttf/dejavu_sans_mono_bold_ansi.ttf", FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS)
-        return fsl_err;
+            fsl_font_init(fsl_mem_handle_get_i(fsl_font, fsl_font_buf, FSL_FONT_INDEX_DEJAVU_SANS_MONO_BOLD), FSL_FONT_RESOLUTION_DEFAULT,
+                "DejaVu Sans Mono Bold (ANSI)", "dejavu_sans_mono_bold_ansi", "dejavu-fonts-ttf/dejavu_sans_mono_bold_ansi.ttf",
+                FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    return fsl_err;
+
+cleanup:
 
     return fsl_err;
 }
@@ -236,21 +277,32 @@ u32 fsl_assets_init(void)
 void fsl_assets_free(void)
 {
     i32 i = 0;
+    fsl_texture *texture = NULL;
+    fsl_shader_program *shader = NULL;
+    fsl_font *font = NULL;
 
     fsl_fbo_free(&_fsl_core.fbo);
     fsl_fbo_free(&_fsl_core.fbo_msaa);
-
     fsl_mesh_free(&fsl_mesh_unit_quad);
 
-    if (fsl_texture_buf)
+    if (fsl_texture_buf.arena)
+    {
+        texture = fsl_mem_handle_get(fsl_texture, fsl_texture_buf);
         for (i = 0; i < FSL_TEXTURE_INDEX_COUNT; ++i)
-            fsl_texture_free(&fsl_texture_buf[i]);
-    if (fsl_shader_buf)
+            fsl_texture_free(&texture[i]);
+    }
+    if (fsl_shader_buf.arena)
+    {
+        shader = fsl_mem_handle_get(fsl_shader_program, fsl_shader_buf);
         for (i = 0; i < FSL_SHADER_INDEX_COUNT; ++i)
-            fsl_shader_program_free(&fsl_shader_buf[i]);
-    if (fsl_font_buf)
+            fsl_shader_program_free(&shader[i]);
+    }
+    if (fsl_font_buf.arena)
+    {
+        font = fsl_mem_handle_get(fsl_font, fsl_font_buf);
         for (i = 0; i < FSL_FONT_INDEX_COUNT; ++i)
-            fsl_font_free(&fsl_font_buf[i]);
+            fsl_font_free(&font[i]);
+    }
 }
 
 /* ---- section: fbo -------------------------------------------------------- */
@@ -258,6 +310,7 @@ void fsl_assets_free(void)
 u32 fsl_fbo_init(fsl_fbo *fbo, fsl_mesh *mesh_fbo, b8 multisample, u32 samples)
 {
     GLuint status = 0;
+    GLfloat *mesh_fbo_vbo_data = NULL;
 
     if (fbo == NULL)
         goto mesh_fbo_init;
@@ -333,20 +386,22 @@ u32 fsl_fbo_init(fsl_fbo *fbo, fsl_mesh *mesh_fbo, b8 multisample, u32 samples)
         return fsl_err;
     }
 
-    fbo->asset.loaded = TRUE;
+    fbo->asset.initialized = TRUE;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 mesh_fbo_init:
 
-    if (mesh_fbo == NULL || mesh_fbo->vbo_data != NULL)
+    if (mesh_fbo == NULL || mesh_fbo->vbo_data.arena != NULL)
         return FSL_ERR_SUCCESS;
 
     mesh_fbo->vbo_len = fsl_arr_len(vbo_data_unit_quad_internal);
-    if (fsl_mem_push_arena(&mem_arena_internal, (void*)&mesh_fbo->vbo_data, sizeof(GLfloat) * mesh_fbo->vbo_len,
+    if (fsl_mem_arena_push(&mem_arena_internal, &mesh_fbo->vbo_data, sizeof(GLfloat) * mesh_fbo->vbo_len,
                 "fsl_fbo_init().mesh_fbo->vbo_data") != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    memcpy(mesh_fbo->vbo_data, vbo_data_unit_quad_internal, sizeof(GLfloat) * mesh_fbo->vbo_len);
+    fsl_asset_set_metadata(&mesh_fbo->asset, FSL_ASSET_MESH, "Unit Quad", "unit_quad", NULL, NULL);
+    mesh_fbo_vbo_data = fsl_mem_handle_get(GLfloat, mesh_fbo->vbo_data);
+    memcpy(mesh_fbo_vbo_data, vbo_data_unit_quad_internal, mesh_fbo->vbo_data.size);
 
     /* ---- bind mesh ------------------------------------------------------- */
 
@@ -356,7 +411,7 @@ mesh_fbo_init:
     glBindVertexArray(mesh_fbo->vao);
     glBindBuffer(GL_ARRAY_BUFFER, mesh_fbo->vbo);
     glBufferData(GL_ARRAY_BUFFER, mesh_fbo->vbo_len * sizeof(GLfloat),
-            mesh_fbo->vbo_data, GL_STATIC_DRAW);
+            fsl_mem_handle_get(GLfloat, mesh_fbo->vbo_data), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)0);
@@ -368,7 +423,7 @@ mesh_fbo_init:
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    mesh_fbo->asset.loaded = TRUE;
+    mesh_fbo->asset.initialized = TRUE;
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -431,7 +486,7 @@ u32 fsl_fbo_realloc(fsl_fbo *fbo, b8 multisample, u32 samples)
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    fbo->asset.loaded = TRUE;
+    fbo->asset.initialized = TRUE;
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -444,9 +499,9 @@ void fsl_fbo_free(fsl_fbo *fbo)
     if (!fbo)
         return;
 
-    if (fbo->asset.loaded)
+    if (fbo->asset.initialized)
     {
-        fbo->asset.loaded = FALSE;
+        fbo->asset.initialized = FALSE;
         glDeleteFramebuffers(1, &fbo->rbo);
         glDeleteTextures(1, &fbo->color_buf);
         glDeleteFramebuffers(1, &fbo->fbo);
@@ -464,10 +519,12 @@ u32 fsl_texture_init(fsl_texture *texture,
     str path_temp[PATH_MAX] = {0};
     u8 *buf = NULL;
 
-    if (fsl_asset_init(&texture->asset, FSL_ASSET_TEXTURE, name, name_id, file, path) != FSL_ERR_SUCCESS)
+    if (fsl_asset_set_metadata(&texture->asset, FSL_ASSET_TEXTURE, name, name_id, file, path) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    snprintf(path_temp, PATH_MAX, "%s%s", texture->asset.path, texture->asset.file);
+    snprintf(path_temp, PATH_MAX, "%s%s",
+            fsl_mem_handle_get(str, texture->asset.path),
+            fsl_mem_handle_get(str, texture->asset.file));
     if (fsl_is_file_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -476,7 +533,7 @@ u32 fsl_texture_init(fsl_texture *texture,
     {
         LOGERROR(FSL_ERR_IMAGE_LOAD_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_TEXTURE_LOAD_REASON_FAIL(texture->asset.name_id, "`stbi_load()` Failed"));
+                MSG_TEXTURE_LOAD_REASON_FAIL(fsl_mem_handle_get(str, texture->asset.name_id), "`stbi_load()` Failed"));
         goto cleanup;
     }
 
@@ -495,22 +552,22 @@ u32 fsl_texture_init(fsl_texture *texture,
     if (bindless)
     {
         texture->bindless = TRUE;
-        texture->handle = glGetTextureHandleARB(texture->asset.id);
-        glMakeTextureHandleResidentARB(texture->handle);
+        texture->bindless_handle = glGetTextureHandleARB(texture->asset.id);
+        glMakeTextureHandleResidentARB(texture->bindless_handle);
         LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_TEXTURE_HANDLE_CREATE(texture->handle, texture->asset.id));
+                MSG_TEXTURE_HANDLE_CREATE(texture->bindless_handle, texture->asset.id));
     }
 
     if (buf)
         stbi_image_free(buf);
 
-    texture->asset.loaded = TRUE;
+    texture->asset.initialized = TRUE;
     texture->format = format;
     texture->filter = filter;
     texture->grayscale = grayscale;
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_TEXTURE_LOAD(texture->asset.name_id, texture->asset.id));
+            MSG_TEXTURE_LOAD(fsl_mem_handle_get(str, texture->asset.name_id), texture->asset.id));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -533,17 +590,17 @@ void fsl_texture_free(fsl_texture *texture)
     if (texture->bindless)
     {
         texture->bindless = FALSE;
-        glMakeTextureHandleNonResidentARB(texture->handle);
+        glMakeTextureHandleNonResidentARB(texture->bindless_handle);
         LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_TEXTURE_HANDLE_DESTROY(texture->handle, texture->asset.id));
+                MSG_TEXTURE_HANDLE_DESTROY(texture->bindless_handle, texture->asset.id));
     }
 
-    if (texture->asset.loaded)
+    if (texture->asset.initialized)
     {
-        texture->asset.loaded = FALSE;
+        texture->asset.initialized = FALSE;
         glDeleteTextures(1, &texture->asset.id);
         LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_TEXTURE_UNLOAD(texture->asset.name_id, texture->asset.id));
+                MSG_TEXTURE_UNLOAD(fsl_mem_handle_get(str, texture->asset.name_id), texture->asset.id));
     }
 
     *texture = notexture;
@@ -556,23 +613,27 @@ u32 fsl_mesh_generate(fsl_mesh *mesh,
         void (*attrib)(void), GLenum usage,
         GLuint vbo_len, GLuint ebo_len, GLfloat *vbo_data, GLuint *ebo_data)
 {
-    if (fsl_mem_push_arena(&mem_arena_internal, (void*)&mesh->vbo_data, sizeof(GLfloat) * vbo_len,
+    GLfloat *vbo_data_p = NULL;
+    GLuint *ebo_data_p = NULL;
+
+    if (fsl_mem_arena_push(&mem_arena_internal, &mesh->vbo_data, sizeof(GLfloat) * vbo_len,
                 "fsl_mesh_generate().mesh->vbo_data") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     if (ebo_data)
-        if (fsl_mem_push_arena(&mem_arena_internal, (void*)&mesh->ebo_data, sizeof(GLuint) * ebo_len,
+        if (fsl_mem_arena_push(&mem_arena_internal, &mesh->ebo_data, sizeof(GLuint) * ebo_len,
                     "fsl_mesh_generate().mesh->ebo_data") != FSL_ERR_SUCCESS)
             goto cleanup;
 
-    if (fsl_asset_init(&mesh->asset, FSL_ASSET_MESH, name, name_id, file, path) != FSL_ERR_SUCCESS)
+    if (fsl_asset_set_metadata(&mesh->asset, FSL_ASSET_MESH, name, name_id, file, path) != FSL_ERR_SUCCESS)
         goto cleanup;
 
+    vbo_data_p = fsl_mem_handle_get(GLfloat, mesh->vbo_data);
+    ebo_data_p = fsl_mem_handle_get(GLuint, mesh->ebo_data);
     mesh->vbo_len = vbo_len;
     mesh->ebo_len = ebo_len;
-
-    memcpy(mesh->vbo_data, vbo_data, sizeof(GLfloat) * vbo_len);
-    memcpy(mesh->ebo_data, ebo_data, sizeof(GLuint) * ebo_len);
+    memcpy(vbo_data_p, vbo_data, sizeof(GLfloat) * vbo_len);
+    memcpy(ebo_data_p, ebo_data, sizeof(GLuint) * ebo_len);
 
     /* ---- bind mesh ------------------------------------------------------- */
 
@@ -584,8 +645,8 @@ u32 fsl_mesh_generate(fsl_mesh *mesh,
     glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
 
-    glBufferData(GL_ARRAY_BUFFER, mesh->vbo_len * sizeof(GLfloat), mesh->vbo_data, usage);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo_len * sizeof(GLuint), mesh->ebo_data, usage);
+    glBufferData(GL_ARRAY_BUFFER, mesh->vbo_len * sizeof(GLfloat), vbo_data_p, usage);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo_len * sizeof(GLuint), ebo_data_p, usage);
 
     if (attrib) attrib();
 
@@ -593,7 +654,7 @@ u32 fsl_mesh_generate(fsl_mesh *mesh,
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    mesh->asset.loaded = TRUE;
+    mesh->asset.initialized = TRUE;
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -612,16 +673,16 @@ void fsl_mesh_free(fsl_mesh *mesh)
     if (mesh == NULL)
         return;
 
-    if (mesh->asset.loaded)
+    if (mesh->asset.initialized)
     {
-        mesh->asset.loaded = FALSE;
+        mesh->asset.initialized = FALSE;
         glDeleteBuffers(1, &mesh->ebo);
         glDeleteBuffers(1, &mesh->vbo);
         glDeleteVertexArrays(1, &mesh->vao);
     }
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_MESH_UNLOAD(mesh->asset.name_id));
+            MSG_MESH_UNLOAD(fsl_mem_handle_get(str, mesh->asset.name_id)));
 
     /* TODO: use `fsl_mem_pop_arena()` when you make it */
     *mesh = nomesh;
@@ -634,6 +695,7 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
 {
     u32 i = 0;
     str path_temp[PATH_MAX] = {0};
+    u8 *file_contents = NULL;
     u8 *bitmap = NULL;
     f32 scale = 0.0f;
     int glyph_index = 0;
@@ -641,35 +703,37 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     i32 x0 = 0, y0 = 0;
     i32 x1 = 0, y1 = 0;
 
-    if (fsl_asset_init(&font->asset, FSL_ASSET_FONT, name, name_id, file, path) != FSL_ERR_SUCCESS)
+    if (fsl_asset_set_metadata(&font->asset, FSL_ASSET_FONT, name, name_id, file, path) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     if (resolution <= 2)
     {
         LOGERROR(FSL_ERR_IMAGE_SIZE_TOO_SMALL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Font", font->asset.name_id, "Size Too Small"));
+                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Font", fsl_mem_handle_get(str, font->asset.name_id), "Size Too Small"));
         return fsl_err;
     }
 
-    snprintf(path_temp, PATH_MAX, "%s%s", font->asset.path, font->asset.file);
+    snprintf(path_temp, PATH_MAX, "%s%s",
+            fsl_mem_handle_get(str, font->asset.path),
+            fsl_mem_handle_get(str, font->asset.file));
     if (fsl_is_file_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    font->buf_len = fsl_get_file_contents(path_temp, (void*)&font->buf, 1, TRUE);
-    if (font->buf == NULL)
+    font->buf_len = fsl_get_file_contents(path_temp, (void*)&file_contents, 1, TRUE);
+    if (file_contents == NULL)
         return fsl_err;
 
-    if (!stbtt_InitFont(&font->info, (const unsigned char*)font->buf, 0))
+    if (!stbtt_InitFont(&font->info, (const unsigned char*)file_contents, 0))
     {
         LOGERROR(FSL_ERR_FONT_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Font", font->asset.name_id, "`stbtt_InitFont()` Failed"));
+                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Font", fsl_mem_handle_get(str, font->asset.name_id), "`stbtt_InitFont()` Failed"));
         goto cleanup;
     }
 
     if (fsl_mem_alloc((void*)&bitmap, FSL_GLYPH_MAX * resolution * resolution,
-                fsl_stringf("fsl_font_init().%s", font->asset.name_id)) != FSL_ERR_SUCCESS)
+                fsl_stringf("fsl_font_init().%s", fsl_mem_handle_get(str, font->asset.name_id))) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     stbtt_GetFontVMetrics(&font->info, &font->ascent, &font->descent, &font->line_gap);
@@ -681,7 +745,8 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     for (i = 0; i < FSL_GLYPH_MAX; ++i)
     {
         glyph_index = stbtt_FindGlyphIndex(&font->info, i);
-        if (!glyph_index) continue;
+        if (!glyph_index)
+            continue;
 
         g = &font->glyph[i];
 
@@ -714,21 +779,21 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     fsl_mem_free((void*)&bitmap, FSL_GLYPH_MAX * resolution * resolution,
-            fsl_stringf("fsl_font_init().%s", font->asset.name_id));
+            fsl_stringf("fsl_font_init().%s", fsl_mem_handle_get(str, font->asset.name_id)));
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_FONT_LOAD(font->asset.name_id));
+            MSG_FONT_LOAD(fsl_mem_handle_get(str, font->asset.name_id)));
 
-    font->asset.loaded = TRUE;
+    font->asset.initialized = TRUE;
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 
 cleanup:
 
-    fsl_mem_free((void*)&font->buf, font->buf_len,
-            fsl_stringf("fsl_font_init().%s", font->asset.name_id));
+    fsl_mem_free((void*)&file_contents, font->buf_len,
+            fsl_stringf("fsl_font_init().%s", fsl_mem_handle_get(str, font->asset.name_id)));
     fsl_mem_free((void*)&bitmap, FSL_GLYPH_MAX * resolution * resolution,
-            fsl_stringf("fsl_font_init().%s", font->asset.name_id));
+            fsl_stringf("fsl_font_init().%s", fsl_mem_handle_get(str, font->asset.name_id)));
     fsl_font_free(font);
     return fsl_err;
 }
@@ -736,19 +801,20 @@ cleanup:
 void fsl_font_free(fsl_font *font)
 {
     fsl_font nofont = {0};
+
     if (!font)
         return;
 
-    if (font->asset.loaded)
+    if (font->asset.initialized)
     {
-        font->asset.loaded = FALSE;
+        font->asset.initialized = FALSE;
         glDeleteTextures(1, &font->asset.id);
     }
 
-    if (font->buf)
-        fsl_mem_free((void*)&font->buf, font->buf_len,
-                fsl_stringf("fsl_font_free().%s", font->asset.name_id));
+    if (font->info.data)
+        fsl_mem_free((void*)&font->info.data, font->buf_len,
+                fsl_stringf("fsl_font_free().%s", fsl_mem_handle_get(str, font->asset.name_id)));
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_FONT_UNLOAD(font->asset.name_id));
+            MSG_FONT_UNLOAD(fsl_mem_handle_get(str, font->asset.name_id)));
     *font = nofont;
 }

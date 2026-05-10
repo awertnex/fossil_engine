@@ -58,7 +58,7 @@ u32 game_init(void)
     LOGTRACE(FSL_FLAG_LOG_CMD,
             fsl_logger_stringf("Main Directory Created '%s'\n", FSL_DIR_PROC_ROOT));
 
-    if (fsl_mem_map_arena(&_memory_arena_internal, 1,
+    if (fsl_mem_map_arena(&_memory_arena_internal, 2,
                 "game_init()._memory_arena_internal") != FSL_ERR_SUCCESS)
         return *GAME_ERR;
 

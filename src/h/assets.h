@@ -21,6 +21,7 @@
 #define FSL_ASSETS_H
 
 #include "limits.h"
+#include "../memory/memory_types.h"
 #include "types.h"
 
 #pragma GCC diagnostic push
@@ -42,6 +43,8 @@ enum fsl_asset_type
     FSL_ASSET_TYPE_COUNT
 }; /* fsl_asset_type */
 
+/*! @remark this struct should be filled using the function @ref fsl_set_asset_metadata().
+ */
 typedef struct fsl_asset
 {
     /*! @remark used by @ref glGenTextures() for textures, @ref glCreateShader() for shaders etc..
@@ -52,7 +55,7 @@ typedef struct fsl_asset
 
     /*! @brief display name, can be used in asset-search (optional).
      */
-    str *name;
+    fsl_mem_handle name;
 
     /*! @brief stable, unique name for asset-search, and logging (optional).
      *
@@ -60,22 +63,32 @@ typedef struct fsl_asset
      *      - no leading digits.
      *      - only lowercase characters, digits 0 -> 9 and underscores.
      */
-    str *name_id;
+    fsl_mem_handle name_id;
 
     /*! @brief base file name (optional).
      */
-    str *file;
+    fsl_mem_handle file;
 
     /*! @brief path to asset file without file name (optional).
      */
-    str *path;
+    fsl_mem_handle path;
 
-    /*! @remark `TRUE` does not mean `name`, `name_internal`, `file` and `path` are filled out,
-     *  it means whatever the asset requires to be fully initialized and usable is fulfilled
+    /*! @remark `TRUE` does not mean 'has metadata', it means whatever the asset
+     *  requires to be fully initialized and usable is fulfilled
      *  (e.g. texture is generated and uploaded to VRAM).
      */
-    b8 loaded;
+    b8 initialized;
 } fsl_asset;
+
+/*! @remark this struct can be filled using the function @ref fsl_get_asset_metadata().
+ */
+typedef struct fsl_asset_metadata
+{
+    str *name;
+    str *name_id;
+    str *file;
+    str *path;
+} fsl_asset_metadata;
 
 typedef struct fsl_fbo
 {
@@ -92,10 +105,10 @@ typedef struct fsl_texture
 
     /*! @brief used by `OpenGL` extension @ref GL_ARB_bindless_texture.
      */
-    u64 handle;
+    u64 bindless_handle;
 
-    GLint format;           /* used by @ref glTexImage2D() */
-    GLint filter;           /* used by @ref glTexParameteri() */
+    GLint format; /* used by @ref glTexImage2D() */
+    GLint filter; /* used by @ref glTexParameteri() */
 
     /*! @brief number of color channels, used by @ref stbi_load().
      */
@@ -113,8 +126,8 @@ typedef struct fsl_mesh
     GLuint ebo;
     GLuint vbo_len;
     GLuint ebo_len;
-    GLfloat *vbo_data;
-    GLuint *ebo_data;
+    fsl_mem_handle vbo_data;
+    fsl_mem_handle ebo_data;
 } fsl_mesh;
 
 typedef struct fsl_shader
@@ -151,8 +164,7 @@ typedef struct fsl_font
     i32 line_height;
     f32 size;               /* global font size, for text uniformity */
     v2i32 scale;            /* biggest glyph bounding box size in font units */
-    u8 *buf;
-    u64 buf_len;
+    u64 buf_len;            /* size allocated for @ref fsl_font.info.data in bytes */
     stbtt_fontinfo info;    /* used by @ref stbtt_InitFont() */
     fsl_glyph glyph[FSL_GLYPH_MAX];
 } fsl_font;
@@ -161,29 +173,33 @@ typedef struct fsl_font
 
 /*! @brief engine's default textures.
  *
- *  @remark declared and initialized internally.
+ *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
  */
-FSLAPI extern fsl_texture *fsl_texture_buf;
-
-/*! @brief engine's default unit quad, with texture coordinates.
- *
- *  @remark declared and initialized internally.
- */
-FSLAPI extern fsl_mesh fsl_mesh_unit_quad;
+FSLAPI extern fsl_mem_handle fsl_texture_buf;
 
 /*! @brief engine's default shaders.
  *
- *  @remark read-only, declared and initialized internally in @ref fsl_init().
+ *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
  */
-FSLAPI extern fsl_shader_program *fsl_shader_buf;
+FSLAPI extern fsl_mem_handle fsl_shader_buf;
 
 /*! @brief engine's default fonts.
  *
- *  @remark declared and initialized internally in @ref fsl_ui_init().
+ *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
  */
-FSLAPI extern fsl_font *fsl_font_buf;
+FSLAPI extern fsl_mem_handle fsl_font_buf;
+
+/*! @brief engine's default unit quad, with texture coordinates.
+ *
+ *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
+ */
+FSLAPI extern fsl_mesh fsl_mesh_unit_quad;
 
 /* ---- section: signatures ------------------------------------------------- */
+
+/*! @remark get asset metadata (e.g., name).
+ */
+FSLAPI fsl_asset_metadata fsl_asset_get_metadata(const fsl_asset asset);
 
 /*! @brief initialize a single asset.
  *
@@ -198,11 +214,11 @@ FSLAPI extern fsl_font *fsl_font_buf;
  *  @param file base file name (optional).
  *  @param path path to asset file without file name (optional).
  *
- *  @remark does not modify @ref asset.loaded.
+ *  @remark does not modify @ref asset.initialized.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_asset_init(fsl_asset *asset, enum fsl_asset_type type,
+FSLAPI u32 fsl_asset_set_metadata(fsl_asset *asset, enum fsl_asset_type type,
         const str *name, const str *name_id, const str *file, const str *path);
 
 /*! @brief initialize engine's internal assets.
@@ -229,15 +245,15 @@ FSLAPI void fsl_fbo_free(fsl_fbo *fbo);
 
 /*! @brief load image data from disk into @ref texture->buf and set texture info.
  *
- *  @param name asset display name (optional) (@ref fsl_asset_init() parameter).
+ *  @param name asset display name (optional) (@ref fsl_asset_set_metadata() parameter).
  *
- *  @param name_id asset stable, unique name for asset-search, and logging (optional) (@ref fsl_asset_init() parameter).
+ *  @param name_id asset stable, unique name for asset-search, and logging (optional) (@ref fsl_asset_set_metadata() parameter).
  *  naming convention: "[a-z_][a-z0-9_]*", or:
  *      - no leading digits.
  *      - only lowercase characters, digits 0 -> 9 and underscores.
  *
- *  @param file base file name (optional) (@ref fsl_asset_init() parameter).
- *  @param path path to asset file without file name (optional) (@ref fsl_asset_init() parameter).
+ *  @param file base file name (optional) (@ref fsl_asset_set_metadata() parameter).
+ *  @param path path to asset file without file name (optional) (@ref fsl_asset_set_metadata() parameter).
  *
  *  @param bindless use 'OpenGL' extension 'GL_ARB_bindless_texture'
  *  (handle is in @ref texture->handle).
@@ -253,13 +269,13 @@ FSLAPI void fsl_texture_free(fsl_texture *texture);
 /*! @param attrib pointer to a function to set attribute arrays for `mesh->vao`
  *  (e.g. &attrib_vec3, set a single vec3 attribute array).
  *
- *  @param name_id asset stable, unique name for asset-search, and logging (optional) (@ref fsl_asset_init() parameter).
+ *  @param name_id asset stable, unique name for asset-search, and logging (optional) (@ref fsl_asset_set_metadata() parameter).
  *  naming convention: "[a-z_][a-z0-9_]*", or:
  *      - no leading digits.
  *      - only lowercase characters, digits 0 -> 9 and underscores.
  *
- *  @param file base file name (optional) (@ref fsl_asset_init() parameter).
- *  @param path path to asset file without file name (optional) (@ref fsl_asset_init() parameter).
+ *  @param file base file name (optional) (@ref fsl_asset_set_metadata() parameter).
+ *  @param path path to asset file without file name (optional) (@ref fsl_asset_set_metadata() parameter).
  *  @param usage `GL_<x>_DRAW`.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
@@ -271,22 +287,20 @@ FSLAPI u32 fsl_mesh_generate(fsl_mesh *mesh,
 
 FSLAPI void fsl_mesh_free(fsl_mesh *mesh);
 
-/*! @brief load font from file at `file_name` or at `font->path`.
+/*! @brief load font from file at `path`/`file`.
  *
- *  1. allocate memory for `font->buf` and load file contents into it in binary format.
- *  2. allocate memory for `font->bitmap` and render glyphs onto it.
- *  3. generate square texture of diameter `resolution` * 16 and bake bitmap onto it.
+ *  - generate square texture of diameter `resolution` * 16 and bake bitmap onto it.
  *
  *  @param resolution font size (font atlas cell diameter).
- *  @param name asset display name (optional) (@ref fsl_asset_init() parameter).
+ *  @param name asset display name (optional) (@ref fsl_asset_set_metadata() parameter).
  *
- *  @param name_id asset stable, unique name for asset-search, and logging (optional) (@ref fsl_asset_init() parameter).
+ *  @param name_id asset stable, unique name for asset-search, and logging (optional) (@ref fsl_asset_set_metadata() parameter).
  *  naming convention: "[a-z_][a-z0-9_]*", or:
  *      - no leading digits.
  *      - only lowercase characters, digits 0 -> 9 and underscores.
  *
- *  @param file base file name (optional) (@ref fsl_asset_init() parameter).
- *  @param path path to asset file without file name (optional) (@ref fsl_asset_init() parameter).
+ *  @param file base file name (optional) (@ref fsl_asset_set_metadata() parameter).
+ *  @param path path to asset file without file name (optional) (@ref fsl_asset_set_metadata() parameter).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */

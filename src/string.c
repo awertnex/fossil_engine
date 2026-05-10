@@ -21,7 +21,7 @@
 #include "h/dir.h"
 #include "h/limits.h"
 #include "logger/log.h"
-#include "h/memory.h"
+#include "memory/memory.h"
 #include "h/string.h"
 
 #include <stdio.h>

@@ -38,10 +38,10 @@
  *      - when using square brackets and the unit of data is unknown, include an
  *        identifier before the brackets, examples:
  *          - "Memory Cleared [3181B]": it is clear that we've cleared 3181 bytes.
- *          - "main()._arena[0x7f12b73e6000] Memory Arena Unmapped [4521611264B] Memb Total [10][45056B]":
+ *          - "main()._arena[0x7f12b73e6000] Memory Arena Unmapped [4521611264B] Entry Total [10][45056B]":
  *            it is clear that "[452..B]" is how many bytes we've cleared,
  *            but it'd be difficult to tell what "[10][45056B]" means without
- *            including "Memb Total" before it (this specific example is a little
+ *            including "Entry Total" before it (this specific example is a little
  *            different, "45056b" isn't the size of each member, but the size of the
  *            members array within the memory arena).
  */
@@ -106,15 +106,15 @@
 #define MSG_MEM_REMAP_REASON_FAIL(name, address, size, reason) fsl_logger_stringf("Failed to Remap Memory %s[%p][%"PRIu64"B], %s\n", name, address, size, reason)
 #define MSG_MEM_REMAP(name, address_old, address_new, size_old, size_new) fsl_logger_stringf("Memory Remapped %s[%p -> %p][%"PRIu64"B -> %"PRIu64"B]\n", name, address_old, address_new, size_old, size_new)
 #define MSG_MEM_UNMAP(name, address, size)                  fsl_logger_stringf("Memory Unmapped %s[%p][%"PRIu64"B]\n", name, address, size)
-#define MSG_MEM_ARENA_UNMAP(name, address, size_arena, memb, size_memb) fsl_logger_stringf("Memory Arena Unmapped %s[%p][%"PRIu64"B], Memb Total [%"PRIu64"][%"PRIu64"B]\n", name, address, size_arena, memb, size_memb)
 #define MSG_MEM_FREE(name, address, size)                   fsl_logger_stringf("Memory Unloaded %s[%p][%"PRIu64"B]\n", name, address, size)
 #define MSG_MEM_CLEAR(name, address, size)                  fsl_logger_stringf("Memory Cleared %s[%p][%"PRIu64"B]\n", name, address, size)
-#define MSG_MEM_MAP_ARENA_POINTER_NULL_FAIL(name, size)     fsl_logger_stringf("Failed to Map Memory Arena %s[%p][%"PRIu64"B], Pointer `NULL`\n", name, NULL, size)
-#define MSG_MEM_MAP_ARENA_REASON_FAIL(name, address, size, reason) fsl_logger_stringf("Failed to Map Memory Arena %s[%p][%"PRIu64"], %s\n", name, address, size, reason)
-#define MSG_MEM_MAP_ARENA_FAIL(name, address, size)         fsl_logger_stringf("Failed to Map Memory Arena %s[%p][%"PRIu64"], `_fsl_mem_map()` Failed\n", name, address, size)
-#define MSG_MEM_MAP_ARENA(name, address, size_arena, size_memb) fsl_logger_stringf("Memory Arena Mapped %s[%p][%"PRIu64"B], Memb [%"PRIu64"B]\n", name, address, size_arena, size_memb)
-#define MSG_MEM_PUSH_ARENA_REASON_FAIL(name, address, size, reason) fsl_logger_stringf("Failed to Push Memory Arena %s[%p][%"PRIu64"B], %s\n", name, address, size, reason)
-#define MSG_MEM_PUSH_ARENA(name, address_base, address_pushed, size_pushed, memb, size_memb) fsl_logger_stringf("Memory Arena Pushed %s[base: %p][pushed: %p][%"PRIu64"B], Memb [%"PRIu64"][%"PRIu64"B]\n", name, address_base, address_pushed, size_pushed, memb, size_memb)
+#define MSG_MEM_ARENA_INIT_POINTER_NULL_FAIL(name, size)    fsl_logger_stringf("Failed to Initialize Memory Arena %s[%p][%"PRIu64"], Pointer `NULL`\n", name, NULL, size)
+#define MSG_MEM_ARENA_INIT_REASON_FAIL(name, address, size, reason) fsl_logger_stringf("Failed to Initialize Memory Arena %s[%p][%"PRIu64"], %s\n", name, address, size, reason)
+#define MSG_MEM_ARENA_INIT_FAIL(name, address, size)        fsl_logger_stringf("Failed to Initialize Memory Arena %s[%p][%"PRIu64"], `_fsl_mem_map()` Failed\n", name, address, size)
+#define MSG_MEM_ARENA_INIT(name, address, size)             fsl_logger_stringf("Memory Arena Initialized %s[%p][%"PRIu64"B]\n", name, address, size)
+#define MSG_MEM_ARENA_PUSH_REASON_FAIL(name, address, size, reason) fsl_logger_stringf("Failed to Push Memory Arena %s[%p][%"PRIu64"B], %s\n", name, address, size, reason)
+#define MSG_MEM_ARENA_PUSH(name, address, offset_pushed, size_pushed, entry, size_entry) fsl_logger_stringf("Memory Arena Pushed %s[%p][offset_pushed: %"PRIu64"][size_pushed: %"PRIu64"B][entry_total: %"PRIu64"][entry_cap: %"PRIu64"B]\n", name, address, offset_pushed, size_pushed, entry, size_entry)
+#define MSG_MEM_ARENA_FREE(name, address, size_arena, entry, size_entry) fsl_logger_stringf("Memory Arena Unmapped %s[%p][%"PRIu64"B], Entry Total [%"PRIu64"][%"PRIu64"B]\n", name, address, size_arena, entry, size_entry)
 
 /* ---- section: process ---------------------------------------------------- */
 

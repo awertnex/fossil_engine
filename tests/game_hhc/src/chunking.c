@@ -20,11 +20,20 @@
 #include <inttypes.h>
 #include <math.h>
 
+fsl_off CHUNK_ORDER_OFF = FSL_OFFSET_INVALID;
+fsl_off chunk_tab_off = FSL_OFFSET_INVALID;
+fsl_off chunk_buf_off = FSL_OFFSET_INVALID;
+fsl_off CHUNK_QUEUE_0_OFF = FSL_OFFSET_INVALID;
+fsl_off CHUNK_QUEUE_1_OFF = FSL_OFFSET_INVALID;
+fsl_off CHUNK_QUEUE_2_OFF = FSL_OFFSET_INVALID;
+fsl_off chunk_gizmo_loaded_off = FSL_OFFSET_INVALID;
+fsl_off chunk_gizmo_render_off = FSL_OFFSET_INVALID;
+
 u64 CHUNKS_MAX[SET_RENDER_DISTANCE_MAX + 1] = {0};
 
 /*! @brief chunk buffer, raw chunk data.
  */
-static chunk *chunk_buf = NULL;
+chunk *chunk_buf = NULL;
 
 /*! @brief position of first empty slot in @ref chunk_buf.
  *
@@ -141,38 +150,47 @@ u32 chunking_init(void)
     u64 chunks_max = 0;
 
     if (
-            fsl_mem_push_arena(&_memory_arena_internal, (void*)&CHUNK_ORDER,
+            fsl_mem_push_arena(&_memory_arena_internal, &CHUNK_ORDER_OFF,
                 CHUNK_BUF_VOLUME_MAX * sizeof(chunk**),
-                "chunking_init().CHUNK_ORDER") != FSL_ERR_SUCCESS ||
+                "chunking_init().CHUNK_ORDER_OFF") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&_memory_arena_internal, (void*)&chunk_tab,
+            fsl_mem_push_arena(&_memory_arena_internal, &chunk_tab_off,
                 CHUNK_BUF_VOLUME_MAX * sizeof(chunk*),
-                "chunking_init().chunk_tab") != FSL_ERR_SUCCESS ||
+                "chunking_init().chunk_tab_off") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&_memory_arena_internal, (void*)&chunk_buf,
+            fsl_mem_push_arena(&_memory_arena_internal, &chunk_buf_off,
                 CHUNK_BUF_VOLUME_MAX * sizeof(chunk),
-                "chunking_init().chunk_buf") != FSL_ERR_SUCCESS ||
+                "chunking_init().chunk_buf_off") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&_memory_arena_internal, (void*)&CHUNK_QUEUE[0].queue,
+            fsl_mem_push_arena(&_memory_arena_internal, &CHUNK_QUEUE_0_OFF,
                 CHUNK_QUEUE_1ST_MAX * sizeof(chunk**),
-                "chunking_init().CHUNK_QUEUE[0].queue") != FSL_ERR_SUCCESS ||
+                "chunking_init().CHUNK_QUEUE_0_OFF") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&_memory_arena_internal, (void*)&CHUNK_QUEUE[1].queue,
+            fsl_mem_push_arena(&_memory_arena_internal, &CHUNK_QUEUE_1_OFF,
                 CHUNK_QUEUE_2ND_MAX * sizeof(chunk**),
-                "chunking_init().CHUNK_QUEUE[1].queue") != FSL_ERR_SUCCESS ||
+                "chunking_init().CHUNK_QUEUE_1_OFF") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&_memory_arena_internal, (void*)&CHUNK_QUEUE[2].queue,
+            fsl_mem_push_arena(&_memory_arena_internal, &CHUNK_QUEUE_2_OFF,
                 CHUNK_QUEUE_3RD_MAX * sizeof(chunk**),
-                "chunking_init().CHUNK_QUEUE[2].queue") != FSL_ERR_SUCCESS ||
+                "chunking_init().CHUNK_QUEUE_2_OFF") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&_memory_arena_internal, (void*)&chunk_gizmo_loaded,
+            fsl_mem_push_arena(&_memory_arena_internal, &chunk_gizmo_loaded_off,
                 CHUNK_BUF_VOLUME_MAX * sizeof(v2u32),
-                "chunking_init().chunk_gizmo_loaded") != FSL_ERR_SUCCESS ||
+                "chunking_init().chunk_gizmo_loaded_off") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_push_arena(&_memory_arena_internal, (void*)&chunk_gizmo_render,
+            fsl_mem_push_arena(&_memory_arena_internal, &chunk_gizmo_render_off,
                 CHUNK_BUF_VOLUME_MAX * sizeof(v2u32),
-                "chunking_init().chunk_gizmo_render") != FSL_ERR_SUCCESS)
+                "chunking_init().chunk_gizmo_render_off") != FSL_ERR_SUCCESS)
         goto cleanup;
+
+    CHUNK_ORDER = (chunk***)fsl_mem_arena_get_offset(&_memory_arena_internal, CHUNK_ORDER_OFF);
+    chunk_tab = (chunk**)fsl_mem_arena_get_offset(&_memory_arena_internal, chunk_tab_off);
+    chunk_buf = (chunk*)fsl_mem_arena_get_offset(&_memory_arena_internal, chunk_buf_off);
+    CHUNK_QUEUE[0].queue = (chunk***)fsl_mem_arena_get_offset(&_memory_arena_internal, CHUNK_QUEUE_0_OFF);
+    CHUNK_QUEUE[1].queue = (chunk***)fsl_mem_arena_get_offset(&_memory_arena_internal, CHUNK_QUEUE_1_OFF);
+    CHUNK_QUEUE[2].queue = (chunk***)fsl_mem_arena_get_offset(&_memory_arena_internal, CHUNK_QUEUE_2_OFF);
+    chunk_gizmo_loaded = (v2u32*)fsl_mem_arena_get_offset(&_memory_arena_internal, chunk_gizmo_loaded_off);
+    chunk_gizmo_render = (v2u32*)fsl_mem_arena_get_offset(&_memory_arena_internal, chunk_gizmo_render_off);
 
     if (
             fsl_mem_map((void*)&distance, CHUNK_BUF_VOLUME_MAX * sizeof(u32),

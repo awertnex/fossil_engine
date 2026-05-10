@@ -175,7 +175,7 @@ static u32 fsl_keyboard_tab[FSL_KEYBOARD_KEYS_MAX] =
     GLFW_KEY_MENU
 }; /* fsl_keyboard_tab */
 
-fsl_key_bind fsl_key_bind_init(const u32 key,
+fsl_key_bind fsl_key_bind_init(const enum fsl_keyboard_key key,
         enum fsl_mod_key shift, enum fsl_mod_key ctrl,
         enum fsl_mod_key alt, enum fsl_mod_key super)
 {

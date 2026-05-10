@@ -91,12 +91,19 @@ typedef struct block
     f32 friction;
 } block;
 
+extern fsl_off fbo_off;
+extern fsl_off texture_off;
+extern fsl_off mesh_off;
+extern fsl_off shader_off;
+extern fsl_off block_textures_off;
+extern fsl_off blocks_off;
+
 extern fsl_texture *texture;
 extern fsl_fbo *fbo;
 extern fsl_mesh *mesh;
 extern fsl_shader_program *shader;
-
 extern block *blocks;
+extern fsl_texture *block_textures;
 
 /*! @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */

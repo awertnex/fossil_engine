@@ -23,7 +23,7 @@
 #include "h/dir.h"
 #include "h/limits.h"
 #include "logger/log.h"
-#include "h/memory.h"
+#include "memory/memory.h"
 #include "h/process.h"
 
 #include <errno.h>
@@ -233,22 +233,18 @@ void _fsl_mem_unmap(void **x, u64 size, const str *name, const str *file, u64 li
     *x = NULL;
 }
 
-void _fsl_mem_unmap_arena(fsl_mem_arena *x, const str *name, const str *file, u64 line)
+void _fsl_mem_arena_free(fsl_mem_arena *x, const str *name, const str *file, u64 line)
 {
-    u64 i = 0;
     fsl_mem_arena nomem_arena = {0};
 
     if (!x || !x->buf) return;
 
     LOGTRACEEX(0,
             file, line,
-            MSG_MEM_ARENA_UNMAP(name, x->buf, x->size_buf, x->memb, x->size_i));
+            MSG_MEM_ARENA_FREE(name, x->buf, x->size_buf, x->entry_count, x->entry_cap));
 
-    for (i = 0; i < x->memb; ++i)
-        *x->i[i] = NULL;
-
-    VirtualFree(x->i, 0, MEM_RELEASE);
     VirtualFree(x->buf, 0, MEM_RELEASE);
-
+    VirtualFree(x->freelist, 0, MEM_RELEASE);
+    VirtualFree(x->entry, 0, MEM_RELEASE);
     *x = nomem_arena;
 }

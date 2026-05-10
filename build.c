@@ -50,7 +50,7 @@ static str str_files[][CMD_SIZE] =
     DIR_SRC "input.c",
     DIR_SRC "logger/logger.c",
     DIR_SRC "math.c",
-    DIR_SRC "memory.c",
+    DIR_SRC "memory/memory.c",
     DIR_SRC FSL_FILE_NAME_PLATFORM,
     DIR_SRC "shaders.c",
     DIR_SRC "string.c",

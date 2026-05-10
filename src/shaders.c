@@ -21,14 +21,14 @@
 #include "h/dir.h"
 #include "h/limits.h"
 #include "logger/log.h"
-#include "h/memory.h"
+#include "memory/memory.h"
 #include "h/shaders.h"
 
 #include <stdio.h>
 #include <string.h>
 
 #define fsl_shader_pre_process(path, file_len) \
-    _fsl_shader_pre_process(path, file_len, FSL_INCLUDE_RECURSION_MAX)
+    _shader_pre_process(path, file_len, FSL_INCLUDE_RECURSION_MAX)
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -38,7 +38,7 @@
  *
  *  @return `NULL` on failure and @ref fsl_err is set accordingly.
  */
-static str *_fsl_shader_pre_process(const str *path, u64 *file_len, u64 recursion_limit);
+static str *_shader_pre_process(const str *path, u64 *file_len, u64 recursion_limit);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -50,7 +50,7 @@ static str *_fsl_shader_pre_process(const str *path, u64 *file_len, u64 recursio
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-static u32 _fsl_shader_get_type(const str *file, GLenum *type);
+static u32 _shader_get_type(const str *file, GLenum *type);
 
 u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created)
 {
@@ -58,16 +58,17 @@ u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created)
     str temp[PATH_MAX] = {0};
     char log[FSL_STRING_MAX] = {0};
     GLenum type = 0;
+    fsl_asset_metadata metadata = {0};
 
-    snprintf(temp, PATH_MAX, "%s%s", shader->asset.path, shader->asset.file);
-
+    metadata = fsl_asset_get_metadata(shader->asset);
+    snprintf(temp, PATH_MAX, "%s%s", metadata.path, metadata.file);
     if (fsl_is_file_exists(temp, FALSE) != FSL_ERR_SUCCESS)
     {
         fsl_err = FSL_ERR_SHADER_TYPE_NULL;
         return fsl_err;
     }
 
-    if (_fsl_shader_get_type(shader->asset.file, &type) != FSL_ERR_SUCCESS)
+    if (_shader_get_type(metadata.file, &type) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     shader->source = fsl_shader_pre_process(temp, NULL);
@@ -75,7 +76,7 @@ u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created)
     {
         LOGERROR(FSL_ERR_POINTER_NULL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Shader", shader->asset.file, "`fsl_shader_pre_process()` Failed"));
+                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Shader", metadata.name_id, "`fsl_shader_pre_process()` Failed"));
         if (shader_created)
             *shader_created = FALSE;
         return fsl_err;
@@ -93,21 +94,21 @@ u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created)
         glGetShaderInfoLog(shader->asset.id, FSL_STRING_MAX, NULL, log);
         LOGERROR(FSL_ERR_SHADER_COMPILE_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("Shader '%s':\n%s", shader->asset.file, log));
+                fsl_logger_stringf("Shader '%s':\n%s", metadata.name_id, log));
         return fsl_err;
     }
     else
     {
-        shader->asset.loaded = TRUE;
+        shader->asset.initialized = TRUE;
         LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_SHADER_INIT(shader->asset.file, shader->asset.id));
+                MSG_SHADER_INIT(metadata.name_id, shader->asset.id));
     }
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
 
-static str *_fsl_shader_pre_process(const str *path, u64 *file_len, u64 recursion_limit)
+static str *_shader_pre_process(const str *path, u64 *file_len, u64 recursion_limit)
 {
     static str token[2][256] =
     {
@@ -141,7 +142,7 @@ static str *_fsl_shader_pre_process(const str *path, u64 *file_len, u64 recursio
         return NULL;
 
     if (fsl_mem_alloc((void*)&buf_resolved, buf_len + 1,
-                "_fsl_shader_pre_process().buf_resolved") != FSL_ERR_SUCCESS)
+                "_shader_pre_process().buf_resolved") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     buf_resolved_len = buf_len + 1;
@@ -172,10 +173,10 @@ static str *_fsl_shader_pre_process(const str *path, u64 *file_len, u64 recursio
                 goto cleanup;
             }
 
-            buf_include = _fsl_shader_pre_process(temp, &buf_include_len, recursion_limit - 1);
+            buf_include = _shader_pre_process(temp, &buf_include_len, recursion_limit - 1);
             if (fsl_err != FSL_ERR_SUCCESS ||
                     fsl_mem_realloc((void*)&buf_resolved, buf_resolved_len + buf_include_len + 1,
-                        "_fsl_shader_pre_process().buf_resolved") != FSL_ERR_SUCCESS)
+                        "_shader_pre_process().buf_resolved") != FSL_ERR_SUCCESS)
                 goto cleanup;
             buf_resolved_len += buf_include_len;
 
@@ -186,7 +187,7 @@ static str *_fsl_shader_pre_process(const str *path, u64 *file_len, u64 recursio
                     buf_resolved_len - cursor, "%s", buf_include);
 
             k = i + j;
-            fsl_mem_free((void*)&buf_include, buf_include_len, "_fsl_shader_pre_process().buf_include");
+            fsl_mem_free((void*)&buf_include, buf_include_len, "_shader_pre_process().buf_include");
         }
     }
 
@@ -194,7 +195,7 @@ static str *_fsl_shader_pre_process(const str *path, u64 *file_len, u64 recursio
         snprintf(buf_resolved + cursor,
                 buf_resolved_len - cursor, "%s", buf + k);
 
-    fsl_mem_free((void*)&buf, buf_len, "_fsl_shader_pre_process().buf");
+    fsl_mem_free((void*)&buf, buf_len, "_shader_pre_process().buf");
     if (file_len) *file_len = buf_resolved_len;
 
     fsl_err = FSL_ERR_SUCCESS;
@@ -202,13 +203,13 @@ static str *_fsl_shader_pre_process(const str *path, u64 *file_len, u64 recursio
 
 cleanup:
 
-    fsl_mem_free((void*)&buf_include, buf_include_len, "_fsl_shader_pre_process().buf_include");
-    fsl_mem_free((void*)&buf_resolved, buf_resolved_len, "_fsl_shader_pre_process().buf_resolved");
-    fsl_mem_free((void*)&buf, buf_len, "_fsl_shader_pre_process().buf");
+    fsl_mem_free((void*)&buf_include, buf_include_len, "_shader_pre_process().buf_include");
+    fsl_mem_free((void*)&buf_resolved, buf_resolved_len, "_shader_pre_process().buf_resolved");
+    fsl_mem_free((void*)&buf, buf_len, "_shader_pre_process().buf");
     return NULL;
 }
 
-static u32 _fsl_shader_get_type(const str *file, GLenum *type)
+static u32 _shader_get_type(const str *file, GLenum *type)
 {
     str base_name[NAME_MAX] = {0};
     str *extension = {0};
@@ -259,16 +260,16 @@ void fsl_shader_free(fsl_shader *shader)
 {
     fsl_shader noshader = {0};
 
-    if (!shader || !shader->asset.loaded)
+    if (!shader || !shader->asset.initialized)
         return;
 
-    shader->asset.loaded = FALSE;
+    shader->asset.initialized = FALSE;
     if (shader->source)
         fsl_mem_free((void*)&shader->source, strlen(shader->source),
                 "fsl_shader_free().shader->source");
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_SHADER_UNLOAD(shader->asset.name_id, shader->asset.id));
+            MSG_SHADER_UNLOAD(fsl_mem_handle_get(str, shader->asset.name_id), shader->asset.id));
 
     *shader = noshader;
 }
@@ -312,52 +313,40 @@ u32 fsl_shader_program_init(fsl_shader_program *program)
         glGetProgramInfoLog(program_temp.asset.id, FSL_STRING_MAX, NULL, log);
         LOGERROR(FSL_ERR_SHADER_PROGRAM_LINK_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("Shader Program '%s':\n%s", program_temp.asset.name_id, log));
+                fsl_logger_stringf("Shader Program '%s':\n%s", fsl_mem_handle_get(str, program_temp.asset.name_id), log));
         goto cleanup;
     }
     else
     {
-        program_temp.asset.loaded = TRUE;
+        program_temp.asset.initialized = TRUE;
         LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_SHADER_PROGRAM_LOAD(program_temp.asset.name_id, program_temp.asset.id));
+                MSG_SHADER_PROGRAM_LOAD(fsl_mem_handle_get(str, program_temp.asset.name_id), program_temp.asset.id));
     }
 
-    if (program_temp.vertex.asset.loaded)
+    if (program_temp.vertex.asset.initialized)
     {
-        program_temp.vertex.asset.loaded = FALSE;
+        program_temp.vertex.asset.initialized = FALSE;
         glDeleteShader(program_temp.vertex.asset.id);
     }
-    if (program_temp.geometry.asset.loaded)
+    if (program_temp.geometry.asset.initialized)
     {
-        program_temp.geometry.asset.loaded = FALSE;
+        program_temp.geometry.asset.initialized = FALSE;
         glDeleteShader(program_temp.geometry.asset.id);
     }
-    if (program_temp.fragment.asset.loaded)
+    if (program_temp.fragment.asset.initialized)
     {
-        program_temp.fragment.asset.loaded = FALSE;
+        program_temp.fragment.asset.initialized = FALSE;
         glDeleteShader(program_temp.fragment.asset.id);
     }
 
-    if (program->asset.loaded)
-    {
-        program->asset.loaded = FALSE;
+    if (program->asset.initialized)
         glDeleteProgram(program->asset.id);
-    }
-    if (program->vertex.asset.loaded)
-    {
-        program->vertex.asset.loaded = FALSE;
+    if (program->vertex.asset.initialized)
         glDeleteShader(program->vertex.asset.id);
-    }
-    if (program->geometry.asset.loaded)
-    {
-        program->geometry.asset.loaded = FALSE;
+    if (program->geometry.asset.initialized)
         glDeleteShader(program->geometry.asset.id);
-    }
-    if (program->fragment.asset.loaded)
-    {
-        program->fragment.asset.loaded = FALSE;
+    if (program->fragment.asset.initialized)
         glDeleteShader(program->fragment.asset.id);
-    }
 
     if (program->vertex.source) /* we make this check so we don't pass `NULL` into `strlen` */
         fsl_mem_free((void*)&program->vertex.source, strlen(program->vertex.source), "fsl_shader_program_init().program->vertex.source");
@@ -382,11 +371,11 @@ cleanup:
     if (created_fragment)
         glDeleteShader(program_temp.fragment.asset.id);
 
-    if (program_temp.vertex.asset.loaded)
+    if (program_temp.vertex.asset.initialized)
         fsl_shader_free(&program_temp.vertex);
-    if (program_temp.geometry.asset.loaded)
+    if (program_temp.geometry.asset.initialized)
         fsl_shader_free(&program_temp.geometry);
-    if (program_temp.fragment.asset.loaded)
+    if (program_temp.fragment.asset.initialized)
         fsl_shader_free(&program_temp.fragment);
     return fsl_err;
 }
@@ -395,10 +384,10 @@ void fsl_shader_program_free(fsl_shader_program *program)
 {
     fsl_shader_program noprogram = {0};
 
-    if (!program || !program->asset.loaded)
+    if (!program || !program->asset.initialized)
         return;
 
-    program->asset.loaded = FALSE;
+    program->asset.initialized = FALSE;
     glDeleteProgram(program->asset.id);
 
     fsl_shader_free(&program->vertex);
@@ -406,7 +395,7 @@ void fsl_shader_program_free(fsl_shader_program *program)
     fsl_shader_free(&program->fragment);
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_SHADER_PROGRAM_UNLOAD(program->asset.name_id, program->asset.id));
+            MSG_SHADER_PROGRAM_UNLOAD(fsl_mem_handle_get(str, program->asset.name_id), program->asset.id));
 
     *program = noprogram;
 }

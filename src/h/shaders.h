@@ -31,7 +31,7 @@
  *  - call @ref fsl_shader_pre_process() on `shader->file_name` before compiling shader and compile shader.
  *
  *  @param shader_created destination for whether an OpenGL shader was successfully created,
- *  used by function @ref fsl_shader_program_init() to take care of dangling shader handles.
+ *  used by function @ref fsl_shader_program_init() to take care of dangling shader IDs in VRAM.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -43,7 +43,7 @@ FSLAPI void fsl_shader_free(fsl_shader *shader);
  *
  *  - call @ref fsl_shader_init() on all shaders in `program` if `shader->type` is set.
  *
- *  @remark function @ref fsl_asset_init() must be used to initialize paths
+ *  @remark function @ref fsl_asset_set_metadata() must be used to initialize paths
  *  and file names for each shader within the program before calling this function.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.

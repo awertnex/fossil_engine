@@ -219,6 +219,15 @@ typedef struct chunk_queue
 #define GET_BLOCK_ID(block)     (block & MASK_BLOCK_ID)
 #define SET_BLOCK_ID(block, id) (block = (block & ~MASK_BLOCK_ID) | id)
 
+extern fsl_off CHUNK_ORDER_OFF;
+extern fsl_off chunk_tab_off;
+extern fsl_off chunk_buf_off;
+extern fsl_off CHUNK_QUEUE_0_OFF;
+extern fsl_off CHUNK_QUEUE_1_OFF;
+extern fsl_off CHUNK_QUEUE_2_OFF;
+extern fsl_off chunk_gizmo_loaded_off;
+extern fsl_off chunk_gizmo_render_off;
+
 /*! @brief look-up table to reduce redundant checks of untouched regions of `chunk_buf`.
  *
  *  the sphere of chunks around @ref chunk_tab center are the only chunks that get processed,
@@ -232,6 +241,8 @@ typedef struct chunk_queue
  *  @remark read-only, initialized internally in @ref chunking_init().
  */
 extern u64 CHUNKS_MAX[CHUNK_BUF_RADIUS_MAX + 1];
+
+extern chunk *chunk_buf;
 
 /*! @brief chunk pointer look-up table that points to `chunk_buf` addresses.
  *

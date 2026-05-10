@@ -1,6 +1,6 @@
 /*  @file memory.h
  *
- *  @brief memory management.
+ *  @brief memory management, main memory module header.
  *
  *  Copyright 2026 Lily Awertnex
  *
@@ -20,39 +20,24 @@
 #ifndef FSL_MEMORY_H
 #define FSL_MEMORY_H
 
-#include "common.h"
-#include "limits.h"
-#include "types.h"
+#include "../h/common.h"
+#include "../h/limits.h"
+#include "memory_types.h"
+
+/* ---- section: tools ------------------------------------------------------ */
+
+#define fsl_arr_len(x) \
+    ((u64)sizeof(x) / sizeof(x[0]))
+
+#define fsl_mem_handle_get(type, handle) \
+    ((handle.arena) ? ((type*)((u8*)handle.arena->buf + handle.offset)) : NULL)
+
+#define fsl_mem_handle_get_i(type, handle, index) \
+    ((handle.arena) ? ((type*)((u8*)handle.arena->buf + handle.offset + index * sizeof(type))) : NULL)
 
 /* ---- section: definitions ------------------------------------------------ */
 
-/*! @brief offset into global memory arena @ref fsl_mem_arena_name.
- */
-typedef u64 fsl_off_name;
-
-/*! @brief offset into global memory arena @ref fsl_mem_arena_name_internal.
- */
-typedef u64 fsl_off_name_internal;
-
-/*! @brief offset into global memory arena @ref fsl_mem_arena_file.
- */
-typedef u64 fsl_off_file;
-
-/*! @brief offset into global memory arena @ref fsl_mem_arena_path.
- */
-typedef u64 fsl_off_path;
-
-typedef struct fsl_mem_arena
-{
-    void ***i;      /* members of `buf` */
-    void *buf;      /* raw data */
-    u64 memb;       /* number of `i` members */
-    u64 size_i;     /* total mapped size for `i` in bytes */
-    u64 size_buf;   /* total mapped size for `buf` in bytes */
-    u64 cursor;     /* current usage */
-} fsl_mem_arena;
-
-#define fsl_arr_len(x) ((u64)sizeof(x) / sizeof(x[0]))
+#define FSL_OFFSET_INVALID FSL_U64_MAX
 
 #define fsl_mem_alloc(x, size, name) \
     _fsl_mem_alloc(x, size, name, __BASE_FILE__, __LINE__)
@@ -96,14 +81,14 @@ typedef struct fsl_mem_arena
 #define fsl_mem_unmap(x, size, name) \
     _fsl_mem_unmap(x, size, name, __BASE_FILE__, __LINE__)
 
-#define fsl_mem_map_arena(x, size, name) \
-    _fsl_mem_map_arena(x, size, name, __BASE_FILE__, __LINE__)
+#define fsl_mem_arena_init(x, name) \
+    _fsl_mem_arena_init(x, name, __BASE_FILE__, __LINE__)
 
-#define fsl_mem_push_arena(arena, p, size, name) \
-    _fsl_mem_push_arena(arena, p, size, name, __BASE_FILE__, __LINE__)
+#define fsl_mem_arena_push(arena, handle, size, name) \
+    _fsl_mem_arena_push(arena, handle, size, name, __BASE_FILE__, __LINE__)
 
-#define fsl_mem_unmap_arena(x, name) \
-    _fsl_mem_unmap_arena(x, name, __BASE_FILE__, __LINE__)
+#define fsl_mem_arena_free(x, name) \
+    _fsl_mem_arena_free(x, name, __BASE_FILE__, __LINE__)
 
 /* ---- section: declarations ----------------------------------------------- */
 
@@ -153,7 +138,7 @@ extern fsl_mem_arena mem_arena_path_internal;
 /*! -- INTERNAL USE ONLY --;
  *
  *  @param size size in bytes.
- *  @param name pointer name (for logging).
+ *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -163,7 +148,7 @@ FSLAPI u32 _fsl_mem_alloc(void **x, u64 size, const str *name, const str *file, 
  *
  *  @param memb number of members.
  *  @param size member size in bytes.
- *  @param name pointer name (for logging).
+ *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -173,7 +158,7 @@ FSLAPI u32 _fsl_mem_alloc_memb(void **x, u64 memb, u64 size, const str *name, co
  *
  *  @param memb number of members.
  *  @param size member size in bytes.
- *  @param name pointer name (for logging).
+ *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -184,7 +169,7 @@ FSLAPI u32 _fsl_mem_alloc_buf(fsl_buf *x, u64 memb, u64 size, const str *name, c
  *  @param memb number of members per buffer.
  *  @param size_key `x->key` member size in bytes.
  *  @param size_val `x->val` member size in bytes.
- *  @param name pointer name (for logging).
+ *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -194,7 +179,7 @@ FSLAPI u32 _fsl_mem_alloc_key_val(fsl_key_value *x, u64 memb, u64 size_key, u64 
 /*! -- INTERNAL USE ONLY --;
  *
  *  @param size size in bytes.
- *  @param name pointer name (for logging).
+ *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -204,7 +189,7 @@ FSLAPI u32 _fsl_mem_realloc(void **x, u64 size, const str *name, const str *file
  *
  *  @param memb number of members.
  *  @param size member size in bytes.
- *  @param name pointer name (for logging).
+ *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -213,30 +198,30 @@ FSLAPI u32 _fsl_mem_realloc_memb(void **x, u64 memb, u64 size, const str *name, 
 /*! -- INTERNAL USE ONLY --;
  *
  *  @param size size in bytes.
- *  @param name pointer name (for logging).
+ *  @param name symbol name (for logging).
  */
 FSLAPI void _fsl_mem_free(void **x, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @param name pointer name (for logging).
+ *  @param name symbol name (for logging).
  */
 FSLAPI void _fsl_mem_free_buf(fsl_buf *x, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @param name pointer name (for logging).
+ *  @param name symbol name (for logging).
  */
 FSLAPI void _fsl_mem_free_key_val(fsl_key_value *x, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
  *  @param size size in bytes.
- *  @param name pointer name (for logging).
+ *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 _fsl_mem_clear(void **x, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 _fsl_mem_clear(void *x, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -245,7 +230,7 @@ FSLAPI u32 _fsl_mem_clear(void **x, u64 size, const str *name, const str *file, 
  *  @brief reserve a block of memory for `*x`.
  *
  *  @param size size in bytes.
- *  @param name pointer name (for logging).
+ *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -258,7 +243,7 @@ FSLAPI u32 _fsl_mem_map(void **x, u64 size, const str *name, const str *file, u6
  *  @brief commit a block of mapped memory for `*x`.
  *
  *  @param size size in bytes.
- *  @param name pointer name (for logging).
+ *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -272,7 +257,7 @@ FSLAPI u32 _fsl_mem_commit(void **x, void *offset, u64 size, const str *name, co
  *
  *  @param size_old old size in bytes.
  *  @param size_new new size in bytes.
- *  @param name pointer name (for logging).
+ *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -284,42 +269,47 @@ FSLAPI u32 _fsl_mem_remap(void **x, u64 size_old, u64 size_new, const str *name,
  *
  *  @brief unmap a block of memory `*x`.
  *
- *  @oaram size size in bytes.
- *  @oaram name pointer name (for logging).
+ *  @param size size in bytes.
+ *  @param name symbol name (for logging).
  */
 FSLAPI void _fsl_mem_unmap(void **x, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief reserve a memory arena for `x`.
+ *  @brief allocate and initialize a memory arena.
  *
- *  @param size size in bytes.
- *  @param name pointer name (for logging).
+ *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 _fsl_mem_map_arena(fsl_mem_arena *x, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 _fsl_mem_arena_init(fsl_mem_arena *x, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief push a block of mapped memory for `*p` hosted by available space in `x` and grow arena if needed.
+ *  @brief reserve a block of available memory in `x` and grow arena if needed and
+ *  initialize `handle` metadata.
  *
- *  @oaram size size in bytes.
- *  @oaram name pointer name (for logging).
+ *  handle's metadata:
+ *      - a reference to the arena.
+ *      - the handle's allocated offset from the arena's base pointer.
+ *      - the handle's allocated size.
+ *
+ *  @param size size in bytes.
+ *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 _fsl_mem_push_arena(fsl_mem_arena *x, void **p, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 _fsl_mem_arena_push(fsl_mem_arena *x, fsl_mem_handle *handle, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
  *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
- *  @brief unmap a memory arena `x`.
+ *  @brief free a memory arena.
  *
- *  @oaram name pointer name (for logging).
+ *  @param name symbol name (for logging).
  */
-FSLAPI void _fsl_mem_unmap_arena(fsl_mem_arena *x, const str *name, const str *file, u64 line);
+FSLAPI void _fsl_mem_arena_free(fsl_mem_arena *x, const str *name, const str *file, u64 line);
 
 /*! @brief similar to `printf("%b\n", x)` but only output `bit_count` bits.
  */

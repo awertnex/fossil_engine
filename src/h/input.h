@@ -175,7 +175,7 @@ typedef struct key_bind fsl_key_bind;
  *
  *  @param key a keyboard key or mouse button.
  */
-FSLAPI fsl_key_bind fsl_key_bind_init(const u32 key,
+FSLAPI fsl_key_bind fsl_key_bind_init(enum fsl_keyboard_key key,
         enum fsl_mod_key shift, enum fsl_mod_key ctrl,
         enum fsl_mod_key alt, enum fsl_mod_key super);
 

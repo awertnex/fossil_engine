@@ -32,7 +32,7 @@
 #include "limits.h"
 #include "../logger/log.h"
 #include "math.h"
-#include "memory.h"
+#include "../memory/memory.h"
 #include "process.h"
 #include "shaders.h"
 #include "string.h"
