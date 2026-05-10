@@ -50,6 +50,13 @@ function fsl_grep()
 
 # ---- section: check health ------------------------------------------------- #
 
+logtrace "Searching for \"TODO\" Markers.."
+fsl_grep "TODO:" "$TARGETS"
+ERR=$ERR_SUCCESS
+
+logtrace "Checking for \"TODO\" Marker Errors.."
+fsl_grep "TODO[^:]" "$TARGETS"
+
 logtrace "Checking for Tabs.."
 fsl_grep $'\t' "$TARGETS"
 

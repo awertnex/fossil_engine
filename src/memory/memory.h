@@ -30,72 +30,72 @@
     ((u64)sizeof(x) / sizeof(x[0]))
 
 #define fsl_mem_handle_get(type, handle) \
-    ((handle.arena) ? ((type*)((u8*)handle.arena->buf + handle.offset)) : NULL)
+    (handle.arena ? (type*)((u8*)handle.arena->buf + handle.offset) : NULL)
 
 #define fsl_mem_handle_get_i(type, handle, index) \
-    ((handle.arena) ? ((type*)((u8*)handle.arena->buf + handle.offset + index * sizeof(type))) : NULL)
+    (handle.arena ? (type*)((u8*)handle.arena->buf + handle.offset + index * sizeof(type)) : NULL)
 
 /* ---- section: definitions ------------------------------------------------ */
 
 #define FSL_OFFSET_INVALID FSL_U64_MAX
 
 #define fsl_mem_alloc(x, size, name) \
-    _fsl_mem_alloc(x, size, name, __BASE_FILE__, __LINE__)
+    fsl_mem_alloc_internal(x, size, name, __BASE_FILE__, __LINE__)
 
 #define fsl_mem_alloc_memb(x, memb, size, name) \
-    _fsl_mem_alloc_memb(x, memb, size, name, __BASE_FILE__, __LINE__)
+    fsl_mem_alloc_memb_internal(x, memb, size, name, __BASE_FILE__, __LINE__)
 
 #define fsl_mem_alloc_buf(x, memb, size, name) \
-    _fsl_mem_alloc_buf(x, memb, size, name, __BASE_FILE__, __LINE__)
+    fsl_mem_alloc_buf_internal(x, memb, size, name, __BASE_FILE__, __LINE__)
 
 #define fsl_mem_alloc_key_val(x, memb, size_key, size_val, name) \
-    _fsl_mem_alloc_key_val(x, memb, size_key, size_val, name, __BASE_FILE__, __LINE__)
+    fsl_mem_alloc_key_val_internal(x, memb, size_key, size_val, name, __BASE_FILE__, __LINE__)
 
 #define fsl_mem_realloc(x, size, name) \
-    _fsl_mem_realloc(x, size, name, __BASE_FILE__, __LINE__)
+    fsl_mem_realloc_internal(x, size, name, __BASE_FILE__, __LINE__)
 
 #define fsl_mem_realloc_memb(x, memb, size, name) \
-    _fsl_mem_realloc_memb(x, memb, size, name, __BASE_FILE__, __LINE__)
+    fsl_mem_realloc_memb_internal(x, memb, size, name, __BASE_FILE__, __LINE__)
 
 #define fsl_mem_free(x, size, name) \
-    _fsl_mem_free(x, size, name, __BASE_FILE__, __LINE__)
+    fsl_mem_free_internal(x, size, name, __BASE_FILE__, __LINE__)
 
 #define fsl_mem_free_buf(x, name) \
-    _fsl_mem_free_buf(x, name, __BASE_FILE__, __LINE__)
+    fsl_mem_free_buf_internal(x, name, __BASE_FILE__, __LINE__)
 
 #define fsl_mem_free_key_val(x, name) \
-    _fsl_mem_free_key_val(x, name, __BASE_FILE__, __LINE__)
+    fsl_mem_free_key_val_internal(x, name, __BASE_FILE__, __LINE__)
 
 #define fsl_mem_clear(x, size, name) \
-    _fsl_mem_clear(x, size, name, __BASE_FILE__, __LINE__)
+    fsl_mem_clear_internal(x, size, name, __BASE_FILE__, __LINE__)
 
 #define fsl_mem_map(x, size, name) \
-    _fsl_mem_map(x, size, name, __BASE_FILE__, __LINE__)
+    fsl_mem_map_internal(x, size, name, __BASE_FILE__, __LINE__)
 
 #define fsl_mem_commit(x, offset, size, name) \
-    _fsl_mem_commit(x, offset, size, name, __BASE_FILE__, __LINE__)
+    fsl_mem_commit_internal(x, offset, size, name, __BASE_FILE__, __LINE__)
 
 #define fsl_mem_remap(x, size_old, size_new, name) \
-    _fsl_mem_remap(x, size_old, size_new, name, __BASE_FILE__, __LINE__)
+    fsl_mem_remap_internal(x, size_old, size_new, name, __BASE_FILE__, __LINE__)
 
 #define fsl_mem_unmap(x, size, name) \
-    _fsl_mem_unmap(x, size, name, __BASE_FILE__, __LINE__)
+    fsl_mem_unmap_internal(x, size, name, __BASE_FILE__, __LINE__)
 
 #define fsl_mem_arena_init(x, name) \
-    _fsl_mem_arena_init(x, name, __BASE_FILE__, __LINE__)
+    fsl_mem_arena_init_internal(x, name, __BASE_FILE__, __LINE__)
 
 #define fsl_mem_arena_push(arena, handle, size, name) \
-    _fsl_mem_arena_push(arena, handle, size, name, __BASE_FILE__, __LINE__)
+    fsl_mem_arena_push_internal(arena, handle, size, name, __BASE_FILE__, __LINE__)
 
 #define fsl_mem_arena_free(x, name) \
-    _fsl_mem_arena_free(x, name, __BASE_FILE__, __LINE__)
+    fsl_mem_arena_free_internal(x, name, __BASE_FILE__, __LINE__)
 
 /* ---- section: declarations ----------------------------------------------- */
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief global memory arena, used to manage all heap memory inside and optionally
- *  outside the engine.
+ *  @brief engine's global memory arena, used to manage all heap memory inside
+ *  and optionally outside the engine.
  *
  *  initialized in @ref fsl_engine_init().
  */
@@ -103,7 +103,7 @@ extern fsl_mem_arena mem_arena_internal;
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief global @ref fsl_asset.name memory arena, for storing runtime asset names.
+ *  @brief engine's global @ref fsl_asset.name memory arena, for storing runtime asset names.
  *
  *  initialized in @ref fsl_engine_init().
  */
@@ -111,7 +111,7 @@ extern fsl_mem_arena mem_arena_name_internal;
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief global @ref fsl_asset.name_id memory arena, for storing runtime asset internal names.
+ *  @brief engine's global @ref fsl_asset.name_id memory arena, for storing runtime asset internal names.
  *
  *  initialized in @ref fsl_engine_init().
  */
@@ -119,7 +119,7 @@ extern fsl_mem_arena mem_arena_name_id_internal;
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief global @ref fsl_asset.file memory arena, for storing runtime asset file names.
+ *  @brief engine's global @ref fsl_asset.file memory arena, for storing runtime asset file names.
  *
  *  initialized in @ref fsl_engine_init().
  */
@@ -127,7 +127,7 @@ extern fsl_mem_arena mem_arena_file_internal;
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief global @ref fsl_asset.path memory arena, for storing runtime asset parent directories.
+ *  @brief engine's global @ref fsl_asset.path memory arena, for storing runtime asset parent directories.
  *
  *  initialized in @ref fsl_engine_init().
  */
@@ -135,97 +135,84 @@ extern fsl_mem_arena mem_arena_path_internal;
 
 /* ---- section: signatures ------------------------------------------------- */
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @param size size, in bytes.
+/*! @param size size, in bytes.
  *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 _fsl_mem_alloc(void **x, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 fsl_mem_alloc_internal(void **x, u64 size,
+        const str *name, const str *src_file, u64 src_line);
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @param memb number of members.
+/*! @param memb number of members.
  *  @param size member size, in bytes.
  *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 _fsl_mem_alloc_memb(void **x, u64 memb, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 fsl_mem_alloc_memb_internal(void **x, u64 memb, u64 size,
+        const str *name, const str *src_file, u64 src_line);
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @param memb number of members.
+/*! @param memb number of members.
  *  @param size member size, in bytes.
  *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 _fsl_mem_alloc_buf(fsl_buf *x, u64 memb, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 fsl_mem_alloc_buf_internal(fsl_buf *x, u64 memb, u64 size,
+        const str *name, const str *src_file, u64 src_line);
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @param memb number of members per buffer.
+/*! @param memb number of members per buffer.
  *  @param size_key `x->key` member size, in bytes.
  *  @param size_val `x->val` member size, in bytes.
  *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 _fsl_mem_alloc_key_val(fsl_key_value *x, u64 memb, u64 size_key, u64 size_val,
-        const str *name, const str *file, u64 line);
+FSLAPI u32 fsl_mem_alloc_key_val_internal(fsl_key_value *x, u64 memb, u64 size_key, u64 size_val,
+        const str *name, const str *src_file, u64 src_line);
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @param size size, in bytes.
+/*! @param size size, in bytes.
  *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 _fsl_mem_realloc(void **x, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 fsl_mem_realloc_internal(void **x, u64 size,
+        const str *name, const str *src_file, u64 src_line);
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @param memb number of members.
+/*! @param memb number of members.
  *  @param size member size, in bytes.
  *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 _fsl_mem_realloc_memb(void **x, u64 memb, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 fsl_mem_realloc_memb_internal(void **x, u64 memb, u64 size,
+        const str *name, const str *src_file, u64 src_line);
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @param size size, in bytes.
+/*! @param size size, in bytes.
  *  @param name symbol name (for logging).
  */
-FSLAPI void _fsl_mem_free(void **x, u64 size, const str *name, const str *file, u64 line);
+FSLAPI void fsl_mem_free_internal(void **x, u64 size,
+        const str *name, const str *src_file, u64 src_line);
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @param name symbol name (for logging).
+/*! @param name symbol name (for logging).
  */
-FSLAPI void _fsl_mem_free_buf(fsl_buf *x, const str *name, const str *file, u64 line);
+FSLAPI void fsl_mem_free_buf_internal(fsl_buf *x, const str *name,
+        const str *src_file, u64 src_line);
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @param name symbol name (for logging).
+/*! @param name symbol name (for logging).
  */
-FSLAPI void _fsl_mem_free_key_val(fsl_key_value *x, const str *name, const str *file, u64 line);
+FSLAPI void fsl_mem_free_key_val_internal(fsl_key_value *x,
+        const str *name, const str *src_file, u64 src_line);
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @param size size, in bytes.
+/*! @param size size, in bytes.
  *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 _fsl_mem_clear(void *x, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 fsl_mem_clear_internal(void *x, u64 size,
+        const str *name, const str *src_file, u64 src_line);
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
+/*! -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
  *  @brief reserve a block of memory for `*x`.
  *
@@ -234,11 +221,10 @@ FSLAPI u32 _fsl_mem_clear(void *x, u64 size, const str *name, const str *file, u
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 _fsl_mem_map(void **x, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 fsl_mem_map_internal(void **x, u64 size,
+        const str *name, const str *src_file, u64 src_line);
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
+/*! -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
  *  @brief commit a block of mapped memory for `*x`.
  *
@@ -247,11 +233,10 @@ FSLAPI u32 _fsl_mem_map(void **x, u64 size, const str *name, const str *file, u6
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 _fsl_mem_commit(void **x, void *offset, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 fsl_mem_commit_internal(void **x, void *offset, u64 size,
+        const str *name, const str *src_file, u64 src_line);
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
+/*! -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
  *  @brief remap a block of memory for `*x`.
  *
@@ -261,32 +246,29 @@ FSLAPI u32 _fsl_mem_commit(void **x, void *offset, u64 size, const str *name, co
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 _fsl_mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const str *file, u64 line);
+FSLAPI u32 fsl_mem_remap_internal(void **x, u64 size_old, u64 size_new,
+        const str *name, const str *src_file, u64 src_line);
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
+/*! -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
  *  @brief unmap a block of memory `*x`.
  *
  *  @param size size, in bytes.
  *  @param name symbol name (for logging).
  */
-FSLAPI void _fsl_mem_unmap(void **x, u64 size, const str *name, const str *file, u64 line);
+FSLAPI void fsl_mem_unmap_internal(void **x, u64 size,
+        const str *name, const str *src_file, u64 src_line);
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @brief allocate and initialize a memory arena.
+/*! @brief allocate and initialize a memory arena.
  *
  *  @param name symbol name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 _fsl_mem_arena_init(fsl_mem_arena *x, const str *name, const str *file, u64 line);
+FSLAPI u32 fsl_mem_arena_init_internal(fsl_mem_arena *x,
+        const str *name, const str *src_file, u64 src_line);
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @brief reserve a block of available memory in `x` and grow arena if needed and
+/*! @brief reserve a block of available memory in `x` and grow arena if needed and
  *  initialize `handle` metadata.
  *
  *  handle's metadata:
@@ -299,17 +281,17 @@ FSLAPI u32 _fsl_mem_arena_init(fsl_mem_arena *x, const str *name, const str *fil
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 _fsl_mem_arena_push(fsl_mem_arena *x, fsl_mem_handle *handle, u64 size, const str *name, const str *file, u64 line);
+FSLAPI u32 fsl_mem_arena_push_internal(fsl_mem_arena *x, fsl_mem_handle *handle, u64 size,
+        const str *name, const str *src_file, u64 src_line);
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
+/*! -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
  *  @brief free a memory arena.
  *
  *  @param name symbol name (for logging).
  */
-FSLAPI void _fsl_mem_arena_free(fsl_mem_arena *x, const str *name, const str *file, u64 line);
+FSLAPI void fsl_mem_arena_free_internal(fsl_mem_arena *x,
+        const str *name, const str *src_file, u64 src_line);
 
 /*! @brief similar to `printf("%b\n", x)` but only output `bit_count` bits.
  */

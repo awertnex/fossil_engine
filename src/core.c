@@ -97,7 +97,7 @@ u32 fsl_engine_init(int argc, char **argv, const str *title,
 {
     b8 is_release = flags & FSL_FLAG_RELEASE_BUILD;
 
-    fsl_core_internal.flag.active = 1;
+    fsl_core_internal.flag.active = TRUE;
 
     if (!fsl_init_time)
     {
@@ -271,11 +271,11 @@ void fsl_engine_close(void)
     fsl_mem_arena_free(&mem_arena_file_internal, "fsl_engine_close().mem_arena_file_internal");
     fsl_mem_arena_free(&mem_arena_name_id_internal, "fsl_engine_close().mem_arena_name_id_internal");
     fsl_mem_arena_free(&mem_arena_name_internal, "fsl_engine_close().mem_arena_name_internal");
-    fsl_mem_arena_free(&mem_arena_internal, "fsl_engine_close().mem_arena_internal");
     fsl_mem_free((void*)&render->screen_buf, render->size.x * render->size.y * FSL_COLOR_CHANNELS_RGB,
             "fsl_engine_close().render->screen_buf");
     fsl_mem_free((void*)&FSL_DIR_PROC_ROOT, PATH_MAX, "fsl_engine_close().FSL_DIR_PROC_ROOT");
     fsl_logger_close();
+    fsl_mem_arena_free(&mem_arena_internal, "fsl_engine_close().mem_arena_internal");
     fsl_err = fsl_err_temp;
 }
 

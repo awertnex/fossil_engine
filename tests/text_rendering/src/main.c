@@ -15,13 +15,6 @@ static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset)
     scrool = fsl_clamp_i32(scrool + (i32)yoffset * 4, 0, logger_core.cursor);
 }
 
-int main2(int argc, char **argv)
-{
-    fsl_engine_init(argc, argv, NULL, 1920, 1080, 0);
-    fsl_engine_close();
-    return 0;
-}
-
 int main(int argc, char **argv)
 {
     if (fsl_engine_init(argc, argv, NULL, 1920, 1080, 0) != FSL_ERR_SUCCESS)

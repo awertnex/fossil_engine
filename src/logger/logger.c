@@ -44,7 +44,7 @@ u32 fsl_log_level_max = FSL_LOG_LEVEL_TRACE;
  *
  *  @remark initialized in @ref fsl_logger_init().
  */
-static str LOG_FILE_NAME[FSL_LOG_LEVEL_COUNT][NAME_MAX] = {0};
+static str LOG_FILE_NAME[FSL_LOG_LEVEL_COUNT][FSL_ID_CAP] = {0};
 
 static u32 logger_color_tab[FSL_LOG_LEVEL_COUNT + 1] =
 {
@@ -86,7 +86,7 @@ static str *esc_code_color[FSL_LOG_LEVEL_COUNT] =
 /*! -- INTERNAL USE ONLY --;
  */
 static void logger_get_log_str_internal(const str *str_in, str *str_out, u32 flags, b8 verbose,
-        u8 level, u32 error_code, const str *file, u64 line);
+        u8 level, u32 error_code, const str *src_file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -95,7 +95,7 @@ static void logger_get_log_str_internal(const str *str_in, str *str_out, u32 fla
  *
  *  @return non-zero on failure, error codes can be found in @ref diagnostics.h.
  */
-static u32 logger_is_dir_exists_internal(const str *name);
+static u32 logger_is_dir_exists_internal(const fsl_fs_path *path);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -104,7 +104,7 @@ static u32 logger_is_dir_exists_internal(const str *name);
  *
  *  @return non-zero on failure, error codes can be found in @ref diagnostics.h.
  */
-static u32 logger_append_file_internal(const str *name, u64 size, void *buf);
+static u32 logger_append_file_internal(const fsl_fs_path *path, u64 size, void *buf);
 
 /* ---- section: implementation --------------------------------------------- */
 
@@ -115,13 +115,13 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags)
 
     snprintf(logger_core.log_dir, PATH_MAX, "%s", FSL_DIR_NAME_LOGS);
 
-    snprintf(LOG_FILE_NAME[FSL_LOG_LEVEL_FATAL], NAME_MAX, "%s", FSL_FILE_NAME_LOG_ERROR);
-    snprintf(LOG_FILE_NAME[FSL_LOG_LEVEL_ERROR], NAME_MAX, "%s", FSL_FILE_NAME_LOG_ERROR);
-    snprintf(LOG_FILE_NAME[FSL_LOG_LEVEL_WARNING], NAME_MAX, "%s", FSL_FILE_NAME_LOG_ERROR);
-    snprintf(LOG_FILE_NAME[FSL_LOG_LEVEL_SUCCESS], NAME_MAX, "%s", FSL_FILE_NAME_LOG_INFO);
-    snprintf(LOG_FILE_NAME[FSL_LOG_LEVEL_INFO], NAME_MAX, "%s", FSL_FILE_NAME_LOG_INFO);
-    snprintf(LOG_FILE_NAME[FSL_LOG_LEVEL_DEBUG], NAME_MAX, "%s", FSL_FILE_NAME_LOG_EXTRA);
-    snprintf(LOG_FILE_NAME[FSL_LOG_LEVEL_TRACE], NAME_MAX, "%s", FSL_FILE_NAME_LOG_EXTRA);
+    snprintf(LOG_FILE_NAME[FSL_LOG_LEVEL_FATAL], FSL_ID_CAP, "%s", FSL_FILE_NAME_LOG_ERROR);
+    snprintf(LOG_FILE_NAME[FSL_LOG_LEVEL_ERROR], FSL_ID_CAP, "%s", FSL_FILE_NAME_LOG_ERROR);
+    snprintf(LOG_FILE_NAME[FSL_LOG_LEVEL_WARNING], FSL_ID_CAP, "%s", FSL_FILE_NAME_LOG_ERROR);
+    snprintf(LOG_FILE_NAME[FSL_LOG_LEVEL_SUCCESS], FSL_ID_CAP, "%s", FSL_FILE_NAME_LOG_INFO);
+    snprintf(LOG_FILE_NAME[FSL_LOG_LEVEL_INFO], FSL_ID_CAP, "%s", FSL_FILE_NAME_LOG_INFO);
+    snprintf(LOG_FILE_NAME[FSL_LOG_LEVEL_DEBUG], FSL_ID_CAP, "%s", FSL_FILE_NAME_LOG_EXTRA);
+    snprintf(LOG_FILE_NAME[FSL_LOG_LEVEL_TRACE], FSL_ID_CAP, "%s", FSL_FILE_NAME_LOG_EXTRA);
 
     if (flags & FSL_FLAG_RELEASE_BUILD)
         fsl_log_level_max = FSL_LOG_LEVEL_INFO;
@@ -164,12 +164,13 @@ void fsl_logger_close(void)
     logger_core.flag.gui_open = FALSE;
 }
 
-void _fsl_log_output(u32 error_code, u32 flags, const str *file, u64 line,
+#include <assert.h>
+void fsl_log_output_internal(u32 error_code, u32 flags, const str *src_file, u64 line,
         u8 level, const str *message)
 {
     str str_in[FSL_STRING_MAX] = {0};
     str str_out[FSL_LOGGER_STRING_MAX] = {0};
-    str temp[PATH_MAX] = {0};
+    str path_temp[PATH_MAX] = {0};
     b8 verbose =    !(flags & FSL_FLAG_LOG_NO_VERBOSE);
     b8 cmd =        (flags & FSL_FLAG_LOG_CMD);
     b8 write_file = !(flags & FSL_FLAG_LOG_NO_FILE);
@@ -179,16 +180,16 @@ void _fsl_log_output(u32 error_code, u32 flags, const str *file, u64 line,
 
     snprintf(str_in, FSL_STRING_MAX, "%s", message);
     logger_get_log_str_internal(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_TERM_COLOR,
-            verbose, level, error_code, file, line);
+            verbose, level, error_code, src_file, line);
     fprintf(stderr, "%s", str_out);
 
     if (logger_core.flag.gui_open)
     {
         if (cmd)
-            logger_get_log_str_internal(str_in, str_out, 0, FALSE, level, 0, file, line);
+            logger_get_log_str_internal(str_in, str_out, 0, FALSE, level, 0, src_file, line);
         else
             logger_get_log_str_internal(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_DATE_TIME,
-                    verbose, level, error_code, file, line);
+                    verbose, level, error_code, src_file, line);
 
         logger_gui_entry = fsl_mem_handle_get_i(fsl_log_entry, logger_core.buf, logger_core.cursor);
         snprintf(logger_gui_entry->message, strnlen(str_out, FSL_LOGGER_STRING_MAX), "%s", str_out);
@@ -199,14 +200,14 @@ void _fsl_log_output(u32 error_code, u32 flags, const str *file, u64 line,
     if (write_file && logger_is_dir_exists_internal(FSL_DIR_NAME_LOGS) == FSL_ERR_SUCCESS)
     {
         logger_get_log_str_internal(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_FULL_TIME,
-                verbose, level, error_code, file, line);
-        snprintf(temp, PATH_MAX, "%s%s", FSL_DIR_NAME_LOGS, LOG_FILE_NAME[level]);
-        logger_append_file_internal(temp, strnlen(str_out, FSL_LOGGER_STRING_MAX) * sizeof(str), str_out);
+                verbose, level, error_code, src_file, line);
+        snprintf(path_temp, PATH_MAX, "%s%s", FSL_DIR_NAME_LOGS, LOG_FILE_NAME[level]);
+        logger_append_file_internal(path_temp, strnlen(str_out, FSL_LOGGER_STRING_MAX) * sizeof(str), str_out);
     }
 }
 
 static void logger_get_log_str_internal(const str *str_in, str *str_out, u32 flags, b8 verbose,
-        u8 level, u32 error_code, const str *file, u64 line)
+        u8 level, u32 error_code, const str *src_file, u64 line)
 {
     str str_time[FSL_TIME_STRING_MAX] = {0};
     str str_timestamp[FSL_TIME_STRING_MAX] = {0};
@@ -244,7 +245,7 @@ static void logger_get_log_str_internal(const str *str_in, str *str_out, u32 fla
         snprintf(str_tag, 32, "[%s] ", log_tag[level]);
 
     if (verbose)
-        snprintf(str_file, FSL_STRING_MAX, "[%s:%"PRIu64"] ", file, line);
+        snprintf(str_file, FSL_STRING_MAX, "[%s:%"PRIu64"] ", src_file, line);
 
     cursor = snprintf(str_out, FSL_LOGGER_STRING_MAX, "%s%s%s%s%s%s",
             str_color, str_time_full, str_tag, str_file, str_in, str_nocolor);
@@ -271,10 +272,10 @@ str *fsl_logger_stringf(const str *format, ...)
     return string;
 }
 
-u32 logger_is_dir_exists_internal(const str *name)
+u32 logger_is_dir_exists_internal(const fsl_fs_path *path)
 {
     struct stat stats;
-    if (stat(name, &stats) == 0)
+    if (stat(path, &stats) == 0)
     {
         if (S_ISDIR(stats.st_mode))
             return FSL_ERR_SUCCESS;
@@ -283,10 +284,10 @@ u32 logger_is_dir_exists_internal(const str *name)
     return FSL_ERR_DIR_NOT_FOUND;
 }
 
-u32 logger_append_file_internal(const str *name, u64 size, void *buf)
+u32 logger_append_file_internal(const fsl_fs_path *path, u64 size, void *buf)
 {
     FILE *file = NULL;
-    if ((file = fopen(name, "ab")) == NULL)
+    if ((file = fopen(path, "ab")) == NULL)
         return FSL_ERR_FILE_OPEN_FAIL;
     fwrite(buf, 1, size, file);
     fclose(file);

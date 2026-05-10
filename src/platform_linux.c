@@ -129,7 +129,8 @@ u32 fsl_exec(fsl_buf *cmd, str *cmd_name)
     return fsl_err;
 }
 
-u32 _fsl_mem_map(void **x, u64 size, const str *name, const str *file, u64 line)
+u32 fsl_mem_map_internal(void **x, u64 size,
+        const str *name, const str *file, u64 line)
 {
     void *temp = NULL;
 
@@ -175,7 +176,8 @@ u32 _fsl_mem_map(void **x, u64 size, const str *name, const str *file, u64 line)
     return fsl_err;
 }
 
-u32 _fsl_mem_commit(void **x, void *offset, u64 size, const str *name, const str *file, u64 line)
+u32 fsl_mem_commit_internal(void **x, void *offset, u64 size,
+        const str *name, const str *file, u64 line)
 {
     if (!x || !*x || !offset)
     {
@@ -201,7 +203,8 @@ u32 _fsl_mem_commit(void **x, void *offset, u64 size, const str *name, const str
     return fsl_err;
 }
 
-u32 _fsl_mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const str *file, u64 line)
+u32 fsl_mem_remap_internal(void **x, u64 size_old, u64 size_new,
+        const str *name, const str *file, u64 line)
 {
     void *temp = NULL;
 
@@ -232,7 +235,8 @@ u32 _fsl_mem_remap(void **x, u64 size_old, u64 size_new, const str *name, const 
     return fsl_err;
 }
 
-void _fsl_mem_unmap(void **x, u64 size, const str *name, const str *file, u64 line)
+void fsl_mem_unmap_internal(void **x, u64 size,
+        const str *name, const str *file, u64 line)
 {
     if (!x || !*x) return;
 
@@ -244,7 +248,8 @@ void _fsl_mem_unmap(void **x, u64 size, const str *name, const str *file, u64 li
     *x = NULL;
 }
 
-void _fsl_mem_arena_free(fsl_mem_arena *x, const str *name, const str *file, u64 line)
+void fsl_mem_arena_free_internal(fsl_mem_arena *x,
+        const str *name, const str *file, u64 line)
 {
     fsl_mem_arena nomem_arena = {0};
 

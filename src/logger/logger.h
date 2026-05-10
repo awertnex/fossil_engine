@@ -87,81 +87,81 @@ typedef struct fsl_logger_core
 /* ---- internal-use macros ------------------------------------------------- */
 
 #define LOGFATAL(err, flags, message) \
-    _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_FATAL, message);
+    fsl_log_output_internal(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_FATAL, message);
 
 #define LOGERROR(err, flags, message) \
     do { \
         if (fsl_log_level_max >= FSL_LOG_LEVEL_ERROR) \
-            _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_ERROR, message); \
+            fsl_log_output_internal(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_ERROR, message); \
     } while (0)
 
 #define LOGWARNING(err, flags, message) \
     do { \
         if (fsl_log_level_max >= FSL_LOG_LEVEL_WARNING) \
-            _fsl_log_output(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_WARNING, message); \
+            fsl_log_output_internal(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_WARNING, message); \
     } while (0)
 
 #define LOGSUCCESS(flags, message) \
     do { \
         if (fsl_log_level_max >= FSL_LOG_LEVEL_SUCCESS) \
-            _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_SUCCESS, message); \
+            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_SUCCESS, message); \
     } while (0)
 
 #define LOGINFO(flags, message) \
     do { \
         if (fsl_log_level_max >= FSL_LOG_LEVEL_INFO) \
-            _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_INFO, message); \
+            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_INFO, message); \
     } while (0)
 
 #define LOGDEBUG(flags, message) \
     do { \
         if (fsl_log_level_max >= FSL_LOG_LEVEL_DEBUG) \
-            _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_DEBUG, message); \
+            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_DEBUG, message); \
     } while (0)
 
 #define LOGTRACE(flags, message) \
     do { \
         if (fsl_log_level_max >= FSL_LOG_LEVEL_TRACE) \
-            _fsl_log_output(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_TRACE, message); \
+            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_TRACE, message); \
     } while (0)
 
 #define LOGFATALEX(err, flags, file, line, message) \
-            _fsl_log_output(err, flags, file, line, FSL_LOG_LEVEL_FATAL, message)
+            fsl_log_output_internal(err, flags, file, line, FSL_LOG_LEVEL_FATAL, message)
 
 #define LOGERROREX(err, flags, file, line, message) \
     do { \
         if (fsl_log_level_max >= FSL_LOG_LEVEL_ERROR) \
-            _fsl_log_output(err, flags, file, line, FSL_LOG_LEVEL_ERROR, message); \
+            fsl_log_output_internal(err, flags, file, line, FSL_LOG_LEVEL_ERROR, message); \
     } while (0)
 
 #define LOGWARNINGEX(err, flags, file, line, message) \
     do { \
         if (fsl_log_level_max >= FSL_LOG_LEVEL_WARNING) \
-            _fsl_log_output(err, flags, file, line, FSL_LOG_LEVEL_WARNING, message); \
+            fsl_log_output_internal(err, flags, file, line, FSL_LOG_LEVEL_WARNING, message); \
     } while (0)
 
 #define LOGSUCCESSEX(flags, file, line, message) \
     do { \
         if (fsl_log_level_max >= FSL_LOG_LEVEL_SUCCESS) \
-            _fsl_log_output(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_SUCCESS, message); \
+            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_SUCCESS, message); \
     } while (0)
 
 #define LOGINFOEX(flags, file, line, message) \
     do { \
         if (fsl_log_level_max >= FSL_LOG_LEVEL_INFO) \
-            _fsl_log_output(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_INFO, message); \
+            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_INFO, message); \
     } while (0)
 
 #define LOGDEBUGEX(flags, file, line, message) \
     do { \
         if (fsl_log_level_max >= FSL_LOG_LEVEL_DEBUG) \
-            _fsl_log_output(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_DEBUG, message); \
+            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_DEBUG, message); \
     } while (0)
 
 #define LOGTRACEEX(flags, file, line, message) \
     do { \
         if (fsl_log_level_max >= FSL_LOG_LEVEL_TRACE) \
-            _fsl_log_output(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_TRACE, message); \
+            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_TRACE, message); \
     } while (0)
 
 /*! @brief logger core, all logger data.
@@ -200,13 +200,12 @@ FSLAPI void fsl_logger_close(void);
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @param flags enum: @ref fsl_log_output_flag.
- *  @param _log_dir directory to write log files into, if `NULL`, logs won't be written to disk.
+ *  @param flags enum @ref fsl_log_output_flag.
  *
  *  @param message @ref fsl_logger_stringf() can be used to create a temporary
  *  static formatted string for the log message.
  */
-FSLAPI void _fsl_log_output(u32 error_code, u32 flags, const str *file, u64 line,
+FSLAPI void fsl_log_output_internal(u32 error_code, u32 flags, const str *src_file, u64 src_line,
         u8 level, const str *message);
 
 /*! @brief like @ref fsl_stringf(), but used for the logger, since @ref fsl_stringf()
