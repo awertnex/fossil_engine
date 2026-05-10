@@ -3,7 +3,7 @@
 #include "src/h/dir.h"
 #include "src/logger/log.h"
 #include "src/h/math.h"
-#include "src/h/memory.h"
+#include "src/memory/memory.h"
 #include "src/h/string.h"
 
 #include "h/common.h"
@@ -58,8 +58,8 @@ u32 game_init(void)
     LOGTRACE(FSL_FLAG_LOG_CMD,
             fsl_logger_stringf("Main Directory Created '%s'\n", FSL_DIR_PROC_ROOT));
 
-    if (fsl_mem_map_arena(&_memory_arena_internal, 2,
-                "game_init()._memory_arena_internal") != FSL_ERR_SUCCESS)
+    if (fsl_mem_arena_init(&memory_arena_internal,
+                "game_init().memory_arena_internal") != FSL_ERR_SUCCESS)
         return *GAME_ERR;
 
     *GAME_ERR = FSL_ERR_SUCCESS;

@@ -675,8 +675,7 @@ void fsl_ui_free(void)
 fsl_panel_nine_slice fsl_get_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
         i32 size_x, i32 size_y, i32 slice_size)
 {
-    fsl_panel_nine_slice _panel = {0};
-    u32 i = 0;
+    fsl_panel_nine_slice panel = {0};
     f32 _pos_x = (f32)pos_x;
     f32 _pos_y = (f32)pos_y;
     f32 _size_x = (f32)size_x;
@@ -688,8 +687,8 @@ fsl_panel_nine_slice fsl_get_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos
     v2f32 _tex_coords_pos[3] = {0};
     v2f32 _tex_coords_size[3] = {0};
 
-    _texture_scale.x = 1.0f / (f32)texture->size.x;
-    _texture_scale.y = 1.0f / (f32)texture->size.y;
+    _texture_scale.x = 1.0f / texture->size.x;
+    _texture_scale.y = 1.0f / texture->size.y;
 
     _pos[0].x = _pos_x;
     _pos[0].y = _pos_y;
@@ -719,17 +718,86 @@ fsl_panel_nine_slice fsl_get_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos
     _tex_coords_size[2].x = _texture_scale.x * _slice_size;
     _tex_coords_size[2].y = _texture_scale.y * _slice_size;
 
-    for (; i < 9; ++i)
-    {
-        _panel.slice[i].pos.x = _pos[i % 3].x;
-        _panel.slice[i].pos.y = _pos[i / 3].y;
-        _panel.slice[i].size.x = _size[i % 3].x;
-        _panel.slice[i].size.y = _size[i / 3].y;
-        _panel.slice[i].tex_coords_pos.x = _tex_coords_pos[i % 3].x;
-        _panel.slice[i].tex_coords_pos.y = _tex_coords_pos[i / 3].y;
-        _panel.slice[i].tex_coords_size.x = _tex_coords_size[i % 3].x;
-        _panel.slice[i].tex_coords_size.y = _tex_coords_size[i / 3].y;
-    }
+    panel.slice[0].pos.x = _pos[0].x;
+    panel.slice[0].pos.y = _pos[0].y;
+    panel.slice[0].size.x = _size[0].x;
+    panel.slice[0].size.y = _size[0].y;
+    panel.slice[0].tex_coords_pos.x = _tex_coords_pos[0].x;
+    panel.slice[0].tex_coords_pos.y = _tex_coords_pos[0].y;
+    panel.slice[0].tex_coords_size.x = _tex_coords_size[0].x;
+    panel.slice[0].tex_coords_size.y = _tex_coords_size[0].y;
 
-    return _panel;
+    panel.slice[1].pos.x = _pos[1].x;
+    panel.slice[1].pos.y = _pos[0].y;
+    panel.slice[1].size.x = _size[1].x;
+    panel.slice[1].size.y = _size[0].y;
+    panel.slice[1].tex_coords_pos.x = _tex_coords_pos[1].x;
+    panel.slice[1].tex_coords_pos.y = _tex_coords_pos[0].y;
+    panel.slice[1].tex_coords_size.x = _tex_coords_size[1].x;
+    panel.slice[1].tex_coords_size.y = _tex_coords_size[0].y;
+
+    panel.slice[2].pos.x = _pos[2].x;
+    panel.slice[2].pos.y = _pos[0].y;
+    panel.slice[2].size.x = _size[2].x;
+    panel.slice[2].size.y = _size[0].y;
+    panel.slice[2].tex_coords_pos.x = _tex_coords_pos[2].x;
+    panel.slice[2].tex_coords_pos.y = _tex_coords_pos[0].y;
+    panel.slice[2].tex_coords_size.x = _tex_coords_size[2].x;
+    panel.slice[2].tex_coords_size.y = _tex_coords_size[0].y;
+
+    panel.slice[3].pos.x = _pos[0].x;
+    panel.slice[3].pos.y = _pos[1].y;
+    panel.slice[3].size.x = _size[0].x;
+    panel.slice[3].size.y = _size[1].y;
+    panel.slice[3].tex_coords_pos.x = _tex_coords_pos[0].x;
+    panel.slice[3].tex_coords_pos.y = _tex_coords_pos[1].y;
+    panel.slice[3].tex_coords_size.x = _tex_coords_size[0].x;
+    panel.slice[3].tex_coords_size.y = _tex_coords_size[1].y;
+
+    panel.slice[4].pos.x = _pos[1].x;
+    panel.slice[4].pos.y = _pos[1].y;
+    panel.slice[4].size.x = _size[1].x;
+    panel.slice[4].size.y = _size[1].y;
+    panel.slice[4].tex_coords_pos.x = _tex_coords_pos[1].x;
+    panel.slice[4].tex_coords_pos.y = _tex_coords_pos[1].y;
+    panel.slice[4].tex_coords_size.x = _tex_coords_size[1].x;
+    panel.slice[4].tex_coords_size.y = _tex_coords_size[1].y;
+
+    panel.slice[5].pos.x = _pos[2].x;
+    panel.slice[5].pos.y = _pos[1].y;
+    panel.slice[5].size.x = _size[2].x;
+    panel.slice[5].size.y = _size[1].y;
+    panel.slice[5].tex_coords_pos.x = _tex_coords_pos[2].x;
+    panel.slice[5].tex_coords_pos.y = _tex_coords_pos[1].y;
+    panel.slice[5].tex_coords_size.x = _tex_coords_size[2].x;
+    panel.slice[5].tex_coords_size.y = _tex_coords_size[1].y;
+
+    panel.slice[6].pos.x = _pos[0].x;
+    panel.slice[6].pos.y = _pos[2].y;
+    panel.slice[6].size.x = _size[0].x;
+    panel.slice[6].size.y = _size[2].y;
+    panel.slice[6].tex_coords_pos.x = _tex_coords_pos[0].x;
+    panel.slice[6].tex_coords_pos.y = _tex_coords_pos[2].y;
+    panel.slice[6].tex_coords_size.x = _tex_coords_size[0].x;
+    panel.slice[6].tex_coords_size.y = _tex_coords_size[2].y;
+
+    panel.slice[7].pos.x = _pos[1].x;
+    panel.slice[7].pos.y = _pos[2].y;
+    panel.slice[7].size.x = _size[1].x;
+    panel.slice[7].size.y = _size[2].y;
+    panel.slice[7].tex_coords_pos.x = _tex_coords_pos[1].x;
+    panel.slice[7].tex_coords_pos.y = _tex_coords_pos[2].y;
+    panel.slice[7].tex_coords_size.x = _tex_coords_size[1].x;
+    panel.slice[7].tex_coords_size.y = _tex_coords_size[2].y;
+
+    panel.slice[8].pos.x = _pos[2].x;
+    panel.slice[8].pos.y = _pos[2].y;
+    panel.slice[8].size.x = _size[2].x;
+    panel.slice[8].size.y = _size[2].y;
+    panel.slice[8].tex_coords_pos.x = _tex_coords_pos[2].x;
+    panel.slice[8].tex_coords_pos.y = _tex_coords_pos[2].y;
+    panel.slice[8].tex_coords_size.x = _tex_coords_size[2].x;
+    panel.slice[8].tex_coords_size.y = _tex_coords_size[2].y;
+
+    return panel;
 }

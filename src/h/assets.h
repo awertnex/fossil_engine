@@ -31,9 +31,23 @@
 
 #include <deps/stb_truetype.h>
 
+/*! @brief an asset's display name.
+ */
 typedef str fsl_name;
+
+/*! @brief an asset's stable, unique name for asset-search, and logging.
+ *  naming convention: "[a-z_][a-z0-9_]*", or:
+ *      - no leading digits.
+ *      - only lowercase characters, digits 0 -> 9 and underscores.
+ */
 typedef str fsl_name_id;
+
+/*! @brief an asset's file base name.
+*/
 typedef str fsl_file;
+
+/*! @brief an asset file's parent directory path.
+ */
 typedef str fsl_path;
 
 typedef struct asset            fsl_asset;
@@ -234,7 +248,7 @@ FSLAPI fsl_asset_metadata fsl_asset_get_metadata(const fsl_asset asset);
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_asset_set_metadata(fsl_asset *asset, enum fsl_asset_type type,
-        const str *name, const str *name_id, const str *file, const str *path);
+        const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path);
 
 /*! @brief initialize engine's internal assets.
  *
@@ -276,7 +290,7 @@ FSLAPI void fsl_fbo_free(fsl_fbo *fbo);
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_texture_init(fsl_texture *texture,
-        const str *name, const str *name_id, const str *file, const str *path,
+        const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path,
         const GLint format, GLint filter, int channels, b8 grayscale, b8 bindless);
 
 FSLAPI void fsl_texture_free(fsl_texture *texture);
@@ -296,7 +310,7 @@ FSLAPI void fsl_texture_free(fsl_texture *texture);
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_mesh_generate(fsl_mesh *mesh,
-        const str *name, const str *name_id, const str *file, const str *path,
+        const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path,
         void (*attrib)(void), GLenum usage,
         GLuint vbo_len, GLuint ebo_len, GLfloat *vbo_data, GLuint *ebo_data);
 
@@ -320,7 +334,7 @@ FSLAPI void fsl_mesh_free(fsl_mesh *mesh);
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_font_init(fsl_font *font, u32 resolution,
-        const str *name, const str *name_id, const str *file, const str *path);
+        const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path);
 
 FSLAPI void fsl_font_free(fsl_font *font);
 

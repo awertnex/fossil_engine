@@ -3,7 +3,7 @@
 
 #include "diagnostics.h"
 
-#include "src/h/memory.h"
+#include "src/memory/memory.h"
 #include "src/h/types.h"
 
 #define GAME_VERSION_STABLE "-stable"
@@ -162,7 +162,7 @@ enum player_death_reason_index
  *
  *  initialized once in @ref game_init().
  */
-extern fsl_mem_arena _memory_arena_internal;
+extern fsl_mem_arena memory_arena_internal;
 
 /*! @brief look-up table for @ref str_death_<x> buffer sizes.
  *

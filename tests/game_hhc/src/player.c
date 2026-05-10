@@ -117,7 +117,8 @@ void player_update(player *p, f64 dt)
 void player_collision_update(player *p, f64 dt)
 {
     chunk *ch = NULL;
-    u32 *block = NULL;
+    block *block_cache = NULL;
+    u32 *_block = NULL;
     f32 speed;
     v3f32 displacement = {0};
     f32 time = 0.0f;
@@ -182,8 +183,8 @@ void player_collision_update(player *p, f64 dt)
                 {
                     ch = get_chunk_resolved(settings.chunk_tab_center, x, y, z);
                     if (!ch || !(ch->flag & FLAG_CHUNK_GENERATED)) continue;
-                    block = get_block_resolved(ch, x, y, z);
-                    if (!block || !*block) continue;
+                    _block = get_block_resolved(ch, x, y, z);
+                    if (!_block || !*_block) continue;
 
                     block_box.pos.x = (f64)((i64)ch->pos.x * CHUNK_DIAMETER + fsl_mod_i32(x, CHUNK_DIAMETER));
                     block_box.pos.y = (f64)((i64)ch->pos.y * CHUNK_DIAMETER + fsl_mod_i32(y, CHUNK_DIAMETER));
@@ -225,7 +226,8 @@ void player_collision_update(player *p, f64 dt)
                                 p->flag &= ~FLAG_PLAYER_FLYING;
                             p->flag |= FLAG_PLAYER_CAN_JUMP;
 
-                            friction = blocks[*block & MASK_BLOCK_ID].friction;
+                            block_cache = fsl_mem_handle_get_i(block, blocks, *_block & MASK_BLOCK_ID);
+                            friction = block_cache->friction;
                             p->friction.x = friction;
                             p->friction.y = friction;
                         }
@@ -549,7 +551,7 @@ void player_target_update(player *p)
     v3i32 step = {1, 1, 1};
     b8 hit = FALSE;
     chunk *ch = NULL;
-    u32 *block = NULL;
+    u32 *_block = NULL;
     i32 x = 0;
     i32 y = 0;
     i32 z = 0;
@@ -625,8 +627,8 @@ void player_target_update(player *p)
         z = block_pos.z - p->ch.z * CHUNK_DIAMETER;
         ch = get_chunk_resolved(settings.chunk_tab_center, x, y, z);
         if (!ch || !(ch->flag & FLAG_CHUNK_GENERATED)) continue;
-        block = get_block_resolved(ch, x, y, z);
-        if (!block || !*block) continue;
+        _block = get_block_resolved(ch, x, y, z);
+        if (!_block || !*_block) continue;
         hit = TRUE;
         break;
     }

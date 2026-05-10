@@ -91,19 +91,11 @@ typedef struct block
     f32 friction;
 } block;
 
-extern fsl_off fbo_off;
-extern fsl_off texture_off;
-extern fsl_off mesh_off;
-extern fsl_off shader_off;
-extern fsl_off block_textures_off;
-extern fsl_off blocks_off;
-
-extern fsl_texture *texture;
-extern fsl_fbo *fbo;
-extern fsl_mesh *mesh;
-extern fsl_shader_program *shader;
-extern block *blocks;
-extern fsl_texture *block_textures;
+extern fsl_mem_handle texture;
+extern fsl_mem_handle fbo;
+extern fsl_mem_handle mesh;
+extern fsl_mem_handle shader;
+extern fsl_mem_handle blocks;
 
 /*! @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
@@ -115,7 +107,7 @@ void assets_free(void);
  *
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
-u32 block_texture_init(u32 index, const str *name, const str *name_id, const str *file);
+u32 block_texture_init(u32 index, const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file);
 
 /*! @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */

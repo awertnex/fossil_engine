@@ -195,6 +195,7 @@ u32 build_nine_slice(int argc, char **argv)
     cmd_push(&cmd, "-Wall");
     cmd_push(&cmd, "-Wextra");
     cmd_push(&cmd, "-Wformat-truncation=0");
+    cmd_push(&cmd, "-Wpedantic");
     cmd_push(&cmd, "-ggdb");
     cmd_push(&cmd, DIR_SRC_NINE_SLICE "main.c");
     cmd_push(&cmd, "-I" DIR_ROOT);

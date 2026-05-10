@@ -33,7 +33,7 @@
     (handle.arena ? (type*)((u8*)handle.arena->buf + handle.offset) : NULL)
 
 #define fsl_mem_handle_get_i(type, handle, index) \
-    (handle.arena ? (type*)((u8*)handle.arena->buf + handle.offset + index * sizeof(type)) : NULL)
+    (handle.arena ? (type*)((u8*)handle.arena->buf + handle.offset + (index) * sizeof(type)) : NULL)
 
 /* ---- section: definitions ------------------------------------------------ */
 

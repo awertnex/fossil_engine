@@ -141,16 +141,22 @@ void input_init(void)
 
 void input_update(player *p)
 {
-    u32 i;
-    f32 px = 0.0f, nx = 0.0f,
-        py = 0.0f, ny = 0.0f,
-        pz = 0.0f, nz = 0.0f,
-        spch = sin(p->pitch * FSL_DEG2RAD),
-        cpch = cos(p->pitch * FSL_DEG2RAD),
-        syaw = sin(p->yaw * FSL_DEG2RAD),
-        cyaw = cos(p->yaw * FSL_DEG2RAD);
+    chunk **chunk_tab_p = fsl_mem_handle_get(chunk*, chunk_tab);
+    u32 i = 0;
+    f32 px = 0.0f;
+    f32 nx = 0.0f;
+    f32 py = 0.0f;
+    f32 ny = 0.0f;
+    f32 pz = 0.0f;
+    f32 nz = 0.0f;
+    f32 spch = sin(p->pitch * FSL_DEG2RAD);
+    f32 cpch = cos(p->pitch * FSL_DEG2RAD);
+    f32 syaw = sin(p->yaw * FSL_DEG2RAD);
+    f32 cyaw = cos(p->yaw * FSL_DEG2RAD);
 
-    p->input = (v3f32){0};
+    p->input.x = 0.0f;
+    p->input.y = 0.0f;
+    p->input.z = 0.0f;
 
     if (!(p->flag & FLAG_PLAYER_DEAD))
     {
@@ -232,21 +238,21 @@ void input_update(player *p)
         if (
                 !core.flag.chunk_buf_dirty &&
                 core.flag.parse_target &&
-                chunk_tab[chunk_tab_index])
+                chunk_tab_p[chunk_tab_index])
         {
             if (fsl_is_mouse_hold(bind_attack_or_destroy))
             {
                 block_break(chunk_tab_index,
-                        (i64)p->target.x - chunk_tab[chunk_tab_index]->pos.x * CHUNK_DIAMETER,
-                        (i64)p->target.y - chunk_tab[chunk_tab_index]->pos.y * CHUNK_DIAMETER,
-                        (i64)p->target.z - chunk_tab[chunk_tab_index]->pos.z * CHUNK_DIAMETER);
+                        (i64)p->target.x - chunk_tab_p[chunk_tab_index]->pos.x * CHUNK_DIAMETER,
+                        (i64)p->target.y - chunk_tab_p[chunk_tab_index]->pos.y * CHUNK_DIAMETER,
+                        (i64)p->target.z - chunk_tab_p[chunk_tab_index]->pos.z * CHUNK_DIAMETER);
             }
             if (fsl_is_mouse_press(bind_build_or_use))
             {
                 block_place(chunk_tab_index,
-                        (i64)p->target.x - chunk_tab[chunk_tab_index]->pos.x * CHUNK_DIAMETER,
-                        (i64)p->target.y - chunk_tab[chunk_tab_index]->pos.y * CHUNK_DIAMETER,
-                        (i64)p->target.z - chunk_tab[chunk_tab_index]->pos.z * CHUNK_DIAMETER,
+                        (i64)p->target.x - chunk_tab_p[chunk_tab_index]->pos.x * CHUNK_DIAMETER,
+                        (i64)p->target.y - chunk_tab_p[chunk_tab_index]->pos.y * CHUNK_DIAMETER,
+                        (i64)p->target.z - chunk_tab_p[chunk_tab_index]->pos.z * CHUNK_DIAMETER,
                         p->target_normal, p->hotbar_slots[p->hotbar_slot_selected]);
             }
 
@@ -386,7 +392,7 @@ void input_update(player *p)
 
     if (fsl_is_key_press(bind_reload_shaders))
     {
-        if (fsl_shader_program_init(&shader[SHADER_SKYBOX]) == FSL_ERR_SUCCESS)
+        if (fsl_shader_program_init(fsl_mem_handle_get_i(fsl_shader_program, shader, SHADER_SKYBOX)) == FSL_ERR_SUCCESS)
             LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     fsl_logger_stringf("%s\n", "Shaders Reloaded!"));
     }

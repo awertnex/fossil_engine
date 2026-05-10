@@ -213,7 +213,7 @@ typedef struct chunk_queue
     u32 cursor;         /* parse position */
     u32 rate_chunk;     /* number of chunks to process per frame */
     u32 rate_block;     /* number of blocks to process per chunk per frame */
-    chunk ***queue;
+    fsl_mem_handle queue;
 } chunk_queue;
 
 #define GET_BLOCK_ID(block)     (block & MASK_BLOCK_ID)
@@ -242,13 +242,11 @@ extern fsl_off chunk_gizmo_render_off;
  */
 extern u64 CHUNKS_MAX[CHUNK_BUF_RADIUS_MAX + 1];
 
-extern chunk *chunk_buf;
-
 /*! @brief chunk pointer look-up table that points to `chunk_buf` addresses.
  *
  *  `chunk_buf` addresses ordered by their positions in 3d space relative to player position.
  */
-extern chunk **chunk_tab;
+extern fsl_mem_handle chunk_tab;
 
 /*! @brief player relative @ref chunk_tab access.
  *
@@ -262,7 +260,7 @@ extern u32 chunk_tab_index;
  *
  *  @remark read-only, initialized internally in @ref chunking_init().
  */
-extern chunk ***CHUNK_ORDER;
+extern fsl_mem_handle CHUNK_ORDER;
 
 /*! @brief queues of chunks to be processed.
  *
@@ -276,7 +274,7 @@ extern chunk_queue CHUNK_QUEUE[CHUNK_QUEUES_MAX];
  *
  *  format: 0xxxyyzz00, 0xrrggbbaa.
  */
-extern v2u32 *chunk_gizmo_loaded;
+extern fsl_mem_handle chunk_gizmo_loaded;
 
 /*! @brief chunk gizmo render buffer data for transparent chunk colors.
  *
@@ -284,7 +282,7 @@ extern v2u32 *chunk_gizmo_loaded;
  *
  *  format: 0xxxyyzz00, 0xrrggbbaa.
  */
-extern v2u32 *chunk_gizmo_render;
+extern fsl_mem_handle chunk_gizmo_render;
 
 extern GLuint chunk_gizmo_loaded_vao;
 extern GLuint chunk_gizmo_loaded_vbo;

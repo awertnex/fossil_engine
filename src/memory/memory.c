@@ -32,6 +32,12 @@
 #include <stdarg.h>
 #include <inttypes.h>
 
+struct mem_arena_handle
+{
+    fsl_off offset;         /* handle's data offset from pointer base */
+    u64 size;               /* handle's allocated size */
+}; /* mem_arena_handle */
+
 fsl_mem_arena mem_arena_internal = {0};
 fsl_mem_arena mem_arena_name_internal = {0};
 fsl_mem_arena mem_arena_name_id_internal = {0};
@@ -407,6 +413,7 @@ u32 fsl_mem_arena_push_internal(fsl_mem_arena *x, fsl_mem_handle *handle, u64 si
 {
     u64 i = 0;
     u64 buf_cap_old = 0;
+    u64 buf_cap_new = 0;
     fsl_off entry_pos = 0;
     u64 entry_cap = 0;
 
@@ -460,21 +467,22 @@ u32 fsl_mem_arena_push_internal(fsl_mem_arena *x, fsl_mem_handle *handle, u64 si
 
     /* expand arena if needed */
 
-    if (size > x->buf_cap - x->buf_cursor)
+    if (size > buf_cap_old - x->buf_cursor)
     {
         buf_cap_old = x->buf_cap;
-        x->buf_cap = (x->buf_cap + size) * 2;
-        if (fsl_mem_remap_internal((void*)&x->buf, buf_cap_old, x->buf_cap, name, src_file, src_line) != FSL_ERR_SUCCESS)
+        buf_cap_new = x->buf_cap * 2 + size;
+        if (fsl_mem_remap_internal((void*)&x->buf, buf_cap_old, buf_cap_new, name, src_file, src_line) != FSL_ERR_SUCCESS)
         {
             LOGERROREX(fsl_err, 0,
                     src_file, src_line,
-                    MSG_MEM_ARENA_PUSH_REASON_FAIL(name, (u8*)x->buf + x->buf_cursor, x->buf_cap, "`fsl_mem_remap_internal()` Failed"));
+                    MSG_MEM_ARENA_PUSH_REASON_FAIL(name, (u8*)x->buf + x->buf_cursor, buf_cap_new, "`fsl_mem_remap_internal()` Failed"));
             return fsl_err;
         }
+        x->buf_cap = buf_cap_new;
     }
 
-    entry_cap = fsl_arr_len(x->entry);
-    while (x->entry[i].offset != FSL_OFFSET_INVALID && i < entry_cap)
+    entry_cap = x->entry_cap / sizeof(fsl_mem_arena_handle);
+    while (i < entry_cap && x->entry[i].offset != FSL_OFFSET_INVALID)
     {++i;}
     entry_pos = i;
 
@@ -490,7 +498,7 @@ u32 fsl_mem_arena_push_internal(fsl_mem_arena *x, fsl_mem_handle *handle, u64 si
             return fsl_err;
         }
         x->entry_cap *= 2;
-        entry_cap = fsl_arr_len(x->entry);
+        entry_cap = x->entry_cap / sizeof(fsl_mem_arena_handle);
         for (; i < entry_cap; ++i)
             x->entry[i].offset = FSL_OFFSET_INVALID;
     }

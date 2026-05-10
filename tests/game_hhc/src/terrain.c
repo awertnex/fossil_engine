@@ -1,5 +1,5 @@
 #include "src/h/math.h"
-#include "src/h/memory.h"
+#include "src/memory/memory.h"
 
 #include "h/chunking.h"
 #include "h/dir.h"
@@ -27,8 +27,7 @@ u32 rand_init(void)
 
     if (fsl_is_file_exists(file_name, FALSE) == FSL_ERR_SUCCESS)
     {
-        file_len = fsl_get_file_contents(file_name,
-                (void*)&file_contents, sizeof(f32), FALSE);
+        file_len = fsl_get_file_contents(file_name, (void*)&file_contents, FALSE);
         if (*GAME_ERR != FSL_ERR_SUCCESS || file_contents == NULL)
             goto cleanup;
 
@@ -44,7 +43,7 @@ u32 rand_init(void)
         for (i = 0; i < RAND_TAB_VOLUME; ++i)
             RAND_TAB[i] = fsl_rand_f32(i);
 
-        if (fsl_write_file(file_name, sizeof(i32), RAND_TAB_VOLUME,
+        if (fsl_write_file(file_name, RAND_TAB_VOLUME * sizeof(f32),
                     RAND_TAB, TRUE, FALSE) != FSL_ERR_SUCCESS)
             goto cleanup;
     }

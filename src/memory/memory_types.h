@@ -40,12 +40,6 @@ struct mem_handle
     u64 size;               /* handle's allocated size */
 }; /* mem_handle */
 
-struct mem_arena_handle
-{
-    fsl_off offset;         /* handle's data offset from pointer base */
-    u64 size;               /* handle's allocated size */
-}; /* mem_arena_handle */
-
 struct mem_arena
 {
     fsl_mem_arena_handle *entry; /* allocated zones in `buf` */

@@ -166,7 +166,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
     snprintf(string[0], PATH_MAX, GAME_DIR_NAME_WORLDS"%s/"GAME_FILE_NAME_WORLD_SEED, world_name);
     if (fsl_is_file_exists(string[0], FALSE) == FSL_ERR_SUCCESS)
     {
-        file_len = fsl_get_file_contents(string[0], (void*)&file_contents, 1, TRUE);
+        file_len = fsl_get_file_contents(string[0], (void*)&file_contents, TRUE);
         if (*GAME_ERR != FSL_ERR_SUCCESS || !file_contents)
             return *GAME_ERR;
         seed = (u64)strtoul(file_contents, NULL, 10);
@@ -178,7 +178,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
             seed = fsl_rand_u64(fsl_get_time_raw_nsec());
 
         fsl_convert_u64_to_str(string[1], NAME_MAX, seed);
-        if (fsl_write_file(string[0], 1, strlen(string[1]),
+        if (fsl_write_file(string[0], strlen(string[1]),
                     &string[1], TRUE, TRUE) != FSL_ERR_SUCCESS)
             return *GAME_ERR;
     }

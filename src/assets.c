@@ -70,7 +70,7 @@ fsl_asset_metadata fsl_asset_get_metadata(const fsl_asset asset)
 }
 
 u32 fsl_asset_set_metadata(fsl_asset *asset, enum fsl_asset_type type,
-        const str *name, const str *name_id, const str *file, const str *path)
+        const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path)
 {
     if (asset == NULL)
     {
@@ -86,7 +86,7 @@ u32 fsl_asset_set_metadata(fsl_asset *asset, enum fsl_asset_type type,
         if (fsl_mem_arena_push(&mem_arena_name_internal, &asset->name, FSL_ID_CAP,
                     "fsl_asset_set_metadata().asset->name") != FSL_ERR_SUCCESS)
             goto cleanup;
-        snprintf(fsl_mem_handle_get(str, asset->name), FSL_ID_CAP, "%s", name);
+        snprintf(fsl_mem_handle_get(fsl_name, asset->name), FSL_ID_CAP, "%s", name);
     }
 
     if (name_id)
@@ -94,7 +94,7 @@ u32 fsl_asset_set_metadata(fsl_asset *asset, enum fsl_asset_type type,
         if (fsl_mem_arena_push(&mem_arena_name_id_internal, &asset->name_id, FSL_ID_CAP,
                     "fsl_asset_set_metadata().asset->name_id") != FSL_ERR_SUCCESS)
             goto cleanup;
-        snprintf(fsl_mem_handle_get(str, asset->name_id), FSL_ID_CAP, "%s", name_id);
+        snprintf(fsl_mem_handle_get(fsl_name_id, asset->name_id), FSL_ID_CAP, "%s", name_id);
     }
 
     if (file)
@@ -102,7 +102,7 @@ u32 fsl_asset_set_metadata(fsl_asset *asset, enum fsl_asset_type type,
         if (fsl_mem_arena_push(&mem_arena_file_internal, &asset->file, FSL_ID_CAP,
                     "fsl_asset_set_metadata().asset->file") != FSL_ERR_SUCCESS)
             goto cleanup;
-        snprintf(fsl_mem_handle_get(str, asset->file), FSL_ID_CAP, "%s", file);
+        snprintf(fsl_mem_handle_get(fsl_file, asset->file), FSL_ID_CAP, "%s", file);
     }
 
     if (path)
@@ -110,9 +110,9 @@ u32 fsl_asset_set_metadata(fsl_asset *asset, enum fsl_asset_type type,
         if (fsl_mem_arena_push(&mem_arena_path_internal, &asset->path, FSL_ID_CAP,
                     "fsl_asset_set_metadata().asset->path") != FSL_ERR_SUCCESS)
             goto cleanup;
-        snprintf(fsl_mem_handle_get(str, asset->path), FSL_ID_CAP, "%s", path);
-        fsl_check_slash(fsl_mem_handle_get(str, asset->path));
-        fsl_posix_slash(fsl_mem_handle_get(str, asset->path));
+        snprintf(fsl_mem_handle_get(fsl_path, asset->path), FSL_ID_CAP, "%s", path);
+        fsl_check_slash(fsl_mem_handle_get(fsl_path, asset->path));
+        fsl_posix_slash(fsl_mem_handle_get(fsl_path, asset->path));
     }
 
     fsl_err = FSL_ERR_SUCCESS;
@@ -513,7 +513,7 @@ void fsl_fbo_free(fsl_fbo *fbo)
 /* ---- section: texture ---------------------------------------------------- */
 
 u32 fsl_texture_init(fsl_texture *texture,
-        const str *name, const str *name_id, const str *file, const str *path,
+        const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path,
         const GLint format, GLint filter, int channels, b8 grayscale, b8 bindless)
 {
     str path_temp[PATH_MAX] = {0};
@@ -523,8 +523,8 @@ u32 fsl_texture_init(fsl_texture *texture,
         goto cleanup;
 
     snprintf(path_temp, PATH_MAX, "%s%s",
-            fsl_mem_handle_get(str, texture->asset.path),
-            fsl_mem_handle_get(str, texture->asset.file));
+            fsl_mem_handle_get(fsl_path, texture->asset.path),
+            fsl_mem_handle_get(fsl_file, texture->asset.file));
     if (fsl_is_file_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -609,7 +609,7 @@ void fsl_texture_free(fsl_texture *texture)
 /* ---- section: mesh ------------------------------------------------------- */
 
 u32 fsl_mesh_generate(fsl_mesh *mesh,
-        const str *name, const str *name_id, const str *file, const str *path,
+        const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path,
         void (*attrib)(void), GLenum usage,
         GLuint vbo_len, GLuint ebo_len, GLfloat *vbo_data, GLuint *ebo_data)
 {
@@ -691,7 +691,7 @@ void fsl_mesh_free(fsl_mesh *mesh)
 /* ---- section: font ------------------------------------------------------- */
 
 u32 fsl_font_init(fsl_font *font, u32 resolution,
-        const str *name, const str *name_id, const str *file, const str *path)
+        const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path)
 {
     u32 i = 0;
     str path_temp[PATH_MAX] = {0};
