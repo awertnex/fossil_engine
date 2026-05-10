@@ -1,6 +1,6 @@
 /*  @file log.h
  *
- *  @brief main logger module header, log messages and other definitions related to logging.
+ *  @brief main logger module header; log messages and other definitions related to logging.
  *
  *  Copyright 2026 Lily Awertnex
  *

@@ -10,6 +10,7 @@
 ## v0.7.0-dev (current)
 
 #### changes
+- (2026 05 10): changed memory arena internals from pointers to offsets.
 - (2026 05 06): removed functions `fsl_mem_request_page_size()` and
                 `_fsl_mem_request_page_size()`, no longer needed
 - (2026 05 06): added guards around log macros to check for log level, the old

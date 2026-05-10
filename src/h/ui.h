@@ -52,7 +52,7 @@ typedef struct fsl_panel_nine_slice
 
 /*! @brief start text rendering batch.
  *
- *  @param size font height in pixels.
+ *  @param size font height, in pixels.
  *
  *  @param length pre-allocate buffer for string (if 0, @ref FSL_STRING_MAX is allocated).
  *  @param clear clear the framebuffer before rendering.
@@ -90,11 +90,11 @@ FSLAPI void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 
 
 /*! @brief render text to framebuffer.
  *
- *  @param shadow_color shadow color if `shadow` is `TRUE`, can be empty,
+ *  @param shadow_color shadow color (if `shadow` is `TRUE`) (optional),
  *  format: 0xrrggbbaa.
  *
  *  @remark the macros @ref fsl_color_hex_to_v4(), @ref fsl_color_v4_to_hex() can be
- *  used to convert from u32 hex color to v4f32 color and vice-versa.
+ *  used to convert from `u32` hex color to `v4f32` color and vice-versa.
  *
  *  @remark can be called multiple times within a text rendering batch.
  */
@@ -102,15 +102,13 @@ FSLAPI void fsl_text_render(b8 shadow, u32 shadow_color);
 
 /*! @brief get total string height of current rendering batch.
  *
- *  @remark call before @ref fsl_text_render.
+ *  @remark call before @ref fsl_text_render().
  */
 FSLAPI f32 fsl_get_text_height(void);
 
 /*! @brief initialize ui.
  *
- *  @param multisample turn on multisampling.
- *
- *  @remark must be called after @ref fsl_init().
+ *  @remark must be called after @ref fsl_engine_init().
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -121,10 +119,9 @@ FSLAPI u32 fsl_ui_init(void);
  *  @param nine_slice use a nine_slice shader
  *  (ui elements with separate edge and corner slices of a texture).
  *
- *  @param clear clear the framebuffer before rendering.
+ *  @param clear clear the currently bound framebuffer before rendering.
  *
- *  @remark disables @ref GL_DEPTH_TEST, @ref fsl_ui_stop() re-enables it.
- *  @remark can re-allocate `fbo` with `multisample` setting used in @ref fsl_ui_init().
+ *  @remark disable @ref GL_DEPTH_TEST, @ref fsl_ui_stop() re-enables it.
  */
 FSLAPI void fsl_ui_start(b8 nine_slice, b8 clear);
 
@@ -139,7 +136,7 @@ FSLAPI void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, 
 FSLAPI void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
         i32 size_x, i32 size_y, i32 slice_size, u32 tint);
 
-/*! @remark enables @ref GL_DEPTH_TEST.
+/*! @remark enable @ref GL_DEPTH_TEST.
  */
 FSLAPI void fsl_ui_stop(void);
 
@@ -147,7 +144,7 @@ FSLAPI void fsl_ui_free(void);
 
 /*! @brief make a 9-slice panel.
  */
-FSLAPI fsl_panel_nine_slice fsl_get_nine_slice(v2i32 texture_size, i32 pos_x, i32 pos_y,
+FSLAPI fsl_panel_nine_slice fsl_get_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
         i32 size_x, i32 size_y, i32 slice_size);
 
 #endif /* FSL_UI_H */

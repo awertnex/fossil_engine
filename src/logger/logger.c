@@ -85,7 +85,7 @@ static str *esc_code_color[FSL_LOG_LEVEL_COUNT] =
 
 /*! -- INTERNAL USE ONLY --;
  */
-static void _get_log_str(const str *str_in, str *str_out, u32 flags, b8 verbose,
+static void logger_get_log_str_internal(const str *str_in, str *str_out, u32 flags, b8 verbose,
         u8 level, u32 error_code, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
@@ -104,7 +104,7 @@ static u32 logger_is_dir_exists_internal(const str *name);
  *
  *  @return non-zero on failure, error codes can be found in @ref diagnostics.h.
  */
-static u32 logger_append_file_internal(const str *name, u64 size, u64 length, void *buf);
+static u32 logger_append_file_internal(const str *name, u64 size, void *buf);
 
 /* ---- section: implementation --------------------------------------------- */
 
@@ -145,7 +145,7 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags)
                 "fsl_logger_init().logger_core.buf") != FSL_ERR_SUCCESS)
     {
         fsl_err = FSL_ERR_LOGGER_INIT_FAIL;
-        _get_log_str(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_TERM_COLOR,
+        logger_get_log_str_internal(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_TERM_COLOR,
                 TRUE, FSL_LOG_LEVEL_FATAL, FSL_ERR_LOGGER_INIT_FAIL, __BASE_FILE__, __LINE__);
         fprintf(stderr, "%s", str_out);
         return fsl_err;
@@ -178,16 +178,16 @@ void _fsl_log_output(u32 error_code, u32 flags, const str *file, u64 line,
     fsl_err = error_code;
 
     snprintf(str_in, FSL_STRING_MAX, "%s", message);
-    _get_log_str(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_TERM_COLOR,
+    logger_get_log_str_internal(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_TERM_COLOR,
             verbose, level, error_code, file, line);
     fprintf(stderr, "%s", str_out);
 
     if (logger_core.flag.gui_open)
     {
         if (cmd)
-            _get_log_str(str_in, str_out, 0, FALSE, level, 0, file, line);
+            logger_get_log_str_internal(str_in, str_out, 0, FALSE, level, 0, file, line);
         else
-            _get_log_str(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_DATE_TIME,
+            logger_get_log_str_internal(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_DATE_TIME,
                     verbose, level, error_code, file, line);
 
         logger_gui_entry = fsl_mem_handle_get_i(fsl_log_entry, logger_core.buf, logger_core.cursor);
@@ -198,14 +198,14 @@ void _fsl_log_output(u32 error_code, u32 flags, const str *file, u64 line,
 
     if (write_file && logger_is_dir_exists_internal(FSL_DIR_NAME_LOGS) == FSL_ERR_SUCCESS)
     {
-        _get_log_str(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_FULL_TIME,
+        logger_get_log_str_internal(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_FULL_TIME,
                 verbose, level, error_code, file, line);
         snprintf(temp, PATH_MAX, "%s%s", FSL_DIR_NAME_LOGS, LOG_FILE_NAME[level]);
-        logger_append_file_internal(temp, 1, strnlen(str_out, FSL_LOGGER_STRING_MAX), str_out);
+        logger_append_file_internal(temp, strnlen(str_out, FSL_LOGGER_STRING_MAX) * sizeof(str), str_out);
     }
 }
 
-static void _get_log_str(const str *str_in, str *str_out, u32 flags, b8 verbose,
+static void logger_get_log_str_internal(const str *str_in, str *str_out, u32 flags, b8 verbose,
         u8 level, u32 error_code, const str *file, u64 line)
 {
     str str_time[FSL_TIME_STRING_MAX] = {0};
@@ -283,12 +283,12 @@ u32 logger_is_dir_exists_internal(const str *name)
     return FSL_ERR_DIR_NOT_FOUND;
 }
 
-u32 logger_append_file_internal(const str *name, u64 size, u64 length, void *buf)
+u32 logger_append_file_internal(const str *name, u64 size, void *buf)
 {
     FILE *file = NULL;
     if ((file = fopen(name, "ab")) == NULL)
         return FSL_ERR_FILE_OPEN_FAIL;
-    fwrite(buf, size, length, file);
+    fwrite(buf, 1, size, file);
     fclose(file);
     return FSL_ERR_SUCCESS;
 }

@@ -69,9 +69,9 @@ f64 fsl_clamp_f64(f64 n, f64 min, f64 max)
     return n < min ? min : n > max ? max : n;
 }
 
-u64 fsl_round_up_u64(u64 n, u64 val)
+u64 fsl_round_up_u64(u64 n, u64 max)
 {
-    return n + (val - (n % val)) % val;
+    return n + (max - (n % max)) % max;
 }
 
 i32 fsl_mod_i32(i32 n, i32 max)

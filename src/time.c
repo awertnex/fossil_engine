@@ -46,33 +46,33 @@ u64 fsl_get_time_raw_usec(void)
 
 u64 fsl_get_time_nsec(void)
 {
-    static u64 _time = 0;
+    static u64 t = 0;
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    if (!_time) _time = (u64)(ts.tv_sec * FSL_SEC2NSEC + ts.tv_nsec);
-    return (u64)(ts.tv_sec * FSL_SEC2NSEC + ts.tv_nsec) - _time;
+    if (!t) t = (u64)(ts.tv_sec * FSL_SEC2NSEC + ts.tv_nsec);
+    return (u64)(ts.tv_sec * FSL_SEC2NSEC + ts.tv_nsec) - t;
 }
 
 f64 fsl_get_time_nsecf(void)
 {
-    static u64 _time = 0;
+    static u64 t = 0;
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    if (!_time) _time = ts.tv_sec;
-    return (f64)(ts.tv_sec - _time) + (f64)ts.tv_nsec * FSL_NSEC2SEC;
+    if (!t) t = ts.tv_sec;
+    return (f64)(ts.tv_sec - t) + (f64)ts.tv_nsec * FSL_NSEC2SEC;
 }
 
 u64 fsl_get_time_delta_nsec(void)
 {
-    static u64 _curr = 0;
+    static u64 curr = 0;
     static u64 _last = 0;
     static u64 _delta = 0;
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    _curr = ts.tv_sec * FSL_SEC2NSEC + ts.tv_nsec;
-    if (!_last) _last = _curr;
-    _delta = _curr - _last;
-    _last = _curr;
+    curr = ts.tv_sec * FSL_SEC2NSEC + ts.tv_nsec;
+    if (!_last) _last = curr;
+    _delta = curr - _last;
+    _last = curr;
     return _delta;
 }
 
@@ -85,35 +85,6 @@ void fsl_get_time_str(str *dst, const str *format)
     strftime(dst, FSL_TIME_STRING_MAX, format, _tm);
 }
 
-b8 fsl_is_in_time_window(u64 *_time, u64 interval, u64 _curr)
-{
-    if (!*_time || _curr - *_time >= interval)
-    {
-        *_time = _curr;
-        return TRUE;
-    }
-    return FALSE;
-}
-
-b8 fsl_on_time_interval(u64 *_time, u64 interval, u64 _curr)
-{
-    i64 diff = 0;
-
-    if (!interval)
-        return TRUE;
-
-    diff = (i64)(_curr - *_time);
-    if (diff < (i64)interval)
-        return FALSE;
-
-    if (diff > (i64)(interval * 2))
-        *_time = _curr;
-    else
-        *_time += interval;
-
-    return TRUE;
-}
-
 void fsl_sleep_nsec(u64 nsec)
 {
     u64 sec = nsec * FSL_NSEC2SEC;
@@ -123,20 +94,50 @@ void fsl_sleep_nsec(u64 nsec)
     clock_nanosleep(CLOCK_MONOTONIC, 0, &ts, NULL);
 }
 
-void fsl_limit_framerate(u64 target_fps, u64 _curr)
+#endif /* FSL_PLATFORM */
+
+b8 fsl_is_in_time_window(u64 *t, u64 interval, u64 curr)
 {
-    static u64 _time = 0;
+    if (!*t || curr - *t >= interval)
+    {
+        *t = curr;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+b8 fsl_on_time_interval(u64 *t, u64 interval, u64 curr)
+{
+    i64 diff = 0;
+
+    if (!interval)
+        return TRUE;
+
+    diff = (i64)(curr - *t);
+    if (diff < (i64)interval)
+        return FALSE;
+
+    if (diff > (i64)(interval * 2))
+        *t = curr;
+    else
+        *t += interval;
+
+    return TRUE;
+}
+
+void fsl_limit_framerate(u64 target_fps, u64 curr)
+{
+    static u64 t = 0;
 
     if (!target_fps)
     {
-        _time = _curr;
+        t = curr;
         return;
     }
 
-    _time += FSL_SEC2NSEC / fsl_clamp_u64(target_fps, FSL_TARGET_FPS_MIN, FSL_TARGET_FPS_MAX);
+    t += FSL_SEC2NSEC / fsl_clamp_u64(target_fps, FSL_TARGET_FPS_MIN, FSL_TARGET_FPS_MAX);
 
-    if (_curr < _time)
-        fsl_sleep_nsec(_time - _curr);
-    else _time = _curr;
+    if (curr < t)
+        fsl_sleep_nsec(t - curr);
+    else t = curr;
 }
-#endif /* FSL_PLATFORM */

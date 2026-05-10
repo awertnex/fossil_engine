@@ -142,16 +142,16 @@
 
 enum fsl_flag
 {
-    FSL_FLAG_RELEASE_BUILD =        0x0001, /* output `TRACE` and `DEBUG` logs to console */
-    FSL_FLAG_MULTISAMPLE =          0x0002  /* use `GLFW` multisampling */
+    FSL_FLAG_RELEASE_BUILD =        0x0001, /* output 'TRACE' and 'DEBUG' logs to console */
+    FSL_FLAG_MULTISAMPLE =          0x0002  /* use 'GLFW' multisampling */
 }; /* fsl_flag */
 
-enum fsl_string_index
+enum fsl_engine_string_index
 {
-    FSL_STR_INDEX_ENGINE_TITLE, /* ENGINE_NAME: ENGINE_VERSION */
-    FSL_STR_INDEX_ENGINE_VERSION,
-    FSL_STR_INDEX_COUNT
-}; /* fsl_string_index */
+    FSL_ENGINE_STR_INDEX_TITLE, /* "ENGINE_NAME: ENGINE_VERSION" */
+    FSL_ENGINE_STR_INDEX_VERSION,
+    FSL_ENGINE_STR_INDEX_COUNT
+}; /* fsl_engine_string_index */
 
 enum fsl_shader_index
 {
@@ -191,17 +191,14 @@ enum fsl_texture_index
     FSL_TEXTURE_INDEX_COUNT
 }; /* fsl_texture_index */
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @brief POSIX timestamp of the main process' start in milliseconds.
+/*! @brief POSIX timestamp of the main process' start, in millisecond format.
  */
 extern u64 fsl_init_time;
 
 /*! @brief project root directory.
  *
- *  @remark called from @ref fsl_init() and @ref fsl_logger_init() to change current working dirctory.
- *
- *  @remark declared internally.
+ *  @remark called from @ref fsl_engine_init() to change current working dirctory to the main process'.
+ *  @remark declared and initialized internally.
  */
 FSLAPI extern str *FSL_DIR_PROC_ROOT;
 

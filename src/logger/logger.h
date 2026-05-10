@@ -176,10 +176,10 @@ FSLAPI extern u32 fsl_log_level_max;
 
 /*! -- INTERNAL USE ONLY --;
  *
- *  @brief allocate logger resources.
+ *  @brief allocate and initialize logger resources.
  *
  *  @param argc number of arguments in `argv` if `argv` provided.
- *  @param argv used for logger log level if args provided.
+ *  @param argv used for logger log level (optional).
  *  @param flags enum @ref fsl_flag.
  *
  *  @remark called automatically from @ref fsl_engine_init().

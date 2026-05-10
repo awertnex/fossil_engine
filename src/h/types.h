@@ -50,14 +50,18 @@ typedef char        str;
 typedef uint8_t     b8;
 typedef uint32_t    b32;
 
+/*! @brief relative or absolute file system path.
+ */
+typedef str         fsl_fs_path;
+
 typedef struct fsl_buf
 {
-    b8 loaded;
     void **i;       /* members of `buf` */
     void *buf;      /* raw data */
     u64 memb;       /* number of `i` members */
-    u64 size;       /* size of each member in bytes */
+    u64 size;       /* size of each member, in bytes */
     u64 cursor;     /* for iteration, optional */
+    b8 loaded;
 } fsl_buf;
 
 typedef struct fsl_key_value
@@ -68,8 +72,8 @@ typedef struct fsl_key_value
     void *buf_key;  /* raw data */
     void *buf_val;  /* raw data */
     u64 memb;       /* numbers of members */
-    u64 size_key;   /* size of each key in bytes */
-    u64 size_val;   /* size of each val in bytes */
+    u64 size_key;   /* size of each key, in bytes */
+    u64 size_val;   /* size of each val, in bytes */
 } fsl_key_value;
 
 /* ---- vector2u ------------------------------------------------------------ */

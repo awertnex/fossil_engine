@@ -1,6 +1,6 @@
 /*  @file collision.h
  *
- *  @brief collision detection and data types.
+ *  @brief collision detection and collision data types.
  *
  *  Copyright 2026 Lily Awertnex
  *
@@ -25,11 +25,13 @@
 
 #define FSL_COLLISION_EPSILON 1e-5
 
-typedef struct fsl_bounding_box
+typedef struct bounding_box fsl_bounding_box;
+
+struct bounding_box
 {
     v3f64 pos;
     v3f64 size;
-} fsl_bounding_box;
+}; /* fsl_bounding_box */
 
 FSLAPI b8 fsl_is_intersect_aabb(fsl_bounding_box a, fsl_bounding_box b);
 

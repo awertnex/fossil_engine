@@ -31,9 +31,24 @@
 
 #include <deps/stb_truetype.h>
 
+typedef str fsl_name;
+typedef str fsl_name_id;
+typedef str fsl_file;
+typedef str fsl_path;
+
+typedef struct asset            fsl_asset;
+typedef struct asset_metadata   fsl_asset_metadata;
+typedef struct fbo              fsl_fbo;
+typedef struct texture          fsl_texture;
+typedef struct mesh             fsl_mesh;
+typedef struct shader           fsl_shader;
+typedef struct shader_program   fsl_shader_program;
+typedef struct glyph            fsl_glyph;
+typedef struct font             fsl_font;
+
 enum fsl_asset_type
 {
-    FSL_ASSET_CUSTOM, /* user defined asset type */
+    FSL_ASSET_CUSTOM, /* user defined asset types */
     FSL_ASSET_FBO,
     FSL_ASSET_TEXTURE,
     FSL_ASSET_MESH,
@@ -45,7 +60,7 @@ enum fsl_asset_type
 
 /*! @remark this struct should be filled using the function @ref fsl_set_asset_metadata().
  */
-typedef struct fsl_asset
+struct asset
 {
     /*! @remark used by @ref glGenTextures() for textures, @ref glCreateShader() for shaders etc..
      */
@@ -78,32 +93,32 @@ typedef struct fsl_asset
      *  (e.g. texture is generated and uploaded to VRAM).
      */
     b8 initialized;
-} fsl_asset;
+}; /* asset */
 
 /*! @remark this struct can be filled using the function @ref fsl_get_asset_metadata().
  */
-typedef struct fsl_asset_metadata
+struct asset_metadata
 {
-    str *name;
-    str *name_id;
-    str *file;
-    str *path;
-} fsl_asset_metadata;
+    fsl_name *name;
+    fsl_name_id *name_id;
+    fsl_file *file;
+    fsl_path *path;
+}; /* asset_metadata */
 
-typedef struct fsl_fbo
+struct fbo
 {
     fsl_asset asset;
     GLuint fbo;
     GLuint color_buf;
     GLuint rbo;
-} fsl_fbo;
+}; /* fbo */
 
-typedef struct fsl_texture
+struct texture
 {
     fsl_asset asset;
     v2i32 size;
 
-    /*! @brief used by `OpenGL` extension @ref GL_ARB_bindless_texture.
+    /*! @brief used by 'OpenGL' extension @ref GL_ARB_bindless_texture.
      */
     u64 bindless_handle;
 
@@ -116,9 +131,9 @@ typedef struct fsl_texture
 
     b8 grayscale;
     b8 bindless;
-} fsl_texture;
+}; /* texture */
 
-typedef struct fsl_mesh
+struct mesh
 {
     fsl_asset asset;
     GLuint vao;
@@ -128,46 +143,46 @@ typedef struct fsl_mesh
     GLuint ebo_len;
     fsl_mem_handle vbo_data;
     fsl_mem_handle ebo_data;
-} fsl_mesh;
+}; /* mesh */
 
-typedef struct fsl_shader
+struct shader
 {
     fsl_asset asset;
     GLint status;       /* used by @ref glGetShaderiv() */
     GLchar *source;     /* shader file source code */
-} fsl_shader;
+}; /* shader */
 
-typedef struct fsl_shader_program
+struct shader_program
 {
     fsl_asset asset;
     GLint status;       /* used by @ref glGetProgramiv() */
     fsl_shader vertex;
     fsl_shader geometry;
     fsl_shader fragment;
-} fsl_shader_program;
+}; /* shader_program */
 
-typedef struct fsl_glyph
+struct glyph
 {
     v2i32 scale;
     v2i32 bearing;
     i32 advance;
     b8 loaded;
-} fsl_glyph;
+}; /* glyph */
 
-typedef struct fsl_font
+struct font
 {
     fsl_asset asset;
-    u32 resolution;         /* glyph bitmap diameter in bytes */
+    u32 resolution;         /* glyph bitmap diameter, in bytes */
     i32 ascent;             /* glyphs highest points' deviation from baseline */
     i32 descent;            /* glyphs lowest points' deviation from baseline */
     i32 line_gap;
     i32 line_height;
     f32 size;               /* global font size, for text uniformity */
-    v2i32 scale;            /* biggest glyph bounding box size in font units */
-    u64 buf_len;            /* size allocated for @ref fsl_font.info.data in bytes */
+    v2i32 scale;            /* biggest glyph bounding box size, in font units */
+    u64 buf_len;            /* size allocated for @ref fsl_font.info.data, in bytes */
     stbtt_fontinfo info;    /* used by @ref stbtt_InitFont() */
     fsl_glyph glyph[FSL_GLYPH_MAX];
-} fsl_font;
+}; /* font */
 
 /* ---- section: declarations ----------------------------------------------- */
 

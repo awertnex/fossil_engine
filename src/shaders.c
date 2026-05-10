@@ -50,7 +50,7 @@ static str *_shader_pre_process(const str *path, u64 *file_len, u64 recursion_li
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-static u32 _shader_get_type(const str *file, GLenum *type);
+static u32 shader_get_type_internal(const str *file, GLenum *type);
 
 u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created)
 {
@@ -61,6 +61,12 @@ u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created)
     fsl_asset_metadata metadata = {0};
 
     metadata = fsl_asset_get_metadata(shader->asset);
+    if (!metadata.file || !metadata.path)
+    {
+        fsl_err = FSL_ERR_SHADER_TYPE_NULL;
+        return fsl_err;
+    }
+
     snprintf(temp, PATH_MAX, "%s%s", metadata.path, metadata.file);
     if (fsl_is_file_exists(temp, FALSE) != FSL_ERR_SUCCESS)
     {
@@ -68,7 +74,7 @@ u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created)
         return fsl_err;
     }
 
-    if (_shader_get_type(metadata.file, &type) != FSL_ERR_SUCCESS)
+    if (shader_get_type_internal(metadata.file, &type) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     shader->source = fsl_shader_pre_process(temp, NULL);
@@ -137,7 +143,7 @@ static str *_shader_pre_process(const str *path, u64 *file_len, u64 recursion_li
         return NULL;
     }
 
-    buf_len = fsl_get_file_contents(path, (void*)&buf, 1, TRUE);
+    buf_len = fsl_get_file_contents(path, (void*)&buf, TRUE);
     if (fsl_err != FSL_ERR_SUCCESS)
         return NULL;
 
@@ -209,7 +215,7 @@ cleanup:
     return NULL;
 }
 
-static u32 _shader_get_type(const str *file, GLenum *type)
+static u32 shader_get_type_internal(const str *file, GLenum *type)
 {
     str base_name[NAME_MAX] = {0};
     str *extension = {0};

@@ -132,8 +132,8 @@ u32 fsl_assets_init(void)
     /* ---- engine framebuffers --------------------------------------------- */
 
     if (
-            fsl_fbo_init(&_fsl_core.fbo, &fsl_mesh_unit_quad, FALSE, 4) != FSL_ERR_SUCCESS ||
-            fsl_fbo_init(&_fsl_core.fbo_msaa, NULL, TRUE, 4) != FSL_ERR_SUCCESS)
+            fsl_fbo_init(&fsl_core_internal.fbo, &fsl_mesh_unit_quad, FALSE, 4) != FSL_ERR_SUCCESS ||
+            fsl_fbo_init(&fsl_core_internal.fbo_msaa, NULL, TRUE, 4) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     /* ---- engine textures ------------------------------------------------- */
@@ -281,8 +281,8 @@ void fsl_assets_free(void)
     fsl_shader_program *shader = NULL;
     fsl_font *font = NULL;
 
-    fsl_fbo_free(&_fsl_core.fbo);
-    fsl_fbo_free(&_fsl_core.fbo_msaa);
+    fsl_fbo_free(&fsl_core_internal.fbo);
+    fsl_fbo_free(&fsl_core_internal.fbo_msaa);
     fsl_mesh_free(&fsl_mesh_unit_quad);
 
     if (fsl_texture_buf.arena)
@@ -720,7 +720,7 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     if (fsl_is_file_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    font->buf_len = fsl_get_file_contents(path_temp, (void*)&file_contents, 1, TRUE);
+    font->buf_len = fsl_get_file_contents(path_temp, (void*)&file_contents, TRUE);
     if (file_contents == NULL)
         return fsl_err;
 

@@ -7,8 +7,6 @@ fsl_key_bind bind_enter = {0};
 fsl_key_bind bind_quit = {0};
 fsl_font *font = NULL;
 
-static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset);
-
 static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset)
 {
     (void)window;

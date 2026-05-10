@@ -27,6 +27,8 @@
 #define FSL_KEYBOARD_KEYS_MAX 120
 #define FSL_DOUBLE_PRESS_TIME_INTERVAL 0.5f
 
+typedef struct key_bind fsl_key_bind;
+
 enum fsl_keyboard_key
 {
     FSL_KEY_SPACE,
@@ -167,9 +169,8 @@ enum fsl_mod_key
 struct key_bind
 {
     u32 key;
-    u32 mod; /* enum: fsl_mod_key_flag */
-};
-typedef struct key_bind fsl_key_bind;
+    u32 mod; /* enum @ref fsl_mod_key_flag (internal enum) */
+}; /* key_bind */
 
 /*! @brief setup a key binding (key combination).
  *
@@ -187,14 +188,18 @@ FSLAPI b8 fsl_is_key_press_double(const fsl_key_bind key);
 FSLAPI b8 fsl_is_key_hold(const fsl_key_bind key);
 FSLAPI b8 fsl_is_key_release(const fsl_key_bind key);
 
-/*! @brief update internal mouse movement.
+/*! @brief update mouse movement.
  *
- *  update parameters at @ref fsl_render.mouse_pos and @ref fsl_render.mouse_delta of
- *  the currently bound `fsl_render`.
+ *  - update parameters at @ref fsl_render.mouse_pos and @ref fsl_render.mouse_delta
+ *    of the currently bound `fsl_render`.
+ *
+ *  @remark called automatically from @ref fsl_engine_running().
  */
 FSLAPI void fsl_update_mouse_movement(void);
 
 /*! @brief update internal mouse and key states: press, double-press, hold and release.
+ *
+ *  @remark called automatically from @ref fsl_engine_running().
  */
 FSLAPI void fsl_update_key_states(void);
 

@@ -2,6 +2,9 @@
  *
  *  @brief build info to link the engine with external software.
  *
+ *  @remark this header is to provide engine bindings for if building using
+ *  buildtool (https://github.com/awertnex/buildtool.git)
+ *
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");

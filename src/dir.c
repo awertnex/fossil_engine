@@ -37,14 +37,14 @@
 #include <fcntl.h>
 #include <errno.h>
 
-u32 fsl_is_file(const str *name)
+u32 fsl_is_file(const fsl_fs_path *path)
 {
     struct stat stats = {0};
 
-    if (fsl_is_file_exists(name, FALSE) != FSL_ERR_SUCCESS)
+    if (fsl_is_file_exists(path, FALSE) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    if (fsl_stat(name, &stats) == 0)
+    if (fsl_stat(path, &stats) == 0)
     {
         if (S_ISREG(stats.st_mode))
             fsl_err = FSL_ERR_SUCCESS;
@@ -57,11 +57,11 @@ u32 fsl_is_file(const str *name)
     return fsl_err;
 }
 
-u32 fsl_is_file_exists(const str *name, b8 log)
+u32 fsl_is_file_exists(const fsl_fs_path *path, b8 log)
 {
     struct stat stats = {0};
 
-    if (fsl_stat(name, &stats) == 0)
+    if (fsl_stat(path, &stats) == 0)
     {
         if (S_ISREG(stats.st_mode) || S_ISLNK(stats.st_mode))
             fsl_err = FSL_ERR_SUCCESS;
@@ -69,7 +69,7 @@ u32 fsl_is_file_exists(const str *name, b8 log)
         {
             if (log)
                 LOGERROR(FSL_ERR_IS_NOT_FILE, 0,
-                        MSG_IS_NOT_FILE(name));
+                        MSG_IS_NOT_FILE(path));
             else
                 fsl_err = FSL_ERR_IS_NOT_FILE;
         }
@@ -78,7 +78,7 @@ u32 fsl_is_file_exists(const str *name, b8 log)
     {
         if (log)
             LOGERROR(FSL_ERR_FILE_NOT_FOUND, 0,
-                    MSG_FILE_NOT_FOUND(name));
+                    MSG_FILE_NOT_FOUND(path));
         else
             fsl_err = FSL_ERR_FILE_NOT_FOUND;
     }
@@ -86,13 +86,13 @@ u32 fsl_is_file_exists(const str *name, b8 log)
     return fsl_err;
 }
 
-u32 fsl_is_dir(const str *name)
+u32 fsl_is_dir(const fsl_fs_path *path)
 {
     struct stat stats = {0};
 
-    if (fsl_is_dir_exists(name, FALSE) != FSL_ERR_SUCCESS)
+    if (fsl_is_dir_exists(path, FALSE) != FSL_ERR_SUCCESS)
         return fsl_err;
-    if (fsl_stat(name, &stats) == 0)
+    if (fsl_stat(path, &stats) == 0)
     {
         if (S_ISDIR(stats.st_mode))
             fsl_err = FSL_ERR_SUCCESS;
@@ -104,11 +104,11 @@ u32 fsl_is_dir(const str *name)
     return fsl_err;
 }
 
-u32 fsl_is_dir_exists(const str *name, b8 log)
+u32 fsl_is_dir_exists(const fsl_fs_path *path, b8 log)
 {
     struct stat stats = {0};
 
-    if (fsl_stat(name, &stats) == 0)
+    if (fsl_stat(path, &stats) == 0)
     {
         if (S_ISDIR(stats.st_mode))
             fsl_err = FSL_ERR_SUCCESS;
@@ -116,7 +116,7 @@ u32 fsl_is_dir_exists(const str *name, b8 log)
         {
             if (log)
                 LOGERROR(FSL_ERR_IS_NOT_DIR, 0,
-                        MSG_IS_NOT_DIR(name));
+                        MSG_IS_NOT_DIR(path));
             else
                 fsl_err = FSL_ERR_IS_NOT_DIR;
         }
@@ -125,7 +125,7 @@ u32 fsl_is_dir_exists(const str *name, b8 log)
     {
         if (log)
             LOGERROR(FSL_ERR_DIR_NOT_FOUND, 0,
-                    MSG_DIR_NOT_FOUND(name));
+                    MSG_DIR_NOT_FOUND(path));
         else
             fsl_err = FSL_ERR_DIR_NOT_FOUND;
     }
@@ -133,7 +133,7 @@ u32 fsl_is_dir_exists(const str *name, b8 log)
     return fsl_err;
 }
 
-u32 fsl_make_dir(const str *path)
+u32 fsl_make_dir(const fsl_fs_path *path)
 {
     if (fsl_mkdir(path) == 0)
     {
@@ -158,7 +158,7 @@ u32 fsl_make_dir(const str *path)
     return fsl_err;
 }
 
-int fsl_change_dir(const str *path)
+int fsl_change_dir(const fsl_fs_path *path)
 {
     int success = 0;
     success = fsl_chdir(path);
@@ -167,11 +167,11 @@ int fsl_change_dir(const str *path)
     return success;
 }
 
-u32 fsl_get_file_type(const str *name, u32 *type)
+u32 fsl_get_file_type(const fsl_fs_path *path, u32 *type)
 {
     struct stat stats = {0};
 
-    if (fsl_stat(name, &stats) == 0)
+    if (fsl_stat(path, &stats) == 0)
     {
         if (S_ISREG(stats.st_mode))
             *type = FSL_FILE_TYPE_REG;
@@ -190,23 +190,23 @@ u32 fsl_get_file_type(const str *name, u32 *type)
     }
 
     LOGERROR(FSL_ERR_FILE_NOT_FOUND, 0,
-            MSG_FILE_NOT_FOUND(name));
+            MSG_FILE_NOT_FOUND(path));
     return fsl_err;
 }
 
-u64 fsl_get_file_contents(const str *name, void **dst, u64 size, b8 terminate)
+u64 fsl_get_file_contents(const fsl_fs_path *path, void **dst, b8 terminate)
 {
     FILE *file = NULL;
     u64 cursor = 0;
     u64 len = 0;
 
-    if (fsl_is_file_exists(name, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_is_file_exists(path, TRUE) != FSL_ERR_SUCCESS)
             return 0;
 
-    if ((file = fopen(name, "rb")) == NULL)
+    if ((file = fopen(path, "rb")) == NULL)
     {
         LOGERROR(FSL_ERR_FILE_OPEN_FAIL, 0,
-                MSG_FILE_OPEN_FAIL(name));
+                MSG_FILE_OPEN_FAIL(path));
         return 0;
     }
 
@@ -218,7 +218,7 @@ u64 fsl_get_file_contents(const str *name, void **dst, u64 size, b8 terminate)
                 "fsl_get_file_contents().dst") != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    cursor = fread(*dst, size, len, file);
+    cursor = fread(*dst, 1, len, file);
 
     fclose(file);
 
@@ -236,7 +236,7 @@ cleanup:
     return 0;
 }
 
-fsl_buf fsl_get_dir_contents(const str *name)
+fsl_buf fsl_get_dir_contents(const fsl_fs_path *path)
 {
     str *dir_name_absolute = NULL;
     str dir_name_absolute_usable[PATH_MAX] = {0};
@@ -247,16 +247,16 @@ fsl_buf fsl_get_dir_contents(const str *name)
     fsl_buf contents = {0};
     u64 i = 0;
 
-    if (!name)
+    if (!path)
     {
         fsl_err = FSL_ERR_POINTER_NULL;
         return nobuf;
     }
 
-    if (fsl_is_dir_exists(name, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_is_dir_exists(path, TRUE) != FSL_ERR_SUCCESS)
         return nobuf;
 
-    if (fsl_get_path_absolute(name, &dir_name_absolute) != FSL_ERR_SUCCESS)
+    if (fsl_get_path_absolute(path, &dir_name_absolute) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     snprintf(dir_name_absolute_usable, PATH_MAX, "%s", dir_name_absolute);
@@ -313,22 +313,22 @@ cleanup:
     return nobuf;
 }
 
-u64 fsl_get_dir_entry_count(const str *name)
+u64 fsl_get_dir_entry_count(const fsl_fs_path *path)
 {
     DIR *dir = NULL;
     u64 count = 0;
     struct dirent *entry = {0};
 
-    if (!name)
+    if (!path)
     {
         fsl_err = FSL_ERR_POINTER_NULL;
         return 0;
     }
 
-    if (fsl_is_dir_exists(name, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_is_dir_exists(path, TRUE) != FSL_ERR_SUCCESS)
         return 0;
 
-    dir = opendir(name);
+    dir = opendir(path);
     if (!dir)
         return 0;
 
@@ -347,7 +347,7 @@ u64 fsl_get_dir_entry_count(const str *name)
     return count;
 }
 
-u32 fsl_copy_file(const str *src, const str *dst)
+u32 fsl_copy_file(const fsl_fs_path *src, const fsl_fs_path *dst)
 {
     str str_dst[PATH_MAX] = {0};
     str str_lnk[PATH_MAX] = {0}; /* if is symlink, store symlink's link in this buffer */
@@ -383,7 +383,7 @@ u32 fsl_copy_file(const str *src, const str *dst)
                 return fsl_err;
             }
 
-            len = fsl_get_file_contents(src, (void*)&in_file, 1, FALSE);
+            len = fsl_get_file_contents(src, (void*)&in_file, FALSE);
             if (fsl_err != FSL_ERR_SUCCESS || !in_file)
             {
                 fclose(out_file);
@@ -456,7 +456,7 @@ u32 fsl_copy_file(const str *src, const str *dst)
     return fsl_err;
 }
 
-u32 fsl_copy_dir(const str *src, const str *dst, b8 contents_only)
+u32 fsl_copy_dir(const fsl_fs_path *src, const fsl_fs_path *dst, b8 contents_only)
 {
     fsl_buf dir_contents = {0};
     str str_src[PATH_MAX] = {0};
@@ -532,38 +532,38 @@ u32 fsl_copy_dir(const str *src, const str *dst, b8 contents_only)
     return fsl_err;
 }
 
-u32 fsl_write_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text)
+u32 fsl_write_file(const fsl_fs_path *path, u64 size, void *buf, b8 log, b8 text)
 {
     FILE *file = NULL;
-    if ((file = fopen(name, "wb")) == NULL)
+    if ((file = fopen(path, "wb")) == NULL)
     {
         if (log)
             LOGERROR(FSL_ERR_FILE_OPEN_FAIL, 0,
-                    MSG_FILE_WRITE_FAIL(name));
+                    MSG_FILE_WRITE_FAIL(path));
 
         fsl_err = FSL_ERR_FILE_OPEN_FAIL;
         return fsl_err;
     }
 
-    fwrite(buf, size, length, file);
+    fwrite(buf, 1, size, file);
     if (text) fprintf(file, "%c", '\n');
     fclose(file);
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_FILE_WRITE(name));
+            MSG_FILE_WRITE(path));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
 
-u32 fsl_append_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8 text)
+u32 fsl_append_file(const fsl_fs_path *path, u64 size, void *buf, b8 log, b8 text)
 {
     FILE *file = NULL;
-    if ((file = fopen(name, "ab")) == NULL)
+    if ((file = fopen(path, "ab")) == NULL)
     {
         if (log)
             LOGERROR(FSL_ERR_FILE_OPEN_FAIL, 0,
-                    MSG_FILE_APPEND_FAIL(name));
+                    MSG_FILE_APPEND_FAIL(path));
         else
         {
             fsl_err = FSL_ERR_FILE_OPEN_FAIL;
@@ -571,33 +571,33 @@ u32 fsl_append_file(const str *name, u64 size, u64 length, void *buf, b8 log, b8
         }
     }
 
-    fwrite(buf, size, length, file);
+    fwrite(buf, 1, size, file);
     if (text) fprintf(file, "%c", '\n');
     fclose(file);
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_FILE_APPEND(name));
+            MSG_FILE_APPEND(path));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
 
-u32 fsl_get_path_absolute(const str *name, str **dst)
+u32 fsl_get_path_absolute(const fsl_fs_path *path, str **dst)
 {
     str path_absolute[PATH_MAX] = {0};
     u64 len = 0;
 
-    if (strlen(name) > PATH_MAX - 2)
+    if (strlen(path) > PATH_MAX - 2)
     {
         LOGERROR(FSL_ERR_GET_PATH_ABSOLUTE_FAIL, 0,
                 MSG_ACTION_REASON_ERROR("Get Absolute Path", "Path Too Long"));
         return fsl_err;
     }
 
-    if (fsl_is_dir_exists(name, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_is_dir_exists(path, TRUE) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    if (_fsl_get_path_absolute(name, path_absolute) != FSL_ERR_SUCCESS)
+    if (fsl_get_path_absolute_internal(path, path_absolute) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     len = strlen(path_absolute);
@@ -619,7 +619,7 @@ u32 fsl_get_path_bin_root(str **dst)
     u64 len = 0;
     char *last_slash = NULL;
 
-    if (_fsl_get_path_bin_root(path_bin_root) != FSL_ERR_SUCCESS)
+    if (fsl_get_path_bin_root_internal(path_bin_root) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     len = strlen(path_bin_root);
@@ -648,7 +648,7 @@ u32 fsl_get_path_bin_root(str **dst)
     return fsl_err;
 }
 
-void fsl_check_slash(str *path)
+void fsl_check_slash(fsl_fs_path *path)
 {
     u64 len = 0;
 
@@ -676,7 +676,7 @@ void fsl_check_slash(str *path)
     fsl_err = FSL_ERR_SUCCESS;
 }
 
-void fsl_normalize_slash(str *path)
+void fsl_normalize_slash(fsl_fs_path *path)
 {
     u64 len = 0, i = 0;
 
@@ -697,7 +697,7 @@ void fsl_normalize_slash(str *path)
     fsl_err = FSL_ERR_SUCCESS;
 }
 
-void fsl_posix_slash(str *path)
+void fsl_posix_slash(fsl_fs_path *path)
 {
     u64 len = 0, i = 0;
 
@@ -718,7 +718,7 @@ void fsl_posix_slash(str *path)
     fsl_err = FSL_ERR_SUCCESS;
 }
 
-u32 fsl_retract_path(str *path)
+u32 fsl_retract_path(fsl_fs_path *path)
 {
     u64 len = 0, i = 0, stage = 0;
 
@@ -753,7 +753,7 @@ u32 fsl_retract_path(str *path)
     return fsl_err;
 }
 
-u32 fsl_get_base_name(const str *path, str *dst, u64 size)
+u32 fsl_get_base_name(const fsl_fs_path *path, str *dst, u64 size)
 {
     i64 i = 0;
     u64 len = 0;

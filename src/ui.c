@@ -229,7 +229,7 @@ void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear)
     struct fsl_glyphf *g = NULL;
     u32 i = 0;
 
-    _fsl_core.fbo_bind();
+    fsl_core_internal.fbo_bind();
 
     if (!length)
         length = FSL_STRING_MAX;
@@ -574,7 +574,7 @@ u32 fsl_ui_init(void)
 
 void fsl_ui_start(b8 nine_slice, b8 clear)
 {
-    _fsl_core.fbo_bind();
+    fsl_core_internal.fbo_bind();
 
     if (nine_slice)
     {
@@ -595,8 +595,7 @@ void fsl_ui_start(b8 nine_slice, b8 clear)
 void fsl_ui_push_panel(i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, u32 tint)
 {
     fsl_texture *texture = fsl_mem_handle_get_i(fsl_texture, fsl_texture_buf, FSL_TEXTURE_INDEX_PANEL_ACTIVE);
-    fsl_panel_nine_slice _panel = fsl_get_nine_slice(
-            texture->size,
+    fsl_panel_nine_slice _panel = fsl_get_nine_slice(texture,
             pos_x, pos_y, size_x, size_y, FSL_UI_SLICE_SIZE_DEFAULT);
 
     glBindBuffer(GL_ARRAY_BUFFER, ui_core.vbo_nine_slice);
@@ -627,7 +626,7 @@ void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 siz
 void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
         i32 size_x, i32 size_y, i32 slice_size, u32 tint)
 {
-    fsl_panel_nine_slice _panel = fsl_get_nine_slice(texture->size,
+    fsl_panel_nine_slice _panel = fsl_get_nine_slice(texture,
             pos_x, pos_y, size_x, size_y, slice_size);
 
     glUniform4f(ui_core.uniform.nine_slice.tint,
@@ -673,7 +672,7 @@ void fsl_ui_free(void)
     }
 }
 
-fsl_panel_nine_slice fsl_get_nine_slice(v2i32 texture_size, i32 pos_x, i32 pos_y,
+fsl_panel_nine_slice fsl_get_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
         i32 size_x, i32 size_y, i32 slice_size)
 {
     fsl_panel_nine_slice _panel = {0};
@@ -689,8 +688,8 @@ fsl_panel_nine_slice fsl_get_nine_slice(v2i32 texture_size, i32 pos_x, i32 pos_y
     v2f32 _tex_coords_pos[3] = {0};
     v2f32 _tex_coords_size[3] = {0};
 
-    _texture_scale.x = 1.0f / (f32)texture_size.x;
-    _texture_scale.y = 1.0f / (f32)texture_size.y;
+    _texture_scale.x = 1.0f / (f32)texture->size.x;
+    _texture_scale.y = 1.0f / (f32)texture->size.y;
 
     _pos[0].x = _pos_x;
     _pos[0].y = _pos_y;

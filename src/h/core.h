@@ -34,11 +34,16 @@
 
 #   include <deps/stb_image.h>
 #   include <deps/stb_image_write.h>
-#pragma GCC diagnostic pop
+#pragma GCC diagnostic pop /* ignored "-Wpedantic" */
 
 /* ---- section: definitions ------------------------------------------------ */
 
-typedef struct fsl_render
+typedef struct render       fsl_render;
+typedef struct camera       fsl_camera;
+typedef struct projection   fsl_projection;
+typedef struct core         fsl_core;
+
+struct render
 {
     GLFWwindow *window;
     char title[NAME_MAX];
@@ -59,9 +64,9 @@ typedef struct fsl_render
     /*! @brief for reading screen pixels back to RAM (e.g. screenshots).
      */
     u8 *screen_buf;
-} fsl_render;
+}; /* render */
 
-typedef struct fsl_camera
+struct camera
 {
     v3f64 pos;
     f64 roll, pitch, yaw;
@@ -73,9 +78,9 @@ typedef struct fsl_camera
     f32 far;
     f32 near;
     f32 zoom;
-} fsl_camera;
+}; /* camera */
 
-typedef struct fsl_projection
+struct projection
 {
     m4f32 target;
     m4f32 translation;
@@ -84,9 +89,9 @@ typedef struct fsl_projection
     m4f32 view;
     m4f32 projection;
     m4f32 perspective;
-} fsl_projection;
+}; /* projection */
 
-typedef struct fsl_core
+struct core
 {
     struct /* flag */
     {
@@ -124,22 +129,17 @@ typedef struct fsl_core
      * @remark initialized in @ref fsl_engine_init().
      */
     void (*fbo_blit)(GLuint fbo);
-
-} fsl_core;
+}; /* core */
 
 /* ---- section: declarations ----------------------------------------------- */
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @brief global core module.
+/*! @brief global core module.
  *
  *  @remark declared and initialized internally.
  */
-extern fsl_core _fsl_core;
+extern fsl_core fsl_core_internal;
 
-/*! -- INTERNAL USE ONLY --;
- *
- *  @brief default render.
+/*! @brief engine's default render.
  *
  *  @remark declared and initialized internally.
  */
@@ -150,26 +150,25 @@ FSLAPI extern fsl_render *render;
 /*! @brief initialize engine stuff.
  *
  *  - set 'GLFW' error callback.
- *  - call @ref fsl_change_dir() to change working directory to the running process'.
- *  - call @ref fsl_logger_init(), @ref fsl_assets_init(), @ref fsl_glfw_init(),
- *    @ref fsl_window_init() and @ref fsl_glad_init().
- *  - initialize default shaders if requested.
+ *  - call @ref fsl_change_dir() to change current working directory to the main process'.
+ *  - call @ref fsl_logger_init(), @ref fsl_glfw_init(), @ref fsl_window_init(),
+ *    @ref fsl_glad_init(), @ref fsl_assets_init() and @ref fsl_ui_init().
  *
- *  @param argc number of arguments in `argv` if `argv` provided.
- *  @param argv used for logger log level if args provided.
+ *  @param argc number of arguments in `argv` (if `argv` provided).
+ *  @param argv used for logger log level (optional).
  *
- *  @param flags enum: @ref fsl_flag.
+ *  @param flags enum @ref fsl_flag.
  *
- *  @param title = window/application title, if `NULL`, default title is used
+ *  @param title window/application title (if `NULL`, default title is used)
  *  (@ref fsl_window_init() parameter).
  *
- *  @param size_x window width, if 0, @ref FSL_RENDER_WIDTH_DEFAULT is used
+ *  @param size_x window width (if 0, @ref FSL_RENDER_WIDTH_DEFAULT is used)
  *  (@ref fsl_window_init() parameter).
  *
- *  @param size_y window height, if 0, @ref FSL_RENDER_HEIGHT_DEFAULT is used
+ *  @param size_y window height (if 0, @ref FSL_RENDER_HEIGHT_DEFAULT is used)
  *  (@ref fsl_window_init() parameter).
  *
- *  @remark release_build can be overridden with these args in `argv`:
+ *  @remark @ref fsl_flag.FSL_FLAG_RELEASE_BUILD can be overridden with these args in `argv`:
  *      logfatal:   only output fatal logs (least verbose).
  *      logerror:   only output <= error logs.
  *      logwarn:    only output <= warning logs.
@@ -177,7 +176,7 @@ FSLAPI extern fsl_render *render;
  *      logdebug:   only output <= debug logs.
  *      logtrace:   only output <= trace logs (most verbose).
  *
- *  @remark on error, @ref fsl_engine_close() must be called to free allocated resources.
+ *  @note @ref fsl_engine_close() will be called on failure.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -188,15 +187,14 @@ FSLAPI u32 fsl_engine_init(int argc, char **argv, const str *title,
  *
  *  - update @ref fsl_render.time and @ref fsl_render.time_delta of the currently bound `fsl_render`.
  *
- *  @return `TRUE` unless @ref glfwWindowShouldClose() returns `FALSE` or engine inactive.
+ *  @return `TRUE` unless @ref glfwWindowShouldClose() returns `FALSE` or
+ *  @ref fsl_request_engine_close() has been called.
  */
 FSLAPI b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32));
 
-/*! @brief update render settings (e.g. render size).
+/*! @brief update render settings (e.g., render size).
  *
- *  - update @ref fsl_render.size of the currently bound `fsl_render` to
- *    window size.
- *
+ *  - update @ref fsl_render.size of the currently bound `fsl_render` to window size.
  *  - update @ref fsl_render.ndc_scale of the currently bound `fsl_render`.
  *
  *  @remark called automatically from @ref fsl_engine_running().
@@ -211,22 +209,22 @@ FSLAPI void fsl_request_engine_close(void);
 
 /*! @brief free all engine's internal resources.
  *
- *  free logger, assets, free internal memory arenas, destroy window (if not `NULL`)
+ *  free logger, assets, internal memory arenas, destroy window (if not `NULL`)
  *  and terminate 'GLFW'.
  */
 FSLAPI void fsl_engine_close(void);
 
-/*! @brief get engine-specific string no longer than @ref NAME_MAX bytes.
+/*! @brief get engine-specific string no longer than @ref FSL_ID_CAP bytes.
  *
  *  @param dst pointer to buffer to store string.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_engine_get_string(str *dst, enum fsl_string_index type);
+FSLAPI u32 fsl_engine_get_string(str *dst, enum fsl_engine_string_index type);
 
 /*! @brief initialize 'GLFW'.
  *
- *  @param multisample = turn on multisampling.
+ *  @param multisample turn on multisampling.
  *
  *  @remark called automatically from @ref fsl_engine_init().
  *
@@ -236,9 +234,9 @@ FSLAPI u32 fsl_glfw_init(b8 multisample);
 
 /*! @brief initialize a new 'GLFW' window for the currently bound `fsl_render`.
  *
- *  @param title = window/application title, if `NULL`, default title is used.
- *  @param size_x window width, if 0, @ref FSL_RENDER_WIDTH_DEFAULT is used.
- *  @param size_y window height, if 0, @ref FSL_RENDER_HEIGHT_DEFAULT is used.
+ *  @param title window/application title (if `NULL`, default title is used).
+ *  @param size_x window width (if 0, @ref FSL_RENDER_WIDTH_DEFAULT is used).
+ *  @param size_y window height (if 0, @ref FSL_RENDER_HEIGHT_DEFAULT is used).
  *
  *  @remark called automatically from @ref fsl_engine_init().
  *
@@ -254,11 +252,9 @@ FSLAPI u32 fsl_window_init(const str *title, i32 size_x, i32 size_y);
  */
 FSLAPI u32 fsl_glad_init(void);
 
-/*! @brief switch engine's current bound `fsl_render` to `_render`.
- *
- *  @remark only if you know what you're doing.
+/*! @brief switch engine's current bound `fsl_render` to `r`.
  */
-FSLAPI u32 fsl_change_render(fsl_render *_render);
+FSLAPI u32 fsl_change_render(fsl_render *r);
 
 /*! @remark send screenshot request to then be processed by @ref fsl_process_screenshot_request().
  *
@@ -270,20 +266,18 @@ FSLAPI void fsl_request_screenshot(void);
 /*! @remark take screenshot requested by @ref fsl_request_screenshot() and save into dir at `dir_screenshots`.
  *
  *  @param dir_screenshots directory to save screenshot to.
- *  @param special_text string appended to file name before extension.
+ *  @param special_text string appended to file name, before file extension.
  *
  *  @remark if directory not found, screenshot is still saved at @ref fsl_render.screen_buf
  *  of the currently bound `fsl_render`.
  *
- *  @remark the internals for taking a screenshot are separated into their own function
- *  internally so to reduce function call overhead since this function is meant to be called
- *  in a render loop and the code for taking a screenshot allocates a sizable block of memory when called.
+ *  @remark this function is a thin wrapper around an internal, heavier function that carries all the logic.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_process_screenshot_request(const str *dir_screenshots, const str *special_text);
 
-/*! @brief blit rendered internal fbo (e.g. text, ui elements) onto `fbo`.
+/*! @brief blit rendered internal fbo (e.g., text, ui elements) onto `fbo`.
  */
 FSLAPI void fsl_fbo_blit(GLuint fbo);
 
@@ -300,7 +294,10 @@ FSLAPI void fsl_update_camera_movement(fsl_camera *camera, b8 roll);
 
 /*! @brief make perspective projection matrices from camera parameters.
  *
- *  - setup camera matrices for Z-up, right-handed coordinates and vertical fov (fovy).
+ *  - setup camera matrices for Z-up, right-handed coordinates and vertical fov (fovy):
+ *      - +X: forward.
+ *      - +Y: left.
+ *      - +Z: up.
  *
  *  @param roll enable/disable roll rotation.
  */

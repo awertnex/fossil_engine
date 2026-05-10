@@ -1,6 +1,6 @@
 /*  @file process.h
  *
- *  @brief identify current process, execute commands, fork.
+ *  @brief execute commands externally, identify current process, fork.
  *
  *  Copyright 2026 Lily Awertnex
  *
@@ -38,9 +38,9 @@ FSLAPI u32 fsl_get_path_bin_root(str **dst);
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 _fsl_get_path_bin_root(str *dst);
+u32 fsl_get_path_bin_root_internal(str *dst);
 
-/*! @brief execute command in a separate child process (based on @ref execvp()).
+/*! @brief execute command in a separate child process (use @ref execvp() internally).
  *
  *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
