@@ -175,7 +175,7 @@ static u32 fsl_keyboard_tab[FSL_KEYBOARD_KEYS_MAX] =
     GLFW_KEY_MENU
 }; /* fsl_keyboard_tab */
 
-fsl_key_bind fsl_key_bind_init(const enum fsl_keyboard_key key,
+fsl_key_bind fsl_key_bind_init(enum fsl_keyboard_key key,
         enum fsl_mod_key shift, enum fsl_mod_key ctrl,
         enum fsl_mod_key alt, enum fsl_mod_key super)
 {
@@ -339,7 +339,7 @@ b8 fsl_is_key_hold(const fsl_key_bind key)
 
 b8 fsl_is_key_release(const fsl_key_bind key)
 {
-    return 
+    return
         fsl_keyboard_key[key.key] == STATE_KEY_RELEASE ||
         fsl_keyboard_key[key.key] == STATE_KEY_RELEASE_DOUBLE;
 }

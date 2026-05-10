@@ -110,7 +110,7 @@ u32 fsl_convert_i32_to_str(str *dst, i32 size, i32 n)
     while (n > 0 && i < size - 1)
     {
         dst[i++] = (n % 10) + '0';
-      	n /= 10;
+        n /= 10;
     }
 
     if (sign < 0)
@@ -151,7 +151,7 @@ u32 fsl_convert_u64_to_str(str *dst, u64 size, u64 n)
     while (n > 0 && i < size - 1)
     {
         dst[i++] = (n % 10) + '0';
-      	n /= 10;
+        n /= 10;
     }
 
     dst[i] = '\0';

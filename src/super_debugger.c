@@ -97,7 +97,7 @@ void draw_super_debugger()
             (Vector2){debug_rectangle.pos.x, debug_rectangle.pos.y},
             (Vector2){debug_rectangle.scl.x, debug_rectangle.scl.y},
             COL_TRANS_MENU);
-    
+
     /* ---- draw edges ------------------------------------------------------ */
     draw_texture_simple(texture_super_debugger, debug_rectangle.edge_left,
             (Vector2){

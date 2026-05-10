@@ -18,23 +18,23 @@
  */
 
 /*! LOG MESSAGE CONVENTIONS:
- *      - action:   string, infinitive verb (e.g. "Open File", not "Opened File").
- *      - subject:  string, subject name (e.g. "door.png", not "Texture").
- *      - reason:   string, can be anything (e.g. "Size Too Small").
+ *      - action:   string, infinitive verb (e.g., "Open File", not "Opened File").
+ *      - subject:  string, subject name (e.g., "door.png", not "Texture").
+ *      - reason:   string, can be anything (e.g., "Size Too Small").
  *
  *      encapsulation:
- *          - immutable data (e.g. names, paths): single quotes `''`.
- *            (e.g. "File 'door.png' Not Found").
- *          - mutable/runtime-generated data (e.g. memory addresses, asset ID):
- *            square brackets `[]` (e.g. Texture[39] Generated).
+ *          - immutable data (e.g., names, paths): single quotes `''`.
+ *            (e.g., "File 'door.png' Not Found").
+ *          - mutable/runtime-generated data (e.g., memory addresses, asset ID):
+ *            square brackets `[]` (e.g., Texture[39] Generated).
  *
  *      general rules:
- *      - when passing function names, include the parentheses `()` (e.g. "fsl_shader_free()").
+ *      - when passing function names, include the parentheses `()` (e.g., "fsl_shader_free()").
  *      - when passing symbol names, pass them as you'd write them in code, starting
- *        with function name (e.g. "fsl_shader_free().shader->source").
+ *        with function name (e.g., "fsl_shader_free().shader->source").
  *      - use square brackets `[]` with no space when the value belongs to the
  *        identifier, and with a space when the value doesn't belong to the previous word
- *        (e.g. "fsl_shader_free().shader->source[0x557a01dd1f50] Memory Cleared [3181B]").
+ *        (e.g., "fsl_shader_free().shader->source[0x557a01dd1f50] Memory Cleared [3181B]").
  *      - when using square brackets and the unit of data is unknown, include an
  *        identifier before the brackets, examples:
  *          - "Memory Cleared [3181B]": it is clear that we've cleared 3181 bytes.

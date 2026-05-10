@@ -61,7 +61,7 @@ struct render
     u64 time;
     u64 time_delta;
 
-    /*! @brief for reading screen pixels back to RAM (e.g. screenshots).
+    /*! @brief for reading screen pixels back to RAM (e.g., screenshots).
      */
     u8 *screen_buf;
 }; /* render */

@@ -90,7 +90,7 @@ struct asset
 
     /*! @remark `TRUE` does not mean 'has metadata', it means whatever the asset
      *  requires to be fully initialized and usable is fulfilled
-     *  (e.g. texture is generated and uploaded to VRAM).
+     *  (e.g., texture is generated and uploaded to VRAM).
      */
     b8 initialized;
 }; /* asset */
@@ -282,7 +282,7 @@ FSLAPI u32 fsl_texture_init(fsl_texture *texture,
 FSLAPI void fsl_texture_free(fsl_texture *texture);
 
 /*! @param attrib pointer to a function to set attribute arrays for `mesh->vao`
- *  (e.g. &attrib_vec3, set a single vec3 attribute array).
+ *  (e.g., &attrib_vec3, set a single vec3 attribute array).
  *
  *  @param name_id asset stable, unique name for asset-search, and logging (optional) (@ref fsl_asset_set_metadata() parameter).
  *  naming convention: "[a-z_][a-z0-9_]*", or:

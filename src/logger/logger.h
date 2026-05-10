@@ -34,7 +34,7 @@
 enum fsl_log_output_flag
 {
     FSL_FLAG_LOG_NO_VERBOSE =   0x0001, /* don't log file and line */
-    FSL_FLAG_LOG_CMD =          0x0002, /* log a command (e.g. "Gravity Toggled On" and nothing else) */
+    FSL_FLAG_LOG_CMD =          0x0002, /* log a command (e.g., "Gravity Toggled On" and nothing else) */
     FSL_FLAG_LOG_NO_FILE =      0x0004  /* don't write to log file */
 }; /* fsl_log_output_flag */
 
