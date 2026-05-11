@@ -1,18 +1,19 @@
+#include "src/common/session.h"
+#include "src/common/limits.h"
+#include "src/logger/logger.h"
+
+#include "src/h/dir.h"
+#include "src/h/math.h"
+#include "src/h/string.h"
+#include "src/h/time.h"
+
 #include "h/chunking.h"
 #include "h/common.h"
 #include "h/diagnostics.h"
 #include "h/dir.h"
 #include "h/gui.h"
-#include "h/logger.h"
 #include "h/main.h"
 #include "h/world.h"
-
-#include "src/h/common.h"
-#include "src/h/dir.h"
-#include "src/h/limits.h"
-#include "src/h/math.h"
-#include "src/h/string.h"
-#include "src/h/time.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -51,12 +52,12 @@ u32 world_init(str *name, u64 seed, player *p)
 
 u32 world_dir_init(const str *world_name)
 {
-    str string[PATH_MAX] = {0};
-    u32 i;
+    str string[FSL_PATH_CAP] = {0};
+    u32 i = 0;
 
     if (!strlen(world_name))
     {
-        HHC_LOGERROR(FSL_ERR_POINTER_NULL,
+        LOGERROR(FSL_ERR_POINTER_NULL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                 fsl_logger_stringf("%s\n", "World Name Cannot Be Empty"));
         return *GAME_ERR;
@@ -70,7 +71,7 @@ u32 world_dir_init(const str *world_name)
 
     if (fsl_is_dir_exists(FSL_DIR_PROC_ROOT, TRUE) != FSL_ERR_SUCCESS)
     {
-        HHC_LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
+        LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                 fsl_logger_stringf("Failed to Create World '%s', Root Directory Not Found\n", world_name));
         return *GAME_ERR;
@@ -78,37 +79,37 @@ u32 world_dir_init(const str *world_name)
 
     if (fsl_is_dir_exists(GAME_DIR_NAME_WORLDS, TRUE) != FSL_ERR_SUCCESS)
     {
-        HHC_LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
+        LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                 fsl_logger_stringf("Failed to Create World '%s', World Directory Not Found\n", world_name));
         return *GAME_ERR;
     }
 
-    snprintf(string, PATH_MAX, GAME_DIR_NAME_WORLDS"%s", world_name);
+    snprintf(string, FSL_PATH_CAP, GAME_DIR_NAME_WORLDS"%s", world_name);
     fsl_check_slash(string);
     fsl_normalize_slash(string);
 
     if (fsl_is_dir_exists(string, FALSE) == FSL_ERR_SUCCESS)
     {
-        snprintf(world.path, PATH_MAX, "%s", string);
+        snprintf(world.path, FSL_PATH_CAP, "%s", string);
         return *GAME_ERR;
     }
 
     fsl_make_dir(string);
-    snprintf(world.path, PATH_MAX, "%s", string);
+    snprintf(world.path, FSL_PATH_CAP, "%s", string);
 
-    HHC_LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+    LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
             fsl_logger_stringf("Creating World Directories '%s'..\n", world.path));
 
     for (i = 0; i < DIR_WORLD_COUNT; ++i)
     {
-        snprintf(string, PATH_MAX, "%s%s", world.path, DIR_WORLD[i]);
+        snprintf(string, FSL_PATH_CAP, "%s%s", world.path, DIR_WORLD[i]);
         fsl_make_dir(string);
         if (*GAME_ERR != FSL_ERR_SUCCESS && *GAME_ERR != FSL_ERR_DIR_EXISTS)
             return *GAME_ERR;
     }
 
-    HHC_LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+    LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
             fsl_logger_stringf("World Created '%s'\n", world_name));
     *GAME_ERR = FSL_ERR_SUCCESS;
     return *GAME_ERR;
@@ -116,13 +117,13 @@ u32 world_dir_init(const str *world_name)
 
 u32 world_load(world_info *world, const str *world_name, u64 seed)
 {
-    str string[2][PATH_MAX] = {0};
+    str string[2][FSL_PATH_CAP] = {0};
     str *file_contents = NULL;
     u64 file_len = 0;
 
     if (!strlen(world_name))
     {
-        HHC_LOGERROR(FSL_ERR_POINTER_NULL,
+        LOGERROR(FSL_ERR_POINTER_NULL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                 fsl_logger_stringf("%s\n", "Failed to Load World, World Name Empty"));
         return *GAME_ERR;
@@ -130,7 +131,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
 
     if (fsl_is_dir_exists(FSL_DIR_PROC_ROOT, TRUE) != FSL_ERR_SUCCESS)
     {
-        HHC_LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
+        LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                 fsl_logger_stringf("Failed to Load World '%s', Root Directory Not Found\n", world_name));
         return *GAME_ERR;
@@ -138,16 +139,16 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
 
     if (fsl_is_dir_exists(GAME_DIR_NAME_WORLDS, TRUE) != FSL_ERR_SUCCESS)
     {
-        HHC_LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
+        LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                 fsl_logger_stringf("Failed to Load World '%s', '"GAME_DIR_NAME_WORLDS"' Directory Not Found\n", world_name));
         return *GAME_ERR;
     }
 
-    snprintf(string[0], PATH_MAX, GAME_DIR_NAME_WORLDS"%s", world_name);
+    snprintf(string[0], FSL_PATH_CAP, GAME_DIR_NAME_WORLDS"%s", world_name);
     if (fsl_is_dir_exists(string[0], TRUE) != FSL_ERR_SUCCESS)
     {
-        HHC_LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
+        LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                 fsl_logger_stringf("Failed to Load World '%s', World Not Found\n", world_name));
         return *GAME_ERR;
@@ -157,16 +158,16 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
 
     world->id = 0;
 
-    snprintf(world->name, NAME_MAX, "%s", world_name);
+    snprintf(world->name, FSL_ID_CAP, "%s", world_name);
 
     world->type = 0;
 
     /* ---- world seed ------------------------------------------------------ */
 
-    snprintf(string[0], PATH_MAX, GAME_DIR_NAME_WORLDS"%s/"GAME_FILE_NAME_WORLD_SEED, world_name);
+    snprintf(string[0], FSL_PATH_CAP, GAME_DIR_NAME_WORLDS"%s/"GAME_FILE_NAME_WORLD_SEED, world_name);
     if (fsl_is_file_exists(string[0], FALSE) == FSL_ERR_SUCCESS)
     {
-        file_len = fsl_get_file_contents(string[0], (void*)&file_contents, 1, TRUE);
+        file_len = fsl_get_file_contents(string[0], (void*)&file_contents, TRUE);
         if (*GAME_ERR != FSL_ERR_SUCCESS || !file_contents)
             return *GAME_ERR;
         seed = (u64)strtoul(file_contents, NULL, 10);
@@ -177,8 +178,8 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
         if (!seed)
             seed = fsl_rand_u64(fsl_get_time_raw_nsec());
 
-        fsl_convert_u64_to_str(string[1], NAME_MAX, seed);
-        if (fsl_write_file(string[0], 1, strlen(string[1]),
+        fsl_convert_u64_to_str(string[1], FSL_ID_CAP, seed);
+        if (fsl_write_file(string[0], strlen(string[1]),
                     &string[1], TRUE, TRUE) != FSL_ERR_SUCCESS)
             return *GAME_ERR;
     }
@@ -197,7 +198,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
 
     core.debug.chunk_gizmo = 1;
 
-    HHC_LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+    LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
             fsl_logger_stringf("World Loaded '%s'\n", world_name));
 
     *GAME_ERR = FSL_ERR_SUCCESS;

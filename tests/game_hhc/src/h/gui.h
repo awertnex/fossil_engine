@@ -21,7 +21,7 @@ enum menu_index
     MENU_SETTINGS_AUDIO,
     MENU_SETTINGS_VIDEO,
     MENU_GAME_PAUSE,
-    MENU_DEATH,
+    MENU_DEATH
 
 }; /* menu_index */
 
@@ -77,7 +77,7 @@ enum button_index
     /* ---- super debugger (SDB) -------------------------------------------- */
 
     BTN_SDB_ADD,
-    BTN_SDB_SUB,
+    BTN_SDB_SUB
 }; /* button_index */
 
 extern u16 menu_index_cur;

@@ -1,7 +1,4 @@
-/*  @file super_debugger.c
- *
- *  @brief gui debugger.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +11,13 @@
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
- *  limitations under the License.OFTWARE.
+ *  limitations under the License.
+ */
+
+/*!
+ *  @file super_debugger.c
+ *
+ *  @brief gui debugger.
  */
 
 #ifdef FSL_SUPER_DEBUGGER
@@ -97,7 +100,7 @@ void draw_super_debugger()
             (Vector2){debug_rectangle.pos.x, debug_rectangle.pos.y},
             (Vector2){debug_rectangle.scl.x, debug_rectangle.scl.y},
             COL_TRANS_MENU);
-    
+
     /* ---- draw edges ------------------------------------------------------ */
     draw_texture_simple(texture_super_debugger, debug_rectangle.edge_left,
             (Vector2){

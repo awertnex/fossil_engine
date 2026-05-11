@@ -1,7 +1,7 @@
+#include "src/common/types.h"
+
 #include "h/common.h"
 #include "h/player.h"
-
-#include "src/h/types.h"
 
 u32 DEATH_STRINGS_MAX[PLAYER_DEATH_REASON_COUNT] =
 {

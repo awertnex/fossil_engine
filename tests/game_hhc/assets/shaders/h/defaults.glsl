@@ -41,7 +41,8 @@ float fog_linear(float distance, float min, float max)
 
 #ifdef USE_TONE_MAPPING
 
-/*! @param w = white point.
+/*!
+ * @param w white point.
  */
 vec3 reinhard_tone_mapping(vec3 color, float w)
 {

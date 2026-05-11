@@ -1,7 +1,4 @@
-/*  @file diagnostics.h
- *
- *  @brief error codes, fsl_err, diagnostic colors.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,12 +14,17 @@
  *  limitations under the License.
  */
 
+/*!
+ *  @file diagnostics.h
+ *
+ *  @brief error codes, fsl_err, diagnostic colors.
+ */
+
 #ifndef FSL_DIAGNOSTICS_H
 #define FSL_DIAGNOSTICS_H
 
-#include "common.h"
+#include "engine_info.h"
 #include "types.h"
-#include "limits.h"
 
 #define FSL_DIAGNOSTIC_COLOR_DEFAULT        0xecececff
 #define FSL_DIAGNOSTIC_COLOR_FATAL          0xa33021ff
@@ -53,7 +55,7 @@
 #define FSL_ERR_PROCESS_FORK_FAIL           4112
 #define FSL_ERR_EXEC_FAIL                   4113
 #define FSL_ERR_EXEC_PROCESS_NON_ZERO       4114
-#define FSL_ERR_EXEC_TERMINATE_BY_SIGNAL    4115
+#define FSL_ERR_EXEC_SIGTERM                4115
 #define FSL_ERR_EXEC_ABNORMAL_EXIT          4116
 #define FSL_ERR_EXECVP_FAIL                 4117
 #define FSL_ERR_WAITPID_FAIL                4118
@@ -95,7 +97,8 @@
 #define FSL_ERR_READ_LINK_FAIL              4154
 #define FSL_ERR_OUT_OF_BOUNDS               4155
 
-/*! @brief global variable for engine-specific error codes.
+/*!
+ *  @brief global variable for engine-specific error codes.
  *
  *  @remark must be declared by the user if not including @ref core.c.
  */

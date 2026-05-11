@@ -1,7 +1,4 @@
-/*  @file math.c
- *
- *  @brief math stuff.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +11,13 @@
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
- *  limitations under the License.OFTWARE.
+ *  limitations under the License.
+ */
+
+/*!
+ *  @file math.c
+ *
+ *  @brief math stuff.
  */
 
 #include "h/math.h"
@@ -69,9 +72,9 @@ f64 fsl_clamp_f64(f64 n, f64 min, f64 max)
     return n < min ? min : n > max ? max : n;
 }
 
-u64 fsl_round_up_u64(u64 n, u64 val)
+u64 fsl_round_up_u64(u64 n, u64 max)
 {
-    return n + (val - (n % val)) % val;
+    return n + (max - (n % max)) % max;
 }
 
 i32 fsl_mod_i32(i32 n, i32 max)
@@ -89,7 +92,17 @@ f32 fsl_min_v3f32(v3f32 v)
     return v.x < v.y ? v.x < v.z ? v.x : v.z : v.y < v.z ? v.y : v.z;
 }
 
+f64 fsl_min_v3f64(v3f64 v)
+{
+    return v.x < v.y ? v.x < v.z ? v.x : v.z : v.y < v.z ? v.y : v.z;
+}
+
 f32 fsl_max_v3f32(v3f32 v)
+{
+    return v.x > v.y ? v.x > v.z ? v.x : v.z : v.y > v.z ? v.y : v.z;
+}
+
+f64 fsl_max_v3f64(v3f64 v)
 {
     return v.x > v.y ? v.x > v.z ? v.x : v.z : v.y > v.z ? v.y : v.z;
 }
@@ -99,7 +112,17 @@ u32 fsl_min_axis_v3f32(v3f32 v)
     return v.x < v.y ? v.x < v.z ? 1 : 3 : v.y < v.z ? 2 : 3;
 }
 
+u64 fsl_min_axis_v3f64(v3f64 v)
+{
+    return v.x < v.y ? v.x < v.z ? 1 : 3 : v.y < v.z ? 2 : 3;
+}
+
 u32 fsl_max_axis_v3f32(v3f32 v)
+{
+    return v.x > v.y ? v.x > v.z ? 1 : 3 : v.y > v.z ? 2 : 3;
+}
+
+u64 fsl_max_axis_v3f64(v3f64 v)
 {
     return v.x > v.y ? v.x > v.z ? 1 : 3 : v.y > v.z ? 2 : 3;
 }

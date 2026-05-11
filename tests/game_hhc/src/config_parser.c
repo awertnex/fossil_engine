@@ -1,8 +1,9 @@
-#include "h/main.h"
+#include "src/common/limits.h"
+#include "src/memory/memory.h"
 
 #include "src/h/dir.h"
-#include "src/h/limits.h"
-#include "src/h/memory.h"
+
+#include "h/main.h"
 
 #include <string.h>
 
@@ -20,7 +21,7 @@ enum TokenIndex
     TOKEN_COUNT,
 };
 
-str tokens[TOKEN_COUNT][NAME_MAX] =
+str tokens[TOKEN_COUNT][FSL_ID_CAP] =
 {
     [TOKEN_MOUSE_SENSITIVITY] = "mouse_sensitivity",
     [TOKEN_FOV] = "fov",
@@ -31,10 +32,10 @@ str tokens[TOKEN_COUNT][NAME_MAX] =
 void parse_config(void)
 {
     str *file_contents = NULL;
-    str string[NAME_MAX] = {0};
+    str string[FSL_ID_CAP] = {0};
     u32 i = 0;
     u64 file_len = fsl_get_file_contents("Heaven-Hell Continuum/config/settings.txt",
-            (void*)&file_contents, 1, TRUE);
+            (void*)&file_contents, TRUE);
     if (fsl_err != FSL_ERR_SUCCESS || !file_contents)
         return;
 

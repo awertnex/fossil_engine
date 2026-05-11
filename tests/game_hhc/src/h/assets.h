@@ -1,13 +1,14 @@
 #ifndef HHC_ASSETS_H
 #define HHC_ASSETS_H
 
-#include "common.h"
-#include "dir.h"
+#include "src/common/types.h"
+#include "src/common/limits.h"
+#include "src/shaders/shaders.h"
 
 #include "src/h/core.h"
-#include "src/h/limits.h"
-#include "src/h/shaders.h"
-#include "src/h/types.h"
+
+#include "common.h"
+#include "dir.h"
 
 #define FRICTION_BLOCK_SLIPPERY 0.02f
 #define FRICTION_BLOCK_WET      0.1f
@@ -22,7 +23,7 @@ enum /* shader_index */
     SHADER_POST_PROCESSING,
     SHADER_VOXEL,
     SHADER_BOUNDING_BOX,
-    SHADER_COUNT,
+    SHADER_COUNT
 }; /* shader_index */
 
 enum /* texture_index */
@@ -34,7 +35,7 @@ enum /* texture_index */
     TEXTURE_SKYBOX_STARS,
     TEXTURE_SUN,
     TEXTURE_MOON,
-    TEXTURE_COUNT,
+    TEXTURE_COUNT
 }; /* texture_index */
 
 enum /* texture_block_index */
@@ -56,7 +57,7 @@ enum /* texture_block_index */
     TEXTURE_BLOCK_WOOD_OAK_LOG_TOP,
     TEXTURE_BLOCK_WOOD_OAK_PLANKS,
     TEXTURE_BLOCK_BLOOD,
-    TEXTURE_BLOCK_COUNT,
+    TEXTURE_BLOCK_COUNT
 }; /* texture_block_index */
 
 enum block_id
@@ -75,7 +76,7 @@ enum block_id
     BLOCK_WOOD_OAK_LOG,
     BLOCK_WOOD_OAK_PLANKS,
     BLOCK_BLOOD,
-    BLOCK_COUNT,
+    BLOCK_COUNT
 }; /* block_id */
 
 enum block_state
@@ -85,30 +86,34 @@ enum block_state
 
 typedef struct block
 {
-    str name[NAME_MAX];
-    enum block_state state;
+    fsl_asset asset;
     u32 texture_index[6]; /* px, nx, py, ny, pz, nz */
+    enum block_state state;
     f32 friction;
 } block;
 
-extern fsl_shader_program shader[SHADER_COUNT];
-extern fsl_texture texture[TEXTURE_COUNT];
+extern fsl_mem_handle texture;
+extern fsl_mem_handle fbo;
+extern fsl_mem_handle mesh;
+extern fsl_mem_handle shader;
+extern fsl_mem_handle blocks;
 
-extern block *blocks;
-
-/*! @return non-zero on failure and @ref *GAME_ERR is set accordingly.
+/*!
+ *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
 u32 assets_init(void);
 
 void assets_free(void);
 
-/*! @param index = index into @ref block_textures.
+/*!
+ *  @param index index into @ref block_textures.
  *
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
-u32 block_texture_init(u32 index, str *name);
+u32 block_texture_init(u32 index, const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file);
 
-/*! @return non-zero on failure and @ref *GAME_ERR is set accordingly.
+/*!
+ *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
 void blocks_init(void);
 

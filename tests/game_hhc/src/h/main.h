@@ -1,12 +1,13 @@
 #ifndef HHC_H
 #define HHC_H
 
-#include "common.h"
+#include "src/common/diagnostics.h"
+#include "src/common/types.h"
 
 #include "src/h/core.h"
-#include "src/h/diagnostics.h"
 #include "src/h/ui.h"
-#include "src/h/types.h"
+
+#include "common.h"
 
 struct hhc_core
 {

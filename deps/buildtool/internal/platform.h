@@ -192,7 +192,7 @@ u32 is_file_exists(const str *name, b8 log)
         {
             if (log)
                 LOGERROR(ERR_IS_NOT_FILE, TRUE,
-                        "'%s' is Not a File\n", name);
+                        logger_stringf("'%s' is Not a File\n", name));
             else
                 build_err = ERR_IS_NOT_FILE;
         }
@@ -201,7 +201,7 @@ u32 is_file_exists(const str *name, b8 log)
     {
         if (log)
             LOGERROR(ERR_FILE_NOT_FOUND, TRUE,
-                    "File '%s' Not Found\n", name);
+                    logger_stringf("File '%s' Not Found\n", name));
         else
             build_err = ERR_FILE_NOT_FOUND;
     }
@@ -240,7 +240,7 @@ u32 is_dir_exists(const str *name, b8 log)
         {
             if (log)
                 LOGERROR(ERR_IS_NOT_DIR, TRUE,
-                        "'%s' is Not a Directory\n", name);
+                        logger_stringf("'%s' is Not a Directory\n", name));
             else
                 build_err = ERR_IS_NOT_DIR;
         }
@@ -249,7 +249,7 @@ u32 is_dir_exists(const str *name, b8 log)
     {
         if (log)
             LOGERROR(ERR_DIR_NOT_FOUND, TRUE,
-                    "Directory '%s' Not Found\n", name);
+                    logger_stringf("Directory '%s' Not Found\n", name));
         else build_err = ERR_DIR_NOT_FOUND;
     }
 
@@ -261,7 +261,7 @@ u32 make_dir(const str *path)
     if (bt_mkdir(path) == 0)
     {
         LOGTRACE(FALSE,
-                "Directory Created '%s'\n", path);
+                logger_stringf("Directory Created '%s'\n", path));
         build_err = ERR_SUCCESS;
         return build_err;
     }
@@ -274,7 +274,7 @@ u32 make_dir(const str *path)
 
         default:
             LOGERROR(ERR_DIR_CREATE_FAIL, TRUE,
-                    "Failed to Create Directory '%s'\n", path);
+                    logger_stringf("Failed to Create Directory '%s'\n", path));
     }
 
     return build_err;
@@ -284,7 +284,7 @@ int change_dir(const str *path)
 {
     int success = bt_chdir(path);
     LOGTRACE(TRUE,
-            "Working Directory Changed to '%s'\n", path);
+            logger_stringf("Working Directory Changed to '%s'\n", path));
     return success;
 }
 
@@ -310,7 +310,7 @@ u32 get_file_type(const str *name, u32 *type)
     }
 
     LOGERROR(ERR_FILE_NOT_FOUND, FALSE,
-            "File '%s' Not Found\n", name);
+            logger_stringf("File '%s' Not Found\n", name));
     return build_err;
 }
 
@@ -325,7 +325,7 @@ u64 get_file_contents(const str *name, void **dst, u64 size, b8 terminate)
     if ((file = fopen(name, "rb")) == NULL)
     {
         LOGERROR(ERR_FILE_OPEN_FAIL, TRUE,
-                "Failed to Open File '%s'\n", name);
+                logger_stringf("Failed to Open File '%s'\n", name));
         return 0;
     }
 
@@ -457,7 +457,7 @@ u32 copy_file(const str *src, const str *dst)
             if ((out_file = fopen(str_dst, "wb")) == NULL)
             {
                 LOGERROR(ERR_FILE_OPEN_FAIL, FALSE,
-                        "Failed to Copy File '%s' -> '%s'\n", src, str_dst);
+                        logger_stringf("Failed to Copy File '%s' -> '%s'\n", src, str_dst));
                 return build_err;
             }
 
@@ -471,7 +471,7 @@ u32 copy_file(const str *src, const str *dst)
             fwrite(in_file, 1, len, out_file);
 
             LOGTRACE(FALSE,
-                    "File Copied '%s' -> '%s'\n", src, str_dst);
+                    logger_stringf("File Copied '%s' -> '%s'\n", src, str_dst));
 
             fclose(out_file);
             mem_free((void*)&in_file, len, "copy_file().in_file");
@@ -481,8 +481,8 @@ u32 copy_file(const str *src, const str *dst)
             else
             {
                 LOGWARNING(ERR_FILE_STAT_FAIL, FALSE,
-                        "Failed to Copy File Permissions '%s' -> '%s', 'bt_stat()' Failed\n",
-                        src, str_dst);
+                        logger_stringf("Failed to Copy File Permissions '%s' -> '%s', 'bt_stat()' Failed\n",
+                        src, str_dst));
                 return build_err;
             }
             break;
@@ -491,7 +491,7 @@ u32 copy_file(const str *src, const str *dst)
             if (readlink(src, str_lnk, PATH_MAX - 1) < 1)
             {
                 LOGERROR(ERR_FILE_OPEN_FAIL, FALSE,
-                        "Failed to Copy Symlink '%s' -> '%s'\n", src, str_dst);
+                        logger_stringf("Failed to Copy Symlink '%s' -> '%s'\n", src, str_dst));
                 return build_err;
             }
 
@@ -503,15 +503,15 @@ u32 copy_file(const str *src, const str *dst)
             symlink(str_lnk, str_dst);
 
             LOGTRACE(FALSE,
-                    "Symlink Copied '%s' -> '%s'\n", src, str_dst);
+                    logger_stringf("Symlink Copied '%s' -> '%s'\n", src, str_dst));
 
             if (bt_stat(src, &stats) == 0)
                 bt_chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
             else
             {
                 LOGWARNING(ERR_FILE_STAT_FAIL, FALSE,
-                        "Failed to Copy File Permissions '%s' -> '%s', 'bt_stat()' Failed\n",
-                        src, str_dst);
+                        logger_stringf("Failed to Copy File Permissions '%s' -> '%s', 'bt_stat()' Failed\n",
+                        src, str_dst));
                 return build_err;
             }
             break;
@@ -584,14 +584,14 @@ u32 copy_dir(const str *src, const str *dst, b8 contents_only)
     }
 
     LOGTRACE(FALSE,
-            "Directory Copied '%s' -> '%s'\n", src, str_dst);
+            logger_stringf("Directory Copied '%s' -> '%s'\n", src, str_dst));
 
     if (bt_stat(str_src, &stats) == 0)
         bt_chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
     else
         LOGWARNING(ERR_FILE_STAT_FAIL, FALSE,
-                "Failed to Copy Directory Permissions '%s' -> '%s', 'bt_stat()' Failed\n",
-                str_src, str_dst);
+                logger_stringf("Failed to Copy Directory Permissions '%s' -> '%s', 'bt_stat()' Failed\n",
+                str_src, str_dst));
 
     if (stats.st_atim.tv_nsec == 0)
         stats.st_atim.tv_nsec = 1;
@@ -620,7 +620,7 @@ str *get_path_absolute(const str *name)
     if (strlen(name) >= PATH_MAX - 1)
     {
         LOGERROR(ERR_GET_PATH_ABSOLUTE_FAIL, TRUE,
-                "%s\n", "Failed to Get Absolute Path, Path Too Long");
+                logger_stringf("%s\n", "Failed to Get Absolute Path, Path Too Long"));
         return NULL;
     }
 
@@ -657,7 +657,7 @@ str *get_path_bin_root(void)
     if (len >= PATH_MAX - 1)
     {
         LOGFATAL(ERR_PATH_TOO_LONG, TRUE,
-                "Path Too Long '%s', Process Aborted\n", path_bin_root);
+                logger_stringf("Path Too Long '%s', Process Aborted\n", path_bin_root));
         return NULL;
     }
 
@@ -736,14 +736,14 @@ u32 get_base_name(const str *path, str *dst, u64 size)
     if (size == 0)
     {
         LOGERROR(ERR_SIZE_TOO_SMALL, TRUE,
-                "Failed to Get Base Name of '%s', 'size' Too Small\n", path);
+                logger_stringf("Failed to Get Base Name of '%s', 'size' Too Small\n", path));
         return build_err;
     }
 
     if (!path || !path[0] || !dst)
     {
         LOGERROR(ERR_POINTER_NULL, TRUE,
-                "%s\n", "Failed to Get Base Name, Pointer NULL");
+                logger_stringf("%s\n", "Failed to Get Base Name, Pointer NULL"));
         return build_err;
     }
 
@@ -751,7 +751,7 @@ u32 get_base_name(const str *path, str *dst, u64 size)
     if (len >= PATH_MAX - 1)
     {
         LOGERROR(ERR_PATH_TOO_LONG, TRUE,
-                "Failed to Get Base Name of '%s', Path Too Long\n", path);
+                logger_stringf("Failed to Get Base Name of '%s', Path Too Long\n", path));
         return build_err;
     }
 

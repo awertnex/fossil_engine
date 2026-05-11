@@ -11,8 +11,8 @@
 typedef struct world_info
 {
     u64 id;
-    str name[NAME_MAX];
-    str path[PATH_MAX];
+    str name[FSL_ID_CAP];
+    str path[FSL_PATH_CAP];
     u32 type;           /* gamemode set at world creation */
     u64 seed;
     u64 tick;
@@ -23,13 +23,15 @@ typedef struct world_info
     v3f32 drag;
 } world_info;
 
-/*! @brief info of current world loaded.
+/*!
+ *  @brief info of current world loaded.
  *
  *  @remark declared internally in @ref world.c.
  */
 extern world_info world;
 
-/*! @brief init, create and load world.
+/*!
+ *  @brief init, create and load world.
  *
  *  @remark if `seed` is 0, a random seed will be generated.
  *
@@ -37,7 +39,8 @@ extern world_info world;
  */
 u32 world_init(str *name, u64 seed, player *p);
 
-/*! @brief initialize world directory structure.
+/*!
+ *  @brief initialize world directory structure.
  *
  *  create world directories needed on disk.
  *
@@ -47,13 +50,14 @@ u32 world_init(str *name, u64 seed, player *p);
  */
 u32 world_dir_init(const str *world_name);
 
-/*! @brief load world and initialize files if not present.
+/*!
+ *  @brief load world and initialize files if not present.
  *
  *  load world data into memory if present and generate and write to disk if not:
  *  1. seed.txt, file containing world seed, can be changed,
  *     but changes only apply if world is loaded again.
  *
- *  @param seed = if file 'seed.txt' not present, it will be created and `seed`
+ *  @param seed if file 'seed.txt' not present, it will be created and `seed`
  *  will be written to it.
  *
  *  @remark if `seed` is 0, a random seed will be generated.

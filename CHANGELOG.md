@@ -7,7 +7,65 @@
    first version of the engine as standalone in this repo
 
 - - -
-## v0.6.0-dev (current)
+## v0.8.0-beta (2026 05 11)
+
+#### changes
+- (2026 05 11): replaced all `PATH_MAX` and `NAME_MAX` with `FSL_PATH_CAP` and
+                `FSL_ID_CAP` respectively
+- (2026 05 11): removed standard header 'limits.h' from engine header 'limits.h'
+- (2026 05 11): added function `fsl_mem_arena_pop()`
+- (2026 05 10): changed memory arena internals from pointers to offsets.
+- (2026 05 06): removed functions `fsl_mem_request_page_size()` and
+                `_fsl_mem_request_page_size()`, no longer needed
+- (2026 05 06): added guards around log macros to check for log level, the old
+                system used to be that 'DEBUG' and 'TRACE' logs were removed by
+                the pre-processor in release builds, it's changed so that log
+                calls are always there, but there's a cheap if-guard around
+                them.
+- (2026 05 05): removed parameter `_render` from function `fsl_engine_init()`.
+- (2026 05 05): added parameter `bindless` to function `fsl_texture_init()`
+                and combined `fsl_texture_generate()` with `fsl_texture_init()`.
+- (2026 05 05): removed member `format_internal` and `buf` from struct
+                `fsl_texture`.
+- (2026 05 05): removed parameter `format_internal` from functions
+                `fsl_texture_init()` and `fsl_texture_generate()`.
+- (2026 05 04): added parameters `name`, `file` and `path` to functions:
+                - `fsl_texture_init()`.
+                - `fsl_mesh_generate()`.
+                - `fsl_font_init()`.
+- (2026 05 04): added asset module.
+- (2026 04 29): updated 'buildtool' version to 'v1.8.4-beta'.
+- (2026 04 29): moved 'logger.c' and 'logger.h' into their own directory
+                'logger/'.
+- (2026 04 29): hide function `fsl_logger_init()` and change name to
+                `_fsl_logger_init()` (automatically called from
+                `fsl_engine_init()`).
+- (2026 04 29): remove param `log_dir_not_found` from function
+                `fsl_logger_init()`.
+- (2026 04 29): remove param `_log_dir` from function `fsl_engine_init()` and
+                function `fsl_logger_init()`.
+- (2026 04 28): add math functions:
+                - `fsl_min_v3f64(v3f64 v)`.
+                - `fsl_max_v3f64(v3f64 v)`.
+                - `fsl_min_axis_v3f64(v3f64 v)`.
+                - `fsl_max_axis_v3f64(v3f64 v)`.
+- (2026 04 28): add shader hot reloading support (just call the function
+                `fsl_shader_program_init()` again on the same
+                `fsl_shader_program` struct) with fallback support (hot
+                reloading and fallback won't work for the function
+                `fsl_shader_init()`).
+- (2026 04 28): add struct `fsl_key_bind` to define key combinations more
+                easily.
+
+## bugs and flaws
+- `fsl_mem_arena_push()` doesn't have a proper implementation for the freelist,
+  even tho a freelist is defined within the arena, same deal with
+  `fsl_mem_arena_pop()` and `fsl_mem_arena_init()`.
+- UI module is still very weak, but it can draw text, textures and 9-slice
+  textures.
+
+- - -
+## v0.7.0-beta (2026 04 27)
 
 #### changes
 - (2026 04 23): add engine version to the stdout info on engine start

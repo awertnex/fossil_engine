@@ -1,7 +1,4 @@
-/*  @file input.h
- *
- *  @brief keyboard and mouse input handling.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,27 +14,23 @@
  *  limitations under the License.
  */
 
+/*!
+ *  @file input.h
+ *
+ *  @brief keyboard and mouse input handling.
+ */
+
 #ifndef FSL_INPUT_H
 #define FSL_INPUT_H
 
-#include "common.h"
-#include "types.h"
+#include "../common/engine_info.h"
+#include "../common/types.h"
 
 #define FSL_MOUSE_BUTTONS_MAX 8
 #define FSL_KEYBOARD_KEYS_MAX 120
 #define FSL_DOUBLE_PRESS_TIME_INTERVAL 0.5f
 
-enum fsl_keyboard_key_state
-{
-    FSL_STATE_KEY_IDLE,
-    FSL_STATE_KEY_PRESS,
-    FSL_STATE_KEY_HOLD,
-    FSL_STATE_KEY_RELEASE,
-    FSL_STATE_KEY_LISTEN_DOUBLE,
-    FSL_STATE_KEY_PRESS_DOUBLE,
-    FSL_STATE_KEY_HOLD_DOUBLE,
-    FSL_STATE_KEY_RELEASE_DOUBLE
-}; /* fsl_keyboard_key_state */
+typedef struct key_bind fsl_key_bind;
 
 enum fsl_keyboard_key
 {
@@ -164,22 +157,55 @@ enum fsl_keyboard_key
     FSL_KEY_MENU
 }; /* fsl_keyboard_key */
 
-FSLAPI b8 fsl_is_mouse_press(const u32 button);
-FSLAPI b8 fsl_is_mouse_hold(const u32 button);
-FSLAPI b8 fsl_is_mouse_release(const u32 button);
-FSLAPI b8 fsl_is_key_press(const u32 key);
-FSLAPI b8 fsl_is_key_press_double(const u32 key);
-FSLAPI b8 fsl_is_key_hold(const u32 key);
-FSLAPI b8 fsl_is_key_release(const u32 key);
+enum fsl_mod_key
+{
+    FSL_SHIFT_LEFT = 1,
+    FSL_SHIFT_RIGHT,
+    FSL_CONTROL_LEFT = 1,
+    FSL_CONTROL_RIGHT,
+    FSL_ALT_LEFT = 1,
+    FSL_ALT_RIGHT,
+    FSL_SUPER_LEFT = 1,
+    FSL_SUPER_RIGHT
+}; /* fsl_mod_key */
 
-/*! @brief update internal mouse movement.
+struct key_bind
+{
+    u32 key;
+    u32 mod; /* enum @ref fsl_mod_key_flag (internal enum) */
+}; /* key_bind */
+
+/*!
+ *  @brief setup a key binding (key combination).
  *
- *  update parameters at @ref fsl_render.mouse_pos and @ref fsl_render.mouse_delta of
- *  the currently bound `fsl_render`.
+ *  @param key a keyboard key or mouse button.
+ */
+FSLAPI fsl_key_bind fsl_key_bind_init(enum fsl_keyboard_key key,
+        enum fsl_mod_key shift, enum fsl_mod_key ctrl,
+        enum fsl_mod_key alt, enum fsl_mod_key super);
+
+FSLAPI b8 fsl_is_mouse_press(const fsl_key_bind button);
+FSLAPI b8 fsl_is_mouse_hold(const fsl_key_bind button);
+FSLAPI b8 fsl_is_mouse_release(const fsl_key_bind button);
+FSLAPI b8 fsl_is_key_press(const fsl_key_bind key);
+FSLAPI b8 fsl_is_key_press_double(const fsl_key_bind key);
+FSLAPI b8 fsl_is_key_hold(const fsl_key_bind key);
+FSLAPI b8 fsl_is_key_release(const fsl_key_bind key);
+
+/*!
+ *  @brief update mouse movement.
+ *
+ *  - update parameters at @ref fsl_render.mouse_pos and @ref fsl_render.mouse_delta
+ *    of the currently bound `fsl_render`.
+ *
+ *  @remark called automatically from @ref fsl_engine_running().
  */
 FSLAPI void fsl_update_mouse_movement(void);
 
-/*! @brief update internal mouse and key states: press, double-press, hold and release.
+/*!
+ *  @brief update internal mouse and key states: press, double-press, hold and release.
+ *
+ *  @remark called automatically from @ref fsl_engine_running().
  */
 FSLAPI void fsl_update_key_states(void);
 

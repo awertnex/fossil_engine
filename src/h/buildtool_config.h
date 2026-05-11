@@ -1,6 +1,6 @@
-/*  @file build.h
- *
- *  @brief build info to link the engine with external software.
+/*!
+ *  @remark this header is to provide engine bindings for if building using
+ *  buildtool (https://github.com/awertnex/buildtool.git)
  *
  *  Copyright 2026 Lily Awertnex
  *
@@ -17,78 +17,89 @@
  *  limitations under the License.
  */
 
-#ifndef FSL_BUILD_H
-#define FSL_BUILD_H
+/*!
+ *  @file buildtool_config.h
+ *
+ *  @brief build info to link the engine with external software.
+ */
 
+#ifndef FSL_BUILDTOOL_CONFIG_H
+#define FSL_BUILDTOOL_CONFIG_H
+
+#include "../common/engine_info.h"
 #include "../../deps/buildtool/buildtool.h"
-
-#define FSL_C_STD "-std=c89"
 
 #if FSL_PLATFORM_WIN
 
-    /*! @brief for the engine itself.
+    /*!
+     *  @brief for the engine itself.
      */
     static const str fsl_str_libs_internal[][CMD_SIZE] =
     {
-        "-Llib/"PLATFORM,
+        "-Llib/" PLATFORM,
         "-lm",
         "-lmvec",
         "-lglfw3",
         "-lgdi32",
         "-lwinmm",
-        "-mwindows",
+        "-mwindows"
     };
 
-    /*! @brief for the including software.
+    /*!
+     *  @brief for the including software.
      */
     static const str fsl_str_libs[][CMD_SIZE] =
     {
-        "-Lfossil/lib"PLATFORM,
+        "-Lfossil/lib" PLATFORM,
         "-lm",
         "-lglfw3",
         "-lfossil",
         "-lgdi32",
-        "-lwinmm",
+        "-lwinmm"
     };
 
 #else
 
-    /*! @brief for the engine itself.
+    /*!
+     *  @brief for the engine itself.
      */
     static const str fsl_str_libs_internal[][CMD_SIZE] =
     {
-        "-Llib/"PLATFORM,
+        "-Llib/" PLATFORM,
         "-lm",
         "-lmvec",
         "-lglfw",
         "", /* empty slots for alignment across different platforms */
         "",
-        "",
+        ""
     };
 
-    /*! @brief for the including software.
+    /*!
+     *  @brief for the including software.
      */
     static const str fsl_str_libs[][CMD_SIZE] =
     {
-        "-Lfossil/lib/"PLATFORM,
+        "-Lfossil/lib/" PLATFORM,
         "-lm",
         "-lglfw",
         "-lfossil",
         "", /* empty slots for alignment across different platforms */
-        "",
+        ""
     };
 
 #endif /* FSL_PLATFORM */
 
 /* ---- section: signatures ------------------------------------------------- */
 
-/*! @brief link engine's dependencies with the including software for compile time.
+/*!
+ *  @brief link engine's dependencies with the including software for compile time.
  *
  *  @param cmd cmd to push engine's required libs to, if `NULL`, internal cmd is used.
  */
 static void fsl_engine_link_libs(_buf *cmd);
 
-/*! @brief link engine's dependencies with the including software for run time.
+/*!
+ *  @brief link engine's dependencies with the including software for run time.
  *
  *  @param cmd cmd to push application's runtime path to, if `NULL`, internal cmd is used.
  */
@@ -113,7 +124,7 @@ void fsl_engine_set_runtime_path(_buf *cmd)
     if (!cmd)
         _cmdp = &_cmd;
 
-    cmd_push(_cmdp, "-Wl,-rpath="RUNTIME_PATH);
+    cmd_push(_cmdp, "-Wl,-rpath=" RUNTIME_PATH);
 }
 
-#endif /* FSL_BUILD_H */
+#endif /* FSL_BUILDTOOL_CONFIG_H */

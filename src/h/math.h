@@ -1,7 +1,4 @@
-/*  @file math.h
- *
- *  @brief math stuff.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,17 +14,23 @@
  *  limitations under the License.
  */
 
+/*!
+ *  @file math.h
+ *
+ *  @brief math stuff.
+ */
+
 #ifndef FSL_MATH_H
 #define FSL_MATH_H
 
-#include "common.h"
-#include "types.h"
+#include "../common/engine_info.h"
+#include "../common/types.h"
 
-#define FSL_PI          3.14159265358979323846f
-#define FSL_DEG2RAD     (FSL_PI / 180.0f)
-#define FSL_RAD2DEG     (180.0f / FSL_PI)
-#define FSL_GRAVITY     9.7803267715f
-#define FSL_EPSILON     1e-5f
+#define FSL_PI          3.14159265358979323846
+#define FSL_DEG2RAD     (FSL_PI / 180.0)
+#define FSL_RAD2DEG     (180.0 / FSL_PI)
+#define FSL_GRAVITY     9.7803267715
+#define FSL_EPSILON     1e-5
 #define FSL_RAND_SCALE  (FSL_PI / ~(~0u >> 1))
 
 FSLAPI v3f32 fsl_add_v3f32(v3f32 a, v3f32 b);
@@ -38,15 +41,19 @@ FSLAPI f32 fsl_clamp_f32(f32 n, f32 min, f32 max);
 FSLAPI i64 fsl_clamp_i64(i64 n, i64 min, i64 max);
 FSLAPI u64 fsl_clamp_u64(u64 n, u64 min, u64 max);
 FSLAPI f64 fsl_clamp_f64(f64 n, f64 min, f64 max);
-FSLAPI u64 fsl_round_up_u64(u64 x, u64 n);
+FSLAPI u64 fsl_round_up_u64(u64 n, u64 max);
 FSLAPI i32 fsl_mod_i32(i32 n, i32 max);
 FSLAPI i64 fsl_mod_i64(i64 n, i64 max);
 FSLAPI f32 fsl_min_v3f32(v3f32 v);
+FSLAPI f64 fsl_min_v3f64(v3f64 v);
 FSLAPI f32 fsl_max_v3f32(v3f32 v);
+FSLAPI f64 fsl_max_v3f64(v3f64 v);
+FSLAPI u32 fsl_min_axis_v3f32(v3f32 v);
+FSLAPI u64 fsl_min_axis_v3f64(v3f64 v);
+FSLAPI u32 fsl_max_axis_v3f32(v3f32 v);
+FSLAPI u64 fsl_max_axis_v3f64(v3f64 v);
 FSLAPI f32 fsl_map_range_f32(f32 n, f32 n_min, f32 n_max, f32 r_min, f32 r_max);
 FSLAPI f64 fsl_map_range_f64(f64 n, f64 n_min, f64 n_max, f64 r_min, f64 r_max);
-FSLAPI u32 fsl_min_axis_v3f32(v3f32 v);
-FSLAPI u32 fsl_max_axis_v3f32(v3f32 v);
 FSLAPI f32 fsl_len_v3f32(v3f32 v);
 FSLAPI f64 fsl_len_v3f64(v3f64 v);
 FSLAPI v3f32 fsl_normalize_v3f32(v3f32 v);

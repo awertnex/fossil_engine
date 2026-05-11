@@ -1,7 +1,4 @@
-/*  @file string.c
- *
- *  @brief string parsing, token searching.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,14 +11,21 @@
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
- *  limitations under the License.OFTWARE.
+ *  limitations under the License.
  */
 
-#include "h/diagnostics.h"
+/*!
+ *  @file string.c
+ *
+ *  @brief string parsing, token searching.
+ */
+
+#include "common/diagnostics.h"
+#include "common/limits.h"
+#include "logger/logger.h"
+#include "memory/memory.h"
+
 #include "h/dir.h"
-#include "h/limits.h"
-#include "h/logger.h"
-#include "h/memory.h"
 #include "h/string.h"
 
 #include <stdio.h>
@@ -87,9 +91,9 @@ u32 fsl_convert_i32_to_str(str *dst, i32 size, i32 n)
 
     if (size <= 0)
     {
-        _LOGERROR(FSL_ERR_SIZE_TOO_SMALL,
+        LOGERROR(FSL_ERR_SIZE_TOO_SMALL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("%s\n", "Failed to Convert i32 to str, 'size' Too Small"));
+                MSG_ACTION_REASON_ERROR("Convert `i32` to `str`", "Size Too Small"));
         return fsl_err;
     }
 
@@ -110,7 +114,7 @@ u32 fsl_convert_i32_to_str(str *dst, i32 size, i32 n)
     while (n > 0 && i < size - 1)
     {
         dst[i++] = (n % 10) + '0';
-      	n /= 10;
+        n /= 10;
     }
 
     if (sign < 0)
@@ -130,9 +134,9 @@ u32 fsl_convert_u64_to_str(str *dst, u64 size, u64 n)
 
     if (size == 0)
     {
-        _LOGERROR(FSL_ERR_SIZE_TOO_SMALL,
+        LOGERROR(FSL_ERR_SIZE_TOO_SMALL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("%s\n", "Failed to Convert u64 to str, 'size' Too Small"));
+                MSG_ACTION_REASON_ERROR("Convert `u64` to `str`", "Size Too Small"));
         return fsl_err;
     }
 
@@ -151,7 +155,7 @@ u32 fsl_convert_u64_to_str(str *dst, u64 size, u64 n)
     while (n > 0 && i < size - 1)
     {
         dst[i++] = (n % 10) + '0';
-      	n /= 10;
+        n /= 10;
     }
 
     dst[i] = '\0';

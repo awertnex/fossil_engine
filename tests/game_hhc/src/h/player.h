@@ -1,10 +1,10 @@
 #ifndef HHC_PLAYER_H
 #define HHC_PLAYER_H
 
+#include "src/h/collision.h"
+
 #include "common.h"
 #include "main.h"
-
-#include "src/h/collision.h"
 
 #define PLAYER_REACH_DISTANCE_MAX   5.0f
 #define PLAYER_HOTBAR_SLOTS_MAX     10
@@ -41,7 +41,9 @@ enum player_flag
     FLAG_PLAYER_OVERFLOW_Y =        0x00000800,
     FLAG_PLAYER_OVERFLOW_Z =        0x00001000,
 
-    /*! @brief positive overflow direction flags,
+    /*!
+     *  @brief positive overflow direction flags.
+     *
      *  @remark default is 0 for negative overflow (underflow).
      */
     FLAG_PLAYER_OVERFLOW_PX =       0x00002000,
@@ -97,7 +99,8 @@ typedef struct player
     f32 camera_distance;            /* for camera collision detection */
     u8 camera_mode;                 /* enum: @ref player_camera_mode */
 
-    /*! @brief player at world edge, enum: @ref player_flag.
+    /*!
+     *  @brief player at world edge, enum: @ref player_flag.
      */
     u8 overflow;
 
@@ -107,7 +110,8 @@ typedef struct player
     v3i64 spawn;                    /* spawn point */
     u64 menu_state;                 /* enum: @ref player_menu_state */
 
-    /*! @remark signed instead of unsigned so it's possible to navigate `hotbar_slots
+    /*!
+     *  @remark signed instead of unsigned so it's possible to navigate `hotbar_slots
      *  when using mousewheel, used for wrapping around when out of range.
      */
     i32 hotbar_slot_selected;
@@ -119,7 +123,8 @@ typedef struct player
     u32 death; /* enum: @ref player_death_reason */
 } player;
 
-/*! @brief update everything related to a player.
+/*!
+ *  @brief update everything related to a player.
  *
  *  1. update kinematics and movement permissions based on `p->flag`.
  *  2. update player FOV based on speed and camera zoom.
@@ -136,28 +141,31 @@ void player_update(player *p, f64 dt);
 void player_collision_update(player *p, f64 dt);
 void player_bounding_box_update(player *p);
 
-/*! @brief make a collision capsule for collision detection.
+/*!
+ *  @brief make a collision capsule for collision detection.
  *
  *  make a capsule encapsulating `b`, plus a padding of 1 in each direction.
  *  useful for limiting collision checks to only within the capsule.
  *
- *  @param ch = current chunk the player is in (named `ch` to avoid symbol clash with @ref chunk).
+ *  @param ch current chunk the player is in (named `ch` to avoid symbol clash with @ref chunk).
  *
  *  @remark collision capsule position is in chunk-relative coordinates, not world
  *  coordinates.
  */
 fsl_bounding_box make_collision_capsule(fsl_bounding_box b, v3i32 ch, v3f32 velocity);
 
-/*! @brief update player chunk deltas.
+/*!
+ *  @brief update player chunk deltas.
  *
  *  calculate current chunk and delta chunk, and determine whether
  *  @ref core.flag.chunk_buf_dirty should be set or not.
  */
 void player_chunk_update(player *p);
 
-/*! @brief calculate camera rotations and mechanics based on `player->camera_mode`.
+/*!
+ *  @brief calculate camera rotations and mechanics based on `player->camera_mode`.
  *
- *  @param use_mouse = let mouse delta move the camera, useful for interacting
+ *  @param use_mouse let mouse delta move the camera, useful for interacting
  *  with UI instead of player.
  */
 void player_camera_movement_update(player *p, v2f64 mouse_delta, b8 use_mouse);
@@ -166,19 +174,22 @@ void player_target_update(player *p);
 void set_player_pos(player *p, f64 x, f64 y, f64 z);
 void set_player_block(player *p, i64 x, i64 y, i64 z);
 
-/*! @brief set player spawn point.
+/*!
+ *  @brief set player spawn point.
  */
 void set_player_spawn(player *p, i64 x, i64 y, i64 z);
 
-/*! @brief re-spawn player.
+/*!
+ *  @brief re-spawn player.
  *
- *  @param hard = `TRUE` will reset all player stats, `FALSE` will only teleport to spawn.
+ *  @param hard `TRUE` will reset all player stats, `FALSE` will only teleport to spawn.
  */
 void player_spawn(player *p, b8 hard);
 
 void player_kill(player *p);
 
-/*! @brief get random string from string buffers in @ref common.c for player death reason.
+/*!
+ *  @brief get random string from string buffers in @ref common.c for player death reason.
  *
  *  @return `NULL` on failure.
  */
