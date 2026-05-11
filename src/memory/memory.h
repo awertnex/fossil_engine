@@ -91,6 +91,9 @@
 #define fsl_mem_arena_push(arena, handle, size, name) \
     fsl_mem_arena_push_internal(arena, handle, size, name, __BASE_FILE__, __LINE__)
 
+#define fsl_mem_arena_pop(handle, name) \
+    fsl_mem_arena_pop_internal(handle, name, __BASE_FILE__, __LINE__)
+
 #define fsl_mem_arena_free(x, name) \
     fsl_mem_arena_free_internal(x, name, __BASE_FILE__, __LINE__)
 
@@ -289,7 +292,7 @@ FSLAPI u32 fsl_mem_arena_init_internal(fsl_mem_arena *x,
         const str *name, const str *src_file, u64 src_line);
 
 /*!
- *  @brief reserve a block of available memory in `x` and grow arena if needed and
+ *  @brief reserve a block of available memory in arena `x` and grow arena if needed and
  *  initialize `handle` metadata.
  *
  *  handle's metadata:
@@ -303,6 +306,19 @@ FSLAPI u32 fsl_mem_arena_init_internal(fsl_mem_arena *x,
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_mem_arena_push_internal(fsl_mem_arena *x, fsl_mem_handle *handle, u64 size,
+        const str *name, const str *src_file, u64 src_line);
+
+/*!
+ *  @brief reserve a block of available memory in arena `x` and grow arena if needed and
+ *  initialize `handle` metadata.
+ *
+ *  @brief remove a memory handle from arena `x` and invalidate it.
+ *
+ *  @param name symbol name (for logging).
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+FSLAPI u32 fsl_mem_arena_pop_internal(fsl_mem_handle *handle,
         const str *name, const str *src_file, u64 src_line);
 
 /*!

@@ -402,7 +402,11 @@ u32 fsl_mem_arena_init_internal(fsl_mem_arena *x,
     x->entry[1].offset = FSL_OFFSET_INVALID;
     x->entry_cap = entry_cap;
     x->entry_count = 0;
+
+    x->freelist[0].offset = FSL_OFFSET_INVALID;
+    x->freelist[1].offset = FSL_OFFSET_INVALID;
     x->freelist_cap = freelist_cap;
+
     x->buf_cap = buf_cap;
     x->buf_cursor = 0;
 
@@ -518,6 +522,92 @@ u32 fsl_mem_arena_push_internal(fsl_mem_arena *x, fsl_mem_handle *handle, u64 si
     LOGTRACEEX(0,
             src_file, src_line,
             MSG_MEM_ARENA_PUSH(name, x->buf, handle->offset, size, x->entry_count, x->entry_cap));
+
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+}
+
+u32 fsl_mem_arena_pop_internal(fsl_mem_handle *handle,
+        const str *name, const str *src_file, u64 src_line)
+{
+    fsl_mem_arena *arena = NULL;
+    fsl_mem_arena_handle *entry = NULL;
+    fsl_off entry_pos = 0;
+    u64 entry_cap = 0;
+
+    fsl_mem_arena_handle *freelist = NULL;
+    fsl_off freelist_pos = 0;
+    u64 freelist_cap = 0;
+
+    if (!handle)
+    {
+        LOGERROREX(FSL_ERR_POINTER_NULL, 0,
+                src_file, src_line,
+                MSG_MEM_ARENA_POP_REASON_FAIL(name, NULL, "Pointer `NULL`"));
+        return fsl_err;
+    }
+
+    if (!handle->arena)
+    {
+        LOGERROREX(FSL_ERR_POINTER_NULL, 0,
+                src_file, src_line,
+                MSG_MEM_ARENA_POP_REASON_FAIL(name, NULL, "Arena Pointer `NULL`"));
+        return fsl_err;
+    }
+
+    if (handle->offset == FSL_OFFSET_INVALID)
+    {
+        LOGERROREX(FSL_ERR_OUT_OF_BOUNDS, 0,
+                src_file, src_line,
+                MSG_MEM_ARENA_POP_REASON_FAIL(name, handle->arena, "Handle Offset Invalid"));
+        return fsl_err;
+    }
+
+    arena = handle->arena;
+    entry = arena->entry;
+    entry_cap = arena->entry_cap / sizeof(fsl_mem_arena_handle);
+    freelist = arena->freelist;
+    freelist_cap = arena->freelist_cap / sizeof(fsl_mem_arena_handle);
+
+    while (entry[entry_pos].offset != handle->offset && entry_pos < entry_cap)
+    {++entry_pos;}
+
+    if (entry_pos < entry_cap)
+    {
+        while (freelist[freelist_pos].offset != FSL_OFFSET_INVALID && freelist_pos < freelist_cap)
+        {++freelist_pos;}
+
+        if (freelist_pos >= freelist_cap)
+        {
+            if (fsl_mem_remap_internal((void*)&arena->freelist, freelist_cap, freelist_cap * 2, name, src_file, src_line) != FSL_ERR_SUCCESS)
+            {
+                LOGERROREX(fsl_err, 0,
+                        src_file, src_line,
+                        MSG_MEM_ARENA_POP_REASON_FAIL(name, arena, "`fsl_mem_remap_internal()` Failed"));
+                return fsl_err;
+            }
+            arena->freelist_cap *= 2;
+            freelist_cap = arena->freelist_cap / sizeof(fsl_mem_arena_handle);
+
+            for (; freelist_pos < freelist_cap; ++freelist_pos)
+                arena->freelist[freelist_pos].offset = FSL_OFFSET_INVALID;
+        }
+
+        freelist[freelist_pos] = entry[entry_pos];
+        entry[entry_pos].offset = FSL_OFFSET_INVALID;
+        entry[entry_pos].size = 0;
+
+        --arena->entry_count;
+        handle->arena = NULL;
+        handle->offset = FSL_OFFSET_INVALID;
+        handle->size = 0;
+    }
+
+    LOGTRACEEX(0,
+            src_file, src_line,
+            MSG_MEM_ARENA_POP(name, arena,
+                freelist[freelist_pos].offset, freelist[freelist_pos].size,
+                arena->entry_count, arena->entry_cap));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;

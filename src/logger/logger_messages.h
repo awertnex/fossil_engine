@@ -112,8 +112,10 @@
 #define MSG_MEM_ARENA_INIT_REASON_FAIL(name, address, size, reason) fsl_logger_stringf("Failed to Initialize Memory Arena %s[%p][%"PRIu64"], %s\n", name, address, size, reason)
 #define MSG_MEM_ARENA_INIT_FAIL(name, address, size)        fsl_logger_stringf("Failed to Initialize Memory Arena %s[%p][%"PRIu64"], `fsl_mem_map_internal()` Failed\n", name, address, size)
 #define MSG_MEM_ARENA_INIT(name, address, size)             fsl_logger_stringf("Memory Arena Initialized %s[%p][%"PRIu64"B]\n", name, address, size)
-#define MSG_MEM_ARENA_PUSH_REASON_FAIL(name, address, size, reason) fsl_logger_stringf("Failed to Push Memory Arena %s[%p][%"PRIu64"B], %s\n", name, address, size, reason)
+#define MSG_MEM_ARENA_PUSH_REASON_FAIL(name, address, size, reason) fsl_logger_stringf("Failed to Push to Memory Arena %s[%p][%"PRIu64"B], %s\n", name, address, size, reason)
 #define MSG_MEM_ARENA_PUSH(name, address, offset_pushed, size_pushed, entry, size_entry) fsl_logger_stringf("Memory Arena Pushed %s[%p][offset_pushed: %"PRIu64"][size_pushed: %"PRIu64"B][entry_total: %"PRIu64"][entry_cap: %"PRIu64"B]\n", name, address, offset_pushed, size_pushed, entry, size_entry)
+#define MSG_MEM_ARENA_POP_REASON_FAIL(name, address, reason) fsl_logger_stringf("Failed to Pop from Memory Arena %s[%p], %s\n", name, address, reason)
+#define MSG_MEM_ARENA_POP(name, address, offset_popped, size_popped, entry, size_entry) fsl_logger_stringf("Memory Arena Popped %s[%p][offset_popped: %"PRIu64"][size_popped: %"PRIu64"B][entry_total: %"PRIu64"][entry_cap: %"PRIu64"B]\n", name, address, offset_popped, size_popped, entry, size_entry)
 #define MSG_MEM_ARENA_FREE(name, address, size_arena, entry, size_entry) fsl_logger_stringf("Memory Arena Unmapped %s[%p][%"PRIu64"B], Entry Total [%"PRIu64"][%"PRIu64"B]\n", name, address, size_arena, entry, size_entry)
 
 /* ---- section: process ---------------------------------------------------- */
