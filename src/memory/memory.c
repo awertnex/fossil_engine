@@ -20,13 +20,12 @@
  *  @brief memory management.
  */
 
-#include "../h/common.h"
-
-#include "../h/diagnostics.h"
+#include "../common/diagnostics.h"
+#include "../common/limits.h"
+#include "../logger/logger.h"
 #include "../h/math.h"
+
 #include "memory.h"
-#include "../h/limits.h"
-#include "../logger/log.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,11 +34,11 @@
 #include <stdarg.h>
 #include <inttypes.h>
 
-struct mem_arena_handle
+struct fsl_mem_arena_handle
 {
     fsl_off offset;         /* handle's data offset from pointer base */
     u64 size;               /* handle's allocated size */
-}; /* mem_arena_handle */
+}; /* fsl_mem_arena_handle */
 
 fsl_mem_arena mem_arena_internal = {0};
 fsl_mem_arena mem_arena_name_internal = {0};

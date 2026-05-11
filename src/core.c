@@ -20,17 +20,22 @@
  *  @brief engine init, running, close, windowing, opengl loading.
  */
 
-#include "h/common.h"
+#include "common/engine_info.h"
+#include "common/common_values.h"
+#include "common/config.h"
+#include "common/diagnostics.h"
+#include "common/limits.h"
+#include "common/session.h"
+#include "common/types.h"
+#include "logger/logger.h"
+#include "memory/memory.h"
+#include "shaders/shaders.h"
 
 #include "h/core.h"
-#include "h/diagnostics.h"
 #include "h/dir.h"
 #include "h/input.h"
-#include "logger/log.h"
 #include "h/math.h"
-#include "memory/memory.h"
 #include "h/process.h"
-#include "h/shaders.h"
 #include "h/string.h"
 #include "h/time.h"
 #include "h/ui.h"

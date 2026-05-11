@@ -23,14 +23,14 @@
 #ifndef FSL_COLLISION_H
 #define FSL_COLLISION_H
 
-#include "common.h"
-#include "types.h"
+#include "../common/engine_info.h"
+#include "../common/types.h"
 
 #define FSL_COLLISION_EPSILON 1e-5
 
-typedef struct bounding_box fsl_bounding_box;
+typedef struct fsl_bounding_box fsl_bounding_box;
 
-struct bounding_box
+struct fsl_bounding_box
 {
     v3f64 pos;
     v3f64 size;

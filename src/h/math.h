@@ -23,8 +23,8 @@
 #ifndef FSL_MATH_H
 #define FSL_MATH_H
 
-#include "common.h"
-#include "types.h"
+#include "../common/engine_info.h"
+#include "../common/types.h"
 
 #define FSL_PI          3.14159265358979323846
 #define FSL_DEG2RAD     (FSL_PI / 180.0)

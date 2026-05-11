@@ -1,5 +1,5 @@
 #include "../deps/buildtool/buildtool.h"
-#include "../src/h/build.h"
+#include "../src/h/buildtool_config.h"
 
 #define DIR_ROOT "../"
 

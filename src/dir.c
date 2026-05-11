@@ -20,13 +20,12 @@
  *  @brief directory and file parsing, writing, copying and path resolution.
  */
 
-#include "h/common.h"
-
-#include "h/diagnostics.h"
-#include "h/dir.h"
-#include "h/limits.h"
-#include "logger/log.h"
+#include "common/diagnostics.h"
+#include "common/limits.h"
+#include "logger/logger.h"
 #include "memory/memory.h"
+
+#include "h/dir.h"
 #include "h/process.h"
 #include "h/time.h"
 

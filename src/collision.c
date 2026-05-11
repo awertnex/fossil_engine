@@ -21,7 +21,6 @@
  */
 
 #include "h/collision.h"
-#include "h/types.h"
 #include "h/math.h"
 
 #include <math.h>

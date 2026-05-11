@@ -1,10 +1,14 @@
-#include "src/h/core.h"
-#include "src/logger/log.h"
+#include "src/common/config.h"
+#include "src/common/types.h"
+#include "src/logger/logger.h"
 #include "src/memory/memory.h"
-#include "src/h/shaders.h"
+#include "src/shaders/shaders.h"
+
+#include "src/h/core.h"
 #include "src/h/string.h"
 
 #include "h/assets.h"
+#include "h/diagnostics.h"
 #include "h/dir.h"
 #include "h/main.h"
 

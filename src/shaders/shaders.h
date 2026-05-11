@@ -17,20 +17,22 @@
 /*!
  *  @file shaders.h
  *
- *  @brief loading, pre-processing, parsing and unloading glsl shaders.
+ *  @brief main shaders module header; shader definitions, pre-processing,
+ *  loading and unloading glsl shaders.
  */
 
 #ifndef FSL_SHADERS_H
 #define FSL_SHADERS_H
 
-#include "common.h"
-#include "assets.h"
-#include "types.h"
+#include "../common/engine_info.h"
+#include "../common/types.h"
+
+#include "shader_types.h"
 
 #include <deps/glad/glad.h>
 
 /*!
- *  @brief initialize single shader.
+ *  @brief initialize a single shader.
  *
  *  - pre-process shader before compiling shader and compile shader.
  *
@@ -41,10 +43,13 @@
  */
 FSLAPI u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created);
 
+/*!
+ *  @brief unload a single shader.
+ */
 FSLAPI void fsl_shader_free(fsl_shader *shader);
 
 /*!
- *  @brief initialize shader program.
+ *  @brief initialize a shader program.
  *
  *  - call @ref fsl_shader_init() on all shaders in `program` if
  *    @ref fsl_shader.asset.file and @ref fsl_shader.asset.path are not `NULL`.
@@ -56,6 +61,9 @@ FSLAPI void fsl_shader_free(fsl_shader *shader);
  */
 FSLAPI u32 fsl_shader_program_init(fsl_shader_program *program);
 
+/*!
+ *  @brief unload a shader program.
+ */
 FSLAPI void fsl_shader_program_free(fsl_shader_program *program);
 
 /*!

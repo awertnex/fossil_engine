@@ -1,4 +1,4 @@
-#include "src/h/types.h"
+#include "src/common/types.h"
 
 #include "h/common.h"
 #include "h/player.h"

@@ -1,7 +1,7 @@
 #ifndef HHC_DIR_H
 #define HHC_DIR_H
 
-#include "src/h/types.h"
+#include "src/common/types.h"
 #include "src/h/dir.h"
 
 #define DIR_MAX 128

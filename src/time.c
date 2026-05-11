@@ -20,15 +20,15 @@
  *  @brief get time, limit framerate, set timer and get time window.
  */
 
-#include "h/common.h"
+#include "common/config.h"
+#include "common/limits.h"
+
+#include "h/math.h"
+#include "h/time.h"
 
 #if FSL_PLATFORM_WIN
 /* TODO: make time functions for windows */
 #else
-#   include "h/limits.h"
-#   include "h/math.h"
-#   include "h/time.h"
-
 #   include <time.h>
 #   include <sys/time.h>
 #   include <unistd.h>

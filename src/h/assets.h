@@ -17,203 +17,20 @@
 /*!
  *  @file assets.h
  *
- *  @brief asset types, textures, meshes, etc..
+ *  @brief parsing, loading and unloading assets.
  */
 
 #ifndef FSL_ASSETS_H
 #define FSL_ASSETS_H
 
-#include "limits.h"
+#include "../common/engine_info.h"
+#include "../common/limits.h"
+#include "../common/types.h"
 #include "../memory/memory_types.h"
-#include "types.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#   include <deps/glad/glad.h>
-#pragma GCC diagnostic pop /* ignored "-Wpedantic" */
+#include "asset_types.h"
 
-#include <deps/stb_truetype.h>
-
-/*!
- *  @brief an asset's display name (optional).
- */
-typedef str fsl_name;
-
-/*!
- *  @brief an asset's stable, unique name for asset-search, and logging.
- *  naming convention: "[a-z_][a-z0-9_]*", or:
- *      - no leading digits.
- *      - only lowercase characters, digits 0 -> 9 and underscores.
- */
-typedef str fsl_name_id;
-
-/*!
- *  @brief an asset's file base name.
-*/
-typedef str fsl_file;
-
-/*!
- *  @brief an asset file's parent directory path.
- */
-typedef str fsl_path;
-
-typedef struct asset            fsl_asset;
-typedef struct asset_metadata   fsl_asset_metadata;
-typedef struct fbo              fsl_fbo;
-typedef struct texture          fsl_texture;
-typedef struct mesh             fsl_mesh;
-typedef struct shader           fsl_shader;
-typedef struct shader_program   fsl_shader_program;
-typedef struct glyph            fsl_glyph;
-typedef struct font             fsl_font;
-
-enum fsl_asset_type
-{
-    FSL_ASSET_CUSTOM, /* user defined asset types */
-    FSL_ASSET_FBO,
-    FSL_ASSET_TEXTURE,
-    FSL_ASSET_MESH,
-    FSL_ASSET_SHADER,
-    FSL_ASSET_SHADER_PROGRAM,
-    FSL_ASSET_FONT,
-    FSL_ASSET_TYPE_COUNT
-}; /* fsl_asset_type */
-
-/*!
- *  @remark this struct should be filled using the function @ref fsl_set_asset_metadata().
- */
-struct asset
-{
-    /*!
-     *  @remark used by @ref glGenTextures() for textures, @ref glCreateShader() for shaders etc..
-     */
-    GLuint id;
-
-    enum fsl_asset_type type;
-
-    /*!
-     *  @brief display name, can be used in asset-search (optional).
-     */
-    fsl_mem_handle name;
-
-    /*!
-     *  @brief stable, unique name for asset-search, and logging (optional).
-     *
-     *  naming convention: "[a-z_][a-z0-9_]*", or:
-     *      - no leading digits.
-     *      - only lowercase characters, digits 0 -> 9 and underscores.
-     */
-    fsl_mem_handle name_id;
-
-    /*!
-     *  @brief base file name (optional).
-     */
-    fsl_mem_handle file;
-
-    /*!
-     *  @brief path to asset file without file name (optional).
-     */
-    fsl_mem_handle path;
-
-    /*!
-     *  @remark `TRUE` does not mean 'has metadata', it means whatever the asset
-     *  requires to be fully initialized and usable is fulfilled
-     *  (e.g., texture is generated and uploaded to VRAM).
-     */
-    b8 initialized;
-}; /* asset */
-
-/*!
- *  @remark this struct can be filled using the function @ref fsl_get_asset_metadata().
- */
-struct asset_metadata
-{
-    fsl_name *name;
-    fsl_name_id *name_id;
-    fsl_file *file;
-    fsl_path *path;
-}; /* asset_metadata */
-
-struct fbo
-{
-    fsl_asset asset;
-    GLuint fbo;
-    GLuint color_buf;
-    GLuint rbo;
-}; /* fbo */
-
-struct texture
-{
-    fsl_asset asset;
-    v2i32 size;
-
-    /*!
-     *  @brief used by 'OpenGL' extension @ref GL_ARB_bindless_texture.
-     */
-    u64 bindless_handle;
-
-    GLint format; /* used by @ref glTexImage2D() */
-    GLint filter; /* used by @ref glTexParameteri() */
-
-    /*!
-     *  @brief number of color channels, used by @ref stbi_load().
-     */
-    int channels;
-
-    b8 grayscale;
-    b8 bindless;
-}; /* texture */
-
-struct mesh
-{
-    fsl_asset asset;
-    GLuint vao;
-    GLuint vbo;
-    GLuint ebo;
-    GLuint vbo_len;
-    GLuint ebo_len;
-    fsl_mem_handle vbo_data;
-    fsl_mem_handle ebo_data;
-}; /* mesh */
-
-struct shader
-{
-    fsl_asset asset;
-    GLint status;       /* used by @ref glGetShaderiv() */
-    GLchar *source;     /* shader file source code */
-}; /* shader */
-
-struct shader_program
-{
-    fsl_asset asset;
-    GLint status;       /* used by @ref glGetProgramiv() */
-    fsl_shader vertex;
-    fsl_shader geometry;
-    fsl_shader fragment;
-}; /* shader_program */
-
-struct glyph
-{
-    v2i32 scale;
-    v2i32 bearing;
-    i32 advance;
-    b8 loaded;
-}; /* glyph */
-
-struct font
-{
-    fsl_asset asset;
-    u32 resolution;         /* glyph bitmap diameter, in bytes */
-    i32 ascent;             /* glyphs highest points' deviation from baseline */
-    i32 descent;            /* glyphs lowest points' deviation from baseline */
-    i32 line_gap;
-    i32 line_height;
-    f32 size;               /* global font size, for text uniformity */
-    v2i32 scale;            /* biggest glyph bounding box size, in font units */
-    u64 buf_len;            /* size allocated for @ref fsl_font.info.data, in bytes */
-    stbtt_fontinfo info;    /* used by @ref stbtt_InitFont() */
-    fsl_glyph glyph[FSL_GLYPH_MAX];
-}; /* font */
+#include <deps/glad/glad.h>
 
 /* ---- section: declarations ----------------------------------------------- */
 
@@ -248,7 +65,7 @@ FSLAPI extern fsl_mesh fsl_mesh_unit_quad;
 /* ---- section: signatures ------------------------------------------------- */
 
 /*!
- *  @remark get asset metadata (e.g., name).
+ *  @remark get asset metadata.
  */
 FSLAPI fsl_asset_metadata fsl_asset_get_metadata(const fsl_asset asset);
 

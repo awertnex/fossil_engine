@@ -17,45 +17,21 @@
 /*!
  *  @file shaders.c
  *
- *  @brief loading, pre-processing, parsing and unloading glsl shaders.
+ *  @brief loading and unloading glsl shaders.
  */
 
-#include "h/diagnostics.h"
-#include "h/dir.h"
-#include "h/limits.h"
-#include "logger/log.h"
-#include "memory/memory.h"
-#include "h/shaders.h"
+#include "../common/diagnostics.h"
+#include "../common/limits.h"
+#include "../logger/logger.h"
+#include "../memory/memory.h"
+
+#include "../h/dir.h"
+#include "../h/assets.h"
+#include "shader_pre_processor.h"
+#include "shaders.h"
 
 #include <stdio.h>
 #include <string.h>
-
-#define fsl_shader_pre_process(path, file_len) \
-    _shader_pre_process(path, file_len, FSL_INCLUDE_RECURSION_MAX)
-
-/*!
- *  @internal
- *
- *  @brief process shader before compilation.
- *
- *  parse includes recursively.
- *
- *  @return `NULL` on failure and @ref fsl_err is set accordingly.
- */
-static str *_shader_pre_process(const str *path, u64 *file_len, u64 recursion_limit);
-
-/*!
- *  @internal
- *
- *  @brief get shader type based on file name conventions.
- *
- *  examples:
- *      - file name "fbo.vert" -> shader type "GL_VERTEX_SHADER".
- *      - file name "frag.glsl" or "fragment.glsl" -> shader type "GL_FRAGMENT_SHADER".
- *
- *  @return non-zero on failure and @ref fsl_err is set accordingly.
- */
-static u32 shader_get_type_internal(const str *file, GLenum *type);
 
 u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created)
 {
@@ -79,15 +55,15 @@ u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created)
         return fsl_err;
     }
 
-    if (shader_get_type_internal(metadata.file, &type) != FSL_ERR_SUCCESS)
+    if (fsl_shader_get_type_internal(metadata.file, &type) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    shader->source = fsl_shader_pre_process(temp, NULL);
+    shader->source = fsl_shader_pre_process_internal(temp, NULL);
     if (!shader->source)
     {
         LOGERROR(FSL_ERR_POINTER_NULL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Shader", metadata.name_id, "`fsl_shader_pre_process()` Failed"));
+                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Shader", metadata.name_id, "`fsl_shader_pre_process_internal()` Failed"));
         if (shader_created)
             *shader_created = FALSE;
         return fsl_err;
@@ -116,154 +92,6 @@ u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created)
     }
 
     fsl_err = FSL_ERR_SUCCESS;
-    return fsl_err;
-}
-
-static str *_shader_pre_process(const str *path, u64 *file_len, u64 recursion_limit)
-{
-    static str token[2][256] =
-    {
-        "#include \"",
-        "\"\n",
-    };
-
-    u64 i = 0;
-    u64 j = 0;
-    u64 k = 0;
-    u64 cursor = 0;
-    str *buf = NULL;
-    str *buf_include = NULL;
-    str *buf_resolved = NULL;
-    u64 buf_len = 0;
-    u64 buf_include_len = 0;
-    u64 buf_resolved_len = 0;
-    str temp[PATH_MAX] = {0};
-    u64 temp_len = 0;
-
-    if (!recursion_limit)
-    {
-        LOGERROR(FSL_ERR_INCLUDE_RECURSION_LIMIT,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_INCLUDE_RECURSION_LIMIT_EXCEED_ACTION_SUBJECT("Pre-Process Shader", path));
-        return NULL;
-    }
-
-    buf_len = fsl_get_file_contents(path, (void*)&buf, TRUE);
-    if (fsl_err != FSL_ERR_SUCCESS)
-        return NULL;
-
-    if (fsl_mem_alloc((void*)&buf_resolved, buf_len + 1,
-                "_shader_pre_process().buf_resolved") != FSL_ERR_SUCCESS)
-        goto cleanup;
-
-    buf_resolved_len = buf_len + 1;
-    snprintf(buf_resolved, buf_resolved_len, "%s", buf);
-    for (; i < buf_len; ++i)
-    {
-        if ((i == 0 || (buf[i - 1] == '\n')) &&
-                (buf[i] == '#') &&
-                !strncmp(buf + i, token[0], strlen(token[0])))
-        {
-            temp_len = 0;
-            for (j = strlen(token[0]); i + j < buf_len &&
-                    strncmp(buf + i + j, token[1], strlen(token[1]));
-                    ++temp_len, ++j)
-            {}
-            j += strlen(token[1]);
-
-            snprintf(temp, PATH_MAX, "%s", path);
-            fsl_retract_path(temp);
-            snprintf(temp + strlen(temp), PATH_MAX - strlen(temp),
-                    "%.*s", (int)temp_len, buf + i + strlen(token[0]));
-
-            if (!strncmp(temp, path, strlen(temp)))
-            {
-                LOGERROR(FSL_ERR_SELF_INCLUDE,
-                        FSL_FLAG_LOG_NO_VERBOSE,
-                        MSG_SELF_INCLUDE_DETECT_ACTION_SUBJECT("Pre-Process Shader", path));
-                goto cleanup;
-            }
-
-            buf_include = _shader_pre_process(temp, &buf_include_len, recursion_limit - 1);
-            if (fsl_err != FSL_ERR_SUCCESS ||
-                    fsl_mem_realloc((void*)&buf_resolved, buf_resolved_len + buf_include_len + 1,
-                        "_shader_pre_process().buf_resolved") != FSL_ERR_SUCCESS)
-                goto cleanup;
-            buf_resolved_len += buf_include_len;
-
-            cursor += snprintf(buf_resolved + cursor,
-                    buf_resolved_len - cursor, "%.*s", (int)(i - k), buf + k);
-
-            cursor += snprintf(buf_resolved + cursor,
-                    buf_resolved_len - cursor, "%s", buf_include);
-
-            k = i + j;
-            fsl_mem_free((void*)&buf_include, buf_include_len, "_shader_pre_process().buf_include");
-        }
-    }
-
-    if (k < buf_len)
-        snprintf(buf_resolved + cursor,
-                buf_resolved_len - cursor, "%s", buf + k);
-
-    fsl_mem_free((void*)&buf, buf_len, "_shader_pre_process().buf");
-    if (file_len) *file_len = buf_resolved_len;
-
-    fsl_err = FSL_ERR_SUCCESS;
-    return buf_resolved;
-
-cleanup:
-
-    fsl_mem_free((void*)&buf_include, buf_include_len, "_shader_pre_process().buf_include");
-    fsl_mem_free((void*)&buf_resolved, buf_resolved_len, "_shader_pre_process().buf_resolved");
-    fsl_mem_free((void*)&buf, buf_len, "_shader_pre_process().buf");
-    return NULL;
-}
-
-static u32 shader_get_type_internal(const str *file, GLenum *type)
-{
-    str base_name[NAME_MAX] = {0};
-    str *extension = {0};
-
-    if (!file || !type)
-    {
-        LOGERROR(FSL_ERR_POINTER_NULL, FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_REASON_ERROR("Get Shader Type", "Pointer `NULL`"));
-        return fsl_err;
-    }
-
-    snprintf(base_name, NAME_MAX, "%s", file);
-    extension = strrchr(base_name, '.');
-    if (extension)
-    {
-        ++extension;
-
-        if (!strncmp(extension, "glsl", 5))
-            extension = base_name;
-    }
-    else extension = base_name;
-
-    if (!strncmp(extension, "vertex", 6) || !strncmp(extension, "vert", 4))
-    {
-        *type = GL_VERTEX_SHADER;
-        fsl_err = FSL_ERR_SUCCESS;
-        return fsl_err;
-    }
-    if (!strncmp(extension, "geometry", 8) || !strncmp(extension, "geom", 4))
-    {
-        *type = GL_GEOMETRY_SHADER;
-        fsl_err = FSL_ERR_SUCCESS;
-        return fsl_err;
-    }
-    if (!strncmp(extension, "fragment", 8) || !strncmp(extension, "frag", 4))
-    {
-        *type = GL_FRAGMENT_SHADER;
-        fsl_err = FSL_ERR_SUCCESS;
-        return fsl_err;
-    }
-
-    LOGERROR(FSL_ERR_SHADER_TYPE_NULL, FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_ACTION_SUBJECT_REASON_ERROR("Get Shader Type", base_name, "Type Detection Failed"));
     return fsl_err;
 }
 

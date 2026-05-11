@@ -20,17 +20,16 @@
  *  @brief logger.
  */
 
-#include "../h/common.h"
+#include "../common/diagnostics.h"
+#include "../common/common_values.h"
+#include "../common/config.h"
+#include "../common/limits.h"
+#include "../common/session.h"
+#include "../common/types.h"
+
 #include "logger.h"
 
-#include "../h/diagnostics.h"
-#include "../h/dir.h"
-#include "../h/limits.h"
-#include "../h/math.h"
-#include "../h/process.h"
-#include "../h/string.h"
 #include "../h/time.h"
-#include "../h/types.h"
 
 #include <stdio.h>
 #include <string.h>

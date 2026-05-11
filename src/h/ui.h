@@ -23,10 +23,10 @@
 #ifndef FSL_UI_H
 #define FSL_UI_H
 
-#include "common.h"
+#include "../common/engine_info.h"
+#include "../common/types.h"
 #include "assets.h"
 #include "core.h"
-#include "types.h"
 
 /* ---- section: definitions ------------------------------------------------ */
 

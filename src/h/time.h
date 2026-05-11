@@ -23,14 +23,14 @@
 #ifndef FSL_TIME_H
 #define FSL_TIME_H
 
-#include "common.h"
-#include "types.h"
+#include "../common/engine_info.h"
+#include "../common/types.h"
 
-#define FSL_SEC2MSEC 1000UL
+#define FSL_SEC2MSEC 1000ul
 #define FSL_MSEC2SEC 0.001
-#define FSL_SEC2USEC 1000000UL
+#define FSL_SEC2USEC 1000000ul
 #define FSL_USEC2SEC 0.000001
-#define FSL_SEC2NSEC 1000000000UL
+#define FSL_SEC2NSEC 1000000000ul
 #define FSL_NSEC2SEC 0.000000001
 
 /*!

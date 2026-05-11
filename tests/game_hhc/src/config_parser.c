@@ -1,6 +1,7 @@
-#include "src/h/dir.h"
-#include "src/h/limits.h"
+#include "src/common/limits.h"
 #include "src/memory/memory.h"
+
+#include "src/h/dir.h"
 
 #include "h/main.h"
 

@@ -23,7 +23,7 @@
 #ifndef FSL_LIMITS_H
 #define FSL_LIMITS_H
 
-#include "common.h"
+#include "engine_info.h"
 
 #if FSL_PLATFORM_WIN
 #   define NAME_MAX 255

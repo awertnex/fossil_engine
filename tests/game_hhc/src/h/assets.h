@@ -1,13 +1,14 @@
 #ifndef HHC_ASSETS_H
 #define HHC_ASSETS_H
 
-#include "common.h"
-#include "dir.h"
+#include "src/common/types.h"
+#include "src/common/limits.h"
+#include "src/shaders/shaders.h"
 
 #include "src/h/core.h"
-#include "src/h/limits.h"
-#include "src/h/shaders.h"
-#include "src/h/types.h"
+
+#include "common.h"
+#include "dir.h"
 
 #define FRICTION_BLOCK_SLIPPERY 0.02f
 #define FRICTION_BLOCK_WET      0.1f

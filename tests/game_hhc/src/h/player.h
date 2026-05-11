@@ -1,10 +1,10 @@
 #ifndef HHC_PLAYER_H
 #define HHC_PLAYER_H
 
+#include "src/h/collision.h"
+
 #include "common.h"
 #include "main.h"
-
-#include "src/h/collision.h"
 
 #define PLAYER_REACH_DISTANCE_MAX   5.0f
 #define PLAYER_HOTBAR_SLOTS_MAX     10

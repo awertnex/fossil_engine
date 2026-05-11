@@ -23,8 +23,8 @@
 #ifndef FSL_PROCESS_H
 #define FSL_PROCESS_H
 
-#include "common.h"
-#include "types.h"
+#include "../common/engine_info.h"
+#include "../common/types.h"
 
 /*!
  *  @brief get current path of binary/executable, slash (`/`) and null (`\0`) terminated,

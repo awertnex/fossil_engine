@@ -15,9 +15,9 @@
  */
 
 /*!
- *  @file log.h
+ *  @file logger_message.h
  *
- *  @brief main logger module header; log messages and other definitions related to logging.
+ *  @brief standardized logger messages and log message conventions.
  */
 
 /*!
@@ -47,12 +47,11 @@
  *            the identifiers inside the brackets.
  */
 
-#ifndef FSL_LOG_H
-#define FSL_LOG_H
+#ifndef FSL_LOGGER_MESSAGE_H
+#define FSL_LOGGER_MESSAGE_H
 
-#include "logger.h"
+#include "logger_macros.h"
 
-#include <stdio.h>
 #include <inttypes.h>
 
 /* ---- section: base ------------------------------------------------------- */
@@ -155,4 +154,4 @@
 #define MSG_FONT_UNLOAD(name)                               fsl_logger_stringf("Font '%s' Unloaded\n", name)
 #define MSG_UPDATE_RENDER_SETTINGS_FAIL                     "Something Went Wrong While Updating Render Settings\n"
 
-#endif /* FSL_LOG_H */
+#endif /* FSL_LOGGER_MESSAGE_H */

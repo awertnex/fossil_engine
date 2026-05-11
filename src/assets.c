@@ -17,23 +17,28 @@
 /*!
  *  @file assets.c
  *
- *  @brief engine's default assets.
+ *  @brief loading, unloading assets, including engine's default assets.
  */
 
-#include "h/common.h"
+#include "common/common_values.h"
+#include "common/config.h"
+#include "common/diagnostics.h"
+#include "common/limits.h"
+#include "common/types.h"
+#include "logger/logger.h"
+#include "memory/memory.h"
+#include "shaders/shader_types.h"
+#include "shaders/shaders.h"
+
 #include "h/assets.h"
 #include "h/core.h"
 #include "h/dir.h"
-#include "logger/log.h"
-#include "memory/memory.h"
-#include "h/shaders.h"
 #include "h/string.h"
-
-#define STB_TRUETYPE_IMPLEMENTATION
-#include <deps/stb_truetype.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
+#   define STB_TRUETYPE_IMPLEMENTATION
+#   include <deps/stb_truetype.h>
 #   define STB_IMAGE_IMPLEMENTATION
 #   include <deps/stb_image.h>
 #pragma GCC diagnostic pop /* ignored "-Wpedantic" */

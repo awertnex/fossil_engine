@@ -1,11 +1,11 @@
 #ifndef HHC_TERRAIN_H
 #define HHC_TERRAIN_H
 
+#include "src/common/types.h"
+
 #include "main.h"
 #include "assets.h"
 #include "chunking.h"
-
-#include "src/h/types.h"
 
 #define TERRAIN_SEA_LEVEL           0
 #define TERRAIN_CAVE_LEVEL          (WORLD_RADIUS_VERTICAL / 2)

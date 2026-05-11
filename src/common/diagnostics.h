@@ -23,9 +23,8 @@
 #ifndef FSL_DIAGNOSTICS_H
 #define FSL_DIAGNOSTICS_H
 
-#include "common.h"
+#include "engine_info.h"
 #include "types.h"
-#include "limits.h"
 
 #define FSL_DIAGNOSTIC_COLOR_DEFAULT        0xecececff
 #define FSL_DIAGNOSTIC_COLOR_FATAL          0xa33021ff

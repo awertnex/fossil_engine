@@ -23,8 +23,8 @@
 #ifndef FSL_INPUT_H
 #define FSL_INPUT_H
 
-#include "common.h"
-#include "types.h"
+#include "../common/engine_info.h"
+#include "../common/types.h"
 
 #define FSL_MOUSE_BUTTONS_MAX 8
 #define FSL_KEYBOARD_KEYS_MAX 120

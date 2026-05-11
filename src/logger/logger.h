@@ -17,17 +17,23 @@
 /*!
  *  @file logger.h
  *
- *  @brief logger.
+ *  @brief main logger module header; include everything regarding logging.
  */
 
 #ifndef FSL_LOGGER_H
 #define FSL_LOGGER_H
 
-#include "../h/common.h"
-#include "../h/diagnostics.h"
-#include "../h/limits.h"
+#include "../common/engine_info.h"
+#include "../common/diagnostics.h"
+#include "../common/limits.h"
+#include "../common/types.h"
 #include "../memory/memory.h"
-#include "../h/types.h"
+
+#include "logger_messages.h"
+#include "logger_macros.h"
+
+typedef struct fsl_log_entry fsl_log_entry;
+typedef struct fsl_logger_core fsl_logger_core;
 
 enum fsl_log_output_flag
 {
@@ -59,19 +65,12 @@ enum fsl_log_level
     FSL_LOG_LEVEL_COUNT
 }; /* fsl_log_level */
 
-struct log_entry
-{
-    u32 color;
-    str message[FSL_LOGGER_STRING_MAX];
-};
-typedef struct log_entry fsl_log_entry;
-
 /*!
  *  @brief global logger buffer, raw log data.
  *
  *  @remark buffer mapped onto @ref mem_arena_internal.
  */
-typedef struct fsl_logger_core
+struct fsl_logger_core
 {
     struct /* flag */
     {
@@ -82,87 +81,13 @@ typedef struct fsl_logger_core
     fsl_mem_handle buf;     /* logger strings */
     fsl_mem_arena arena;    /* logger's memory arena */
     i32 cursor;             /* current position in `buf` */
-} fsl_logger_core;
+}; /* fsl_logger_core */
 
-/* ---- internal-use macros ------------------------------------------------- */
-
-#define LOGFATAL(err, flags, message) \
-    fsl_log_output_internal(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_FATAL, message);
-
-#define LOGERROR(err, flags, message) \
-    do { \
-        if (fsl_log_level_max >= FSL_LOG_LEVEL_ERROR) \
-            fsl_log_output_internal(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_ERROR, message); \
-    } while (0)
-
-#define LOGWARNING(err, flags, message) \
-    do { \
-        if (fsl_log_level_max >= FSL_LOG_LEVEL_WARNING) \
-            fsl_log_output_internal(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_WARNING, message); \
-    } while (0)
-
-#define LOGSUCCESS(flags, message) \
-    do { \
-        if (fsl_log_level_max >= FSL_LOG_LEVEL_SUCCESS) \
-            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_SUCCESS, message); \
-    } while (0)
-
-#define LOGINFO(flags, message) \
-    do { \
-        if (fsl_log_level_max >= FSL_LOG_LEVEL_INFO) \
-            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_INFO, message); \
-    } while (0)
-
-#define LOGDEBUG(flags, message) \
-    do { \
-        if (fsl_log_level_max >= FSL_LOG_LEVEL_DEBUG) \
-            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_DEBUG, message); \
-    } while (0)
-
-#define LOGTRACE(flags, message) \
-    do { \
-        if (fsl_log_level_max >= FSL_LOG_LEVEL_TRACE) \
-            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_TRACE, message); \
-    } while (0)
-
-#define LOGFATALEX(err, flags, file, line, message) \
-            fsl_log_output_internal(err, flags, file, line, FSL_LOG_LEVEL_FATAL, message)
-
-#define LOGERROREX(err, flags, file, line, message) \
-    do { \
-        if (fsl_log_level_max >= FSL_LOG_LEVEL_ERROR) \
-            fsl_log_output_internal(err, flags, file, line, FSL_LOG_LEVEL_ERROR, message); \
-    } while (0)
-
-#define LOGWARNINGEX(err, flags, file, line, message) \
-    do { \
-        if (fsl_log_level_max >= FSL_LOG_LEVEL_WARNING) \
-            fsl_log_output_internal(err, flags, file, line, FSL_LOG_LEVEL_WARNING, message); \
-    } while (0)
-
-#define LOGSUCCESSEX(flags, file, line, message) \
-    do { \
-        if (fsl_log_level_max >= FSL_LOG_LEVEL_SUCCESS) \
-            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_SUCCESS, message); \
-    } while (0)
-
-#define LOGINFOEX(flags, file, line, message) \
-    do { \
-        if (fsl_log_level_max >= FSL_LOG_LEVEL_INFO) \
-            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_INFO, message); \
-    } while (0)
-
-#define LOGDEBUGEX(flags, file, line, message) \
-    do { \
-        if (fsl_log_level_max >= FSL_LOG_LEVEL_DEBUG) \
-            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_DEBUG, message); \
-    } while (0)
-
-#define LOGTRACEEX(flags, file, line, message) \
-    do { \
-        if (fsl_log_level_max >= FSL_LOG_LEVEL_TRACE) \
-            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_TRACE, message); \
-    } while (0)
+struct fsl_log_entry
+{
+    u32 color;
+    str message[FSL_LOGGER_STRING_MAX];
+}; /* fsl_log_entry */
 
 /*!
  *  @brief logger core, all logger data.

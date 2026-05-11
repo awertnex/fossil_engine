@@ -23,80 +23,29 @@
 #ifndef FSL_CORE_H
 #define FSL_CORE_H
 
-#include "common.h"
+#include "../common/engine_info.h"
+#include "../common/common_values.h"
+#include "../common/types.h"
 #include "assets.h"
-#include "limits.h"
-#include "types.h"
+
+#include <deps/glad/glad.h>
+#define GLFW_INCLUDE_NONE
+#include <deps/glfw3.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
-#   include <deps/glad/glad.h>
-
-#   define GLFW_INCLUDE_NONE
-#   include <deps/glfw3.h>
-
 #   include <deps/stb_image.h>
 #   include <deps/stb_image_write.h>
 #pragma GCC diagnostic pop /* ignored "-Wpedantic" */
 
 /* ---- section: definitions ------------------------------------------------ */
 
-typedef struct render       fsl_render;
-typedef struct camera       fsl_camera;
-typedef struct projection   fsl_projection;
-typedef struct core         fsl_core;
+typedef struct fsl_core         fsl_core;
+typedef struct fsl_render       fsl_render;
+typedef struct fsl_camera       fsl_camera;
+typedef struct fsl_projection   fsl_projection;
 
-struct render
-{
-    GLFWwindow *window;
-    char title[NAME_MAX];
-    v2i32 size;
-
-    /*!
-     *  @brief conversion from world-space to screen-space.
-     *
-     *  @remark read-only, updated internally in @ref fsl_running().
-     */
-    v2f32 ndc_scale;
-
-    GLFWimage icon;
-    v2f64 mouse_pos;
-    v2f64 mouse_delta;
-    u64 time;
-    u64 time_delta;
-
-    /*!
-     *  @brief for reading screen pixels back to RAM (e.g., screenshots).
-     */
-    u8 *screen_buf;
-}; /* render */
-
-struct camera
-{
-    v3f64 pos;
-    f64 roll, pitch, yaw;
-    f64 sin_roll, sin_pitch, sin_yaw;
-    f64 cos_roll, cos_pitch, cos_yaw;
-    f32 fovy;
-    f32 fovy_smooth;
-    f32 ratio;
-    f32 far;
-    f32 near;
-    f32 zoom;
-}; /* camera */
-
-struct projection
-{
-    m4f32 target;
-    m4f32 translation;
-    m4f32 rotation;
-    m4f32 orientation;
-    m4f32 view;
-    m4f32 projection;
-    m4f32 perspective;
-}; /* projection */
-
-struct core
+struct fsl_core
 {
     struct /* flag */
     {
@@ -138,7 +87,57 @@ struct core
      * @remark initialized in @ref fsl_engine_init().
      */
     void (*fbo_blit)(GLuint fbo);
-}; /* core */
+}; /* fsl_core */
+
+struct fsl_render
+{
+    GLFWwindow *window;
+    char title[NAME_MAX];
+    v2i32 size;
+
+    /*!
+     *  @brief conversion from world-space to screen-space.
+     *
+     *  @remark read-only, updated internally in @ref fsl_running().
+     */
+    v2f32 ndc_scale;
+
+    GLFWimage icon;
+    v2f64 mouse_pos;
+    v2f64 mouse_delta;
+    u64 time;
+    u64 time_delta;
+
+    /*!
+     *  @brief for reading screen pixels back to RAM (e.g., screenshots).
+     */
+    u8 *screen_buf;
+}; /* fsl_render */
+
+struct fsl_camera
+{
+    v3f64 pos;
+    f64 roll, pitch, yaw;
+    f64 sin_roll, sin_pitch, sin_yaw;
+    f64 cos_roll, cos_pitch, cos_yaw;
+    f32 fovy;
+    f32 fovy_smooth;
+    f32 ratio;
+    f32 far;
+    f32 near;
+    f32 zoom;
+}; /* fsl_camera */
+
+struct fsl_projection
+{
+    m4f32 target;
+    m4f32 translation;
+    m4f32 rotation;
+    m4f32 orientation;
+    m4f32 view;
+    m4f32 projection;
+    m4f32 perspective;
+}; /* fsl_projection */
 
 /* ---- section: declarations ----------------------------------------------- */
 

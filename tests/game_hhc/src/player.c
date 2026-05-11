@@ -1,5 +1,6 @@
+#include "src/logger/logger.h"
+
 #include "src/h/collision.h"
-#include "src/logger/log.h"
 #include "src/h/math.h"
 #include "src/h/time.h"
 
@@ -695,6 +696,9 @@ void player_kill(player *p)
     p->velocity.z = 0.0;
     p->health = 0.0f;
     p->flag |= FLAG_PLAYER_DEAD;
+    p->flag &= ~FLAG_PLAYER_CAN_JUMP;
+    p->flag &= ~FLAG_PLAYER_FLYING;
+    p->flag &= ~FLAG_PLAYER_CINEMATIC_MOTION;
 
     LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
             fsl_logger_stringf("%s %s\n", p->name, get_death_str(p)));

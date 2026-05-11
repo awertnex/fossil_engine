@@ -15,28 +15,28 @@
  */
 
 /*!
- *  @file fossil_engine.h
+ *  @file session.h
  *
- *  @brief main engine header; include everything.
+ *  @brief engine's session info.
  */
 
-#ifndef FSL_FOSSIL_ENGINE_H
-#define FSL_FOSSIL_ENGINE_H
+#ifndef FSL_SESSION_H
+#define FSL_SESSION_H
 
-#include "../common/common.h"
-#include "../logger/logger.h"
-#include "../memory/memory.h"
-#include "../shaders/shaders.h"
-#include "assets.h"
-#include "collision.h"
-#include "core.h"
-#include "dir.h"
-#include "input.h"
-#include "math.h"
-#include "process.h"
-#include "string.h"
-#include "super_debugger.h"
-#include "time.h"
-#include "ui.h"
+#include "engine_info.h"
+#include "types.h"
 
-#endif /* FSL_FOSSIL_ENGINE_H */
+/*!
+ *  @brief POSIX timestamp of the main process' start, in millisecond format.
+ */
+extern u64 fsl_init_time;
+
+/*!
+ *  @brief project root directory.
+ *
+ *  @remark called from @ref fsl_engine_init() to change current working dirctory to the main process'.
+ *  @remark declared and initialized internally.
+ */
+FSLAPI extern str *FSL_DIR_PROC_ROOT;
+
+#endif /* FSL_SESSION_H */

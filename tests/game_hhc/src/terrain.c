@@ -1,7 +1,9 @@
-#include "src/h/math.h"
 #include "src/memory/memory.h"
 
+#include "src/h/math.h"
+
 #include "h/chunking.h"
+#include "h/diagnostics.h"
 #include "h/dir.h"
 #include "h/main.h"
 #include "h/terrain.h"

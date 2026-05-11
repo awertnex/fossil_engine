@@ -18,17 +18,16 @@
  */
 
 /*!
- *  @file build.h
+ *  @file buildtool_config.h
  *
  *  @brief build info to link the engine with external software.
  */
 
-#ifndef FSL_BUILD_H
-#define FSL_BUILD_H
+#ifndef FSL_BUILDTOOL_CONFIG_H
+#define FSL_BUILDTOOL_CONFIG_H
 
+#include "../common/engine_info.h"
 #include "../../deps/buildtool/buildtool.h"
-
-#define FSL_C_STD "-std=c89"
 
 #if FSL_PLATFORM_WIN
 
@@ -128,4 +127,4 @@ void fsl_engine_set_runtime_path(_buf *cmd)
     cmd_push(_cmdp, "-Wl,-rpath=" RUNTIME_PATH);
 }
 
-#endif /* FSL_BUILD_H */
+#endif /* FSL_BUILDTOOL_CONFIG_H */

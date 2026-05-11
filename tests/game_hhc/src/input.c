@@ -1,5 +1,6 @@
+#include "src/logger/logger.h"
+
 #include "src/h/input.h"
-#include "src/logger/log.h"
 #include "src/h/math.h"
 #include "src/h/time.h"
 

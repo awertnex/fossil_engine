@@ -1,12 +1,13 @@
 #ifndef HHC_INPUT_H
 #define HHC_INPUT_H
 
-#include "main.h"
-#include "player.h"
+#include "src/common/types.h"
 
 #include "src/h/core.h"
 #include "src/h/input.h"
-#include "src/h/types.h"
+
+#include "main.h"
+#include "player.h"
 
 /* ---- movement ------------------------------------------------------------ */
 

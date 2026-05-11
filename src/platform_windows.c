@@ -20,13 +20,13 @@
  *  @brief code specific to the platform: windows, abstracted.
  */
 
-#include "h/common.h"
-
-#include "h/diagnostics.h"
-#include "h/dir.h"
-#include "h/limits.h"
-#include "logger/log.h"
+#include "common/diagnostics.h"
+#include "common/limits.h"
+#include "common/types.h"
+#include "logger/logger.h"
 #include "memory/memory.h"
+
+#include "h/dir.h"
 #include "h/process.h"
 
 #include <errno.h>

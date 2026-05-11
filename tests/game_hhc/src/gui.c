@@ -1,7 +1,8 @@
-#include "src/h/core.h"
-#include "src/h/diagnostics.h"
-#include "src/logger/log.h"
+#include "src/common/diagnostics.h"
+#include "src/logger/logger.h"
 #include "src/memory/memory.h"
+
+#include "src/h/core.h"
 #include "src/h/string.h"
 
 #include "h/common.h"

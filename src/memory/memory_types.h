@@ -23,7 +23,7 @@
 #ifndef FSL_MEMORY_TYPES_H
 #define FSL_MEMORY_TYPES_H
 
-#include "../h/types.h"
+#include "../common/types.h"
 
 /*!
  *  @brief offset specific to memory arena pushes, it is a memory offset from
@@ -31,21 +31,21 @@
  */
 typedef u64 fsl_off;
 
-typedef struct mem_handle fsl_mem_handle;
-typedef struct mem_arena_handle fsl_mem_arena_handle;
-typedef struct mem_arena fsl_mem_arena;
+typedef struct fsl_mem_handle fsl_mem_handle;
+typedef struct fsl_mem_arena_handle fsl_mem_arena_handle;
+typedef struct fsl_mem_arena fsl_mem_arena;
 
 /*!
  *  @remark retrieve allocation address using @ref fsl_mem_handle_get() or @ref fsl_mem_handle_get_i().
  */
-struct mem_handle
+struct fsl_mem_handle
 {
     fsl_mem_arena *arena;   /* address of arena the handle was allocated on */
     fsl_off offset;         /* handle's data offset from arena start (@ref mem_arena.buf) */
     u64 size;               /* handle's allocated size */
-}; /* mem_handle */
+}; /* fsl_mem_handle */
 
-struct mem_arena
+struct fsl_mem_arena
 {
     fsl_mem_arena_handle *entry; /* allocated zones in `buf` */
     u64 entry_cap;      /* current capacity of `entry` in bytes */
@@ -57,6 +57,6 @@ struct mem_arena
     void *buf;          /* raw data */
     u64 buf_cap;        /* current capacity of `buf` in bytes */
     fsl_off buf_cursor; /* -- DEPRECATED IN v0.8.0-beta --; current usage */
-}; /* mem_arena */
+}; /* fsl_mem_arena */
 
 #endif /* FSL_MEMORY_TYPES_H */

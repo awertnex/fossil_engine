@@ -23,8 +23,8 @@
 #ifndef FSL_STRING_H
 #define FSL_STRING_H
 
-#include "common.h"
-#include "types.h"
+#include "../common/engine_info.h"
+#include "../common/types.h"
 
 /*!
  *  @brief swap string buffers `s1` with `s2` (without a `temp` buffer).
