@@ -24,8 +24,8 @@
 
 typedef struct fsl_test_info
 {
-    str *name;      /* test name (e.g. composable_ui) */
-    str *abbrev;    /* test name abbreviation (e.g. ui) */
+    str *name;      /* test name (e.g., composable_ui) */
+    str *abbrev;    /* test name abbreviation (e.g., ui) */
     u32 (*build_func)(int argc, char **argv);
 } fsl_test_info;
 

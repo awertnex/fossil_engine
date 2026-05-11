@@ -22,11 +22,13 @@
 
 u64 CHUNKS_MAX[SET_RENDER_DISTANCE_MAX + 1] = {0};
 
-/*! @brief chunk buffer, raw chunk data.
+/*!
+ *  @brief chunk buffer, raw chunk data.
  */
 static fsl_mem_handle chunk_buf = {0};
 
-/*! @brief position of first empty slot in @ref chunk_buf.
+/*!
+ *  @brief position of first empty slot in @ref chunk_buf.
  *
  *  @remark updated internally.
  */
@@ -43,81 +45,93 @@ GLuint chunk_gizmo_loaded_vbo = 0;
 GLuint chunk_gizmo_render_vao = 0;
 GLuint chunk_gizmo_render_vbo = 0;
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  @internal
  */
 static void block_place_internal(chunk *ch,
         chunk *px, chunk *nx, chunk *py, chunk *ny, chunk *pz, chunk *nz,
         v3u32 chunk_tab_coordinates, i32 x, i32 y, i32 z, enum block_id block_id);
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  @internal
  */
 static void block_break_internal(chunk *ch,
         chunk *px, chunk *nx, chunk *py, chunk *ny, chunk *pz, chunk *nz,
         v3u32 chunk_tab_coordinates, i32 x, i32 y, i32 z);
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  @internal
  *
  *  @brief generate chunk blocks.
  *
- *  @param rate = number of blocks to process per chunk per frame.
+ *  @param rate number of blocks to process per chunk per frame.
  *
  *  @remark calls @ref chunk_mesh_init() when done generating.
  *  @remark must be called before @ref chunk_mesh_update().
  */
 static void chunk_generate(chunk **ch, u32 rate, terrain (*terrain_func)(v3i32));
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  @internal
  *
  *  @brief generate chunk blocks.
  *
  *  automatically called from @ref chunk_generate().
  *
- *  @param rate = number of blocks to process per chunk per frame.
+ *  @param rate number of blocks to process per chunk per frame.
  *
  *  @remark calls @ref chunk_mesh_init() when done generating.
  *  @remark must be called before @ref chunk_mesh_update().
  */
 static void chunk_generate_internal(chunk **ch, u32 rate, terrain (*terrain_func)(v3i32));
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  @internal
  *
- *  @param index = index into global array @ref chunk_tab.
+ *  @param index index into global array @ref chunk_tab.
  */
 static void chunk_mesh_init(u32 index, chunk *ch);
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  @internal
  *
- *  @param index = index into global array @ref chunk_tab.
+ *  @param index index into global array @ref chunk_tab.
  */
 static void chunk_mesh_update(u32 index, chunk *ch);
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  @internal
  */
 static void chunk_serialize_internal(chunk *ch);
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  @internal
  */
 static void chunk_deserialize_internal(const str *file_name, chunk *ch);
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  @internal
  *
- *  @param index = index into global array @ref chunk_tab.
+ *  @param index index into global array @ref chunk_tab.
  */
 static void chunk_buf_push_internal(u32 index, v3i32 player_chunk_delta);
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  @internal
  *
- *  @param index = index into global array @ref chunk_tab.
+ *  @param index index into global array @ref chunk_tab.
  */
 static void chunk_gizmo_write_internal(u32 index, chunk *ch);
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  @internal
  *
- *  @param index = index into global array @ref chunk_tab.
+ *  @param index index into global array @ref chunk_tab.
  */
 static void chunk_buf_pop_internal(u32 index);
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  @internal
  */
 static void chunk_queue_update_internal(chunk_queue *q);
 

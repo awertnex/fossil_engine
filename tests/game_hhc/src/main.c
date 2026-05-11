@@ -50,7 +50,8 @@ static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset);
 static void bind_shader_uniforms(void);
 static void generate_standard_meshes(void);
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  @internal
  *
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */

@@ -29,7 +29,9 @@ extern fsl_key_bind bind_build_or_use;
 /* extern fsl_key_bind bind_drop_item; */
 extern fsl_key_bind bind_inventory;
 
-/*! @remark two arrays for number keys and numberpad keys */
+/*!
+ *  @remark two arrays for number keys and numberpad keys.
+ */
 extern fsl_key_bind bind_hotbar[2][PLAYER_HOTBAR_SLOTS_MAX];
 
 /* ---- misc ---------------------------------------------------------------- */
@@ -63,11 +65,13 @@ extern fsl_key_bind bind_toggle_bounding_boxes;
 extern fsl_key_bind bind_toggle_chunk_gizmo;
 extern fsl_key_bind bind_toggle_chunk_queue_visualizer;
 
-/*! @brief setup all key binding values and rules.
+/*!
+ *  @brief setup all key binding values and rules.
  */
 void input_init(void);
 
-/*! @brief update input from keyboard.
+/*!
+ *  @brief update input from keyboard.
  *
  *  handle all key binds listed above and perform their logic on mostly `p->flag`.
  *

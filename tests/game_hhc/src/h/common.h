@@ -156,7 +156,8 @@ enum player_death_reason_index
     PLAYER_DEATH_REASON_COUNT
 }; /* player_death_reason_index */
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  @internal
  *
  *  @brief global memory arena, used to manage all heap memory that belongs to the game.
  *
@@ -164,7 +165,8 @@ enum player_death_reason_index
  */
 extern fsl_mem_arena memory_arena_internal;
 
-/*! @brief look-up table for @ref str_death_<x> buffer sizes.
+/*!
+ *  @brief look-up table for @ref str_death_<x> buffer sizes.
  *
  *  @remark read-only, initialized internally in @ref common.c.
  */

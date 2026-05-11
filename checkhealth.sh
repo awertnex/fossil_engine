@@ -81,9 +81,16 @@ logtrace "Checking Doxygen Blocks.."
 fsl_grep "/\*\*" "$TARGETS"
 fsl_grep "/\*![^$]" "$TARGETS"
 
-logtrace "Checking for \"e.g.\" Syntax Errors.."
+logtrace "Checking Doxygen \"@param\" Syntax.."
+fsl_grep "@param.*=" "$TARGETS"
+
+logtrace "Checking for \"e.g.\" Textual Errors.."
 fsl_grep "[^(]e\.g\." "$TARGETS"
 fsl_grep "e\.g\.[^,]" "$TARGETS"
+
+logtrace "Checking for Old-Style Tags.."
+fsl_grep "INTERNAL[ -]USE[ -]ONLY [-;$]" "$TARGETS"
+fsl_grep "IMPLEMENTATION[ :]" "$TARGETS"
 
 # ---- section: log health --------------------------------------------------- #
 

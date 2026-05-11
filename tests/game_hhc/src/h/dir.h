@@ -40,7 +40,8 @@ enum directory_index
 extern str DIR_ROOT[DIR_ROOT_COUNT][NAME_MAX];
 extern str DIR_WORLD[DIR_WORLD_COUNT][NAME_MAX];
 
-/*! @brief initialize game stuff.
+/*!
+ *  @brief initialize game stuff.
  *
  *  @remark will create directories if not found next to the binary.
  *

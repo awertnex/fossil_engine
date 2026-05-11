@@ -10,7 +10,8 @@
 
 #include <math.h>
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  @internal
  *
  *  @brief handle player being near or past world edges.
  *

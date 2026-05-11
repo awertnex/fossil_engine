@@ -97,19 +97,22 @@ extern fsl_mem_handle mesh;
 extern fsl_mem_handle shader;
 extern fsl_mem_handle blocks;
 
-/*! @return non-zero on failure and @ref *GAME_ERR is set accordingly.
+/*!
+ *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
 u32 assets_init(void);
 
 void assets_free(void);
 
-/*! @param index = index into @ref block_textures.
+/*!
+ *  @param index index into @ref block_textures.
  *
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
 u32 block_texture_init(u32 index, const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file);
 
-/*! @return non-zero on failure and @ref *GAME_ERR is set accordingly.
+/*!
+ *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
 void blocks_init(void);
 
