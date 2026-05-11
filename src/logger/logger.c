@@ -11,7 +11,7 @@
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
- *  limitations under the License.OFTWARE.
+ *  limitations under the License.
  */
 
 /*!
@@ -88,13 +88,13 @@ static str *esc_code_color[FSL_LOG_LEVEL_COUNT] =
 /* ---- section: signatures ------------------------------------------------- */
 
 /*!
- *  -- INTERNAL USE ONLY --;
+ *  @internal
  */
 static void get_log_str_internal(const str *str_in, str *str_out, u32 flags, b8 verbose,
         u8 level, u32 error_code, const str *src_file, u64 line);
 
 /*!
- *  -- INTERNAL USE ONLY --;
+ *  @internal
  *
  *  @brief like @ref fsl_is_dir_exists(), but no logging on success, no writing to
  *  log file and no modifying @ref fsl_err (used for logger dir checks).
@@ -104,7 +104,7 @@ static void get_log_str_internal(const str *str_in, str *str_out, u32 flags, b8 
 static u32 is_dir_exists_internal(const fsl_fs_path *path);
 
 /*!
- *  -- INTERNAL USE ONLY --;
+ *  @internal
  *
  *  @brief like @ref fsl_append_file(), but no logging on success and no modifying
  *  @ref fsl_err (used for logger file writes).
@@ -117,7 +117,6 @@ static u32 append_file_internal(const fsl_fs_path *path, u64 size, void *buf);
 
 u32 fsl_logger_init(int argc, char **argv, u64 flags)
 {
-    str str_in[FSL_STRING_MAX] = {0};
     str str_out[FSL_LOGGER_STRING_MAX] = {0};
 
     snprintf(logger_core.log_dir, PATH_MAX, "%s", FSL_DIR_NAME_LOGS);
@@ -152,9 +151,10 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags)
                 "fsl_logger_init().logger_core.buf") != FSL_ERR_SUCCESS)
     {
         fsl_err = FSL_ERR_LOGGER_INIT_FAIL;
-        get_log_str_internal(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_TERM_COLOR,
+        get_log_str_internal("Failed to Initialize Logger, Process Aborted", str_out,
+                FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_TERM_COLOR,
                 TRUE, FSL_LOG_LEVEL_FATAL, FSL_ERR_LOGGER_INIT_FAIL, __BASE_FILE__, __LINE__);
-        fprintf(stderr, "%s", str_out);
+        fprintf(stderr, "%s\n", str_out);
         return fsl_err;
     }
 
@@ -166,7 +166,7 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags)
 
 void fsl_logger_close(void)
 {
-    LOGTRACE(0, logger_stringf("%s\n", "Closing Logger.."));
+    LOGTRACE(0, fsl_logger_stringf("%s\n", "Closing Logger.."));
     fsl_mem_arena_free(&logger_core.arena, "fsl_logger_close().logger_core.arena");
 
     logger_core.flag.gui_open = FALSE;
@@ -265,7 +265,7 @@ static void get_log_str_internal(const str *str_in, str *str_out, u32 flags, b8 
     }
 }
 
-str *logger_stringf(const str *format, ...)
+str *fsl_logger_stringf(const str *format, ...)
 {
     static str buf[FSL_STRINGF_BUFFERS_MAX][FSL_STRING_MAX] = {0};
     static u64 index = 0;

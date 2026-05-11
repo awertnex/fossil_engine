@@ -176,11 +176,10 @@ FSLAPI u32 fsl_append_file(const fsl_fs_path *path, u64 size, void *buf, b8 log,
 FSLAPI u32 fsl_get_path_absolute(const fsl_fs_path *path, str **dst);
 
 /*!
- *  -- INTERNAL USE ONLY --;
- *
- *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
+ *  @internal
  *
  *  @brief get real path from relative path at `path`.
+ *  implemented in `platform_<PLATFORM>.c`.
  *
  *  @param path relative path.
  *  @param dst result/canonical `path`, slash (`/`) teminated.

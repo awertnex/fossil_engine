@@ -11,7 +11,7 @@
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
- *  limitations under the License.OFTWARE.
+ *  limitations under the License.
  */
 
 /*!
@@ -470,10 +470,10 @@ u32 fsl_mem_arena_push_internal(fsl_mem_arena *x, fsl_mem_handle *handle, u64 si
 
     /* expand arena if needed */
 
+    buf_cap_old = x->buf_cap;
+    buf_cap_new = x->buf_cap * 2 + size;
     if (size > buf_cap_old - x->buf_cursor)
     {
-        buf_cap_old = x->buf_cap;
-        buf_cap_new = x->buf_cap * 2 + size;
         if (fsl_mem_remap_internal((void*)&x->buf, buf_cap_old, buf_cap_new, name, src_file, src_line) != FSL_ERR_SUCCESS)
         {
             LOGERROREX(fsl_err, 0,

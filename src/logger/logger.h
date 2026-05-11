@@ -177,7 +177,7 @@ FSLAPI extern fsl_logger_core logger_core;
 FSLAPI extern u32 fsl_log_level_max;
 
 /*!
- *  -- INTERNAL USE ONLY --;
+ *  @internal
  *
  *  @brief allocate and initialize logger resources.
  *
@@ -202,7 +202,7 @@ FSLAPI u32 fsl_logger_init(int argc, char **argv, u64 flags);
 FSLAPI void fsl_logger_close(void);
 
 /*!
- *  -- INTERNAL USE ONLY --;
+ *  @internal
  *
  *  @param flags enum @ref fsl_log_output_flag.
  *

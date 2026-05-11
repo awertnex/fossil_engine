@@ -96,7 +96,7 @@
 /* ---- section: declarations ----------------------------------------------- */
 
 /*!
- *  -- INTERNAL USE ONLY --;
+ *  @internal
  *
  *  @brief engine's global memory arena, used to manage all heap memory inside
  *  and optionally outside the engine.
@@ -106,7 +106,7 @@
 extern fsl_mem_arena mem_arena_internal;
 
 /*!
- *  -- INTERNAL USE ONLY --;
+ *  @internal
  *
  *  @brief engine's global @ref fsl_asset.name memory arena, for storing runtime asset names.
  *
@@ -115,7 +115,7 @@ extern fsl_mem_arena mem_arena_internal;
 extern fsl_mem_arena mem_arena_name_internal;
 
 /*!
- *  -- INTERNAL USE ONLY --;
+ *  @internal
  *
  *  @brief engine's global @ref fsl_asset.name_id memory arena, for storing runtime asset internal names.
  *
@@ -124,7 +124,7 @@ extern fsl_mem_arena mem_arena_name_internal;
 extern fsl_mem_arena mem_arena_name_id_internal;
 
 /*!
- *  -- INTERNAL USE ONLY --;
+ *  @internal
  *
  *  @brief engine's global @ref fsl_asset.file memory arena, for storing runtime asset file names.
  *
@@ -133,7 +133,7 @@ extern fsl_mem_arena mem_arena_name_id_internal;
 extern fsl_mem_arena mem_arena_file_internal;
 
 /*!
- *  -- INTERNAL USE ONLY --;
+ *  @internal
  *
  *  @brief engine's global @ref fsl_asset.path memory arena, for storing runtime asset parent directories.
  *
@@ -231,9 +231,8 @@ FSLAPI u32 fsl_mem_clear_internal(void *x, u64 size,
         const str *name, const str *src_file, u64 src_line);
 
 /*!
- *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
- *
  *  @brief reserve a block of memory for `*x`.
+ *  implemented in `platform_<PLATFORM>.c`.
  *
  *  @param size size, in bytes.
  *  @param name symbol name (for logging).
@@ -244,9 +243,8 @@ FSLAPI u32 fsl_mem_map_internal(void **x, u64 size,
         const str *name, const str *src_file, u64 src_line);
 
 /*!
- *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
- *
  *  @brief commit a block of mapped memory for `*x`.
+ *  implemented in `platform_<PLATFORM>.c`.
  *
  *  @param size size, in bytes.
  *  @param name symbol name (for logging).
@@ -257,9 +255,8 @@ FSLAPI u32 fsl_mem_commit_internal(void **x, void *offset, u64 size,
         const str *name, const str *src_file, u64 src_line);
 
 /*!
- *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
- *
  *  @brief remap a block of memory for `*x`.
+ *  implemented in `platform_<PLATFORM>.c`.
  *
  *  @param size_old old size, in bytes.
  *  @param size_new new size, in bytes.
@@ -271,9 +268,8 @@ FSLAPI u32 fsl_mem_remap_internal(void **x, u64 size_old, u64 size_new,
         const str *name, const str *src_file, u64 src_line);
 
 /*!
- *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
- *
  *  @brief unmap a block of memory `*x`.
+ *  implemented in `platform_<PLATFORM>.c`.
  *
  *  @param size size, in bytes.
  *  @param name symbol name (for logging).
@@ -309,9 +305,8 @@ FSLAPI u32 fsl_mem_arena_push_internal(fsl_mem_arena *x, fsl_mem_handle *handle,
         const str *name, const str *src_file, u64 src_line);
 
 /*!
- *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
- *
  *  @brief free a memory arena.
+ *  implemented in `platform_<PLATFORM>.c`.
  *
  *  @param name symbol name (for logging).
  */
@@ -319,7 +314,7 @@ FSLAPI void fsl_mem_arena_free_internal(fsl_mem_arena *x,
         const str *name, const str *src_file, u64 src_line);
 
 /*!
- *  @brief similar to `printf("%b\n", x)` but only output `bit_count` bits.
+ *  @brief similar to 'printf("%b\n", x)' but only output `bit_count` bits.
  */
 FSLAPI void fsl_print_bits(u64 x, u8 bit_count);
 

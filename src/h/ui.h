@@ -142,6 +142,12 @@ FSLAPI void fsl_ui_start(b8 nine_slice, b8 clear);
 FSLAPI void fsl_ui_push_panel(i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, u32 tint);
 
 FSLAPI void fsl_ui_render(void);
+
+/*!
+ *  @brief draw a texture as a UI element.
+ *
+ *  @remark if `size_x` is 0, `texture->size.x` is used, and likewise for `size_y`.
+ */
 FSLAPI void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
         f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint);
 

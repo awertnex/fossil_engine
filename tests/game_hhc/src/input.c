@@ -376,7 +376,16 @@ void input_update(player *p)
     }
 
     if (fsl_is_key_press(bind_toggle_chunk_gizmo))
+    {
         core.debug.chunk_gizmo ^= 1;
+
+        if (core.debug.chunk_gizmo)
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                    fsl_logger_stringf("%s\n", "View Chunk Gizmo On"));
+        else
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                    fsl_logger_stringf("%s\n", "View Chunk Gizmo Off"));
+    }
 
     if (fsl_is_key_press(bind_toggle_chunk_queue_visualizer))
     {

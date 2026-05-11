@@ -11,7 +11,7 @@
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
- *  limitations under the License.OFTWARE.
+ *  limitations under the License.
  */
 
 /*!
@@ -573,7 +573,7 @@ u32 fsl_ui_init(void)
 
     ui_core.shader.ui_9_slice = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UI_9_SLICE);
     ui_core.uniform.nine_slice.tint =
-        glGetUniformLocation(ui_core.shader.ui->asset.id, "tint");
+        glGetUniformLocation(ui_core.shader.ui_9_slice->asset.id, "tint");
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -591,7 +591,7 @@ void fsl_ui_start(b8 nine_slice, b8 clear)
     else
     {
         ui_core.shader.ui = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UI);
-        glUseProgram(ui_core.shader.ui_9_slice->asset.id);
+        glUseProgram(ui_core.shader.ui->asset.id);
     }
 
     glDisable(GL_DEPTH_TEST);
@@ -614,6 +614,9 @@ void fsl_ui_push_panel(i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, u32 tint)
 void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
         f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint)
 {
+    if (!size_x) size_x = texture->size.x;
+    if (!size_y) size_y = texture->size.y;
+
     glUniform2i(ui_core.uniform.ui.position, pos_x, pos_y);
     glUniform2i(ui_core.uniform.ui.size, size_x, size_y);
     glUniform2i(ui_core.uniform.ui.texture_size, texture->size.x, texture->size.y);
@@ -633,8 +636,7 @@ void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 siz
 void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
         i32 size_x, i32 size_y, i32 slice_size, u32 tint)
 {
-    fsl_panel_nine_slice _panel = fsl_get_nine_slice(texture,
-            pos_x, pos_y, size_x, size_y, slice_size);
+    fsl_panel_nine_slice _panel = fsl_get_nine_slice(texture, pos_x, pos_y, size_x, size_y, slice_size);
 
     glUniform4f(ui_core.uniform.nine_slice.tint,
             (f32)((tint >> 0x18) & 0xff) / 0xff,
@@ -694,8 +696,8 @@ fsl_panel_nine_slice fsl_get_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos
     v2f32 _tex_coords_pos[3] = {0};
     v2f32 _tex_coords_size[3] = {0};
 
-    _texture_scale.x = 1.0f / texture->size.x;
-    _texture_scale.y = 1.0f / texture->size.y;
+    _texture_scale.x = 1.0f / (f32)texture->size.x;
+    _texture_scale.y = 1.0f / (f32)texture->size.y;
 
     _pos[0].x = _pos_x;
     _pos[0].y = _pos_y;

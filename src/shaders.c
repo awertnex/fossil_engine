@@ -11,7 +11,7 @@
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
- *  limitations under the License.OFTWARE.
+ *  limitations under the License.
  */
 
 /*!
@@ -34,7 +34,7 @@
     _shader_pre_process(path, file_len, FSL_INCLUDE_RECURSION_MAX)
 
 /*!
- *  -- INTERNAL USE ONLY --;
+ *  @internal
  *
  *  @brief process shader before compilation.
  *
@@ -45,7 +45,7 @@
 static str *_shader_pre_process(const str *path, u64 *file_len, u64 recursion_limit);
 
 /*!
- *  -- INTERNAL USE ONLY --;
+ *  @internal
  *
  *  @brief get shader type based on file name conventions.
  *

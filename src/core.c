@@ -11,7 +11,7 @@
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
- *  limitations under the License.OFTWARE.
+ *  limitations under the License.
  */
 
 /*!
@@ -62,7 +62,7 @@ fsl_render *render = &fsl_render_internal;
 /* ---- section: signatures ------------------------------------------------- */
 
 /*!
- *  -- INTERNAL USE ONLY --;
+ *  @internal
  *
  *  @brief engine's default error callback for 'GLFW'.
  */
@@ -73,7 +73,7 @@ static void glfw_callback_error(int error, const char* message)
 }
 
 /*!
- *  -- INTERNAL USE ONLY --;
+ *  @internal
  *
  *  @brief take screenshot and save it into dir at `dir_screenshots`.
  *
@@ -280,8 +280,8 @@ void fsl_engine_close(void)
     fsl_mem_free((void*)&render->screen_buf, render->size.x * render->size.y * FSL_COLOR_CHANNELS_RGB,
             "fsl_engine_close().render->screen_buf");
     fsl_mem_free((void*)&FSL_DIR_PROC_ROOT, PATH_MAX, "fsl_engine_close().FSL_DIR_PROC_ROOT");
-    fsl_logger_close();
     fsl_mem_arena_free(&mem_arena_internal, "fsl_engine_close().mem_arena_internal");
+    fsl_logger_close();
     fsl_err = fsl_err_temp;
 }
 

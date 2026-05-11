@@ -142,7 +142,7 @@ static u32 settings_init(void)
 
     settings.lerp_speed = SET_LERP_SPEED_DEFAULT;
 
-    settings.render_distance = 2;
+    settings.render_distance = 3;
     settings.chunk_buf_radius = settings.render_distance;
     settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
 
@@ -510,6 +510,7 @@ static void draw_everything(void)
     fsl_shader_program *fsl_shader_p = fsl_mem_handle_get(fsl_shader_program, fsl_shader_buf);
     chunk **chunk_tab_p = fsl_mem_handle_get(chunk*, chunk_tab);
     chunk ***CHUNK_ORDER_p = fsl_mem_handle_get(chunk**, CHUNK_ORDER);
+
     f32 delay_in_hours = 6.0f;
     f32 sun_time = skybox_data.time * FSL_PI;
     f64 mid_day = 0.0f;
@@ -977,8 +978,7 @@ static void draw_everything(void)
     {
         if (!core.flag.debug)
             fsl_ui_draw(&texture_p[TEXTURE_CROSSHAIR], render->size.x / 2, render->size.y / 2,
-                    texture_p[TEXTURE_CROSSHAIR].size.x,
-                    texture_p[TEXTURE_CROSSHAIR].size.y,
+                    0, 0,
                     0.0f, 0.0f, -1, -1, 0xffffffff);
 
         fsl_ui_draw(&texture_p[TEXTURE_ITEM_BAR], render->size.x / 2, render->size.y,

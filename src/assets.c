@@ -11,7 +11,7 @@
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
- *  limitations under the License.OFTWARE.
+ *  limitations under the License.
  */
 
 /*!
@@ -75,6 +75,11 @@ fsl_asset_metadata fsl_asset_get_metadata(const fsl_asset asset)
 u32 fsl_asset_set_metadata(fsl_asset *asset, enum fsl_asset_type type,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path)
 {
+    fsl_name *name_p = NULL;
+    fsl_name_id *name_id_p = NULL;
+    fsl_file *file_p = NULL;
+    fsl_path *path_p = NULL;
+
     if (asset == NULL)
     {
         LOGERROR(FSL_ERR_POINTER_NULL, 0,
@@ -89,7 +94,8 @@ u32 fsl_asset_set_metadata(fsl_asset *asset, enum fsl_asset_type type,
         if (fsl_mem_arena_push(&mem_arena_name_internal, &asset->name, FSL_ID_CAP,
                     "fsl_asset_set_metadata().asset->name") != FSL_ERR_SUCCESS)
             goto cleanup;
-        snprintf(fsl_mem_handle_get(fsl_name, asset->name), FSL_ID_CAP, "%s", name);
+        name_p = fsl_mem_handle_get(fsl_name, asset->name),
+        snprintf(name_p, FSL_ID_CAP, "%s", name);
     }
 
     if (name_id)
@@ -97,7 +103,8 @@ u32 fsl_asset_set_metadata(fsl_asset *asset, enum fsl_asset_type type,
         if (fsl_mem_arena_push(&mem_arena_name_id_internal, &asset->name_id, FSL_ID_CAP,
                     "fsl_asset_set_metadata().asset->name_id") != FSL_ERR_SUCCESS)
             goto cleanup;
-        snprintf(fsl_mem_handle_get(fsl_name_id, asset->name_id), FSL_ID_CAP, "%s", name_id);
+        name_id_p = fsl_mem_handle_get(fsl_name_id, asset->name_id);
+        snprintf(name_id_p, FSL_ID_CAP, "%s", name_id);
     }
 
     if (file)
@@ -105,7 +112,8 @@ u32 fsl_asset_set_metadata(fsl_asset *asset, enum fsl_asset_type type,
         if (fsl_mem_arena_push(&mem_arena_file_internal, &asset->file, FSL_ID_CAP,
                     "fsl_asset_set_metadata().asset->file") != FSL_ERR_SUCCESS)
             goto cleanup;
-        snprintf(fsl_mem_handle_get(fsl_file, asset->file), FSL_ID_CAP, "%s", file);
+        file_p = fsl_mem_handle_get(fsl_file, asset->file);
+        snprintf(file_p, FSL_ID_CAP, "%s", file);
     }
 
     if (path)
@@ -113,9 +121,10 @@ u32 fsl_asset_set_metadata(fsl_asset *asset, enum fsl_asset_type type,
         if (fsl_mem_arena_push(&mem_arena_path_internal, &asset->path, FSL_ID_CAP,
                     "fsl_asset_set_metadata().asset->path") != FSL_ERR_SUCCESS)
             goto cleanup;
-        snprintf(fsl_mem_handle_get(fsl_path, asset->path), FSL_ID_CAP, "%s", path);
-        fsl_check_slash(fsl_mem_handle_get(fsl_path, asset->path));
-        fsl_posix_slash(fsl_mem_handle_get(fsl_path, asset->path));
+        path_p = fsl_mem_handle_get(fsl_path, asset->path);
+        snprintf(path_p, FSL_ID_CAP, "%s", path);
+        fsl_check_slash(path_p);
+        fsl_posix_slash(path_p);
     }
 
     fsl_err = FSL_ERR_SUCCESS;
@@ -130,7 +139,9 @@ cleanup:
 u32 fsl_assets_init(void)
 {
     i32 i = 0;
-    fsl_shader_program *shader_temp = NULL;
+    fsl_texture *texture_p = NULL;
+    fsl_shader_program *shader_p = NULL;
+    fsl_font *font_p = NULL;
 
     /* ---- engine framebuffers --------------------------------------------- */
 
@@ -151,27 +162,28 @@ u32 fsl_assets_init(void)
                 FSL_FONT_INDEX_COUNT * sizeof(fsl_font), "fsl_assets_init().fsl_font_buf") != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    if (fsl_texture_init(fsl_mem_handle_get_i(fsl_texture, fsl_texture_buf, FSL_TEXTURE_INDEX_PANEL_ACTIVE),
+    texture_p = fsl_mem_handle_get(fsl_texture, fsl_texture_buf);
+    if (fsl_texture_init(&texture_p[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
                 "Panel Active", "panel_active", "panel_active.png", FSL_DIR_NAME_TEXTURES,
                 GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS)
         goto cleanup;
-    if (fsl_texture_init(fsl_mem_handle_get_i(fsl_texture, fsl_texture_buf, FSL_TEXTURE_INDEX_PANEL_INACTIVE),
+    if (fsl_texture_init(&texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE],
                 "Panel Inactive", "panel_inactive", "panel_inactive.png", FSL_DIR_NAME_TEXTURES,
                 GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS)
         goto cleanup;
-    if (fsl_texture_init(fsl_mem_handle_get_i(fsl_texture, fsl_texture_buf, FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE),
+    if (fsl_texture_init(&texture_p[FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE],
                 "Panel Debug 9-Slice", "panel_debug_9_slice", "panel_debug_nine_slice.png", FSL_DIR_NAME_TEXTURES,
                 GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS)
         goto cleanup;
-    if (fsl_texture_init(fsl_mem_handle_get_i(fsl_texture, fsl_texture_buf, FSL_TEXTURE_INDEX_BUTTON_SELECTED),
+    if (fsl_texture_init(&texture_p[FSL_TEXTURE_INDEX_BUTTON_SELECTED],
                 "Button Selected", "button_selected", "button_selected.png", FSL_DIR_NAME_TEXTURES,
                 GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
         goto cleanup;
-    if (fsl_texture_init(fsl_mem_handle_get_i(fsl_texture, fsl_texture_buf, FSL_TEXTURE_INDEX_BUTTON_ACTIVE),
+    if (fsl_texture_init(&texture_p[FSL_TEXTURE_INDEX_BUTTON_ACTIVE],
                 "Button Active", "button_active", "button_active.png", FSL_DIR_NAME_TEXTURES,
                 GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
         goto cleanup;
-    if (fsl_texture_init(fsl_mem_handle_get_i(fsl_texture, fsl_texture_buf, FSL_TEXTURE_INDEX_BUTTON_INACTIVE),
+    if (fsl_texture_init(&texture_p[FSL_TEXTURE_INDEX_BUTTON_INACTIVE],
                 "Button Inactive", "button_inactive", "button_inactive.png", FSL_DIR_NAME_TEXTURES,
                 GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
         goto cleanup;
@@ -183,93 +195,93 @@ u32 fsl_assets_init(void)
 
     /* ---- engine shaders -------------------------------------------------- */
 
-    shader_temp = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UNIT_QUAD);
+    shader_p = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UNIT_QUAD);
     if (
-            fsl_asset_set_metadata(&shader_temp->asset, FSL_ASSET_SHADER_PROGRAM,
+            fsl_asset_set_metadata(&shader_p->asset, FSL_ASSET_SHADER_PROGRAM,
                 "Unit Quad", "unit_quad", NULL, NULL) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_set_metadata(&shader_temp->vertex.asset, FSL_ASSET_SHADER,
+            fsl_asset_set_metadata(&shader_p->vertex.asset, FSL_ASSET_SHADER,
                 "Unit Quad", "unit_quad", "unit_quad.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_set_metadata(&shader_temp->geometry.asset, FSL_ASSET_SHADER,
+            fsl_asset_set_metadata(&shader_p->geometry.asset, FSL_ASSET_SHADER,
                 NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_set_metadata(&shader_temp->fragment.asset, FSL_ASSET_SHADER,
+            fsl_asset_set_metadata(&shader_p->fragment.asset, FSL_ASSET_SHADER,
                 "Unit Quad", "unit_quad", "unit_quad.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    shader_temp = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_TEXT);
+    shader_p = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_TEXT);
     if (
-            fsl_asset_set_metadata(&shader_temp->asset, FSL_ASSET_SHADER_PROGRAM,
+            fsl_asset_set_metadata(&shader_p->asset, FSL_ASSET_SHADER_PROGRAM,
                 "Text", "text", NULL, NULL) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_set_metadata(&shader_temp->vertex.asset, FSL_ASSET_SHADER,
+            fsl_asset_set_metadata(&shader_p->vertex.asset, FSL_ASSET_SHADER,
                 "Text", "text", "text.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_set_metadata(&shader_temp->geometry.asset, FSL_ASSET_SHADER,
+            fsl_asset_set_metadata(&shader_p->geometry.asset, FSL_ASSET_SHADER,
                 NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_set_metadata(&shader_temp->fragment.asset, FSL_ASSET_SHADER,
+            fsl_asset_set_metadata(&shader_p->fragment.asset, FSL_ASSET_SHADER,
                 "Text", "text", "text.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    shader_temp = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UI);
+    shader_p = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UI);
     if (
-            fsl_asset_set_metadata(&shader_temp->asset, FSL_ASSET_SHADER_PROGRAM,
+            fsl_asset_set_metadata(&shader_p->asset, FSL_ASSET_SHADER_PROGRAM,
                 "UI", "ui", NULL, NULL) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_set_metadata(&shader_temp->vertex.asset, FSL_ASSET_SHADER,
+            fsl_asset_set_metadata(&shader_p->vertex.asset, FSL_ASSET_SHADER,
                 "UI", "ui", "ui.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_set_metadata(&shader_temp->geometry.asset, FSL_ASSET_SHADER,
+            fsl_asset_set_metadata(&shader_p->geometry.asset, FSL_ASSET_SHADER,
                 NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_set_metadata(&shader_temp->fragment.asset, FSL_ASSET_SHADER,
+            fsl_asset_set_metadata(&shader_p->fragment.asset, FSL_ASSET_SHADER,
                 "UI", "ui", "ui.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    shader_temp = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UI_9_SLICE);
+    shader_p = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UI_9_SLICE);
     if (
-            fsl_asset_set_metadata(&shader_temp->asset, FSL_ASSET_SHADER_PROGRAM,
+            fsl_asset_set_metadata(&shader_p->asset, FSL_ASSET_SHADER_PROGRAM,
                 "UI 9-Slice", "ui_9_slice", NULL, NULL) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_set_metadata(&shader_temp->vertex.asset, FSL_ASSET_SHADER,
+            fsl_asset_set_metadata(&shader_p->vertex.asset, FSL_ASSET_SHADER,
                 "UI 9-Slice", "ui_9_slice", "ui_9_slice.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_set_metadata(&shader_temp->geometry.asset, FSL_ASSET_SHADER,
+            fsl_asset_set_metadata(&shader_p->geometry.asset, FSL_ASSET_SHADER,
                 NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_set_metadata(&shader_temp->fragment.asset, FSL_ASSET_SHADER,
+            fsl_asset_set_metadata(&shader_p->fragment.asset, FSL_ASSET_SHADER,
                 "UI 9-Slice", "ui_9_slice", "ui_9_slice.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
         goto cleanup;
 
+    shader_p = fsl_mem_handle_get(fsl_shader_program, fsl_shader_buf);
     for (i = 0; i < FSL_SHADER_INDEX_COUNT; ++i)
-    {
-        shader_temp = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, i);
-        if (fsl_shader_program_init(shader_temp) != FSL_ERR_SUCCESS)
+        if (fsl_shader_program_init(&shader_p[i]) != FSL_ERR_SUCCESS)
             goto cleanup;
-    }
 
     /* ---- engine fonts ---------------------------------------------------- */
 
+    font_p = fsl_mem_handle_get(fsl_font, fsl_font_buf);
     if (
-            fsl_font_init(fsl_mem_handle_get_i(fsl_font, fsl_font_buf, FSL_FONT_INDEX_DEJAVU_SANS), FSL_FONT_RESOLUTION_DEFAULT,
+            fsl_font_init(&font_p[FSL_FONT_INDEX_DEJAVU_SANS], FSL_FONT_RESOLUTION_DEFAULT,
                 "DejaVu Sans (ANSI)", "dejavu_sans_ansi", "dejavu-fonts-ttf/dejavu_sans_ansi.ttf",
                 FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
 
-            fsl_font_init(fsl_mem_handle_get_i(fsl_font, fsl_font_buf, FSL_FONT_INDEX_DEJAVU_SANS_BOLD), FSL_FONT_RESOLUTION_DEFAULT,
+            fsl_font_init(&font_p[FSL_FONT_INDEX_DEJAVU_SANS_BOLD], FSL_FONT_RESOLUTION_DEFAULT,
                 "DejaVu Sans Bold (ANSI)", "dejavu_sans_bold_ansi", "dejavu-fonts-ttf/dejavu_sans_bold_ansi.ttf",
                 FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
 
-            fsl_font_init(fsl_mem_handle_get_i(fsl_font, fsl_font_buf, FSL_FONT_INDEX_DEJAVU_SANS_MONO), FSL_FONT_RESOLUTION_DEFAULT,
+            fsl_font_init(&font_p[FSL_FONT_INDEX_DEJAVU_SANS_MONO], FSL_FONT_RESOLUTION_DEFAULT,
                 "DejaVu Sans Mono (ANSI)", "dejavu_sans_mono_ansi", "dejavu-fonts-ttf/dejavu_sans_mono_ansi.ttf",
                 FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
 
-            fsl_font_init(fsl_mem_handle_get_i(fsl_font, fsl_font_buf, FSL_FONT_INDEX_DEJAVU_SANS_MONO_BOLD), FSL_FONT_RESOLUTION_DEFAULT,
+            fsl_font_init(&font_p[FSL_FONT_INDEX_DEJAVU_SANS_MONO_BOLD], FSL_FONT_RESOLUTION_DEFAULT,
                 "DejaVu Sans Mono Bold (ANSI)", "dejavu_sans_mono_bold_ansi", "dejavu-fonts-ttf/dejavu_sans_mono_bold_ansi.ttf",
                 FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS)
         goto cleanup;
 
+    fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 
 cleanup:
@@ -280,9 +292,9 @@ cleanup:
 void fsl_assets_free(void)
 {
     i32 i = 0;
-    fsl_texture *texture = NULL;
-    fsl_shader_program *shader = NULL;
-    fsl_font *font = NULL;
+    fsl_texture *texture_p = NULL;
+    fsl_shader_program *shader_p = NULL;
+    fsl_font *font_p = NULL;
 
     fsl_fbo_free(&fsl_core_internal.fbo);
     fsl_fbo_free(&fsl_core_internal.fbo_msaa);
@@ -290,21 +302,21 @@ void fsl_assets_free(void)
 
     if (fsl_texture_buf.arena)
     {
-        texture = fsl_mem_handle_get(fsl_texture, fsl_texture_buf);
+        texture_p = fsl_mem_handle_get(fsl_texture, fsl_texture_buf);
         for (i = 0; i < FSL_TEXTURE_INDEX_COUNT; ++i)
-            fsl_texture_free(&texture[i]);
+            fsl_texture_free(&texture_p[i]);
     }
     if (fsl_shader_buf.arena)
     {
-        shader = fsl_mem_handle_get(fsl_shader_program, fsl_shader_buf);
+        shader_p = fsl_mem_handle_get(fsl_shader_program, fsl_shader_buf);
         for (i = 0; i < FSL_SHADER_INDEX_COUNT; ++i)
-            fsl_shader_program_free(&shader[i]);
+            fsl_shader_program_free(&shader_p[i]);
     }
     if (fsl_font_buf.arena)
     {
-        font = fsl_mem_handle_get(fsl_font, fsl_font_buf);
+        font_p = fsl_mem_handle_get(fsl_font, fsl_font_buf);
         for (i = 0; i < FSL_FONT_INDEX_COUNT; ++i)
-            fsl_font_free(&font[i]);
+            fsl_font_free(&font_p[i]);
     }
 }
 
@@ -521,13 +533,14 @@ u32 fsl_texture_init(fsl_texture *texture,
 {
     str path_temp[PATH_MAX] = {0};
     u8 *buf = NULL;
+    fsl_asset_metadata metadata = {0};
 
     if (fsl_asset_set_metadata(&texture->asset, FSL_ASSET_TEXTURE, name, name_id, file, path) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    snprintf(path_temp, PATH_MAX, "%s%s",
-            fsl_mem_handle_get(fsl_path, texture->asset.path),
-            fsl_mem_handle_get(fsl_file, texture->asset.file));
+    metadata = fsl_asset_get_metadata(texture->asset);
+
+    snprintf(path_temp, PATH_MAX, "%s%s", metadata.path, metadata.file);
     if (fsl_is_file_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -536,7 +549,7 @@ u32 fsl_texture_init(fsl_texture *texture,
     {
         LOGERROR(FSL_ERR_IMAGE_LOAD_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_TEXTURE_LOAD_REASON_FAIL(fsl_mem_handle_get(str, texture->asset.name_id), "`stbi_load()` Failed"));
+                MSG_TEXTURE_LOAD_REASON_FAIL(metadata.name_id, "`stbi_load()` Failed"));
         goto cleanup;
     }
 
@@ -570,7 +583,7 @@ u32 fsl_texture_init(fsl_texture *texture,
     texture->grayscale = grayscale;
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_TEXTURE_LOAD(fsl_mem_handle_get(str, texture->asset.name_id), texture->asset.id));
+            MSG_TEXTURE_LOAD(metadata.name_id, texture->asset.id));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -705,21 +718,22 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     fsl_glyph *g = NULL;
     i32 x0 = 0, y0 = 0;
     i32 x1 = 0, y1 = 0;
+    fsl_asset_metadata metadata = {0};
 
     if (fsl_asset_set_metadata(&font->asset, FSL_ASSET_FONT, name, name_id, file, path) != FSL_ERR_SUCCESS)
         return fsl_err;
+
+    metadata = fsl_asset_get_metadata(font->asset);
 
     if (resolution <= 2)
     {
         LOGERROR(FSL_ERR_IMAGE_SIZE_TOO_SMALL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Font", fsl_mem_handle_get(str, font->asset.name_id), "Size Too Small"));
+                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Font", metadata.name_id, "Size Too Small"));
         return fsl_err;
     }
 
-    snprintf(path_temp, PATH_MAX, "%s%s",
-            fsl_mem_handle_get(str, font->asset.path),
-            fsl_mem_handle_get(str, font->asset.file));
+    snprintf(path_temp, PATH_MAX, "%s%s", metadata.path, metadata.file);
     if (fsl_is_file_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
         return fsl_err;
 
@@ -731,12 +745,12 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     {
         LOGERROR(FSL_ERR_FONT_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Font", fsl_mem_handle_get(str, font->asset.name_id), "`stbtt_InitFont()` Failed"));
+                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Font", metadata.name_id, "`stbtt_InitFont()` Failed"));
         goto cleanup;
     }
 
     if (fsl_mem_alloc((void*)&bitmap, FSL_GLYPH_MAX * resolution * resolution,
-                fsl_stringf("fsl_font_init().%s", fsl_mem_handle_get(str, font->asset.name_id))) != FSL_ERR_SUCCESS)
+                fsl_stringf("fsl_font_init().%s", metadata.name_id)) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     stbtt_GetFontVMetrics(&font->info, &font->ascent, &font->descent, &font->line_gap);
@@ -782,10 +796,10 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     fsl_mem_free((void*)&bitmap, FSL_GLYPH_MAX * resolution * resolution,
-            fsl_stringf("fsl_font_init().%s", fsl_mem_handle_get(str, font->asset.name_id)));
+            fsl_stringf("fsl_font_init().%s", metadata.name_id));
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_FONT_LOAD(fsl_mem_handle_get(str, font->asset.name_id)));
+            MSG_FONT_LOAD(metadata.name_id));
 
     font->asset.initialized = TRUE;
     fsl_err = FSL_ERR_SUCCESS;
@@ -794,9 +808,9 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
 cleanup:
 
     fsl_mem_free((void*)&file_contents, font->buf_len,
-            fsl_stringf("fsl_font_init().%s", fsl_mem_handle_get(str, font->asset.name_id)));
+            fsl_stringf("fsl_font_init().%s", metadata.name_id));
     fsl_mem_free((void*)&bitmap, FSL_GLYPH_MAX * resolution * resolution,
-            fsl_stringf("fsl_font_init().%s", fsl_mem_handle_get(str, font->asset.name_id)));
+            fsl_stringf("fsl_font_init().%s", metadata.name_id));
     fsl_font_free(font);
     return fsl_err;
 }

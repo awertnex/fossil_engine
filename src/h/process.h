@@ -35,11 +35,10 @@
 FSLAPI u32 fsl_get_path_bin_root(str **dst);
 
 /*!
- *  -- INTERNAL USE ONLY --;
- *
- *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
+ *  @internal
  *
  *  @brief get current path of binary/executable and assign to `dst`.
+ *  implemented in `platform_<PLATFORM>.c`.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -47,8 +46,7 @@ u32 fsl_get_path_bin_root_internal(str *dst);
 
 /*!
  *  @brief execute command in a separate child process (use @ref execvp() internally).
- *
- *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
+ *  implemented in `platform_<PLATFORM>.c`.
  *
  *  @param cmd command and args to execute.
  *  @param cmd_name command name (for logging).
