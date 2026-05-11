@@ -136,8 +136,8 @@
 #define MSG_TEXTURE_LOAD_REASON_FAIL(name, reason)          MSG_ACTION_SUBJECT_REASON_ERROR("Load Texture", name, reason)
 #define MSG_TEXTURE_LOAD(name, id)                          fsl_logger_stringf("Texture %s[%u] Loaded\n", name, id)
 #define MSG_TEXTURE_UNLOAD(name, id)                        fsl_logger_stringf("Texture %s[%u] Unloaded\n", name, id)
-#define MSG_TEXTURE_HANDLE_CREATE(texture_id, handle_id)    fsl_logger_stringf("Handle[%"PRIu64"] for Texture[%u] Created\n", handle_id, texture_id)
-#define MSG_TEXTURE_HANDLE_DESTROY(texture_id, handle_id)   fsl_logger_stringf("Handle[%"PRIu64"] for Texture[%u] Destroyed\n", handle_id, texture_id)
+#define MSG_TEXTURE_HANDLE_CREATE(handle_id, texture_name, texture_id) fsl_logger_stringf("Handle[%"PRIx64"] for Texture %s[%u] Created\n", handle_id, texture_name, texture_id)
+#define MSG_TEXTURE_HANDLE_DESTROY(handle_id, texture_name, texture_id) fsl_logger_stringf("Handle[%"PRIx64"] for Texture %s[%u] Destroyed\n", handle_id, texture_name, texture_id)
 #define LOG_MESH_GENERATE(name) \
     do { \
         if (fsl_err == FSL_ERR_SUCCESS) \

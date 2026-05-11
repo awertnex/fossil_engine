@@ -576,7 +576,7 @@ u32 fsl_texture_init(fsl_texture *texture,
         texture->bindless_handle = glGetTextureHandleARB(texture->asset.id);
         glMakeTextureHandleResidentARB(texture->bindless_handle);
         LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_TEXTURE_HANDLE_CREATE(texture->bindless_handle, texture->asset.id));
+                MSG_TEXTURE_HANDLE_CREATE(texture->bindless_handle, metadata.name_id, texture->asset.id));
     }
 
     if (buf)
@@ -604,16 +604,19 @@ cleanup:
 void fsl_texture_free(fsl_texture *texture)
 {
     fsl_texture notexture = {0};
+    fsl_asset_metadata metadata = {0};
 
     if (texture == NULL)
         return;
+
+    metadata = fsl_asset_get_metadata(texture->asset);
 
     if (texture->bindless)
     {
         texture->bindless = FALSE;
         glMakeTextureHandleNonResidentARB(texture->bindless_handle);
         LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_TEXTURE_HANDLE_DESTROY(texture->bindless_handle, texture->asset.id));
+                MSG_TEXTURE_HANDLE_DESTROY(texture->bindless_handle, metadata.name_id, texture->asset.id));
     }
 
     if (texture->asset.initialized)
@@ -621,7 +624,7 @@ void fsl_texture_free(fsl_texture *texture)
         texture->asset.initialized = FALSE;
         glDeleteTextures(1, &texture->asset.id);
         LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_TEXTURE_UNLOAD(fsl_mem_handle_get(str, texture->asset.name_id), texture->asset.id));
+                MSG_TEXTURE_UNLOAD(metadata.name_id, texture->asset.id));
     }
 
     *texture = notexture;

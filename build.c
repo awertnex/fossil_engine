@@ -7,13 +7,6 @@
 
 _buf cmd = {0};
 
-typedef struct fsl_str_pair fsl_str_pair;
-struct fsl_str_pair
-{
-    str *a;
-    str *b;
-};
-
 static str str_dir[][CMD_SIZE] =
 {
     DIR_DST,
@@ -68,7 +61,7 @@ static str str_files[][CMD_SIZE] =
     DIR_SRC "ui.c"
 };
 
-static fsl_str_pair copy_targets[] =
+static str *copy_targets[][32] =
 {
     {DIR_SRC "logger/logger.h",                 DIR_DST DIR_DEPS DIR_DST "logger/logger.h"},
     {DIR_SRC "logger/logger_macros.h",          DIR_DST DIR_DEPS DIR_DST "logger/logger_macros.h"},
@@ -146,7 +139,7 @@ int main(int argc, char **argv)
         cmd_fail(&cmd);
 
     for (i = 0; i < arr_len(copy_targets); ++i)
-        if (copy_file(copy_targets[i].a, copy_targets[i].b) != ERR_SUCCESS)
+        if (copy_file(copy_targets[i][0], copy_targets[i][1]) != ERR_SUCCESS)
             cmd_fail(&cmd);
 
     return ERR_SUCCESS;

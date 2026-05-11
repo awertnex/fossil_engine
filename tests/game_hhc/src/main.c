@@ -298,6 +298,7 @@ static void bind_shader_uniforms(void)
 static void generate_standard_meshes(void)
 {
     fsl_mesh *mesh_p = fsl_mem_handle_get(fsl_mesh, mesh);
+    fsl_asset_metadata metadata = {0};
     u32 i = 0;
     const u32 VBO_LEN_SKYBOX =  120;
     const u32 EBO_LEN_SKYBOX =  36;
@@ -461,37 +462,49 @@ static void generate_standard_meshes(void)
         10, 12, 16, 16, 11, 10
     };
 
-    if (fsl_mesh_generate(&mesh_p[MESH_SKYBOX], "Skybox", "skybox", NULL, NULL, &fsl_attrib_vec3_vec2, GL_STATIC_DRAW,
+    if (fsl_mesh_generate(&mesh_p[MESH_SKYBOX], "Skybox", "skybox", NULL, NULL,
+                &fsl_attrib_vec3_vec2, GL_STATIC_DRAW,
                 VBO_LEN_SKYBOX, EBO_LEN_SKYBOX, vbo_data_skybox, ebo_data_skybox) != FSL_ERR_SUCCESS)
     {
-        LOG_MESH_GENERATE(mesh_p[MESH_SKYBOX].asset.name_id);
+        metadata = fsl_asset_get_metadata(mesh_p[MESH_SKYBOX].asset);
+        LOG_MESH_GENERATE(metadata.name_id);
         goto cleanup;
     }
-    LOG_MESH_GENERATE(mesh_p[MESH_SKYBOX].asset.name_id);
+    metadata = fsl_asset_get_metadata(mesh_p[MESH_SKYBOX].asset);
+    LOG_MESH_GENERATE(metadata.name_id);
 
-    if (fsl_mesh_generate(&mesh_p[MESH_CUBE_OF_HAPPINESS], "Cube of Happiness", "cube_of_happiness", NULL, NULL, &fsl_attrib_vec3, GL_STATIC_DRAW,
+    if (fsl_mesh_generate(&mesh_p[MESH_CUBE_OF_HAPPINESS], "Cube of Happiness", "cube_of_happiness", NULL, NULL,
+                &fsl_attrib_vec3, GL_STATIC_DRAW,
                 VBO_LEN_COH, EBO_LEN_COH, vbo_data_coh, ebo_data_coh) != FSL_ERR_SUCCESS)
     {
-        LOG_MESH_GENERATE(mesh_p[MESH_CUBE_OF_HAPPINESS].asset.name_id);
+        metadata = fsl_asset_get_metadata(mesh_p[MESH_CUBE_OF_HAPPINESS].asset);
+        LOG_MESH_GENERATE(metadata.name_id);
         goto cleanup;
     }
-    LOG_MESH_GENERATE(mesh_p[MESH_CUBE_OF_HAPPINESS].asset.name_id);
+    metadata = fsl_asset_get_metadata(mesh_p[MESH_CUBE_OF_HAPPINESS].asset);
+    LOG_MESH_GENERATE(metadata.name_id);
 
-    if (fsl_mesh_generate(&mesh_p[MESH_PLAYER], "Player", "player", NULL, NULL, &fsl_attrib_vec3_vec3, GL_STATIC_DRAW,
+    if (fsl_mesh_generate(&mesh_p[MESH_PLAYER], "Player", "player", NULL, NULL,
+                &fsl_attrib_vec3_vec3, GL_STATIC_DRAW,
                 VBO_LEN_PLAYER, 0, vbo_data_player, NULL) != FSL_ERR_SUCCESS)
     {
-        LOG_MESH_GENERATE(mesh_p[MESH_PLAYER].asset.name_id);
+        metadata = fsl_asset_get_metadata(mesh_p[MESH_PLAYER].asset);
+        LOG_MESH_GENERATE(metadata.name_id);
         goto cleanup;
     }
-    LOG_MESH_GENERATE(mesh_p[MESH_PLAYER].asset.name_id);
+    metadata = fsl_asset_get_metadata(mesh_p[MESH_PLAYER].asset);
+    LOG_MESH_GENERATE(metadata.name_id);
 
-    if (fsl_mesh_generate(&mesh_p[MESH_GIZMO], "Gizmo", "gizmo", NULL, NULL, &fsl_attrib_vec3, GL_STATIC_DRAW,
+    if (fsl_mesh_generate(&mesh_p[MESH_GIZMO], "Gizmo", "gizmo", NULL, NULL,
+                &fsl_attrib_vec3, GL_STATIC_DRAW,
                 VBO_LEN_GIZMO, EBO_LEN_GIZMO, vbo_data_gizmo, ebo_data_gizmo) != FSL_ERR_SUCCESS)
     {
-        LOG_MESH_GENERATE(mesh_p[MESH_GIZMO].asset.name_id);
+        metadata = fsl_asset_get_metadata(mesh_p[MESH_GIZMO].asset);
+        LOG_MESH_GENERATE(metadata.name_id);
         goto cleanup;
     }
-    LOG_MESH_GENERATE(mesh_p[MESH_GIZMO].asset.name_id);
+    metadata = fsl_asset_get_metadata(mesh_p[MESH_GIZMO].asset);
+    LOG_MESH_GENERATE(metadata.name_id);
 
     *GAME_ERR = FSL_ERR_SUCCESS;
     return;
