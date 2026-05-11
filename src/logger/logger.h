@@ -1,7 +1,4 @@
-/*  @file logger.h
- *
- *  @brief logger.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,13 +14,14 @@
  *  limitations under the License.
  */
 
+/*!
+ *  @file logger.h
+ *
+ *  @brief logger.
+ */
+
 #ifndef FSL_LOGGER_H
 #define FSL_LOGGER_H
-
-/*  notes:
- *      log macros beginning with an underscore (`_`) are used by the engine.
- *      log macros ending in `EX` are used to pass `file` and `line` manually.
- */
 
 #include "../h/common.h"
 #include "../h/diagnostics.h"
@@ -33,8 +31,8 @@
 
 enum fsl_log_output_flag
 {
-    FSL_FLAG_LOG_NO_VERBOSE =   0x0001, /* don't log file and line */
-    FSL_FLAG_LOG_CMD =          0x0002, /* log a command (e.g., "Gravity Toggled On" and nothing else) */
+    FSL_FLAG_LOG_NO_VERBOSE =   0x0001, /* don't log 'file' and 'line' */
+    FSL_FLAG_LOG_CMD =          0x0002, /* log a command (e.g., "Gravity Disabled" and nothing else) */
     FSL_FLAG_LOG_NO_FILE =      0x0004  /* don't write to log file */
 }; /* fsl_log_output_flag */
 
@@ -68,7 +66,8 @@ struct log_entry
 };
 typedef struct log_entry fsl_log_entry;
 
-/*! @brief global logger buffer, raw log data.
+/*!
+ *  @brief global logger buffer, raw log data.
  *
  *  @remark buffer mapped onto @ref mem_arena_internal.
  */
@@ -81,7 +80,8 @@ typedef struct fsl_logger_core
 
     str log_dir[PATH_MAX];
     fsl_mem_handle buf;     /* logger strings */
-    i32 cursor;             /* current position in `memb` */
+    fsl_mem_arena arena;    /* logger's memory arena */
+    i32 cursor;             /* current position in `buf` */
 } fsl_logger_core;
 
 /* ---- internal-use macros ------------------------------------------------- */
@@ -164,17 +164,20 @@ typedef struct fsl_logger_core
             fsl_log_output_internal(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_TRACE, message); \
     } while (0)
 
-/*! @brief logger core, all logger data.
+/*!
+ *  @brief logger core, all logger data.
  *
  *  @remark read-only, initialized internally in @ref _fsl_logger_init().
  */
 FSLAPI extern fsl_logger_core logger_core;
 
-/*! @remark read-only, initialized internally in @ref _fsl_logger_init().
+/*!
+ *  @remark read-only, initialized internally in @ref _fsl_logger_init().
  */
 FSLAPI extern u32 fsl_log_level_max;
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  -- INTERNAL USE ONLY --;
  *
  *  @brief allocate and initialize logger resources.
  *
@@ -198,7 +201,8 @@ FSLAPI u32 fsl_logger_init(int argc, char **argv, u64 flags);
 
 FSLAPI void fsl_logger_close(void);
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  -- INTERNAL USE ONLY --;
  *
  *  @param flags enum @ref fsl_log_output_flag.
  *
@@ -208,7 +212,8 @@ FSLAPI void fsl_logger_close(void);
 FSLAPI void fsl_log_output_internal(u32 error_code, u32 flags, const str *src_file, u64 src_line,
         u8 level, const str *message);
 
-/*! @brief like @ref fsl_stringf(), but used for the logger, since @ref fsl_stringf()
+/*!
+ *  @brief like @ref fsl_stringf(), but used for the logger, since @ref fsl_stringf()
  *  uses features like buffer truncation with `...`, the logger needs the raw string.
  *
  *  @note the use of @ref fsl_logger_stringf more than once in a single expression is not advised.

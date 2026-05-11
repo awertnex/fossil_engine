@@ -1,7 +1,4 @@
-/*  @file ui.c
- *
- *  @brief everything about drawing ui elements.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +12,12 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.OFTWARE.
+ */
+
+/*!
+ *  @file ui.c
+ *
+ *  @brief everything about drawing ui elements.
  */
 
 #include "h/common.h"
@@ -55,11 +58,13 @@ static struct text_core
     f32 advance;
     v2f32 text_scale;
 
-    /*! @brief iterator for `buf`, resets at @ref fsl_text_start() and @ref fsl_text_render().
+    /*!
+     *  @brief iterator for `buf`, resets at @ref fsl_text_start() and @ref fsl_text_render().
      */
     GLuint cursor;
 
-    /*! @brief text buffer, raw text data.
+    /*!
+     *  @brief text buffer, raw text data.
     */
     struct fsl_text_data *buf;
 
@@ -77,7 +82,8 @@ static struct ui_core
     GLuint vbo_nine_slice;
     b8 vao_loaded;
 
-    /*! @brief panel buffer, raw panel data.
+    /*!
+     *  @brief panel buffer, raw panel data.
      */
     fsl_panel_nine_slice *panel_buf;
 
@@ -131,7 +137,8 @@ static f32 vbo_data_unit_quad_internal[] =
 
 /* ---- section: signatures ------------------------------------------------- */
 
-/*! @brief init text rendering settings (and engine default fonts at @ref fsl_font_buf).
+/*!
+ *  @brief init text rendering settings (and engine default fonts at @ref fsl_font_buf).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */

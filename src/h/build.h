@@ -1,7 +1,4 @@
-/*  @file build.h
- *
- *  @brief build info to link the engine with external software.
- *
+/*!
  *  @remark this header is to provide engine bindings for if building using
  *  buildtool (https://github.com/awertnex/buildtool.git)
  *
@@ -20,6 +17,12 @@
  *  limitations under the License.
  */
 
+/*!
+ *  @file build.h
+ *
+ *  @brief build info to link the engine with external software.
+ */
+
 #ifndef FSL_BUILD_H
 #define FSL_BUILD_H
 
@@ -29,7 +32,8 @@
 
 #if FSL_PLATFORM_WIN
 
-    /*! @brief for the engine itself.
+    /*!
+     *  @brief for the engine itself.
      */
     static const str fsl_str_libs_internal[][CMD_SIZE] =
     {
@@ -42,7 +46,8 @@
         "-mwindows"
     };
 
-    /*! @brief for the including software.
+    /*!
+     *  @brief for the including software.
      */
     static const str fsl_str_libs[][CMD_SIZE] =
     {
@@ -56,7 +61,8 @@
 
 #else
 
-    /*! @brief for the engine itself.
+    /*!
+     *  @brief for the engine itself.
      */
     static const str fsl_str_libs_internal[][CMD_SIZE] =
     {
@@ -69,7 +75,8 @@
         ""
     };
 
-    /*! @brief for the including software.
+    /*!
+     *  @brief for the including software.
      */
     static const str fsl_str_libs[][CMD_SIZE] =
     {
@@ -85,13 +92,15 @@
 
 /* ---- section: signatures ------------------------------------------------- */
 
-/*! @brief link engine's dependencies with the including software for compile time.
+/*!
+ *  @brief link engine's dependencies with the including software for compile time.
  *
  *  @param cmd cmd to push engine's required libs to, if `NULL`, internal cmd is used.
  */
 static void fsl_engine_link_libs(_buf *cmd);
 
-/*! @brief link engine's dependencies with the including software for run time.
+/*!
+ *  @brief link engine's dependencies with the including software for run time.
  *
  *  @param cmd cmd to push application's runtime path to, if `NULL`, internal cmd is used.
  */

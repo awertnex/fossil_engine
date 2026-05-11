@@ -1,7 +1,4 @@
-/*  @file common.h
- *
- *  @brief engine info and commonly shared values.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +12,12 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ */
+
+/*!
+ *  @file common.h
+ *
+ *  @brief engine info and commonly shared values.
  */
 
 #ifndef FSL_COMMON_H
@@ -122,7 +125,8 @@
 
 /* ---- color conversion macros --------------------------------------------- */
 
-/*! @brief convert RGBA color to 4-Byte hex color.
+/*!
+ *  @brief convert RGBA color to 4-Byte hex color.
  *  @remark color range [0.0f, 1.0f].
  */
 #define fsl_color_v4_to_hex(r, g, b, a) \
@@ -131,7 +135,8 @@
      ((u32)((b) * 0xff) << 0x08) | \
      ((u32)(a) * 0xff))
 
-/*! @brief convert 4-Byte hex color to RGBA color.
+/*!
+ *  @brief convert 4-Byte hex color to RGBA color.
  *  @remark color range [0.0f, 1.0f].
  */
 #define fsl_color_hex_to_v4(n) (v4f32){ \
@@ -191,11 +196,13 @@ enum fsl_texture_index
     FSL_TEXTURE_INDEX_COUNT
 }; /* fsl_texture_index */
 
-/*! @brief POSIX timestamp of the main process' start, in millisecond format.
+/*!
+ *  @brief POSIX timestamp of the main process' start, in millisecond format.
  */
 extern u64 fsl_init_time;
 
-/*! @brief project root directory.
+/*!
+ *  @brief project root directory.
  *
  *  @remark called from @ref fsl_engine_init() to change current working dirctory to the main process'.
  *  @remark declared and initialized internally.

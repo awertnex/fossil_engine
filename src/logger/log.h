@@ -1,7 +1,4 @@
-/*  @file log.h
- *
- *  @brief main logger module header; log messages and other definitions related to logging.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,33 +14,37 @@
  *  limitations under the License.
  */
 
-/*! LOG MESSAGE CONVENTIONS:
+/*!
+ *  @file log.h
+ *
+ *  @brief main logger module header; log messages and other definitions related to logging.
+ */
+
+/*!
+ *  LOG MESSAGE CONVENTIONS:
  *      - action:   string, infinitive verb (e.g., "Open File", not "Opened File").
  *      - subject:  string, subject name (e.g., "door.png", not "Texture").
- *      - reason:   string, can be anything (e.g., "Size Too Small").
+ *      - reason:   string, can be anything (e.g., "Size Too Small" or "`function()` Failed").
  *
  *      encapsulation:
  *          - immutable data (e.g., names, paths): single quotes `''`.
  *            (e.g., "File 'door.png' Not Found").
- *          - mutable/runtime-generated data (e.g., memory addresses, asset ID):
+ *          - mutable/runtime-generated data (e.g., memory addresses, asset IDs):
  *            square brackets `[]` (e.g., Texture[39] Generated).
+ *          - symbol names: back-ticks "``" (e.g., "`function().param` Empty").
  *
  *      general rules:
  *      - when passing function names, include the parentheses `()` (e.g., "fsl_shader_free()").
  *      - when passing symbol names, pass them as you'd write them in code, starting
  *        with function name (e.g., "fsl_shader_free().shader->source").
  *      - use square brackets `[]` with no space when the value belongs to the
- *        identifier, and with a space when the value doesn't belong to the previous word
- *        (e.g., "fsl_shader_free().shader->source[0x557a01dd1f50] Memory Cleared [3181B]").
+ *        identifier (e.g., "Memory Cleared fsl_shader_free().shader->source[0x557a01dd1f50][3181B]").
  *      - when using square brackets and the unit of data is unknown, include an
- *        identifier before the brackets, examples:
- *          - "Memory Cleared [3181B]": it is clear that we've cleared 3181 bytes.
- *          - "main()._arena[0x7f12b73e6000] Memory Arena Unmapped [4521611264B] Entry Total [10][45056B]":
- *            it is clear that "[452..B]" is how many bytes we've cleared,
- *            but it'd be difficult to tell what "[10][45056B]" means without
- *            including "Entry Total" before it (this specific example is a little
- *            different, "45056b" isn't the size of each member, but the size of the
- *            members array within the memory arena).
+ *        identifier within the brackets, examples:
+ *          - "Memory Cleared [3181B]": it is clear that we've cleared 3181 Bytes.
+ *          - "Memory Arena Unloaded main()._arena[0x7f12b73e6000][4521611264B][entry_total: 10][entry_cap: 45056B]":
+ *            it is not immediately clear what the last two fields represent, hence
+ *            the identifiers inside the brackets.
  */
 
 #ifndef FSL_LOG_H

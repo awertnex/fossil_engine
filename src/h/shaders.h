@@ -1,7 +1,4 @@
-/*  @file shaders.h
- *
- *  @brief loading, pre-processing, parsing and unloading glsl shaders.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +14,12 @@
  *  limitations under the License.
  */
 
+/*!
+ *  @file shaders.h
+ *
+ *  @brief loading, pre-processing, parsing and unloading glsl shaders.
+ */
+
 #ifndef FSL_SHADERS_H
 #define FSL_SHADERS_H
 
@@ -26,7 +29,8 @@
 
 #include <deps/glad/glad.h>
 
-/*! @brief initialize single shader.
+/*!
+ *  @brief initialize single shader.
  *
  *  - pre-process shader before compiling shader and compile shader.
  *
@@ -39,7 +43,8 @@ FSLAPI u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created);
 
 FSLAPI void fsl_shader_free(fsl_shader *shader);
 
-/*! @brief initialize shader program.
+/*!
+ *  @brief initialize shader program.
  *
  *  - call @ref fsl_shader_init() on all shaders in `program` if
  *    @ref fsl_shader.asset.file and @ref fsl_shader.asset.path are not `NULL`.
@@ -53,19 +58,23 @@ FSLAPI u32 fsl_shader_program_init(fsl_shader_program *program);
 
 FSLAPI void fsl_shader_program_free(fsl_shader_program *program);
 
-/*! @brief set a `vec3` attribute array for a `vao`.
+/*!
+ *  @brief set a `vec3` attribute array for a `vao`.
  */
 FSLAPI void fsl_attrib_vec3(void);
 
-/*! @brief set a `vec3` and a `vec2` attribute arrays for a `vao`.
+/*!
+ *  @brief set a `vec3` and a `vec2` attribute arrays for a `vao`.
  */
 FSLAPI void fsl_attrib_vec3_vec2(void);
 
-/*! @brief set a `vec3` and a `vec3` attribute arrays for a `vao`.
+/*!
+ *  @brief set a `vec3` and a `vec3` attribute arrays for a `vao`.
  */
 FSLAPI void fsl_attrib_vec3_vec3(void);
 
-/*! @brief set a `vec3` and a `vec4` attribute arrays for a `vao`.
+/*!
+ *  @brief set a `vec3` and a `vec4` attribute arrays for a `vao`.
  */
 FSLAPI void fsl_attrib_vec3_vec4(void);
 

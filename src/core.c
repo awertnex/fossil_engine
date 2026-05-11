@@ -1,7 +1,4 @@
-/*  @file core.c
- *
- *  @brief engine init, running, close, windowing, opengl loading.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +12,12 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.OFTWARE.
+ */
+
+/*!
+ *  @file core.c
+ *
+ *  @brief engine init, running, close, windowing, opengl loading.
  */
 
 #include "h/common.h"
@@ -49,7 +52,8 @@ str *FSL_DIR_PROC_ROOT = NULL;
 u32 fsl_err = FSL_ERR_SUCCESS;
 fsl_core fsl_core_internal = {0};
 
-/*! @remark initialized in @ref fsl_engine_init().
+/*!
+ *  @remark initialized in @ref fsl_engine_init().
  */
 static fsl_render fsl_render_internal = {0};
 
@@ -57,7 +61,8 @@ fsl_render *render = &fsl_render_internal;
 
 /* ---- section: signatures ------------------------------------------------- */
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  -- INTERNAL USE ONLY --;
  *
  *  @brief engine's default error callback for 'GLFW'.
  */
@@ -67,7 +72,8 @@ static void glfw_callback_error(int error, const char* message)
     LOGERROR(FSL_ERR_GLFW, 0, fsl_logger_stringf("GLFW: %s\n", message));
 }
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  -- INTERNAL USE ONLY --;
  *
  *  @brief take screenshot and save it into dir at `dir_screenshots`.
  *

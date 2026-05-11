@@ -1,4 +1,5 @@
-/*  @file string.c
+/*!
+ *  @file string.c
  *
  *  @brief string parsing, token searching.
  *

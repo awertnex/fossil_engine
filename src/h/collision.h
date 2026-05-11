@@ -1,7 +1,4 @@
-/*  @file collision.h
- *
- *  @brief collision detection and collision data types.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +12,12 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ */
+
+/*!
+ *  @file collision.h
+ *
+ *  @brief collision detection and collision data types.
  */
 
 #ifndef FSL_COLLISION_H
@@ -35,7 +38,8 @@ struct bounding_box
 
 FSLAPI b8 fsl_is_intersect_aabb(fsl_bounding_box a, fsl_bounding_box b);
 
-/*! @brief get collision status and stats between `a` and `b` using the 'Swept AABB' algorithm.
+/*!
+ *  @brief get collision status and stats between `a` and `b` using the 'Swept AABB' algorithm.
  *
  *  @param displacement displacement of `a`, since this function assumes `b` is static.
  *

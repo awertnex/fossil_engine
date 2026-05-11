@@ -1,7 +1,4 @@
-/*  @file string.h
- *
- *  @brief string parsing, token searching.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,23 +14,32 @@
  *  limitations under the License.
  */
 
+/*!
+ *  @file string.h
+ *
+ *  @brief string parsing, token searching.
+ */
+
 #ifndef FSL_STRING_H
 #define FSL_STRING_H
 
 #include "common.h"
 #include "types.h"
 
-/*! @brief swap string buffers `s1` with `s2` (without a `temp` buffer).
+/*!
+ *  @brief swap string buffers `s1` with `s2` (without a `temp` buffer).
  */
 FSLAPI void fsl_swap_strings(str *s1, str *s2);
 
-/*! @brief swap all occurrences of `c1` in `string` with `c2` (without a `temp` buffer).
+/*!
+ *  @brief swap all occurrences of `c1` in `string` with `c2` (without a `temp` buffer).
  *
  *  @return processed `string`.
  */
 FSLAPI void fsl_swap_string_char(str *string, char c1, char c2);
 
-/*! @brief write temporary formatted string.
+/*!
+ *  @brief write temporary formatted string.
  *
  *  @note the use of @ref fsl_stringf more than once in a single expression is not advised.
  *
@@ -44,13 +50,15 @@ FSLAPI void fsl_swap_string_char(str *string, char c1, char c2);
  */
 FSLAPI str *fsl_stringf(const str *format, ...);
 
-/*! @brief compare `arg` to any of `argv` entries.
+/*!
+ *  @brief compare `arg` to any of `argv` entries.
  *
  *  @return `argc` of match if found, 0 otherwise.
  */
 FSLAPI u64 fsl_find_token(str *arg, int argc, str **argv);
 
-/*! @brief load tokens from file at `path` into a @ref fsl_key_value buffer as
+/*!
+ *  @brief load tokens from file at `path` into a @ref fsl_key_value buffer as
  *  `str` and `u64` arrays respectively.
  *
  *  @return @ref fsl_key_value buffer of tokens.
@@ -58,7 +66,8 @@ FSLAPI u64 fsl_find_token(str *arg, int argc, str **argv);
  */
 FSLAPI fsl_key_value fsl_get_tokens_key_val(const str *path);
 
-/*! @brief convert an int into a string.
+/*!
+ *  @brief convert an int into a string.
  *
  *  convert a signed 32-bit integer into a string and write into `dst`
  *  at most `size` bytes.
@@ -67,7 +76,8 @@ FSLAPI fsl_key_value fsl_get_tokens_key_val(const str *path);
  */
 FSLAPI u32 fsl_convert_i32_to_str(str *dst, i32 size, i32 n);
 
-/*! @brief convert an int into a string.
+/*!
+ *  @brief convert an int into a string.
  *
  *  convert an unsigned 64-bit integer into a string and write into `dst`
  *  at most `size` bytes.

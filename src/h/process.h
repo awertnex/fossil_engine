@@ -1,7 +1,4 @@
-/*  @file process.h
- *
- *  @brief execute commands externally, identify current process, fork.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,20 +14,28 @@
  *  limitations under the License.
  */
 
+/*!
+ *  @file process.h
+ *
+ *  @brief execute commands externally, identify current process, fork.
+ */
+
 #ifndef FSL_PROCESS_H
 #define FSL_PROCESS_H
 
 #include "common.h"
 #include "types.h"
 
-/*! @brief get current path of binary/executable, slash (`/`) and null (`\0`) terminated,
+/*!
+ *  @brief get current path of binary/executable, slash (`/`) and null (`\0`) terminated,
  *  assign allocated path string (of size @ref PATH_MAX) to `dst`.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_get_path_bin_root(str **dst);
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  -- INTERNAL USE ONLY --;
  *
  *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *
@@ -40,7 +45,8 @@ FSLAPI u32 fsl_get_path_bin_root(str **dst);
  */
 u32 fsl_get_path_bin_root_internal(str *dst);
 
-/*! @brief execute command in a separate child process (use @ref execvp() internally).
+/*!
+ *  @brief execute command in a separate child process (use @ref execvp() internally).
  *
  *  -- IMPLEMENTATION: platform_<PLATFORM>.c --;
  *

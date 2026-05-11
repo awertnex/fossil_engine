@@ -1,7 +1,4 @@
-/*  @file input.c
- *
- *  @brief keyboard and mouse input handling.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +12,12 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.OFTWARE.
+ */
+
+/*!
+ *  @file input.c
+ *
+ *  @brief keyboard and mouse input handling.
  */
 
 #include "h/core.h"
@@ -48,7 +51,8 @@ enum keyboard_key_state
 static u32 fsl_mouse_button[FSL_MOUSE_BUTTONS_MAX] = {0};
 static u32 fsl_keyboard_key[FSL_KEYBOARD_KEYS_MAX] = {0};
 
-/*! @brief translation table to communicate engine conventions to GLFW.
+/*!
+ *  @brief translation table to communicate engine conventions to GLFW.
  */
 static u32 fsl_keyboard_tab[FSL_KEYBOARD_KEYS_MAX] =
 {

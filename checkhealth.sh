@@ -4,16 +4,8 @@
 # adding a version tag to a commit.
 
 ERR_SUCCESS=1
-ERR=$ERR_SUCCESS
-
-TARGETS=(
-    src/
-    tests/
-    build.c
-)
-
-DIR_ROOT="$(dirname "$(realpath -e $0)")"
-cd $DIR_ROOT
+ERR_NO_TARGETS=3
+ERR_TARGET_NOT_FOUND=4
 
 function logerror()
 {
@@ -40,13 +32,35 @@ function fsl_grep()
 {
     local err="$ERR_SUCCESS"
     for i in $2; do
-        grep --color -rn "$1" "$i"
+        grep --color -rnI "$1" "$i"
         err=$?
         if [[ $err != $ERR_SUCCESS ]]; then
             ERR=$err
         fi
     done
 }
+
+# ---- section: check targets ------------------------------------------------ #
+
+DIR_ROOT="$(dirname "$(realpath -e $0)")"
+cd $DIR_ROOT
+
+ERR=$ERR_SUCCESS
+TARGETS=$@
+
+if [[ ! $TARGETS ]]; then
+    echo "Usage: checkhealth [FILE]..."
+    echo "Check for textual errors recursively in each FILE."
+    echo "Example: checkhealth common.h main.c src/"
+    exit $ERR_NO_TARGETS
+fi
+
+for i in $TARGETS; do
+    if [[ ! -e $i ]]; then
+        logerror $ERR_TARGET_NOT_FOUND "Failed to Check Health, Target '$i' Not Found"
+        exit $ERR_TARGET_NOT_FOUND
+    fi
+done
 
 # ---- section: check health ------------------------------------------------- #
 
@@ -62,6 +76,10 @@ fsl_grep $'\t' "$TARGETS"
 
 logtrace "Checking for Trailing Spaces.."
 fsl_grep " $" "$TARGETS"
+
+logtrace "Checking Doxygen Blocks.."
+fsl_grep "/\*\*" "$TARGETS"
+fsl_grep "/\*![^$]" "$TARGETS"
 
 logtrace "Checking for \"e.g.\" Syntax Errors.."
 fsl_grep "[^(]e\.g\." "$TARGETS"

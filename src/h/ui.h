@@ -1,7 +1,4 @@
-/*  @file ui.h
- *
- *  @brief everything about drawing ui elements.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +12,12 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ */
+
+/*!
+ *  @file ui.h
+ *
+ *  @brief everything about drawing ui elements.
  */
 
 #ifndef FSL_UI_H
@@ -31,7 +34,8 @@
 #define FSL_UI_PANEL_PADDING_DEFAULT 10
 #define FSL_UI_SLICE_SIZE_DEFAULT 8
 
-/*! @brief one slice in a 9-slice panel.
+/*!
+ *  @brief one slice in a 9-slice panel.
  */
 typedef struct fsl_panel_slice
 {
@@ -41,7 +45,8 @@ typedef struct fsl_panel_slice
     v2f32 tex_coords_size;
 } fsl_panel_slice;
 
-/*! @brief one 9-slice panel.
+/*!
+ *  @brief one 9-slice panel.
  */
 typedef struct fsl_panel_nine_slice
 {
@@ -50,7 +55,8 @@ typedef struct fsl_panel_nine_slice
 
 /* ---- section: signatures ------------------------------------------------- */
 
-/*! @brief start text rendering batch.
+/*!
+ *  @brief start text rendering batch.
  *
  *  @param size font height, in pixels.
  *
@@ -62,7 +68,8 @@ typedef struct fsl_panel_nine_slice
  */
 FSLAPI void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear);
 
-/*! @brief push string's glyph metrics, position, alignment and color to internal text queue.
+/*!
+ *  @brief push string's glyph metrics, position, alignment and color to internal text queue.
  *
  *  @param align_x enum @ref fsl_text_alignment:
  *      FSL_TEXT_ALIGN_RIGHT.
@@ -88,7 +95,8 @@ FSLAPI void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear);
 FSLAPI void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y,
         i32 window_x, u32 color);
 
-/*! @brief render text to framebuffer.
+/*!
+ *  @brief render text to framebuffer.
  *
  *  @param shadow_color shadow color (if `shadow` is `TRUE`) (optional),
  *  format: 0xrrggbbaa.
@@ -100,13 +108,15 @@ FSLAPI void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 
  */
 FSLAPI void fsl_text_render(b8 shadow, u32 shadow_color);
 
-/*! @brief get total string height of current rendering batch.
+/*!
+ *  @brief get total string height of current rendering batch.
  *
  *  @remark call before @ref fsl_text_render().
  */
 FSLAPI f32 fsl_get_text_height(void);
 
-/*! @brief initialize ui.
+/*!
+ *  @brief initialize ui.
  *
  *  @remark must be called after @ref fsl_engine_init().
  *
@@ -114,7 +124,8 @@ FSLAPI f32 fsl_get_text_height(void);
  */
 FSLAPI u32 fsl_ui_init(void);
 
-/*! @brief start ui rendering batch.
+/*!
+ *  @brief start ui rendering batch.
  *
  *  @param nine_slice use a nine_slice shader
  *  (ui elements with separate edge and corner slices of a texture).
@@ -125,7 +136,8 @@ FSLAPI u32 fsl_ui_init(void);
  */
 FSLAPI void fsl_ui_start(b8 nine_slice, b8 clear);
 
-/*! @brief push default engine panel onto internal panel buffer.
+/*!
+ *  @brief push default engine panel onto internal panel buffer.
  */
 FSLAPI void fsl_ui_push_panel(i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, u32 tint);
 
@@ -136,13 +148,15 @@ FSLAPI void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, 
 FSLAPI void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
         i32 size_x, i32 size_y, i32 slice_size, u32 tint);
 
-/*! @remark enable @ref GL_DEPTH_TEST.
+/*!
+ *  @remark enable @ref GL_DEPTH_TEST.
  */
 FSLAPI void fsl_ui_stop(void);
 
 FSLAPI void fsl_ui_free(void);
 
-/*! @brief make a 9-slice panel.
+/*!
+ *  @brief make a 9-slice panel.
  */
 FSLAPI fsl_panel_nine_slice fsl_get_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
         i32 size_x, i32 size_y, i32 slice_size);

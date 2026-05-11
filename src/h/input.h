@@ -1,7 +1,4 @@
-/*  @file input.h
- *
- *  @brief keyboard and mouse input handling.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +12,12 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ */
+
+/*!
+ *  @file input.h
+ *
+ *  @brief keyboard and mouse input handling.
  */
 
 #ifndef FSL_INPUT_H
@@ -172,7 +175,8 @@ struct key_bind
     u32 mod; /* enum @ref fsl_mod_key_flag (internal enum) */
 }; /* key_bind */
 
-/*! @brief setup a key binding (key combination).
+/*!
+ *  @brief setup a key binding (key combination).
  *
  *  @param key a keyboard key or mouse button.
  */
@@ -188,7 +192,8 @@ FSLAPI b8 fsl_is_key_press_double(const fsl_key_bind key);
 FSLAPI b8 fsl_is_key_hold(const fsl_key_bind key);
 FSLAPI b8 fsl_is_key_release(const fsl_key_bind key);
 
-/*! @brief update mouse movement.
+/*!
+ *  @brief update mouse movement.
  *
  *  - update parameters at @ref fsl_render.mouse_pos and @ref fsl_render.mouse_delta
  *    of the currently bound `fsl_render`.
@@ -197,7 +202,8 @@ FSLAPI b8 fsl_is_key_release(const fsl_key_bind key);
  */
 FSLAPI void fsl_update_mouse_movement(void);
 
-/*! @brief update internal mouse and key states: press, double-press, hold and release.
+/*!
+ *  @brief update internal mouse and key states: press, double-press, hold and release.
  *
  *  @remark called automatically from @ref fsl_engine_running().
  */

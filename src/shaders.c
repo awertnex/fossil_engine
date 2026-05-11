@@ -1,7 +1,4 @@
-/*  @file shaders.c
- *
- *  @brief loading, pre-processing, parsing and unloading glsl shaders.
- *
+/*!
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +14,12 @@
  *  limitations under the License.OFTWARE.
  */
 
+/*!
+ *  @file shaders.c
+ *
+ *  @brief loading, pre-processing, parsing and unloading glsl shaders.
+ */
+
 #include "h/diagnostics.h"
 #include "h/dir.h"
 #include "h/limits.h"
@@ -30,7 +33,8 @@
 #define fsl_shader_pre_process(path, file_len) \
     _shader_pre_process(path, file_len, FSL_INCLUDE_RECURSION_MAX)
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  -- INTERNAL USE ONLY --;
  *
  *  @brief process shader before compilation.
  *
@@ -40,7 +44,8 @@
  */
 static str *_shader_pre_process(const str *path, u64 *file_len, u64 recursion_limit);
 
-/*! -- INTERNAL USE ONLY --;
+/*!
+ *  -- INTERNAL USE ONLY --;
  *
  *  @brief get shader type based on file name conventions.
  *
