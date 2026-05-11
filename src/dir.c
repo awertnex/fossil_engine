@@ -241,8 +241,8 @@ cleanup:
 fsl_buf fsl_get_dir_contents(const fsl_fs_path *path)
 {
     str *dir_name_absolute = NULL;
-    str dir_name_absolute_usable[PATH_MAX] = {0};
-    str entry_name_full[PATH_MAX] = {0};
+    str dir_name_absolute_usable[FSL_PATH_CAP] = {0};
+    str entry_name_full[FSL_PATH_CAP] = {0};
     DIR *dir = NULL;
     struct dirent *entry = {0};
     fsl_buf nobuf = {0};
@@ -261,7 +261,7 @@ fsl_buf fsl_get_dir_contents(const fsl_fs_path *path)
     if (fsl_get_path_absolute(path, &dir_name_absolute) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    snprintf(dir_name_absolute_usable, PATH_MAX, "%s", dir_name_absolute);
+    snprintf(dir_name_absolute_usable, FSL_PATH_CAP, "%s", dir_name_absolute);
 
     dir = opendir(dir_name_absolute);
     if (!dir)
@@ -277,7 +277,7 @@ fsl_buf fsl_get_dir_contents(const fsl_fs_path *path)
     contents.memb -= 2;
 
     if (!contents.memb || fsl_mem_alloc_buf(&contents, contents.memb,
-                NAME_MAX, "fsl_get_dir_contents().contents") != FSL_ERR_SUCCESS)
+                FSL_ID_CAP, "fsl_get_dir_contents().contents") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     rewinddir(dir);
@@ -288,9 +288,9 @@ fsl_buf fsl_get_dir_contents(const fsl_fs_path *path)
                 !strncmp(entry->d_name, "..\0", 3))
             continue;
 
-        contents.i[i] = (u8*)contents.buf + i * NAME_MAX;
-        memcpy(contents.i[i], entry->d_name, NAME_MAX - 1);
-        snprintf(entry_name_full, PATH_MAX, "%s%s", dir_name_absolute_usable, entry->d_name);
+        contents.i[i] = (u8*)contents.buf + i * FSL_ID_CAP;
+        memcpy(contents.i[i], entry->d_name, FSL_ID_CAP - 1);
+        snprintf(entry_name_full, FSL_PATH_CAP, "%s%s", dir_name_absolute_usable, entry->d_name);
 
         if (fsl_is_dir(entry_name_full) == FSL_ERR_SUCCESS)
             fsl_check_slash(contents.i[i]);
@@ -351,8 +351,8 @@ u64 fsl_get_dir_entry_count(const fsl_fs_path *path)
 
 u32 fsl_copy_file(const fsl_fs_path *src, const fsl_fs_path *dst)
 {
-    str str_dst[PATH_MAX] = {0};
-    str str_lnk[PATH_MAX] = {0}; /* if is symlink, store symlink's link in this buffer */
+    str str_dst[FSL_PATH_CAP] = {0};
+    str str_lnk[FSL_PATH_CAP] = {0}; /* if is symlink, store symlink's link in this buffer */
     str *in_file = NULL;
     FILE *out_file = NULL;
     u64 len = 0;
@@ -363,12 +363,12 @@ u32 fsl_copy_file(const fsl_fs_path *src, const fsl_fs_path *dst)
     if (fsl_is_file_exists(src, TRUE) != FSL_ERR_SUCCESS)
             return fsl_err;
 
-    snprintf(str_dst, PATH_MAX, "%s", dst);
+    snprintf(str_dst, FSL_PATH_CAP, "%s", dst);
 
     if (fsl_is_dir(dst) == FSL_ERR_SUCCESS)
     {
         fsl_check_slash(str_dst);
-        fsl_get_base_name(src, str_dst + strlen(str_dst), PATH_MAX);
+        fsl_get_base_name(src, str_dst + strlen(str_dst), FSL_PATH_CAP);
         fsl_posix_slash(str_dst);
     }
 
@@ -412,7 +412,7 @@ u32 fsl_copy_file(const fsl_fs_path *src, const fsl_fs_path *dst)
             break;
 
         case FSL_FILE_TYPE_LNK:
-            if (readlink(src, str_lnk, PATH_MAX - 1) < 1)
+            if (readlink(src, str_lnk, FSL_PATH_CAP - 1) < 1)
             {
                 LOGERROR(FSL_ERR_FILE_OPEN_FAIL, 0,
                         MSG_FILE_SYMLINK_COPY_FAIL(src, str_dst));
@@ -422,7 +422,7 @@ u32 fsl_copy_file(const fsl_fs_path *src, const fsl_fs_path *dst)
             if (fsl_is_file_exists(str_dst, FALSE) == FSL_ERR_SUCCESS)
                 remove(str_dst);
 
-            str_lnk[strnlen(str_lnk, PATH_MAX - 1)] = '\0';
+            str_lnk[strnlen(str_lnk, FSL_PATH_CAP - 1)] = '\0';
             symlink(str_lnk, str_dst);
 
             LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
@@ -461,10 +461,10 @@ u32 fsl_copy_file(const fsl_fs_path *src, const fsl_fs_path *dst)
 u32 fsl_copy_dir(const fsl_fs_path *src, const fsl_fs_path *dst, b8 contents_only)
 {
     fsl_buf dir_contents = {0};
-    str str_src[PATH_MAX] = {0};
-    str str_dst[PATH_MAX] = {0};
-    str in_dir[PATH_MAX] = {0};
-    str out_dir[PATH_MAX] = {0};
+    str str_src[FSL_PATH_CAP] = {0};
+    str str_dst[FSL_PATH_CAP] = {0};
+    str in_dir[FSL_PATH_CAP] = {0};
+    str out_dir[FSL_PATH_CAP] = {0};
     u64 i = 0;
     struct stat stats = {0};
     struct timespec ts[2] = {0};
@@ -476,17 +476,17 @@ u32 fsl_copy_dir(const fsl_fs_path *src, const fsl_fs_path *dst, b8 contents_onl
     if (!dir_contents.loaded)
         return fsl_err;
 
-    snprintf(str_src, PATH_MAX, "%s", src);
+    snprintf(str_src, FSL_PATH_CAP, "%s", src);
     fsl_check_slash(str_src);
     fsl_normalize_slash(str_src);
 
-    snprintf(str_dst, PATH_MAX, "%s", dst);
+    snprintf(str_dst, FSL_PATH_CAP, "%s", dst);
     fsl_check_slash(str_dst);
     fsl_normalize_slash(str_dst);
 
     if (fsl_is_dir_exists(str_dst, FALSE) == FSL_ERR_SUCCESS && !contents_only)
     {
-        fsl_get_base_name(str_src, str_dst + strlen(str_dst), PATH_MAX - strlen(str_dst));
+        fsl_get_base_name(str_src, str_dst + strlen(str_dst), FSL_PATH_CAP - strlen(str_dst));
         fsl_check_slash(str_dst);
         fsl_posix_slash(str_dst);
         fsl_make_dir(str_dst);
@@ -495,8 +495,8 @@ u32 fsl_copy_dir(const fsl_fs_path *src, const fsl_fs_path *dst, b8 contents_onl
 
     for (i = 0; i < dir_contents.memb; ++i)
     {
-        snprintf(in_dir, PATH_MAX - 1, "%s%s", str_src, (str*)dir_contents.i[i]);
-        snprintf(out_dir, PATH_MAX - 1, "%s%s", str_dst, (str*)dir_contents.i[i]);
+        snprintf(in_dir, FSL_PATH_CAP - 1, "%s%s", str_src, (str*)dir_contents.i[i]);
+        snprintf(out_dir, FSL_PATH_CAP - 1, "%s%s", str_dst, (str*)dir_contents.i[i]);
 
         if (fsl_is_dir(in_dir) == FSL_ERR_SUCCESS)
         {
@@ -586,10 +586,10 @@ u32 fsl_append_file(const fsl_fs_path *path, u64 size, void *buf, b8 log, b8 tex
 
 u32 fsl_get_path_absolute(const fsl_fs_path *path, str **dst)
 {
-    str path_absolute[PATH_MAX] = {0};
+    str path_absolute[FSL_PATH_CAP] = {0};
     u64 len = 0;
 
-    if (strlen(path) > PATH_MAX - 2)
+    if (strlen(path) > FSL_PATH_CAP - 2)
     {
         LOGERROR(FSL_ERR_GET_PATH_ABSOLUTE_FAIL, 0,
                 MSG_ACTION_REASON_ERROR("Get Absolute Path", "Path Too Long"));
@@ -617,7 +617,7 @@ u32 fsl_get_path_absolute(const fsl_fs_path *path, str **dst)
 
 u32 fsl_get_path_bin_root(str **dst)
 {
-    str path_bin_root[PATH_MAX] = {0};
+    str path_bin_root[FSL_PATH_CAP] = {0};
     u64 len = 0;
     char *last_slash = NULL;
 
@@ -625,7 +625,7 @@ u32 fsl_get_path_bin_root(str **dst)
         return fsl_err;
 
     len = strlen(path_bin_root);
-    if (len > PATH_MAX - 1)
+    if (len > FSL_PATH_CAP - 1)
     {
         LOGFATAL(FSL_ERR_PATH_TOO_LONG, 0,
                 MSG_PATH_TOO_LONG_FATAL("Get Binary Root", path_bin_root));
@@ -633,11 +633,11 @@ u32 fsl_get_path_bin_root(str **dst)
     }
 
     path_bin_root[len] = 0;
-    if (!*dst && fsl_mem_alloc((void*)dst, PATH_MAX,
+    if (!*dst && fsl_mem_alloc((void*)dst, FSL_PATH_CAP,
                 "fsl_get_path_bin_root().dst") != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    memcpy(*dst, path_bin_root, PATH_MAX - 1);
+    memcpy(*dst, path_bin_root, FSL_PATH_CAP - 1);
 
     fsl_posix_slash(*dst);
     last_slash = strrchr(*dst, '/');
@@ -661,7 +661,7 @@ void fsl_check_slash(fsl_fs_path *path)
     }
 
     len = strlen(path);
-    if (len > PATH_MAX - 2)
+    if (len > FSL_PATH_CAP - 2)
     {
         fsl_err = FSL_ERR_PATH_TOO_LONG;
         return;
@@ -759,7 +759,7 @@ u32 fsl_get_base_name(const fsl_fs_path *path, str *dst, u64 size)
 {
     i64 i = 0;
     u64 len = 0;
-    str path_resolved[PATH_MAX] = {0};
+    str path_resolved[FSL_PATH_CAP] = {0};
 
     if (size == 0)
     {
@@ -776,14 +776,14 @@ u32 fsl_get_base_name(const fsl_fs_path *path, str *dst, u64 size)
     }
 
     len = strlen(path);
-    if (len > PATH_MAX - 2)
+    if (len > FSL_PATH_CAP - 2)
     {
         LOGERROR(FSL_ERR_PATH_TOO_LONG, 0,
                 MSG_GET_BASE_NAME_FAIL(path, "Path Too Long"));
         return fsl_err;
     }
 
-    snprintf(path_resolved, PATH_MAX, "%s", path);
+    snprintf(path_resolved, FSL_PATH_CAP, "%s", path);
     fsl_posix_slash(path_resolved);
 
     i = (i64)len - 1;

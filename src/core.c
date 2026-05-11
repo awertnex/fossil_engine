@@ -284,7 +284,7 @@ void fsl_engine_close(void)
     fsl_mem_arena_free(&mem_arena_name_internal, "fsl_engine_close().mem_arena_name_internal");
     fsl_mem_free((void*)&render->screen_buf, render->size.x * render->size.y * FSL_COLOR_CHANNELS_RGB,
             "fsl_engine_close().render->screen_buf");
-    fsl_mem_free((void*)&FSL_DIR_PROC_ROOT, PATH_MAX, "fsl_engine_close().FSL_DIR_PROC_ROOT");
+    fsl_mem_free((void*)&FSL_DIR_PROC_ROOT, FSL_PATH_CAP, "fsl_engine_close().FSL_DIR_PROC_ROOT");
     fsl_mem_arena_free(&mem_arena_internal, "fsl_engine_close().mem_arena_internal");
     fsl_logger_close();
     fsl_err = fsl_err_temp;
@@ -352,7 +352,7 @@ u32 fsl_glfw_init(b8 multisample)
 
 u32 fsl_window_init(const str *title, i32 size_x, i32 size_y)
 {
-    if (title) snprintf(render->title, NAME_MAX, "%s", title);
+    if (title) snprintf(render->title, FSL_ID_CAP, "%s", title);
     else fsl_engine_get_string(render->title, FSL_ENGINE_STR_INDEX_TITLE);
     if (size_x) render->size.x = fsl_clamp_i32(size_x, FSL_RENDER_WIDTH_MIN, FSL_RENDER_WIDTH_MAX);
     else render->size.x = FSL_RENDER_WIDTH_DEFAULT;
@@ -390,7 +390,7 @@ u32 fsl_window_init(const str *title, i32 size_x, i32 size_y)
 
 u32 fsl_glad_init(void)
 {
-    str str_engine_version[NAME_MAX] = {0};
+    str str_engine_version[FSL_ID_CAP] = {0};
 
     fsl_engine_get_string(str_engine_version, FSL_ENGINE_STR_INDEX_VERSION);
 
@@ -471,10 +471,10 @@ static u32 take_screenshot_internal(const str *dir_screenshots, const str *speci
 {
     u64 i = 0;
     str str_time[FSL_TIME_STRING_MAX] = {0};
-    str str_special_text[NAME_MAX] = {0};
-    str file_name[PATH_MAX] = {0};
-    str file_name_full[PATH_MAX] = {0};
-    str str_dir_screenshots[PATH_MAX] = {0};
+    str str_special_text[FSL_ID_CAP] = {0};
+    str file_name[FSL_PATH_CAP] = {0};
+    str file_name_full[FSL_PATH_CAP] = {0};
+    str str_dir_screenshots[FSL_PATH_CAP] = {0};
 
     if (fsl_is_dir_exists(dir_screenshots, FALSE) != FSL_ERR_SUCCESS)
     {
@@ -484,20 +484,20 @@ static u32 take_screenshot_internal(const str *dir_screenshots, const str *speci
         return fsl_err;
     }
 
-    snprintf(str_dir_screenshots, PATH_MAX, "%s", dir_screenshots);
+    snprintf(str_dir_screenshots, FSL_PATH_CAP, "%s", dir_screenshots);
     fsl_check_slash(str_dir_screenshots);
     fsl_posix_slash(str_dir_screenshots);
 
     fsl_get_time_str(str_time, "%F_%H-%M-%S");
 
     if (special_text[0])
-        snprintf(str_special_text, NAME_MAX, "_%s", special_text);
+        snprintf(str_special_text, FSL_ID_CAP, "_%s", special_text);
 
-    snprintf(file_name, PATH_MAX, "%s%s", str_dir_screenshots, str_time);
+    snprintf(file_name, FSL_PATH_CAP, "%s%s", str_dir_screenshots, str_time);
 
     for (i = 0; i < FSL_SCREENSHOT_RATE_MAX; ++i)
     {
-        snprintf(file_name_full, PATH_MAX, "%s_%"PRIu64"%s.png", file_name, i, str_special_text);
+        snprintf(file_name_full, FSL_PATH_CAP, "%s_%"PRIu64"%s.png", file_name, i, str_special_text);
         if (fsl_is_file_exists(file_name_full, FALSE) != FSL_ERR_SUCCESS)
         {
             glPixelStorei(GL_PACK_ALIGNMENT, 1);

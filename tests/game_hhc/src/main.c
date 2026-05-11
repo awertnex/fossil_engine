@@ -1118,7 +1118,7 @@ static void draw_everything(void)
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
         fsl_text_start(font[FONT_MONO], FSL_FONT_SIZE_DEFAULT, 0, FALSE);
 
-        static str temp[NAME_MAX] = {0};
+        static str temp[FSL_ID_CAP] = {0};
         fsl_engine_get_string(temp, FSL_ENGINE_STR_INDEX_VERSION);
         fsl_text_push(fsl_stringf(
                     "Game:     %s %s\n"
@@ -1263,7 +1263,7 @@ int main(int argc, char **argv)
 
     /* ---- initialize player ----------------------------------------------- */
 
-    snprintf(_player.name, NAME_MAX, "%s", "Lily");
+    snprintf(_player.name, FSL_ID_CAP, "%s", "Lily");
     _player.size.x = 0.6f;
     _player.size.y = 0.6f;
     _player.size.z = 1.8f;

@@ -92,7 +92,7 @@ struct fsl_core
 struct fsl_render
 {
     GLFWwindow *window;
-    char title[NAME_MAX];
+    char title[FSL_ID_CAP];
     v2i32 size;
 
     /*!

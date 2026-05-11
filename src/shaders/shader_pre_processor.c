@@ -71,7 +71,7 @@ str *fsl_shader_pre_process_includes_internal(const str *path, u64 *file_len, u6
     u64 buf_len = 0;
     u64 buf_include_len = 0;
     u64 buf_resolved_len = 0;
-    str temp[PATH_MAX] = {0};
+    str temp[FSL_PATH_CAP] = {0};
     u64 temp_len = 0;
 
     if (!recursion_limit)
@@ -105,9 +105,9 @@ str *fsl_shader_pre_process_includes_internal(const str *path, u64 *file_len, u6
             {}
             j += strlen(token[1]);
 
-            snprintf(temp, PATH_MAX, "%s", path);
+            snprintf(temp, FSL_PATH_CAP, "%s", path);
             fsl_retract_path(temp);
-            snprintf(temp + strlen(temp), PATH_MAX - strlen(temp),
+            snprintf(temp + strlen(temp), FSL_PATH_CAP - strlen(temp),
                     "%.*s", (int)temp_len, buf + i + strlen(token[0]));
 
             if (!strncmp(temp, path, strlen(temp)))
@@ -156,7 +156,7 @@ cleanup:
 
 u32 fsl_shader_get_type_internal(const str *file, GLenum *type)
 {
-    str base_name[NAME_MAX] = {0};
+    str base_name[FSL_ID_CAP] = {0};
     str *extension = {0};
 
     if (!file || !type)
@@ -166,7 +166,7 @@ u32 fsl_shader_get_type_internal(const str *file, GLenum *type)
         return fsl_err;
     }
 
-    snprintf(base_name, NAME_MAX, "%s", file);
+    snprintf(base_name, FSL_ID_CAP, "%s", file);
     extension = strrchr(base_name, '.');
     if (extension)
     {

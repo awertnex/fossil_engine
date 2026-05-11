@@ -52,7 +52,7 @@ u32 world_init(str *name, u64 seed, player *p)
 
 u32 world_dir_init(const str *world_name)
 {
-    str string[PATH_MAX] = {0};
+    str string[FSL_PATH_CAP] = {0};
     u32 i = 0;
 
     if (!strlen(world_name))
@@ -85,25 +85,25 @@ u32 world_dir_init(const str *world_name)
         return *GAME_ERR;
     }
 
-    snprintf(string, PATH_MAX, GAME_DIR_NAME_WORLDS"%s", world_name);
+    snprintf(string, FSL_PATH_CAP, GAME_DIR_NAME_WORLDS"%s", world_name);
     fsl_check_slash(string);
     fsl_normalize_slash(string);
 
     if (fsl_is_dir_exists(string, FALSE) == FSL_ERR_SUCCESS)
     {
-        snprintf(world.path, PATH_MAX, "%s", string);
+        snprintf(world.path, FSL_PATH_CAP, "%s", string);
         return *GAME_ERR;
     }
 
     fsl_make_dir(string);
-    snprintf(world.path, PATH_MAX, "%s", string);
+    snprintf(world.path, FSL_PATH_CAP, "%s", string);
 
     LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
             fsl_logger_stringf("Creating World Directories '%s'..\n", world.path));
 
     for (i = 0; i < DIR_WORLD_COUNT; ++i)
     {
-        snprintf(string, PATH_MAX, "%s%s", world.path, DIR_WORLD[i]);
+        snprintf(string, FSL_PATH_CAP, "%s%s", world.path, DIR_WORLD[i]);
         fsl_make_dir(string);
         if (*GAME_ERR != FSL_ERR_SUCCESS && *GAME_ERR != FSL_ERR_DIR_EXISTS)
             return *GAME_ERR;
@@ -117,7 +117,7 @@ u32 world_dir_init(const str *world_name)
 
 u32 world_load(world_info *world, const str *world_name, u64 seed)
 {
-    str string[2][PATH_MAX] = {0};
+    str string[2][FSL_PATH_CAP] = {0};
     str *file_contents = NULL;
     u64 file_len = 0;
 
@@ -145,7 +145,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
         return *GAME_ERR;
     }
 
-    snprintf(string[0], PATH_MAX, GAME_DIR_NAME_WORLDS"%s", world_name);
+    snprintf(string[0], FSL_PATH_CAP, GAME_DIR_NAME_WORLDS"%s", world_name);
     if (fsl_is_dir_exists(string[0], TRUE) != FSL_ERR_SUCCESS)
     {
         LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
@@ -158,13 +158,13 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
 
     world->id = 0;
 
-    snprintf(world->name, NAME_MAX, "%s", world_name);
+    snprintf(world->name, FSL_ID_CAP, "%s", world_name);
 
     world->type = 0;
 
     /* ---- world seed ------------------------------------------------------ */
 
-    snprintf(string[0], PATH_MAX, GAME_DIR_NAME_WORLDS"%s/"GAME_FILE_NAME_WORLD_SEED, world_name);
+    snprintf(string[0], FSL_PATH_CAP, GAME_DIR_NAME_WORLDS"%s/"GAME_FILE_NAME_WORLD_SEED, world_name);
     if (fsl_is_file_exists(string[0], FALSE) == FSL_ERR_SUCCESS)
     {
         file_len = fsl_get_file_contents(string[0], (void*)&file_contents, TRUE);
@@ -178,7 +178,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
         if (!seed)
             seed = fsl_rand_u64(fsl_get_time_raw_nsec());
 
-        fsl_convert_u64_to_str(string[1], NAME_MAX, seed);
+        fsl_convert_u64_to_str(string[1], FSL_ID_CAP, seed);
         if (fsl_write_file(string[0], strlen(string[1]),
                     &string[1], TRUE, TRUE) != FSL_ERR_SUCCESS)
             return *GAME_ERR;

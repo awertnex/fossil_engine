@@ -77,7 +77,7 @@ struct fsl_logger_core
         b8 gui_open;
     } flag;
 
-    str log_dir[PATH_MAX];
+    str log_dir[FSL_PATH_CAP];
     fsl_mem_handle buf;     /* logger strings */
     fsl_mem_arena arena;    /* logger's memory arena */
     i32 cursor;             /* current position in `buf` */

@@ -118,7 +118,7 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags)
 {
     str str_out[FSL_LOGGER_STRING_MAX] = {0};
 
-    snprintf(logger_core.log_dir, PATH_MAX, "%s", FSL_DIR_NAME_LOGS);
+    snprintf(logger_core.log_dir, FSL_PATH_CAP, "%s", FSL_DIR_NAME_LOGS);
 
     snprintf(LOG_FILE_NAME[FSL_LOG_LEVEL_FATAL], FSL_ID_CAP, "%s", FSL_FILE_NAME_LOG_ERROR);
     snprintf(LOG_FILE_NAME[FSL_LOG_LEVEL_ERROR], FSL_ID_CAP, "%s", FSL_FILE_NAME_LOG_ERROR);
@@ -177,7 +177,7 @@ void fsl_log_output_internal(u32 error_code, u32 flags, const str *src_file, u64
 {
     str str_in[FSL_STRING_MAX] = {0};
     str str_out[FSL_LOGGER_STRING_MAX] = {0};
-    str path_temp[PATH_MAX] = {0};
+    str path_temp[FSL_PATH_CAP] = {0};
     b8 verbose =    !(flags & FSL_FLAG_LOG_NO_VERBOSE);
     b8 cmd =        (flags & FSL_FLAG_LOG_CMD);
     b8 write_file = !(flags & FSL_FLAG_LOG_NO_FILE);
@@ -208,7 +208,7 @@ void fsl_log_output_internal(u32 error_code, u32 flags, const str *src_file, u64
     {
         get_log_str_internal(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_FULL_TIME,
                 verbose, level, error_code, src_file, line);
-        snprintf(path_temp, PATH_MAX, "%s%s", FSL_DIR_NAME_LOGS, LOG_FILE_NAME[level]);
+        snprintf(path_temp, FSL_PATH_CAP, "%s%s", FSL_DIR_NAME_LOGS, LOG_FILE_NAME[level]);
         append_file_internal(path_temp, strnlen(str_out, FSL_LOGGER_STRING_MAX) * sizeof(str), str_out);
     }
 }

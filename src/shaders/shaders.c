@@ -36,7 +36,7 @@
 u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created)
 {
     GLint status = 0;
-    str temp[PATH_MAX] = {0};
+    str temp[FSL_PATH_CAP] = {0};
     char log[FSL_STRING_MAX] = {0};
     GLenum type = 0;
     fsl_asset_metadata metadata = {0};
@@ -48,7 +48,7 @@ u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created)
         return fsl_err;
     }
 
-    snprintf(temp, PATH_MAX, "%s%s", metadata.path, metadata.file);
+    snprintf(temp, FSL_PATH_CAP, "%s%s", metadata.path, metadata.file);
     if (fsl_is_file_exists(temp, FALSE) != FSL_ERR_SUCCESS)
     {
         fsl_err = FSL_ERR_SHADER_TYPE_NULL;

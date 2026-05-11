@@ -11,8 +11,8 @@
 typedef struct world_info
 {
     u64 id;
-    str name[NAME_MAX];
-    str path[PATH_MAX];
+    str name[FSL_ID_CAP];
+    str path[FSL_PATH_CAP];
     u32 type;           /* gamemode set at world creation */
     u64 seed;
     u64 tick;

@@ -96,8 +96,8 @@ u32 fsl_mem_alloc_memb_internal(void **x, u64 memb, u64 size,
 u32 fsl_mem_alloc_buf_internal(fsl_buf *x, u64 memb, u64 size,
         const str *name, const str *src_file, u64 src_line)
 {
-    str name_i[NAME_MAX] = {0};
-    str name_buf[NAME_MAX] = {0};
+    str name_i[FSL_ID_CAP] = {0};
+    str name_buf[FSL_ID_CAP] = {0};
     u64 i = 0;
 
     if (!x)
@@ -111,8 +111,8 @@ u32 fsl_mem_alloc_buf_internal(fsl_buf *x, u64 memb, u64 size,
     if (x->loaded || x->buf || x->i)
         return FSL_ERR_SUCCESS;
 
-    snprintf(name_i, NAME_MAX, "%s.i", name);
-    snprintf(name_buf, NAME_MAX, "%s.buf", name);
+    snprintf(name_i, FSL_ID_CAP, "%s.i", name);
+    snprintf(name_buf, FSL_ID_CAP, "%s.buf", name);
 
     if (fsl_mem_alloc_memb_internal((void*)&x->i,
                 memb, sizeof(str*), name_i, src_file, src_line) != FSL_ERR_SUCCESS)
@@ -138,10 +138,10 @@ u32 fsl_mem_alloc_buf_internal(fsl_buf *x, u64 memb, u64 size,
 u32 fsl_mem_alloc_key_val_internal(fsl_key_value *x, u64 memb, u64 size_key, u64 size_val,
         const str *name, const str *src_file, u64 src_line)
 {
-    str name_key[NAME_MAX] = {0};
-    str name_val[NAME_MAX] = {0};
-    str name_buf_key[NAME_MAX] = {0};
-    str name_buf_val[NAME_MAX] = {0};
+    str name_key[FSL_ID_CAP] = {0};
+    str name_val[FSL_ID_CAP] = {0};
+    str name_buf_key[FSL_ID_CAP] = {0};
+    str name_buf_val[FSL_ID_CAP] = {0};
     u64 i = 0;
 
     if (!x)
@@ -152,10 +152,10 @@ u32 fsl_mem_alloc_key_val_internal(fsl_key_value *x, u64 memb, u64 size_key, u64
         return fsl_err;
     }
 
-    snprintf(name_key, NAME_MAX, "%s.key", name);
-    snprintf(name_val, NAME_MAX, "%s.val", name);
-    snprintf(name_buf_key, NAME_MAX, "%s.buf_key", name);
-    snprintf(name_buf_val, NAME_MAX, "%s.buf_val", name);
+    snprintf(name_key, FSL_ID_CAP, "%s.key", name);
+    snprintf(name_val, FSL_ID_CAP, "%s.val", name);
+    snprintf(name_buf_key, FSL_ID_CAP, "%s.buf_key", name);
+    snprintf(name_buf_val, FSL_ID_CAP, "%s.buf_val", name);
 
     if (
             fsl_mem_alloc_memb_internal((void*)&x->key,
@@ -273,14 +273,14 @@ void fsl_mem_free_buf_internal(fsl_buf *x,
         const str *name, const str *src_file, u64 src_line)
 {
     fsl_buf nobuf = {0};
-    str name_i[NAME_MAX] = {0};
-    str name_buf[NAME_MAX] = {0};
+    str name_i[FSL_ID_CAP] = {0};
+    str name_buf[FSL_ID_CAP] = {0};
     void *temp = NULL;
 
     if (!x) return;
 
-    snprintf(name_i, NAME_MAX, "%s.i", name);
-    snprintf(name_buf, NAME_MAX, "%s.buf", name);
+    snprintf(name_i, FSL_ID_CAP, "%s.i", name);
+    snprintf(name_buf, FSL_ID_CAP, "%s.buf", name);
 
     if (x->i)
     {
@@ -309,18 +309,18 @@ void fsl_mem_free_key_val_internal(fsl_key_value *x,
         const str *name, const str *src_file, u64 src_line)
 {
     fsl_key_value nokey_value = {0};
-    str name_key[NAME_MAX] = {0};
-    str name_val[NAME_MAX] = {0};
-    str name_buf_key[NAME_MAX] = {0};
-    str name_buf_val[NAME_MAX] = {0};
+    str name_key[FSL_ID_CAP] = {0};
+    str name_val[FSL_ID_CAP] = {0};
+    str name_buf_key[FSL_ID_CAP] = {0};
+    str name_buf_val[FSL_ID_CAP] = {0};
     void *temp = NULL;
 
     if (!x) return;
 
-    snprintf(name_key, NAME_MAX, "%s.key", name);
-    snprintf(name_val, NAME_MAX, "%s.val", name);
-    snprintf(name_buf_key, NAME_MAX, "%s.buf_key", name);
-    snprintf(name_buf_val, NAME_MAX, "%s.buf_val", name);
+    snprintf(name_key, FSL_ID_CAP, "%s.key", name);
+    snprintf(name_val, FSL_ID_CAP, "%s.val", name);
+    snprintf(name_buf_key, FSL_ID_CAP, "%s.buf_key", name);
+    snprintf(name_buf_val, FSL_ID_CAP, "%s.buf_val", name);
 
     if (x->key)
     {
@@ -686,7 +686,7 @@ void fsl_sort_buf(fsl_buf *buf) /* TODO: fucking fix this */
                 smallest = j;
 
             if (cmp0 == cmp1 && buf->i[j] && cmp1)
-                for (u16 k = 1; k < NAME_MAX - 1 && buf->i[j][k - 1] && buf->i[smallest][k - 1]; ++k)
+                for (u16 k = 1; k < FSL_ID_CAP - 1 && buf->i[j][k - 1] && buf->i[smallest][k - 1]; ++k)
                 {
                     if (tolower(buf->i[j] + k) < tolower(buf->i[smallest] + k))
                     {

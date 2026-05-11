@@ -16,7 +16,7 @@ f32 *RAND_TAB = {0};
 
 u32 rand_init(void)
 {
-    str file_name[PATH_MAX] = {0};
+    str file_name[FSL_PATH_CAP] = {0};
     f32 *file_contents = NULL;
     u64 file_len = 0;
     i32 i;
@@ -25,7 +25,7 @@ u32 rand_init(void)
                 "rand_init().RAND_TAB") != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    snprintf(file_name, PATH_MAX, "%slookup_rand_tab.bin", DIR_ROOT[DIR_LOOKUPS]);
+    snprintf(file_name, FSL_PATH_CAP, "%slookup_rand_tab.bin", DIR_ROOT[DIR_LOOKUPS]);
 
     if (fsl_is_file_exists(file_name, FALSE) == FSL_ERR_SUCCESS)
     {

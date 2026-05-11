@@ -536,7 +536,7 @@ u32 fsl_texture_init(fsl_texture *texture,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path,
         const GLint format, GLint filter, int channels, b8 grayscale, b8 bindless)
 {
-    str path_temp[PATH_MAX] = {0};
+    str path_temp[FSL_PATH_CAP] = {0};
     u8 *buf = NULL;
     fsl_asset_metadata metadata = {0};
 
@@ -545,7 +545,7 @@ u32 fsl_texture_init(fsl_texture *texture,
 
     metadata = fsl_asset_get_metadata(texture->asset);
 
-    snprintf(path_temp, PATH_MAX, "%s%s", metadata.path, metadata.file);
+    snprintf(path_temp, FSL_PATH_CAP, "%s%s", metadata.path, metadata.file);
     if (fsl_is_file_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -718,7 +718,7 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path)
 {
     u32 i = 0;
-    str path_temp[PATH_MAX] = {0};
+    str path_temp[FSL_PATH_CAP] = {0};
     u8 *file_contents = NULL;
     u8 *bitmap = NULL;
     f32 scale = 0.0f;
@@ -741,7 +741,7 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
         return fsl_err;
     }
 
-    snprintf(path_temp, PATH_MAX, "%s%s", metadata.path, metadata.file);
+    snprintf(path_temp, FSL_PATH_CAP, "%s%s", metadata.path, metadata.file);
     if (fsl_is_file_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
         return fsl_err;
 

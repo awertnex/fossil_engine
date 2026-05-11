@@ -39,7 +39,7 @@
 
 u32 fsl_get_path_absolute_internal(const fsl_fs_path *fs_path, str *dst)
 {
-    if (!GetFullPathNameA(fs_path, PATH_MAX, dst, NULL))
+    if (!GetFullPathNameA(fs_path, FSL_PATH_CAP, dst, NULL))
     {
         fsl_err = FSL_ERR_GET_PATH_ABSOLUTE_FAIL;
         return fsl_err;
@@ -53,15 +53,15 @@ u32 fsl_get_path_absolute_internal(const fsl_fs_path *fs_path, str *dst)
 
 u32 fsl_get_path_bin_root_internal(str *dst)
 {
-    /* here, "PATH_MAX - 2" to leave space for a slash (`/`) and a null (`\0`) terminator */
-    if (strlen(_pgmptr) > PATH_MAX - 2)
+    /* here, "FSL_PATH_CAP - 2" to leave space for a slash (`/`) and a null (`\0`) terminator */
+    if (strlen(_pgmptr) > FSL_PATH_CAP - 2)
     {
         LOGFATAL(FSL_ERR_GET_PATH_BIN_ROOT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
                 MSG_ACTION_REASON_FATAL("Get Binary Root", "`fsl_get_path_bin_root_internal()` Failed"));
         return fsl_err;
     }
-    memcpy(dst, _pgmptr, PATH_MAX - 2);
+    memcpy(dst, _pgmptr, FSL_PATH_CAP - 2);
     fsl_retract_path(dst);
     fsl_posix_slash(dst);
 

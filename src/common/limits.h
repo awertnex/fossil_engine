@@ -23,15 +23,6 @@
 #ifndef FSL_LIMITS_H
 #define FSL_LIMITS_H
 
-#include "engine_info.h"
-
-#if FSL_PLATFORM_WIN
-#   define NAME_MAX 255
-#   include <limits.h>
-#else
-#   include <linux/limits.h>
-#endif /* FSL_PLATFORM */
-
 #define FSL_U8_MAX 255
 #define FSL_I8_MAX 127
 #define FSL_I8_MIN (-FSL_I8_MAX - 1)
@@ -48,6 +39,8 @@
 #define FSL_I64_MAX 9223372036854775807
 #define FSL_I64_MIN (-FSL_I64_MAX - 1)
 
+#define FSL_ID_CAP                  256
+#define FSL_PATH_CAP                2048
 #define FSL_STRING_MAX              2048
 #define FSL_OUT_STRING_MAX          (FSL_STRING_MAX + 256)
 #define FSL_LOGGER_STRING_MAX       FSL_OUT_STRING_MAX
@@ -55,7 +48,6 @@
 #define FSL_TIME_STRING_MAX         128
 #define FSL_STRING_TOKEN_MAX        128
 #define FSL_STRINGF_BUFFERS_MAX     8
-#define FSL_ID_CAP                  256
 #define FSL_GLYPH_MAX               256
 #define FSL_INCLUDE_RECURSION_MAX   512
 #define FSL_SCREENSHOT_RATE_MAX     128
