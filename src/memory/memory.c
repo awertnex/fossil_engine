@@ -365,6 +365,24 @@ void fsl_mem_free_key_val_internal(fsl_key_value *x,
     *x = nokey_value;
 }
 
+u32 fsl_mem_clear_internal(void *x, u64 size,
+        const str *name, const str *src_file, u64 src_line)
+{
+    if (!x)
+    {
+        fsl_err = FSL_ERR_POINTER_NULL;
+        return fsl_err;
+    }
+
+    memset(x, '\0', size);
+    LOGTRACEEX(0,
+            src_file, src_line,
+            MSG_MEM_CLEAR(name, x, size));
+
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+}
+
 u32 fsl_mem_arena_init_internal(fsl_mem_arena *x,
         const str *name, const str *src_file, u64 src_line)
 {
@@ -608,24 +626,6 @@ u32 fsl_mem_arena_pop_internal(fsl_mem_handle *handle,
             MSG_MEM_ARENA_POP(name, arena,
                 freelist[freelist_pos].offset, freelist[freelist_pos].size,
                 arena->entry_count, arena->entry_cap));
-
-    fsl_err = FSL_ERR_SUCCESS;
-    return fsl_err;
-}
-
-u32 fsl_mem_clear_internal(void *x, u64 size,
-        const str *name, const str *src_file, u64 src_line)
-{
-    if (!x)
-    {
-        fsl_err = FSL_ERR_POINTER_NULL;
-        return fsl_err;
-    }
-
-    memset(x, '\0', size);
-    LOGTRACEEX(0,
-            src_file, src_line,
-            MSG_MEM_CLEAR(name, x, size));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;

@@ -309,9 +309,6 @@ FSLAPI u32 fsl_mem_arena_push_internal(fsl_mem_arena *x, fsl_mem_handle *handle,
         const str *name, const str *src_file, u64 src_line);
 
 /*!
- *  @brief reserve a block of available memory in arena `x` and grow arena if needed and
- *  initialize `handle` metadata.
- *
  *  @brief remove a memory handle from arena `x` and invalidate it.
  *
  *  @param name symbol name (for logging).

@@ -31,12 +31,12 @@ windows-specific:
 ## Build From Source
 
 >**NOTES:**
->- for release build, pass argument "release" into the build tool.
->- if build successful, you can place the files inside `fossil/` in your project's deployment directory.
+>- for release build, run `./build release`.
+>- if build successful, you can copy/move the files in `fossil/` into your project's root.
 >- files:
 >   - `deps/`: required dependencies for development
->   - `fossil/`: required dependencies and libraries for deployment
->   - `lib/`: required libraries for link time
+>   - `fossil/`: required dependencies for runtime/deployment
+>   - `lib/`: required libraries for linking
 
 **linux x86_64:**
 
@@ -48,7 +48,7 @@ cd fossil_engine/
 ./build
 ```
 
-if you want, bootstrap the build script:
+if you want, bootstrap buildtool:
 
 ```bash
 cc build.c -o build
@@ -59,7 +59,7 @@ additional build commands:
 - `./build help`: show help and exit
 - `./build show`: show build command in list format
 - `./build raw`: show build command in raw format
-- `./build self`: re-build build tool
+- `./build self`: re-build buildtool
 - `./build release`: build as release
 
 
@@ -86,7 +86,7 @@ additional build commands:
 - `./build.exe help`: show help and exit
 - `./build.exe show`: show build command in list format
 - `./build.exe raw`: show build command in raw format
-- `./build.exe self`: re-build build tool
+- `./build.exe self`: re-build buildtool
 - `./build.exe release`: build as release
 
 ## Contributing:

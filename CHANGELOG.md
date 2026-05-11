@@ -7,9 +7,13 @@
    first version of the engine as standalone in this repo
 
 - - -
-## v0.7.0-dev (current)
+## v0.8.0-beta (2026 05 11)
 
 #### changes
+- (2026 05 11): replaced all `PATH_MAX` and `NAME_MAX` with `FSL_PATH_CAP` and
+                `FSL_ID_CAP` respectively
+- (2026 05 11): removed standard header 'limits.h' from engine header 'limits.h'
+- (2026 05 11): added function `fsl_mem_arena_pop()`
 - (2026 05 10): changed memory arena internals from pointers to offsets.
 - (2026 05 06): removed functions `fsl_mem_request_page_size()` and
                 `_fsl_mem_request_page_size()`, no longer needed
@@ -50,7 +54,15 @@
                 `fsl_shader_program` struct) with fallback support (hot
                 reloading and fallback won't work for the function
                 `fsl_shader_init()`).
-- (2026 04 28): add struct `fsl_key_bind` to define key combinations more easily.
+- (2026 04 28): add struct `fsl_key_bind` to define key combinations more
+                easily.
+
+## bugs and flaws
+- `fsl_mem_arena_push()` doesn't have a proper implementation for the freelist,
+  even tho a freelist is defined within the arena, same deal with
+  `fsl_mem_arena_pop()` and `fsl_mem_arena_init()`.
+- UI module is still very weak, but it can draw text, textures and 9-slice
+  textures.
 
 - - -
 ## v0.7.0-beta (2026 04 27)

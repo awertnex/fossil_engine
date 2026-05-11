@@ -538,7 +538,9 @@ void fsl_fbo_blit(GLuint fbo)
 
 static void fbo_blit_internal(GLuint fbo)
 {
-    fsl_shader_program *shader_unit_quad = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UNIT_QUAD);
+    fsl_shader_program *shader_unit_quad =
+        fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UNIT_QUAD);
+
     glUseProgram(shader_unit_quad->asset.id);
     glBindVertexArray(fsl_mesh_unit_quad.vao);
 
@@ -549,7 +551,9 @@ static void fbo_blit_internal(GLuint fbo)
 
 static void fbo_blit_msaa_internal(GLuint fbo)
 {
-    fsl_shader_program *shader_unit_quad = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UNIT_QUAD);
+    fsl_shader_program *shader_unit_quad =
+        fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UNIT_QUAD);
+
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fsl_core_internal.fbo_msaa.fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fsl_core_internal.fbo.fbo);
     glBlitFramebuffer(0, 0, render->size.x, render->size.y, 0, 0,

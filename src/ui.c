@@ -212,14 +212,10 @@ static u32 text_init_internal(void)
     }
 
     ui_core.shader.text = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_TEXT);
-    ui_core.uniform.text.font_size =
-        glGetUniformLocation(ui_core.shader.text->asset.id, "font_size");
-    ui_core.uniform.text.draw_shadow =
-        glGetUniformLocation(ui_core.shader.text->asset.id, "draw_shadow");
-    ui_core.uniform.text.shadow_color =
-        glGetUniformLocation(ui_core.shader.text->asset.id, "shadow_color");
-    ui_core.uniform.text.shadow_offset =
-        glGetUniformLocation(ui_core.shader.text->asset.id, "shadow_offset");
+    ui_core.uniform.text.font_size = glGetUniformLocation(ui_core.shader.text->asset.id, "font_size");
+    ui_core.uniform.text.draw_shadow = glGetUniformLocation(ui_core.shader.text->asset.id, "draw_shadow");
+    ui_core.uniform.text.shadow_color = glGetUniformLocation(ui_core.shader.text->asset.id, "shadow_color");
+    ui_core.uniform.text.shadow_offset = glGetUniformLocation(ui_core.shader.text->asset.id, "shadow_offset");
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
