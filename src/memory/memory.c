@@ -22,17 +22,15 @@
 
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
+
 #include "../logger/logger.h"
-#include "../h/math.h"
+#include "../logger/logger_messages_internal.h"
 
 #include "memory.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <inttypes.h>
 
 struct fsl_mem_arena_handle
 {

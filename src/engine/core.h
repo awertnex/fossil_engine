@@ -24,26 +24,24 @@
 #define FSL_CORE_H
 
 #include "../common/engine_info.h"
-#include "../common/common_values.h"
+#include "../common/limits.h"
 #include "../common/types.h"
-#include "assets.h"
+#include "../assets/asset_types.h"
 
-#include <deps/glad/glad.h>
 #define GLFW_INCLUDE_NONE
-#include <deps/glfw3.h>
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#   include <deps/stb_image.h>
-#   include <deps/stb_image_write.h>
-#pragma GCC diagnostic pop /* ignored "-Wpedantic" */
-
-/* ---- section: definitions ------------------------------------------------ */
+#include "../external/glfw3.h"
 
 typedef struct fsl_core         fsl_core;
 typedef struct fsl_render       fsl_render;
 typedef struct fsl_camera       fsl_camera;
 typedef struct fsl_projection   fsl_projection;
+
+enum fsl_engine_string_index
+{
+    FSL_ENGINE_STR_INDEX_TITLE, /* "ENGINE_NAME: ENGINE_VERSION" */
+    FSL_ENGINE_STR_INDEX_VERSION,
+    FSL_ENGINE_STR_INDEX_COUNT
+}; /* fsl_engine_string_index */
 
 struct fsl_core
 {
@@ -142,6 +140,8 @@ struct fsl_projection
 /* ---- section: declarations ----------------------------------------------- */
 
 /*!
+ *  @internal
+ *
  *  @brief global core module.
  *
  *  @remark declared and initialized internally.
@@ -149,11 +149,13 @@ struct fsl_projection
 extern fsl_core fsl_core_internal;
 
 /*!
+ *  @internal
+ *
  *  @brief engine's default render.
  *
  *  @remark declared and initialized internally.
  */
-FSLAPI extern fsl_render *render;
+extern fsl_render render_internal;
 
 /* ---- section: signatures ------------------------------------------------- */
 
@@ -197,7 +199,7 @@ FSLAPI u32 fsl_engine_init(int argc, char **argv, const str *title,
 /*!
  *  @brief engine main loop check.
  *
- *  - update @ref fsl_render.time and @ref fsl_render.time_delta of the currently bound `fsl_render`.
+ *  - update @ref fsl_render.time and @ref fsl_render.time_delta of the currently bound @ref fsl_render.
  *
  *  @return `TRUE` unless @ref glfwWindowShouldClose() returns `FALSE` or
  *  @ref fsl_request_engine_close() has been called.
@@ -207,8 +209,8 @@ FSLAPI b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32));
 /*!
  *  @brief update render settings (e.g., render size).
  *
- *  - update @ref fsl_render.size of the currently bound `fsl_render` to window size.
- *  - update @ref fsl_render.ndc_scale of the currently bound `fsl_render`.
+ *  - update @ref fsl_render.size of the currently bound @ref fsl_render to window size.
+ *  - update @ref fsl_render.ndc_scale of the currently bound @ref fsl_render.
  *
  *  @remark called automatically from @ref fsl_engine_running().
  *
@@ -250,7 +252,7 @@ FSLAPI u32 fsl_engine_get_string(str *dst, enum fsl_engine_string_index type);
 FSLAPI u32 fsl_glfw_init(b8 multisample);
 
 /*!
- *  @brief initialize a new 'GLFW' window for the currently bound `fsl_render`.
+ *  @brief initialize a new 'GLFW' window for the currently bound @ref fsl_render.
  *
  *  @param title window/application title (if `NULL`, default title is used).
  *  @param size_x window width (if 0, @ref FSL_RENDER_WIDTH_DEFAULT is used).
@@ -272,7 +274,14 @@ FSLAPI u32 fsl_window_init(const str *title, i32 size_x, i32 size_y);
 FSLAPI u32 fsl_glad_init(void);
 
 /*!
- *  @brief switch engine's current bound `fsl_render` to `r`.
+ *  @brief get address of currently bound @ref fsl_render.
+ *
+ *  get metadata like render size, current process time, delta time and screen buffer.
+ */
+FSLAPI fsl_render *fsl_render_get(void);
+
+/*!
+ *  @brief switch engine's currently bound @ref fsl_render to `r`.
  */
 FSLAPI u32 fsl_change_render(fsl_render *r);
 
@@ -291,7 +300,7 @@ FSLAPI void fsl_request_screenshot(void);
  *  @param special_text string appended to file name, before file extension.
  *
  *  @remark if directory not found, screenshot is still saved at @ref fsl_render.screen_buf
- *  of the currently bound `fsl_render`.
+ *  of the currently bound @ref fsl_render.
  *
  *  @remark this function is a thin wrapper around an internal, heavier function that carries all the logic.
  *

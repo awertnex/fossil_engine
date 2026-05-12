@@ -27,7 +27,7 @@
 #define FSL_BUILDTOOL_CONFIG_H
 
 #include "../common/engine_info.h"
-#include "../../deps/buildtool/buildtool.h"
+#include "../external/buildtool/buildtool.h"
 
 #if FSL_PLATFORM_WIN
 

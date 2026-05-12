@@ -15,18 +15,18 @@
  */
 
 /*!
- *  @file shader_pre_processor.h
+ *  @file shader_pre_processor_internal.h
  *
  *  @brief pre-processing glsl shaders.
  */
 
-#ifndef FSL_SHADER_PRE_PROCESSOR_H
-#define FSL_SHADER_PRE_PROCESSOR_H
+#ifndef FSL_SHADER_PRE_PROCESSOR_INTERNAL_H
+#define FSL_SHADER_PRE_PROCESSOR_INTERNAL_H
 
 #include "../common/limits.h"
 #include "../common/types.h"
 
-#include <deps/glad/glad.h>
+#include "../external/glad/glad.h"
 
 #define FSL_SHADER_PRE_PROCESS_INCLUDE_RECURSION_MAX FSL_INCLUDE_RECURSION_MAX
 
@@ -54,4 +54,4 @@ str *fsl_shader_pre_process_internal(const str *path, u64 *file_len);
  */
 u32 fsl_shader_get_type_internal(const str *file, GLenum *type);
 
-#endif /* FSL_SHADER_PRE_PROCESSOR_H */
+#endif /* FSL_SHADER_PRE_PROCESSOR_INTERNAL_H */

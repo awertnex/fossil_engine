@@ -26,6 +26,7 @@
 #include "../common/engine_info.h"
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
+
 #include "memory_types.h"
 
 /* ---- section: tools ------------------------------------------------------ */

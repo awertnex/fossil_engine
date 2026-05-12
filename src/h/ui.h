@@ -25,8 +25,7 @@
 
 #include "../common/engine_info.h"
 #include "../common/types.h"
-#include "assets.h"
-#include "core.h"
+#include "../assets/asset_types.h"
 
 /* ---- section: definitions ------------------------------------------------ */
 

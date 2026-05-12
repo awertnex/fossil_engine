@@ -17,33 +17,36 @@
 /*!
  *  @file core.c
  *
- *  @brief engine init, running, close, windowing, opengl loading.
+ *  @brief engine init, running, close, windowing, opengl loading and default assets.
  */
 
-#include "common/engine_info.h"
-#include "common/common_values.h"
-#include "common/config.h"
-#include "common/diagnostics.h"
-#include "common/limits.h"
-#include "common/session.h"
-#include "common/types.h"
-#include "logger/logger.h"
-#include "memory/memory.h"
-#include "shaders/shaders.h"
+#include "../common/engine_info.h"
+#include "../common/common_values.h"
+#include "../common/config.h"
+#include "../common/diagnostics.h"
+#include "../common/limits.h"
+#include "../common/session.h"
+#include "../common/types.h"
+#include "../assets/assets.h"
+#include "../logger/logger.h"
+#include "../logger/logger_messages_internal.h"
+#include "../memory/memory.h"
+#include "../shaders/shader_types.h"
 
-#include "h/core.h"
-#include "h/dir.h"
-#include "h/input.h"
-#include "h/math.h"
-#include "h/process.h"
-#include "h/string.h"
-#include "h/time.h"
-#include "h/ui.h"
+#include "../h/dir.h"
+#include "../h/input.h"
+#include "../h/math.h"
+#include "../h/process.h"
+#include "../h/time.h"
+#include "../h/ui.h"
+
+#include "core.h"
+#include "engine_default_assets.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #   define STB_IMAGE_WRITE_IMPLEMENTATION
-#   include <deps/stb_image_write.h>
+#   include "../external/stb_image_write.h"
 #pragma GCC diagnostic pop /* ignored "-Wpedantic" */
 
 #include <stdio.h>
@@ -56,13 +59,7 @@ u64 fsl_init_time = 0;
 str *FSL_DIR_PROC_ROOT = NULL;
 u32 fsl_err = FSL_ERR_SUCCESS;
 fsl_core fsl_core_internal = {0};
-
-/*!
- *  @remark initialized in @ref fsl_engine_init().
- */
-static fsl_render fsl_render_internal = {0};
-
-fsl_render *render = &fsl_render_internal;
+fsl_render render_internal = {0};
 
 /* ---- section: signatures ------------------------------------------------- */
 
@@ -169,7 +166,7 @@ u32 fsl_engine_init(int argc, char **argv, const str *title,
 
     glGenBuffers(1, &fsl_core_internal.ubo.ndc_scale);
     glBindBuffer(GL_UNIFORM_BUFFER, fsl_core_internal.ubo.ndc_scale);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(v2f32), &render->ndc_scale, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(v2f32), &render_internal.ndc_scale, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     glBindBufferBase(GL_UNIFORM_BUFFER, FSL_SHADER_BUFFER_BINDING_UBO_NDC_SCALE,
@@ -192,7 +189,7 @@ b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32))
     static u64 time_last = 0;
     if (fsl_core_internal.flag.active == FALSE ||
             fsl_core_internal.flag.request_engine_close == TRUE ||
-            glfwWindowShouldClose(render->window))
+            glfwWindowShouldClose(render_internal.window))
         return FALSE;
 
     if (fsl_update_render_settings(callback_framebuffer_size) != FSL_ERR_SUCCESS)
@@ -201,12 +198,12 @@ b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32))
                 MSG_UPDATE_RENDER_SETTINGS_FAIL);
     }
 
-    render->time = fsl_get_time_nsec();
-    if (!time_last) time_last = render->time;
-    render->time_delta = render->time - time_last;
-    time_last = render->time;
+    render_internal.time = fsl_get_time_nsec();
+    if (!time_last) time_last = render_internal.time;
+    render_internal.time_delta = render_internal.time - time_last;
+    time_last = render_internal.time;
 
-    glfwSwapBuffers(render->window);
+    glfwSwapBuffers(render_internal.window);
     glfwPollEvents();
     fsl_update_mouse_movement();
     fsl_update_key_states();
@@ -219,27 +216,27 @@ u32 fsl_update_render_settings(void (*callback_framebuffer_size)(i32, i32))
 {
     static v2i32 size = {0};
 
-    glfwGetFramebufferSize(render->window, &size.x, &size.y);
+    glfwGetFramebufferSize(render_internal.window, &size.x, &size.y);
 
-    if (size.x != render->size.x || size.y != render->size.y)
+    if (size.x != render_internal.size.x || size.y != render_internal.size.y)
     {
-        render->size.x = size.x;
-        render->size.y = size.y;
+        render_internal.size.x = size.x;
+        render_internal.size.y = size.y;
         glViewport(0, 0, size.x, size.y);
 
-        render->ndc_scale.x = 2.0f / size.x;
-        render->ndc_scale.y = 2.0f / size.y;
+        render_internal.ndc_scale.x = 2.0f / size.x;
+        render_internal.ndc_scale.y = 2.0f / size.y;
 
         glBindBuffer(GL_UNIFORM_BUFFER, fsl_core_internal.ubo.ndc_scale);
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(v2f32), &render->ndc_scale);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(v2f32), &render_internal.ndc_scale);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        if (fsl_mem_realloc((void*)&render->screen_buf, size.x * size.y * FSL_COLOR_CHANNELS_RGB,
-                    "fsl_update_render_settings().render.screen_buf") != FSL_ERR_SUCCESS)
+        if (fsl_mem_realloc((void*)&render_internal.screen_buf, size.x * size.y * FSL_COLOR_CHANNELS_RGB,
+                    "fsl_update_render_settings().render_internal.screen_buf") != FSL_ERR_SUCCESS)
             return fsl_err;
 
-        fsl_fbo_realloc(&fsl_core_internal.fbo, FALSE, 4);
-        fsl_fbo_realloc(&fsl_core_internal.fbo_msaa, TRUE, 4);
+        fsl_fbo_realloc(&fsl_core_internal.fbo, render_internal.size.x, render_internal.size.y, FALSE, 4);
+        fsl_fbo_realloc(&fsl_core_internal.fbo_msaa,render_internal.size.x, render_internal.size.y, TRUE, 4);
 
         if (callback_framebuffer_size)
             callback_framebuffer_size(size.x, size.y);
@@ -253,8 +250,8 @@ void fsl_request_engine_close(void)
 {
     fsl_core_internal.flag.request_engine_close = TRUE;
 
-    if (render && render->window)
-        glfwSetWindowShouldClose(render->window, GL_TRUE);
+    if (render_internal.window)
+        glfwSetWindowShouldClose(render_internal.window, GL_TRUE);
 }
 
 void fsl_engine_close(void)
@@ -269,8 +266,8 @@ void fsl_engine_close(void)
     fsl_ui_free();
     fsl_assets_free();
 
-    if (render->window)
-        glfwDestroyWindow(render->window);
+    if (render_internal.window)
+        glfwDestroyWindow(render_internal.window);
 
     if (fsl_core_internal.flag.glfw_initialized)
     {
@@ -282,8 +279,8 @@ void fsl_engine_close(void)
     fsl_mem_arena_free(&mem_arena_file_internal, "fsl_engine_close().mem_arena_file_internal");
     fsl_mem_arena_free(&mem_arena_name_id_internal, "fsl_engine_close().mem_arena_name_id_internal");
     fsl_mem_arena_free(&mem_arena_name_internal, "fsl_engine_close().mem_arena_name_internal");
-    fsl_mem_free((void*)&render->screen_buf, render->size.x * render->size.y * FSL_COLOR_CHANNELS_RGB,
-            "fsl_engine_close().render->screen_buf");
+    fsl_mem_free((void*)&render_internal.screen_buf, render_internal.size.x * render_internal.size.y * FSL_COLOR_CHANNELS_RGB,
+            "fsl_engine_close().render_internal.screen_buf");
     fsl_mem_free((void*)&FSL_DIR_PROC_ROOT, FSL_PATH_CAP, "fsl_engine_close().FSL_DIR_PROC_ROOT");
     fsl_mem_arena_free(&mem_arena_internal, "fsl_engine_close().mem_arena_internal");
     fsl_logger_close();
@@ -352,16 +349,25 @@ u32 fsl_glfw_init(b8 multisample)
 
 u32 fsl_window_init(const str *title, i32 size_x, i32 size_y)
 {
-    if (title) snprintf(render->title, FSL_ID_CAP, "%s", title);
-    else fsl_engine_get_string(render->title, FSL_ENGINE_STR_INDEX_TITLE);
-    if (size_x) render->size.x = fsl_clamp_i32(size_x, FSL_RENDER_WIDTH_MIN, FSL_RENDER_WIDTH_MAX);
-    else render->size.x = FSL_RENDER_WIDTH_DEFAULT;
-    if (size_y) render->size.y = fsl_clamp_i32(size_y, FSL_RENDER_HEIGHT_MIN, FSL_RENDER_HEIGHT_MAX);
-    else render->size.y = FSL_RENDER_HEIGHT_DEFAULT;
+    if (title)
+        snprintf(render_internal.title, FSL_ID_CAP, "%s", title);
+    else
+        fsl_engine_get_string(render_internal.title, FSL_ENGINE_STR_INDEX_TITLE);
 
-    render->window = glfwCreateWindow(render->size.x, render->size.y, render->title, NULL, NULL);
+    if (size_x)
+        render_internal.size.x = fsl_clamp_i32(size_x, FSL_RENDER_WIDTH_MIN, FSL_RENDER_WIDTH_MAX);
+    else
+        render_internal.size.x = FSL_RENDER_WIDTH_DEFAULT;
 
-    if (!render->window)
+    if (size_y)
+        render_internal.size.y = fsl_clamp_i32(size_y, FSL_RENDER_HEIGHT_MIN, FSL_RENDER_HEIGHT_MAX);
+    else
+        render_internal.size.y = FSL_RENDER_HEIGHT_DEFAULT;
+
+    render_internal.window = glfwCreateWindow(render_internal.size.x, render_internal.size.y,
+                render_internal.title, NULL, NULL);
+
+    if (!render_internal.window)
     {
         LOGFATAL(FSL_ERR_WINDOW_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
@@ -369,19 +375,20 @@ u32 fsl_window_init(const str *title, i32 size_x, i32 size_y)
         return fsl_err;
     }
 
-    glfwMakeContextCurrent(render->window);
-    glfwSetWindowSizeLimits(render->window,
+    glfwMakeContextCurrent(render_internal.window);
+    glfwSetWindowSizeLimits(render_internal.window,
             FSL_RENDER_WIDTH_MIN, FSL_RENDER_HEIGHT_MIN,
             FSL_RENDER_WIDTH_MAX, FSL_RENDER_HEIGHT_MAX);
 
-    if (render->size.x && render->size.y)
+    if (render_internal.size.x && render_internal.size.y)
     {
-        render->ndc_scale.x = 2.0f / render->size.x;
-        render->ndc_scale.y = 2.0f / render->size.y;
+        render_internal.ndc_scale.x = 2.0f / render_internal.size.x;
+        render_internal.ndc_scale.y = 2.0f / render_internal.size.y;
     }
 
-    if (fsl_mem_alloc((void*)&render->screen_buf, render->size.x * render->size.y * FSL_COLOR_CHANNELS_RGB,
-                "fsl_window_init().render.screen_buf") != FSL_ERR_SUCCESS)
+    if (fsl_mem_alloc((void*)&render_internal.screen_buf,
+                render_internal.size.x * render_internal.size.y * FSL_COLOR_CHANNELS_RGB,
+                "fsl_window_init().render_internal.screen_buf") != FSL_ERR_SUCCESS)
         return fsl_err;
 
     fsl_err = FSL_ERR_SUCCESS;
@@ -429,6 +436,11 @@ u32 fsl_glad_init(void)
     return fsl_err;
 }
 
+fsl_render *fsl_render_get(void)
+{
+    return &render_internal;
+}
+
 u32 fsl_change_render(fsl_render *r)
 {
     if (r == NULL)
@@ -447,7 +459,7 @@ u32 fsl_change_render(fsl_render *r)
         return fsl_err;
     }
 
-    render = r;
+    render_internal = *r;
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
@@ -501,14 +513,15 @@ static u32 take_screenshot_internal(const str *dir_screenshots, const str *speci
         if (fsl_is_file_exists(file_name_full, FALSE) != FSL_ERR_SUCCESS)
         {
             glPixelStorei(GL_PACK_ALIGNMENT, 1);
-            glReadPixels(0, 0, render->size.x, render->size.y, GL_RGB, GL_UNSIGNED_BYTE, render->screen_buf);
+            glReadPixels(0, 0, render_internal.size.x, render_internal.size.y,
+                    GL_RGB, GL_UNSIGNED_BYTE, render_internal.screen_buf);
 
             stbi_flip_vertically_on_write(TRUE);
             LOGINFO(FSL_FLAG_LOG_CMD,
                     fsl_logger_stringf("Screenshot: %s\n", file_name_full));
 
-            stbi_write_png(file_name_full, render->size.x, render->size.y, FSL_COLOR_CHANNELS_RGB,
-                    render->screen_buf, render->size.x * FSL_COLOR_CHANNELS_RGB);
+            stbi_write_png(file_name_full, render_internal.size.x, render_internal.size.y, FSL_COLOR_CHANNELS_RGB,
+                    render_internal.screen_buf, render_internal.size.x * FSL_COLOR_CHANNELS_RGB);
 
             fsl_err = FSL_ERR_SUCCESS;
             return fsl_err;
@@ -556,8 +569,8 @@ static void fbo_blit_msaa_internal(GLuint fbo)
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fsl_core_internal.fbo_msaa.fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fsl_core_internal.fbo.fbo);
-    glBlitFramebuffer(0, 0, render->size.x, render->size.y, 0, 0,
-            render->size.x, render->size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(0, 0, render_internal.size.x, render_internal.size.y, 0, 0,
+            render_internal.size.x, render_internal.size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
     glUseProgram(shader_unit_quad->asset.id);
     glBindVertexArray(fsl_mesh_unit_quad.vao);

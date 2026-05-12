@@ -23,9 +23,9 @@
 #ifndef FSL_SHADER_TYPES_H
 #define FSL_SHADER_TYPES_H
 
-#include "../h/asset_types.h"
+#include "../assets/asset_types.h"
 
-#include <deps/glad/glad.h>
+#include "../external/glad/glad.h"
 
 typedef struct fsl_shader           fsl_shader;
 typedef struct fsl_shader_program   fsl_shader_program;

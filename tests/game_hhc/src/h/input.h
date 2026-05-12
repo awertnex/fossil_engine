@@ -3,10 +3,8 @@
 
 #include "src/common/types.h"
 
-#include "src/h/core.h"
 #include "src/h/input.h"
 
-#include "main.h"
 #include "player.h"
 
 /* ---- movement ------------------------------------------------------------ */

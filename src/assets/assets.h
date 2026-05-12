@@ -24,50 +24,14 @@
 #define FSL_ASSETS_H
 
 #include "../common/engine_info.h"
-#include "../common/limits.h"
 #include "../common/types.h"
-#include "../memory/memory_types.h"
 
 #include "asset_types.h"
-
-#include <deps/glad/glad.h>
-
-/* ---- section: declarations ----------------------------------------------- */
-
-/*!
- *  @brief engine's default textures.
- *
- *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
- */
-FSLAPI extern fsl_mem_handle fsl_texture_buf;
-
-/*!
- *  @brief engine's default shaders.
- *
- *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
- */
-FSLAPI extern fsl_mem_handle fsl_shader_buf;
-
-/*!
- *  @brief engine's default fonts.
- *
- *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
- */
-FSLAPI extern fsl_mem_handle fsl_font_buf;
-
-/*!
- *  @brief engine's default unit quad, with texture coordinates.
- *
- *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
- */
-FSLAPI extern fsl_mesh fsl_mesh_unit_quad;
-
-/* ---- section: signatures ------------------------------------------------- */
 
 /*!
  *  @remark get asset metadata.
  */
-FSLAPI fsl_asset_metadata fsl_asset_get_metadata(const fsl_asset asset);
+FSLAPI fsl_asset_metadata fsl_asset_get_metadata(fsl_asset asset);
 
 /*!
  *  @brief initialize a single asset.
@@ -87,32 +51,19 @@ FSLAPI fsl_asset_metadata fsl_asset_get_metadata(const fsl_asset asset);
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_asset_set_metadata(fsl_asset *asset, enum fsl_asset_type type,
+FSLAPI u32 fsl_asset_set_metadata(fsl_asset *asset, fsl_asset_type type,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path);
 
 /*!
- *  @brief initialize engine's internal assets.
- *
- *  @remark called automatically from @ref fsl_engine_init().
- *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_assets_init(void);
-
-/*!
- *  @brief free all engine's internal assets.
- */
-FSLAPI void fsl_assets_free(void);
+FSLAPI u32 fsl_fbo_init(fsl_fbo *fbo, i32 size_x, i32 size_y, fsl_mesh *mesh_fbo,
+        b8 multisample, u32 samples);
 
 /*!
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_fbo_init(fsl_fbo *fbo, fsl_mesh *mesh_fbo, b8 multisample, u32 samples);
-
-/*!
- *  @return non-zero on failure and @ref fsl_err is set accordingly.
- */
-FSLAPI u32 fsl_fbo_realloc(fsl_fbo *fbo, b8 multisample, u32 samples);
+FSLAPI u32 fsl_fbo_realloc(fsl_fbo *fbo, i32 size_x, i32 size_y, b8 multisample, u32 samples);
 
 FSLAPI void fsl_fbo_free(fsl_fbo *fbo);
 

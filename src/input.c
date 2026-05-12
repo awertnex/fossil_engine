@@ -20,7 +20,8 @@
  *  @brief keyboard and mouse input handling.
  */
 
-#include "h/core.h"
+#include "engine/core.h"
+
 #include "h/input.h"
 #include "h/time.h"
 
@@ -351,16 +352,16 @@ b8 fsl_is_key_release(const fsl_key_bind key)
 void fsl_update_mouse_movement(void)
 {
     static v2f64 mouse_last = {0};
-    glfwGetCursorPos(render->window, &render->mouse_pos.x, &render->mouse_pos.y);
-    render->mouse_delta.x = render->mouse_pos.x - mouse_last.x;
-    render->mouse_delta.y = render->mouse_pos.y - mouse_last.y;
-    mouse_last = render->mouse_pos;
+    glfwGetCursorPos(render_internal.window, &render_internal.mouse_pos.x, &render_internal.mouse_pos.y);
+    render_internal.mouse_delta.x = render_internal.mouse_pos.x - mouse_last.x;
+    render_internal.mouse_delta.y = render_internal.mouse_pos.y - mouse_last.y;
+    mouse_last = render_internal.mouse_pos;
 }
 
 void fsl_update_key_states(void)
 {
-    GLFWwindow *_window = render->window;
-    u64 _time = render->time;
+    GLFWwindow *_window = render_internal.window;
+    u64 _time = render_internal.time;
     static u64 double_press_time_interval = (u64)(FSL_DOUBLE_PRESS_TIME_INTERVAL * FSL_SEC2NSEC);
     static u64 key_press_start_time[FSL_KEYBOARD_KEYS_MAX] = {0};
     b8 key_press = FALSE;

@@ -9,6 +9,8 @@
 ## v0.8.0-dev (current)
 
 #### changes
+- (2026 05 12): added parameters `size_x` and `size_y` to functions
+                `fsl_fbo_init()` and `fsl_fbo_realloc()`
 
 - - -
 ## v0.8.0-beta (2026 05 11)

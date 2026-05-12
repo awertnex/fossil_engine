@@ -23,8 +23,11 @@
 #ifndef FSL_ASSET_TYPES_H
 #define FSL_ASSET_TYPES_H
 
-#include <deps/glad/glad.h>
-#include <deps/stb_truetype.h>
+#include "../common/limits.h"
+#include "../memory/memory_types.h"
+
+#include "../external/glad/glad.h"
+#include "../external/stb_truetype.h"
 
 /*!
  *  @brief an asset's display name (optional).
@@ -57,17 +60,17 @@ typedef struct fsl_mesh             fsl_mesh;
 typedef struct fsl_glyph            fsl_glyph;
 typedef struct fsl_font             fsl_font;
 
-enum fsl_asset_type
+typedef enum fsl_asset_type
 {
-    FSL_ASSET_CUSTOM, /* user defined asset types */
-    FSL_ASSET_FBO,
-    FSL_ASSET_TEXTURE,
-    FSL_ASSET_MESH,
-    FSL_ASSET_SHADER,
-    FSL_ASSET_SHADER_PROGRAM,
-    FSL_ASSET_FONT,
+    FSL_ASSET_CUSTOM = 0, /* user defined asset types */
+    FSL_ASSET_FBO = 1,
+    FSL_ASSET_TEXTURE = 2,
+    FSL_ASSET_MESH = 3,
+    FSL_ASSET_SHADER = 4,
+    FSL_ASSET_SHADER_PROGRAM = 5,
+    FSL_ASSET_FONT = 6,
     FSL_ASSET_TYPE_COUNT
-}; /* fsl_asset_type */
+} fsl_asset_type;
 
 /*!
  *  @remark this struct should be filled using the function @ref fsl_set_asset_metadata().
@@ -79,7 +82,7 @@ struct fsl_asset
      */
     GLuint id;
 
-    enum fsl_asset_type type;
+    fsl_asset_type type;
 
     /*!
      *  @brief display name, can be used in asset-search (optional).

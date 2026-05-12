@@ -25,13 +25,14 @@
 #include "common/diagnostics.h"
 #include "common/limits.h"
 #include "common/types.h"
+#include "assets/asset_types.h"
 #include "logger/logger.h"
+#include "logger/logger_messages_internal.h"
 #include "memory/memory.h"
-#include "shaders/shaders.h"
+#include "shaders/shader_types.h"
 
-#include "h/core.h"
-#include "h/dir.h"
-#include "h/string.h"
+#include "engine/core.h"
+#include "engine/engine_default_assets.h"
 #include "h/ui.h"
 
 #include <string.h>
@@ -258,7 +259,7 @@ void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear)
     }
 
     if (text_core.font == NULL || font->asset.id != text_core.font->asset.id ||
-            render_size.x != render->size.x || render_size.y != render->size.y)
+            render_size.x != render_internal.size.x || render_size.y != render_internal.size.y)
     {
         text_core.font = font;
         text_core.font_size = size;
@@ -267,8 +268,8 @@ void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear)
         text_core.cursor = 0;
 
         scale = stbtt_ScaleForPixelHeight(&font->info, size);
-        text_core.text_scale.x = scale * render->ndc_scale.x;
-        text_core.text_scale.y = scale * render->ndc_scale.y;
+        text_core.text_scale.x = scale * render_internal.ndc_scale.x;
+        text_core.text_scale.y = scale * render_internal.ndc_scale.y;
 
         for (i = 0; i < FSL_GLYPH_MAX; ++i)
         {
@@ -286,8 +287,8 @@ void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear)
     ui_core.shader.text = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_TEXT);
     glUseProgram(ui_core.shader.text->asset.id);
     glUniform2f(ui_core.uniform.text.font_size,
-            text_core.font_size * render->ndc_scale.x,
-            text_core.font_size * render->ndc_scale.y);
+            text_core.font_size * render_internal.ndc_scale.x,
+            text_core.font_size * render_internal.ndc_scale.y);
 
     glBindTexture(GL_TEXTURE_2D, text_core.font->asset.id);
     glDisable(GL_DEPTH_TEST);
@@ -308,7 +309,7 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
     u64 len = 0, i = 0;
     f32 descent = 0.0f, line_height = 0.0f;
     struct fsl_glyphf *g = NULL;
-    f32 _window_x = (f32)window_x * render->ndc_scale.x;
+    f32 _window_x = (f32)window_x * render_internal.ndc_scale.x;
     void (*align_x_func)(const str *, i64, f32) = &text_align_x_none_internal;
     void (*align_y_func)(u64, f32) = &text_align_y_none_internal;
 
@@ -361,8 +362,8 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
     else if (align_y == FSL_TEXT_ALIGN_BOTTOM)
         align_y_func = &text_align_y_bottom_internal;
 
-    pos_x *= render->ndc_scale.x;
-    pos_y *= render->ndc_scale.y;
+    pos_x *= render_internal.ndc_scale.x;
+    pos_y *= render_internal.ndc_scale.y;
     pos_y += text_core.font->scale.y * text_core.text_scale.y;
 
     descent = text_core.font->descent * text_core.text_scale.y;

@@ -26,6 +26,7 @@
 #include "../common/limits.h"
 #include "../common/session.h"
 #include "../common/types.h"
+#include "../memory/memory.h"
 
 #include "logger.h"
 
@@ -36,6 +37,17 @@
 #include <stdarg.h>
 #include <sys/stat.h>
 #include <inttypes.h>
+
+enum fsl_log_message_flag
+{
+    FSL_FLAG_LOG_TIMESTAMP =    0x0001,
+    FSL_FLAG_LOG_DATE =         0x0002,
+    FSL_FLAG_LOG_TIME =         0x0004,
+    FSL_FLAG_LOG_DATE_TIME =    0x0006,
+    FSL_FLAG_LOG_FULL_TIME =    0x0007,
+    FSL_FLAG_LOG_TAG =          0x0008,
+    FSL_FLAG_LOG_TERM_COLOR =   0x0010
+}; /* fsl_log_message_flag */
 
 /* ---- section: declarations ----------------------------------------------- */
 

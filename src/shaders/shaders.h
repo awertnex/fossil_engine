@@ -29,8 +29,6 @@
 
 #include "shader_types.h"
 
-#include <deps/glad/glad.h>
-
 /*!
  *  @brief initialize a single shader.
  *

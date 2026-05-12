@@ -29,31 +29,6 @@ enum fsl_flag
     FSL_FLAG_MULTISAMPLE =          0x0002  /* use 'GLFW' multisampling */
 }; /* fsl_flag */
 
-enum fsl_engine_string_index
-{
-    FSL_ENGINE_STR_INDEX_TITLE, /* "ENGINE_NAME: ENGINE_VERSION" */
-    FSL_ENGINE_STR_INDEX_VERSION,
-    FSL_ENGINE_STR_INDEX_COUNT
-}; /* fsl_engine_string_index */
-
-enum fsl_shader_index
-{
-    FSL_SHADER_INDEX_UNIT_QUAD,
-    FSL_SHADER_INDEX_TEXT,
-    FSL_SHADER_INDEX_UI,
-    FSL_SHADER_INDEX_UI_9_SLICE,
-    FSL_SHADER_INDEX_COUNT
-}; /* fsl_shader_index */
-
-enum fsl_font_index
-{
-    FSL_FONT_INDEX_DEJAVU_SANS,
-    FSL_FONT_INDEX_DEJAVU_SANS_BOLD,
-    FSL_FONT_INDEX_DEJAVU_SANS_MONO,
-    FSL_FONT_INDEX_DEJAVU_SANS_MONO_BOLD,
-    FSL_FONT_INDEX_COUNT
-}; /* fsl_font_index */
-
 enum fsl_text_alignment
 {
     FSL_TEXT_ALIGN_LEFT = 0,
@@ -62,16 +37,5 @@ enum fsl_text_alignment
     FSL_TEXT_ALIGN_TOP = 0,
     FSL_TEXT_ALIGN_BOTTOM = 2
 }; /* fsl_text_alignment */
-
-enum fsl_texture_index
-{
-    FSL_TEXTURE_INDEX_PANEL_ACTIVE,
-    FSL_TEXTURE_INDEX_PANEL_INACTIVE,
-    FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE,
-    FSL_TEXTURE_INDEX_BUTTON_SELECTED,
-    FSL_TEXTURE_INDEX_BUTTON_ACTIVE,
-    FSL_TEXTURE_INDEX_BUTTON_INACTIVE,
-    FSL_TEXTURE_INDEX_COUNT
-}; /* fsl_texture_index */
 
 #endif /* FSL_COMMON_VALUES_H */

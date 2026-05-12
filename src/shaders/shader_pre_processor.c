@@ -24,11 +24,11 @@
 #include "../common/limits.h"
 #include "../common/types.h"
 #include "../logger/logger.h"
+#include "../logger/logger_messages_internal.h"
 #include "../memory/memory.h"
 
 #include "../h/dir.h"
-#include "shader_pre_processor.h"
-#include "shaders.h"
+#include "shader_pre_processor_internal.h"
 
 #include <stdio.h>
 #include <string.h>

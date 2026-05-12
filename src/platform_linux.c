@@ -24,16 +24,14 @@
 #include "common/limits.h"
 #include "common/types.h"
 #include "logger/logger.h"
+#include "logger/logger_messages_internal.h"
 #include "memory/memory.h"
 
 #include "h/dir.h"
 #include "h/process.h"
 
-#include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <inttypes.h>
-#include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
 

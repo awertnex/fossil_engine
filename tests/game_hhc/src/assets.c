@@ -1,15 +1,13 @@
 #include "src/common/config.h"
 #include "src/common/types.h"
+#include "src/assets/assets.h"
+#include "src/engine/engine_default_assets.h"
 #include "src/logger/logger.h"
 #include "src/memory/memory.h"
 #include "src/shaders/shaders.h"
 
-#include "src/h/core.h"
-#include "src/h/string.h"
-
 #include "h/assets.h"
 #include "h/diagnostics.h"
-#include "h/dir.h"
 #include "h/main.h"
 
 #include <stdio.h>
@@ -73,12 +71,12 @@ u32 assets_init(void)
 
     fbo_p = fsl_mem_handle_get(fsl_fbo, fbo);
     if (
-            fsl_fbo_init(&fbo_p[FBO_SKYBOX],     NULL, FALSE, 4) != FSL_ERR_SUCCESS ||
-            fsl_fbo_init(&fbo_p[FBO_WORLD],      NULL, FALSE, 4) != FSL_ERR_SUCCESS ||
-            fsl_fbo_init(&fbo_p[FBO_WORLD_MSAA], NULL, TRUE, 4) != FSL_ERR_SUCCESS ||
-            fsl_fbo_init(&fbo_p[FBO_HUD],        NULL, FALSE, 4) != FSL_ERR_SUCCESS ||
-            fsl_fbo_init(&fbo_p[FBO_HUD_MSAA],   NULL, TRUE, 4) != FSL_ERR_SUCCESS ||
-            fsl_fbo_init(&fbo_p[FBO_POST_PROCESSING], NULL, FALSE, 4) != FSL_ERR_SUCCESS)
+            fsl_fbo_init(&fbo_p[FBO_SKYBOX],     render->size.x, render->size.y, NULL, FALSE, 4) != FSL_ERR_SUCCESS ||
+            fsl_fbo_init(&fbo_p[FBO_WORLD],      render->size.x, render->size.y, NULL, FALSE, 4) != FSL_ERR_SUCCESS ||
+            fsl_fbo_init(&fbo_p[FBO_WORLD_MSAA], render->size.x, render->size.y, NULL, TRUE, 4) != FSL_ERR_SUCCESS ||
+            fsl_fbo_init(&fbo_p[FBO_HUD],        render->size.x, render->size.y, NULL, FALSE, 4) != FSL_ERR_SUCCESS ||
+            fsl_fbo_init(&fbo_p[FBO_HUD_MSAA],   render->size.x, render->size.y, NULL, TRUE, 4) != FSL_ERR_SUCCESS ||
+            fsl_fbo_init(&fbo_p[FBO_POST_PROCESSING], render->size.x, render->size.y, NULL, FALSE, 4) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     /* ---- shaders --------------------------------------------------------- */

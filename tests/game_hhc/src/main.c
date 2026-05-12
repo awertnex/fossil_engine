@@ -1,4 +1,4 @@
-#include "src/h/fossil_engine.h"
+#include "src/fossil_engine.h"
 
 #include "h/main.h"
 #include "h/assets.h"
@@ -12,7 +12,7 @@
 #include "h/terrain.h"
 #include "h/world.h"
 
-#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
 #include <math.h>
@@ -20,6 +20,7 @@
 i32 scrool = 0;
 u32 *const GAME_ERR = (u32*)&fsl_err;
 fsl_mem_arena memory_arena_internal = {0};
+fsl_render *render = NULL;
 struct hhc_core core = {0};
 struct hhc_settings settings = {0};
 static struct hhc_uniform uniform = {0};
@@ -67,12 +68,12 @@ static void callback_framebuffer_size(i32 size_x, i32 size_y)
     _player.camera.ratio = (f32)size_x / (f32)size_y;
     _player.camera_hud.ratio = (f32)size_x / (f32)size_y;
 
-    fsl_fbo_realloc(&fbo_p[FBO_SKYBOX], FALSE, 4);
-    fsl_fbo_realloc(&fbo_p[FBO_WORLD], FALSE, 4);
-    fsl_fbo_realloc(&fbo_p[FBO_WORLD_MSAA], TRUE, 4);
-    fsl_fbo_realloc(&fbo_p[FBO_HUD], FALSE, 4);
-    fsl_fbo_realloc(&fbo_p[FBO_HUD_MSAA], TRUE, 4);
-    fsl_fbo_realloc(&fbo_p[FBO_POST_PROCESSING], FALSE, 4);
+    fsl_fbo_realloc(&fbo_p[FBO_SKYBOX], render->size.x, render->size.y, FALSE, 4);
+    fsl_fbo_realloc(&fbo_p[FBO_WORLD], render->size.x, render->size.y, FALSE, 4);
+    fsl_fbo_realloc(&fbo_p[FBO_WORLD_MSAA], render->size.x, render->size.y, TRUE, 4);
+    fsl_fbo_realloc(&fbo_p[FBO_HUD], render->size.x, render->size.y, FALSE, 4);
+    fsl_fbo_realloc(&fbo_p[FBO_HUD_MSAA], render->size.x, render->size.y, TRUE, 4);
+    fsl_fbo_realloc(&fbo_p[FBO_POST_PROCESSING], render->size.x, render->size.y, FALSE, 4);
 }
 
 static void callback_key(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -298,7 +299,6 @@ static void bind_shader_uniforms(void)
 static void generate_standard_meshes(void)
 {
     fsl_mesh *mesh_p = fsl_mem_handle_get(fsl_mesh, mesh);
-    fsl_asset_metadata metadata = {0};
     u32 i = 0;
     const u32 VBO_LEN_SKYBOX =  120;
     const u32 EBO_LEN_SKYBOX =  36;
@@ -465,46 +465,22 @@ static void generate_standard_meshes(void)
     if (fsl_mesh_generate(&mesh_p[MESH_SKYBOX], "Skybox", "skybox", NULL, NULL,
                 &fsl_attrib_vec3_vec2, GL_STATIC_DRAW,
                 VBO_LEN_SKYBOX, EBO_LEN_SKYBOX, vbo_data_skybox, ebo_data_skybox) != FSL_ERR_SUCCESS)
-    {
-        metadata = fsl_asset_get_metadata(mesh_p[MESH_SKYBOX].asset);
-        LOG_MESH_GENERATE(metadata.name_id);
         goto cleanup;
-    }
-    metadata = fsl_asset_get_metadata(mesh_p[MESH_SKYBOX].asset);
-    LOG_MESH_GENERATE(metadata.name_id);
 
     if (fsl_mesh_generate(&mesh_p[MESH_CUBE_OF_HAPPINESS], "Cube of Happiness", "cube_of_happiness", NULL, NULL,
                 &fsl_attrib_vec3, GL_STATIC_DRAW,
                 VBO_LEN_COH, EBO_LEN_COH, vbo_data_coh, ebo_data_coh) != FSL_ERR_SUCCESS)
-    {
-        metadata = fsl_asset_get_metadata(mesh_p[MESH_CUBE_OF_HAPPINESS].asset);
-        LOG_MESH_GENERATE(metadata.name_id);
         goto cleanup;
-    }
-    metadata = fsl_asset_get_metadata(mesh_p[MESH_CUBE_OF_HAPPINESS].asset);
-    LOG_MESH_GENERATE(metadata.name_id);
 
     if (fsl_mesh_generate(&mesh_p[MESH_PLAYER], "Player", "player", NULL, NULL,
                 &fsl_attrib_vec3_vec3, GL_STATIC_DRAW,
                 VBO_LEN_PLAYER, 0, vbo_data_player, NULL) != FSL_ERR_SUCCESS)
-    {
-        metadata = fsl_asset_get_metadata(mesh_p[MESH_PLAYER].asset);
-        LOG_MESH_GENERATE(metadata.name_id);
         goto cleanup;
-    }
-    metadata = fsl_asset_get_metadata(mesh_p[MESH_PLAYER].asset);
-    LOG_MESH_GENERATE(metadata.name_id);
 
     if (fsl_mesh_generate(&mesh_p[MESH_GIZMO], "Gizmo", "gizmo", NULL, NULL,
                 &fsl_attrib_vec3, GL_STATIC_DRAW,
                 VBO_LEN_GIZMO, EBO_LEN_GIZMO, vbo_data_gizmo, ebo_data_gizmo) != FSL_ERR_SUCCESS)
-    {
-        metadata = fsl_asset_get_metadata(mesh_p[MESH_GIZMO].asset);
-        LOG_MESH_GENERATE(metadata.name_id);
         goto cleanup;
-    }
-    metadata = fsl_asset_get_metadata(mesh_p[MESH_GIZMO].asset);
-    LOG_MESH_GENERATE(metadata.name_id);
 
     *GAME_ERR = FSL_ERR_SUCCESS;
     return;
