@@ -9,8 +9,11 @@ STATUS  DONE DATE       TASK
 - [x]   (2025 11 XX):   make `mem_map()`, `mem_commit()` and `mem_unmap()` for
                         windows
 - [ ]   (          ):   compile glfw into the binary directly
-- [ ]   (          ):   move all allocations to one big memory arena (including
+- [x]   (2026 05 10):   move all allocations to one big memory arena (including
                         stack arrays in struct definitions)
+- [ ]   (          ):   change deployment package directory structure to make
+                        engine headers' relative includes not break in other
+                        repos
 
 quirks:
 - [x]   (2025 09 19):   fix weird framebuffer scaling on window scaling
