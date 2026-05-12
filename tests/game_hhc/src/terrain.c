@@ -73,19 +73,19 @@ v3f32 random_2d(i32 x, i32 y, u64 seed)
     const u64 S = 64;
     u64 a = x + seed + 94580993;
     u64 b = y - seed - 35786975;
+    f64 land_final = 0.0;
+    v3f32 result = {0};
 
     a *= 3284157443;
     b ^= a << S | a >> S;
     b *= 1911520717;
     a ^= b << S | b >> S;
     a *= 2048419325;
-    f64 land_final = (f64)a * FSL_RAND_SCALE;
-
-    return (v3f32){
-        sinf((f32)land_final),
-        cosf((f32)land_final),
-        sinf((f32)land_final + 0.25f),
-    };
+    land_final = (f64)a * FSL_RAND_SCALE;
+    result.x = sinf((f32)land_final);
+    result.y = cosf((f32)land_final);
+    result.z = sinf((f32)land_final + 0.25f);
+    return result;
 }
 
 v3f32 random_3d(i32 x, i32 y, i32 z, u64 seed)
@@ -94,6 +94,8 @@ v3f32 random_3d(i32 x, i32 y, i32 z, u64 seed)
     u64 a = x + seed + 7467244;
     u64 b = y - seed - 4909393;
     u64 c = z + seed + 2500462;
+    f64 land_final = 0.0;
+    v3f32 result = {0};
 
     a *= 3284157443;
     b ^= a << S | a >> S;
@@ -102,37 +104,29 @@ v3f32 random_3d(i32 x, i32 y, i32 z, u64 seed)
     a *= 2048419325;
     c ^= a << S | b >> S;
     c *= 3567382653;
-    f64 land_final = (f64)c * FSL_RAND_SCALE;
-
-    return (v3f32){
-        sinf((f32)land_final),
-        cosf((f32)land_final),
-        sinf((f32)land_final + 0.25f),
-    };
+    land_final = (f64)c * FSL_RAND_SCALE;
+    result.x = sinf((f32)land_final);
+    result.y = cosf((f32)land_final);
+    result.z = sinf((f32)land_final + 0.25f);
+    return result;
 }
 
 #pragma GCC diagnostic pop /* ignored "-Wshift-count-overflow" */
 
 f32 gradient_2d(f32 vx, f32 vy, i32 x, i32 y, u64 seed)
 {
-    v2f32 sample =
-    {
-        RAND_TAB[(seed + (234 + x) * (672 + y)) % RAND_TAB_VOLUME],
-        RAND_TAB[(seed + (862 + y) * (873 + x)) % RAND_TAB_VOLUME],
-    };
-
+    v2f32 sample = {0};
+    sample.x = RAND_TAB[(seed + (234 + x) * (672 + y)) % RAND_TAB_VOLUME];
+    sample.y = RAND_TAB[(seed + (862 + y) * (873 + x)) % RAND_TAB_VOLUME];
     return (vx - x) * sample.x + (vy - y) * sample.y;
 }
 
 f32 gradient_3d(f32 vx, f32 vy, f32 vz, i32 x, i32 y, i32 z, u64 seed)
 {
-    v3f32 sample =
-    {
-        RAND_TAB[(seed + (834 + x) * (677 + y) * (834 + z)) % RAND_TAB_VOLUME],
-        RAND_TAB[(seed + (523 + y) * (343 + z) * (328 + x)) % RAND_TAB_VOLUME],
-        RAND_TAB[(seed + (118 + z) * (853 + x) * (953 + y)) % RAND_TAB_VOLUME],
-    };
-
+    v3f32 sample = {0};
+    sample.x = RAND_TAB[(seed + (834 + x) * (677 + y) * (834 + z)) % RAND_TAB_VOLUME];
+    sample.y = RAND_TAB[(seed + (523 + y) * (343 + z) * (328 + x)) % RAND_TAB_VOLUME];
+    sample.z = RAND_TAB[(seed + (118 + z) * (853 + x) * (953 + y)) % RAND_TAB_VOLUME];
     return (vx - x) * sample.x + (vy - y) * sample.y + (vz - z) * sample.z;
 }
 
@@ -150,10 +144,11 @@ f32 perlin_noise_2d(v2i32 coordinates, f32 amplitude, f32 frequency, u64 seed)
     f32 g0 = gradient_2d(vx, vy, ax, ay, seed);
     f32 g1 = gradient_2d(vx, vy, bx, ay, seed);
     f32 l0 = fsl_lerp_cubic_f32(g0, g1, dx);
+    f32 l1 = 0.0f;
 
     g0 = gradient_2d(vx, vy, ax, by, seed);
     g1 = gradient_2d(vx, vy, bx, by, seed);
-    f32 l1 = fsl_lerp_cubic_f32(g0, g1, dx);
+    l1 = fsl_lerp_cubic_f32(g0, g1, dx);
 
     return fsl_lerp_cubic_f32(l0, l1, dy) * amplitude;
 }
@@ -175,28 +170,31 @@ f32 perlin_noise_2d_ex(v2i32 coordinates, f32 intensity, f32 scale,
 
 f32 perlin_noise_3d(v3i32 coordinates, f32 intensity, f32 scale, u64 seed)
 {
-    f32 vx = (f32)coordinates.x / scale,
-        vy = (f32)coordinates.y / scale,
-        vz = (f32)coordinates.z / scale;
-    i32 ax = (i32)floorf(vx),
-        ay = (i32)floorf(vy),
-        az = (i32)floorf(vz);
-    i32 bx = ax + 1,
-        by = ay + 1,
-        bz = az + 1;
-    f32 dx = vx - (f32)ax,
-        dy = vy - (f32)ay,
-        dz = vz - (f32)az;
+    f32 vx = (f32)coordinates.x / scale;
+    f32 vy = (f32)coordinates.y / scale;
+    f32 vz = (f32)coordinates.z / scale;
+    i32 ax = (i32)floorf(vx);
+    i32 ay = (i32)floorf(vy);
+    i32 az = (i32)floorf(vz);
+    i32 bx = ax + 1;
+    i32 by = ay + 1;
+    i32 bz = az + 1;
+    f32 dx = vx - (f32)ax;
+    f32 dy = vy - (f32)ay;
+    f32 dz = vz - (f32)az;
 
     f32 g0 = gradient_3d(vx, vy, vz, ax, ay, az, seed);
     f32 g1 = gradient_3d(vx, vy, vz, bx, ay, az, seed);
     f32 l0 = fsl_lerp_cubic_f32(g0, g1, dx);
+    f32 l1 = 0.0f;
+    f32 ll0 = 0.0f;
+    f32 ll1 = 0.0f;
 
     g0 = gradient_3d(vx, vy, vz, ax, by, az, seed);
     g1 = gradient_3d(vx, vy, vz, bx, by, az, seed);
-    f32 l1 = fsl_lerp_cubic_f32(g0, g1, dx);
+    l1 = fsl_lerp_cubic_f32(g0, g1, dx);
 
-    f32 ll0 = fsl_lerp_cubic_f32(l0, l1, dy);
+    ll0 = fsl_lerp_cubic_f32(l0, l1, dy);
 
     g0 = gradient_3d(vx, vy, vz, ax, ay, bz, seed);
     g1 = gradient_3d(vx, vy, vz, bx, ay, bz, seed);
@@ -206,7 +204,7 @@ f32 perlin_noise_3d(v3i32 coordinates, f32 intensity, f32 scale, u64 seed)
     g1 = gradient_3d(vx, vy, vz, bx, by, bz, seed);
     l1 = fsl_lerp_cubic_f32(g0, g1, dx);
 
-    f32 ll1 = fsl_lerp_cubic_f32(l0, l1, dy);
+    ll1 = fsl_lerp_cubic_f32(l0, l1, dy);
 
     return fsl_lerp_cubic_f32(ll0, ll1, dz) * intensity;
 }
@@ -228,29 +226,35 @@ f32 perlin_noise_3d_ex(v3i32 coordinates, f32 intensity, f32 scale,
 
 terrain terrain_land(v3i32 coordinates)
 {
+    v2i32 coordinates_2d = {0};
+    f32 crush = 0.0f;
+    f32 mountains = 0.0f;
+    f32 peaks = 0.0f;
+    f32 hills = 0.0f;
+    f32 ridges = 0.0f;
+    f32 elevation = 0.0f;
+    f32 influence = 0.0f;
+    f32 gathering = 0.0f;
+    f32 cave_frequency = 0.0f;
+    f32 cave_spaghetti = 0.0f;
+    f32 cave_features_big = 0.0f;
+    f32 cave_features_small = 0.0f;
+    f32 cave_entrances = 0.0f;
+    f32 cave_level = 0.0f;
+    f32 biome_blend = 0.0f;
+    f32 land_final = 0.0f;
+    f32 cave_final = 0.0f;
     terrain result = {0};
+
     coordinates.x += 7324;
     coordinates.y -= 7272;
     coordinates.z -= 30;
-    v2i32 coordinates_2d = {coordinates.x, coordinates.y};
+    coordinates_2d.x = coordinates.x;
+    coordinates_2d.y = coordinates.y;
 
-    f32 mountains,
-        peaks,
-        hills,
-        ridges,
-        elevation,
-        influence,
-        gathering,
-        cave_frequency,
-        cave_spaghetti,
-        cave_features_big,
-        cave_features_small,
-        cave_entrances,
-        cave_level,
-        biome_blend = perlin_noise_2d(coordinates_2d, 15.0f, 1000.0f, world.seed + 7543),
-        crush = fabsf(((f32)(coordinates.z + TERRAIN_CAVE_LEVEL) / WORLD_DIAMETER_VERTICAL) + 0.4f) * 0.8f,
-        land_final = 0.0f,
-        cave_final = 0.0f;
+    crush = fabsf(((f32)(coordinates.z + TERRAIN_CAVE_LEVEL) / WORLD_DIAMETER_VERTICAL) + 0.4f) * 0.8f;
+
+    biome_blend = perlin_noise_2d(coordinates_2d, 15.0f, 1000.0f, world.seed + 7543);
 
     /* ---- flow control ---------------------------------------------------- */
 
@@ -320,23 +324,27 @@ terrain terrain_land(v3i32 coordinates)
 
 terrain terrain_decaying_lands(v3i32 coordinates)
 {
+    v2i32 coordinates_2d = {0};
+    f32 crush = 0.0f;
+    f32 mountains = 0.0f;
+    f32 ridges = 0.0f;
+    f32 gathering = 0.0f;
+    f32 cave_frequency = 0.0f;
+    f32 cave_spaghetti = 0.0f;
+    f32 cave_features_big = 0.0f;
+    f32 cave_features_small = 0.0f;
+    f32 cave_level = 0.0f;
+    f32 land_final = 0.0f;
+    f32 cave_final = 0.0f;
     terrain result = {0};
+
     coordinates.x += 7324;
     coordinates.y -= 7272;
     coordinates.z += 30;
-    v2i32 coordinates_2d = {coordinates.x, coordinates.y};
+    coordinates_2d.x = coordinates.x;
+    coordinates_2d.y = coordinates.y;
 
-    f32 mountains,
-        ridges,
-        gathering,
-        cave_frequency,
-        cave_spaghetti,
-        cave_features_big,
-        cave_features_small,
-        cave_level,
-        crush = fabsf((((f32)coordinates.z - (WORLD_RADIUS_VERTICAL / 2)) / WORLD_RADIUS_VERTICAL) + 0.4f) * 0.8f,
-        land_final = 0.0f,
-        cave_final = 0.0f;
+    crush = fabsf((((f32)coordinates.z - (WORLD_RADIUS_VERTICAL / 2)) / WORLD_RADIUS_VERTICAL) + 0.4f) * 0.8f;
 
     gathering = perlin_noise_2d(coordinates_2d, 0.5f, 133.0f, world.seed + 75489);
 
@@ -372,31 +380,44 @@ terrain terrain_decaying_lands(v3i32 coordinates)
 
 terrain terrain_biome_blend_test(v3i32 coordinates)
 {
-    terrain result = {0};
-    v2i32 coordinates_2d = {coordinates.x, coordinates.y};
+    v2i32 coordinates_2d = {0};
     v3i32 coordinates_shifted = coordinates;
+    f32 crush = 0.0f;
+    f32 squish = 0.0f;
+    f32 biome_hills_mountains = 0.0f;
+    f32 biome_sandstorm_mountains = 0.0f;
+    f32 biome_decaying_lands_caves = 0.0f;
+    f32 biome_rocks_mountains = 0.0f;
+    f32 biome_hills = 0.0f;
+    f32 biome_sandstorm = 0.0f;
+    f32 biome_decaying_lands = 0.0f;
+    f32 biome_rocks = 0.0f;
+    f32 biome_blend = 0.0f;
+    f32 land_final = 0.0f;
+    terrain result = {0};
+
+    coordinates_2d.x = coordinates.x;
+    coordinates_2d.y = coordinates.y;
     coordinates_shifted.z *= 1.5f;
+    crush = fabsf((f32)(coordinates.z + TERRAIN_CAVE_LEVEL) / WORLD_DIAMETER_VERTICAL);
+    squish = (f32)coordinates.z * TERRAIN_SQUISH_MAGNITUDE;
 
-    f32 crush = fabsf((f32)(coordinates.z + TERRAIN_CAVE_LEVEL) / WORLD_DIAMETER_VERTICAL);
-    f32 squish = (f32)coordinates.z * TERRAIN_SQUISH_MAGNITUDE;
-
-    f32 biome_hills_mountains = perlin_noise_2d_ex(coordinates_2d, 200.0f, 255.0f, 3, 0.6f, 0.4f, world.seed + 347);
-    f32 biome_sandstorm_mountains = perlin_noise_2d_ex(coordinates_2d, 20.0f, 60.0f, 3, 0.9f, 0.8f, world.seed + 3470);
-    f32 biome_decaying_lands_caves = perlin_noise_3d(coordinates_shifted, 20.0f, 100.0f, world.seed - 34729222) - 3.0f;
+    biome_hills_mountains = perlin_noise_2d_ex(coordinates_2d, 200.0f, 255.0f, 3, 0.6f, 0.4f, world.seed + 347);
+    biome_sandstorm_mountains = perlin_noise_2d_ex(coordinates_2d, 20.0f, 60.0f, 3, 0.9f, 0.8f, world.seed + 3470);
+    biome_decaying_lands_caves = perlin_noise_3d(coordinates_shifted, 20.0f, 100.0f, world.seed - 34729222) - 3.0f;
     biome_decaying_lands_caves += perlin_noise_3d_ex(coordinates_shifted, 20.0f, 50.0f, 3, 0.8f, 0.5f, world.seed - 349222) - 1.5f;
-    f32 biome_rocks_mountains = perlin_noise_2d_ex(coordinates_2d, 20.0f, 33.0f, 3, 0.9f, 0.7f, world.seed + 357644);
+    biome_rocks_mountains = perlin_noise_2d_ex(coordinates_2d, 20.0f, 33.0f, 3, 0.9f, 0.7f, world.seed + 357644);
 
-    f32 biome_hills = perlin_noise_2d(coordinates_2d, 1.0f, 20.0f, world.seed + 374744);
-    f32 biome_sandstorm = perlin_noise_2d(coordinates_2d, 1.0f, 20.0f, world.seed + 3747440);
-    f32 biome_decaying_lands = perlin_noise_3d_ex(coordinates_shifted, 1.0f, 47.3f, 3, 0.5f, 0.38f, world.seed + 6787888);
+    biome_hills = perlin_noise_2d(coordinates_2d, 1.0f, 20.0f, world.seed + 374744);
+    biome_sandstorm = perlin_noise_2d(coordinates_2d, 1.0f, 20.0f, world.seed + 3747440);
+    biome_decaying_lands = perlin_noise_3d_ex(coordinates_shifted, 1.0f, 47.3f, 3, 0.5f, 0.38f, world.seed + 6787888);
     biome_decaying_lands += perlin_noise_3d(coordinates, 1.0f, 60.0f, world.seed + 374262287);
     biome_decaying_lands += squish;
-    f32 biome_rocks = perlin_noise_2d(coordinates_2d, 0.3f, 20.0f, world.seed + 32742383);
+    biome_rocks = perlin_noise_2d(coordinates_2d, 0.3f, 20.0f, world.seed + 32742383);
 
-    f32 biome_blend = biome_hills + biome_sandstorm + biome_decaying_lands + biome_rocks;
-
+    biome_blend = biome_hills + biome_sandstorm + biome_decaying_lands + biome_rocks;
     biome_blend = fsl_lerp_f32(0.0f, 1.0f, biome_blend);
-    f32 land_final = (biome_hills_mountains + biome_sandstorm_mountains + biome_decaying_lands) * biome_blend;
+    land_final = (biome_hills_mountains + biome_sandstorm_mountains + biome_decaying_lands) * biome_blend;
 
     result.biome = BIOME_HILLS;
     result.block_id = BLOCK_GRASS;

@@ -142,6 +142,8 @@ void input_init(void)
 
 void input_update(player *p)
 {
+    fsl_shader_program *shader_p = fsl_mem_handle_get(fsl_shader_program, shader);
+    u32 shader_err = FSL_ERR_SUCCESS;
     chunk **chunk_tab_p = fsl_mem_handle_get(chunk*, chunk_tab);
     u32 i = 0;
     f32 px = 0.0f;
@@ -402,8 +404,17 @@ void input_update(player *p)
 
     if (fsl_is_key_press(bind_reload_shaders))
     {
-        if (fsl_shader_program_init(fsl_mem_handle_get_i(fsl_shader_program, shader, SHADER_SKYBOX)) == FSL_ERR_SUCCESS)
+        for (i = 0; i < SHADER_COUNT; ++i)
+        {
+            if (fsl_shader_program_init(&shader_p[i]) != FSL_ERR_SUCCESS)
+                shader_err = FSL_ERR_SHADER_COMPILE_FAIL;
+        }
+
+        if (shader_err == FSL_ERR_SUCCESS)
             LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     fsl_logger_stringf("%s\n", "Shaders Reloaded!"));
+        else
+            LOGERROR(shader_err, FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                    MSG_ACTION_ERROR("Reloaded Shaders"));
     }
 }

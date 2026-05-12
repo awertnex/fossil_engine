@@ -408,7 +408,8 @@ void chunking_update(v3i32 player_chunk, v3i32 *player_chunk_delta)
     v3u32 _coordinates = {0};
     v3u32 _mirror_index = {0};
     v3u32 _target_index = {0};
-    u32 mirror_index, target_index = 0;
+    u32 mirror_index = 0;
+    u32 target_index = 0;
     u8 is_on_edge = 0;
     v3u8 _is_on_edge = {0};
     i64 i = 0;
@@ -484,7 +485,8 @@ chunk_tab_shift:
 
     for (i = 0; i < settings.chunk_buf_volume; ++i)
     {
-        if (!chunk_tab_p[i]) continue;
+        if (!chunk_tab_p[i])
+            continue;
 
         _coordinates.x = i % settings.chunk_buf_diameter;
         _coordinates.y = (i / settings.chunk_buf_diameter) % settings.chunk_buf_diameter;
@@ -551,7 +553,8 @@ chunk_tab_shift:
     for (i = (INCREMENT == 1) ? 0 : settings.chunk_buf_volume - 1;
             i < settings.chunk_buf_volume && i >= 0; i += INCREMENT)
     {
-        if (!chunk_tab_p[i]) continue;
+        if (!chunk_tab_p[i])
+            continue;
 
         _coordinates.x = i % settings.chunk_buf_diameter;
         _coordinates.y = (i / settings.chunk_buf_diameter) % settings.chunk_buf_diameter;

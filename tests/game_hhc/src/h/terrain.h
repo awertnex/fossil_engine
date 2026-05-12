@@ -22,7 +22,7 @@ enum biome_index
     BIOME_HILLS,
     BIOME_SANDSTORM,
     BIOME_DECAYING_LANDS,
-    BIOME_COUNT,
+    BIOME_COUNT
 }; /* biome_index */
 
 struct biome

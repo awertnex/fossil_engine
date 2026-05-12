@@ -85,7 +85,7 @@ enum block_flag
      *
      *  63 [00000000 00000000 00000000 00000000] 32;
      *  31 [00000000 10000000 00000000 00000000] 00; */
-    FLAG_BLOCK_RLE =            0x0000000000800000,
+    FLAG_BLOCK_RLE =            0x0000000000800000
 }; /* block_flag */
 
 enum block_mask
@@ -124,7 +124,7 @@ enum block_mask
 
     /*  63 [00000000 00000000 00001111 00000000] 32;
      *  31 [00000000 00000000 00000000 00000000] 00; */
-    MASK_BLOCK_Z =              0x00000f0000000000,
+    MASK_BLOCK_Z =              0x00000f0000000000
 }; /* block_mask */
 
 enum block_shift
@@ -137,7 +137,7 @@ enum block_shift
     SHIFT_BLOCK_COORDINATES =   32,
     SHIFT_BLOCK_X =             32,
     SHIFT_BLOCK_Y =             36,
-    SHIFT_BLOCK_Z =             40,
+    SHIFT_BLOCK_Z =             40
 }; /* block_shift */
 
 enum chunk_flag
@@ -152,7 +152,7 @@ enum chunk_flag
     /*!
      *  @brief chunk marking for @ref chunk_tab shifting logic.
      */
-    FLAG_CHUNK_EDGE =       0x40,
+    FLAG_CHUNK_EDGE =       0x40
 }; /* chunk_flag */
 
 enum chunk_shift_state
@@ -162,7 +162,7 @@ enum chunk_shift_state
     STATE_CHUNK_SHIFT_PY = 3,
     STATE_CHUNK_SHIFT_NY = 4,
     STATE_CHUNK_SHIFT_PZ = 5,
-    STATE_CHUNK_SHIFT_NZ = 6,
+    STATE_CHUNK_SHIFT_NZ = 6
 }; /* chunk_shift_state */
 
 typedef struct chunk
@@ -227,15 +227,6 @@ typedef struct chunk_queue
 #define GET_BLOCK_ID(block)     (block & MASK_BLOCK_ID)
 #define SET_BLOCK_ID(block, id) (block = (block & ~MASK_BLOCK_ID) | id)
 
-extern fsl_off CHUNK_ORDER_OFF;
-extern fsl_off chunk_tab_off;
-extern fsl_off chunk_buf_off;
-extern fsl_off CHUNK_QUEUE_0_OFF;
-extern fsl_off CHUNK_QUEUE_1_OFF;
-extern fsl_off CHUNK_QUEUE_2_OFF;
-extern fsl_off chunk_gizmo_loaded_off;
-extern fsl_off chunk_gizmo_render_off;
-
 /*!
  *  @brief look-up table to reduce redundant checks of untouched regions of `chunk_buf`.
  *
@@ -259,7 +250,7 @@ extern u64 CHUNKS_MAX[CHUNK_BUF_RADIUS_MAX + 1];
 extern fsl_mem_handle chunk_tab;
 
 /*!
- *  @brief player relative @ref chunk_tab access.
+ *  @brief player-relative @ref chunk_tab access.
  *
  *  @remark declared by the user.
  */

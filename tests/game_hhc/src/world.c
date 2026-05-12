@@ -207,6 +207,11 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
 
 void world_update(player *p)
 {
+    /* player camera shouldn't move when a menu is open,
+     * so we pass this to the camera function.
+     */
+    b8 use_mouse = !state_menu_depth && !core.flag.super_debug && !(p->flag & FLAG_PLAYER_DEAD);
+
     world.tick = world.tick_start + (u64)((f64)render->time * FSL_NSEC2SEC * WORLD_TICK_SPEED);
     world.days = world.tick / SET_DAY_TICKS_MAX;
 
@@ -215,7 +220,6 @@ void world_update(player *p)
     else disable_cursor;
 
     player_update(p, 1.0 - exp(-1.0 * (f64)render->time_delta * FSL_NSEC2SEC));
-    b8 use_mouse = !state_menu_depth && !core.flag.super_debug && !(p->flag & FLAG_PLAYER_DEAD);
     player_camera_movement_update(p, render->mouse_delta, use_mouse);
     player_target_update(p);
 

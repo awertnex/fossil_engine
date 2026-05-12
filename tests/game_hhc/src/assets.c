@@ -83,53 +83,115 @@ u32 assets_init(void)
 
     /* ---- shaders --------------------------------------------------------- */
 
-    shader_p = fsl_mem_handle_get(fsl_shader_program, shader);
+    shader_p = fsl_mem_handle_get_i(fsl_shader_program, shader, SHADER_DEFAULT);
     if (
-            fsl_asset_set_metadata(&shader_p[SHADER_DEFAULT].asset, FSL_ASSET_SHADER_PROGRAM, "Default", "default", NULL, GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_DEFAULT].vertex.asset, FSL_ASSET_SHADER, "Default", "default", "default.vert", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_DEFAULT].geometry.asset, FSL_ASSET_SHADER, NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_DEFAULT].fragment.asset, FSL_ASSET_SHADER, "Default", "default", "default.frag", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+            fsl_asset_set_metadata(&shader_p->asset, FSL_ASSET_SHADER_PROGRAM,
+                "Default", "default", NULL, GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_set_metadata(&shader_p[SHADER_SKYBOX].asset, FSL_ASSET_SHADER_PROGRAM, "Skybox", "skybox", NULL, GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_SKYBOX].vertex.asset, FSL_ASSET_SHADER, "Skybox", "skybox", "skybox.vert", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_SKYBOX].geometry.asset, FSL_ASSET_SHADER, NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_SKYBOX].fragment.asset, FSL_ASSET_SHADER, "Skybox", "skybox", "skybox.frag", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+            fsl_asset_set_metadata(&shader_p->vertex.asset, FSL_ASSET_SHADER,
+                "Default", "default", "default.vert", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_set_metadata(&shader_p[SHADER_GIZMO].asset, FSL_ASSET_SHADER_PROGRAM, "Gizmo", "gizmo", NULL, GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_GIZMO].vertex.asset, FSL_ASSET_SHADER, "Gizmo", "gizmo", "gizmo.vert", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_GIZMO].geometry.asset, FSL_ASSET_SHADER, NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_GIZMO].fragment.asset, FSL_ASSET_SHADER, "Gizmo", "gizmo", "gizmo.frag", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+            fsl_asset_set_metadata(&shader_p->geometry.asset, FSL_ASSET_SHADER,
+                NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
 
-            fsl_asset_set_metadata(&shader_p[SHADER_GIZMO_CHUNK].asset, FSL_ASSET_SHADER_PROGRAM, "Gizmo Chunk", "gizmo_chunk", NULL, GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_GIZMO_CHUNK].vertex.asset, FSL_ASSET_SHADER, "Gizmo Chunk", "gizmo_chunk", "gizmo_chunk.vert", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_GIZMO_CHUNK].geometry.asset, FSL_ASSET_SHADER, "Gizmo Chunk", "gizmo_chunk", "gizmo_chunk.geom", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_GIZMO_CHUNK].fragment.asset, FSL_ASSET_SHADER, "Gizmo Chunk", "gizmo_chunk", "gizmo_chunk.frag", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[SHADER_POST_PROCESSING].asset, FSL_ASSET_SHADER_PROGRAM, "Post Processing", "post_processing", NULL, GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_POST_PROCESSING].vertex.asset, FSL_ASSET_SHADER, "Post Processing", "post_processing", "post_processing.vert", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_POST_PROCESSING].geometry.asset, FSL_ASSET_SHADER, NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_POST_PROCESSING].fragment.asset, FSL_ASSET_SHADER, "Post Processing", "post_processing", "post_processing.frag", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[SHADER_VOXEL].asset, FSL_ASSET_SHADER_PROGRAM, "Voxel", "voxel", NULL, GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_VOXEL].vertex.asset, FSL_ASSET_SHADER, "Voxel", "voxel", "voxel.vert", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_VOXEL].geometry.asset, FSL_ASSET_SHADER, "Voxel", "voxel", "voxel.geom", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_VOXEL].fragment.asset, FSL_ASSET_SHADER, "Voxel", "voxel", "voxel.frag", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[SHADER_BOUNDING_BOX].asset, FSL_ASSET_SHADER_PROGRAM, "Bounding Box", "bounding_box", NULL, GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_BOUNDING_BOX].vertex.asset, FSL_ASSET_SHADER, "Bounding Box", "bounding_box", "bounding_box.vert", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_BOUNDING_BOX].geometry.asset, FSL_ASSET_SHADER, NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&shader_p[SHADER_BOUNDING_BOX].fragment.asset, FSL_ASSET_SHADER, "Bounding Box", "bounding_box", "bounding_box.frag", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
-            goto cleanup;
-
-    if (
-            fsl_shader_program_init(&shader_p[SHADER_DEFAULT]) != FSL_ERR_SUCCESS ||
-            fsl_shader_program_init(&shader_p[SHADER_GIZMO]) != FSL_ERR_SUCCESS ||
-            fsl_shader_program_init(&shader_p[SHADER_GIZMO_CHUNK]) != FSL_ERR_SUCCESS ||
-            fsl_shader_program_init(&shader_p[SHADER_SKYBOX]) != FSL_ERR_SUCCESS ||
-            fsl_shader_program_init(&shader_p[SHADER_POST_PROCESSING]) != FSL_ERR_SUCCESS ||
-            fsl_shader_program_init(&shader_p[SHADER_VOXEL]) != FSL_ERR_SUCCESS ||
-            fsl_shader_program_init(&shader_p[SHADER_BOUNDING_BOX]) != FSL_ERR_SUCCESS)
+            fsl_asset_set_metadata(&shader_p->fragment.asset, FSL_ASSET_SHADER,
+                "Default", "default", "default.frag", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
         goto cleanup;
+
+    shader_p = fsl_mem_handle_get_i(fsl_shader_program, shader, SHADER_SKYBOX);
+    if (
+            fsl_asset_set_metadata(&shader_p->asset, FSL_ASSET_SHADER_PROGRAM,
+                "Skybox", "skybox", NULL, GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p->vertex.asset, FSL_ASSET_SHADER,
+                "Skybox", "skybox", "skybox.vert", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p->geometry.asset, FSL_ASSET_SHADER,
+                NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p->fragment.asset, FSL_ASSET_SHADER,
+                "Skybox", "skybox", "skybox.frag", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    shader_p = fsl_mem_handle_get_i(fsl_shader_program, shader, SHADER_GIZMO);
+    if (
+            fsl_asset_set_metadata(&shader_p->asset, FSL_ASSET_SHADER_PROGRAM,
+                "Gizmo", "gizmo", NULL, GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p->vertex.asset, FSL_ASSET_SHADER,
+                "Gizmo", "gizmo", "gizmo.vert", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p->geometry.asset, FSL_ASSET_SHADER,
+                NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p->fragment.asset, FSL_ASSET_SHADER,
+                "Gizmo", "gizmo", "gizmo.frag", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    shader_p = fsl_mem_handle_get_i(fsl_shader_program, shader, SHADER_GIZMO_CHUNK);
+    if (
+            fsl_asset_set_metadata(&shader_p->asset, FSL_ASSET_SHADER_PROGRAM,
+                "Gizmo Chunk", "gizmo_chunk", NULL, GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p->vertex.asset, FSL_ASSET_SHADER,
+                "Gizmo Chunk", "gizmo_chunk", "gizmo_chunk.vert", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p->geometry.asset, FSL_ASSET_SHADER,
+                "Gizmo Chunk", "gizmo_chunk", "gizmo_chunk.geom", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p->fragment.asset, FSL_ASSET_SHADER,
+                "Gizmo Chunk", "gizmo_chunk", "gizmo_chunk.frag", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    shader_p = fsl_mem_handle_get_i(fsl_shader_program, shader, SHADER_POST_PROCESSING);
+    if (
+            fsl_asset_set_metadata(&shader_p->asset, FSL_ASSET_SHADER_PROGRAM,
+                "Post Processing", "post_processing", NULL, GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p->vertex.asset, FSL_ASSET_SHADER,
+                "Post Processing", "post_processing", "post_processing.vert", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p->geometry.asset, FSL_ASSET_SHADER,
+                NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p->fragment.asset, FSL_ASSET_SHADER,
+                "Post Processing", "post_processing", "post_processing.frag", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    shader_p = fsl_mem_handle_get_i(fsl_shader_program, shader, SHADER_VOXEL);
+    if (
+            fsl_asset_set_metadata(&shader_p->asset, FSL_ASSET_SHADER_PROGRAM,
+                "Voxel", "voxel", NULL, GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p->vertex.asset, FSL_ASSET_SHADER,
+                "Voxel", "voxel", "voxel.vert", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p->geometry.asset, FSL_ASSET_SHADER,
+                "Voxel", "voxel", "voxel.geom", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p->fragment.asset, FSL_ASSET_SHADER,
+                "Voxel", "voxel", "voxel.frag", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    shader_p = fsl_mem_handle_get_i(fsl_shader_program, shader, SHADER_BOUNDING_BOX);
+    if (
+            fsl_asset_set_metadata(&shader_p->asset, FSL_ASSET_SHADER_PROGRAM,
+                "Bounding Box", "bounding_box", NULL, GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p->vertex.asset, FSL_ASSET_SHADER,
+                "Bounding Box", "bounding_box", "bounding_box.vert", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p->geometry.asset, FSL_ASSET_SHADER,
+                NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p->fragment.asset, FSL_ASSET_SHADER,
+                "Bounding Box", "bounding_box", "bounding_box.frag", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    shader_p = fsl_mem_handle_get(fsl_shader_program, shader);
+    for (i = 0; i < SHADER_COUNT; ++i)
+        if (fsl_shader_program_init(&shader_p[i]) != FSL_ERR_SUCCESS)
+            goto cleanup;
 
     /* ---- textures -------------------------------------------------------- */
 

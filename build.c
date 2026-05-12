@@ -96,16 +96,16 @@ int main(int argc, char **argv)
 
     cmd_push(&cmd, COMPILER);
 
-    if (!find_token("release", argc, argv))
+    if (find_token("release", argc, argv))
     {
-        LOGWARNING(0, FALSE, logger_stringf("%s\n", "Building in Debug Mode.."));
-        for (i = 0; i < arr_len(str_cflags_debug); ++i)
-            cmd_push(&cmd, str_cflags_debug[i]);
+        LOGINFO(FALSE, "Building For Release..\n");
+        cmd_push(&cmd, "-DFOSSIL_RELEASE_BUILD");
     }
     else
     {
-        LOGINFO(FALSE, logger_stringf("%s\n", "Building For Release.."));
-        cmd_push(&cmd, "-DFOSSIL_RELEASE_BUILD");
+        LOGWARNING(0, FALSE, "Building in Debug Mode..\n");
+        for (i = 0; i < arr_len(str_cflags_debug); ++i)
+            cmd_push(&cmd, str_cflags_debug[i]);
     }
 
     cmd_push(&cmd, stringf("-ffile-prefix-map=%s=", DIR_BUILDTOOL_BIN_ROOT));
@@ -128,6 +128,7 @@ int main(int argc, char **argv)
 
     if (
             copy_dir(DIR_DEPS,          DIR_DST, FALSE) != ERR_SUCCESS ||
+            copy_dir(DIR_SRC "common/", DIR_DST DIR_DEPS DIR_DST, FALSE) != ERR_SUCCESS ||
             copy_dir(DIR_SRC "h/",      DIR_DST DIR_DEPS DIR_DST, TRUE) != ERR_SUCCESS ||
             copy_file("LICENSE",        DIR_DST DIR_DEPS DIR_DST) != ERR_SUCCESS ||
 

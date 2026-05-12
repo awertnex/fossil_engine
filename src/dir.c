@@ -458,6 +458,7 @@ u32 fsl_copy_file(const fsl_fs_path *src, const fsl_fs_path *dst)
     return fsl_err;
 }
 
+/* TODO: make function `fsl_copy_dir()` copy empty directories. */
 u32 fsl_copy_dir(const fsl_fs_path *src, const fsl_fs_path *dst, b8 contents_only)
 {
     fsl_buf dir_contents = {0};

@@ -81,7 +81,7 @@ enum block_id
 
 enum block_state
 {
-    BLOCK_STATE_SOLID = 1,
+    BLOCK_STATE_SOLID = 1
 }; /* block_state */
 
 typedef struct block
