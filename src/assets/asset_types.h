@@ -27,7 +27,6 @@
 #include "../memory/memory_types.h"
 
 #include "../external/glad/glad.h"
-#include "../external/stb_truetype.h"
 
 /*!
  *  @brief an asset's display name (optional).
@@ -185,10 +184,17 @@ struct fsl_font
     i32 descent;            /* glyphs lowest points' deviation from baseline */
     i32 line_gap;
     i32 line_height;
+
+    /*
+     *  divisor for converting 'font units' to 'pixel height'.
+     */
+    i32 fheight;
+
     f32 size;               /* global font size, for text uniformity */
     v2i32 scale;            /* biggest glyph bounding box size, in font units */
-    u64 buf_len;            /* size allocated for @ref fsl_font.info.data, in bytes */
-    stbtt_fontinfo info;    /* used by @ref stbtt_InitFont() */
+    u8* buf;                /* font file contents (used in runtime) */
+    u64 buf_len;            /* size allocated for @ref fsl_font.buf, in bytes */
+    fsl_mem_handle info;    /* used by @ref stbtt_InitFont() */
     fsl_glyph glyph[FSL_GLYPH_MAX];
 }; /* fsl_font */
 

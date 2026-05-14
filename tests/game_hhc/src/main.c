@@ -1,4 +1,4 @@
-#include "src/fossil_engine.h"
+#include "deps/fossil/fossil_engine.h"
 
 #include "h/main.h"
 #include "h/assets.h"
@@ -63,7 +63,7 @@ static void draw_everything(void);
 
 static void callback_framebuffer_size(i32 size_x, i32 size_y)
 {
-    fsl_fbo *fbo_p = fsl_mem_handle_get(fsl_fbo, fbo);
+    fsl_fbo *fbo_p = fsl_mem_handle_get(fbo);
 
     _player.camera.ratio = (f32)size_x / (f32)size_y;
     _player.camera_hud.ratio = (f32)size_x / (f32)size_y;
@@ -185,7 +185,7 @@ void settings_update(void)
 
 static void bind_shader_uniforms(void)
 {
-    fsl_shader_program *shader_p = fsl_mem_handle_get(fsl_shader_program, shader);
+    fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
     uniform.defaults.offset =
         glGetUniformLocation(shader_p[SHADER_DEFAULT].asset.id, "offset");
     uniform.defaults.scale =
@@ -298,7 +298,7 @@ static void bind_shader_uniforms(void)
 
 static void generate_standard_meshes(void)
 {
-    fsl_mesh *mesh_p = fsl_mem_handle_get(fsl_mesh, mesh);
+    fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
     u32 i = 0;
     const u32 VBO_LEN_SKYBOX =  120;
     const u32 EBO_LEN_SKYBOX =  36;
@@ -493,13 +493,14 @@ cleanup:
 
 static void draw_everything(void)
 {
-    fsl_fbo *fbo_p = fsl_mem_handle_get(fsl_fbo, fbo);
-    fsl_texture *texture_p = fsl_mem_handle_get(fsl_texture, texture);
-    fsl_mesh *mesh_p = fsl_mem_handle_get(fsl_mesh, mesh);
-    fsl_shader_program *shader_p = fsl_mem_handle_get(fsl_shader_program, shader);
-    fsl_shader_program *fsl_shader_p = fsl_mem_handle_get(fsl_shader_program, fsl_shader_buf);
-    chunk **chunk_tab_p = fsl_mem_handle_get(chunk*, chunk_tab);
-    chunk ***CHUNK_ORDER_p = fsl_mem_handle_get(chunk**, CHUNK_ORDER);
+    fsl_fbo *fbo_p = fsl_mem_handle_get(fbo);
+    fsl_texture *texture_p = fsl_mem_handle_get(texture);
+    fsl_texture *fsl_texture_p = fsl_mem_handle_get(fsl_texture_buf);
+    fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
+    fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
+    fsl_shader_program *fsl_shader_p = fsl_mem_handle_get(fsl_shader_buf);
+    chunk **chunk_tab_p = fsl_mem_handle_get(chunk_tab);
+    chunk ***CHUNK_ORDER_p = fsl_mem_handle_get(CHUNK_ORDER);
 
     f32 delay_in_hours = 6.0f;
     f32 sun_time = skybox_data.time * FSL_PI;
@@ -1127,13 +1128,13 @@ static void draw_everything(void)
         fsl_log_entry *log_entry = NULL;
 
         fsl_ui_start(TRUE, FALSE);
-        fsl_ui_draw_nine_slice(fsl_mem_handle_get_i(fsl_texture, fsl_texture_buf, FSL_TEXTURE_INDEX_PANEL_INACTIVE),
+        fsl_ui_draw_nine_slice(&fsl_texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE],
                 10, render->size.y - logger_panel_height - 30,
                 render->size.x - 20, logger_panel_height + 20, 8, 0xffffff5f);
 
         fsl_text_start(font[FONT_MONO_BOLD], settings.font_size, 0, FALSE);
 
-        log_entry = fsl_mem_handle_get(fsl_log_entry, logger_core.buf);
+        log_entry = fsl_mem_handle_get(logger_core.buf);
         for (i = 20; i > 0; --i)
         {
             index = fsl_mod_i32(logger_core.cursor - i - scrool, FSL_LOGGER_HISTORY_MAX);

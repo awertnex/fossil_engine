@@ -1,6 +1,6 @@
-#include "src/memory/memory.h"
+#include "deps/fossil/memory/memory.h"
 
-#include "src/h/math.h"
+#include "deps/fossil/h/math.h"
 
 #include "h/chunking.h"
 #include "h/diagnostics.h"

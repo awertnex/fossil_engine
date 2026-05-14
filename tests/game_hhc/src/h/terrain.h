@@ -1,7 +1,7 @@
 #ifndef HHC_TERRAIN_H
 #define HHC_TERRAIN_H
 
-#include "src/common/types.h"
+#include "deps/fossil/common/types.h"
 
 #include "main.h"
 #include "assets.h"

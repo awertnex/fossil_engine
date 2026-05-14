@@ -15,7 +15,7 @@
  */
 
 /*!
- *  @file core.c
+ *  @file engine.c
  *
  *  @brief engine init, running, close, windowing, opengl loading and default assets.
  */
@@ -28,20 +28,20 @@
 #include "../common/session.h"
 #include "../common/types.h"
 #include "../assets/assets.h"
+#include "../input/input.h"
 #include "../logger/logger.h"
 #include "../logger/logger_messages_internal.h"
 #include "../memory/memory.h"
 #include "../shaders/shader_types.h"
 
 #include "../h/dir.h"
-#include "../h/input.h"
 #include "../h/math.h"
 #include "../h/process.h"
 #include "../h/time.h"
 #include "../h/ui.h"
 
-#include "core.h"
-#include "engine_default_assets.h"
+#include "engine.h"
+#include "engine_assets.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -55,10 +55,53 @@
 
 /* ---- section: declarations ----------------------------------------------- */
 
+struct /* fsl_core */
+{
+    struct /* flag */
+    {
+        b8 active;
+        b8 glfw_initialized;
+        b8 request_screenshot;
+        b8 request_engine_close;
+    } flag;
+
+    struct /* ubo */
+    {
+        GLuint ndc_scale;
+    } ubo;
+
+    /*!
+     *  @brief global fbo for rendering mostly ui elements.
+     *
+     *  @remark initialized in @ref fsl_engine_init().
+     */
+    fsl_fbo fbo;
+
+    /*!
+     *  @brief global fbo for rendering mostly ui elements, multisampled.
+     *
+     *  @remark initialized in @ref fsl_engine_init().
+     */
+    fsl_fbo fbo_msaa;
+
+    /*!
+     *  @brief function to bind a final framebuffer to draw to based on anti-aliasing setting.
+     *
+     *  @remark initialized in @ref fsl_engine_init().
+     */
+    void (*fbo_bind)(void);
+
+    /*!
+     *  @brief function to draw onto a final framebuffer based on anti-aliasing setting.
+     *
+     * @remark initialized in @ref fsl_engine_init().
+     */
+    void (*fbo_blit)(GLuint fbo);
+} fsl_core;
+
 u64 fsl_init_time = 0;
 str *FSL_DIR_PROC_ROOT = NULL;
 u32 fsl_err = FSL_ERR_SUCCESS;
-fsl_core fsl_core_internal = {0};
 fsl_render render_internal = {0};
 
 /* ---- section: signatures ------------------------------------------------- */
@@ -105,7 +148,7 @@ u32 fsl_engine_init(int argc, char **argv, const str *title,
 {
     b8 is_release = flags & FSL_FLAG_RELEASE_BUILD;
 
-    fsl_core_internal.flag.active = TRUE;
+    fsl_core.flag.active = TRUE;
 
     if (!fsl_init_time)
     {
@@ -153,24 +196,35 @@ u32 fsl_engine_init(int argc, char **argv, const str *title,
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_MULTISAMPLE);
 
+    /* ---- engine framebuffers --------------------------------------------- */
+
+    if (fsl_fbo_init(&fsl_core.fbo, render_internal.size.x, render_internal.size.y,
+                &fsl_mesh_unit_quad, FALSE, 4) != FSL_ERR_SUCCESS)
+        goto cleanup;
+    if (fsl_fbo_init(&fsl_core.fbo_msaa, render_internal.size.x, render_internal.size.y,
+                NULL, TRUE, 4) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
     if (flags & FSL_FLAG_MULTISAMPLE)
     {
-        fsl_core_internal.fbo_bind = &fbo_bind_msaa_internal;
-        fsl_core_internal.fbo_blit = &fbo_blit_msaa_internal;
+        fsl_core.fbo_bind = &fbo_bind_msaa_internal;
+        fsl_core.fbo_blit = &fbo_blit_msaa_internal;
     }
     else
     {
-        fsl_core_internal.fbo_bind = &fbo_bind_internal;
-        fsl_core_internal.fbo_blit = &fbo_blit_internal;
+        fsl_core.fbo_bind = &fbo_bind_internal;
+        fsl_core.fbo_blit = &fbo_blit_internal;
     }
 
-    glGenBuffers(1, &fsl_core_internal.ubo.ndc_scale);
-    glBindBuffer(GL_UNIFORM_BUFFER, fsl_core_internal.ubo.ndc_scale);
+    /* ---- engine uniform buffers ------------------------------------------ */
+
+    glGenBuffers(1, &fsl_core.ubo.ndc_scale);
+    glBindBuffer(GL_UNIFORM_BUFFER, fsl_core.ubo.ndc_scale);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(v2f32), &render_internal.ndc_scale, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     glBindBufferBase(GL_UNIFORM_BUFFER, FSL_SHADER_BUFFER_BINDING_UBO_NDC_SCALE,
-            fsl_core_internal.ubo.ndc_scale);
+            fsl_core.ubo.ndc_scale);
 
     if (fsl_ui_init() != FSL_ERR_SUCCESS)
         goto cleanup;
@@ -187,8 +241,8 @@ cleanup:
 b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32))
 {
     static u64 time_last = 0;
-    if (fsl_core_internal.flag.active == FALSE ||
-            fsl_core_internal.flag.request_engine_close == TRUE ||
+    if (fsl_core.flag.active == FALSE ||
+            fsl_core.flag.request_engine_close == TRUE ||
             glfwWindowShouldClose(render_internal.window))
         return FALSE;
 
@@ -227,7 +281,7 @@ u32 fsl_update_render_settings(void (*callback_framebuffer_size)(i32, i32))
         render_internal.ndc_scale.x = 2.0f / size.x;
         render_internal.ndc_scale.y = 2.0f / size.y;
 
-        glBindBuffer(GL_UNIFORM_BUFFER, fsl_core_internal.ubo.ndc_scale);
+        glBindBuffer(GL_UNIFORM_BUFFER, fsl_core.ubo.ndc_scale);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(v2f32), &render_internal.ndc_scale);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -235,8 +289,8 @@ u32 fsl_update_render_settings(void (*callback_framebuffer_size)(i32, i32))
                     "fsl_update_render_settings().render_internal.screen_buf") != FSL_ERR_SUCCESS)
             return fsl_err;
 
-        fsl_fbo_realloc(&fsl_core_internal.fbo, render_internal.size.x, render_internal.size.y, FALSE, 4);
-        fsl_fbo_realloc(&fsl_core_internal.fbo_msaa,render_internal.size.x, render_internal.size.y, TRUE, 4);
+        fsl_fbo_realloc(&fsl_core.fbo, render_internal.size.x, render_internal.size.y, FALSE, 4);
+        fsl_fbo_realloc(&fsl_core.fbo_msaa,render_internal.size.x, render_internal.size.y, TRUE, 4);
 
         if (callback_framebuffer_size)
             callback_framebuffer_size(size.x, size.y);
@@ -248,7 +302,7 @@ u32 fsl_update_render_settings(void (*callback_framebuffer_size)(i32, i32))
 
 void fsl_request_engine_close(void)
 {
-    fsl_core_internal.flag.request_engine_close = TRUE;
+    fsl_core.flag.request_engine_close = TRUE;
 
     if (render_internal.window)
         glfwSetWindowShouldClose(render_internal.window, GL_TRUE);
@@ -258,20 +312,23 @@ void fsl_engine_close(void)
 {
     u32 fsl_err_temp = fsl_err;
 
-    if (fsl_core_internal.flag.active == FALSE)
+    if (fsl_core.flag.active == FALSE)
         return;
 
-    fsl_core_internal.flag.active = FALSE;
+    fsl_core.flag.active = FALSE;
 
     fsl_ui_free();
     fsl_assets_free();
 
+    fsl_fbo_free(&fsl_core.fbo);
+    fsl_fbo_free(&fsl_core.fbo_msaa);
+
     if (render_internal.window)
         glfwDestroyWindow(render_internal.window);
 
-    if (fsl_core_internal.flag.glfw_initialized)
+    if (fsl_core.flag.glfw_initialized)
     {
-        fsl_core_internal.flag.glfw_initialized = 0;
+        fsl_core.flag.glfw_initialized = 0;
         glfwTerminate();
     }
 
@@ -335,7 +392,7 @@ u32 fsl_glfw_init(b8 multisample)
         return fsl_err;
     }
 
-    fsl_core_internal.flag.glfw_initialized = 1;
+    fsl_core.flag.glfw_initialized = 1;
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -466,14 +523,14 @@ u32 fsl_change_render(fsl_render *r)
 
 void fsl_request_screenshot(void)
 {
-    fsl_core_internal.flag.request_screenshot = TRUE;
+    fsl_core.flag.request_screenshot = TRUE;
 }
 
 u32 fsl_process_screenshot_request(const str *dir_screenshots, const str *special_text)
 {
-    if (fsl_core_internal.flag.request_screenshot)
+    if (fsl_core.flag.request_screenshot)
     {
-        fsl_core_internal.flag.request_screenshot = FALSE;
+        fsl_core.flag.request_screenshot = FALSE;
         return take_screenshot_internal(dir_screenshots, special_text);
     }
     return FSL_ERR_SUCCESS;
@@ -534,41 +591,46 @@ static u32 take_screenshot_internal(const str *dir_screenshots, const str *speci
     return fsl_err;
 }
 
+void fsl_fbo_bind(void)
+{
+    fsl_core.fbo_bind();
+}
+
 static void fbo_bind_internal(void)
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, fsl_core_internal.fbo.fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fsl_core.fbo.fbo);
 }
 
 static void fbo_bind_msaa_internal(void)
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, fsl_core_internal.fbo_msaa.fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fsl_core.fbo_msaa.fbo);
 }
 
 void fsl_fbo_blit(GLuint fbo)
 {
-    fsl_core_internal.fbo_blit(fbo);
+    fsl_core.fbo_blit(fbo);
 }
 
 static void fbo_blit_internal(GLuint fbo)
 {
-    fsl_shader_program *shader_unit_quad =
-        fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UNIT_QUAD);
+    fsl_shader_program *shader_unit_quad = fsl_mem_handle_get(fsl_shader_buf);
+    shader_unit_quad = &shader_unit_quad[FSL_SHADER_INDEX_UNIT_QUAD];
 
     glUseProgram(shader_unit_quad->asset.id);
     glBindVertexArray(fsl_mesh_unit_quad.vao);
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glBindTexture(GL_TEXTURE_2D, fsl_core_internal.fbo.color_buf);
+    glBindTexture(GL_TEXTURE_2D, fsl_core.fbo.color_buf);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
 static void fbo_blit_msaa_internal(GLuint fbo)
 {
-    fsl_shader_program *shader_unit_quad =
-        fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UNIT_QUAD);
+    fsl_shader_program *shader_unit_quad = fsl_mem_handle_get(fsl_shader_buf);
+    shader_unit_quad = &shader_unit_quad[FSL_SHADER_INDEX_UNIT_QUAD];
 
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, fsl_core_internal.fbo_msaa.fbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fsl_core_internal.fbo.fbo);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fsl_core.fbo_msaa.fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fsl_core.fbo.fbo);
     glBlitFramebuffer(0, 0, render_internal.size.x, render_internal.size.y, 0, 0,
             render_internal.size.x, render_internal.size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
@@ -576,7 +638,7 @@ static void fbo_blit_msaa_internal(GLuint fbo)
     glBindVertexArray(fsl_mesh_unit_quad.vao);
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glBindTexture(GL_TEXTURE_2D, fsl_core_internal.fbo.color_buf);
+    glBindTexture(GL_TEXTURE_2D, fsl_core.fbo.color_buf);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 

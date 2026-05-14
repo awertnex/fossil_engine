@@ -28,13 +28,19 @@
 
 #define FSL_MOUSE_BUTTONS_MAX 8
 #define FSL_KEYBOARD_KEYS_MAX 120
-#define FSL_DOUBLE_PRESS_TIME_INTERVAL 0.5f
+#define FSL_DOUBLE_PRESS_TIME_INTERVAL 0.5
 
-typedef struct key_bind fsl_key_bind;
-typedef enum fsl_keyboard_key fsl_keyboard_key;
-typedef enum fsl_mod_key fsl_mod_key;
+/*!
+ *  @brief input layer, only key binds attached to a specific input context are active when the context is.
+ *
+ *  @remark default input context is 0.
+ *  @remark key binds not attached to an input context will always work (will be attached to 0).
+ */
+typedef i32 fsl_input_context;
 
-enum fsl_keyboard_key
+typedef struct fsl_key_bind fsl_key_bind;
+
+typedef enum fsl_keyboard_key
 {
     FSL_KEY_SPACE,
     FSL_KEY_APOSTROPHE,
@@ -157,33 +163,57 @@ enum fsl_keyboard_key
     FSL_KEY_RIGHT_ALT,
     FSL_KEY_RIGHT_SUPER,
     FSL_KEY_MENU
-}; /* fsl_keyboard_key */
+} fsl_keyboard_key;
 
-enum fsl_mod_key
+typedef enum fsl_mod_key
 {
     FSL_SHIFT_LEFT = 1,
-    FSL_SHIFT_RIGHT,
+    FSL_SHIFT_RIGHT = 2,
     FSL_CONTROL_LEFT = 1,
-    FSL_CONTROL_RIGHT,
+    FSL_CONTROL_RIGHT = 2,
     FSL_ALT_LEFT = 1,
-    FSL_ALT_RIGHT,
+    FSL_ALT_RIGHT = 2,
     FSL_SUPER_LEFT = 1,
-    FSL_SUPER_RIGHT
-}; /* fsl_mod_key */
+    FSL_SUPER_RIGHT = 2
+} fsl_mod_key;
 
-struct key_bind
+struct fsl_key_bind
 {
     u32 key;
     u32 mod; /* enum @ref fsl_mod_key_flag (internal enum) */
-}; /* key_bind */
+
+    /*!
+     *  @brief context to attach key bind to (listening for key bind is only active when the current input context is active).
+     */
+    fsl_input_context context;
+
+}; /* fsl_key_bind */
+
+/*!
+ *  @brief set current input context to `context`.
+ */
+FSLAPI void fsl_input_context_set(fsl_input_context context);
 
 /*!
  *  @brief setup a key binding (key combination).
  *
  *  @param key a keyboard key or mouse button.
+ *  @param shift left or right shift.
+ *  @param ctrl left or right ctrl.
+ *  @param alt left or right alt.
+ *  @param super left or right super.
+ *  @param context input context to attach key bind to.
+ *
+ *  @return `fsl_key_bind{0}` on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI fsl_key_bind fsl_key_bind_init(fsl_keyboard_key key,
-        fsl_mod_key shift, fsl_mod_key ctrl, fsl_mod_key alt, fsl_mod_key super);
+        fsl_mod_key shift, fsl_mod_key ctrl, fsl_mod_key alt, fsl_mod_key super,
+        fsl_input_context context);
+
+/*!
+ *  @brief attach a key bind to an input context.
+ */
+FSLAPI void fsl_key_bind_attach(fsl_key_bind *bind, fsl_input_context context);
 
 FSLAPI b8 fsl_is_mouse_press(fsl_key_bind button);
 FSLAPI b8 fsl_is_mouse_hold(fsl_key_bind button);
@@ -194,20 +224,16 @@ FSLAPI b8 fsl_is_key_hold(fsl_key_bind key);
 FSLAPI b8 fsl_is_key_release(fsl_key_bind key);
 
 /*!
- *  @internal
- *
  *  @brief update mouse movement.
  *
  *  - update parameters at @ref fsl_render.mouse_pos and @ref fsl_render.mouse_delta
- *    of the currently bound @ref fsl_render.
+ *    of the currently bound `fsl_render`.
  *
  *  @remark called automatically from @ref fsl_engine_running().
  */
 void fsl_update_mouse_movement(void);
 
 /*!
- *  @internal
- *
  *  @brief update internal mouse and key states: press, double-press, hold and release.
  *
  *  @remark called automatically from @ref fsl_engine_running().

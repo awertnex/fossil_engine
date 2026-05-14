@@ -12,16 +12,16 @@
     - modifications: remove `__cplusplus` support guard, just to keep it completely C
 - [stb_truetype.h v1.26](https://github.com/nothings/stb/blob/master/stb_truetype.h): loading font data (modified)
     - modifications: change all // comments to /* */ block comments to support C89 standard
-- [dejavu-fonts v2.37](https://github.com/dejavu-fonts/dejavu-fonts): font of choice (modified)
+- [stb_image.h v2.30](https://github.com/nothings/stb/blob/master/stb_image.h): loading image data (modified)
+    - modifications: change all // comments to /* */ block comments to support C89 standard
+- [stb_image_write.h v1.26](https://github.com/nothings/stb/blob/master/stb_image_write.h): writing images (modified, unused)
+    - modifications: change all // comments to /* */ block comments to support C89 standard
+- [dejavu-fonts v2.37](https://github.com/dejavu-fonts/dejavu-fonts): fonts of choice (modified)
     - modifications:
         - (subset: U+0000-00ff): dejavu_sans_ansi.ttf
         - (subset: U+0000-00ff): dejavu_sans_bold_ansi.ttf
         - (subset: U+0000-00ff): dejavu_sans_mono_ansi.ttf
         - (subset: U+0000-00ff): dejavu_sans_mono_bold_ansi.ttf
-- [stb_image.h v2.30](https://github.com/nothings/stb/blob/master/stb_image.h): loading image data (modified)
-    - modifications: change all // comments to /* */ block comments to support C89 standard
-- [stb_image_write.h v1.26](https://github.com/nothings/stb/blob/master/stb_image_write.h): writing images (modified, unused)
-    - modifications: change all // comments to /* */ block comments to support C89 standard
 
 windows-specific:
 - [w64devkit v2.4.0](https://github.com/skeeto/w64devkit): not necessary for runtime, just for building from source
@@ -34,8 +34,8 @@ windows-specific:
 >- for release build, run `./build release`.
 >- if build successful, you can copy/move the files in `fossil/` into your project's root.
 >- files:
->   - `deps/`: required dependencies for development
->   - `fossil/`: required dependencies for runtime/deployment
+>   - `deps/`: required headers for development
+>   - `fossil/`: required stuff for runtime/deployment
 >   - `lib/`: required libraries for linking
 
 **linux x86_64:**

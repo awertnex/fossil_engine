@@ -1,11 +1,11 @@
-#include "src/common/session.h"
-#include "src/common/limits.h"
-#include "src/logger/logger.h"
+#include "deps/fossil/common/session.h"
+#include "deps/fossil/common/limits.h"
+#include "deps/fossil/logger/logger.h"
 
-#include "src/h/dir.h"
-#include "src/h/math.h"
-#include "src/h/string.h"
-#include "src/h/time.h"
+#include "deps/fossil/h/dir.h"
+#include "deps/fossil/h/math.h"
+#include "deps/fossil/h/string.h"
+#include "deps/fossil/h/time.h"
 
 #include "h/chunking.h"
 #include "h/common.h"

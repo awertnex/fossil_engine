@@ -555,29 +555,8 @@ u32 fsl_mem_arena_pop_internal(fsl_mem_handle *handle,
     fsl_off freelist_pos = 0;
     u64 freelist_cap = 0;
 
-    if (!handle)
-    {
-        LOGERROREX(FSL_ERR_POINTER_NULL, 0,
-                src_file, src_line,
-                MSG_MEM_ARENA_POP_REASON_FAIL(name, NULL, "Pointer `NULL`"));
-        return fsl_err;
-    }
-
-    if (!handle->arena)
-    {
-        LOGERROREX(FSL_ERR_POINTER_NULL, 0,
-                src_file, src_line,
-                MSG_MEM_ARENA_POP_REASON_FAIL(name, NULL, "Arena Pointer `NULL`"));
-        return fsl_err;
-    }
-
-    if (handle->offset == FSL_OFFSET_INVALID)
-    {
-        LOGERROREX(FSL_ERR_OUT_OF_BOUNDS, 0,
-                src_file, src_line,
-                MSG_MEM_ARENA_POP_REASON_FAIL(name, handle->arena, "Handle Offset Invalid"));
-        return fsl_err;
-    }
+    if (!handle || !handle->arena || handle->offset == FSL_OFFSET_INVALID)
+        return FSL_ERR_SUCCESS;
 
     arena = handle->arena;
     entry = arena->entry;
@@ -627,6 +606,10 @@ u32 fsl_mem_arena_pop_internal(fsl_mem_handle *handle,
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
+}
+void *fsl_mem_handle_get_internal(fsl_mem_handle handle)
+{
+    return handle.arena ? (void*)((u8*)handle.arena->buf + handle.offset) : NULL;
 }
 
 void fsl_print_bits(u64 x, u8 bit_count)

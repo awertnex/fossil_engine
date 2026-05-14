@@ -34,12 +34,6 @@
 #define fsl_arr_len(x) \
     ((u64)sizeof(x) / sizeof(x[0]))
 
-#define fsl_mem_handle_get(type, handle) \
-    (handle.arena ? (type*)((u8*)handle.arena->buf + handle.offset) : NULL)
-
-#define fsl_mem_handle_get_i(type, handle, index) \
-    (handle.arena ? (type*)((u8*)handle.arena->buf + handle.offset + (index) * sizeof(type)) : NULL)
-
 /* ---- section: definitions ------------------------------------------------ */
 
 #define FSL_OFFSET_INVALID FSL_U64_MAX
@@ -97,6 +91,9 @@
 
 #define fsl_mem_arena_free(x, name) \
     fsl_mem_arena_free_internal(x, name, __BASE_FILE__, __LINE__)
+
+#define fsl_mem_handle_get(handle) \
+    fsl_mem_handle_get_internal(handle)
 
 /* ---- section: declarations ----------------------------------------------- */
 
@@ -327,6 +324,13 @@ FSLAPI u32 fsl_mem_arena_pop_internal(fsl_mem_handle *handle,
  */
 FSLAPI void fsl_mem_arena_free_internal(fsl_mem_arena *x,
         const str *name, const str *src_file, u64 src_line);
+
+/*!
+ *  @brief get a memory address from `handle` (that was previously pushed onto a memory arena).
+ *
+ *  @return `NULL` on failure.
+ */
+FSLAPI void *fsl_mem_handle_get_internal(fsl_mem_handle handle);
 
 /*!
  *  @brief similar to 'printf("%b\n", x)' but only output `bit_count` bits.

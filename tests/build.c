@@ -2,6 +2,7 @@
 #include "../src/h/buildtool_config.h"
 
 #define DIR_ROOT "../"
+#define DIR_DEPS "../fossil/"
 
 #define DIR_GAME                "game_hhc/"
 #define DIR_SRC_GAME            DIR_GAME"src/"
@@ -129,7 +130,7 @@ u32 build_game(int argc, char **argv)
     cmd_push(&cmd, DIR_SRC_GAME"player.c");
     cmd_push(&cmd, DIR_SRC_GAME"terrain.c");
     cmd_push(&cmd, DIR_SRC_GAME"world.c");
-    cmd_push(&cmd, "-I"DIR_ROOT);
+    cmd_push(&cmd, "-I"DIR_DEPS);
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
     cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
@@ -164,7 +165,7 @@ u32 build_text_rendering(int argc, char **argv)
     cmd_push(&cmd, "-Wformat-truncation=0");
     cmd_push(&cmd, "-ggdb");
     cmd_push(&cmd, DIR_SRC_TEXT_RENDERING"main.c");
-    cmd_push(&cmd, "-I"DIR_ROOT);
+    cmd_push(&cmd, "-I"DIR_DEPS);
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
     cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
@@ -198,7 +199,7 @@ u32 build_nine_slice(int argc, char **argv)
     cmd_push(&cmd, "-Wpedantic");
     cmd_push(&cmd, "-ggdb");
     cmd_push(&cmd, DIR_SRC_NINE_SLICE"main.c");
-    cmd_push(&cmd, "-I"DIR_ROOT);
+    cmd_push(&cmd, "-I"DIR_DEPS);
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
     cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
@@ -233,7 +234,7 @@ u32 build_composable_ui(int argc, char **argv)
     cmd_push(&cmd, "-Wformat-truncation=0");
     cmd_push(&cmd, "-ggdb");
     cmd_push(&cmd, DIR_SRC_COMPOSABLE_UI"main.c");
-    cmd_push(&cmd, "-I"DIR_ROOT);
+    cmd_push(&cmd, "-I"DIR_DEPS);
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
     cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);

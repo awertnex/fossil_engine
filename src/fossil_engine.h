@@ -25,15 +25,15 @@
 
 #include "common/common.h"
 #include "assets/assets.h"
-#include "engine/core.h"
-#include "engine/engine_default_assets.h"
+#include "engine/engine.h"
+#include "engine/engine_assets.h"
+#include "input/input.h"
 #include "logger/logger.h"
 #include "memory/memory.h"
 #include "shaders/shaders.h"
 
 #include "h/collision.h"
 #include "h/dir.h"
-#include "h/input.h"
 #include "h/math.h"
 #include "h/process.h"
 #include "h/string.h"

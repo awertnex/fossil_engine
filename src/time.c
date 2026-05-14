@@ -26,7 +26,7 @@
 #include "h/math.h"
 #include "h/time.h"
 
-#if FSL_PLATFORM_WIN
+#if defined(FSL_PLATFORM_WIN)
 /* TODO: make time functions for windows */
 #else
 #   include <time.h>

@@ -1,10 +1,10 @@
-#include "src/common/limits.h"
-#include "src/common/session.h"
-#include "src/engine/core.h"
-#include "src/logger/logger.h"
-#include "src/memory/memory.h"
+#include "deps/fossil/common/limits.h"
+#include "deps/fossil/common/session.h"
+#include "deps/fossil/engine/engine.h"
+#include "deps/fossil/logger/logger.h"
+#include "deps/fossil/memory/memory.h"
 
-#include "src/h/dir.h"
+#include "deps/fossil/h/dir.h"
 
 #include "h/main.h"
 #include "h/common.h"

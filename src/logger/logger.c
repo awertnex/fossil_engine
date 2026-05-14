@@ -155,23 +155,26 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags)
     }
 
     if (fsl_mem_arena_init(&logger_core.arena,
-                "fsl_logger_init().logger_core.arena") != FSL_ERR_SUCCESS ||
+                "fsl_logger_init().logger_core.arena") != FSL_ERR_SUCCESS)
+        goto cleanup;
 
-            fsl_mem_arena_push(&logger_core.arena, &logger_core.buf,
+    if (fsl_mem_arena_push(&logger_core.arena, &logger_core.buf,
                 FSL_LOGGER_HISTORY_MAX * sizeof(fsl_log_entry),
                 "fsl_logger_init().logger_core.buf") != FSL_ERR_SUCCESS)
-    {
-        fsl_err = FSL_ERR_LOGGER_INIT_FAIL;
-        get_log_str_internal("Failed to Initialize Logger, Process Aborted", str_out,
-                FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_TERM_COLOR,
-                TRUE, FSL_LOG_LEVEL_FATAL, FSL_ERR_LOGGER_INIT_FAIL, __BASE_FILE__, __LINE__);
-        fprintf(stderr, "%s\n", str_out);
-        return fsl_err;
-    }
+        goto cleanup;
 
     logger_core.flag.gui_open = TRUE;
 
     fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+
+cleanup:
+
+    fsl_err = FSL_ERR_LOGGER_INIT_FAIL;
+    get_log_str_internal("Failed to Initialize Logger, Process Aborted", str_out,
+            FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_TERM_COLOR,
+            TRUE, FSL_LOG_LEVEL_FATAL, FSL_ERR_LOGGER_INIT_FAIL, __BASE_FILE__, __LINE__);
+    fprintf(stderr, "%s\n", str_out);
     return fsl_err;
 }
 
@@ -210,7 +213,8 @@ void fsl_log_output_internal(u32 error_code, u32 flags, const str *src_file, u64
             get_log_str_internal(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_DATE_TIME,
                     verbose, level, error_code, src_file, line);
 
-        log_entry = fsl_mem_handle_get_i(fsl_log_entry, logger_core.buf, logger_core.cursor);
+        log_entry = fsl_mem_handle_get(logger_core.buf);
+        log_entry = &log_entry[logger_core.cursor];
         snprintf(log_entry->message, strnlen(str_out, FSL_LOGGER_STRING_MAX), "%s", str_out);
         log_entry->color = logger_color_tab[level];
         logger_core.cursor = (logger_core.cursor + 1) % FSL_LOGGER_HISTORY_MAX;

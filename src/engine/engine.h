@@ -15,13 +15,13 @@
  */
 
 /*!
- *  @file core.h
+ *  @file engine.h
  *
- *  @brief engine init, running, close, windowing, opengl loading.
+ *  @brief main engine module header; engine init, running, close, windowing, opengl loading.
  */
 
-#ifndef FSL_CORE_H
-#define FSL_CORE_H
+#ifndef FSL_ENGINE_H
+#define FSL_ENGINE_H
 
 #include "../common/engine_info.h"
 #include "../common/limits.h"
@@ -31,7 +31,6 @@
 #define GLFW_INCLUDE_NONE
 #include "../external/glfw3.h"
 
-typedef struct fsl_core         fsl_core;
 typedef struct fsl_render       fsl_render;
 typedef struct fsl_camera       fsl_camera;
 typedef struct fsl_projection   fsl_projection;
@@ -42,50 +41,6 @@ enum fsl_engine_string_index
     FSL_ENGINE_STR_INDEX_VERSION,
     FSL_ENGINE_STR_INDEX_COUNT
 }; /* fsl_engine_string_index */
-
-struct fsl_core
-{
-    struct /* flag */
-    {
-        b8 active;
-        b8 glfw_initialized;
-        b8 request_screenshot;
-        b8 request_engine_close;
-    } flag;
-
-    struct /* ubo */
-    {
-        GLuint ndc_scale;
-    } ubo;
-
-    /*!
-     *  @brief global fbo for rendering mostly ui elements.
-     *
-     *  @remark initialized in @ref fsl_engine_init().
-     */
-    fsl_fbo fbo;
-
-    /*!
-     *  @brief global fbo for rendering mostly ui elements, multisampled.
-     *
-     *  @remark initialized in @ref fsl_engine_init().
-     */
-    fsl_fbo fbo_msaa;
-
-    /*!
-     *  @brief function to bind a final framebuffer to draw to based on anti-aliasing setting.
-     *
-     *  @remark initialized in @ref fsl_engine_init().
-     */
-    void (*fbo_bind)(void);
-
-    /*!
-     *  @brief function to draw onto a final framebuffer based on anti-aliasing setting.
-     *
-     * @remark initialized in @ref fsl_engine_init().
-     */
-    void (*fbo_blit)(GLuint fbo);
-}; /* fsl_core */
 
 struct fsl_render
 {
@@ -138,15 +93,6 @@ struct fsl_projection
 }; /* fsl_projection */
 
 /* ---- section: declarations ----------------------------------------------- */
-
-/*!
- *  @internal
- *
- *  @brief global core module.
- *
- *  @remark declared and initialized internally.
- */
-extern fsl_core fsl_core_internal;
 
 /*!
  *  @internal
@@ -309,6 +255,11 @@ FSLAPI void fsl_request_screenshot(void);
 FSLAPI u32 fsl_process_screenshot_request(const str *dir_screenshots, const str *special_text);
 
 /*!
+ *  @brief bind internal fbo for rendering.
+ */
+FSLAPI void fsl_fbo_bind(void);
+
+/*!
  *  @brief blit rendered internal fbo (e.g., text, ui elements) onto `fbo`.
  */
 FSLAPI void fsl_fbo_blit(GLuint fbo);
@@ -344,4 +295,4 @@ FSLAPI void fsl_update_projection_perspective(fsl_camera camera, fsl_projection 
  */
 FSLAPI void fsl_get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f64 *yaw);
 
-#endif /* FSL_CORE_H */
+#endif /* FSL_ENGINE_H */

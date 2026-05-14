@@ -9,20 +9,24 @@
 ## v0.8.0-dev (current)
 
 #### changes
+- (2026 05 14): added feature 'input contexts' (input layers), and made context
+                0 the default input context (always active).
+- (2026 05 13): including dependency 'stb_truetype.h' is no longer required in
+                order to use assets module externally.
 - (2026 05 12): added parameters `size_x` and `size_y` to functions
-                `fsl_fbo_init()` and `fsl_fbo_realloc()`
+                `fsl_fbo_init()` and `fsl_fbo_realloc()`.
 
 - - -
 ## v0.8.0-beta (2026 05 11)
 
 #### changes
 - (2026 05 11): replaced all `PATH_MAX` and `NAME_MAX` with `FSL_PATH_CAP` and
-                `FSL_ID_CAP` respectively
-- (2026 05 11): removed standard header 'limits.h' from engine header 'limits.h'
-- (2026 05 11): added function `fsl_mem_arena_pop()`
+                `FSL_ID_CAP` respectively.
+- (2026 05 11): removed standard header 'limits.h' from engine header 'limits.h'.
+- (2026 05 11): added function `fsl_mem_arena_pop()`.
 - (2026 05 10): changed memory arena internals from pointers to offsets.
 - (2026 05 06): removed functions `fsl_mem_request_page_size()` and
-                `_fsl_mem_request_page_size()`, no longer needed
+                `_fsl_mem_request_page_size()`, no longer needed.
 - (2026 05 06): added guards around log macros to check for log level, the old
                 system used to be that 'DEBUG' and 'TRACE' logs were removed by
                 the pre-processor in release builds, it's changed so that log

@@ -23,13 +23,11 @@
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
 #include "../common/types.h"
-#include "../engine/core.h"
 #include "../logger/logger.h"
 #include "../logger/logger_messages_internal.h"
 #include "../memory/memory.h"
 
 #include "../h/dir.h"
-#include "../h/string.h"
 
 #include "assets.h"
 
@@ -58,13 +56,13 @@ fsl_asset_metadata fsl_asset_get_metadata(fsl_asset asset)
 {
     fsl_asset_metadata metadata = {0};
     if (asset.name.arena)
-        metadata.name = fsl_mem_handle_get(str, asset.name);
+        metadata.name = fsl_mem_handle_get(asset.name);
     if (asset.name_id.arena)
-        metadata.name_id = fsl_mem_handle_get(str, asset.name_id);
+        metadata.name_id = fsl_mem_handle_get(asset.name_id);
     if (asset.file.arena)
-        metadata.file = fsl_mem_handle_get(str, asset.file);
+        metadata.file = fsl_mem_handle_get(asset.file);
     if (asset.path.arena)
-        metadata.path = fsl_mem_handle_get(str, asset.path);
+        metadata.path = fsl_mem_handle_get(asset.path);
     return metadata;
 }
 
@@ -90,7 +88,7 @@ u32 fsl_asset_set_metadata(fsl_asset *asset, fsl_asset_type type,
         if (fsl_mem_arena_push(&mem_arena_name_internal, &asset->name, FSL_ID_CAP,
                     "fsl_asset_set_metadata().asset->name") != FSL_ERR_SUCCESS)
             goto cleanup;
-        name_p = fsl_mem_handle_get(fsl_name, asset->name),
+        name_p = fsl_mem_handle_get(asset->name),
         snprintf(name_p, FSL_ID_CAP, "%s", name);
     }
 
@@ -99,7 +97,7 @@ u32 fsl_asset_set_metadata(fsl_asset *asset, fsl_asset_type type,
         if (fsl_mem_arena_push(&mem_arena_name_id_internal, &asset->name_id, FSL_ID_CAP,
                     "fsl_asset_set_metadata().asset->name_id") != FSL_ERR_SUCCESS)
             goto cleanup;
-        name_id_p = fsl_mem_handle_get(fsl_name_id, asset->name_id);
+        name_id_p = fsl_mem_handle_get(asset->name_id);
         snprintf(name_id_p, FSL_ID_CAP, "%s", name_id);
     }
 
@@ -108,7 +106,7 @@ u32 fsl_asset_set_metadata(fsl_asset *asset, fsl_asset_type type,
         if (fsl_mem_arena_push(&mem_arena_file_internal, &asset->file, FSL_ID_CAP,
                     "fsl_asset_set_metadata().asset->file") != FSL_ERR_SUCCESS)
             goto cleanup;
-        file_p = fsl_mem_handle_get(fsl_file, asset->file);
+        file_p = fsl_mem_handle_get(asset->file);
         snprintf(file_p, FSL_ID_CAP, "%s", file);
     }
 
@@ -117,7 +115,7 @@ u32 fsl_asset_set_metadata(fsl_asset *asset, fsl_asset_type type,
         if (fsl_mem_arena_push(&mem_arena_path_internal, &asset->path, FSL_ID_CAP,
                     "fsl_asset_set_metadata().asset->path") != FSL_ERR_SUCCESS)
             goto cleanup;
-        path_p = fsl_mem_handle_get(fsl_path, asset->path);
+        path_p = fsl_mem_handle_get(asset->path);
         snprintf(path_p, FSL_ID_CAP, "%s", path);
         fsl_check_slash(path_p);
         fsl_posix_slash(path_p);
@@ -228,7 +226,7 @@ mesh_fbo_init:
         goto cleanup;
 
     fsl_asset_set_metadata(&mesh_fbo->asset, FSL_ASSET_MESH, "Unit Quad", "unit_quad", NULL, NULL);
-    mesh_fbo_vbo_data = fsl_mem_handle_get(GLfloat, mesh_fbo->vbo_data);
+    mesh_fbo_vbo_data = fsl_mem_handle_get(mesh_fbo->vbo_data);
     memcpy(mesh_fbo_vbo_data, vbo_data_unit_quad_internal, mesh_fbo->vbo_data.size);
 
     /* ---- bind mesh ------------------------------------------------------- */
@@ -239,7 +237,7 @@ mesh_fbo_init:
     glBindVertexArray(mesh_fbo->vao);
     glBindBuffer(GL_ARRAY_BUFFER, mesh_fbo->vbo);
     glBufferData(GL_ARRAY_BUFFER, mesh_fbo->vbo_len * sizeof(GLfloat),
-            fsl_mem_handle_get(GLfloat, mesh_fbo->vbo_data), GL_STATIC_DRAW);
+            fsl_mem_handle_get(mesh_fbo->vbo_data), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)0);
@@ -480,8 +478,8 @@ u32 fsl_mesh_generate(fsl_mesh *mesh,
 
     metadata = fsl_asset_get_metadata(mesh->asset);
 
-    vbo_data_p = fsl_mem_handle_get(GLfloat, mesh->vbo_data);
-    ebo_data_p = fsl_mem_handle_get(GLuint, mesh->ebo_data);
+    vbo_data_p = fsl_mem_handle_get(mesh->vbo_data);
+    ebo_data_p = fsl_mem_handle_get(mesh->ebo_data);
     mesh->vbo_len = vbo_len;
     mesh->ebo_len = ebo_len;
     memcpy(vbo_data_p, vbo_data, sizeof(GLfloat) * vbo_len);
@@ -536,7 +534,7 @@ void fsl_mesh_free(fsl_mesh *mesh)
     }
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_MESH_UNLOAD(fsl_mem_handle_get(str, mesh->asset.name_id)));
+            MSG_MESH_UNLOAD(fsl_mem_handle_get(mesh->asset.name_id)));
 
     /* TODO: use `fsl_mem_pop_arena()` when you make it */
     *mesh = nomesh;
@@ -547,6 +545,7 @@ void fsl_mesh_free(fsl_mesh *mesh)
 u32 fsl_font_init(fsl_font *font, u32 resolution,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path)
 {
+    stbtt_fontinfo *info = NULL;
     u32 i = 0;
     str path_temp[FSL_PATH_CAP] = {0};
     u8 *file_contents = NULL;
@@ -579,7 +578,12 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     if (file_contents == NULL)
         return fsl_err;
 
-    if (!stbtt_InitFont(&font->info, (const unsigned char*)file_contents, 0))
+    if (fsl_mem_arena_push(&mem_arena_internal, &font->info, sizeof(stbtt_fontinfo),
+                "fsl_font_init().font->info") != FSL_ERR_SUCCESS)
+        goto cleanup;
+    info = fsl_mem_handle_get(font->info);
+
+    if (!stbtt_InitFont(info, (const unsigned char*)file_contents, 0))
     {
         LOGERROR(FSL_ERR_FONT_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
@@ -588,25 +592,28 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     }
 
     if (fsl_mem_alloc((void*)&bitmap, FSL_GLYPH_MAX * resolution * resolution,
-                fsl_stringf("fsl_font_init().%s", metadata.name_id)) != FSL_ERR_SUCCESS)
+                "fsl_font_init().bitmap") != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    stbtt_GetFontVMetrics(&font->info, &font->ascent, &font->descent, &font->line_gap);
+    /* this line, stolen from 'stb_truetype.h' v1.26, function `stbtt_ScaleForPixelHeight()` */
+    font->fheight = ttSHORT(info->data + info->hhea + 4) - ttSHORT(info->data + info->hhea + 6);
+
+    stbtt_GetFontVMetrics(info, &font->ascent, &font->descent, &font->line_gap);
     font->resolution = resolution;
     font->line_height = font->ascent - font->descent + font->line_gap;
     font->size = resolution;
-    scale = stbtt_ScaleForPixelHeight(&font->info, resolution);
+    scale = (f32)resolution / font->fheight;
 
     for (i = 0; i < FSL_GLYPH_MAX; ++i)
     {
-        glyph_index = stbtt_FindGlyphIndex(&font->info, i);
+        glyph_index = stbtt_FindGlyphIndex(info, i);
         if (!glyph_index)
             continue;
 
         g = &font->glyph[i];
 
-        stbtt_GetGlyphHMetrics(&font->info, glyph_index, &g->advance, &g->bearing.x);
-        stbtt_GetGlyphBitmapBoxSubpixel(&font->info, glyph_index,
+        stbtt_GetGlyphHMetrics(info, glyph_index, &g->advance, &g->bearing.x);
+        stbtt_GetGlyphBitmapBoxSubpixel(info, glyph_index,
                 1.0f, 1.0f, 0.0f, 0.0f, &x0, &y0, &x1, &y1);
 
         g->bearing.y = y0;
@@ -616,8 +623,8 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
         g->scale.y > font->scale.y ? font->scale.y = g->scale.y : 0;
         g->loaded = TRUE;
 
-        if (!stbtt_IsGlyphEmpty(&font->info, glyph_index))
-            stbtt_MakeGlyphBitmapSubpixel(&font->info, bitmap + i * resolution * resolution,
+        if (!stbtt_IsGlyphEmpty(info, glyph_index))
+            stbtt_MakeGlyphBitmapSubpixel(info, bitmap + i * resolution * resolution,
                     resolution, resolution, resolution, scale, scale, 0.0f, 0.0f, glyph_index);
     }
 
@@ -634,21 +641,21 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     fsl_mem_free((void*)&bitmap, FSL_GLYPH_MAX * resolution * resolution,
-            fsl_stringf("fsl_font_init().%s", metadata.name_id));
+            "fsl_font_init().bitmap");
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             MSG_FONT_LOAD(metadata.name_id));
 
     font->asset.initialized = TRUE;
+    font->buf = file_contents;
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 
 cleanup:
 
-    fsl_mem_free((void*)&file_contents, font->buf_len,
-            fsl_stringf("fsl_font_init().%s", metadata.name_id));
-    fsl_mem_free((void*)&bitmap, FSL_GLYPH_MAX * resolution * resolution,
-            fsl_stringf("fsl_font_init().%s", metadata.name_id));
+    fsl_mem_free((void*)&file_contents, font->buf_len, "fsl_font_init().file_contents");
+    fsl_mem_free((void*)&bitmap, FSL_GLYPH_MAX * resolution * resolution, "fsl_font_init().bitmap");
+    fsl_mem_arena_pop(&font->info, "fsl_font_init().font->info");
     fsl_font_free(font);
     return fsl_err;
 }
@@ -666,10 +673,12 @@ void fsl_font_free(fsl_font *font)
         glDeleteTextures(1, &font->asset.id);
     }
 
-    if (font->info.data)
-        fsl_mem_free((void*)&font->info.data, font->buf_len,
-                fsl_stringf("fsl_font_free().%s", fsl_mem_handle_get(str, font->asset.name_id)));
+    if (font->buf)
+        fsl_mem_free((void*)&font->buf, font->buf_len, "fsl_font_free().font->buf");
+    if (font->info.arena)
+        fsl_mem_arena_pop(&font->info, "fsl_font_free().font->info");
+
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_FONT_UNLOAD(fsl_mem_handle_get(str, font->asset.name_id)));
+            MSG_FONT_UNLOAD(fsl_mem_handle_get(font->asset.name_id)));
     *font = nofont;
 }

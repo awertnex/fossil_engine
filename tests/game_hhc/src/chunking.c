@@ -1,11 +1,11 @@
-#include "src/common/limits.h"
-#include "src/logger/logger.h"
-#include "src/memory/memory.h"
+#include "deps/fossil/common/limits.h"
+#include "deps/fossil/logger/logger.h"
+#include "deps/fossil/memory/memory.h"
 
-#include "src/h/dir.h"
-#include "src/h/input.h"
-#include "src/h/math.h"
-#include "src/h/string.h"
+#include "deps/fossil/h/dir.h"
+#include "deps/fossil/input/input.h"
+#include "deps/fossil/h/math.h"
+#include "deps/fossil/h/string.h"
 
 #include "h/assets.h"
 #include "h/chunking.h"
@@ -266,8 +266,8 @@ u32 chunking_init(void)
             CHUNK_ORDER_lookup_file_contents == NULL)
         goto cleanup;
 
-    chunk_tab_p = fsl_mem_handle_get(chunk*, chunk_tab);
-    CHUNK_ORDER_p = fsl_mem_handle_get(chunk**, CHUNK_ORDER);
+    chunk_tab_p = fsl_mem_handle_get(chunk_tab);
+    CHUNK_ORDER_p = fsl_mem_handle_get(CHUNK_ORDER);
     for (i = 0; i < settings.chunk_buf_volume; ++i)
         CHUNK_ORDER_p[i] = &chunk_tab_p[CHUNK_ORDER_lookup_file_contents[i]];
     fsl_mem_free((void*)&CHUNK_ORDER_lookup_file_contents, file_len,
@@ -366,7 +366,7 @@ u32 chunking_init(void)
     glBindVertexArray(chunk_gizmo_loaded_vao);
     glBindBuffer(GL_ARRAY_BUFFER, chunk_gizmo_loaded_vbo);
     glBufferData(GL_ARRAY_BUFFER, settings.chunk_buf_volume * sizeof(v2u32),
-            fsl_mem_handle_get(v2u32, chunk_gizmo_loaded), GL_STATIC_DRAW);
+            fsl_mem_handle_get(chunk_gizmo_loaded), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribIPointer(0, 2, GL_UNSIGNED_INT, sizeof(v2u32), (void*)0);
@@ -377,7 +377,7 @@ u32 chunking_init(void)
     glBindVertexArray(chunk_gizmo_render_vao);
     glBindBuffer(GL_ARRAY_BUFFER, chunk_gizmo_render_vbo);
     glBufferData(GL_ARRAY_BUFFER, settings.chunk_buf_volume * sizeof(v2u32),
-            fsl_mem_handle_get(v2u32, chunk_gizmo_render), GL_STATIC_DRAW);
+            fsl_mem_handle_get(chunk_gizmo_render), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribIPointer(0, 2, GL_UNSIGNED_INT, sizeof(v2u32), (void*)0);
@@ -402,8 +402,8 @@ cleanup:
 
 void chunking_update(v3i32 player_chunk, v3i32 *player_chunk_delta)
 {
-    chunk **chunk_tab_p = fsl_mem_handle_get(chunk*, chunk_tab);
-    chunk ***CHUNK_ORDER_p = fsl_mem_handle_get(chunk**, CHUNK_ORDER);
+    chunk **chunk_tab_p = fsl_mem_handle_get(chunk_tab);
+    chunk ***CHUNK_ORDER_p = fsl_mem_handle_get(CHUNK_ORDER);
     chunk ***cursor = NULL;
     v3u32 _coordinates = {0};
     v3u32 _mirror_index = {0};
@@ -640,7 +640,7 @@ chunk_buf_push:
 
 void chunking_free(void)
 {
-    chunk **chunk_tab_p = fsl_mem_handle_get(chunk*, chunk_tab);
+    chunk **chunk_tab_p = fsl_mem_handle_get(chunk_tab);
 
     if (chunk_tab_p)
     {
@@ -658,7 +658,7 @@ void chunking_free(void)
 
 void block_place(u32 index, i32 x, i32 y, i32 z, v3f64 normal, enum block_id block_id)
 {
-    chunk **chunk_tab_p = fsl_mem_handle_get(chunk*, chunk_tab);
+    chunk **chunk_tab_p = fsl_mem_handle_get(chunk_tab);
     chunk **ch = NULL;
     chunk *px = NULL;
     chunk *nx = NULL;
@@ -803,7 +803,7 @@ static void block_place_internal(chunk *ch,
 
 void block_break(u32 index, i32 x, i32 y, i32 z)
 {
-    chunk **chunk_tab_p = fsl_mem_handle_get(chunk*, chunk_tab);
+    chunk **chunk_tab_p = fsl_mem_handle_get(chunk_tab);
     chunk **ch = &chunk_tab_p[index];
     chunk *px = NULL;
     chunk *nx = NULL;
@@ -935,7 +935,7 @@ static void chunk_generate(chunk **ch, u32 rate, terrain (*terrain_func)(v3i32))
 
 static void chunk_generate_internal(chunk **ch, u32 rate, terrain (*terrain_func)(v3i32))
 {
-    chunk **chunk_tab_p = fsl_mem_handle_get(chunk*, chunk_tab);
+    chunk **chunk_tab_p = fsl_mem_handle_get(chunk_tab);
     chunk *_ch = NULL;
     chunk *px = NULL;
     chunk *nx = NULL;
@@ -1181,8 +1181,8 @@ static void chunk_deserialize_internal(const str *file_name, chunk *ch)
 static void chunk_buf_push_internal(u32 index, v3i32 player_chunk_delta)
 {
     chunk nochunk = {0};
-    chunk *chunk_buf_p = fsl_mem_handle_get(chunk, chunk_buf);
-    chunk **chunk_tab_p = fsl_mem_handle_get(chunk*, chunk_tab);
+    chunk *chunk_buf_p = fsl_mem_handle_get(chunk_buf);
+    chunk **chunk_tab_p = fsl_mem_handle_get(chunk_tab);
     chunk *ch = NULL;
     chunk *end = NULL;
     v3u32 chunk_tab_coordinates = {0};
@@ -1244,8 +1244,8 @@ static void chunk_buf_push_internal(u32 index, v3i32 player_chunk_delta)
 
 static void chunk_buf_pop_internal(u32 index)
 {
-    chunk *chunk_buf_p = fsl_mem_handle_get(chunk, chunk_buf);
-    chunk **chunk_tab_p = fsl_mem_handle_get(chunk*, chunk_tab);
+    chunk *chunk_buf_p = fsl_mem_handle_get(chunk_buf);
+    chunk **chunk_tab_p = fsl_mem_handle_get(chunk_tab);
     u32 index_popped = chunk_tab_p[index] - chunk_buf_p;
 
     chunk_gizmo_write_internal(index, chunk_tab_p[index]);
@@ -1269,11 +1269,11 @@ static void chunk_buf_pop_internal(u32 index)
 
 static void chunk_queue_update_internal(chunk_queue *q)
 {
-    chunk **chunk_tab_p = fsl_mem_handle_get(chunk*, chunk_tab);
-    chunk ***CHUNK_ORDER_p = fsl_mem_handle_get(chunk**, CHUNK_ORDER);
+    chunk **chunk_tab_p = fsl_mem_handle_get(chunk_tab);
+    chunk ***CHUNK_ORDER_p = fsl_mem_handle_get(CHUNK_ORDER);
     chunk ***ch = &CHUNK_ORDER_p[q->offset];
     chunk ***end = NULL;
-    chunk ***queue = fsl_mem_handle_get(chunk**, q->queue);
+    chunk ***queue = fsl_mem_handle_get(q->queue);
     u32 i = 0;
     u64 size = q->size;
     u32 cursor = q->cursor;
@@ -1330,8 +1330,8 @@ generate_and_mesh:
 
 static void chunk_gizmo_write_internal(u32 index, chunk *ch)
 {
-    v2u32 *chunk_gizmo_loaded_p = fsl_mem_handle_get(v2u32, chunk_gizmo_loaded);
-    v2u32 *chunk_gizmo_render_p = fsl_mem_handle_get(v2u32, chunk_gizmo_render);
+    v2u32 *chunk_gizmo_loaded_p = fsl_mem_handle_get(chunk_gizmo_loaded);
+    v2u32 *chunk_gizmo_render_p = fsl_mem_handle_get(chunk_gizmo_render);
     v3u32 chunk_pos = {0};
     v4u32 chunk_color = {0};
 
@@ -1396,7 +1396,7 @@ u32 *get_block_resolved(chunk *ch, i32 x, i32 y, i32 z)
 
 chunk *get_chunk_resolved(u32 index, i32 x, i32 y, i32 z)
 {
-    chunk **chunk_tab_p = fsl_mem_handle_get(chunk*, chunk_tab);
+    chunk **chunk_tab_p = fsl_mem_handle_get(chunk_tab);
     x = (i32)floorf((f32)x / CHUNK_DIAMETER);
     y = (i32)floorf((f32)y / CHUNK_DIAMETER);
     z = (i32)floorf((f32)z / CHUNK_DIAMETER);

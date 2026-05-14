@@ -15,13 +15,13 @@
  */
 
 /*!
- *  @file engine_default_assets.h
+ *  @file engine_assets.h
  *
  *  @brief loading and unloading engine's default assets.
  */
 
-#ifndef FSL_ENGINE_DEFAULT_ASSETS_H
-#define FSL_ENGINE_DEFAULT_ASSETS_H
+#ifndef FSL_ENGINE_ASSETS_H
+#define FSL_ENGINE_ASSETS_H
 
 #include "../common/engine_info.h"
 #include "../common/types.h"
@@ -87,7 +87,7 @@ FSLAPI extern fsl_mem_handle fsl_font_buf;
  */
 FSLAPI extern fsl_mesh fsl_mesh_unit_quad;
 
-/* ---- section: signatures 00----------------------------------------------- */
+/* ---- section: signatures ------------------------------------------------- */
 
 /*!
  *  @brief initialize engine's internal assets.
@@ -103,4 +103,4 @@ u32 fsl_assets_init(void);
  */
 void fsl_assets_free(void);
 
-#endif /* FSL_ENGINE_DEFAULT_ASSETS_H */
+#endif /* FSL_ENGINE_ASSETS_H */
