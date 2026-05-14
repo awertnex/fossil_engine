@@ -61,12 +61,6 @@
             fsl_log_output_internal(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_DEBUG, message); \
     } while (0)
 
-#define LOGTRACE(flags, message) \
-    do { \
-        if (fsl_log_level_max >= FSL_LOG_LEVEL_TRACE) \
-            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_TRACE, message); \
-    } while (0)
-
 #define LOGFATALEX(err, flags, file, line, message) \
             fsl_log_output_internal(err, flags, file, line, FSL_LOG_LEVEL_FATAL, message)
 
@@ -100,11 +94,22 @@
             fsl_log_output_internal(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_DEBUG, message); \
     } while (0)
 
-#define LOGTRACEEX(flags, file, line, message) \
-    do { \
-        if (fsl_log_level_max >= FSL_LOG_LEVEL_TRACE) \
+#ifdef FOSSIL_RELEASE_BUILD
+#   define LOGTRACE(flags, message) (void)0
+#   define LOGTRACEEX(flags, file, line, message) (void)0
+#else
+#   define LOGTRACE(flags, message) \
+        do { \
+            if (fsl_log_level_max >= FSL_LOG_LEVEL_TRACE) \
+                fsl_log_output_internal(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_TRACE, message); \
+        } while (0)
+
+#   define LOGTRACEEX(flags, file, line, message) \
+        do { \
+            if (fsl_log_level_max >= FSL_LOG_LEVEL_TRACE) \
             fsl_log_output_internal(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_TRACE, message); \
-    } while (0)
+        } while (0)
+#endif /* FOSSIL_RELEASE_BUILD */
 
 typedef struct fsl_log_entry fsl_log_entry;
 typedef struct fsl_logger_core fsl_logger_core;

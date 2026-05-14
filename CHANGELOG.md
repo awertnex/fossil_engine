@@ -9,6 +9,7 @@
 ## v0.8.0-dev (current)
 
 #### changes
+- (2026 05 14): removed 'TRACE' logs from release builds completely.
 - (2026 05 14): added feature 'input contexts' (input layers), and made context
                 0 the default input context (always active).
 - (2026 05 13): including dependency 'stb_truetype.h' is no longer required in
