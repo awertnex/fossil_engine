@@ -30,13 +30,12 @@
 
 #include "logger.h"
 
-#include "../h/time.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
 #include <sys/stat.h>
 #include <inttypes.h>
+#include <time.h>
 
 enum fsl_log_message_flag
 {
@@ -123,6 +122,13 @@ static u32 is_dir_exists_internal(const fsl_fs_path *path);
  *  @return non-zero on failure, error codes can be found in @ref diagnostics.h.
  */
 static u32 append_file_internal(const fsl_fs_path *path, u64 size, void *buf);
+
+/*!
+ *  @internal
+ *
+ *  @brief like @ref fsl_get_time_str(), but just for the logger.
+ */
+static void get_time_str_internal(str *dst, const str *format);
 
 /* ---- section: implementation --------------------------------------------- */
 
@@ -245,11 +251,11 @@ static void get_log_str_internal(const str *str_in, str *str_out, u32 flags, b8 
     if (flags & FSL_FLAG_LOG_FULL_TIME)
     {
         if ((flags & FSL_FLAG_LOG_DATE_TIME) == FSL_FLAG_LOG_DATE_TIME)
-            fsl_get_time_str(str_time, "[%F %T]");
+            get_time_str_internal(str_time, "[%F %T]");
         else if (flags & FSL_FLAG_LOG_DATE)
-            fsl_get_time_str(str_time, "[%F]");
+            get_time_str_internal(str_time, "[%F]");
         else if (flags & FSL_FLAG_LOG_TIME)
-            fsl_get_time_str(str_time, "[%T]");
+            get_time_str_internal(str_time, "[%T]");
         if (flags & FSL_FLAG_LOG_TIMESTAMP)
             snprintf(str_timestamp, FSL_TIME_STRING_MAX, "[%"PRIu64"]", fsl_init_time);
 
@@ -315,4 +321,13 @@ u32 append_file_internal(const fsl_fs_path *path, u64 size, void *buf)
     fwrite(buf, 1, size, file);
     fclose(file);
     return FSL_ERR_SUCCESS;
+}
+
+void get_time_str_internal(str *dst, const str *format)
+{
+    struct timespec ts;
+    struct tm *time_metadata = {0};
+    clock_gettime(CLOCK_REALTIME, &ts);
+    time_metadata = localtime(&ts.tv_sec);
+    strftime(dst, FSL_TIME_STRING_MAX, format, time_metadata);
 }

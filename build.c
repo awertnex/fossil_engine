@@ -12,7 +12,6 @@ static str str_cflags[][CMD_SIZE] =
     "-shared",
     "-fPIC",
     "-fvisibility=hidden",
-    "-Ofast",
     "-std="FSL_ENGINE_C_STD,
     "-D_GNU_SOURCE",
     "-DGLAD_GLAPI_EXPORT",

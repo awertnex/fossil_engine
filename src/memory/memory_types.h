@@ -41,21 +41,21 @@ typedef struct fsl_mem_arena fsl_mem_arena;
 struct fsl_mem_handle
 {
     fsl_mem_arena *arena;   /* address of arena the handle was allocated on */
-    fsl_off offset;         /* handle's data offset from arena start (@ref mem_arena.buf) */
-    u64 size;               /* handle's allocated size */
+    fsl_off offset;         /* handle's data offset from arena start */
+    u64 size;               /* handle's allocated size, in bytes */
 }; /* fsl_mem_handle */
 
 struct fsl_mem_arena
 {
     fsl_mem_arena_handle *entry; /* allocated zones in `buf` */
-    u64 entry_cap;      /* current capacity of `entry` in bytes */
+    u64 entry_cap;      /* current capacity of `entry`, in bytes */
     u64 entry_count;    /* entry count */
 
     fsl_mem_arena_handle *freelist; /* unallocated zones in `buf` */
-    u64 freelist_cap;   /* current capacity of `freelist` in bytes */
+    u64 freelist_cap;   /* current capacity of `freelist`, in bytes */
 
     void *buf;          /* raw data */
-    u64 buf_cap;        /* current capacity of `buf` in bytes */
+    u64 buf_cap;        /* current capacity of `buf`, in bytes */
     fsl_off buf_cursor; /* -- DEPRECATED IN v0.8.0-beta --; current usage */
 }; /* fsl_mem_arena */
 
