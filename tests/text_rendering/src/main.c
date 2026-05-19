@@ -6,6 +6,7 @@ i32 scrool = 0;
 fsl_key_bind bind_enter = {0};
 fsl_key_bind bind_quit = {0};
 fsl_font *font = NULL;
+fsl_render *render = NULL;
 
 static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset)
 {
@@ -20,9 +21,13 @@ int main(int argc, char **argv)
     if (fsl_engine_init(argc, argv, NULL, 1920, 1080, 0) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    bind_enter = fsl_key_bind_init(FSL_KEY_ENTER, 0, 0, 0, 0);
-    bind_quit = fsl_key_bind_init(FSL_KEY_Q, 0, 0, 0, 0);
-    font = fsl_mem_handle_get_i(fsl_font, fsl_font_buf, FSL_FONT_INDEX_DEJAVU_SANS_MONO);
+    render = fsl_render_get();
+
+    bind_enter = fsl_key_bind_init(FSL_KEY_ENTER, 0, 0, 0, 0, 0);
+    bind_quit = fsl_key_bind_init(FSL_KEY_Q, 0, 0, 0, 0, 0);
+
+    font = fsl_mem_handle_get(fsl_font_buf);
+    font = &font[FSL_FONT_INDEX_DEJAVU_SANS_MONO];
 
     glfwSetScrollCallback(render->window, callback_scroll);
 
@@ -72,12 +77,11 @@ page_2:
 
         i32 i = 0;
         u32 index = 0;
-        fsl_log_entry *log_entry = NULL;
+        fsl_log_entry *log_entry = fsl_mem_handle_get(logger_core.buf);
         for (i = 46; i > 0; --i)
         {
             index = fsl_mod_i32(logger_core.cursor - i - scrool, FSL_LOGGER_HISTORY_MAX);
-            log_entry = fsl_mem_handle_get_i(fsl_log_entry, logger_core.buf, index);
-            fsl_text_push(fsl_stringf("%s\n", log_entry->message),
+            fsl_text_push(fsl_stringf("%s\n", log_entry[index].message),
                     MARGIN, render->size.y - MARGIN,
                     0, 0,
                     render->size.x, log_entry->color);
