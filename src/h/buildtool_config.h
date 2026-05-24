@@ -1,7 +1,4 @@
 /*!
- *  @remark this header is to provide engine bindings for if building using
- *  buildtool (https://github.com/awertnex/buildtool.git)
- *
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +18,9 @@
  *  @file buildtool_config.h
  *
  *  @brief build info to link the engine with external software.
+ *
+ *  @remark this header is to provide engine bindings for if building using
+ *  buildtool (https://github.com/awertnex/buildtool.git)
  */
 
 #ifndef FSL_BUILDTOOL_CONFIG_H
@@ -29,14 +29,14 @@
 #include "../common/engine_info.h"
 #include "../external/buildtool/buildtool.h"
 
-#if FSL_PLATFORM_WIN
+#if defined(FSL_PLATFORM_WIN)
 
     /*!
      *  @brief for the engine itself.
      */
     static const str fsl_str_libs_internal[][CMD_SIZE] =
     {
-        "-Llib/" PLATFORM,
+        "-Llib/"PLATFORM,
         "-lm",
         "-lmvec",
         "-lglfw3",
@@ -50,7 +50,7 @@
      */
     static const str fsl_str_libs[][CMD_SIZE] =
     {
-        "-Lfossil/lib" PLATFORM,
+        "-Lfossil/lib"PLATFORM,
         "-lm",
         "-lglfw3",
         "-lfossil",
@@ -65,13 +65,10 @@
      */
     static const str fsl_str_libs_internal[][CMD_SIZE] =
     {
-        "-Llib/" PLATFORM,
+        "-Llib/"PLATFORM,
         "-lm",
         "-lmvec",
         "-lglfw",
-        "", /* empty slots for alignment across different platforms */
-        "",
-        ""
     };
 
     /*!
@@ -79,12 +76,10 @@
      */
     static const str fsl_str_libs[][CMD_SIZE] =
     {
-        "-Lfossil/lib/" PLATFORM,
+        "-Lfossil/lib/"PLATFORM,
         "-lm",
         "-lglfw",
         "-lfossil",
-        "", /* empty slots for alignment across different platforms */
-        ""
     };
 
 #endif /* FSL_PLATFORM */
