@@ -96,6 +96,8 @@
 #define FSL_ERR_FILE_STAT_FAIL              4153
 #define FSL_ERR_READ_LINK_FAIL              4154
 #define FSL_ERR_OUT_OF_BOUNDS               4155
+#define FSL_ERR_MESH_LOAD_FAIL              4156
+#define FSL_ERR_MESH_FORMAT_UNKNOWN         4157
 
 /*!
  *  @brief global variable for engine-specific error codes.

@@ -2,12 +2,14 @@
 
 in vec4 position;
 in vec3 normal;
+in vec2 tex_coords;
 out vec4 color;
+uniform vec3 sun_rotation;
 
-#define USE_SUN_DIRECTION
-#include "h/defaults.glsl"
+float sun_direction = clamp(dot(normal, sun_rotation), 0.0, 1.0);
+float moon_direction = clamp(dot(-normal, sun_rotation), 0.0, 1.0);
 
-vec3 base_color = vec3(0.19, 0.13, 0.01);
+vec3 base_color = vec3(0.35, 0.58, 1.41);
 
 void main()
 {

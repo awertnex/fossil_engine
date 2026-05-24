@@ -55,7 +55,6 @@ typedef struct fsl_asset            fsl_asset;
 typedef struct fsl_asset_metadata   fsl_asset_metadata;
 typedef struct fsl_fbo              fsl_fbo;
 typedef struct fsl_texture          fsl_texture;
-typedef struct fsl_mesh             fsl_mesh;
 typedef struct fsl_glyph            fsl_glyph;
 typedef struct fsl_font             fsl_font;
 
@@ -155,18 +154,6 @@ struct fsl_texture
     b8 grayscale;
     b8 bindless;
 }; /* fsl_texture */
-
-struct fsl_mesh
-{
-    fsl_asset asset;
-    GLuint vao;
-    GLuint vbo;
-    GLuint ebo;
-    GLuint vbo_len;
-    GLuint ebo_len;
-    fsl_mem_handle vbo_data;
-    fsl_mem_handle ebo_data;
-}; /* fsl_mesh */
 
 struct fsl_glyph
 {

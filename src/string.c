@@ -85,6 +85,91 @@ u64 fsl_find_token(str *arg, int argc, char **argv)
     return 0;
 }
 
+b8 fsl_is_digit(char n)
+{
+    return n >= '0' && n <= '9' ? TRUE : FALSE;
+}
+
+i32 fsl_convert_char_to_int(char n)
+{
+    return (i32)n - '0';
+}
+
+u32 fsl_convert_str_to_i64(const str *n, i64 *dst, i32 size)
+{
+    i32 i = 0;
+    i32 len = strlen(n);
+    i64 result = 0;
+    b8 is_negative = FALSE;
+
+    if (n[0] == '-')
+    {
+        ++i;
+        is_negative = TRUE;
+    }
+
+    for (; i < len; ++i)
+    {
+        if (fsl_is_digit(n[i]))
+            result = result * 10 + fsl_convert_char_to_int(n[i]);
+        else break;
+    }
+
+    if (is_negative)
+        result = -result;
+
+    *dst = result;
+
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+}
+
+u32 fsl_convert_str_to_f32(const str *n, f32 *dst, i32 size)
+{
+    i32 i = 0;
+    i32 len = strlen(n);
+    i32 result = 0;
+    i32 decimal = 0;
+    u32 base = 1;
+    b8 is_decimal = FALSE;
+    b8 is_negative = FALSE;
+
+    if (n[0] == '-')
+    {
+        ++i;
+        is_negative = TRUE;
+    }
+
+    for (; i < len; ++i)
+    {
+        if (n[i] == '.')
+        {
+            base = 1;
+            is_decimal = TRUE;
+            ++i;
+            break;
+        }
+
+        if (fsl_is_digit(n[i]))
+            result = result * 10 + fsl_convert_char_to_int(n[i]);
+    }
+
+    if (is_decimal)
+        for (; i < len && fsl_is_digit(n[i]); ++i)
+        {
+            decimal = decimal * 10 + fsl_convert_char_to_int(n[i]);
+            base *= 10;
+        }
+
+    *dst = (f64)result + (f64)decimal / base;
+
+    if (is_negative)
+        *dst = -*dst;
+
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+}
+
 u32 fsl_convert_i32_to_str(str *dst, i32 size, i32 n)
 {
     i32 i = 1, j = 0, len = 0, sign = n;

@@ -154,6 +154,20 @@ u32 fsl_assets_init(void)
                 "UI 9-Slice", "ui_9_slice", "ui_9_slice.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
         goto cleanup;
 
+    if (
+            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_OBJECT].asset, FSL_ASSET_SHADER_PROGRAM,
+                "Object", "object", NULL, NULL) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_OBJECT].vertex.asset, FSL_ASSET_SHADER,
+                "Object", "object", "object.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_OBJECT].geometry.asset, FSL_ASSET_SHADER,
+                NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
+
+            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_OBJECT].fragment.asset, FSL_ASSET_SHADER,
+                "Object", "object", "object.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
     for (i = 0; i < FSL_SHADER_INDEX_COUNT; ++i)
         if (fsl_shader_program_init(&shader_p[i]) != FSL_ERR_SUCCESS)
             goto cleanup;

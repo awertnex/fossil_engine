@@ -26,6 +26,7 @@
 #include "../common/engine_info.h"
 #include "../common/types.h"
 #include "../assets/asset_types.h"
+#include "../assets/mesh/mesh.h"
 #include "../memory/memory_types.h"
 
 enum fsl_shader_index
@@ -34,6 +35,7 @@ enum fsl_shader_index
     FSL_SHADER_INDEX_TEXT,
     FSL_SHADER_INDEX_UI,
     FSL_SHADER_INDEX_UI_9_SLICE,
+    FSL_SHADER_INDEX_OBJECT,
     FSL_SHADER_INDEX_COUNT
 }; /* fsl_shader_index */
 

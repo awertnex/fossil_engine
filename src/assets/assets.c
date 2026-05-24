@@ -17,7 +17,7 @@
 /*!
  *  @file assets.c
  *
- *  @brief loading, unloading assets.
+ *  @brief asset parsing, loading and unloading.
  */
 
 #include "../common/diagnostics.h"
@@ -434,110 +434,6 @@ void fsl_texture_free(fsl_texture *texture)
     }
 
     *texture = notexture;
-}
-
-/* ---- section: mesh ------------------------------------------------------- */
-
-u32 fsl_mesh_generate(fsl_mesh *mesh,
-        const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path,
-        void (*attrib)(void), GLenum usage,
-        GLuint vbo_len, GLuint ebo_len, GLfloat *vbo_data, GLuint *ebo_data)
-{
-    GLfloat *vbo_data_p = NULL;
-    GLuint *ebo_data_p = NULL;
-    fsl_asset_metadata metadata = {0};
-
-    if (fsl_mem_arena_push(&mem_arena_internal, &mesh->vbo_data, sizeof(GLfloat) * vbo_len,
-                "fsl_mesh_generate().mesh->vbo_data") != FSL_ERR_SUCCESS)
-    {
-        LOGERROR(FSL_ERR_MESH_GENERATION_FAIL,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Load Mesh", name_id, "`fsl_mem_arena_push()` Failed"));
-        goto cleanup;
-    }
-
-    if (ebo_data)
-    {
-        if (fsl_mem_arena_push(&mem_arena_internal, &mesh->ebo_data, sizeof(GLuint) * ebo_len,
-                    "fsl_mesh_generate().mesh->ebo_data") != FSL_ERR_SUCCESS)
-        {
-            LOGERROR(FSL_ERR_MESH_GENERATION_FAIL,
-                    FSL_FLAG_LOG_NO_VERBOSE,
-                    MSG_ACTION_SUBJECT_REASON_ERROR("Load Mesh", name_id, "`fsl_mem_arena_push()` Failed"));
-            goto cleanup;
-        }
-    }
-
-    if (fsl_asset_set_metadata(&mesh->asset, FSL_ASSET_MESH, name, name_id, file, path) != FSL_ERR_SUCCESS)
-    {
-        LOGERROR(FSL_ERR_MESH_GENERATION_FAIL,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Load Mesh", name_id, "`fsl_asset_set_metadata()` Failed"));
-        goto cleanup;
-    }
-
-    metadata = fsl_asset_get_metadata(mesh->asset);
-
-    vbo_data_p = fsl_mem_handle_get(mesh->vbo_data);
-    ebo_data_p = fsl_mem_handle_get(mesh->ebo_data);
-    mesh->vbo_len = vbo_len;
-    mesh->ebo_len = ebo_len;
-    memcpy(vbo_data_p, vbo_data, sizeof(GLfloat) * vbo_len);
-    memcpy(ebo_data_p, ebo_data, sizeof(GLuint) * ebo_len);
-
-    /* ---- bind mesh ------------------------------------------------------- */
-
-    glGenVertexArrays(1, &mesh->vao);
-    glGenBuffers(1, &mesh->vbo);
-    glGenBuffers(1, &mesh->ebo);
-
-    glBindVertexArray(mesh->vao);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
-
-    glBufferData(GL_ARRAY_BUFFER, mesh->vbo_len * sizeof(GLfloat), vbo_data_p, usage);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo_len * sizeof(GLuint), ebo_data_p, usage);
-
-    if (attrib) attrib();
-
-    glBindVertexArray(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    mesh->asset.initialized = TRUE;
-    LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_MESH_INIT(metadata.name_id));
-
-    fsl_err = FSL_ERR_SUCCESS;
-    return fsl_err;
-
-cleanup:
-
-    fsl_mesh_free(mesh);
-    fsl_err = FSL_ERR_MESH_GENERATION_FAIL;
-    return fsl_err;
-}
-
-void fsl_mesh_free(fsl_mesh *mesh)
-{
-    fsl_mesh nomesh = {0};
-
-    if (mesh == NULL)
-        return;
-
-    if (mesh->asset.initialized)
-    {
-        mesh->asset.initialized = FALSE;
-        glDeleteBuffers(1, &mesh->ebo);
-        glDeleteBuffers(1, &mesh->vbo);
-        glDeleteVertexArrays(1, &mesh->vao);
-    }
-
-    LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_MESH_UNLOAD(fsl_mem_handle_get(mesh->asset.name_id)));
-
-    /* TODO: use `fsl_mem_pop_arena()` when you make it */
-    *mesh = nomesh;
 }
 
 /* ---- section: font ------------------------------------------------------- */

@@ -67,6 +67,41 @@ FSLAPI u64 fsl_find_token(str *arg, int argc, str **argv);
 FSLAPI fsl_key_value fsl_get_tokens_key_val(const str *path);
 
 /*!
+ *  @return FALSE on failure.
+ */
+FSLAPI b8 fsl_is_digit(char n);
+
+/*!
+ *  @brief convert a character into an int.
+ *
+ *  convert a character representation of a digit into a signed 32-bit integer
+ *  and write into `dst`.
+ *
+ *  @return converted digit, @ref fsl_err is set accordingly on failure.
+ */
+FSLAPI i32 fsl_convert_char_to_int(char n);
+
+/*!
+ *  @brief convert a string into an integer.
+ *
+ *  convert a string representation of a number of at most `size` bytes into a
+ *  signed 64-bit integer and write into `dst`.
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+FSLAPI u32 fsl_convert_str_to_i64(const str *n, i64 *dst, i32 size);
+
+/*!
+ *  @brief convert a string into a float.
+ *
+ *  convert a string representation of a number of at most `size` bytes into a 32-bit float
+ *  and write into `dst`.
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+FSLAPI u32 fsl_convert_str_to_f32(const str *n, f32 *dst, i32 size);
+
+/*!
  *  @brief convert an int into a string.
  *
  *  convert a signed 32-bit integer into a string and write into `dst`

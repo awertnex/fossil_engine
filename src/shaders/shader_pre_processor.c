@@ -172,24 +172,24 @@ u32 fsl_shader_get_type_internal(const str *file, GLenum *type)
     {
         ++extension;
 
-        if (!strncmp(extension, "glsl", 5))
+        if (!strncmp(extension, "glsl\0", 6))
             extension = base_name;
     }
     else extension = base_name;
 
-    if (!strncmp(extension, "vertex", 6) || !strncmp(extension, "vert", 4))
+    if (!strncmp(extension, "vertex.", 7) || !strncmp(extension, "vert\0", 5))
     {
         *type = GL_VERTEX_SHADER;
         fsl_err = FSL_ERR_SUCCESS;
         return fsl_err;
     }
-    if (!strncmp(extension, "geometry", 8) || !strncmp(extension, "geom", 4))
+    if (!strncmp(extension, "geometry.", 9) || !strncmp(extension, "geom\0", 5))
     {
         *type = GL_GEOMETRY_SHADER;
         fsl_err = FSL_ERR_SUCCESS;
         return fsl_err;
     }
-    if (!strncmp(extension, "fragment", 8) || !strncmp(extension, "frag", 4))
+    if (!strncmp(extension, "fragment.", 9) || !strncmp(extension, "frag\0", 5))
     {
         *type = GL_FRAGMENT_SHADER;
         fsl_err = FSL_ERR_SUCCESS;

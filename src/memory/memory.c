@@ -447,6 +447,9 @@ u32 fsl_mem_arena_push_internal(fsl_mem_arena *x, fsl_mem_handle *handle, u64 si
         return fsl_err;
     }
 
+    if (handle->arena)
+        return FSL_ERR_SUCCESS;
+
     if (!x)
     {
         LOGERROREX(FSL_ERR_POINTER_NULL, 0,

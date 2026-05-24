@@ -304,7 +304,6 @@ static void generate_standard_meshes(void)
     const u32 EBO_LEN_SKYBOX =  36;
     const u32 VBO_LEN_COH =     24;
     const u32 EBO_LEN_COH =     36;
-    const u32 VBO_LEN_PLAYER =  216;
     const u32 VBO_LEN_GIZMO =   51;
     const u32 EBO_LEN_GIZMO =   90;
 
@@ -373,52 +372,6 @@ static void generate_standard_meshes(void)
         0, 1, 3, 3, 2, 0
     };
 
-    GLfloat vbo_data_player[] =
-    {
-        /* pos            normals */
-        1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, /* px */
-        1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-        1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-
-        0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, /* nx */
-        0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f,
-
-        0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, /* py */
-        0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-        1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-        1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-        1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-
-        0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, /* ny */
-        1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
-        1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,
-        1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
-
-        0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, /* pz */
-        0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-
-        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, /* nz */
-        1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-        1.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-        1.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-        0.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f
-    };
-
     const GLfloat THIC = 0.06f;
     GLfloat vbo_data_gizmo[] =
     {
@@ -472,9 +425,7 @@ static void generate_standard_meshes(void)
                 VBO_LEN_COH, EBO_LEN_COH, vbo_data_coh, ebo_data_coh) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    if (fsl_mesh_generate(&mesh_p[MESH_PLAYER], "Player", "player", NULL, NULL,
-                &fsl_attrib_vec3_vec3, GL_STATIC_DRAW,
-                VBO_LEN_PLAYER, 0, vbo_data_player, NULL) != FSL_ERR_SUCCESS)
+    if (fsl_mesh_load(&mesh_p[MESH_PLAYER], "Player", "player", "player.obj", GAME_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     if (fsl_mesh_generate(&mesh_p[MESH_GIZMO], "Gizmo", "gizmo", NULL, NULL,
@@ -733,7 +684,6 @@ static void draw_everything(void)
 
     if (_player.camera_mode != PLAYER_CAMERA_MODE_1ST_PERSON)
     {
-
         glUseProgram(shader_p[SHADER_DEFAULT].asset.id);
         glUniform3fv(uniform.defaults.scale, 1, (GLfloat*)&_player.size);
         glUniform3f(uniform.defaults.offset,

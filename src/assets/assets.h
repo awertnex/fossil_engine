@@ -17,7 +17,7 @@
 /*!
  *  @file assets.h
  *
- *  @brief parsing, loading and unloading assets.
+ *  @brief asset parsing, loading and unloading.
  */
 
 #ifndef FSL_ASSETS_H
@@ -27,6 +27,7 @@
 #include "../common/types.h"
 
 #include "asset_types.h"
+#include "mesh/mesh.h"
 
 /*!
  *  @remark get asset metadata.
@@ -90,28 +91,6 @@ FSLAPI u32 fsl_texture_init(fsl_texture *texture,
         const GLint format, GLint filter, int channels, b8 grayscale, b8 bindless);
 
 FSLAPI void fsl_texture_free(fsl_texture *texture);
-
-/*!
- *  @param attrib pointer to a function to set attribute arrays for `mesh->vao`
- *  (e.g., &attrib_vec3, set a single vec3 attribute array).
- *
- *  @param name_id asset stable, unique name for asset-search, and logging (optional) (@ref fsl_asset_set_metadata() parameter).
- *  naming convention: "[a-z_][a-z0-9_]*", or:
- *      - no leading digits.
- *      - only lowercase characters, digits 0 -> 9 and underscores.
- *
- *  @param file base file name (optional) (@ref fsl_asset_set_metadata() parameter).
- *  @param path path to asset file without file name (optional) (@ref fsl_asset_set_metadata() parameter).
- *  @param usage `GL_<x>_DRAW`.
- *
- *  @return non-zero on failure and @ref fsl_err is set accordingly.
- */
-FSLAPI u32 fsl_mesh_generate(fsl_mesh *mesh,
-        const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path,
-        void (*attrib)(void), GLenum usage,
-        GLuint vbo_len, GLuint ebo_len, GLfloat *vbo_data, GLuint *ebo_data);
-
-FSLAPI void fsl_mesh_free(fsl_mesh *mesh);
 
 /*!
  *  @brief load font from file at `path`/`file`.
