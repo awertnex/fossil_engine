@@ -13,7 +13,7 @@ out vec3 normal;
 void main()
 {
     position = vec4(a_pos * scale, 1.0);
-    position.xy -= (scale.xy / 2.0);
+    position.xy -= scale.xy / 2.0;
     position *= mat_rotation;
     position.xyz += offset;
     normal = a_normal;

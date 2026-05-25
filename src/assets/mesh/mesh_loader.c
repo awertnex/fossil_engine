@@ -37,16 +37,6 @@
 #include <string.h>
 #include <ctype.h>
 
-enum primitive_type
-{
-    PRIMITIVE_TYPE_NONE,
-    PRIMITIVE_TYPE_VERTEX,
-    PRIMITIVE_TYPE_INDEX,
-    PRIMITIVE_TYPE_NORMAL,
-    PRIMITIVE_TYPE_TEXTURE_COORDINATE,
-    PRIMITIVE_TYPE_COUNT
-}; /* primitive_type */
-
 u32 fsl_mesh_get_format_internal(const str *file, fsl_mesh_format *format)
 {
     str base_name[FSL_ID_CAP] = {0};
@@ -112,12 +102,12 @@ u32 fsl_mesh_load_obj_internal(fsl_mesh *mesh, fsl_fs_path *path)
     GLfloat *vbo_data_p = NULL;
     GLuint *ebo_data_p = NULL;
     FILE *file = NULL;
-    str line_curr[FSL_STRING_MAX] = {0};
+    str line[FSL_STRING_MAX] = {0};
     str line_copy[FSL_STRING_MAX] = {0};
+    str *line_curr = NULL;
     str *token = NULL;
     str *token_save[2] = {0};
     str delim[] = " ";
-    u64 line_count = 0;
     i32 i = 0;
 
     v4f32 vertex = {0};
@@ -145,7 +135,6 @@ u32 fsl_mesh_load_obj_internal(fsl_mesh *mesh, fsl_fs_path *path)
     b8 has_normal = FALSE;
     b8 has_tex_coord = FALSE;
     u64 primitive_curr = 0;
-    void *primitive[PRIMITIVE_TYPE_COUNT] = {0};
 
     if (
             fsl_mem_alloc((void*)&vertex_buf, vertex_cap,
@@ -169,10 +158,10 @@ u32 fsl_mesh_load_obj_internal(fsl_mesh *mesh, fsl_fs_path *path)
         return fsl_err;
     }
 
-    while (fgets(line_curr, FSL_STRING_MAX, file) != NULL)
+    while (fgets(line, FSL_STRING_MAX, file) != NULL)
     {
-        ++line_count;
-
+        line_curr = line;
+        fsl_skip_spaces(&line_curr);
         if (line_curr[0] == '#' || line_curr[0] == '\n')
             continue;
 
@@ -181,12 +170,7 @@ u32 fsl_mesh_load_obj_internal(fsl_mesh *mesh, fsl_fs_path *path)
 
         if (!strncmp(token, "v\0", 2))
         {
-            if (!has_vertex)
-            {
-                has_vertex = TRUE;
-                primitive[primitive_curr] = vertex_buf;
-                ++primitive_curr;
-            }
+            has_vertex = TRUE;
 
             token = strtok_r(NULL, delim, &token_save[0]);
             fsl_convert_str_to_f32(token, &vertex.x, FSL_ID_CAP);
@@ -226,12 +210,7 @@ u32 fsl_mesh_load_obj_internal(fsl_mesh *mesh, fsl_fs_path *path)
 
         if (!strncmp(token, "vn\0", 3))
         {
-            if (!has_normal)
-            {
-                has_normal = TRUE;
-                primitive[primitive_curr] = normal_buf;
-                ++primitive_curr;
-            }
+            has_normal = TRUE;
 
             token = strtok_r(NULL, delim, &token_save[0]);
             fsl_convert_str_to_f32(token, &normal.x, FSL_ID_CAP);
@@ -258,12 +237,7 @@ u32 fsl_mesh_load_obj_internal(fsl_mesh *mesh, fsl_fs_path *path)
 
         if (!strncmp(token, "vt\0", 3))
         {
-            if (!has_tex_coord)
-            {
-                has_tex_coord = TRUE;
-                primitive[primitive_curr] = tex_coord_buf;
-                ++primitive_curr;
-            }
+            has_tex_coord = TRUE;
 
             token = strtok_r(NULL, delim, &token_save[0]);
             fsl_convert_str_to_f32(token, &tex_coord.x, FSL_ID_CAP);
@@ -381,14 +355,20 @@ cleanup:
 
 u32 fsl_mesh_load_fbx_internal(fsl_mesh *mesh, fsl_fs_path *path)
 {
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
 }
 
 /* TODO: make function `fsl_mesh_load_gltf_internal()` */
 u32 fsl_mesh_load_gltf_internal(fsl_mesh *mesh, fsl_fs_path *path)
 {
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
 }
 
 /* TODO: make function `fsl_mesh_load_glb_internal()` */
 u32 fsl_mesh_load_glb_internal(fsl_mesh *mesh, fsl_fs_path *path)
 {
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
 }

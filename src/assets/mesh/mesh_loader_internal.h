@@ -26,7 +26,9 @@
 #include "../../common/types.h"
 #include "mesh.h"
 
-enum fsl_mesh_format
+typedef struct fsl_mesh_vertex fsl_mesh_vertex;
+
+typedef enum fsl_mesh_format
 {
     FSL_MESH_FORMAT_NONE,
     FSL_MESH_FORMAT_OBJ,
@@ -34,8 +36,14 @@ enum fsl_mesh_format
     FSL_MESH_FORMAT_GLTF,
     FSL_MESH_FORMAT_GLB,
     FSL_MESH_FORMAT_COUNT
-};
-typedef enum fsl_mesh_format fsl_mesh_format;
+} fsl_mesh_format;
+
+struct fsl_mesh_vertex
+{
+    v3f32 pos;
+    v3f32 normal;
+    v2f32 uv;
+}; /* fsl_mesh_vertex */
 
 /*!
  *  @internal

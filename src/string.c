@@ -76,6 +76,12 @@ str *fsl_stringf(const str *format, ...)
     return string;
 }
 
+void fsl_skip_spaces(str **string)
+{
+    while (**string == ' ' || **string == '\t' || **string == '\r')
+        ++*string;
+}
+
 u64 fsl_find_token(str *arg, int argc, char **argv)
 {
     u32 i = 0;

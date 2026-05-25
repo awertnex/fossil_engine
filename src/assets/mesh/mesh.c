@@ -29,12 +29,18 @@
 #include "../../shaders/shaders.h"
 
 #include "../../h/dir.h"
+#include "../../h/string.h"
 
 #include "mesh.h"
 #include "mesh_loader_internal.h"
 
 #include <stdio.h>
 #include <string.h>
+
+/*!
+ *  @brief set attribute arrays for a mesh `vao`.
+ */
+static void attrib_mesh_internal(void);
 
 u32 fsl_mesh_load(fsl_mesh *mesh,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path)
@@ -92,7 +98,7 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
     mesh->vbo_data = mesh_temp.vbo_data;
     mesh->ebo_data = mesh_temp.ebo_data;
 
-    if (fsl_mesh_generate(mesh, name, name_id, file, path, fsl_attrib_vec3_vec3, GL_STATIC_DRAW,
+    if (fsl_mesh_generate(mesh, name, name_id, file, path, attrib_mesh_internal, GL_STATIC_DRAW,
                 mesh_temp.vbo_len, mesh_temp.ebo_len, vbo_data_p, ebo_data_p) != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -103,6 +109,11 @@ cleanup:
 
     fsl_mesh_free(&mesh_temp);
     return fsl_err;
+}
+
+void fsl_mesh_draw(fsl_mesh *mesh, f32 pos_x, f32 pos_y, f32 pos_z,
+        f32 roll, f32 pitch, f32 yaw)
+{
 }
 
 u32 fsl_mesh_generate(fsl_mesh *mesh,
@@ -205,4 +216,17 @@ void fsl_mesh_free(fsl_mesh *mesh)
 
     /* TODO: use `fsl_mem_pop_arena()` when you make it */
     *mesh = nomesh;
+}
+
+static void attrib_mesh_internal(void)
+{
+    u64 stride = sizeof(v3f32) + sizeof(v3f32);
+
+    /* position */
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+
+    /* normal */
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(GLfloat)));
 }

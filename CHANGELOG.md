@@ -9,6 +9,7 @@
 ## v0.8.0-dev (current)
 
 #### changes
+- (2026 05 25): added 'Wavefront OBJ' mesh format loader.
 - (2026 05 14): removed 'TRACE' logs from release builds completely.
 - (2026 05 14): added feature 'input contexts' (input layers), and made context
                 0 the default input context (always active).

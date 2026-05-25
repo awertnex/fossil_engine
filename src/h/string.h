@@ -51,6 +51,13 @@ FSLAPI void fsl_swap_string_char(str *string, char c1, char c2);
 FSLAPI str *fsl_stringf(const str *format, ...);
 
 /*!
+ *  @brief skip leading spaces in `*string`.
+ *
+ *  @remark modifies `*string`.
+ */
+FSLAPI void fsl_skip_spaces(str **string);
+
+/*!
  *  @brief compare `arg` to any of `argv` entries.
  *
  *  @return `argc` of match if found, 0 otherwise.
