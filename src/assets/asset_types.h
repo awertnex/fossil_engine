@@ -24,6 +24,7 @@
 #define FSL_ASSET_TYPES_H
 
 #include "../common/limits.h"
+#include "../common/types.h"
 #include "../memory/memory_types.h"
 
 #include "../external/glad/glad.h"
@@ -59,6 +60,8 @@ typedef struct fsl_fbo              fsl_fbo;
 typedef struct fsl_texture          fsl_texture;
 typedef struct fsl_glyph            fsl_glyph;
 typedef struct fsl_font             fsl_font;
+typedef struct fsl_projection       fsl_projection;
+typedef struct fsl_camera           fsl_camera;
 
 typedef enum fsl_asset_type
 {
@@ -130,7 +133,8 @@ struct fsl_asset_metadata
 struct fsl_vbo
 {
     GLuint id;
-    u64 len;            /* number of elements in `buf` */
+    fsl_size size;      /* size of each element in `buf` */
+    fsl_size len;       /* number of elements in `buf` */
     fsl_mem_handle buf;
     b8 initialized;
 }; /* fsl_vbo */
@@ -194,5 +198,31 @@ struct fsl_font
     fsl_mem_handle info;    /* used by @ref stbtt_InitFont() */
     fsl_glyph glyph[FSL_GLYPH_MAX];
 }; /* fsl_font */
+
+struct fsl_projection
+{
+    m4f32 target;
+    m4f32 translation;
+    m4f32 rotation;
+    m4f32 orientation;
+    m4f32 view;
+    m4f32 projection;
+    m4f32 perspective;
+}; /* fsl_projection */
+
+struct fsl_camera
+{
+    v3f64 pos;
+    f64 roll, pitch, yaw;
+    f64 sin_roll, sin_pitch, sin_yaw;
+    f64 cos_roll, cos_pitch, cos_yaw;
+    f32 fovy;
+    f32 fovy_smooth;
+    f32 ratio;
+    f32 far;
+    f32 near;
+    f32 zoom;
+    fsl_projection projection;
+}; /* fsl_camera */
 
 #endif /* FSL_ASSET_TYPES_H */

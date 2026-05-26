@@ -41,6 +41,7 @@ struct fsl_mem_arena_handle
 }; /* fsl_mem_arena_handle */
 
 fsl_mem_arena mem_arena_internal = {0};
+fsl_mem_arena mem_arena_sub_data_internal = {0};
 fsl_mem_arena mem_arena_name_internal = {0};
 fsl_mem_arena mem_arena_name_id_internal = {0};
 fsl_mem_arena mem_arena_file_internal = {0};
@@ -50,7 +51,7 @@ u32 fsl_mem_array_init_internal(fsl_array *array)
 {
     if (!array->buf)
     {
-        if (fsl_mem_alloc((void*)array->buf, MEM_ALLOC_SIZE_MIN,
+        if (fsl_mem_alloc((void*)&array->buf, MEM_ALLOC_SIZE_MIN,
                     "fsl_mem_array_init_internal().array->buf") != FSL_ERR_SUCCESS)
             return fsl_err;
         array->cap = MEM_ALLOC_SIZE_MIN;
@@ -90,7 +91,7 @@ void fsl_mem_array_free_internal(fsl_array *array)
     fsl_array noarray = {0};
 
     if (array->buf)
-        fsl_mem_free((void*)array->buf, array->cap, "fsl_mem_array_free_internal().array->buf");
+        fsl_mem_free((void*)&array->buf, array->cursor, "fsl_mem_array_free_internal().array->buf");
     *array = noarray;
 }
 

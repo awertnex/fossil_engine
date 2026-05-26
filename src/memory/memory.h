@@ -109,12 +109,21 @@
 /*!
  *  @internal
  *
- *  @brief engine's global memory arena, used to manage all heap memory inside
- *  and optionally outside the engine.
+ *  @brief engine's global memory arena, used to manage all heap memory inside the engine.
  *
  *  initialized in @ref fsl_engine_init().
  */
 extern fsl_mem_arena mem_arena_internal;
+
+/*!
+ *  @internal
+ *
+ *  @brief engine's sub-data memory arena, for any data that belongs to an asset
+ *  (e.g., a vertex buffer).
+ *
+ *  initialized in @ref fsl_engine_init().
+ */
+extern fsl_mem_arena mem_arena_sub_data_internal;
 
 /*!
  *  @internal

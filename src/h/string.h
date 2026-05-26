@@ -58,6 +58,11 @@ FSLAPI str *fsl_stringf(const str *format, ...);
 FSLAPI void fsl_skip_spaces(str **string);
 
 /*!
+ *  @brief strip `string` of non-printable ascii and non-ascii characters, and spaces.
+ */
+FSLAPI void fsl_strip_non_printable(str *string);
+
+/*!
  *  @brief compare `arg` to any of `argv` entries.
  *
  *  @return `argc` of match if found, 0 otherwise.
@@ -127,5 +132,31 @@ FSLAPI u32 fsl_convert_i32_to_str(str *dst, i32 size, i32 n);
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_convert_u64_to_str(str *dst, u64 size, u64 n);
+
+/*!
+ *  @brief create basic 'djb2' hash from `data`.
+ *
+ *  @param len data size, in bytes (0 auto-detects size, useful for strings).
+ *
+ *  @return hash.
+ */
+FSLAPI u64 fsl_hash_djb2_u64(const void *data, fsl_cap len);
+
+/*!
+ *  @brief create basic 'FNV-1a' hash from `data`.
+ *
+ *  @param len data size, in bytes (0 auto-detects size, useful for strings).
+ *
+ *  @return hash.
+ */
+FSLAPI u64 fsl_hash_fnv1a_u64(const void *data, fsl_cap len);
+
+/*!
+ *  @brief find an unsigned 64-bit hash within `buf` that matches `hash`.
+ *
+ *  @param dst recipient of hash index if found.
+ *  @param len number of elements in `buf`.
+ */
+b8 fsl_find_hash_u64(u64 hash, u64 *buf, u64 *dst, fsl_len len);
 
 #endif /* FSL_STRING_H */

@@ -59,6 +59,11 @@ struct fsl_mesh
      *  @brief model transform data (location, rotation and scale).
      */
     fsl_vbo transform_buf;
+
+    /*!
+     *  @brief shader uniform location for the perspective matrix.
+     */
+    GLuint uniform_perspective;
 }; /* fsl_mesh */
 
 /*!
@@ -80,6 +85,12 @@ struct fsl_mesh
  */
 FSLAPI u32 fsl_mesh_load(fsl_mesh *mesh,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path);
+
+/*!
+ *  @brief draw mesh using `camera` parameters at specified transforms.
+ */
+FSLAPI void fsl_mesh_draw(fsl_mesh *mesh, fsl_camera *camera, f32 pos_x, f32 pos_y, f32 pos_z,
+        f32 roll, f32 pitch, f32 yaw);
 
 /*!
  *  @param attrib pointer to a function to set attribute arrays for `mesh->vao`

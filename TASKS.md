@@ -11,12 +11,12 @@ STATUS  DONE DATE       TASK
 - [!]   (          ):   compile glfw into the binary directly
 - [x]   (2026 05 10):   move all allocations to one big memory arena (including
                         stack arrays in struct definitions)
-- [ ]   (          ):   change deployment package directory structure to make
+- [x]   (2026 05 17):   change deployment package directory structure to make
                         engine headers' relative includes not break in other
                         repos
 - [ ]   (          ):   make physics module
 - [ ]   (          ):   make camera module
-- [ ]   (          ):   do mesh loading and unloading from disk
+- [x]   (2026 05 24):   do mesh loading and unloading from disk
 - [ ]   (          ):   do json parsing
 
 quirks:

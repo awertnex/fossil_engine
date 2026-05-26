@@ -82,6 +82,25 @@ void fsl_skip_spaces(str **string)
         ++*string;
 }
 
+void fsl_strip_non_printable(str *string)
+{
+    i64 i = 0;
+    i64 j = 0;
+    u64 len = strlen(string);
+    while (string[i])
+    {
+        if (string[i] > ' ' && string[i] < 127)
+        {
+            string[j] = string[i];
+            ++j;
+        }
+        ++i;
+    }
+
+    if (j < i)
+        string[j] = 0;
+}
+
 u64 fsl_find_token(str *arg, int argc, char **argv)
 {
     u32 i = 0;
@@ -256,4 +275,45 @@ u32 fsl_convert_u64_to_str(str *dst, u64 size, u64 n)
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
+}
+
+u64 fsl_hash_djb2_u64(const void *data, fsl_cap len)
+{
+    u8* d = data;
+    u64 hash = 5381;
+    i64 i = 0;
+    for (; (len && i < len) || *d; ++i, ++d)
+        hash = ((hash << 5) + hash) + *d;
+    return hash;
+}
+
+u64 fsl_hash_fnv1a_u64(const void *data, fsl_cap len)
+{
+    u8 *d = data;
+    u64 i = 0;
+    u64 hash = 2166136261;
+
+    for (i = 0; (len && i < len) || *d; ++i, ++d)
+    {
+        hash ^= *d;
+        hash *= 16777619;
+    }
+
+    return hash;
+}
+
+b8 fsl_find_hash_u64(u64 hash, u64 *buf, u64 *dst, fsl_len len)
+{
+    u64 i = 0;
+    while (i < len)
+    {
+        if (hash == *buf)
+        {
+            *dst = i;
+            return TRUE;
+        }
+        ++i;
+        ++buf;
+    }
+    return FALSE;
 }

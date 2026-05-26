@@ -39,11 +39,11 @@ typedef enum fsl_mesh_format
 /*!
  *  @internal
  *
- *  @brief get mesh type based on file name conventions.
+ *  @brief get mesh file format based on file name conventions.
  *
  *  examples:
- *      - file name "player.obj" -> mesh format "FSL_MESH_FORMAT_OBJ".
- *      - file name "player.glb" -> mesh format "FSL_MESH_FORMAT_GLB".
+ *      - file name "player.obj" -> mesh format @ref FSL_MESH_FORMAT_OBJ.
+ *      - file name "player.glb" -> mesh format @ref FSL_MESH_FORMAT_GLB.
  *
  *  @remark case insensitive.
  *

@@ -133,7 +133,12 @@
 
 /* ---- section: data_and_assets -------------------------------------------- */
 
+#define MSG_VBO_INIT(id, size)                              fsl_logger_stringf("VBO[%u][%"PRIu64"B] Initialized\n", id, size)
+#define MSG_VBO_FREE(id, size)                              fsl_logger_stringf("VBO[%u][%"PRIu64"B] Unloaded\n", id, size)
 #define MSG_FBO_INIT_FAIL(id, status)                       fsl_logger_stringf("Failed to Initialize FBO[%u], Status[%d]\n", id, status)
+#define MSG_FBO_INIT(id, size_x, size_y)                    fsl_logger_stringf("FBO[%u][size_x: %"PRIu64"][size_y: %"PRIu64"] Initialized\n", id, size_x, size_y)
+#define MSG_FBO_REALLOC(id, size_x, size_y)                 fsl_logger_stringf("FBO[%u][size_x: %"PRIu64"][size_y: %"PRIu64"] Reallocated\n", id, size_x, size_y)
+#define MSG_FBO_FREE(id)                                    fsl_logger_stringf("FBO[%u] Unloaded\n", id)
 #define MSG_TEXTURE_LOAD_REASON_FAIL(name, reason)          MSG_ACTION_SUBJECT_REASON_ERROR("Load Texture", name, reason)
 #define MSG_TEXTURE_LOAD(name, id)                          fsl_logger_stringf("Texture %s[%u] Loaded\n", name, id)
 #define MSG_TEXTURE_UNLOAD(name, id)                        fsl_logger_stringf("Texture %s[%u] Unloaded\n", name, id)

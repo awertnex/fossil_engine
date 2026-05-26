@@ -29,6 +29,14 @@
 #include "asset_types.h"
 #include "mesh/mesh.h"
 
+typedef enum fsl_draw_type
+{
+    FSL_DRAW_TYPE_NONE,
+    FSL_DRAW_TYPE_STREAM,
+    FSL_DRAW_TYPE_STATIC,
+    FSL_DRAW_TYPE_DYNAMIC
+} fsl_draw_type;
+
 /*!
  *  @remark get asset metadata.
  */
@@ -54,6 +62,20 @@ FSLAPI fsl_asset_metadata fsl_asset_get_metadata(fsl_asset asset);
  */
 FSLAPI u32 fsl_asset_set_metadata(fsl_asset *asset, fsl_asset_type type,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path);
+
+/*!
+ *  @param target 'OpenGL' buffer target (e.g., GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER).
+ *  @param size size of each element in buffer.
+ *  @param len number of elements in buffer.
+ *
+ *  @remark does not unbind buffer, @ref glBindBuffer() must be used to bind different buffer.
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+FSLAPI u32 fsl_vbo_init(fsl_vbo *vbo, fsl_size size, fsl_len len, void *data,
+        GLenum target, fsl_draw_type draw_type);
+
+void fsl_vbo_free(fsl_vbo *vbo);
 
 /*!
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
@@ -114,5 +136,38 @@ FSLAPI u32 fsl_font_init(fsl_font *font, u32 resolution,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path);
 
 FSLAPI void fsl_font_free(fsl_font *font);
+
+/*!
+ *  @brief update `sine` and `cosine` of camera roll, pitch and yaw.
+ *
+ *  @param roll enable/disable roll rotation.
+ *
+ *  @remark rotation limits:
+ *      roll:  [  0, 360].
+ *      pitch: [-90,  90].
+ *      yaw:   [  0, 360].
+ */
+FSLAPI void fsl_update_camera_movement(fsl_camera *camera, b8 roll);
+
+/*!
+ *  @brief make perspective projection matrices from camera parameters.
+ *
+ *  - setup camera matrices for Z-up, right-handed coordinates and vertical fov (fovy):
+ *      - +X: forward.
+ *      - +Y: left.
+ *      - +Z: up.
+ *
+ *  @remark called automatically from @ref fsl_update_camera_movement().
+ *
+ *  @param roll enable/disable roll rotation.
+ */
+FSLAPI void fsl_update_projection_perspective(fsl_camera camera, fsl_projection *projection, b8 roll);
+
+/*!
+ *  @brief get camera look-at angles from camera position and target position.
+ *
+ *  assign vertical angle to `pitch` and horizontal angle to `yaw`.
+ */
+FSLAPI void fsl_get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f64 *yaw);
 
 #endif /* FSL_ASSETS_H */

@@ -31,9 +31,7 @@
 #define GLFW_INCLUDE_NONE
 #include "../external/glfw3.h"
 
-typedef struct fsl_render       fsl_render;
-typedef struct fsl_camera       fsl_camera;
-typedef struct fsl_projection   fsl_projection;
+typedef struct fsl_render fsl_render;
 
 enum fsl_engine_string_index
 {
@@ -66,31 +64,6 @@ struct fsl_render
      */
     u8 *screen_buf;
 }; /* fsl_render */
-
-struct fsl_camera
-{
-    v3f64 pos;
-    f64 roll, pitch, yaw;
-    f64 sin_roll, sin_pitch, sin_yaw;
-    f64 cos_roll, cos_pitch, cos_yaw;
-    f32 fovy;
-    f32 fovy_smooth;
-    f32 ratio;
-    f32 far;
-    f32 near;
-    f32 zoom;
-}; /* fsl_camera */
-
-struct fsl_projection
-{
-    m4f32 target;
-    m4f32 translation;
-    m4f32 rotation;
-    m4f32 orientation;
-    m4f32 view;
-    m4f32 projection;
-    m4f32 perspective;
-}; /* fsl_projection */
 
 /* ---- section: declarations ----------------------------------------------- */
 
@@ -263,36 +236,5 @@ FSLAPI void fsl_fbo_bind(void);
  *  @brief blit rendered internal fbo (e.g., text, ui elements) onto `fbo`.
  */
 FSLAPI void fsl_fbo_blit(GLuint fbo);
-
-/*!
- *  @brief update `sine` and `cosine` of camera roll, pitch and yaw.
- *
- *  @param roll enable/disable roll rotation.
- *
- *  @remark rotation limits:
- *      roll:  [  0, 360].
- *      pitch: [-90,  90].
- *      yaw:   [  0, 360].
- */
-FSLAPI void fsl_update_camera_movement(fsl_camera *camera, b8 roll);
-
-/*!
- *  @brief make perspective projection matrices from camera parameters.
- *
- *  - setup camera matrices for Z-up, right-handed coordinates and vertical fov (fovy):
- *      - +X: forward.
- *      - +Y: left.
- *      - +Z: up.
- *
- *  @param roll enable/disable roll rotation.
- */
-FSLAPI void fsl_update_projection_perspective(fsl_camera camera, fsl_projection *projection, b8 roll);
-
-/*!
- *  @brief get camera look-at angles from camera position and target position.
- *
- *  assign vertical angle to `pitch` and horizontal angle to `yaw`.
- */
-FSLAPI void fsl_get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f64 *yaw);
 
 #endif /* FSL_ENGINE_H */

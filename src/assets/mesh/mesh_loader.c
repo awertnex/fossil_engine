@@ -39,7 +39,7 @@
 
 struct fsl_mesh_vertex
 {
-    v4f32 pos;
+    v3f32 pos;
     v3f32 normal;
     v2f32 uv;
 }; /* fsl_mesh_vertex */
@@ -55,7 +55,7 @@ struct fsl_mesh_vertex
  *  uv index goes into `vertex->y` and
  *  normal index goes into `vertex->z`.
  */
-static void mesh_obj_get_vertex_internal(const str *token, v3i64 *vertex);
+static void mesh_obj_get_vertex_internal(str *token, v3i64 *vertex);
 
 /* ---- section: implementation --------------------------------------------- */
 
@@ -125,27 +125,25 @@ u32 mesh_load_obj_internal(fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *
     str line[FSL_STRING_MAX] = {0};
     str *line_p = NULL;
     str *token = NULL;
-    str *token_save[2] = {0};
+    str *token_save[1] = {0};
     str delim[] = " ";
     i32 i = 0;
 
-    u64 vertex_dst_alloc_size = 0;
     v3i64 vertex_indices_first = {0};
     v3i64 vertex_indices = {0};
     struct fsl_mesh_vertex vertex = {0};
+    f32 vertex_w = 0.0f;
+    u64 vertex_hash = 0;
     fsl_array vertex_buf = {0};
-    fsl_array normal_buf = {0};
     fsl_array uv_buf = {0};
-
-    b8 has_vertex = FALSE;
-    b8 has_index = FALSE;
-    b8 has_normal = FALSE;
-    b8 has_uv = FALSE;
+    fsl_array normal_buf = {0};
+    fsl_array hash_buf = {0}; /* face vertex hashes */
 
     if (
             fsl_mem_array_init(&vertex_buf) != FSL_ERR_SUCCESS ||
-            fsl_mem_array_init(&normal_buf) != FSL_ERR_SUCCESS ||
             fsl_mem_array_init(&uv_buf) != FSL_ERR_SUCCESS ||
+            fsl_mem_array_init(&normal_buf) != FSL_ERR_SUCCESS ||
+            fsl_mem_array_init(&hash_buf) != FSL_ERR_SUCCESS ||
             fsl_mem_array_init(vertex_dst) != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -168,8 +166,6 @@ u32 mesh_load_obj_internal(fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *
 
         if (!strncmp(token, "v\0", 2))
         {
-            has_vertex = TRUE;
-
             token = strtok_r(NULL, delim, &token_save[0]);
             fsl_convert_str_to_f32(token, &vertex.pos.x, FSL_ID_CAP);
 
@@ -181,42 +177,23 @@ u32 mesh_load_obj_internal(fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *
 
             token = strtok_r(NULL, delim, &token_save[0]);
             if (token)
-                fsl_convert_str_to_f32(token, &vertex.pos.w, FSL_ID_CAP);
+                fsl_convert_str_to_f32(token, &vertex_w, FSL_ID_CAP);
             else
-                vertex.pos.w = 1.0;
+                vertex_w = 1.0;
 
-            if (vertex.pos.w != 0.0)
+            if (vertex_w != 0.0)
             {
-                vertex.pos.x /= vertex.pos.w;
-                vertex.pos.y /= vertex.pos.w;
-                vertex.pos.z /= vertex.pos.w;
+                vertex.pos.x /= vertex_w;
+                vertex.pos.y /= vertex_w;
+                vertex.pos.z /= vertex_w;
             }
 
             fsl_mem_array_push(&vertex_buf, &vertex.pos, sizeof(v3f32));
             continue;
         }
 
-        if (!strncmp(token, "vn\0", 3))
-        {
-            has_normal = TRUE;
-
-            token = strtok_r(NULL, delim, &token_save[0]);
-            fsl_convert_str_to_f32(token, &vertex.normal.x, FSL_ID_CAP);
-
-            token = strtok_r(NULL, delim, &token_save[0]);
-            fsl_convert_str_to_f32(token, &vertex.normal.y, FSL_ID_CAP);
-
-            token = strtok_r(NULL, delim, &token_save[0]);
-            fsl_convert_str_to_f32(token, &vertex.normal.z, FSL_ID_CAP);
-
-            fsl_mem_array_push(&normal_buf, &vertex.normal, sizeof(v3f32));
-            continue;
-        }
-
         if (!strncmp(token, "vt\0", 3))
         {
-            has_uv = TRUE;
-
             token = strtok_r(NULL, delim, &token_save[0]);
             fsl_convert_str_to_f32(token, &vertex.uv.x, FSL_ID_CAP);
 
@@ -230,77 +207,93 @@ u32 mesh_load_obj_internal(fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *
             continue;
         }
 
+        if (!strncmp(token, "vn\0", 3))
+        {
+            token = strtok_r(NULL, delim, &token_save[0]);
+            fsl_convert_str_to_f32(token, &vertex.normal.x, FSL_ID_CAP);
+
+            token = strtok_r(NULL, delim, &token_save[0]);
+            fsl_convert_str_to_f32(token, &vertex.normal.y, FSL_ID_CAP);
+
+            token = strtok_r(NULL, delim, &token_save[0]);
+            fsl_convert_str_to_f32(token, &vertex.normal.z, FSL_ID_CAP);
+
+            fsl_mem_array_push(&normal_buf, &vertex.normal, sizeof(v3f32));
+            continue;
+        }
+
         if (!strncmp(token, "f\0", 2))
         {
-            if (!has_index)
-            {
-                if (fsl_mem_array_init(index_dst) != FSL_ERR_SUCCESS)
-                    goto cleanup;
-                has_index = TRUE;
-            }
+            if (!index_dst->cap && fsl_mem_array_init(index_dst) != FSL_ERR_SUCCESS)
+                goto cleanup;
 
             if ((token = strtok_r(NULL, delim, &token_save[0])) == NULL)
                 continue;
 
-            /* get first vertex */
-            mesh_obj_get_vertex_internal(token, &vertex_indices_first);
-            fsl_mem_array_push(index_dst, &vertex_indices_first.x, sizeof(u64));
-            fsl_mem_array_push(vertex_dst, &*((u8*)vertex_buf.buf +
-                        vertex_indices_first.x * sizeof(v3f32)), sizeof(v3f32));
-            fsl_mem_array_push(vertex_dst, &*((u8*)normal_buf.buf +
-                        vertex_indices_first.z * sizeof(v3f32)), sizeof(v3f32));
-            fsl_mem_array_push(vertex_dst, &*((u8*)uv_buf.buf +
-                        vertex_indices_first.y * sizeof(v2f32)), sizeof(v2f32));
+            fsl_strip_non_printable(token);
+            vertex_hash = fsl_hash_djb2_u64(token, 0);
+
+            if (fsl_find_hash_u64(vertex_hash, hash_buf.buf, &vertex_indices_first.x, hash_buf.cursor / sizeof(i64)))
+                fsl_mem_array_push(index_dst, &vertex_indices_first.x, sizeof(u32));
+            else
+            {
+                fsl_mem_array_push(&hash_buf, &vertex_hash, sizeof(u64));
+                mesh_obj_get_vertex_internal(token, &vertex_indices_first);
+                vertex.pos = *((v3f32*)vertex_buf.buf + vertex_indices_first.x);
+                vertex.uv = *((v2f32*)uv_buf.buf + vertex_indices_first.y);
+                vertex.normal = *((v3f32*)normal_buf.buf + vertex_indices_first.z);
+                fsl_mem_array_push(index_dst, &vertex_indices_first.x, sizeof(u32));
+                fsl_mem_array_push(vertex_dst, &vertex, sizeof(struct fsl_mesh_vertex));
+            }
+            ++i;
 
             while ((token = strtok_r(NULL, delim, &token_save[0])) != NULL)
             {
-                mesh_obj_get_vertex_internal(token, &vertex_indices);
-                fsl_mem_array_push(index_dst, &vertex_indices.x, sizeof(u64));
-                fsl_mem_array_push(vertex_dst, &*((u8*)vertex_buf.buf +
-                            vertex_indices_first.x * sizeof(v3f32)), sizeof(v3f32));
-                fsl_mem_array_push(vertex_dst, &*((u8*)normal_buf.buf +
-                            vertex_indices_first.z * sizeof(v3f32)), sizeof(v3f32));
-                fsl_mem_array_push(vertex_dst, &*((u8*)uv_buf.buf +
-                            vertex_indices_first.y * sizeof(v2f32)), sizeof(v2f32));
+                fsl_strip_non_printable(token);
+                vertex_hash = fsl_hash_djb2_u64(token, 0);
+
+                if (fsl_find_hash_u64(vertex_hash, hash_buf.buf, &vertex_indices.x, hash_buf.cursor / sizeof(i64)))
+                    fsl_mem_array_push(index_dst, &vertex_indices.x, sizeof(u32));
+                else
+                {
+                    fsl_mem_array_push(&hash_buf, &vertex_hash, sizeof(u64));
+                    mesh_obj_get_vertex_internal(token, &vertex_indices);
+                    vertex.pos = *((v3f32*)vertex_buf.buf + vertex_indices.x);
+                    vertex.uv = *((v2f32*)uv_buf.buf + vertex_indices.y);
+                    vertex.normal = *((v3f32*)normal_buf.buf + vertex_indices.z);
+                    fsl_mem_array_push(index_dst, &vertex_indices.x, sizeof(u32));
+                    fsl_mem_array_push(vertex_dst, &vertex, sizeof(struct fsl_mesh_vertex));
+                }
                 ++i;
 
-                /* use first vertex to triangulate face */
                 if (i % 3 == 0)
                 {
-                    fsl_mem_array_push(index_dst, &vertex_indices_first.x, sizeof(u64));
-                    fsl_mem_array_push(vertex_dst, &*((u8*)vertex_buf.buf +
-                                vertex_indices_first.x * sizeof(v3f32)), sizeof(v3f32));
-                    fsl_mem_array_push(vertex_dst, &*((u8*)normal_buf.buf +
-                                vertex_indices_first.z * sizeof(v3f32)), sizeof(v3f32));
-                    fsl_mem_array_push(vertex_dst, &*((u8*)uv_buf.buf +
-                                vertex_indices_first.y * sizeof(v2f32)), sizeof(v2f32));
+                    fsl_mem_array_push(index_dst, &vertex_indices_first.x, sizeof(u32));
+                    fsl_mem_array_push(index_dst, &vertex_indices.x, sizeof(u32));
                     ++i;
                 }
             }
+            ++i;
 
             /* triangulate final face */
             if ((i + 1) % 3 == 0)
-            {
-                fsl_mem_array_push(index_dst, &vertex_indices_first.x, sizeof(u64));
-                fsl_mem_array_push(vertex_dst, &*((u8*)vertex_buf.buf +
-                            vertex_indices_first.x * sizeof(v3f32)), sizeof(v3f32));
-                fsl_mem_array_push(vertex_dst, &*((u8*)normal_buf.buf +
-                        vertex_indices_first.z * sizeof(v3f32)), sizeof(v3f32));
-                fsl_mem_array_push(vertex_dst, &*((u8*)uv_buf.buf +
-                        vertex_indices_first.y * sizeof(v2f32)), sizeof(v2f32));
-            }
+                fsl_mem_array_push(index_dst, &vertex_indices_first.x, sizeof(u32));
 
             i = 0;
             continue;
         }
     }
 
+    for (i = 0; i < index_dst->cursor / sizeof(u32); ++i)
+        printf("i[%u]\n", *((u32*)index_dst->buf + i));
+
     fclose(file);
     file = NULL;
 
     fsl_mem_array_free(&vertex_buf);
-    fsl_mem_array_free(&normal_buf);
     fsl_mem_array_free(&uv_buf);
+    fsl_mem_array_free(&normal_buf);
+    fsl_mem_array_free(&hash_buf);
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -312,19 +305,20 @@ cleanup:
     fsl_mem_array_free(vertex_dst);
     fsl_mem_array_free(index_dst);
     fsl_mem_array_free(&vertex_buf);
-    fsl_mem_array_free(&normal_buf);
     fsl_mem_array_free(&uv_buf);
+    fsl_mem_array_free(&normal_buf);
+    fsl_mem_array_free(&hash_buf);
     return fsl_err;
 }
 
-static void mesh_obj_get_vertex_internal(const str *token, v3i64 *vertex)
+static void mesh_obj_get_vertex_internal(str *token, v3i64 *vertex)
 {
     str *p = token;
     str temp[FSL_ID_CAP] = {0};
     u32 i = 0;
 
     /* vertex index */
-    while(p++)
+    while(p)
     {
         if (fsl_is_digit(*p))
         {
@@ -338,10 +332,11 @@ static void mesh_obj_get_vertex_internal(const str *token, v3i64 *vertex)
         }
         else
             vertex->x = 0;
+        ++p;
     }
 
     /* vertex uv */
-    while(p++)
+    while(p)
     {
         if (fsl_is_digit(*p))
         {
@@ -355,10 +350,11 @@ static void mesh_obj_get_vertex_internal(const str *token, v3i64 *vertex)
         }
         else
             vertex->y = 0;
+        ++p;
     }
 
     /* vertex normal */
-    while(p++)
+    while(p)
     {
         if (fsl_is_digit(*p))
         {
@@ -372,6 +368,7 @@ static void mesh_obj_get_vertex_internal(const str *token, v3i64 *vertex)
         }
         else
             vertex->z = 0;
+        ++p;
     }
 }
 

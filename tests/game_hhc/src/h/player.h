@@ -74,7 +74,7 @@ enum player_menu_state
 typedef struct player
 {
     str name[64];                   /* in-game name */
-    u64 flag;                       /* enum: @ref player_flag */
+    u64 flag;                       /* enum @ref player_flag */
     v3f64 pos;                      /* coordinates in world */
     v3f64 pos_last;                 /* coordinates in world of previous frame */
     v3f32 size;                     /* size (for collision detection) */
@@ -97,10 +97,10 @@ typedef struct player
     fsl_camera camera;
     fsl_camera camera_hud;          /* for hud 3d elements */
     f32 camera_distance;            /* for camera collision detection */
-    u8 camera_mode;                 /* enum: @ref player_camera_mode */
+    u8 camera_mode;                 /* enum @ref player_camera_mode */
 
     /*!
-     *  @brief player at world edge, enum: @ref player_flag.
+     *  @brief player at world edge, enum @ref player_flag.
      */
     u8 overflow;
 
@@ -108,7 +108,7 @@ typedef struct player
     v3i32 ch_delta;                 /* previous chunk (named `ch` to avoid symbol clash with @ref chunk) */
 
     v3i64 spawn;                    /* spawn point */
-    u64 menu_state;                 /* enum: @ref player_menu_state */
+    u64 menu_state;                 /* enum @ref player_menu_state */
 
     /*!
      *  @remark signed instead of unsigned so it's possible to navigate `hotbar_slots`
@@ -120,7 +120,7 @@ typedef struct player
     u32 inventory_slots[PLAYER_INVENTORY_SLOTS_MAX];
 
     fsl_bounding_box bbox;
-    u32 death; /* enum: @ref player_death_reason */
+    u32 death; /* enum @ref player_death_reason */
 } player;
 
 /*!

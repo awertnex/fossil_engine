@@ -186,8 +186,8 @@ void settings_update(void)
 static void bind_shader_uniforms(void)
 {
     fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
-    uniform.defaults.offset =
-        glGetUniformLocation(shader_p[SHADER_DEFAULT].asset.id, "offset");
+    uniform.defaults.location =
+        glGetUniformLocation(shader_p[SHADER_DEFAULT].asset.id, "location");
     uniform.defaults.scale =
         glGetUniformLocation(shader_p[SHADER_DEFAULT].asset.id, "scale");
     uniform.defaults.mat_rotation =
@@ -685,8 +685,7 @@ static void draw_everything(void)
     if (_player.camera_mode != PLAYER_CAMERA_MODE_1ST_PERSON)
     {
         glUseProgram(shader_p[SHADER_DEFAULT].asset.id);
-        glUniform3fv(uniform.defaults.scale, 1, (GLfloat*)&_player.size);
-        glUniform3f(uniform.defaults.offset,
+        glUniform3f(uniform.defaults.location,
                 _player.pos.x, _player.pos.y, _player.pos.z);
         glUniformMatrix4fv(uniform.defaults.mat_rotation, 1, GL_FALSE,
                 (GLfloat*)(f32[]){
@@ -702,7 +701,12 @@ static void draw_everything(void)
                 (GLfloat*)&skybox_data.sky_color);
 
         glBindVertexArray(mesh_p[MESH_PLAYER].vao);
-        glDrawArrays(GL_TRIANGLES, 0, mesh_p[MESH_PLAYER].vbo_len);
+        glDrawElementsInstanced(GL_TRIANGLES, mesh_p[MESH_PLAYER].index_buf.len, GL_UNSIGNED_INT, NULL, 1);
+        /*
+        fsl_mesh_draw(&mesh_p[MESH_PLAYER], &_player.camera,
+                _player.pos.x, _player.pos.y, _player.pos.z,
+                _player.roll, _player.pitch, _player.yaw);
+        */
     }
 
     /* ---- draw player target bounding box --------------------------------- */

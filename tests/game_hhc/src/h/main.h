@@ -70,7 +70,7 @@ struct hhc_uniform
 {
     struct /* defaults */
     {
-        GLint offset;
+        GLint location;
         GLint scale;
         GLint mat_rotation;
         GLint mat_perspective;

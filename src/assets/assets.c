@@ -20,6 +20,7 @@
  *  @brief asset parsing, loading and unloading.
  */
 
+#include "../common/config.h"
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
 #include "../common/types.h"
@@ -28,6 +29,7 @@
 #include "../memory/memory.h"
 
 #include "../h/dir.h"
+#include "../h/math.h"
 
 #include "assets.h"
 
@@ -130,6 +132,82 @@ cleanup:
     return fsl_err;
 }
 
+/* ---- section: vbo -------------------------------------------------------- */
+
+FSLAPI u32 fsl_vbo_init(fsl_vbo *vbo, fsl_size size, fsl_len len, void *data,
+        GLenum target, fsl_draw_type draw_type)
+{
+    GLenum draw_type_temp = 0;
+
+    if (!vbo)
+    {
+        LOGERROR(FSL_ERR_POINTER_NULL,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                MSG_POINTER_NULL_ACTION("Initialize VBO"));
+    }
+
+    if (vbo->initialized)
+        return FSL_ERR_SUCCESS;
+
+    if (!vbo->buf.arena && fsl_mem_arena_push(&mem_arena_sub_data_internal, &vbo->buf, size * len,
+                "fsl_vbo_init().vbo->buf") != FSL_ERR_SUCCESS)
+    {
+        LOGERROR(FSL_ERR_VBO_INIT_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                MSG_ACTION_REASON_ERROR("Initialize VBO", "`fsl_mem_arena_push()` Failed"));
+        return fsl_err;
+    }
+
+    switch(draw_type)
+    {
+        case FSL_DRAW_TYPE_STREAM:
+            draw_type_temp = GL_STREAM_DRAW;
+            break;
+        case FSL_DRAW_TYPE_STATIC:
+            draw_type_temp = GL_STATIC_DRAW;
+            break;
+        case FSL_DRAW_TYPE_DYNAMIC:
+            draw_type_temp = GL_DYNAMIC_DRAW;
+            break;
+        default:
+            draw_type_temp = GL_STATIC_DRAW;
+    }
+
+    glGenBuffers(1, &vbo->id);
+    glBindBuffer(target, vbo->id);
+    glBufferData(target, size * len, data, draw_type_temp);
+
+    vbo->size = size;
+    vbo->len = len;
+    vbo->initialized = TRUE;
+    LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+            MSG_VBO_INIT(vbo->id, size * len));
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+}
+
+void fsl_vbo_free(fsl_vbo *vbo)
+{
+    fsl_vbo novbo = {0};
+    GLuint id = 0;
+
+    if (!vbo)
+        return;
+
+    id = vbo->id;
+
+    if (vbo->initialized)
+    {
+        vbo->initialized = FALSE;
+        glDeleteBuffers(1, &vbo->id);
+        fsl_mem_arena_pop(&vbo->buf, "fsl_vbo_free().vbo->buf");
+    }
+
+    *vbo = novbo;
+    LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+            MSG_VBO_FREE(id, vbo->size * vbo->len));
+}
+
 /* ---- section: fbo -------------------------------------------------------- */
 
 u32 fsl_fbo_init(fsl_fbo *fbo, i32 size_x, i32 size_y, fsl_mesh *mesh_fbo,
@@ -138,11 +216,10 @@ u32 fsl_fbo_init(fsl_fbo *fbo, i32 size_x, i32 size_y, fsl_mesh *mesh_fbo,
     GLuint status = 0;
     GLfloat *mesh_fbo_vbo_data = NULL;
 
-    if (fbo == NULL)
+    if (!fbo || fbo->asset.initialized)
         goto mesh_fbo_init;
 
     fbo->asset.type = FSL_ASSET_FBO;
-    fsl_fbo_free(fbo);
 
     glGenFramebuffers(1, &fbo->fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
@@ -221,7 +298,7 @@ mesh_fbo_init:
         return FSL_ERR_SUCCESS;
 
     mesh_fbo->vbo_len = fsl_arr_len(vbo_data_unit_quad_internal);
-    if (fsl_mem_arena_push(&mem_arena_internal, &mesh_fbo->vbo_data, sizeof(GLfloat) * mesh_fbo->vbo_len,
+    if (fsl_mem_arena_push(&mem_arena_sub_data_internal, &mesh_fbo->vbo_data, sizeof(GLfloat) * mesh_fbo->vbo_len,
                 "fsl_fbo_init().mesh_fbo->vbo_data") != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -250,6 +327,8 @@ mesh_fbo_init:
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     mesh_fbo->asset.initialized = TRUE;
+    LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+            MSG_FBO_INIT(fbo->fbo, size_x, size_y));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -313,6 +392,8 @@ u32 fsl_fbo_realloc(fsl_fbo *fbo, i32 size_x, i32 size_y, b8 multisample, u32 sa
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     fbo->asset.initialized = TRUE;
+    LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+            MSG_FBO_REALLOC(fbo->fbo, size_x, size_y));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -321,9 +402,12 @@ u32 fsl_fbo_realloc(fsl_fbo *fbo, i32 size_x, i32 size_y, b8 multisample, u32 sa
 void fsl_fbo_free(fsl_fbo *fbo)
 {
     fsl_fbo nofbo = {0};
+    GLuint id = 0;
 
     if (!fbo)
         return;
+
+    id = fbo->fbo;
 
     if (fbo->asset.initialized)
     {
@@ -332,6 +416,9 @@ void fsl_fbo_free(fsl_fbo *fbo)
         glDeleteTextures(1, &fbo->color_buf);
         glDeleteFramebuffers(1, &fbo->fbo);
     }
+
+    LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+            MSG_FBO_FREE(id));
 
     *fbo = nofbo;
 }
@@ -577,4 +664,148 @@ void fsl_font_free(fsl_font *font)
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             MSG_FONT_UNLOAD(fsl_mem_handle_get(font->asset.name_id)));
     *font = nofont;
+}
+
+/* ---- section: camera ----------------------------------------------------- */
+
+void fsl_update_camera_movement(fsl_camera *camera, b8 roll)
+{
+    if (roll)
+    {
+        camera->roll = fmod(camera->roll, FSL_CAMERA_RANGE_MAX);
+        if (camera->roll < 0.0) camera->roll += FSL_CAMERA_RANGE_MAX;
+    }
+    else camera->roll = 0.0;
+
+    camera->pitch = fsl_clamp_f64(camera->pitch, -FSL_CAMERA_ANGLE_MAX, FSL_CAMERA_ANGLE_MAX);
+    camera->yaw = fmod(camera->yaw, FSL_CAMERA_RANGE_MAX);
+    if (camera->yaw < 0.0) camera->yaw += FSL_CAMERA_RANGE_MAX;
+
+    camera->sin_roll = sin(camera->roll * FSL_DEG2RAD);
+    camera->cos_roll = cos(camera->roll * FSL_DEG2RAD);
+    camera->sin_pitch = sin(camera->pitch * FSL_DEG2RAD);
+    camera->cos_pitch = cos(camera->pitch * FSL_DEG2RAD);
+    camera->sin_yaw = sin(camera->yaw * FSL_DEG2RAD);
+    camera->cos_yaw = cos(camera->yaw * FSL_DEG2RAD);
+
+    fsl_update_projection_perspective(*camera, &camera->projection, roll);
+}
+
+void fsl_update_projection_perspective(fsl_camera camera, fsl_projection *projection, b8 roll)
+{
+    const f32 SROL = camera.sin_roll;
+    const f32 CROL = camera.cos_roll;
+    const f32 SPCH = camera.sin_pitch;
+    const f32 CPCH = camera.cos_pitch;
+    const f32 SYAW = camera.sin_yaw;
+    const f32 CYAW = camera.cos_yaw;
+    f32 ratio = 0.0f;
+    f32 fovy = 0.0f;
+    f32 far = 0.0f;
+    f32 near = 0.0f;
+    f32 clip = 0.0f;
+    f32 offset = 0.0f;
+    fsl_projection noprojection = {0};
+    m4f32 mat_roll = {0};
+    m4f32 mat_pitch = {0};
+    m4f32 mat_yaw = {0};
+
+    *projection = noprojection;
+
+    ratio = camera.ratio;
+    fovy = 1.0f / tanf((camera.fovy_smooth / 2.0f) * FSL_DEG2RAD);
+    far = camera.far;
+    near = camera.near;
+    clip = -(far + near) / (far - near);
+    offset = -(2.0f * far * near) / (far - near);
+
+    /* ---- target ---------------------------------------------------------- */
+
+    projection->target.a11 = 1.0f;
+    projection->target.a22 = 1.0f;
+    projection->target.a33 = 1.0f;
+    projection->target.a41 = -CYAW * -CPCH;
+    projection->target.a42 = SYAW * -CPCH;
+    projection->target.a43 = -SPCH;
+    projection->target.a44 = 1.0f;
+
+    /* ---- translation ----------------------------------------------------- */
+
+    projection->translation.a11 = 1.0f;
+    projection->translation.a22 = 1.0f;
+    projection->translation.a33 = 1.0f;
+    projection->translation.a41 = -camera.pos.x;
+    projection->translation.a42 = -camera.pos.y;
+    projection->translation.a43 = -camera.pos.z;
+    projection->translation.a44 = 1.0f;
+
+    /* ---- rotation: yaw --------------------------------------------------- */
+
+    mat_yaw.a11 = CYAW;
+    mat_yaw.a12 = SYAW;
+    mat_yaw.a21 = -SYAW;
+    mat_yaw.a22 = CYAW;
+    mat_yaw.a33 = 1.0f;
+    mat_yaw.a44 = 1.0f;
+
+    /* ---- rotation: pitch ------------------------------------------------- */
+
+    mat_pitch.a11 = CPCH;
+    mat_pitch.a13 = SPCH;
+    mat_pitch.a22 = 1.0f;
+    mat_pitch.a31 = -SPCH;
+    mat_pitch.a33 = CPCH;
+    mat_pitch.a44 = 1.0f;
+
+    projection->rotation = fsl_matrix_multiply(mat_yaw, mat_pitch);
+
+    /* ---- rotation: roll -------------------------------------------------- */
+
+    if (roll)
+    {
+        mat_roll.a11 = 1.0f;
+        mat_roll.a22 = CROL;
+        mat_roll.a23 = SROL;
+        mat_roll.a32 = -SROL;
+        mat_roll.a33 = CROL;
+        mat_roll.a44 = 1.0f;
+
+        projection->rotation = fsl_matrix_multiply(projection->rotation, mat_roll);
+    }
+
+    /* ---- orientation: z-up ----------------------------------------------- */
+
+    projection->orientation.a13 = -1.0f;
+    projection->orientation.a21 = -1.0f;
+    projection->orientation.a32 = 1.0f;
+    projection->orientation.a44 = 1.0f;
+
+    /* ---- view ------------------------------------------------------------ */
+
+    projection->view = fsl_matrix_multiply(projection->translation,
+                fsl_matrix_multiply(projection->rotation, projection->orientation));
+
+    /* ---- projection ------------------------------------------------------ */
+
+    projection->projection.a11 = fovy / ratio;
+    projection->projection.a22 = fovy;
+    projection->projection.a33 = clip;
+    projection->projection.a34 = -1.0f;
+    projection->projection.a43 = offset;
+
+    projection->perspective = fsl_matrix_multiply(projection->view, projection->projection);
+}
+
+void fsl_get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f64 *yaw)
+{
+    v3f64 direction = {0};
+
+    camera_pos.x -= target.x;
+    camera_pos.y -= target.y;
+    camera_pos.z -= target.z;
+
+    direction = fsl_normalize_v3f64(camera_pos);
+
+    *pitch = atan2(direction.z, sqrt(direction.x * direction.x + direction.y * direction.y));
+    *yaw = atan2(-direction.y, direction.x);
 }
