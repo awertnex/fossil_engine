@@ -53,6 +53,8 @@ typedef str fsl_path;
 
 typedef struct fsl_asset            fsl_asset;
 typedef struct fsl_asset_metadata   fsl_asset_metadata;
+typedef struct fsl_vbo              fsl_vbo;
+typedef struct fsl_vbo              fsl_ebo;
 typedef struct fsl_fbo              fsl_fbo;
 typedef struct fsl_texture          fsl_texture;
 typedef struct fsl_glyph            fsl_glyph;
@@ -124,6 +126,14 @@ struct fsl_asset_metadata
     fsl_file *file;
     fsl_path *path;
 }; /* fsl_asset_metadata */
+
+struct fsl_vbo
+{
+    GLuint id;
+    u64 len;            /* number of elements in `buf` */
+    fsl_mem_handle buf;
+    b8 initialized;
+}; /* fsl_vbo */
 
 struct fsl_fbo
 {

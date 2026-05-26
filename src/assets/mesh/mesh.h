@@ -37,13 +37,28 @@ struct fsl_mesh
     fsl_asset asset;
     GLuint vao;
 
-    GLuint vbo;
-    GLuint vbo_len;
-    fsl_mem_handle vbo_data;
+    GLuint vbo;                 /* -- DEPRECATED IN v0.8.0-dev -- */
+    GLuint vbo_len;             /* -- DEPRECATED IN v0.8.0-dev -- */
+    fsl_mem_handle vbo_data;    /* -- DEPRECATED IN v0.8.0-dev -- */
 
-    GLuint ebo;
-    GLuint ebo_len;
-    fsl_mem_handle ebo_data;
+    GLuint ebo;                 /* -- DEPRECATED IN v0.8.0-dev -- */
+    GLuint ebo_len;             /* -- DEPRECATED IN v0.8.0-dev -- */
+    fsl_mem_handle ebo_data;    /* -- DEPRECATED IN v0.8.0-dev -- */
+
+    /*!
+     *  @brief mesh vertex data.
+     */
+    fsl_vbo vertex_buf;
+
+    /*!
+     *  @brief mesh indices of vertex data.
+     */
+    fsl_ebo index_buf;
+
+    /*!
+     *  @brief model transform data (location, rotation and scale).
+     */
+    fsl_vbo transform_buf;
 }; /* fsl_mesh */
 
 /*!

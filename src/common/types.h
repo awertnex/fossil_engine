@@ -58,6 +58,13 @@ typedef uint32_t    b32;
  */
 typedef str         fsl_fs_path;
 
+typedef struct fsl_array
+{
+    u64 cursor; /* current usage */
+    u64 cap;    /* current capacity of `buf`, in bytes */
+    void *buf;  /* raw data */
+} fsl_array;
+
 typedef struct fsl_buf
 {
     void **i;       /* members of `buf` */

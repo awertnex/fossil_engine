@@ -26,8 +26,6 @@
 #include "../../common/types.h"
 #include "mesh.h"
 
-typedef struct fsl_mesh_vertex fsl_mesh_vertex;
-
 typedef enum fsl_mesh_format
 {
     FSL_MESH_FORMAT_NONE,
@@ -37,13 +35,6 @@ typedef enum fsl_mesh_format
     FSL_MESH_FORMAT_GLB,
     FSL_MESH_FORMAT_COUNT
 } fsl_mesh_format;
-
-struct fsl_mesh_vertex
-{
-    v3f32 pos;
-    v3f32 normal;
-    v2f32 uv;
-}; /* fsl_mesh_vertex */
 
 /*!
  *  @internal
@@ -58,42 +49,54 @@ struct fsl_mesh_vertex
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 fsl_mesh_get_format_internal(const str *file, fsl_mesh_format *format);
+u32 mesh_get_format_internal(const str *file, fsl_mesh_format *format);
 
 /*!
  *  @internal
  *
- *  @brief load a 'Wavefront Obj' (.obj) mesh from disk into `mesh`.
+ *  @brief load a 'Wavefront Obj' (.obj) mesh from disk into specified buffers.
+ *
+ *  @remark buffers must be `NULL`, will be allocated via @ref fsl_mem_alloc()
+ *  and should be copied and freed using @ref fsl_mem_free().
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 fsl_mesh_load_obj_internal(fsl_mesh *mesh, fsl_fs_path *path);
+u32 mesh_load_obj_internal(fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *index_dst);
 
 /*!
  *  @internal
  *
- *  @brief load an 'Autodesk FBX' (.fbx) mesh from disk into `mesh`.
+ *  @brief load an 'Autodesk FBX' (.fbx) mesh from disk into specified buffers.
+ *
+ *  @remark buffers must be `NULL`, will be allocated via @ref fsl_mem_alloc()
+ *  and should be copied and freed using @ref fsl_mem_free().
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 fsl_mesh_load_fbx_internal(fsl_mesh *mesh, fsl_fs_path *path);
+u32 mesh_load_fbx_internal(fsl_fs_path *path, fsl_array *vertex_buf, fsl_array *index_buf);
 
 /*!
  *  @internal
  *
- *  @brief load a 'Khronos GLTF' (.gltf) mesh from disk into `mesh`.
+ *  @brief load a 'Khronos GLTF' (.gltf) mesh from disk into specified buffers.
+ *
+ *  @remark buffers must be `NULL`, will be allocated via @ref fsl_mem_alloc()
+ *  and should be copied and freed using @ref fsl_mem_free().
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 fsl_mesh_load_gltf_internal(fsl_mesh *mesh, fsl_fs_path *path);
+u32 mesh_load_gltf_internal(fsl_fs_path *path, fsl_array *vertex_buf, fsl_array *index_buf);
 
 /*!
  *  @internal
  *
- *  @brief load a 'Khronos GLB' (.glb) mesh from disk into `mesh`.
+ *  @brief load a 'Khronos GLB' (.glb) mesh from disk into specified buffers.
+ *
+ *  @remark buffers must be `NULL`, will be allocated via @ref fsl_mem_alloc()
+ *  and should be copied and freed using @ref fsl_mem_free().
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 fsl_mesh_load_glb_internal(fsl_mesh *mesh, fsl_fs_path *path);
+u32 mesh_load_glb_internal(fsl_fs_path *path, fsl_array *vertex_buf, fsl_array *index_buf);
 
 #endif /* FSL_MESH_LOADER_INTERNAL_H */

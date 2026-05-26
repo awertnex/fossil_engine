@@ -38,9 +38,11 @@
 #include <string.h>
 
 /*!
- *  @brief set attribute arrays for a mesh `vao`.
+ *  @brief generate GPU-ready vertex arrays and transforms for a mesh.
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly on failure.
  */
-static void attrib_mesh_internal(void);
+static u32 mesh_generate_arrays(fsl_mesh *mesh, fsl_array vertex_buf, fsl_array index_buf);
 
 u32 fsl_mesh_load(fsl_mesh *mesh,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path)
@@ -48,8 +50,8 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
     fsl_mesh mesh_temp = {0};
     fsl_fs_path path_temp[FSL_PATH_CAP] = {0};
     fsl_mesh_format format = 0;
-    GLfloat *vbo_data_p = NULL;
-    GLuint *ebo_data_p = NULL;
+    fsl_array vertex_buf = {0};
+    fsl_array index_buf = {0};
 
     if (!mesh)
     {
@@ -68,45 +70,57 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
         return fsl_err;
     }
 
-    if (fsl_mesh_get_format_internal(file, &format) != FSL_ERR_SUCCESS)
+    if (mesh_get_format_internal(file, &format) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     switch(format)
     {
         case FSL_MESH_FORMAT_OBJ:
-            if (fsl_mesh_load_obj_internal(&mesh_temp, path_temp) != FSL_ERR_SUCCESS)
+            if (mesh_load_obj_internal(path_temp, &vertex_buf, &index_buf) != FSL_ERR_SUCCESS)
                 goto cleanup;
             break;
         case FSL_MESH_FORMAT_FBX:
-            if (fsl_mesh_load_fbx_internal(&mesh_temp, path_temp) != FSL_ERR_SUCCESS)
+            if (mesh_load_fbx_internal(path_temp, &vertex_buf, &index_buf) != FSL_ERR_SUCCESS)
                 goto cleanup;
             break;
         case FSL_MESH_FORMAT_GLTF:
-            if (fsl_mesh_load_gltf_internal(&mesh_temp, path_temp) != FSL_ERR_SUCCESS)
+            if (mesh_load_gltf_internal(path_temp, &vertex_buf, &index_buf) != FSL_ERR_SUCCESS)
                 goto cleanup;
             break;
         case FSL_MESH_FORMAT_GLB:
-            if (fsl_mesh_load_glb_internal(&mesh_temp, path_temp) != FSL_ERR_SUCCESS)
+            if (mesh_load_glb_internal(path_temp, &vertex_buf, &index_buf) != FSL_ERR_SUCCESS)
                 goto cleanup;
             break;
         default: /* error logging not needed here, already handled earlier */
             return fsl_err;
     }
 
-    vbo_data_p = fsl_mem_handle_get(mesh_temp.vbo_data);
-    ebo_data_p = fsl_mem_handle_get(mesh_temp.ebo_data);
-    mesh->vbo_data = mesh_temp.vbo_data;
-    mesh->ebo_data = mesh_temp.ebo_data;
-
-    if (fsl_mesh_generate(mesh, name, name_id, file, path, attrib_mesh_internal, GL_STATIC_DRAW,
-                mesh_temp.vbo_len, mesh_temp.ebo_len, vbo_data_p, ebo_data_p) != FSL_ERR_SUCCESS)
+    if (fsl_asset_set_metadata(&mesh_temp.asset, FSL_ASSET_MESH, name, name_id, file, path) != FSL_ERR_SUCCESS)
+    {
+        LOGERROR(FSL_ERR_MESH_GENERATION_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                MSG_ACTION_SUBJECT_REASON_ERROR("Load Mesh", name_id, "`fsl_asset_set_metadata()` Failed"));
         goto cleanup;
+    }
+
+    if (mesh_generate_arrays(&mesh_temp, vertex_buf, index_buf) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    fsl_mem_array_free(&vertex_buf);
+    fsl_mem_array_free(&index_buf);
+
+    mesh_temp.asset.initialized = TRUE;
+    *mesh = mesh_temp;
+    LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+            MSG_MESH_INIT(name_id));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 
 cleanup:
 
+    fsl_mem_array_free(&vertex_buf);
+    fsl_mem_array_free(&index_buf);
     fsl_mesh_free(&mesh_temp);
     return fsl_err;
 }
@@ -218,15 +232,107 @@ void fsl_mesh_free(fsl_mesh *mesh)
     *mesh = nomesh;
 }
 
-static void attrib_mesh_internal(void)
+static u32 mesh_generate_arrays(fsl_mesh *mesh, fsl_array vertex_buf, fsl_array index_buf)
 {
-    u64 stride = sizeof(v3f32) + sizeof(v3f32);
+    u64 stride_vertex = 2 * sizeof(v3f32) + sizeof(v2f32);
+    u64 stride_instance = sizeof(m4f32);
+    fsl_asset_metadata metadata = {0};
+
+    metadata = fsl_asset_get_metadata(mesh->asset);
+
+    if (
+            fsl_mem_arena_push(&mem_arena_internal, &mesh->vertex_buf.buf, vertex_buf.cursor,
+                fsl_stringf("mesh_generate_arrays().%s", metadata.name_id)) != FSL_ERR_SUCCESS ||
+            fsl_mem_arena_push(&mem_arena_internal, &mesh->transform_buf.buf, stride_instance,
+                fsl_stringf("mesh_generate_arrays().%s", metadata.name_id)) != FSL_ERR_SUCCESS)
+    {
+        LOGERROR(FSL_ERR_MESH_GENERATION_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                MSG_ACTION_SUBJECT_REASON_ERROR("Generate Mesh Arrays", metadata.name_id, "`fsl_mem_arena_push()` Failed"));
+        goto cleanup;
+    }
+
+    if (index_buf.cursor &&
+            fsl_mem_arena_push(&mem_arena_internal, &mesh->index_buf.buf, index_buf.cursor,
+                fsl_stringf("mesh_generate_arrays().%s", metadata.name_id)) != FSL_ERR_SUCCESS)
+    {
+        LOGERROR(FSL_ERR_MESH_GENERATION_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                MSG_ACTION_SUBJECT_REASON_ERROR("Generate Mesh Arrays", metadata.name_id, "`fsl_mem_arena_push()` Failed"));
+        goto cleanup;
+    }
+
+    /* ---- bind mesh ------------------------------------------------------- */
+
+    glGenVertexArrays(1, &mesh->vao);
+    glBindVertexArray(mesh->vao);
+
+    glGenBuffers(1, &mesh->vertex_buf.id);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->vertex_buf.id);
+    glBufferData(GL_ARRAY_BUFFER, mesh->vertex_buf.len * sizeof(GLfloat),
+            vertex_buf.buf, GL_STATIC_DRAW);
+
+    mesh->vertex_buf.initialized = TRUE;
+    mesh->transform_buf.initialized = TRUE;
+
+    if (index_buf.cursor)
+    {
+        glGenBuffers(1, &mesh->index_buf.id);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->index_buf.id);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->index_buf.len * sizeof(GLuint),
+                index_buf.buf, GL_STATIC_DRAW);
+
+        mesh->index_buf.initialized = TRUE;
+    }
 
     /* position */
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride_vertex, (void*)0);
 
     /* normal */
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(GLfloat)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride_vertex, (void*)(3 * sizeof(GLfloat)));
+
+    /* uv */
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride_vertex, (void*)(6 * sizeof(GLfloat)));
+
+    mesh->transform_buf.len = 16;
+    glGenBuffers(1, &mesh->transform_buf.id);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->transform_buf.id);
+    glBufferData(GL_ARRAY_BUFFER, mesh->transform_buf.len * sizeof(GLfloat),
+            NULL, GL_DYNAMIC_DRAW);
+
+    /* transform, row 1 */
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, stride_instance, (void*)0);
+    glVertexAttribDivisor(3, 1);
+
+    /* transform, row 2 */
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, stride_instance, (void*)(4 * sizeof(GLfloat)));
+    glVertexAttribDivisor(4, 1);
+
+    /* transform, row 3 */
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, stride_instance, (void*)(8 * sizeof(GLfloat)));
+    glVertexAttribDivisor(5, 1);
+
+    /* transform, row 4 */
+    glEnableVertexAttribArray(6);
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, stride_instance, (void*)(12 * sizeof(GLfloat)));
+    glVertexAttribDivisor(6, 1);
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+
+cleanup:
+
+    fsl_mesh_free(mesh);
+    fsl_err = FSL_ERR_MESH_GENERATION_FAIL;
+    return fsl_err;
 }

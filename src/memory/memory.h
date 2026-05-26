@@ -38,6 +38,15 @@
 
 #define FSL_OFFSET_INVALID FSL_U64_MAX
 
+#define fsl_mem_array_init(x) \
+    fsl_mem_array_init_internal(x)
+
+#define fsl_mem_array_push(x, data, size) \
+    fsl_mem_array_push_internal(x, data, size)
+
+#define fsl_mem_array_free(x) \
+    fsl_mem_array_free_internal(x)
+
 #define fsl_mem_alloc(x, size, name) \
     fsl_mem_alloc_internal(x, size, name, __BASE_FILE__, __LINE__)
 
@@ -144,6 +153,27 @@ extern fsl_mem_arena mem_arena_file_internal;
 extern fsl_mem_arena mem_arena_path_internal;
 
 /* ---- section: signatures ------------------------------------------------- */
+
+/*!
+ *  @brief initialize (allocate) an array using @ref fsl_mem_alloc().
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+FSLAPI u32 fsl_mem_array_init_internal(fsl_array *array);
+
+/*!
+ *  @param array array to push data to.
+ *  @param data data to push to array.
+ *  @param size size of data, in bytes.
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+FSLAPI u32 fsl_mem_array_push_internal(fsl_array *array, void *data, u64 size);
+
+/*!
+ *  @brief free an array using @ref fsl_mem_free().
+ */
+FSLAPI void fsl_mem_array_free_internal(fsl_array *array);
 
 /*!
  *  @param size size, in bytes.

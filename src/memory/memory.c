@@ -32,6 +32,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MEM_ALLOC_SIZE_MIN 2
+
 struct fsl_mem_arena_handle
 {
     fsl_off offset;         /* handle's data offset from pointer base */
@@ -43,6 +45,54 @@ fsl_mem_arena mem_arena_name_internal = {0};
 fsl_mem_arena mem_arena_name_id_internal = {0};
 fsl_mem_arena mem_arena_file_internal = {0};
 fsl_mem_arena mem_arena_path_internal = {0};
+
+u32 fsl_mem_array_init_internal(fsl_array *array)
+{
+    if (!array->buf)
+    {
+        if (fsl_mem_alloc((void*)array->buf, MEM_ALLOC_SIZE_MIN,
+                    "fsl_mem_array_init_internal().array->buf") != FSL_ERR_SUCCESS)
+            return fsl_err;
+        array->cap = MEM_ALLOC_SIZE_MIN;
+    }
+
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+}
+
+u32 fsl_mem_array_push_internal(fsl_array *array, void *data, u64 size)
+{
+    void *buf_temp = NULL;
+
+    if (!array->buf && fsl_mem_alloc((void*)&array->buf, MEM_ALLOC_SIZE_MIN,
+                "fsl_mem_array_push_internal().array->buf") != FSL_ERR_SUCCESS)
+        return fsl_err;
+
+    if (size >= array->cap - array->cursor)
+    {
+        buf_temp = array->buf;
+        if (fsl_mem_realloc((void*)&buf_temp, array->cap * 2 + size,
+                    "fsl_mem_array_push_internal().array->buf") != FSL_ERR_SUCCESS)
+            return fsl_err;
+        array->cap = array->cap * 2 + size;
+        array->buf = buf_temp;
+    }
+
+    memcpy((u8*)array->buf + array->cursor, data, size);
+    array->cursor += size;
+
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+}
+
+void fsl_mem_array_free_internal(fsl_array *array)
+{
+    fsl_array noarray = {0};
+
+    if (array->buf)
+        fsl_mem_free((void*)array->buf, array->cap, "fsl_mem_array_free_internal().array->buf");
+    *array = noarray;
+}
 
 u32 fsl_mem_alloc_internal(void **x, u64 size,
         const str *name, const str *src_file, u64 src_line)
@@ -386,13 +436,13 @@ u32 fsl_mem_arena_init_internal(fsl_mem_arena *x,
 {
     u64 entry_cap = sizeof(fsl_mem_arena_handle) * 2;
     u64 freelist_cap = sizeof(fsl_mem_arena_handle) * 2;
-    u64 buf_cap = 2;
+    u64 buf_cap = MEM_ALLOC_SIZE_MIN;
 
     if (!x)
     {
         LOGERROREX(FSL_ERR_POINTER_NULL, 0,
                 src_file, src_line,
-                MSG_MEM_ARENA_INIT_POINTER_NULL_FAIL(name, 2));
+                MSG_MEM_ARENA_INIT_POINTER_NULL_FAIL(name, MEM_ALLOC_SIZE_MIN));
         return fsl_err;
     }
 
