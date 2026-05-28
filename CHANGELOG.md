@@ -9,7 +9,31 @@
 ## v0.8.0-dev (current)
 
 #### changes
-- (2026 05 25): added 'Wavefront OBJ' mesh format loader.
+- (2026 05 27): deprecate `vbo_data` and `ebo_data` arrays in struct `fsl_mesh`.
+- (2026 05 27): added `fsl_vbo` data type and its initialization and freeing
+                functions.
+- (2026 05 27):   added string functions:
+                - `fsl_is_digit()`.
+                - `fsl_skip_spaces()`.
+                - `fsl_strip_non_printable()`.
+                - `fsl_convert_char_to_int()`.
+                - `fsl_convert_str_to_u32()`.
+                - `fsl_convert_str_to_u64()`.
+                - `fsl_convert_str_to_f32()`.
+                - `fsl_convert_str_to_f64()`.
+                - `fsl_hash_djb2_u64()`.
+                - `fsl_hash_fnv1a_u64()`.
+                - `fsl_find_hash_u64()`.
+- (2026 05 27): added mesh-drawing function `fsl_mesh_draw()`.
+- (2026 05 27): moved camera structs and functions from 'engine/' module to
+                'assets/' module.
+- (2026 05 25): added 'Wavefront OBJ' mesh format loader:
+                - parses vertices (x, y, z[, w]), normals (x, y, z), UVs
+                  (u[, v]) and, of course, faces.
+                - skips all non-printable characters.
+                - handles optional parameters.
+                - hashes vertex entries to de-duplicate.
+                - triangulates faces in fan-pattern.
 - (2026 05 14): removed 'TRACE' logs from release builds completely.
 - (2026 05 14): added feature 'input contexts' (input layers), and made context
                 0 the default input context (always active).

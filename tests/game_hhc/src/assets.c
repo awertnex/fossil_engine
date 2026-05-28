@@ -290,7 +290,6 @@ void assets_free(void)
     fsl_mesh *mesh_p = NULL;
     fsl_shader_program *shader_p = NULL;
     fsl_texture *block_textures_p = NULL;
-    fsl_font *font_p = NULL;
 
     if (block_textures.arena)
     {

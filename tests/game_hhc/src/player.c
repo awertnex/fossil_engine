@@ -1,3 +1,4 @@
+#include "deps/fossil/assets/assets.h"
 #include "deps/fossil/logger/logger.h"
 
 #include "deps/fossil/h/collision.h"

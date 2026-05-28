@@ -74,6 +74,7 @@ FSLAPI b8 fsl_is_in_volume_i32(v3i32 v, v3i32 min, v3i32 max);
 FSLAPI b8 fsl_is_in_volume_f32(v3f32 v, v3f32 min, v3f32 max);
 FSLAPI b8 fsl_is_in_volume_i64(v3i64 v, v3i64 min, v3i64 max);
 FSLAPI b8 fsl_is_in_volume_f64(v3f64 v, v3f64 min, v3f64 max);
+FSLAPI m4f32 fsl_matrix_unit(void);
 FSLAPI m4f32 fsl_matrix_add(m4f32 a, m4f32 b);
 FSLAPI m4f32 fsl_matrix_subtract(m4f32 a, m4f32 b);
 FSLAPI m4f32 fsl_matrix_multiply(m4f32 a, m4f32 b);

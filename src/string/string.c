@@ -20,13 +20,13 @@
  *  @brief string parsing, token searching.
  */
 
-#include "common/diagnostics.h"
-#include "common/limits.h"
-#include "logger/logger.h"
-#include "logger/logger_messages_internal.h"
-#include "memory/memory.h"
+#include "../common/diagnostics.h"
+#include "../common/limits.h"
+#include "../logger/logger.h"
+#include "../logger/logger_messages_internal.h"
+#include "../memory/memory.h"
 
-#include "h/string.h"
+#include "string.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -76,6 +76,29 @@ str *fsl_stringf(const str *format, ...)
     return string;
 }
 
+str *stringf_internal(const str *format, ...)
+{
+    static str buf[FSL_STRINGF_BUFFERS_MAX][FSL_OUT_STRING_MAX] = {0};
+    static u64 index = 0;
+    str *string = buf[index];
+    str *trunc = NULL;
+    int cursor = 0;
+    __builtin_va_list args;
+
+    va_start(args, format);
+    cursor = vsnprintf(string, FSL_OUT_STRING_MAX, format, args);
+    va_end(args);
+
+    if (cursor >= FSL_OUT_STRING_MAX - 1)
+    {
+        trunc = string + FSL_OUT_STRING_MAX - 4;
+        snprintf(trunc, 4, "...");
+    }
+
+    index = (index + 1) % FSL_STRINGF_BUFFERS_MAX;
+    return string;
+}
+
 void fsl_skip_spaces(str **string)
 {
     while (**string == ' ' || **string == '\t' || **string == '\r')
@@ -84,12 +107,11 @@ void fsl_skip_spaces(str **string)
 
 void fsl_strip_non_printable(str *string)
 {
-    i64 i = 0;
-    i64 j = 0;
-    u64 len = strlen(string);
+    u64 i = 0;
+    u64 j = 0;
     while (string[i])
     {
-        if (string[i] > ' ' && string[i] < 127)
+        if (string[i] >= ' ' && string[i] < 127)
         {
             string[j] = string[i];
             ++j;
@@ -120,7 +142,65 @@ i32 fsl_convert_char_to_int(char n)
     return (i32)n - '0';
 }
 
-u32 fsl_convert_str_to_i64(const str *n, i64 *dst, i32 size)
+u32 fsl_convert_str_to_u32(const str *n, u32 *dst)
+{
+    i32 i = 0;
+    i32 len = strlen(n);
+    i32 result = 0;
+    b8 is_negative = FALSE;
+
+    if (n[0] == '-')
+    {
+        ++i;
+        is_negative = TRUE;
+    }
+
+    for (; i < len; ++i)
+    {
+        if (fsl_is_digit(n[i]))
+            result = result * 10 + fsl_convert_char_to_int(n[i]);
+        else break;
+    }
+
+    if (is_negative)
+        result = -result;
+
+    *dst = (u32)result;
+
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+}
+
+u32 fsl_convert_str_to_u64(const str *n, u64 *dst)
+{
+    i32 i = 0;
+    i32 len = strlen(n);
+    i64 result = 0;
+    b8 is_negative = FALSE;
+
+    if (n[0] == '-')
+    {
+        ++i;
+        is_negative = TRUE;
+    }
+
+    for (; i < len; ++i)
+    {
+        if (fsl_is_digit(n[i]))
+            result = result * 10 + fsl_convert_char_to_int(n[i]);
+        else break;
+    }
+
+    if (is_negative)
+        result = -result;
+
+    *dst = (u64)result;
+
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+}
+
+u32 fsl_convert_str_to_i64(const str *n, i64 *dst)
 {
     i32 i = 0;
     i32 len = strlen(n);
@@ -149,13 +229,12 @@ u32 fsl_convert_str_to_i64(const str *n, i64 *dst, i32 size)
     return fsl_err;
 }
 
-u32 fsl_convert_str_to_f32(const str *n, f32 *dst, i32 size)
+u32 fsl_convert_str_to_f32(const str *n, f32 *dst)
 {
     i32 i = 0;
     i32 len = strlen(n);
-    i32 result = 0;
-    i32 decimal = 0;
-    u32 base = 1;
+    f64 result = 0.0;
+    f64 divisor = 1.0;
     b8 is_decimal = FALSE;
     b8 is_negative = FALSE;
 
@@ -169,27 +248,62 @@ u32 fsl_convert_str_to_f32(const str *n, f32 *dst, i32 size)
     {
         if (n[i] == '.')
         {
-            base = 1;
             is_decimal = TRUE;
-            ++i;
-            break;
+            continue;
         }
 
         if (fsl_is_digit(n[i]))
-            result = result * 10 + fsl_convert_char_to_int(n[i]);
+            result = result * 10.0 + fsl_convert_char_to_int(n[i]);
+
+        if (is_decimal)
+            divisor *= 10.0;
     }
 
-    if (is_decimal)
-        for (; i < len && fsl_is_digit(n[i]); ++i)
+    result /= divisor;
+    if (is_negative)
+        result = -result;
+
+    *dst = (f32)result;
+
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+}
+
+u32 fsl_convert_str_to_f64(const str *n, f64 *dst)
+{
+    i32 i = 0;
+    i32 len = strlen(n);
+    f64 result = 0.0;
+    f64 divisor = 1.0;
+    b8 is_decimal = FALSE;
+    b8 is_negative = FALSE;
+
+    if (n[0] == '-')
+    {
+        ++i;
+        is_negative = TRUE;
+    }
+
+    for (; i < len; ++i)
+    {
+        if (n[i] == '.')
         {
-            decimal = decimal * 10 + fsl_convert_char_to_int(n[i]);
-            base *= 10;
+            is_decimal = TRUE;
+            continue;
         }
 
-    *dst = (f64)result + (f64)decimal / base;
+        if (fsl_is_digit(n[i]))
+            result = result * 10.0 + fsl_convert_char_to_int(n[i]);
 
+        if (is_decimal)
+            divisor *= 10.0;
+    }
+
+    result /= divisor;
     if (is_negative)
-        *dst = -*dst;
+        result = -result;
+
+    *dst = result;
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -279,27 +393,25 @@ u32 fsl_convert_u64_to_str(str *dst, u64 size, u64 n)
 
 u64 fsl_hash_djb2_u64(const void *data, fsl_cap len)
 {
-    u8* d = data;
-    u64 hash = 5381;
-    i64 i = 0;
+    u8* d = (u8*)data;
+    u64 i = 0;
+    u64 h = 5381;
     for (; (len && i < len) || *d; ++i, ++d)
-        hash = ((hash << 5) + hash) + *d;
-    return hash;
+        h = ((h << 5) + h) + *d;
+    return h;
 }
 
 u64 fsl_hash_fnv1a_u64(const void *data, fsl_cap len)
 {
-    u8 *d = data;
+    u8 *d = (u8*)data;
     u64 i = 0;
-    u64 hash = 2166136261;
-
+    u64 h = 2166136261;
     for (i = 0; (len && i < len) || *d; ++i, ++d)
     {
-        hash ^= *d;
-        hash *= 16777619;
+        h ^= *d;
+        h *= 16777619;
     }
-
-    return hash;
+    return h;
 }
 
 b8 fsl_find_hash_u64(u64 hash, u64 *buf, u64 *dst, fsl_len len)

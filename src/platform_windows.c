@@ -26,6 +26,7 @@
 #include "logger/logger.h"
 #include "logger/logger_messages_internal.h"
 #include "memory/memory.h"
+#include "string/string_internal.h"
 
 #include "h/dir.h"
 #include "h/process.h"
@@ -86,11 +87,11 @@ u32 fsl_exec(fsl_buf *cmd, str *cmd_name)
     }
 
     if (fsl_mem_alloc((void*)&cmd_cat, cmd->size * cmd->memb,
-            fsl_stringf("exec().%s", cmd_name)) != FSL_ERR_SUCCESS)
+            stringf_internal("exec().%s", cmd_name)) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     for (i = 0; i < cmd->memb; ++i)
-        strncat(cmd_cat, fsl_stringf("%s ", cmd->i[i]), cmd->size);
+        strncat(cmd_cat, stringf_internal("%s ", cmd->i[i]), cmd->size);
 
     if(!CreateProcessA(NULL, cmd_cat, NULL, NULL, FALSE, 0, NULL, NULL,
                 &startup_info, &process_info))

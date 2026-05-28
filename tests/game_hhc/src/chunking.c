@@ -1,11 +1,11 @@
 #include "deps/fossil/common/limits.h"
 #include "deps/fossil/logger/logger.h"
 #include "deps/fossil/memory/memory.h"
+#include "deps/fossil/string/string.h"
 
 #include "deps/fossil/h/dir.h"
 #include "deps/fossil/input/input.h"
 #include "deps/fossil/h/math.h"
-#include "deps/fossil/h/string.h"
 
 #include "h/assets.h"
 #include "h/chunking.h"

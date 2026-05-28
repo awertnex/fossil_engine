@@ -29,15 +29,18 @@
 #include "../../logger/logger_messages_internal.h"
 #include "../../memory/memory.h"
 #include "../../shaders/shaders.h"
+#include "../../string/string.h"
+#include "../../string/string_internal.h"
 
 #include "../../h/dir.h"
-#include "../../h/string.h"
+#include "../../h/math.h"
 
 #include "mesh.h"
 #include "mesh_loader_internal.h"
 
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 /*!
  *  @brief generate vertex arrays and transforms for a mesh and upload to VRAM.
@@ -54,7 +57,6 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
     fsl_mesh_format format = 0;
     fsl_array vertex_buf = {0};
     fsl_array index_buf = {0};
-    fsl_shader_program *shader = NULL;
 
     if (!mesh)
     {
@@ -112,9 +114,6 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
     fsl_mem_array_free(&vertex_buf);
     fsl_mem_array_free(&index_buf);
 
-    shader = fsl_mem_handle_get(fsl_shader_buf);
-    shader = &shader[FSL_SHADER_INDEX_OBJECT];
-    mesh_temp.uniform_perspective = glGetUniformLocation(shader->asset.id, "mat_perspective");
     mesh_temp.asset.initialized = TRUE;
     *mesh = mesh_temp;
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
@@ -131,16 +130,63 @@ cleanup:
     return fsl_err;
 }
 
-void fsl_mesh_draw(fsl_mesh *mesh, fsl_camera *camera, f32 pos_x, f32 pos_y, f32 pos_z,
-        f32 roll, f32 pitch, f32 yaw)
+void fsl_mesh_draw(fsl_mesh *mesh, fsl_camera *camera,
+        f32 pos_x, f32 pos_y, f32 pos_z,
+        f32 roll, f32 pitch, f32 yaw,
+        f32 scale_x, f32 scale_y, f32 scale_z)
 {
+    f32 SROL = 0.0f, CROL = 0.0f, SPCH = 0.0f, CPCH = 0.0f, SYAW = 0.0f, CYAW = 0.0f;
     m4f32 transform = {0};
-    fsl_shader_program *shader = fsl_mem_handle_get(fsl_shader_buf);
-    shader = &shader[FSL_SHADER_INDEX_OBJECT];
+    m4f32 location = {0};
+    m4f32 rotation_roll = {0};
+    m4f32 rotation_pitch = {0};
+    m4f32 rotation_yaw = {0};
+    m4f32 scale = {0};
 
-    glUseProgram(shader->asset.id);
-    glUniformMatrix4fv(mesh->uniform_perspective, 1, GL_FALSE,
-            (GLfloat*)&camera->projection.perspective);
+    SROL = sinf(roll * FSL_DEG2RAD);
+    CROL = cosf(roll * FSL_DEG2RAD);
+    SPCH = sinf(pitch * FSL_DEG2RAD);
+    CPCH = cosf(pitch * FSL_DEG2RAD);
+    SYAW = sinf(yaw * FSL_DEG2RAD);
+    CYAW = cosf(yaw * FSL_DEG2RAD);
+
+    location.a11 = 1.0f;
+    location.a22 = 1.0f;
+    location.a33 = 1.0f;
+    location.a41 = pos_x;
+    location.a42 = pos_y;
+    location.a43 = pos_z;
+    location.a44 = 1.0f;
+
+    rotation_roll.a11 = 1.0f;
+    rotation_roll.a22 = CROL;
+    rotation_roll.a23 = -SROL;
+    rotation_roll.a32 = SROL;
+    rotation_roll.a33 = CROL;
+    rotation_roll.a44 = 1.0f;
+
+    rotation_pitch.a11 = CPCH;
+    rotation_pitch.a13 = -SPCH;
+    rotation_pitch.a22 = 1.0f;
+    rotation_pitch.a31 = SPCH;
+    rotation_pitch.a33 = CPCH;
+    rotation_pitch.a44 = 1.0f;
+
+    rotation_yaw.a11 = CYAW;
+    rotation_yaw.a12 = -SYAW;
+    rotation_yaw.a21 = SYAW;
+    rotation_yaw.a22 = CYAW;
+    rotation_yaw.a33 = 1.0f;
+    rotation_yaw.a44 = 1.0f;
+
+    scale.a11 = scale_x;
+    scale.a22 = scale_y;
+    scale.a33 = scale_z;
+    scale.a44 = 1.0f;
+
+    transform = fsl_matrix_multiply(scale, location);
+    transform = fsl_matrix_multiply(rotation_yaw, transform);
+    transform = fsl_matrix_multiply(transform, camera->projection.perspective);
 
     glBindBuffer(GL_ARRAY_BUFFER, mesh->transform_buf.id);
     glBufferData(GL_ARRAY_BUFFER, sizeof(m4f32), &transform, GL_DYNAMIC_DRAW);
@@ -244,9 +290,9 @@ static u32 mesh_generate_arrays(fsl_mesh *mesh, fsl_array vertex_buf, fsl_array 
 
     if (
             fsl_mem_arena_push(&mem_arena_sub_data_internal, &mesh->vertex_buf.buf, vertex_buf.cursor,
-                fsl_stringf("mesh_generate_arrays().%s", metadata.name_id)) != FSL_ERR_SUCCESS ||
+                stringf_internal("mesh_generate_arrays().%s", metadata.name_id)) != FSL_ERR_SUCCESS ||
             fsl_mem_arena_push(&mem_arena_sub_data_internal, &mesh->transform_buf.buf, stride_instance,
-                fsl_stringf("mesh_generate_arrays().%s", metadata.name_id)) != FSL_ERR_SUCCESS)
+                stringf_internal("mesh_generate_arrays().%s", metadata.name_id)) != FSL_ERR_SUCCESS)
     {
         LOGERROR(FSL_ERR_MESH_GENERATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
@@ -256,7 +302,7 @@ static u32 mesh_generate_arrays(fsl_mesh *mesh, fsl_array vertex_buf, fsl_array 
 
     if (index_buf.cursor &&
             fsl_mem_arena_push(&mem_arena_sub_data_internal, &mesh->index_buf.buf, index_buf.cursor,
-                fsl_stringf("mesh_generate_arrays().%s", metadata.name_id)) != FSL_ERR_SUCCESS)
+                stringf_internal("mesh_generate_arrays().%s", metadata.name_id)) != FSL_ERR_SUCCESS)
     {
         LOGERROR(FSL_ERR_MESH_GENERATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,

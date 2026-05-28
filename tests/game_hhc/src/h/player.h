@@ -2,6 +2,7 @@
 #define HHC_PLAYER_H
 
 #include "deps/fossil/h/collision.h"
+#include "deps/fossil/assets/mesh/mesh.h"
 
 #include "common.h"
 #include "main.h"
@@ -77,6 +78,7 @@ typedef struct player
     u64 flag;                       /* enum @ref player_flag */
     v3f64 pos;                      /* coordinates in world */
     v3f64 pos_last;                 /* coordinates in world of previous frame */
+    v3f32 scale;
     v3f32 size;                     /* size (for collision detection) */
     v3f64 target;                   /* arm */
     v3f64 target_normal;
@@ -85,6 +87,7 @@ typedef struct player
     f32 sin_roll, sin_pitch, sin_yaw;
     f32 cos_roll, cos_pitch, cos_yaw;
     f32 eye_height;                 /* eye-level (camera height) */
+    fsl_mesh mesh;
 
     v3f32 input;                    /* raw user input */
     v3f32 acceleration;

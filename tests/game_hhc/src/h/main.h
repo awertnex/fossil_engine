@@ -152,8 +152,6 @@ struct hhc_uniform
 extern fsl_render *render;
 extern struct hhc_core core;
 extern struct hhc_settings settings;
-extern fsl_projection projection_world;
-extern fsl_projection projection_hud;
 extern fsl_font *font[FONT_COUNT];
 
 #endif /* HHC_MAIN_H */

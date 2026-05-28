@@ -16,5 +16,5 @@ void main()
     normal = a_normal;
     uv = a_uv;
 
-    gl_Position = a_transform * mat_perspective * pos;
+    gl_Position = mat_perspective * a_transform * pos;
 }

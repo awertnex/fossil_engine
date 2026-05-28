@@ -2,8 +2,7 @@
 #include "deps/fossil/engine/engine.h"
 #include "deps/fossil/logger/logger.h"
 #include "deps/fossil/memory/memory.h"
-
-#include "deps/fossil/h/string.h"
+#include "deps/fossil/string/string.h"
 
 #include "h/common.h"
 #include "h/main.h"

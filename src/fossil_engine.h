@@ -31,12 +31,12 @@
 #include "logger/logger.h"
 #include "memory/memory.h"
 #include "shaders/shaders.h"
+#include "string/string.h"
 
 #include "h/collision.h"
 #include "h/dir.h"
 #include "h/math.h"
 #include "h/process.h"
-#include "h/string.h"
 #include "h/super_debugger.h"
 #include "h/time.h"
 #include "h/ui.h"

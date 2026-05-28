@@ -24,8 +24,6 @@ fsl_render *render = NULL;
 struct hhc_core core = {0};
 struct hhc_settings settings = {0};
 static struct hhc_uniform uniform = {0};
-fsl_projection projection_world = {0};
-fsl_projection projection_hud = {0};
 
 static player _player = {0};
 
@@ -425,7 +423,7 @@ static void generate_standard_meshes(void)
                 VBO_LEN_COH, EBO_LEN_COH, vbo_data_coh, ebo_data_coh) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    if (fsl_mesh_load(&mesh_p[MESH_PLAYER], "Player", "player", "player.obj", GAME_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
+    if (fsl_mesh_load(&_player.mesh, "Player", "player", "ico_sphere.obj", GAME_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     if (fsl_mesh_generate(&mesh_p[MESH_GIZMO], "Gizmo", "gizmo", NULL, NULL,
@@ -522,12 +520,12 @@ static void draw_everything(void)
     glUniform1f(uniform.skybox.texture_scale, 0.25f);
     glUniformMatrix4fv(uniform.skybox.mat_translation, 1, GL_FALSE, (GLfloat*)&translation);
     glUniformMatrix4fv(uniform.skybox.mat_rotation, 1, GL_FALSE,
-            (GLfloat*)&projection_world.rotation);
+            (GLfloat*)&_player.camera.projection.rotation);
     glUniformMatrix4fv(uniform.skybox.mat_sun_rotation, 1, GL_FALSE, (GLfloat*)&rotation);
     glUniformMatrix4fv(uniform.skybox.mat_orientation, 1, GL_FALSE,
-            (GLfloat*)&projection_world.orientation);
+            (GLfloat*)&_player.camera.projection.orientation);
     glUniformMatrix4fv(uniform.skybox.mat_projection, 1, GL_FALSE,
-            (GLfloat*)&projection_world.projection);
+            (GLfloat*)&_player.camera.projection.projection);
     glUniform3fv(uniform.skybox.sun_rotation, 1, (GLfloat*)&skybox_data.sun_rotation);
     glUniform3fv(uniform.skybox.sky_color, 1, (GLfloat*)&skybox_data.sky_color);
     glUniform3fv(uniform.skybox.horizon_color, 1, (GLfloat*)&skybox_data.horizon_color);
@@ -644,7 +642,7 @@ static void draw_everything(void)
 
     glUseProgram(shader_p[SHADER_VOXEL].asset.id);
     glUniformMatrix4fv(uniform.voxel.mat_perspective, 1, GL_FALSE,
-            (GLfloat*)&projection_world.perspective);
+            (GLfloat*)&_player.camera.projection.perspective);
     glUniform3f(uniform.voxel.camera_position,
             _player.camera.pos.x, _player.camera.pos.y, _player.camera.pos.z);
     glUniform3f(uniform.voxel.flashlight_position,
@@ -684,26 +682,51 @@ static void draw_everything(void)
 
     if (_player.camera_mode != PLAYER_CAMERA_MODE_1ST_PERSON)
     {
+        m4f32 transform = {0};
+        m4f32 location = {0};
+        m4f32 rotation = {0};
+        m4f32 scale = {0};
+
+        location.a11 = 1.0f;
+        location.a22 = 1.0f;
+        location.a33 = 1.0f;
+        location.a41 = _player.pos.x;
+        location.a42 = _player.pos.y;
+        location.a43 = _player.pos.z;
+        location.a44 = 1.0f;
+
+        rotation.a11 = _player.cos_yaw;
+        rotation.a12 = -_player.sin_yaw;
+        rotation.a21 = _player.sin_yaw;
+        rotation.a22 = _player.cos_yaw;
+        rotation.a33 = 1.0f;
+        rotation.a44 = 1.0f;
+
+        scale.a11 = _player.scale.x;
+        scale.a22 = _player.scale.y;
+        scale.a33 = _player.scale.z;
+        scale.a44 = 1.0f;
+
+        transform = fsl_matrix_multiply(scale, location);
+        transform = fsl_matrix_multiply(rotation, transform);
+        transform = fsl_matrix_multiply(transform, _player.camera.projection.perspective);
+
+        glBindBuffer(GL_ARRAY_BUFFER, _player.mesh.transform_buf.id);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(m4f32), &transform, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
         glUseProgram(shader_p[SHADER_DEFAULT].asset.id);
-        glUniform3f(uniform.defaults.location,
-                _player.pos.x, _player.pos.y, _player.pos.z);
-        glUniformMatrix4fv(uniform.defaults.mat_rotation, 1, GL_FALSE,
-                (GLfloat*)(f32[]){
-                _player.cos_yaw, _player.sin_yaw, 0.0f, 0.0f,
-                -_player.sin_yaw, _player.cos_yaw, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f});
         glUniformMatrix4fv(uniform.defaults.mat_perspective, 1, GL_FALSE,
-                (GLfloat*)&projection_world.perspective);
+                (GLfloat*)&_player.camera.projection.perspective);
         glUniform3fv(uniform.defaults.sun_rotation, 1,
                 (GLfloat*)&skybox_data.sun_rotation);
         glUniform3fv(uniform.defaults.sky_color, 1,
                 (GLfloat*)&skybox_data.sky_color);
 
-        glBindVertexArray(mesh_p[MESH_PLAYER].vao);
-        glDrawElementsInstanced(GL_TRIANGLES, mesh_p[MESH_PLAYER].index_buf.len, GL_UNSIGNED_INT, NULL, 1);
+        glBindVertexArray(_player.mesh.vao);
+        glDrawElementsInstanced(GL_TRIANGLES, _player.mesh.index_buf.len, GL_UNSIGNED_INT, NULL, 1);
         /*
-        fsl_mesh_draw(&mesh_p[MESH_PLAYER], &_player.camera,
+        fsl_mesh_draw(&_player.mesh, &_player.camera,
                 _player.pos.x, _player.pos.y, _player.pos.z,
                 _player.roll, _player.pitch, _player.yaw);
         */
@@ -713,7 +736,7 @@ static void draw_everything(void)
 
     glUseProgram(shader_p[SHADER_BOUNDING_BOX].asset.id);
     glUniformMatrix4fv(uniform.bounding_box.mat_perspective, 1, GL_FALSE,
-            (GLfloat*)&projection_world.perspective);
+            (GLfloat*)&_player.camera.projection.perspective);
 
     if (core.flag.parse_target && core.flag.hud &&
             chunk_tab_p[chunk_tab_index] &&
@@ -768,7 +791,7 @@ static void draw_everything(void)
     if (core.debug.chunk_queue_visualizer)
     {
         glUniformMatrix4fv(uniform.bounding_box.mat_perspective, 1, GL_FALSE,
-                (GLfloat*)&projection_world.perspective);
+                (GLfloat*)&_player.camera.projection.perspective);
         glUniform3f(uniform.bounding_box.size,
                 CHUNK_DIAMETER, CHUNK_DIAMETER, CHUNK_DIAMETER);
 
@@ -848,13 +871,13 @@ static void draw_everything(void)
 
         glUniform2fv(uniform.gizmo.ndc_scale, 1, (GLfloat*)&render->ndc_scale);
         glUniformMatrix4fv(uniform.gizmo.mat_translation, 1, GL_FALSE,
-                (GLfloat*)&projection_hud.target);
+                (GLfloat*)&_player.camera_hud.projection.target);
         glUniformMatrix4fv(uniform.gizmo.mat_rotation, 1, GL_FALSE,
-                (GLfloat*)&projection_hud.rotation);
+                (GLfloat*)&_player.camera_hud.projection.rotation);
         glUniformMatrix4fv(uniform.gizmo.mat_orientation, 1, GL_FALSE,
-                (GLfloat*)&projection_hud.orientation);
+                (GLfloat*)&_player.camera_hud.projection.orientation);
         glUniformMatrix4fv(uniform.gizmo.mat_projection, 1, GL_FALSE,
-                (GLfloat*)&projection_hud.projection);
+                (GLfloat*)&_player.camera_hud.projection.projection);
 
         glBindVertexArray(mesh_p[MESH_GIZMO].vao);
         glUniform3f(uniform.gizmo.color, 1.0f, 0.0f, 0.0f);
@@ -877,16 +900,16 @@ static void draw_everything(void)
         glUniform1i(uniform.gizmo_chunk.chunk_buf_diameter, settings.chunk_buf_diameter);
 
         glUniformMatrix4fv(uniform.gizmo_chunk.mat_translation,
-                1, GL_FALSE, (GLfloat*)&projection_hud.target);
+                1, GL_FALSE, (GLfloat*)&_player.camera_hud.projection.target);
 
         glUniformMatrix4fv(uniform.gizmo_chunk.mat_rotation,
-                1, GL_FALSE, (GLfloat*)&projection_hud.rotation);
+                1, GL_FALSE, (GLfloat*)&_player.camera_hud.projection.rotation);
 
         glUniformMatrix4fv(uniform.gizmo_chunk.mat_orientation,
-                1, GL_FALSE, (GLfloat*)&projection_hud.orientation);
+                1, GL_FALSE, (GLfloat*)&_player.camera_hud.projection.orientation);
 
         glUniformMatrix4fv(uniform.gizmo_chunk.mat_projection,
-                1, GL_FALSE, (GLfloat*)&projection_hud.projection);
+                1, GL_FALSE, (GLfloat*)&_player.camera_hud.projection.projection);
 
         v3f32 camera_position =
         {
@@ -1198,6 +1221,9 @@ int main(int argc, char **argv)
     _player.size.x = 0.6f;
     _player.size.y = 0.6f;
     _player.size.z = 1.8f;
+    _player.scale.x = 1.0f;
+    _player.scale.y = 1.0f;
+    _player.scale.z = 1.0f;
     _player.eye_height = PLAYER_EYE_HEIGHT;
     _player.camera_mode = PLAYER_CAMERA_MODE_1ST_PERSON;
     _player.camera_distance = SET_CAMERA_DISTANCE_MAX;

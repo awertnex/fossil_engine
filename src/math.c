@@ -295,6 +295,16 @@ b8 fsl_is_in_volume_f64(v3f64 v, v3f64 min, v3f64 max)
         (v.z - min.z >= 0.0f) & (max.z - v.z >= 0.0f);
 }
 
+m4f32 fsl_matrix_unit(void)
+{
+    m4f32 matrix = {0};
+    matrix.a11 = 1.0f;
+    matrix.a22 = 1.0f;
+    matrix.a33 = 1.0f;
+    matrix.a44 = 1.0f;
+    return matrix;
+}
+
 m4f32 fsl_matrix_add(m4f32 a, m4f32 b)
 {
     m4f32 m = {0};

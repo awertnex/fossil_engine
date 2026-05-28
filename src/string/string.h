@@ -58,7 +58,7 @@ FSLAPI str *fsl_stringf(const str *format, ...);
 FSLAPI void fsl_skip_spaces(str **string);
 
 /*!
- *  @brief strip `string` of non-printable ascii and non-ascii characters, and spaces.
+ *  @brief strip `string` of non-printable ascii and non-ascii characters.
  */
 FSLAPI void fsl_strip_non_printable(str *string);
 
@@ -84,39 +84,52 @@ FSLAPI fsl_key_value fsl_get_tokens_key_val(const str *path);
 FSLAPI b8 fsl_is_digit(char n);
 
 /*!
- *  @brief convert a character into an int.
+ *  @brief convert a character representation of a digit into a signed 32-bit integer.
  *
- *  convert a character representation of a digit into a signed 32-bit integer
- *  and write into `dst`.
- *
- *  @return converted digit, @ref fsl_err is set accordingly on failure.
+ *  @return converted digit.
  */
 FSLAPI i32 fsl_convert_char_to_int(char n);
 
 /*!
- *  @brief convert a string into an integer.
- *
- *  convert a string representation of a number of at most `size` bytes into a
- *  signed 64-bit integer and write into `dst`.
+ *  @brief convert a string representation of a number into an unsigned 32-bit
+ *  integer and write into `dst`.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_convert_str_to_i64(const str *n, i64 *dst, i32 size);
+FSLAPI u32 fsl_convert_str_to_u32(const str *n, u32 *dst);
 
 /*!
- *  @brief convert a string into a float.
- *
- *  convert a string representation of a number of at most `size` bytes into a 32-bit float
- *  and write into `dst`.
+ *  @brief convert a string representation of a number into an unsigned 64-bit
+ *  integer and write into `dst`.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_convert_str_to_f32(const str *n, f32 *dst, i32 size);
+FSLAPI u32 fsl_convert_str_to_u64(const str *n, u64 *dst);
 
 /*!
- *  @brief convert an int into a string.
+ *  @brief convert a string representation of a number into a signed 64-bit
+ *  integer and write into `dst`.
  *
- *  convert a signed 32-bit integer into a string and write into `dst`
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+FSLAPI u32 fsl_convert_str_to_i64(const str *n, i64 *dst);
+
+/*!
+ *  @brief convert a string representation of a number into a 32-bit float and write into `dst`.
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+FSLAPI u32 fsl_convert_str_to_f32(const str *n, f32 *dst);
+
+/*!
+ *  @brief convert a string representation of a number into a 64-bit float and write into `dst`.
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+FSLAPI u32 fsl_convert_str_to_f64(const str *n, f64 *dst);
+
+/*!
+ *  @brief convert a signed 32-bit integer into a string and write into `dst`
  *  at most `size` bytes.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
@@ -124,9 +137,7 @@ FSLAPI u32 fsl_convert_str_to_f32(const str *n, f32 *dst, i32 size);
 FSLAPI u32 fsl_convert_i32_to_str(str *dst, i32 size, i32 n);
 
 /*!
- *  @brief convert an int into a string.
- *
- *  convert an unsigned 64-bit integer into a string and write into `dst`
+ *  @brief convert an unsigned 64-bit integer into a string and write into `dst`
  *  at most `size` bytes.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
@@ -156,7 +167,9 @@ FSLAPI u64 fsl_hash_fnv1a_u64(const void *data, fsl_cap len);
  *
  *  @param dst recipient of hash index if found.
  *  @param len number of elements in `buf`.
+ *
+ *  @remark modifies `dst` only when hash is found.
  */
-b8 fsl_find_hash_u64(u64 hash, u64 *buf, u64 *dst, fsl_len len);
+FSLAPI b8 fsl_find_hash_u64(u64 hash, u64 *buf, u64 *dst, fsl_len len);
 
 #endif /* FSL_STRING_H */

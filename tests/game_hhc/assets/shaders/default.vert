@@ -5,19 +5,13 @@ layout (location = 1) in vec3 a_normal;
 layout (location = 2) in vec2 a_uv;
 layout (location = 3) in mat4 a_transform;
 
-uniform vec3 location;
-uniform vec3 scale;
-uniform mat4 mat_rotation;
-uniform mat4 mat_perspective;
-out vec4 position;
+out vec4 pos;
 out vec3 normal;
 
 void main()
 {
-    position = vec4(a_pos, 1.0);
-    position *= mat_rotation;
-    position.xyz += location;
+    pos = vec4(a_pos, 1.0);
     normal = a_normal;
 
-    gl_Position = mat_perspective * position;
+    gl_Position = a_transform * pos;
 }

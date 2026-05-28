@@ -121,7 +121,6 @@ enum mesh_index
 {
     MESH_SKYBOX,
     MESH_CUBE_OF_HAPPINESS,
-    MESH_PLAYER,
     MESH_GIZMO,
     MESH_COUNT
 }; /* mesh_index */

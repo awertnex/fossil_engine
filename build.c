@@ -40,11 +40,11 @@ static str str_files[][CMD_SIZE] =
     DIR_SRC"memory/memory.c",
     DIR_SRC"shaders/shaders.c",
     DIR_SRC"shaders/shader_pre_processor.c",
+    DIR_SRC"string/string.c",
     DIR_SRC"collision.c",
     DIR_SRC"dir.c",
     DIR_SRC"math.c",
     DIR_SRC FSL_FILE_NAME_PLATFORM,
-    DIR_SRC"string.c",
     DIR_SRC"time.c",
     DIR_SRC"ui.c"
 };
@@ -64,6 +64,7 @@ static str str_make_dir[][CMD_SIZE] =
     DIR_DST DIR_DEPS DIR_DST"logger/",
     DIR_DST DIR_DEPS DIR_DST"memory/",
     DIR_DST DIR_DEPS DIR_DST"shaders/",
+    DIR_DST DIR_DEPS DIR_DST"string/",
 
     DIR_DST DIR_DST,
     DIR_DST DIR_DST DIR_DST,
@@ -89,7 +90,8 @@ static str *copy_targets[][32] =
     {DIR_SRC"memory/memory.h",              DIR_DST DIR_DEPS DIR_DST"memory/"},
     {DIR_SRC"memory/memory_types.h",        DIR_DST DIR_DEPS DIR_DST"memory/"},
     {DIR_SRC"shaders/shader_types.h",       DIR_DST DIR_DEPS DIR_DST"shaders/"},
-    {DIR_SRC"shaders/shaders.h",            DIR_DST DIR_DEPS DIR_DST"shaders/"}
+    {DIR_SRC"shaders/shaders.h",            DIR_DST DIR_DEPS DIR_DST"shaders/"},
+    {DIR_SRC"string/string.h",              DIR_DST DIR_DEPS DIR_DST"string/"}
 };
 
 int main(int argc, char **argv)
