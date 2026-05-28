@@ -315,11 +315,11 @@ static u32 mesh_generate_arrays(fsl_mesh *mesh, fsl_array vertex_buf, fsl_array 
     glGenVertexArrays(1, &mesh->vao);
     glBindVertexArray(mesh->vao);
 
-    fsl_vbo_init(&mesh->vertex_buf, sizeof(GLfloat), vertex_buf.cursor, vertex_buf.buf,
+    fsl_vbo_init(&mesh->vertex_buf, 1, vertex_buf.cursor, vertex_buf.buf,
             GL_ARRAY_BUFFER, FSL_DRAW_TYPE_STATIC);
 
     if (index_buf.cursor)
-        fsl_vbo_init(&mesh->index_buf, sizeof(GLuint), index_buf.cursor, index_buf.buf,
+        fsl_vbo_init(&mesh->index_buf, 1, index_buf.cursor, index_buf.buf,
                 GL_ELEMENT_ARRAY_BUFFER, FSL_DRAW_TYPE_STATIC);
 
     /* position */

@@ -423,7 +423,7 @@ static void generate_standard_meshes(void)
                 VBO_LEN_COH, EBO_LEN_COH, vbo_data_coh, ebo_data_coh) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    if (fsl_mesh_load(&_player.mesh, "Player", "player", "ico_sphere.obj", GAME_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
+    if (fsl_mesh_load(&_player.mesh, "Player", "player", "sphere.obj", GAME_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     if (fsl_mesh_generate(&mesh_p[MESH_GIZMO], "Gizmo", "gizmo", NULL, NULL,
