@@ -366,9 +366,9 @@ void fsl_mesh_free(fsl_mesh *mesh)
     if (mesh->asset.initialized)
     {
         mesh->asset.initialized = FALSE;
-        glDeleteBuffers(1, &mesh->ebo);
-        glDeleteBuffers(1, &mesh->vbo);
-        glDeleteVertexArrays(1, &mesh->vao);
+        glDeleteBuffers(1, &mesh->ebo); /* -- DEPRECATED IN v0.8.0-dev -- */
+        glDeleteBuffers(1, &mesh->vbo); /* -- DEPRECATED IN v0.8.0-dev -- */
+        glDeleteVertexArrays(1, &mesh->vao); /* -- DEPRECATED IN v0.8.0-dev -- */
     }
 
     if (mesh->vertex_buf.initialized)
@@ -380,8 +380,6 @@ void fsl_mesh_free(fsl_mesh *mesh)
     if (mesh->transform_buf.initialized)
         fsl_vbo_free(&mesh->transform_buf);
 
-    fsl_mem_arena_pop(&mesh->vbo_data, "fsl_mesh_free().mesh->vbo_data");
-    fsl_mem_arena_pop(&mesh->ebo_data, "fsl_mesh_free().mesh->ebo_data");
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             MSG_MESH_UNLOAD(fsl_mem_handle_get(mesh->asset.name_id)));
     *mesh = nomesh;

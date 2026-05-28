@@ -203,9 +203,9 @@ void fsl_vbo_free(fsl_vbo *vbo)
         fsl_mem_arena_pop(&vbo->buf, "fsl_vbo_free().vbo->buf");
     }
 
-    *vbo = novbo;
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             MSG_VBO_FREE(id, vbo->size * vbo->len));
+    *vbo = novbo;
 }
 
 /* ---- section: fbo -------------------------------------------------------- */

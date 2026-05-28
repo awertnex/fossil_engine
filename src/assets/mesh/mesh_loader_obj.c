@@ -27,6 +27,7 @@
 #include "../../logger/logger_messages_internal.h"
 #include "../../memory/memory.h"
 #include "../../string/string.h"
+#include "../../string/string_internal.h"
 
 #include "../../h/math.h"
 
@@ -37,6 +38,17 @@
 
 #include <stdio.h>
 #include <string.h>
+
+#define FSL_HASH_TABLE_MAX 8192
+
+typedef struct fsl_hash_node fsl_hash_node;
+
+struct fsl_hash_node
+{
+    u64 hash;
+    u64 index;
+    fsl_hash_node *next;
+}; /* fsl_hash_node */
 
 struct mesh_vertex
 {
@@ -101,13 +113,19 @@ u32 mesh_load_obj_internal(fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *
     fsl_array vertex_buf = {0};
     fsl_array uv_buf = {0};
     fsl_array normal_buf = {0};
-    fsl_array hash_buf = {0};
+
+    fsl_hash_node *node_curr = NULL;
+    fsl_hash_node *node_new = NULL;
+    fsl_hash_node *hash_table = NULL;
+    u64 bucket_index = 0;
+    b8 hash_found = FALSE;
 
     if (
+            fsl_mem_map((void*)&hash_table, FSL_HASH_TABLE_MAX * sizeof(fsl_hash_node),
+                "mesh_load_obj_internal().hash_table") != FSL_ERR_SUCCESS ||
             fsl_mem_array_init(&vertex_buf) != FSL_ERR_SUCCESS ||
             fsl_mem_array_init(&uv_buf) != FSL_ERR_SUCCESS ||
             fsl_mem_array_init(&normal_buf) != FSL_ERR_SUCCESS ||
-            fsl_mem_array_init(&hash_buf) != FSL_ERR_SUCCESS ||
             fsl_mem_array_init(vertex_dst) != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -197,10 +215,28 @@ u32 mesh_load_obj_internal(fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *
                         uv_buf.cursor / sizeof(v2f32),
                         normal_buf.cursor / sizeof(v3f32));
                 vertex_hash = fsl_hash_djb2_u64(&vertex_indices, 3 * sizeof(u32));
+                bucket_index = vertex_hash & (FSL_HASH_TABLE_MAX - 1);
+                node_curr = &hash_table[bucket_index];
 
-                if (!fsl_find_hash_u64(vertex_hash, hash_buf.buf, &vertex_hash_index,
-                            hash_buf.cursor / sizeof(u64)))
+                while (node_curr)
                 {
+                    if (node_curr->hash == vertex_hash)
+                    {
+                        vertex_hash_index = node_curr->index;
+                        hash_found = TRUE;
+                        break;
+                    }
+                    node_curr = node_curr->next;
+                }
+
+                if (!hash_found)
+                {
+                    node_new = &hash_table[bucket_index];
+                    node_new->hash = vertex_hash;
+                    node_new->index = vertex_dst->cursor / sizeof(struct mesh_vertex);
+                    node_new->next = node_curr;
+
+                    vertex_hash_index = node_new->index;
                     vertex = novertex;
                     if (vertex_indices.pos)
                         vertex.pos = *((v3f32*)vertex_buf.buf + vertex_indices.pos - 1);
@@ -208,9 +244,7 @@ u32 mesh_load_obj_internal(fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *
                         vertex.uv = *((v2f32*)uv_buf.buf + vertex_indices.uv - 1);
                     if (vertex_indices.normal)
                         vertex.normal = *((v3f32*)normal_buf.buf + vertex_indices.normal - 1);
-                    vertex_hash_index = hash_buf.cursor / sizeof(u64);
-                    fsl_mem_array_push(vertex_dst, &vertex, 8 * sizeof(f32));
-                    fsl_mem_array_push(&hash_buf, &vertex_hash, sizeof(u64));
+                    fsl_mem_array_push(vertex_dst, &vertex, sizeof(struct mesh_vertex));
                 }
 
                 triangle.curr = vertex_hash_index;
@@ -225,12 +259,11 @@ u32 mesh_load_obj_internal(fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *
     }
 
     fclose(file);
-    file = NULL;
-
+    fsl_mem_unmap((void*)&hash_table, FSL_HASH_TABLE_MAX * sizeof(fsl_hash_node*),
+            "mesh_load_obj_internal().hash_table");
     fsl_mem_array_free(&vertex_buf);
     fsl_mem_array_free(&uv_buf);
     fsl_mem_array_free(&normal_buf);
-    fsl_mem_array_free(&hash_buf);
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -239,12 +272,13 @@ cleanup:
 
     if (file)
         fclose(file);
+    fsl_mem_unmap((void*)&hash_table, FSL_HASH_TABLE_MAX * sizeof(fsl_hash_node*),
+            "mesh_load_obj_internal().hash_table");
     fsl_mem_array_free(vertex_dst);
     fsl_mem_array_free(index_dst);
     fsl_mem_array_free(&vertex_buf);
     fsl_mem_array_free(&uv_buf);
     fsl_mem_array_free(&normal_buf);
-    fsl_mem_array_free(&hash_buf);
     return fsl_err;
 }
 
@@ -257,7 +291,6 @@ static void get_vertex_indices_internal(str *token, struct mesh_vertex_indices *
     u32 j = 0;
     i32 sign = 1;
     i64 index[3] = {0};
-    i64 index_temp = 0;
     fsl_len len[3] = {0};
     len[0] = pos_len;
     len[1] = uv_len;
@@ -285,8 +318,7 @@ static void get_vertex_indices_internal(str *token, struct mesh_vertex_indices *
                 temp[j] = 0;
                 fsl_convert_str_to_i64(temp, &index[i]);
                 index[i] *= sign;
-                index_temp = index[i];
-                if (len[i] && index[i] != len[i])
+                if (len[i] && index[i] != (i64)len[i])
                     index[i] = fsl_mod_i64(index[i], len[i]);
                 break;
             }
