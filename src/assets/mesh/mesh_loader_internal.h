@@ -30,7 +30,6 @@ typedef enum fsl_mesh_format
 {
     FSL_MESH_FORMAT_NONE,
     FSL_MESH_FORMAT_OBJ,
-    FSL_MESH_FORMAT_FBX,
     FSL_MESH_FORMAT_GLTF,
     FSL_MESH_FORMAT_GLB,
     FSL_MESH_FORMAT_COUNT
@@ -62,18 +61,6 @@ u32 mesh_get_format_internal(const str *file, fsl_mesh_format *format);
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 u32 mesh_load_obj_internal(fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *index_dst);
-
-/*!
- *  @internal
- *
- *  @brief load an 'Autodesk FBX' (.fbx) mesh from disk into specified buffers.
- *
- *  @remark buffers must be `NULL`, will be allocated via @ref fsl_mem_alloc()
- *  and should be copied and freed using @ref fsl_mem_free().
- *
- *  @return non-zero on failure and @ref fsl_err is set accordingly.
- */
-u32 mesh_load_fbx_internal(fsl_fs_path *path, fsl_array *vertex_buf, fsl_array *index_buf);
 
 /*!
  *  @internal

@@ -84,10 +84,6 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
             if (mesh_load_obj_internal(path_temp, &vertex_buf, &index_buf) != FSL_ERR_SUCCESS)
                 goto cleanup;
             break;
-        case FSL_MESH_FORMAT_FBX:
-            if (mesh_load_fbx_internal(path_temp, &vertex_buf, &index_buf) != FSL_ERR_SUCCESS)
-                goto cleanup;
-            break;
         case FSL_MESH_FORMAT_GLTF:
             if (mesh_load_gltf_internal(path_temp, &vertex_buf, &index_buf) != FSL_ERR_SUCCESS)
                 goto cleanup;

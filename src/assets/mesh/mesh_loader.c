@@ -75,12 +75,6 @@ u32 mesh_get_format_internal(const str *file, fsl_mesh_format *format)
         fsl_err = FSL_ERR_SUCCESS;
         return fsl_err;
     }
-    if (!strncmp(extension, "fbx\0", 4))
-    {
-        *format = FSL_MESH_FORMAT_FBX;
-        fsl_err = FSL_ERR_SUCCESS;
-        return fsl_err;
-    }
     if (!strncmp(extension, "gltf\0", 5))
     {
         *format = FSL_MESH_FORMAT_GLTF;
@@ -96,12 +90,6 @@ u32 mesh_get_format_internal(const str *file, fsl_mesh_format *format)
 
     LOGERROR(FSL_ERR_MESH_FORMAT_UNKNOWN, FSL_FLAG_LOG_NO_VERBOSE,
             MSG_ACTION_SUBJECT_REASON_ERROR("Get Mesh Format", base_name, "Format Detection Failed"));
-    return fsl_err;
-}
-
-u32 mesh_load_fbx_internal(fsl_fs_path *path, fsl_array *vertex_buf, fsl_array *index_buf)
-{
-    fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
 

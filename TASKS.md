@@ -15,7 +15,7 @@ STATUS  DONE DATE       TASK
                         engine headers' relative includes not break in other
                         repos
 - [ ]   (          ):   make physics module
-- [ ]   (          ):   make camera module
+- [x]   (2026 05 27):   make camera module
 - [x]   (2026 05 24):   do mesh loading and unloading from disk
 - [ ]   (          ):   do json parsing
 
