@@ -32,6 +32,8 @@
 #define FSL_FILE_NAME_LOG_INFO  "log_info.log"
 #define FSL_FILE_NAME_LOG_EXTRA "log_verbose.log"
 
+#define FSL_FILE_FORMAT_NAME_FOSSIL_MESH "fmesh"
+
 #define FSL_COLOR_CHANNELS_GRAY 1
 #define FSL_COLOR_CHANNELS_RGB 3
 #define FSL_COLOR_CHANNELS_RGBA 4

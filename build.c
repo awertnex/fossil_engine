@@ -33,6 +33,7 @@ static str str_files[][CMD_SIZE] =
     DIR_SRC"assets/assets.c",
     DIR_SRC"assets/mesh/mesh.c",
     DIR_SRC"assets/mesh/mesh_loader.c",
+    DIR_SRC"assets/mesh/mesh_loader_fmesh.c",
     DIR_SRC"assets/mesh/mesh_loader_obj.c",
     DIR_SRC"engine/engine.c",
     DIR_SRC"engine/engine_assets.c",

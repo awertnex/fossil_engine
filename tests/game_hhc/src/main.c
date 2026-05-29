@@ -423,7 +423,7 @@ static void generate_standard_meshes(void)
                 VBO_LEN_COH, EBO_LEN_COH, vbo_data_coh, ebo_data_coh) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    if (fsl_mesh_load(&_player.mesh, "Player", "player", "sphere.obj", GAME_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
+    if (fsl_mesh_load(&_player.mesh, "Player", "player", "player.obj", GAME_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     if (fsl_mesh_generate(&mesh_p[MESH_GIZMO], "Gizmo", "gizmo", NULL, NULL,
@@ -682,54 +682,10 @@ static void draw_everything(void)
 
     if (_player.camera_mode != PLAYER_CAMERA_MODE_1ST_PERSON)
     {
-        m4f32 transform = {0};
-        m4f32 location = {0};
-        m4f32 rotation = {0};
-        m4f32 scale = {0};
-
-        location.a11 = 1.0f;
-        location.a22 = 1.0f;
-        location.a33 = 1.0f;
-        location.a41 = _player.pos.x;
-        location.a42 = _player.pos.y;
-        location.a43 = _player.pos.z;
-        location.a44 = 1.0f;
-
-        rotation.a11 = _player.cos_yaw;
-        rotation.a12 = -_player.sin_yaw;
-        rotation.a21 = _player.sin_yaw;
-        rotation.a22 = _player.cos_yaw;
-        rotation.a33 = 1.0f;
-        rotation.a44 = 1.0f;
-
-        scale.a11 = _player.scale.x;
-        scale.a22 = _player.scale.y;
-        scale.a33 = _player.scale.z;
-        scale.a44 = 1.0f;
-
-        transform = fsl_matrix_multiply(scale, location);
-        transform = fsl_matrix_multiply(rotation, transform);
-        transform = fsl_matrix_multiply(transform, _player.camera.projection.perspective);
-
-        glBindBuffer(GL_ARRAY_BUFFER, _player.mesh.transform_buf.id);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(m4f32), &transform, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        glUseProgram(shader_p[SHADER_DEFAULT].asset.id);
-        glUniformMatrix4fv(uniform.defaults.mat_perspective, 1, GL_FALSE,
-                (GLfloat*)&_player.camera.projection.perspective);
-        glUniform3fv(uniform.defaults.sun_rotation, 1,
-                (GLfloat*)&skybox_data.sun_rotation);
-        glUniform3fv(uniform.defaults.sky_color, 1,
-                (GLfloat*)&skybox_data.sky_color);
-
-        glBindVertexArray(_player.mesh.vao);
-        glDrawElementsInstanced(GL_TRIANGLES, _player.mesh.index_buf.len, GL_UNSIGNED_INT, NULL, 1);
-        /*
         fsl_mesh_draw(&_player.mesh, &_player.camera,
                 _player.pos.x, _player.pos.y, _player.pos.z,
-                _player.roll, _player.pitch, _player.yaw);
-        */
+                _player.roll, _player.pitch, _player.yaw,
+                _player.scale.x, _player.scale.y, _player.scale.z);
     }
 
     /* ---- draw player target bounding box --------------------------------- */
@@ -1287,9 +1243,7 @@ cleanup:
     assets_free();
     chunking_free();
     rand_free();
-
     fsl_mem_arena_free(&memory_arena_internal, "main().memory_arena_internal");
-
     fsl_engine_close();
     return *GAME_ERR;
 }

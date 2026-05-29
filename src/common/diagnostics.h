@@ -99,6 +99,8 @@
 #define FSL_ERR_MESH_LOAD_FAIL              4156
 #define FSL_ERR_MESH_FORMAT_UNKNOWN         4157
 #define FSL_ERR_VBO_INIT_FAIL               4158
+#define FSL_ERR_FILE_FORMAT_INVALID         4159
+#define FSL_ERR_FILE_DATA_CORRUPT           4160
 
 /*!
  *  @brief global variable for engine-specific error codes.

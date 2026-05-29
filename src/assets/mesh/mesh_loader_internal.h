@@ -26,14 +26,41 @@
 #include "../../common/types.h"
 #include "mesh.h"
 
+#define MESH_FILE_ID "fsl_mesh"
+
+typedef struct fsl_file_format_fmesh fsl_file_format_fmesh;
+
 typedef enum fsl_mesh_format
 {
     FSL_MESH_FORMAT_NONE,
+    FSL_MESH_FORMAT_FMESH, /* engine's binary mesh format */
     FSL_MESH_FORMAT_OBJ,
     FSL_MESH_FORMAT_GLTF,
     FSL_MESH_FORMAT_GLB,
     FSL_MESH_FORMAT_COUNT
 } fsl_mesh_format;
+
+struct fsl_file_format_fmesh
+{
+    u64 asset_type;
+    str id[8]; /* @ref MESH_FILE_ID */
+
+    fsl_size vertex_size;
+    fsl_len vertex_len;
+    fsl_size index_size;
+    fsl_len index_len;
+    u64 hash; /* hash of `vertex_size`, `vertex_len`, `index_size` and `index_len`, in that order */
+
+    u8* vertex_data;
+    u8* index_data;
+}; /* fsl_file_format_fmesh */
+
+struct mesh_vertex
+{
+    v3f32 pos;
+    v3f32 normal;
+    v2f32 uv;
+}; /* mesh_vertex */
 
 /*!
  *  @internal
@@ -53,37 +80,67 @@ u32 mesh_get_format_internal(const str *file, fsl_mesh_format *format);
 /*!
  *  @internal
  *
- *  @brief load a 'Wavefront Obj' (.obj) mesh from disk into specified buffers.
+ *  @brief check whether a cooked version of the mesh file has been found or not.
  *
- *  @remark buffers must be `NULL`, will be allocated via @ref fsl_mem_alloc()
- *  and should be copied and freed using @ref fsl_mem_free().
+ *  @return FALSE on failure.
+ */
+b8 mesh_is_cooked(const fsl_fs_path *path);
+
+/*!
+ *  @internal
+ *
+ *  @brief load a 'Fossil Mesh' (.fmesh) mesh from disk into specified buffers.
+ *
+ *  @remark buffers must be `NULL`, will be allocated via @ref fsl_mem_array_init()
+ *  and should be copied and freed using @ref fsl_mem_array_free().
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 mesh_load_obj_internal(fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *index_dst);
+u32 mesh_load_fmesh_internal(const fsl_fs_path *path, fsl_array *vertex_buf, fsl_array *index_buf);
+
+/*!
+ *  @internal
+ *
+ *  @brief export a 'Fossil Mesh' (.fmesh) mesh from RAM into `path`.
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+u32 mesh_export_fmesh_internal(const fsl_fs_path *path, fsl_array vertex_buf, fsl_array index_buf);
+
+/*!
+ *  @internal
+ *
+ *  @brief load a 'Wavefront Obj' (.obj) mesh from disk into specified buffers.
+ *
+ *  @remark buffers must be `NULL`, will be allocated via @ref fsl_mem_array_init()
+ *  and should be copied and freed using @ref fsl_mem_array_free().
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *index_dst);
 
 /*!
  *  @internal
  *
  *  @brief load a 'Khronos GLTF' (.gltf) mesh from disk into specified buffers.
  *
- *  @remark buffers must be `NULL`, will be allocated via @ref fsl_mem_alloc()
- *  and should be copied and freed using @ref fsl_mem_free().
+ *  @remark buffers must be `NULL`, will be allocated via @ref fsl_mem_array_init()
+ *  and should be copied and freed using @ref fsl_mem_array_free().
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 mesh_load_gltf_internal(fsl_fs_path *path, fsl_array *vertex_buf, fsl_array *index_buf);
+u32 mesh_load_gltf_internal(const fsl_fs_path *path, fsl_array *vertex_buf, fsl_array *index_buf);
 
 /*!
  *  @internal
  *
  *  @brief load a 'Khronos GLB' (.glb) mesh from disk into specified buffers.
  *
- *  @remark buffers must be `NULL`, will be allocated via @ref fsl_mem_alloc()
- *  and should be copied and freed using @ref fsl_mem_free().
+ *  @remark buffers must be `NULL`, will be allocated via @ref fsl_mem_array_init()
+ *  and should be copied and freed using @ref fsl_mem_array_free().
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 mesh_load_glb_internal(fsl_fs_path *path, fsl_array *vertex_buf, fsl_array *index_buf);
+u32 mesh_load_glb_internal(const fsl_fs_path *path, fsl_array *vertex_buf, fsl_array *index_buf);
 
 #endif /* FSL_MESH_LOADER_INTERNAL_H */

@@ -146,6 +146,7 @@
 #define MSG_TEXTURE_HANDLE_DESTROY(handle_id, texture_name, texture_id) fsl_logger_stringf("Handle[%"PRIx64"] for Texture %s[%u] Destroyed\n", handle_id, texture_name, texture_id)
 #define MSG_MESH_INIT(name)                                 fsl_logger_stringf("Mesh '%s' Loaded\n", name)
 #define MSG_MESH_UNLOAD(name)                               fsl_logger_stringf("Mesh '%s' Unloaded\n", name)
+#define MSG_MESH_EXPORT_FMESH(path, size)                   fsl_logger_stringf("Mesh File '%s' [%"PRIu64"B] Expoted\n", path, size)
 #define MSG_SHADER_INIT(name, id)                           fsl_logger_stringf("Shader %s[%u] Loaded\n", name, id)
 #define MSG_SHADER_UNLOAD(name, id)                         fsl_logger_stringf("Shader %s[%u] Unloaded\n", name, id)
 #define MSG_SHADER_PROGRAM_LOAD(name, id)                   fsl_logger_stringf("Shader Program %s[%u] Loaded\n", name, id)

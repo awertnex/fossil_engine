@@ -79,7 +79,8 @@ u32 fsl_mem_array_push_internal(fsl_array *array, void *data, u64 size)
         array->buf = buf_temp;
     }
 
-    memcpy((u8*)array->buf + array->cursor, data, size);
+    if (data)
+        memcpy((u8*)array->buf + array->cursor, data, size);
     array->cursor += size;
 
     fsl_err = FSL_ERR_SUCCESS;

@@ -20,20 +20,14 @@
  *  @brief mesh file parsing and loading.
  */
 
+#include "../../common/config.h"
 #include "../../common/diagnostics.h"
 #include "../../common/limits.h"
 #include "../../common/types.h"
 #include "../../logger/logger.h"
 #include "../../logger/logger_messages_internal.h"
-#include "../../memory/memory.h"
-#include "../../string/string.h"
 
-#include "../../h/math.h"
-
-#include "mesh.h"
 #include "mesh_loader_internal.h"
-
-#include "../../external/glad/glad.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -69,6 +63,12 @@ u32 mesh_get_format_internal(const str *file, fsl_mesh_format *format)
         return fsl_err;
     }
 
+    if (!strncmp(extension, FSL_FILE_FORMAT_NAME_FOSSIL_MESH"\0", strlen(FSL_FILE_FORMAT_NAME_FOSSIL_MESH) + 1))
+    {
+        *format = FSL_MESH_FORMAT_FMESH;
+        fsl_err = FSL_ERR_SUCCESS;
+        return fsl_err;
+    }
     if (!strncmp(extension, "obj\0", 4))
     {
         *format = FSL_MESH_FORMAT_OBJ;
@@ -94,14 +94,14 @@ u32 mesh_get_format_internal(const str *file, fsl_mesh_format *format)
 }
 
 /* TODO: make function `fsl_mesh_load_gltf_internal()` */
-u32 mesh_load_gltf_internal(fsl_fs_path *path, fsl_array *vertex_buf, fsl_array *index_buf)
+u32 mesh_load_gltf_internal(const fsl_fs_path *path, fsl_array *vertex_buf, fsl_array *index_buf)
 {
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
 
 /* TODO: make function `fsl_mesh_load_glb_internal()` */
-u32 mesh_load_glb_internal(fsl_fs_path *path, fsl_array *vertex_buf, fsl_array *index_buf)
+u32 mesh_load_glb_internal(const fsl_fs_path *path, fsl_array *vertex_buf, fsl_array *index_buf)
 {
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;

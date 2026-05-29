@@ -21,6 +21,7 @@
  */
 
 #include "../../common/common_values.h"
+#include "../../common/config.h"
 #include "../../common/diagnostics.h"
 #include "../../common/types.h"
 #include "../assets.h"
@@ -54,9 +55,12 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
 {
     fsl_mesh mesh_temp = {0};
     fsl_fs_path path_temp[FSL_PATH_CAP] = {0};
+    str file_temp[FSL_ID_CAP] = {0};
+    str *extension = NULL;
     fsl_mesh_format format = 0;
     fsl_array vertex_buf = {0};
     fsl_array index_buf = {0};
+    u32 i = 0;
 
     if (!mesh)
     {
@@ -75,11 +79,46 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
         return fsl_err;
     }
 
-    if (mesh_get_format_internal(file, &format) != FSL_ERR_SUCCESS)
+    snprintf(file_temp, FSL_ID_CAP, "%s", file);
+    if (mesh_is_cooked(path_temp))
+    {
+        extension = strrchr(file_temp, '.');
+        if (extension)
+        {
+            ++extension;
+            snprintf(extension, strlen(FSL_FILE_FORMAT_NAME_FOSSIL_MESH) + 1, "%s", FSL_FILE_FORMAT_NAME_FOSSIL_MESH);
+        }
+        extension = strrchr(path_temp, '.');
+        if (extension)
+        {
+            ++extension;
+            snprintf(extension, strlen(FSL_FILE_FORMAT_NAME_FOSSIL_MESH) + 1, "%s", FSL_FILE_FORMAT_NAME_FOSSIL_MESH);
+        }
+    }
+
+fallback:
+
+    if (mesh_get_format_internal(file_temp, &format) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     switch(format)
     {
+        case FSL_MESH_FORMAT_FMESH:
+            if (mesh_load_fmesh_internal(path_temp, &vertex_buf, &index_buf) != FSL_ERR_SUCCESS)
+            {
+                for (i = 0; i < FSL_ID_CAP && (file_temp[i] || file[i]); ++i)
+                {
+                    if (file_temp[i] != file[i])
+                    {
+                        snprintf(path_temp, FSL_PATH_CAP, "%s%s", path, file);
+                        snprintf(file_temp, FSL_ID_CAP, "%s", file);
+                        format = 0;
+                        goto fallback;
+                    }
+                }
+                goto cleanup;
+            }
+            break;
         case FSL_MESH_FORMAT_OBJ:
             if (mesh_load_obj_internal(path_temp, &vertex_buf, &index_buf) != FSL_ERR_SUCCESS)
                 goto cleanup;
@@ -107,6 +146,18 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
     if (mesh_generate_arrays(&mesh_temp, vertex_buf, index_buf) != FSL_ERR_SUCCESS)
         goto cleanup;
 
+    snprintf(path_temp, FSL_PATH_CAP, "%s%s", path, file);
+    extension = strrchr(path_temp, '.');
+    if (extension)
+    {
+        ++extension;
+        snprintf(extension, strlen(FSL_FILE_FORMAT_NAME_FOSSIL_MESH) + 1, "%s",
+                FSL_FILE_FORMAT_NAME_FOSSIL_MESH);
+    }
+    if (fsl_is_file_exists(path_temp, FALSE) != FSL_ERR_SUCCESS &&
+            mesh_export_fmesh_internal(path_temp, vertex_buf, index_buf) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
     fsl_mem_array_free(&vertex_buf);
     fsl_mem_array_free(&index_buf);
 
@@ -131,6 +182,7 @@ void fsl_mesh_draw(fsl_mesh *mesh, fsl_camera *camera,
         f32 roll, f32 pitch, f32 yaw,
         f32 scale_x, f32 scale_y, f32 scale_z)
 {
+    fsl_shader_program *shader = NULL;
     f32 SROL = 0.0f, CROL = 0.0f, SPCH = 0.0f, CPCH = 0.0f, SYAW = 0.0f, CYAW = 0.0f;
     m4f32 transform = {0};
     m4f32 location = {0};
@@ -138,6 +190,8 @@ void fsl_mesh_draw(fsl_mesh *mesh, fsl_camera *camera,
     m4f32 rotation_pitch = {0};
     m4f32 rotation_yaw = {0};
     m4f32 scale = {0};
+
+    shader = fsl_mem_handle_get(fsl_shader_buf);
 
     SROL = sinf(roll * FSL_DEG2RAD);
     CROL = cosf(roll * FSL_DEG2RAD);
@@ -188,6 +242,7 @@ void fsl_mesh_draw(fsl_mesh *mesh, fsl_camera *camera,
     glBufferData(GL_ARRAY_BUFFER, sizeof(m4f32), &transform, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    glUseProgram(shader[FSL_SHADER_INDEX_OBJECT].asset.id);
     glBindVertexArray(mesh->vao);
     if (mesh->index_buf.initialized)
         glDrawElementsInstanced(GL_TRIANGLES, mesh->index_buf.len, GL_UNSIGNED_INT, NULL, 1);

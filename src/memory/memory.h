@@ -172,7 +172,7 @@ FSLAPI u32 fsl_mem_array_init_internal(fsl_array *array);
 
 /*!
  *  @param array array to push data to.
- *  @param data data to push to array.
+ *  @param data data to push to array (if `NULL`, array will just expand).
  *  @param size size of data, in bytes.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.

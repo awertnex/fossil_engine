@@ -1,6 +1,6 @@
 #version 430 core
 
-in vec4 position;
+in vec4 pos;
 in vec3 normal;
 out vec4 color;
 

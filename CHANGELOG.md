@@ -9,6 +9,9 @@
 ## v0.8.0-dev (current)
 
 #### changes
+- (2026 05 29): added engine's mesh format 'Fossil Mesh' (.fmesh), now loaded
+                meshes get automatically cooked into '.fmesh' for next time
+                and will be loaded instead when found.
 - (2026 05 27): deprecate `vbo_data` and `ebo_data` arrays in struct `fsl_mesh`.
 - (2026 05 27): added `fsl_vbo` data type and its initialization and freeing
                 functions.

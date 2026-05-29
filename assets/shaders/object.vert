@@ -6,9 +6,9 @@ layout (location = 2) in vec2 a_uv;
 layout (location = 3) in mat4 a_transform;
 
 uniform mat4 mat_perspective;
+out vec4 pos;
 out vec3 normal;
 out vec2 uv;
-vec4 pos;
 
 void main()
 {
@@ -16,5 +16,5 @@ void main()
     normal = a_normal;
     uv = a_uv;
 
-    gl_Position = mat_perspective * a_transform * pos;
+    gl_Position = a_transform * pos;
 }

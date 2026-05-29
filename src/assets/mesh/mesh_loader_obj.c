@@ -50,13 +50,6 @@ struct fsl_hash_node
     fsl_hash_node *next;
 }; /* fsl_hash_node */
 
-struct mesh_vertex
-{
-    v3f32 pos;
-    v3f32 normal;
-    v2f32 uv;
-}; /* mesh_vertex */
-
 struct mesh_vertex_indices
 {
     u32 pos;
@@ -92,7 +85,7 @@ static void get_vertex_indices_internal(str *token, struct mesh_vertex_indices *
 
 /* ---- section: implementation --------------------------------------------- */
 
-u32 mesh_load_obj_internal(fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *index_dst)
+u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *index_dst)
 {
     FILE *file = NULL;
     str line[FSL_STRING_MAX] = {0};
