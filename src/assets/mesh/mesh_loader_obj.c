@@ -50,19 +50,19 @@ struct fsl_hash_node
     fsl_hash_node *next;
 }; /* fsl_hash_node */
 
-struct mesh_vertex_indices
+struct vertex_indices
 {
     u32 pos;
     u32 normal;
     u32 uv;
-}; /* mesh_vertex_indices */
+}; /* vertex_indices */
 
-struct mesh_triangle_indices
+struct triangle_indices
 {
     u32 first;
     u32 curr;
     u32 prev;
-}; /* mesh_triangle_indices */
+}; /* triangle_indices */
 
 /* ---- section: signatures ------------------------------------------------- */
 
@@ -80,7 +80,7 @@ struct mesh_triangle_indices
  *
  *  @remark result indices are 1-based so to separate 0 (first index) from 0 (no index).
  */
-static void get_vertex_indices_internal(str *token, struct mesh_vertex_indices *vertex,
+static void get_vertex_indices_internal(str *token, struct vertex_indices *vertex,
         fsl_len pos_len, fsl_len uv_len, fsl_len normal_len);
 
 /* ---- section: implementation --------------------------------------------- */
@@ -97,8 +97,8 @@ u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_a
 
     struct mesh_vertex vertex = {0};
     struct mesh_vertex novertex = {0}; /* to zero-out `vertex` */
-    struct mesh_vertex_indices vertex_indices = {0};
-    struct mesh_triangle_indices triangle = {0};
+    struct vertex_indices vertex_indices = {0};
+    struct triangle_indices triangle = {0};
     f32 vertex_w = 0.0f;
     u64 vertex_hash = 0;
     u64 vertex_hash_index = 0;
@@ -275,7 +275,7 @@ cleanup:
     return fsl_err;
 }
 
-static void get_vertex_indices_internal(str *token, struct mesh_vertex_indices *vertex,
+static void get_vertex_indices_internal(str *token, struct vertex_indices *vertex,
         fsl_len pos_len, fsl_len uv_len, fsl_len normal_len)
 {
     str *p = token;
@@ -313,6 +313,8 @@ static void get_vertex_indices_internal(str *token, struct mesh_vertex_indices *
                 index[i] *= sign;
                 if (len[i] && index[i] != (i64)len[i])
                     index[i] = fsl_mod_i64(index[i], len[i]);
+                if (sign < 0)
+                    ++index[i];
                 break;
             }
             ++p;
