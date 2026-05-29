@@ -1,7 +1,7 @@
 #ifndef HHC_PLAYER_H
 #define HHC_PLAYER_H
 
-#include "deps/fossil/h/collision.h"
+#include "deps/fossil/physics/collision.h"
 #include "deps/fossil/assets/mesh/mesh.h"
 
 #include "common.h"

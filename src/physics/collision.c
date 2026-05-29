@@ -20,8 +20,9 @@
  *  @brief collision detection.
  */
 
-#include "h/collision.h"
-#include "h/math.h"
+#include "../h/math.h"
+
+#include "collision.h"
 
 #include <math.h>
 

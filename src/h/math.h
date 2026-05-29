@@ -27,11 +27,28 @@
 #include "../common/types.h"
 
 #define FSL_PI          3.14159265358979323846
+#define FSL_HALF_PI     1.57079632679489661923
 #define FSL_DEG2RAD     (FSL_PI / 180.0)
 #define FSL_RAD2DEG     (180.0 / FSL_PI)
 #define FSL_GRAVITY     9.7803267715
 #define FSL_EPSILON     1e-5
 #define FSL_RAND_SCALE  (FSL_PI / ~(~0u >> 1))
+
+typedef struct angle_f32
+{
+    f32 angle;
+    f32 sin;
+    f32 cos;
+    f32 tan;
+} angle_f32;
+
+typedef struct angle_f64
+{
+    f64 angle;
+    f64 sin;
+    f64 cos;
+    f64 tan;
+} angle_f64;
 
 FSLAPI v3f32 fsl_add_v3f32(v3f32 a, v3f32 b);
 FSLAPI v3f32 fsl_sub_v3f32(v3f32 a, v3f32 b);
@@ -60,7 +77,14 @@ FSLAPI v3f32 fsl_normalize_v3f32(v3f32 v);
 FSLAPI v3f64 fsl_normalize_v3f64(v3f64 v);
 FSLAPI f32 fsl_dot_v3f32(v3f32 a, v3f32 b);
 FSLAPI f64 fsl_dot_v3f64(v3f64 a, v3f64 b);
-FSLAPI f32 fsl_q_rsqrt(f32 n);
+FSLAPI angle_f32 fsl_angle_f32(f32 n);
+FSLAPI angle_f64 fsl_angle_f64(f64 n);
+FSLAPI f32 fsl_fast_sin_f32(f32 n);
+FSLAPI f64 fsl_fast_sin_f64(f64 n);
+FSLAPI f32 fsl_fast_cos_f32(f32 n);
+FSLAPI f64 fsl_fast_cos_f64(f64 n);
+FSLAPI f32 fsl_fast_tan_f32(f32 n);
+FSLAPI f64 fsl_fast_tan_f64(f64 n);
 FSLAPI u32 fsl_distance_v3i32(v3i32 a, v3i32 b);
 FSLAPI f32 fsl_distance_v3f32(v3f32 a, v3f32 b);
 FSLAPI f64 fsl_distance_v3f64(v3f64 a, v3f64 b);

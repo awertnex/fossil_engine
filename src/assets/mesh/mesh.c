@@ -41,7 +41,25 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <math.h>
+
+/* ---- section: signatures ------------------------------------------------- */
+
+/*!
+ *  @internal
+ *
+ *  @brief get mesh file format based on file name conventions.
+ *
+ *  examples:
+ *      - file name "player.obj" -> mesh format @ref FSL_MESH_FORMAT_OBJ.
+ *      - file name "player.glb" -> mesh format @ref FSL_MESH_FORMAT_GLB.
+ *
+ *  @remark case insensitive.
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+static u32 get_mesh_file_format_internal(const str *file, fsl_mesh_format *format);
 
 /*!
  *  @brief generate vertex arrays and transforms for a mesh and upload to VRAM.
@@ -49,6 +67,68 @@
  *  @return non-zero on failure and @ref fsl_err is set accordingly on failure.
  */
 static u32 mesh_generate_arrays(fsl_mesh *mesh, fsl_array vertex_buf, fsl_array index_buf);
+
+/* ---- section: implementation --------------------------------------------- */
+
+static u32 get_mesh_file_format_internal(const str *file, fsl_mesh_format *format)
+{
+    str base_name[FSL_ID_CAP] = {0};
+    str *extension = {0};
+    u64 i = 0;
+    u64 len = 0;
+
+    if (!file || !format)
+    {
+        LOGERROR(FSL_ERR_POINTER_NULL, FSL_FLAG_LOG_NO_VERBOSE,
+                MSG_ACTION_REASON_ERROR("Get Mesh Format", "Pointer `NULL`"));
+        return fsl_err;
+    }
+
+    snprintf(base_name, FSL_ID_CAP, "%s", file);
+    extension = strrchr(base_name, '.');
+    if (extension)
+    {
+        ++extension;
+        len = strnlen(extension, FSL_ID_CAP - (extension - base_name));
+        for (i = 0; i < len; ++i)
+            extension[i] = tolower(extension[i]);
+    }
+    else
+    {
+        LOGERROR(FSL_ERR_MESH_FORMAT_UNKNOWN, FSL_FLAG_LOG_NO_VERBOSE,
+                MSG_ACTION_REASON_ERROR("Get Mesh Format", "Format Unknown"));
+        return fsl_err;
+    }
+
+    if (!strncmp(extension, FSL_FILE_FORMAT_NAME_FOSSIL_MESH"\0", strlen(FSL_FILE_FORMAT_NAME_FOSSIL_MESH) + 1))
+    {
+        *format = FSL_MESH_FORMAT_FMESH;
+        fsl_err = FSL_ERR_SUCCESS;
+        return fsl_err;
+    }
+    if (!strncmp(extension, "obj\0", 4))
+    {
+        *format = FSL_MESH_FORMAT_OBJ;
+        fsl_err = FSL_ERR_SUCCESS;
+        return fsl_err;
+    }
+    if (!strncmp(extension, "gltf\0", 5))
+    {
+        *format = FSL_MESH_FORMAT_GLTF;
+        fsl_err = FSL_ERR_SUCCESS;
+        return fsl_err;
+    }
+    if (!strncmp(extension, "glb\0", 4))
+    {
+        *format = FSL_MESH_FORMAT_GLB;
+        fsl_err = FSL_ERR_SUCCESS;
+        return fsl_err;
+    }
+
+    LOGERROR(FSL_ERR_MESH_FORMAT_UNKNOWN, FSL_FLAG_LOG_NO_VERBOSE,
+            MSG_ACTION_SUBJECT_REASON_ERROR("Get Mesh Format", base_name, "Format Detection Failed"));
+    return fsl_err;
+}
 
 u32 fsl_mesh_load(fsl_mesh *mesh,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path)
@@ -98,7 +178,7 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
 
 fallback:
 
-    if (mesh_get_format_internal(file_temp, &format) != FSL_ERR_SUCCESS)
+    if (get_mesh_file_format_internal(file_temp, &format) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     switch(format)

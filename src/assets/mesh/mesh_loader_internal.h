@@ -65,21 +65,6 @@ struct mesh_vertex
 /*!
  *  @internal
  *
- *  @brief get mesh file format based on file name conventions.
- *
- *  examples:
- *      - file name "player.obj" -> mesh format @ref FSL_MESH_FORMAT_OBJ.
- *      - file name "player.glb" -> mesh format @ref FSL_MESH_FORMAT_GLB.
- *
- *  @remark case insensitive.
- *
- *  @return non-zero on failure and @ref fsl_err is set accordingly.
- */
-u32 mesh_get_format_internal(const str *file, fsl_mesh_format *format);
-
-/*!
- *  @internal
- *
  *  @brief check whether a cooked version of the mesh file has been found or not.
  *
  *  @return FALSE on failure.

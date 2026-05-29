@@ -1,7 +1,7 @@
 #include "deps/fossil/assets/assets.h"
 #include "deps/fossil/logger/logger.h"
 
-#include "deps/fossil/h/collision.h"
+#include "deps/fossil/physics/collision.h"
 #include "deps/fossil/h/math.h"
 #include "deps/fossil/h/time.h"
 

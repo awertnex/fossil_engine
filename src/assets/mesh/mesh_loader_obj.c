@@ -64,8 +64,6 @@ struct triangle_indices
     u32 prev;
 }; /* triangle_indices */
 
-/* ---- section: signatures ------------------------------------------------- */
-
 /*!
  *  @internal
  *
@@ -83,8 +81,6 @@ struct triangle_indices
 static void get_vertex_indices_internal(str *token, struct vertex_indices *vertex,
         fsl_len pos_len, fsl_len uv_len, fsl_len normal_len);
 
-/* ---- section: implementation --------------------------------------------- */
-
 u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *index_dst)
 {
     FILE *file = NULL;
@@ -93,7 +89,7 @@ u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_a
     str *token = NULL;
     str *token_save[1] = {0};
     str delim[] = " ";
-    u64 i = 0;
+    u32 i = 0;
 
     struct mesh_vertex vertex = {0};
     struct mesh_vertex novertex = {0}; /* to zero-out `vertex` */

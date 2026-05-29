@@ -9,7 +9,11 @@
 ## v0.8.0-dev (current)
 
 #### changes
-- (2026 05 29): added engine's mesh format 'Fossil Mesh' (.fmesh), now loaded
+- (2026 05 29): added math types `angle_f32` and `angle_f64` to store an angle
+                along with its cached sine, cosine and tangent values, and
+                functions `fsl_angle_f32()` and `fsl_angle_f64()` to calculate
+                all three with a single call to `sin()`.
+- (2026 05 29): added engine's mesh format 'Fossil Mesh' (.fmesh), now, loaded
                 meshes get automatically cooked into '.fmesh' for next time
                 and will be loaded instead when found.
 - (2026 05 27): deprecate `vbo_data` and `ebo_data` arrays in struct `fsl_mesh`.

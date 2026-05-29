@@ -205,6 +205,53 @@ f32 q_rsqrt(f32 n)
 
 #pragma GCC diagnostic pop
 
+angle_f32 fsl_angle_f32(f32 n)
+{
+    angle_f32 angle = {0};
+    angle.angle = n;
+    angle.sin = sinf(n);
+    angle.cos = angle.sin + FSL_HALF_PI;
+    if (angle.cos > 1.0f)
+        angle.cos -= 1.0f;
+    return angle;
+}
+
+angle_f64 fsl_angle_f64(f64 n)
+{
+    angle_f64 angle = {0};
+    angle.angle = n;
+    angle.sin = sin(n);
+    angle.cos = angle.sin + FSL_HALF_PI;
+    if (angle.cos > 1.0f)
+        angle.cos -= 1.0f;
+    return angle;
+}
+
+f32 fsl_fast_sin_f32(f32 n)
+{
+    i32 index = n;
+}
+
+f64 fsl_fast_sin_f64(f64 n)
+{
+}
+
+f32 fsl_fast_cos_f32(f32 n)
+{
+}
+
+f64 fsl_fast_cos_f64(f64 n)
+{
+}
+
+f32 fsl_fast_tan_f32(f32 n)
+{
+}
+
+f64 fsl_fast_tan_f64(f64 n)
+{
+}
+
 u32 fsl_distance_v3i32(v3i32 a, v3i32 b)
 {
     return

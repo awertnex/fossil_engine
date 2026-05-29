@@ -30,10 +30,10 @@
 #include "input/input.h"
 #include "logger/logger.h"
 #include "memory/memory.h"
+#include "physics/collision.h"
 #include "shaders/shaders.h"
 #include "string/string.h"
 
-#include "h/collision.h"
 #include "h/dir.h"
 #include "h/math.h"
 #include "h/process.h"
