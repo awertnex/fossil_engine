@@ -22,7 +22,12 @@
 #include <inttypes.h>
 #include <math.h>
 
-fsl_mem_arena memory_arena_chunking_internal = {0};
+/*!
+ *  @internal
+ *
+ *  @brief memory arena used to store all chunking buffers.
+ */
+static fsl_mem_arena memory_arena_chunking_internal = {0};
 
 u64 CHUNKS_MAX[SET_RENDER_DISTANCE_MAX + 1] = {0};
 
