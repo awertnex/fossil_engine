@@ -1151,15 +1151,28 @@ static void chunk_mesh_update(u32 index, chunk *ch)
 static void chunk_export_internal(chunk *ch)
 {
     fsl_fs_path path[FSL_PATH_CAP] = {0};
-
-    if (ch->cursor < CHUNK_VOLUME)
-        return;
+    u32 buf[CHUNK_VOLUME] = {0};
+    u32 *blocks = (u32*)ch->block;
+    u16 i = 0;
+    u16 j = 0;
+    u32 rle = 0; /* run-length */
 
     snprintf(path, FSL_PATH_CAP,
             GAME_DIR_NAME_WORLDS"%s/"GAME_DIR_WORLD_NAME_CHUNKS FORMAT_FILE_NAME_HHCC,
             world.name, ch->pos.x, ch->pos.y, ch->pos.z);
 
-    fsl_write_file(path, CHUNK_VOLUME * sizeof(u32), ch->block, TRUE, FALSE);
+    for (; i < CHUNK_VOLUME; ++j, i += rle, blocks += rle)
+    {
+        buf[j] = *blocks;
+        rle = fsl_rle(blocks, sizeof(u32), CHUNK_VOLUME - i);
+        if (rle > 1)
+        {
+            buf[j++] |= FLAG_BLOCK_RLE;
+            buf[j] = rle;
+        }
+    }
+
+    fsl_write_file(path, j * sizeof(u32), buf, TRUE, FALSE);
 }
 
 static void chunk_import_internal(const fsl_fs_path *path, chunk *ch)
@@ -1168,11 +1181,15 @@ static void chunk_import_internal(const fsl_fs_path *path, chunk *ch)
     str file_name[FSL_ID_CAP] = {0};
     str *cursor = file_name;
     i64 pos_cache[3] = {0};
-    u32 i = 0;
+    u32 buf[CHUNK_VOLUME] = {0};
+    u32 *blocks = (u32*)ch->block;
+    u16 i = 0;
+    u16 j = 0;
+    u32 rle = 0;
 
     fsl_get_base_name(path, file_name, FSL_ID_CAP);
 
-    for (; i < 3; ++i)
+    for (i = 0; i < 3; ++i)
     {
         fsl_convert_str_to_i64(cursor, &pos_cache[i]);
         cursor = strchr(cursor, '.') + 1;
@@ -1191,8 +1208,22 @@ static void chunk_import_internal(const fsl_fs_path *path, chunk *ch)
     fseek(file, 0, SEEK_END);
     i = ftell(file);
     fseek(file, 0, SEEK_SET);
-    fread(ch->block, 1, i, file);
+    fread(buf, 1, i, file);
     fclose(file);
+
+    for (i = 0; j < CHUNK_VOLUME; ++i)
+    {
+        if (buf[i] & FLAG_BLOCK_RLE)
+        {
+            buf[i] &= ~FLAG_BLOCK_RLE;
+            rle = buf[i + 1];
+            while (rle--)
+                blocks[j++] = buf[i];
+            ++i;
+        }
+        else
+            blocks[j++] = buf[i];
+    }
 }
 
 static void chunk_buf_push_internal(u32 index, v3i32 player_chunk_delta)
