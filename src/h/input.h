@@ -31,6 +31,8 @@
 #define FSL_DOUBLE_PRESS_TIME_INTERVAL 0.5f
 
 typedef struct key_bind fsl_key_bind;
+typedef enum fsl_keyboard_key fsl_keyboard_key;
+typedef enum fsl_mod_key fsl_mod_key;
 
 enum fsl_keyboard_key
 {
@@ -180,33 +182,36 @@ struct key_bind
  *
  *  @param key a keyboard key or mouse button.
  */
-FSLAPI fsl_key_bind fsl_key_bind_init(enum fsl_keyboard_key key,
-        enum fsl_mod_key shift, enum fsl_mod_key ctrl,
-        enum fsl_mod_key alt, enum fsl_mod_key super);
+FSLAPI fsl_key_bind fsl_key_bind_init(fsl_keyboard_key key,
+        fsl_mod_key shift, fsl_mod_key ctrl, fsl_mod_key alt, fsl_mod_key super);
 
-FSLAPI b8 fsl_is_mouse_press(const fsl_key_bind button);
-FSLAPI b8 fsl_is_mouse_hold(const fsl_key_bind button);
-FSLAPI b8 fsl_is_mouse_release(const fsl_key_bind button);
-FSLAPI b8 fsl_is_key_press(const fsl_key_bind key);
-FSLAPI b8 fsl_is_key_press_double(const fsl_key_bind key);
-FSLAPI b8 fsl_is_key_hold(const fsl_key_bind key);
-FSLAPI b8 fsl_is_key_release(const fsl_key_bind key);
+FSLAPI b8 fsl_is_mouse_press(fsl_key_bind button);
+FSLAPI b8 fsl_is_mouse_hold(fsl_key_bind button);
+FSLAPI b8 fsl_is_mouse_release(fsl_key_bind button);
+FSLAPI b8 fsl_is_key_press(fsl_key_bind key);
+FSLAPI b8 fsl_is_key_press_double(fsl_key_bind key);
+FSLAPI b8 fsl_is_key_hold(fsl_key_bind key);
+FSLAPI b8 fsl_is_key_release(fsl_key_bind key);
 
 /*!
+ *  @internal
+ *
  *  @brief update mouse movement.
  *
  *  - update parameters at @ref fsl_render.mouse_pos and @ref fsl_render.mouse_delta
- *    of the currently bound `fsl_render`.
+ *    of the currently bound @ref fsl_render.
  *
  *  @remark called automatically from @ref fsl_engine_running().
  */
-FSLAPI void fsl_update_mouse_movement(void);
+void fsl_update_mouse_movement(void);
 
 /*!
+ *  @internal
+ *
  *  @brief update internal mouse and key states: press, double-press, hold and release.
  *
  *  @remark called automatically from @ref fsl_engine_running().
  */
-FSLAPI void fsl_update_key_states(void);
+void fsl_update_key_states(void);
 
 #endif /* FSL_INPUT_H */

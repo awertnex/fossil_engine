@@ -23,8 +23,11 @@
 #ifndef FSL_ASSET_TYPES_H
 #define FSL_ASSET_TYPES_H
 
-#include <deps/glad/glad.h>
-#include <deps/stb_truetype.h>
+#include "../common/limits.h"
+#include "../common/types.h"
+#include "../memory/memory_types.h"
+
+#include "../external/glad/glad.h"
 
 /*!
  *  @brief an asset's display name (optional).
@@ -51,23 +54,26 @@ typedef str fsl_path;
 
 typedef struct fsl_asset            fsl_asset;
 typedef struct fsl_asset_metadata   fsl_asset_metadata;
+typedef struct fsl_vbo              fsl_vbo;
+typedef struct fsl_vbo              fsl_ebo;
 typedef struct fsl_fbo              fsl_fbo;
 typedef struct fsl_texture          fsl_texture;
-typedef struct fsl_mesh             fsl_mesh;
 typedef struct fsl_glyph            fsl_glyph;
 typedef struct fsl_font             fsl_font;
+typedef struct fsl_projection       fsl_projection;
+typedef struct fsl_camera           fsl_camera;
 
-enum fsl_asset_type
+typedef enum fsl_asset_type
 {
-    FSL_ASSET_CUSTOM, /* user defined asset types */
-    FSL_ASSET_FBO,
-    FSL_ASSET_TEXTURE,
-    FSL_ASSET_MESH,
-    FSL_ASSET_SHADER,
-    FSL_ASSET_SHADER_PROGRAM,
-    FSL_ASSET_FONT,
+    FSL_ASSET_CUSTOM = 0, /* user defined asset types */
+    FSL_ASSET_FBO = 1,
+    FSL_ASSET_TEXTURE = 2,
+    FSL_ASSET_MESH = 3,
+    FSL_ASSET_SHADER = 4,
+    FSL_ASSET_SHADER_PROGRAM = 5,
+    FSL_ASSET_FONT = 6,
     FSL_ASSET_TYPE_COUNT
-}; /* fsl_asset_type */
+} fsl_asset_type;
 
 /*!
  *  @remark this struct should be filled using the function @ref fsl_set_asset_metadata().
@@ -79,7 +85,7 @@ struct fsl_asset
      */
     GLuint id;
 
-    enum fsl_asset_type type;
+    fsl_asset_type type;
 
     /*!
      *  @brief display name, can be used in asset-search (optional).
@@ -124,6 +130,15 @@ struct fsl_asset_metadata
     fsl_path *path;
 }; /* fsl_asset_metadata */
 
+struct fsl_vbo
+{
+    GLuint id;
+    fsl_size size;      /* size of each element in `buf` */
+    fsl_size len;       /* number of elements in `buf` */
+    fsl_mem_handle buf;
+    b8 initialized;
+}; /* fsl_vbo */
+
 struct fsl_fbo
 {
     fsl_asset asset;
@@ -154,18 +169,6 @@ struct fsl_texture
     b8 bindless;
 }; /* fsl_texture */
 
-struct fsl_mesh
-{
-    fsl_asset asset;
-    GLuint vao;
-    GLuint vbo;
-    GLuint ebo;
-    GLuint vbo_len;
-    GLuint ebo_len;
-    fsl_mem_handle vbo_data;
-    fsl_mem_handle ebo_data;
-}; /* fsl_mesh */
-
 struct fsl_glyph
 {
     v2i32 scale;
@@ -182,11 +185,44 @@ struct fsl_font
     i32 descent;            /* glyphs lowest points' deviation from baseline */
     i32 line_gap;
     i32 line_height;
+
+    /*
+     *  divisor for converting 'font units' to 'pixel height'.
+     */
+    i32 fheight;
+
     f32 size;               /* global font size, for text uniformity */
     v2i32 scale;            /* biggest glyph bounding box size, in font units */
-    u64 buf_len;            /* size allocated for @ref fsl_font.info.data, in bytes */
-    stbtt_fontinfo info;    /* used by @ref stbtt_InitFont() */
+    u8* buf;                /* font file contents (used in runtime) */
+    u64 buf_len;            /* size allocated for @ref fsl_font.buf, in bytes */
+    fsl_mem_handle info;    /* used by @ref stbtt_InitFont() */
     fsl_glyph glyph[FSL_GLYPH_MAX];
 }; /* fsl_font */
+
+struct fsl_projection
+{
+    m4f32 target;
+    m4f32 translation;
+    m4f32 rotation;
+    m4f32 orientation;
+    m4f32 view;
+    m4f32 projection;
+    m4f32 perspective;
+}; /* fsl_projection */
+
+struct fsl_camera
+{
+    v3f64 pos;
+    f64 roll, pitch, yaw;
+    f64 sin_roll, sin_pitch, sin_yaw;
+    f64 cos_roll, cos_pitch, cos_yaw;
+    f32 fovy;
+    f32 fovy_smooth;
+    f32 ratio;
+    f32 far;
+    f32 near;
+    f32 zoom;
+    fsl_projection projection;
+}; /* fsl_camera */
 
 #endif /* FSL_ASSET_TYPES_H */

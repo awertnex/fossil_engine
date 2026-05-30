@@ -15,9 +15,9 @@
  */
 
 /*!
- *  @file logger_message.h
+ *  @file logger_messages_internal.h
  *
- *  @brief standardized logger messages and log message conventions.
+ *  @brief engine's standardized logger messages and log message conventions.
  */
 
 /*!
@@ -50,8 +50,7 @@
 #ifndef FSL_LOGGER_MESSAGE_H
 #define FSL_LOGGER_MESSAGE_H
 
-#include "logger_macros.h"
-
+#include <stdio.h>
 #include <inttypes.h>
 
 /* ---- section: base ------------------------------------------------------- */
@@ -134,20 +133,20 @@
 
 /* ---- section: data_and_assets -------------------------------------------- */
 
+#define MSG_VBO_INIT(id, size)                              fsl_logger_stringf("VBO[%u][%"PRIu64"B] Initialized\n", id, size)
+#define MSG_VBO_FREE(id, size)                              fsl_logger_stringf("VBO[%u][%"PRIu64"B] Unloaded\n", id, size)
 #define MSG_FBO_INIT_FAIL(id, status)                       fsl_logger_stringf("Failed to Initialize FBO[%u], Status[%d]\n", id, status)
+#define MSG_FBO_INIT(id, size_x, size_y)                    fsl_logger_stringf("FBO[%u][size_x: %"PRIu64"][size_y: %"PRIu64"] Initialized\n", id, size_x, size_y)
+#define MSG_FBO_REALLOC(id, size_x, size_y)                 fsl_logger_stringf("FBO[%u][size_x: %"PRIu64"][size_y: %"PRIu64"] Reallocated\n", id, size_x, size_y)
+#define MSG_FBO_FREE(id)                                    fsl_logger_stringf("FBO[%u] Unloaded\n", id)
 #define MSG_TEXTURE_LOAD_REASON_FAIL(name, reason)          MSG_ACTION_SUBJECT_REASON_ERROR("Load Texture", name, reason)
 #define MSG_TEXTURE_LOAD(name, id)                          fsl_logger_stringf("Texture %s[%u] Loaded\n", name, id)
 #define MSG_TEXTURE_UNLOAD(name, id)                        fsl_logger_stringf("Texture %s[%u] Unloaded\n", name, id)
 #define MSG_TEXTURE_HANDLE_CREATE(handle_id, texture_name, texture_id) fsl_logger_stringf("Handle[%"PRIx64"] for Texture %s[%u] Created\n", handle_id, texture_name, texture_id)
 #define MSG_TEXTURE_HANDLE_DESTROY(handle_id, texture_name, texture_id) fsl_logger_stringf("Handle[%"PRIx64"] for Texture %s[%u] Destroyed\n", handle_id, texture_name, texture_id)
-#define LOG_MESH_GENERATE(name) \
-    do { \
-        if (fsl_err == FSL_ERR_SUCCESS) \
-            LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE, fsl_logger_stringf("Mesh '%s' Generated\n", name)); \
-        else if (fsl_err == FSL_ERR_MESH_GENERATION_FAIL) \
-            LOGERROR(FSL_ERR_MESH_GENERATION_FAIL, 0, fsl_logger_stringf("Failed to Generate Mesh '%s'\n", name)); \
-    } while (0)
+#define MSG_MESH_INIT(name)                                 fsl_logger_stringf("Mesh '%s' Loaded\n", name)
 #define MSG_MESH_UNLOAD(name)                               fsl_logger_stringf("Mesh '%s' Unloaded\n", name)
+#define MSG_MESH_EXPORT_FMESH(path, size)                   fsl_logger_stringf("Mesh File '%s' [%"PRIu64"B] Expoted\n", path, size)
 #define MSG_SHADER_INIT(name, id)                           fsl_logger_stringf("Shader %s[%u] Loaded\n", name, id)
 #define MSG_SHADER_UNLOAD(name, id)                         fsl_logger_stringf("Shader %s[%u] Unloaded\n", name, id)
 #define MSG_SHADER_PROGRAM_LOAD(name, id)                   fsl_logger_stringf("Shader Program %s[%u] Loaded\n", name, id)
@@ -155,5 +154,11 @@
 #define MSG_FONT_LOAD(name)                                 fsl_logger_stringf("Font '%s' Loaded\n", name)
 #define MSG_FONT_UNLOAD(name)                               fsl_logger_stringf("Font '%s' Unloaded\n", name)
 #define MSG_UPDATE_RENDER_SETTINGS_FAIL                     "Something Went Wrong While Updating Render Settings\n"
+
+/* ---- section: input ------------------------------------------------------ */
+
+#define MSG_INPUT_KEY_BIND_INIT(key, shift, ctrl, alt, super, context) fsl_logger_stringf("Key Bind [%s%s%s%s%s] for Input Context [%u] Initialized\n", key, shift, ctrl, alt, super, context)
+#define MSG_INPUT_KEY_BIND_ATTACH(key, shift, ctrl, alt, super, context) fsl_logger_stringf("Key Bind [%s%s%s%s%s] Attached to Input Context [%u]\n", key, shift, ctrl, alt, super, context)
+#define MSG_INPUT_CONTEXT_SET(context_old, context_new)     fsl_logger_stringf("Input Context Set [%u -> %u]\n", context_old, context_new)
 
 #endif /* FSL_LOGGER_MESSAGE_H */

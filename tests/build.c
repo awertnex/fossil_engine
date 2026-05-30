@@ -1,23 +1,24 @@
-#include "../deps/buildtool/buildtool.h"
+#include "../src/external/buildtool/buildtool.h"
 #include "../src/h/buildtool_config.h"
 
 #define DIR_ROOT "../"
+#define DIR_DEPS "../fossil/"
 
 #define DIR_GAME                "game_hhc/"
-#define DIR_SRC_GAME            DIR_GAME "src/"
-#define DIR_OUT_GAME            DIR_GAME "out/"
+#define DIR_SRC_GAME            DIR_GAME"src/"
+#define DIR_OUT_GAME            DIR_GAME"out/"
 
 #define DIR_TEXT_RENDERING      "text_rendering/"
-#define DIR_SRC_TEXT_RENDERING  DIR_TEXT_RENDERING "src/"
-#define DIR_OUT_TEXT_RENDERING  DIR_TEXT_RENDERING "out/"
+#define DIR_SRC_TEXT_RENDERING  DIR_TEXT_RENDERING"src/"
+#define DIR_OUT_TEXT_RENDERING  DIR_TEXT_RENDERING"out/"
 
 #define DIR_NINE_SLICE          "nine_slice/"
-#define DIR_SRC_NINE_SLICE      DIR_NINE_SLICE "src/"
-#define DIR_OUT_NINE_SLICE      DIR_NINE_SLICE "out/"
+#define DIR_SRC_NINE_SLICE      DIR_NINE_SLICE"src/"
+#define DIR_OUT_NINE_SLICE      DIR_NINE_SLICE"out/"
 
 #define DIR_COMPOSABLE_UI       "composable_ui/"
-#define DIR_SRC_COMPOSABLE_UI   DIR_COMPOSABLE_UI "src/"
-#define DIR_OUT_COMPOSABLE_UI   DIR_COMPOSABLE_UI "out/"
+#define DIR_SRC_COMPOSABLE_UI   DIR_COMPOSABLE_UI"src/"
+#define DIR_OUT_COMPOSABLE_UI   DIR_COMPOSABLE_UI"out/"
 
 #define TEST_NAME_WIDTH 32
 #define TEST_NAME_WIDTH_FULL 64
@@ -102,6 +103,8 @@ int main(int argc, char **argv)
 
 u32 build_game(int argc, char **argv)
 {
+    LOGWARNING(0, FALSE, "THIS VERSION SAVES CHUNKS AS SEPARATE FILES ON DISK, VERY DISK-HEAVY AND PERFORMANCE INTENSIVE\n\n");
+
     if (is_dir_exists(DIR_SRC_GAME, TRUE) != ERR_SUCCESS)
         return build_err;
 
@@ -119,32 +122,32 @@ u32 build_game(int argc, char **argv)
         cmd_push(&cmd, "-ggdb");
     }
 
-    cmd_push(&cmd, DIR_SRC_GAME "main.c");
-    cmd_push(&cmd, DIR_SRC_GAME "assets.c");
-    cmd_push(&cmd, DIR_SRC_GAME "chunking.c");
-    cmd_push(&cmd, DIR_SRC_GAME "common.c");
-    cmd_push(&cmd, DIR_SRC_GAME "dir.c");
-    cmd_push(&cmd, DIR_SRC_GAME "gui.c");
-    cmd_push(&cmd, DIR_SRC_GAME "input.c");
-    cmd_push(&cmd, DIR_SRC_GAME "player.c");
-    cmd_push(&cmd, DIR_SRC_GAME "terrain.c");
-    cmd_push(&cmd, DIR_SRC_GAME "world.c");
-    cmd_push(&cmd, "-I" DIR_ROOT);
+    cmd_push(&cmd, DIR_SRC_GAME"main.c");
+    cmd_push(&cmd, DIR_SRC_GAME"assets.c");
+    cmd_push(&cmd, DIR_SRC_GAME"chunking.c");
+    cmd_push(&cmd, DIR_SRC_GAME"common.c");
+    cmd_push(&cmd, DIR_SRC_GAME"dir.c");
+    cmd_push(&cmd, DIR_SRC_GAME"gui.c");
+    cmd_push(&cmd, DIR_SRC_GAME"input.c");
+    cmd_push(&cmd, DIR_SRC_GAME"player.c");
+    cmd_push(&cmd, DIR_SRC_GAME"terrain.c");
+    cmd_push(&cmd, DIR_SRC_GAME"world.c");
+    cmd_push(&cmd, "-I"DIR_DEPS);
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
-    cmd_push(&cmd, "-L" DIR_ROOT "lib/" PLATFORM);
+    cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
     fsl_engine_link_libs(&cmd);
     fsl_engine_set_runtime_path(&cmd);
     cmd_push(&cmd, "-o");
-    cmd_push(&cmd, DIR_OUT_GAME "hhc");
+    cmd_push(&cmd, DIR_OUT_GAME"hhc");
     cmd_ready(&cmd);
 
     if (exec(&cmd, "build_game().cmd") != ERR_SUCCESS)
         cmd_fail(&cmd);
 
     if (
-            copy_dir(DIR_ROOT "fossil/fossil/", DIR_OUT_GAME, TRUE) != ERR_SUCCESS ||
-            copy_dir(DIR_GAME "assets/", DIR_OUT_GAME, FALSE) != ERR_SUCCESS)
+            copy_dir(DIR_ROOT"fossil/fossil/", DIR_OUT_GAME, TRUE) != ERR_SUCCESS ||
+            copy_dir(DIR_GAME"assets/", DIR_OUT_GAME, FALSE) != ERR_SUCCESS)
         cmd_fail(&cmd);
 
     build_err = ERR_SUCCESS;
@@ -163,21 +166,21 @@ u32 build_text_rendering(int argc, char **argv)
     cmd_push(&cmd, "-Wextra");
     cmd_push(&cmd, "-Wformat-truncation=0");
     cmd_push(&cmd, "-ggdb");
-    cmd_push(&cmd, DIR_SRC_TEXT_RENDERING "main.c");
-    cmd_push(&cmd, "-I" DIR_ROOT);
+    cmd_push(&cmd, DIR_SRC_TEXT_RENDERING"main.c");
+    cmd_push(&cmd, "-I"DIR_DEPS);
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
-    cmd_push(&cmd, "-L" DIR_ROOT "lib/" PLATFORM);
+    cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
     fsl_engine_link_libs(&cmd);
     fsl_engine_set_runtime_path(&cmd);
     cmd_push(&cmd, "-o");
-    cmd_push(&cmd, DIR_OUT_TEXT_RENDERING "text_rendering");
+    cmd_push(&cmd, DIR_OUT_TEXT_RENDERING"text_rendering");
     cmd_ready(&cmd);
 
     if (exec(&cmd, "build_text_rendering().cmd") != ERR_SUCCESS)
         cmd_fail(&cmd);
 
-    if (copy_dir(DIR_ROOT "fossil/fossil/", DIR_OUT_TEXT_RENDERING, TRUE) != ERR_SUCCESS)
+    if (copy_dir(DIR_ROOT"fossil/fossil/", DIR_OUT_TEXT_RENDERING, TRUE) != ERR_SUCCESS)
         cmd_fail(&cmd);
 
     build_err = ERR_SUCCESS;
@@ -197,23 +200,23 @@ u32 build_nine_slice(int argc, char **argv)
     cmd_push(&cmd, "-Wformat-truncation=0");
     cmd_push(&cmd, "-Wpedantic");
     cmd_push(&cmd, "-ggdb");
-    cmd_push(&cmd, DIR_SRC_NINE_SLICE "main.c");
-    cmd_push(&cmd, "-I" DIR_ROOT);
+    cmd_push(&cmd, DIR_SRC_NINE_SLICE"main.c");
+    cmd_push(&cmd, "-I"DIR_DEPS);
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
-    cmd_push(&cmd, "-L" DIR_ROOT "lib/" PLATFORM);
+    cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
     fsl_engine_link_libs(&cmd);
     fsl_engine_set_runtime_path(&cmd);
     cmd_push(&cmd, "-o");
-    cmd_push(&cmd, DIR_OUT_NINE_SLICE "9s");
+    cmd_push(&cmd, DIR_OUT_NINE_SLICE"9s");
     cmd_ready(&cmd);
 
     if (exec(&cmd, "build_nine_slice().cmd") != ERR_SUCCESS)
         cmd_fail(&cmd);
 
     if (
-            copy_dir(DIR_ROOT "fossil/fossil/", DIR_OUT_NINE_SLICE, TRUE) != ERR_SUCCESS ||
-            copy_dir(DIR_NINE_SLICE "shaders/", DIR_OUT_NINE_SLICE, TRUE) != ERR_SUCCESS)
+            copy_dir(DIR_ROOT"fossil/fossil/", DIR_OUT_NINE_SLICE, TRUE) != ERR_SUCCESS ||
+            copy_dir(DIR_NINE_SLICE"shaders/", DIR_OUT_NINE_SLICE, TRUE) != ERR_SUCCESS)
         cmd_fail(&cmd);
 
     build_err = ERR_SUCCESS;
@@ -232,21 +235,21 @@ u32 build_composable_ui(int argc, char **argv)
     cmd_push(&cmd, "-Wextra");
     cmd_push(&cmd, "-Wformat-truncation=0");
     cmd_push(&cmd, "-ggdb");
-    cmd_push(&cmd, DIR_SRC_COMPOSABLE_UI "main.c");
-    cmd_push(&cmd, "-I" DIR_ROOT);
+    cmd_push(&cmd, DIR_SRC_COMPOSABLE_UI"main.c");
+    cmd_push(&cmd, "-I"DIR_DEPS);
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
-    cmd_push(&cmd, "-L" DIR_ROOT "lib/" PLATFORM);
+    cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
     fsl_engine_link_libs(&cmd);
     fsl_engine_set_runtime_path(&cmd);
     cmd_push(&cmd, "-o");
-    cmd_push(&cmd, DIR_OUT_COMPOSABLE_UI "ui");
+    cmd_push(&cmd, DIR_OUT_COMPOSABLE_UI"ui");
     cmd_ready(&cmd);
 
     if (exec(&cmd, "build_composable_ui().cmd") != ERR_SUCCESS)
         cmd_fail(&cmd);
 
-    if (copy_dir(DIR_ROOT "fossil/fossil/", DIR_OUT_COMPOSABLE_UI, TRUE) != ERR_SUCCESS)
+    if (copy_dir(DIR_ROOT"fossil/fossil/", DIR_OUT_COMPOSABLE_UI, TRUE) != ERR_SUCCESS)
         cmd_fail(&cmd);
 
     build_err = ERR_SUCCESS;

@@ -1,4 +1,4 @@
-#include "src/common/types.h"
+#include "deps/fossil/common/types.h"
 
 #include "h/common.h"
 #include "h/player.h"

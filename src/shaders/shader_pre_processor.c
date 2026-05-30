@@ -24,11 +24,11 @@
 #include "../common/limits.h"
 #include "../common/types.h"
 #include "../logger/logger.h"
+#include "../logger/logger_messages_internal.h"
 #include "../memory/memory.h"
 
 #include "../h/dir.h"
-#include "shader_pre_processor.h"
-#include "shaders.h"
+#include "shader_pre_processor_internal.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -53,7 +53,7 @@ str *fsl_shader_pre_process_internal(const str *path, u64 *file_len)
     return fsl_shader_pre_process_includes_internal(path, file_len, FSL_SHADER_PRE_PROCESS_INCLUDE_RECURSION_MAX);
 }
 
-str *fsl_shader_pre_process_includes_internal(const str *path, u64 *file_len, u64 recursion_limit)
+static str *fsl_shader_pre_process_includes_internal(const str *path, u64 *file_len, u64 recursion_limit)
 {
     static str token[2][256] =
     {
@@ -172,24 +172,24 @@ u32 fsl_shader_get_type_internal(const str *file, GLenum *type)
     {
         ++extension;
 
-        if (!strncmp(extension, "glsl", 5))
+        if (!strncmp(extension, "glsl\0", 6))
             extension = base_name;
     }
     else extension = base_name;
 
-    if (!strncmp(extension, "vertex", 6) || !strncmp(extension, "vert", 4))
+    if (!strncmp(extension, "vertex.", 7) || !strncmp(extension, "vert\0", 5))
     {
         *type = GL_VERTEX_SHADER;
         fsl_err = FSL_ERR_SUCCESS;
         return fsl_err;
     }
-    if (!strncmp(extension, "geometry", 8) || !strncmp(extension, "geom", 4))
+    if (!strncmp(extension, "geometry.", 9) || !strncmp(extension, "geom\0", 5))
     {
         *type = GL_GEOMETRY_SHADER;
         fsl_err = FSL_ERR_SUCCESS;
         return fsl_err;
     }
-    if (!strncmp(extension, "fragment", 8) || !strncmp(extension, "frag", 4))
+    if (!strncmp(extension, "fragment.", 9) || !strncmp(extension, "frag\0", 5))
     {
         *type = GL_FRAGMENT_SHADER;
         fsl_err = FSL_ERR_SUCCESS;

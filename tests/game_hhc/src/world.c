@@ -1,11 +1,12 @@
-#include "src/common/session.h"
-#include "src/common/limits.h"
-#include "src/logger/logger.h"
+#include "deps/fossil/common/session.h"
+#include "deps/fossil/common/limits.h"
+#include "deps/fossil/assets/assets.h"
+#include "deps/fossil/logger/logger.h"
+#include "deps/fossil/string/string.h"
 
-#include "src/h/dir.h"
-#include "src/h/math.h"
-#include "src/h/string.h"
-#include "src/h/time.h"
+#include "deps/fossil/h/dir.h"
+#include "deps/fossil/h/math.h"
+#include "deps/fossil/h/time.h"
 
 #include "h/chunking.h"
 #include "h/common.h"
@@ -16,6 +17,7 @@
 #include "h/world.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
@@ -207,6 +209,11 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
 
 void world_update(player *p)
 {
+    /* player camera shouldn't move when a menu is open,
+     * so we pass this to the camera function.
+     */
+    b8 use_mouse = !state_menu_depth && !core.flag.super_debug && !(p->flag & FLAG_PLAYER_DEAD);
+
     world.tick = world.tick_start + (u64)((f64)render->time * FSL_NSEC2SEC * WORLD_TICK_SPEED);
     world.days = world.tick / SET_DAY_TICKS_MAX;
 
@@ -215,13 +222,12 @@ void world_update(player *p)
     else disable_cursor;
 
     player_update(p, 1.0 - exp(-1.0 * (f64)render->time_delta * FSL_NSEC2SEC));
-    b8 use_mouse = !state_menu_depth && !core.flag.super_debug && !(p->flag & FLAG_PLAYER_DEAD);
     player_camera_movement_update(p, render->mouse_delta, use_mouse);
     player_target_update(p);
 
     chunking_update(p->ch, &p->ch_delta);
     chunk_tab_index = get_chunk_index(p->ch, p->target);
 
-    fsl_update_projection_perspective(p->camera, &projection_world, FALSE);
-    fsl_update_projection_perspective(p->camera_hud, &projection_hud, FALSE);
+    fsl_update_projection_perspective(p->camera, &p->camera.projection, FALSE);
+    fsl_update_projection_perspective(p->camera_hud, &p->camera_hud.projection, FALSE);
 }

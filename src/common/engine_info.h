@@ -17,7 +17,7 @@
 /*!
  *  @file engine_info.h
  *
- *  @brief engine info and API definitions.
+ *  @brief engine info and API definitions and visibility.
  */
 
 #ifndef FSL_ENGINE_INFO_H
@@ -33,12 +33,12 @@
 #define FSL_ENGINE_VERSION_DEV      "-dev"
 
 #define FSL_ENGINE_VERSION_MAJOR    0
-#define FSL_ENGINE_VERSION_MINOR    8
+#define FSL_ENGINE_VERSION_MINOR    9
 #define FSL_ENGINE_VERSION_PATCH    0
 #define FSL_ENGINE_VERSION_BUILD    FSL_ENGINE_VERSION_BETA
 
 #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__) || defined(__MINGW32__)
-#   define FSL_PLATFORM_WIN         1
+#   define FSL_PLATFORM_WIN
 #   define FSL_PLATFORM             "win"
 #   define FSL_FILE_NAME_LIB        "fossil.dll"
 #   define FSL_FILE_NAME_PLATFORM   "platform_win.c"
@@ -55,7 +55,7 @@
 #       define _GNU_SOURCE
 #   endif /* _GNU_SOURCE */
 
-#   define FSL_PLATFORM_LINUX       1
+#   define FSL_PLATFORM_LINUX
 #   define FSL_PLATFORM             "linux"
 #   define FSL_FILE_NAME_LIB        "libfossil.so"
 #   define FSL_FILE_NAME_PLATFORM   "platform_linux.c"
@@ -69,7 +69,7 @@
 #   define fsl_chmod(name, n)       lchmod(name, n)
 #endif /* FSL_PLATFORM */
 
-#if FSL_PLATFORM_WIN
+#if defined(FSL_PLATFORM_WIN)
 #   define FSLAPI __declspec(dllexport)
 #else
 #   define FSLAPI __attribute__((visibility("default")))

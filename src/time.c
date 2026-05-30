@@ -26,12 +26,13 @@
 #include "h/math.h"
 #include "h/time.h"
 
-#if FSL_PLATFORM_WIN
+#include <time.h>
+
+#if defined(FSL_PLATFORM_WIN)
+
 /* TODO: make time functions for windows */
+
 #else
-#   include <time.h>
-#   include <sys/time.h>
-#   include <unistd.h>
 
 u64 fsl_get_time_raw_nsec(void)
 {
@@ -68,24 +69,24 @@ f64 fsl_get_time_nsecf(void)
 u64 fsl_get_time_delta_nsec(void)
 {
     static u64 curr = 0;
-    static u64 _last = 0;
-    static u64 _delta = 0;
+    static u64 last = 0;
+    static u64 delta = 0;
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     curr = ts.tv_sec * FSL_SEC2NSEC + ts.tv_nsec;
-    if (!_last) _last = curr;
-    _delta = curr - _last;
-    _last = curr;
-    return _delta;
+    if (!last) last = curr;
+    delta = curr - last;
+    last = curr;
+    return delta;
 }
 
 void fsl_get_time_str(str *dst, const str *format)
 {
     struct timespec ts;
-    struct tm *_tm = {0};
+    struct tm *time_metadata = {0};
     clock_gettime(CLOCK_REALTIME, &ts);
-    _tm = localtime(&ts.tv_sec);
-    strftime(dst, FSL_TIME_STRING_MAX, format, _tm);
+    time_metadata = localtime(&ts.tv_sec);
+    strftime(dst, FSL_TIME_STRING_MAX, format, time_metadata);
 }
 
 void fsl_sleep_nsec(u64 nsec)

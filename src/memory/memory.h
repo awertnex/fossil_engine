@@ -26,6 +26,7 @@
 #include "../common/engine_info.h"
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
+
 #include "memory_types.h"
 
 /* ---- section: tools ------------------------------------------------------ */
@@ -33,15 +34,18 @@
 #define fsl_arr_len(x) \
     ((u64)sizeof(x) / sizeof(x[0]))
 
-#define fsl_mem_handle_get(type, handle) \
-    (handle.arena ? (type*)((u8*)handle.arena->buf + handle.offset) : NULL)
-
-#define fsl_mem_handle_get_i(type, handle, index) \
-    (handle.arena ? (type*)((u8*)handle.arena->buf + handle.offset + (index) * sizeof(type)) : NULL)
-
 /* ---- section: definitions ------------------------------------------------ */
 
 #define FSL_OFFSET_INVALID FSL_U64_MAX
+
+#define fsl_mem_array_init(x) \
+    fsl_mem_array_init_internal(x)
+
+#define fsl_mem_array_push(x, data, size) \
+    fsl_mem_array_push_internal(x, data, size)
+
+#define fsl_mem_array_free(x) \
+    fsl_mem_array_free_internal(x)
 
 #define fsl_mem_alloc(x, size, name) \
     fsl_mem_alloc_internal(x, size, name, __BASE_FILE__, __LINE__)
@@ -97,17 +101,29 @@
 #define fsl_mem_arena_free(x, name) \
     fsl_mem_arena_free_internal(x, name, __BASE_FILE__, __LINE__)
 
+#define fsl_mem_handle_get(handle) \
+    fsl_mem_handle_get_internal(handle)
+
 /* ---- section: declarations ----------------------------------------------- */
 
 /*!
  *  @internal
  *
- *  @brief engine's global memory arena, used to manage all heap memory inside
- *  and optionally outside the engine.
+ *  @brief engine's global memory arena, used to manage all heap memory inside the engine.
  *
  *  initialized in @ref fsl_engine_init().
  */
 extern fsl_mem_arena mem_arena_internal;
+
+/*!
+ *  @internal
+ *
+ *  @brief engine's sub-data memory arena, for any data that belongs to an asset
+ *  (e.g., a vertex buffer).
+ *
+ *  initialized in @ref fsl_engine_init().
+ */
+extern fsl_mem_arena mem_arena_sub_data_internal;
 
 /*!
  *  @internal
@@ -146,6 +162,27 @@ extern fsl_mem_arena mem_arena_file_internal;
 extern fsl_mem_arena mem_arena_path_internal;
 
 /* ---- section: signatures ------------------------------------------------- */
+
+/*!
+ *  @brief initialize (allocate) an array using @ref fsl_mem_alloc().
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+FSLAPI u32 fsl_mem_array_init_internal(fsl_array *array);
+
+/*!
+ *  @param array array to push data to.
+ *  @param data data to push to array (if `NULL`, array will just expand).
+ *  @param size size of data, in bytes.
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+FSLAPI u32 fsl_mem_array_push_internal(fsl_array *array, void *data, u64 size);
+
+/*!
+ *  @brief free an array using @ref fsl_mem_free().
+ */
+FSLAPI void fsl_mem_array_free_internal(fsl_array *array);
 
 /*!
  *  @param size size, in bytes.
@@ -326,6 +363,13 @@ FSLAPI u32 fsl_mem_arena_pop_internal(fsl_mem_handle *handle,
  */
 FSLAPI void fsl_mem_arena_free_internal(fsl_mem_arena *x,
         const str *name, const str *src_file, u64 src_line);
+
+/*!
+ *  @brief get a memory address from `handle` (that was previously pushed onto a memory arena).
+ *
+ *  @return `NULL` on failure.
+ */
+FSLAPI void *fsl_mem_handle_get_internal(fsl_mem_handle handle);
 
 /*!
  *  @brief similar to 'printf("%b\n", x)' but only output `bit_count` bits.

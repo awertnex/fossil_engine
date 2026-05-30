@@ -17,57 +17,30 @@
 /*!
  *  @file assets.h
  *
- *  @brief parsing, loading and unloading assets.
+ *  @brief asset parsing, loading and unloading.
  */
 
 #ifndef FSL_ASSETS_H
 #define FSL_ASSETS_H
 
 #include "../common/engine_info.h"
-#include "../common/limits.h"
 #include "../common/types.h"
-#include "../memory/memory_types.h"
 
 #include "asset_types.h"
+#include "mesh/mesh.h"
 
-#include <deps/glad/glad.h>
-
-/* ---- section: declarations ----------------------------------------------- */
-
-/*!
- *  @brief engine's default textures.
- *
- *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
- */
-FSLAPI extern fsl_mem_handle fsl_texture_buf;
-
-/*!
- *  @brief engine's default shaders.
- *
- *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
- */
-FSLAPI extern fsl_mem_handle fsl_shader_buf;
-
-/*!
- *  @brief engine's default fonts.
- *
- *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
- */
-FSLAPI extern fsl_mem_handle fsl_font_buf;
-
-/*!
- *  @brief engine's default unit quad, with texture coordinates.
- *
- *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
- */
-FSLAPI extern fsl_mesh fsl_mesh_unit_quad;
-
-/* ---- section: signatures ------------------------------------------------- */
+typedef enum fsl_draw_type
+{
+    FSL_DRAW_TYPE_NONE,
+    FSL_DRAW_TYPE_STREAM,
+    FSL_DRAW_TYPE_STATIC,
+    FSL_DRAW_TYPE_DYNAMIC
+} fsl_draw_type;
 
 /*!
  *  @remark get asset metadata.
  */
-FSLAPI fsl_asset_metadata fsl_asset_get_metadata(const fsl_asset asset);
+FSLAPI fsl_asset_metadata fsl_asset_get_metadata(fsl_asset asset);
 
 /*!
  *  @brief initialize a single asset.
@@ -87,32 +60,33 @@ FSLAPI fsl_asset_metadata fsl_asset_get_metadata(const fsl_asset asset);
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_asset_set_metadata(fsl_asset *asset, enum fsl_asset_type type,
+FSLAPI u32 fsl_asset_set_metadata(fsl_asset *asset, fsl_asset_type type,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path);
 
 /*!
- *  @brief initialize engine's internal assets.
+ *  @param target 'OpenGL' buffer target (e.g., GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER).
+ *  @param size size of each element in buffer.
+ *  @param len number of elements in buffer.
  *
- *  @remark called automatically from @ref fsl_engine_init().
+ *  @remark does not unbind buffer, @ref glBindBuffer() must be used to bind different buffer.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_assets_init(void);
+FSLAPI u32 fsl_vbo_init(fsl_vbo *vbo, fsl_size size, fsl_len len, void *data,
+        GLenum target, fsl_draw_type draw_type);
 
-/*!
- *  @brief free all engine's internal assets.
- */
-FSLAPI void fsl_assets_free(void);
-
-/*!
- *  @return non-zero on failure and @ref fsl_err is set accordingly.
- */
-FSLAPI u32 fsl_fbo_init(fsl_fbo *fbo, fsl_mesh *mesh_fbo, b8 multisample, u32 samples);
+void fsl_vbo_free(fsl_vbo *vbo);
 
 /*!
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_fbo_realloc(fsl_fbo *fbo, b8 multisample, u32 samples);
+FSLAPI u32 fsl_fbo_init(fsl_fbo *fbo, i32 size_x, i32 size_y, fsl_mesh *mesh_fbo,
+        b8 multisample, u32 samples);
+
+/*!
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+FSLAPI u32 fsl_fbo_realloc(fsl_fbo *fbo, i32 size_x, i32 size_y, b8 multisample, u32 samples);
 
 FSLAPI void fsl_fbo_free(fsl_fbo *fbo);
 
@@ -141,28 +115,6 @@ FSLAPI u32 fsl_texture_init(fsl_texture *texture,
 FSLAPI void fsl_texture_free(fsl_texture *texture);
 
 /*!
- *  @param attrib pointer to a function to set attribute arrays for `mesh->vao`
- *  (e.g., &attrib_vec3, set a single vec3 attribute array).
- *
- *  @param name_id asset stable, unique name for asset-search, and logging (optional) (@ref fsl_asset_set_metadata() parameter).
- *  naming convention: "[a-z_][a-z0-9_]*", or:
- *      - no leading digits.
- *      - only lowercase characters, digits 0 -> 9 and underscores.
- *
- *  @param file base file name (optional) (@ref fsl_asset_set_metadata() parameter).
- *  @param path path to asset file without file name (optional) (@ref fsl_asset_set_metadata() parameter).
- *  @param usage `GL_<x>_DRAW`.
- *
- *  @return non-zero on failure and @ref fsl_err is set accordingly.
- */
-FSLAPI u32 fsl_mesh_generate(fsl_mesh *mesh,
-        const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path,
-        void (*attrib)(void), GLenum usage,
-        GLuint vbo_len, GLuint ebo_len, GLfloat *vbo_data, GLuint *ebo_data);
-
-FSLAPI void fsl_mesh_free(fsl_mesh *mesh);
-
-/*!
  *  @brief load font from file at `path`/`file`.
  *
  *  - generate square texture of diameter `resolution` * 16 and bake bitmap onto it.
@@ -184,5 +136,38 @@ FSLAPI u32 fsl_font_init(fsl_font *font, u32 resolution,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path);
 
 FSLAPI void fsl_font_free(fsl_font *font);
+
+/*!
+ *  @brief update `sine` and `cosine` of camera roll, pitch and yaw.
+ *
+ *  @param roll enable/disable roll rotation.
+ *
+ *  @remark rotation limits:
+ *      roll:  [  0, 360].
+ *      pitch: [-90,  90].
+ *      yaw:   [  0, 360].
+ */
+FSLAPI void fsl_update_camera_movement(fsl_camera *camera, b8 roll);
+
+/*!
+ *  @brief make perspective projection matrices from camera parameters.
+ *
+ *  - setup camera matrices for Z-up, right-handed coordinates and vertical fov (fovy):
+ *      - +X: forward.
+ *      - +Y: left.
+ *      - +Z: up.
+ *
+ *  @remark called automatically from @ref fsl_update_camera_movement().
+ *
+ *  @param roll enable/disable roll rotation.
+ */
+FSLAPI void fsl_update_projection_perspective(fsl_camera camera, fsl_projection *projection, b8 roll);
+
+/*!
+ *  @brief get camera look-at angles from camera position and target position.
+ *
+ *  assign vertical angle to `pitch` and horizontal angle to `yaw`.
+ */
+FSLAPI void fsl_get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f64 *yaw);
 
 #endif /* FSL_ASSETS_H */

@@ -23,20 +23,22 @@
 #ifndef FSL_FOSSIL_ENGINE_H
 #define FSL_FOSSIL_ENGINE_H
 
-#include "../common/common.h"
-#include "../logger/logger.h"
-#include "../memory/memory.h"
-#include "../shaders/shaders.h"
-#include "assets.h"
-#include "collision.h"
-#include "core.h"
-#include "dir.h"
-#include "input.h"
-#include "math.h"
-#include "process.h"
-#include "string.h"
-#include "super_debugger.h"
-#include "time.h"
-#include "ui.h"
+#include "common/common.h"
+#include "assets/assets.h"
+#include "engine/engine.h"
+#include "engine/engine_assets.h"
+#include "input/input.h"
+#include "logger/logger.h"
+#include "memory/memory.h"
+#include "physics/collision.h"
+#include "shaders/shaders.h"
+#include "string/string.h"
+
+#include "h/dir.h"
+#include "h/math.h"
+#include "h/process.h"
+#include "h/super_debugger.h"
+#include "h/time.h"
+#include "h/ui.h"
 
 #endif /* FSL_FOSSIL_ENGINE_H */

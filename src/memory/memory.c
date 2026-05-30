@@ -22,17 +22,17 @@
 
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
+
 #include "../logger/logger.h"
-#include "../h/math.h"
+#include "../logger/logger_messages_internal.h"
 
 #include "memory.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <inttypes.h>
+
+#define MEM_ALLOC_SIZE_MIN 2
 
 struct fsl_mem_arena_handle
 {
@@ -41,10 +41,60 @@ struct fsl_mem_arena_handle
 }; /* fsl_mem_arena_handle */
 
 fsl_mem_arena mem_arena_internal = {0};
+fsl_mem_arena mem_arena_sub_data_internal = {0};
 fsl_mem_arena mem_arena_name_internal = {0};
 fsl_mem_arena mem_arena_name_id_internal = {0};
 fsl_mem_arena mem_arena_file_internal = {0};
 fsl_mem_arena mem_arena_path_internal = {0};
+
+u32 fsl_mem_array_init_internal(fsl_array *array)
+{
+    if (!array->buf)
+    {
+        if (fsl_mem_map((void*)&array->buf, MEM_ALLOC_SIZE_MIN,
+                    "fsl_mem_array_init_internal().array->buf") != FSL_ERR_SUCCESS)
+            return fsl_err;
+        array->cap = MEM_ALLOC_SIZE_MIN;
+    }
+
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+}
+
+u32 fsl_mem_array_push_internal(fsl_array *array, void *data, u64 size)
+{
+    void *buf_temp = NULL;
+
+    if (!array->buf && fsl_mem_map((void*)&array->buf, MEM_ALLOC_SIZE_MIN,
+                "fsl_mem_array_push_internal().array->buf") != FSL_ERR_SUCCESS)
+        return fsl_err;
+
+    if (size >= array->cap - array->cursor)
+    {
+        buf_temp = array->buf;
+        if (fsl_mem_remap((void*)&buf_temp, array->cap, array->cap * 2 + size,
+                    "fsl_mem_array_push_internal().array->buf") != FSL_ERR_SUCCESS)
+            return fsl_err;
+        array->cap = array->cap * 2 + size;
+        array->buf = buf_temp;
+    }
+
+    if (data)
+        memcpy((u8*)array->buf + array->cursor, data, size);
+    array->cursor += size;
+
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+}
+
+void fsl_mem_array_free_internal(fsl_array *array)
+{
+    fsl_array noarray = {0};
+
+    if (array->buf)
+        fsl_mem_unmap((void*)&array->buf, array->cursor, "fsl_mem_array_free_internal().array->buf");
+    *array = noarray;
+}
 
 u32 fsl_mem_alloc_internal(void **x, u64 size,
         const str *name, const str *src_file, u64 src_line)
@@ -388,13 +438,13 @@ u32 fsl_mem_arena_init_internal(fsl_mem_arena *x,
 {
     u64 entry_cap = sizeof(fsl_mem_arena_handle) * 2;
     u64 freelist_cap = sizeof(fsl_mem_arena_handle) * 2;
-    u64 buf_cap = 2;
+    u64 buf_cap = MEM_ALLOC_SIZE_MIN;
 
     if (!x)
     {
         LOGERROREX(FSL_ERR_POINTER_NULL, 0,
                 src_file, src_line,
-                MSG_MEM_ARENA_INIT_POINTER_NULL_FAIL(name, 2));
+                MSG_MEM_ARENA_INIT_POINTER_NULL_FAIL(name, MEM_ALLOC_SIZE_MIN));
         return fsl_err;
     }
 
@@ -448,6 +498,9 @@ u32 fsl_mem_arena_push_internal(fsl_mem_arena *x, fsl_mem_handle *handle, u64 si
                 MSG_MEM_ARENA_PUSH_REASON_FAIL(name, NULL, size, "Pointer `NULL`"));
         return fsl_err;
     }
+
+    if (handle->arena)
+        return FSL_ERR_SUCCESS;
 
     if (!x)
     {
@@ -557,29 +610,8 @@ u32 fsl_mem_arena_pop_internal(fsl_mem_handle *handle,
     fsl_off freelist_pos = 0;
     u64 freelist_cap = 0;
 
-    if (!handle)
-    {
-        LOGERROREX(FSL_ERR_POINTER_NULL, 0,
-                src_file, src_line,
-                MSG_MEM_ARENA_POP_REASON_FAIL(name, NULL, "Pointer `NULL`"));
-        return fsl_err;
-    }
-
-    if (!handle->arena)
-    {
-        LOGERROREX(FSL_ERR_POINTER_NULL, 0,
-                src_file, src_line,
-                MSG_MEM_ARENA_POP_REASON_FAIL(name, NULL, "Arena Pointer `NULL`"));
-        return fsl_err;
-    }
-
-    if (handle->offset == FSL_OFFSET_INVALID)
-    {
-        LOGERROREX(FSL_ERR_OUT_OF_BOUNDS, 0,
-                src_file, src_line,
-                MSG_MEM_ARENA_POP_REASON_FAIL(name, handle->arena, "Handle Offset Invalid"));
-        return fsl_err;
-    }
+    if (!handle || !handle->arena || handle->offset == FSL_OFFSET_INVALID)
+        return FSL_ERR_SUCCESS;
 
     arena = handle->arena;
     entry = arena->entry;
@@ -629,6 +661,10 @@ u32 fsl_mem_arena_pop_internal(fsl_mem_handle *handle,
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
+}
+void *fsl_mem_handle_get_internal(fsl_mem_handle handle)
+{
+    return handle.arena ? (void*)((u8*)handle.arena->buf + handle.offset) : NULL;
 }
 
 void fsl_print_bits(u64 x, u8 bit_count)

@@ -6,17 +6,65 @@
    at engine version v0.3.3-beta (2026 01 24), which makes v0.3.4-beta the
    first version of the engine as standalone in this repo
 
+## v0.9.0-beta (2026 05 31)
+
+#### changes
+- (2026 05 29): added math types `angle_f32` and `angle_f64` to store an angle
+                along with its cached sine, cosine and tangent values, and
+                functions `fsl_angle_f32()` and `fsl_angle_f64()` to calculate
+                all three.
+- (2026 05 29): added engine's mesh format 'Fossil Mesh' (.fmesh), now, loaded
+                meshes get automatically cooked into '.fmesh' for next time
+                and will be loaded instead when found.
+- (2026 05 27): deprecate `vbo_data` and `ebo_data` arrays in struct `fsl_mesh`.
+- (2026 05 27): added `fsl_vbo` data type and its initialization and freeing
+                functions.
+- (2026 05 27):   added string functions:
+                - `fsl_is_digit()`.
+                - `fsl_skip_spaces()`.
+                - `fsl_strip_non_printable()`.
+                - `fsl_convert_char_to_int()`.
+                - `fsl_convert_str_to_u32()`.
+                - `fsl_convert_str_to_u64()`.
+                - `fsl_convert_str_to_f32()`.
+                - `fsl_convert_str_to_f64()`.
+                - `fsl_hash_djb2_u64()`.
+                - `fsl_hash_fnv1a_u64()`.
+                - `fsl_find_hash_u64()`.
+- (2026 05 27): added mesh-drawing function `fsl_mesh_draw()`.
+- (2026 05 27): moved camera structs and functions from 'engine/' module to
+                'assets/' module.
+- (2026 05 25): added 'Wavefront OBJ' mesh format loader:
+                - parses vertices (x, y, z[, w]), normals (x, y, z), UVs
+                  (u[, v]) and, of course, faces.
+                - skips all non-printable characters.
+                - handles optional parameters.
+                - hashes vertex entries to de-duplicate.
+                - triangulates faces in fan-pattern.
+- (2026 05 14): removed 'TRACE' logs from release builds completely.
+- (2026 05 14): added feature 'input contexts' (input layers), and made context
+                0 the default input context (always active).
+- (2026 05 13): including dependency 'stb_truetype.h' is no longer required in
+                order to use assets module externally.
+- (2026 05 12): added parameters `size_x` and `size_y` to functions
+                `fsl_fbo_init()` and `fsl_fbo_realloc()`.
+
+#### bugs and flaws
+- function `fsl_mem_arena_pop()` removes the member but doesn't use the freelist.
+- test 'game_hhc' saves chunks as separate files on disk, in one directory,
+  which is very taxing for file I/O.
+
 - - -
 ## v0.8.0-beta (2026 05 11)
 
 #### changes
 - (2026 05 11): replaced all `PATH_MAX` and `NAME_MAX` with `FSL_PATH_CAP` and
-                `FSL_ID_CAP` respectively
-- (2026 05 11): removed standard header 'limits.h' from engine header 'limits.h'
-- (2026 05 11): added function `fsl_mem_arena_pop()`
+                `FSL_ID_CAP` respectively.
+- (2026 05 11): removed standard header 'limits.h' from engine header 'limits.h'.
+- (2026 05 11): added function `fsl_mem_arena_pop()`.
 - (2026 05 10): changed memory arena internals from pointers to offsets.
 - (2026 05 06): removed functions `fsl_mem_request_page_size()` and
-                `_fsl_mem_request_page_size()`, no longer needed
+                `_fsl_mem_request_page_size()`, no longer needed.
 - (2026 05 06): added guards around log macros to check for log level, the old
                 system used to be that 'DEBUG' and 'TRACE' logs were removed by
                 the pre-processor in release builds, it's changed so that log

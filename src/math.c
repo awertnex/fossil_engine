@@ -181,29 +181,25 @@ f64 fsl_dot_v3f64(v3f64 a, v3f64 b)
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuninitialized"
-#pragma GCC diagnostic ignored "-Wstrict-aliasing"
-#pragma GCC diagnostic ignored "-Warray-bounds"
-
-f32 q_rsqrt(f32 n)
+angle_f32 fsl_angle_f32(f32 n)
 {
-    i64 i;
-    f32 x2, y;
-    const f32 threehalfs = 1.5f;
-
-    x2 = n * 0.5f;
-    y = n;
-    i = *(i64*)&y;                          /* evil floating point bit hack */
-    i = 0x5f3759df - (i >> 1);              /* what the fuck? */
-    y = *(f32*)&i;
-    y = y * (threehalfs - (x2 * y * y));    /* 1st iteration */
-    y = y * (threehalfs - (x2 * y * y));    /* 2nd iteration, can be removed */
-
-    return y;
+    angle_f32 angle = {0};
+    angle.angle = n;
+    angle.sin = sinf(n);
+    angle.cos = sinf(n + FSL_HALF_PI);
+    angle.tan = tanf(n);
+    return angle;
 }
 
-#pragma GCC diagnostic pop
+angle_f64 fsl_angle_f64(f64 n)
+{
+    angle_f64 angle = {0};
+    angle.angle = n;
+    angle.sin = sin(n);
+    angle.cos = sin(n + FSL_HALF_PI);
+    angle.tan = tan(n);
+    return angle;
+}
 
 u32 fsl_distance_v3i32(v3i32 a, v3i32 b)
 {
@@ -293,6 +289,16 @@ b8 fsl_is_in_volume_f64(v3f64 v, v3f64 min, v3f64 max)
         (v.x - min.x >= 0.0f) & (max.x - v.x >= 0.0f) &
         (v.y - min.y >= 0.0f) & (max.y - v.y >= 0.0f) &
         (v.z - min.z >= 0.0f) & (max.z - v.z >= 0.0f);
+}
+
+m4f32 fsl_matrix_unit(void)
+{
+    m4f32 matrix = {0};
+    matrix.a11 = 1.0f;
+    matrix.a22 = 1.0f;
+    matrix.a33 = 1.0f;
+    matrix.a44 = 1.0f;
+    return matrix;
 }
 
 m4f32 fsl_matrix_add(m4f32 a, m4f32 b)
@@ -409,32 +415,27 @@ f32 fsl_smoothstep_f32(f32 a, f32 b, f32 t)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshift-count-overflow"
 
-f32 fsl_rand_f32(i32 n)
+u32 fsl_rand_u32(u32 n)
 {
     const u32 S = 32;
-    u32 a = (i32)n + 234678493574;
-    u32 b = (i32)n - 879763936541;
-
+    u32 a = n + 234678493574;
+    u32 b = n - 879763936541;
     a *= 3284157443;
     b ^= a << S | a >> S;
     b *= 1911520717;
     a ^= b << S | b >> S;
-    a *= 2048419325;
-
-    return sin((f32)a * FSL_RAND_SCALE);
+    return a * 2048419325;
 }
 
 u64 fsl_rand_u64(u64 n)
 {
-    const u64 S = 63;
-    u64 a = (i64)n + 234678493574;
-    u64 b = (i64)n - 879763936541;
-
+    const u64 S = 64;
+    u64 a = n + 234678493574;
+    u64 b = n - 879763936541;
     a *= 3284157443;
     b ^= a << S | a >> S;
     b *= 1911520717;
     a ^= b << S | b >> S;
-
     return a * 2048419325;
 }
 

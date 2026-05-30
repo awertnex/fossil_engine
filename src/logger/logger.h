@@ -24,13 +24,92 @@
 #define FSL_LOGGER_H
 
 #include "../common/engine_info.h"
-#include "../common/diagnostics.h"
 #include "../common/limits.h"
 #include "../common/types.h"
-#include "../memory/memory.h"
+#include "../memory/memory_types.h"
 
-#include "logger_messages.h"
-#include "logger_macros.h"
+#define LOGFATAL(err, flags, message) \
+    fsl_log_output_internal(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_FATAL, message);
+
+#define LOGERROR(err, flags, message) \
+    do { \
+        if (fsl_log_level_max >= FSL_LOG_LEVEL_ERROR) \
+            fsl_log_output_internal(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_ERROR, message); \
+    } while (0)
+
+#define LOGWARNING(err, flags, message) \
+    do { \
+        if (fsl_log_level_max >= FSL_LOG_LEVEL_WARNING) \
+            fsl_log_output_internal(err, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_WARNING, message); \
+    } while (0)
+
+#define LOGSUCCESS(flags, message) \
+    do { \
+        if (fsl_log_level_max >= FSL_LOG_LEVEL_SUCCESS) \
+            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_SUCCESS, message); \
+    } while (0)
+
+#define LOGINFO(flags, message) \
+    do { \
+        if (fsl_log_level_max >= FSL_LOG_LEVEL_INFO) \
+            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_INFO, message); \
+    } while (0)
+
+#define LOGDEBUG(flags, message) \
+    do { \
+        if (fsl_log_level_max >= FSL_LOG_LEVEL_DEBUG) \
+            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_DEBUG, message); \
+    } while (0)
+
+#define LOGFATALEX(err, flags, file, line, message) \
+            fsl_log_output_internal(err, flags, file, line, FSL_LOG_LEVEL_FATAL, message)
+
+#define LOGERROREX(err, flags, file, line, message) \
+    do { \
+        if (fsl_log_level_max >= FSL_LOG_LEVEL_ERROR) \
+            fsl_log_output_internal(err, flags, file, line, FSL_LOG_LEVEL_ERROR, message); \
+    } while (0)
+
+#define LOGWARNINGEX(err, flags, file, line, message) \
+    do { \
+        if (fsl_log_level_max >= FSL_LOG_LEVEL_WARNING) \
+            fsl_log_output_internal(err, flags, file, line, FSL_LOG_LEVEL_WARNING, message); \
+    } while (0)
+
+#define LOGSUCCESSEX(flags, file, line, message) \
+    do { \
+        if (fsl_log_level_max >= FSL_LOG_LEVEL_SUCCESS) \
+            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_SUCCESS, message); \
+    } while (0)
+
+#define LOGINFOEX(flags, file, line, message) \
+    do { \
+        if (fsl_log_level_max >= FSL_LOG_LEVEL_INFO) \
+            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_INFO, message); \
+    } while (0)
+
+#define LOGDEBUGEX(flags, file, line, message) \
+    do { \
+        if (fsl_log_level_max >= FSL_LOG_LEVEL_DEBUG) \
+            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_DEBUG, message); \
+    } while (0)
+
+#ifdef FOSSIL_RELEASE_BUILD
+#   define LOGTRACE(flags, message) (void)0
+#   define LOGTRACEEX(flags, file, line, message) (void)0
+#else
+#   define LOGTRACE(flags, message) \
+        do { \
+            if (fsl_log_level_max >= FSL_LOG_LEVEL_TRACE) \
+                fsl_log_output_internal(FSL_ERR_SUCCESS, flags, __BASE_FILE__, __LINE__, FSL_LOG_LEVEL_TRACE, message); \
+        } while (0)
+
+#   define LOGTRACEEX(flags, file, line, message) \
+        do { \
+            if (fsl_log_level_max >= FSL_LOG_LEVEL_TRACE) \
+            fsl_log_output_internal(FSL_ERR_SUCCESS, flags, file, line, FSL_LOG_LEVEL_TRACE, message); \
+        } while (0)
+#endif /* FOSSIL_RELEASE_BUILD */
 
 typedef struct fsl_log_entry fsl_log_entry;
 typedef struct fsl_logger_core fsl_logger_core;
@@ -41,17 +120,6 @@ enum fsl_log_output_flag
     FSL_FLAG_LOG_CMD =          0x0002, /* log a command (e.g., "Gravity Disabled" and nothing else) */
     FSL_FLAG_LOG_NO_FILE =      0x0004  /* don't write to log file */
 }; /* fsl_log_output_flag */
-
-enum fsl_log_message_flag
-{
-    FSL_FLAG_LOG_TIMESTAMP =    0x0001,
-    FSL_FLAG_LOG_DATE =         0x0002,
-    FSL_FLAG_LOG_TIME =         0x0004,
-    FSL_FLAG_LOG_DATE_TIME =    0x0006,
-    FSL_FLAG_LOG_FULL_TIME =    0x0007,
-    FSL_FLAG_LOG_TAG =          0x0008,
-    FSL_FLAG_LOG_TERM_COLOR =   0x0010
-}; /* fsl_log_message_flag */
 
 enum fsl_log_level
 {
@@ -89,6 +157,8 @@ struct fsl_log_entry
     str message[FSL_LOGGER_STRING_MAX];
 }; /* fsl_log_entry */
 
+/* ---- section: declarations ----------------------------------------------- */
+
 /*!
  *  @brief logger core, all logger data.
  *
@@ -100,6 +170,8 @@ FSLAPI extern fsl_logger_core logger_core;
  *  @remark read-only, initialized internally in @ref _fsl_logger_init().
  */
 FSLAPI extern u32 fsl_log_level_max;
+
+/* ---- section: signatures ------------------------------------------------- */
 
 /*!
  *  @internal
@@ -149,5 +221,4 @@ FSLAPI void fsl_log_output_internal(u32 error_code, u32 flags, const str *src_fi
  *  @return static formatted string.
  */
 FSLAPI str *fsl_logger_stringf(const str *format, ...);
-
 #endif /* FSL_LOGGER_H */

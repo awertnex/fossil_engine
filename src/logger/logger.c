@@ -26,16 +26,27 @@
 #include "../common/limits.h"
 #include "../common/session.h"
 #include "../common/types.h"
+#include "../memory/memory.h"
 
 #include "logger.h"
-
-#include "../h/time.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
 #include <sys/stat.h>
 #include <inttypes.h>
+#include <time.h>
+
+enum fsl_log_message_flag
+{
+    FSL_FLAG_LOG_TIMESTAMP =    0x0001,
+    FSL_FLAG_LOG_DATE =         0x0002,
+    FSL_FLAG_LOG_TIME =         0x0004,
+    FSL_FLAG_LOG_DATE_TIME =    0x0006,
+    FSL_FLAG_LOG_FULL_TIME =    0x0007,
+    FSL_FLAG_LOG_TAG =          0x0008,
+    FSL_FLAG_LOG_TERM_COLOR =   0x0010
+}; /* fsl_log_message_flag */
 
 /* ---- section: declarations ----------------------------------------------- */
 
@@ -112,6 +123,13 @@ static u32 is_dir_exists_internal(const fsl_fs_path *path);
  */
 static u32 append_file_internal(const fsl_fs_path *path, u64 size, void *buf);
 
+/*!
+ *  @internal
+ *
+ *  @brief like @ref fsl_get_time_str(), but just for the logger.
+ */
+static void get_time_str_internal(str *dst, const str *format);
+
 /* ---- section: implementation --------------------------------------------- */
 
 u32 fsl_logger_init(int argc, char **argv, u64 flags)
@@ -143,23 +161,26 @@ u32 fsl_logger_init(int argc, char **argv, u64 flags)
     }
 
     if (fsl_mem_arena_init(&logger_core.arena,
-                "fsl_logger_init().logger_core.arena") != FSL_ERR_SUCCESS ||
+                "fsl_logger_init().logger_core.arena") != FSL_ERR_SUCCESS)
+        goto cleanup;
 
-            fsl_mem_arena_push(&logger_core.arena, &logger_core.buf,
+    if (fsl_mem_arena_push(&logger_core.arena, &logger_core.buf,
                 FSL_LOGGER_HISTORY_MAX * sizeof(fsl_log_entry),
                 "fsl_logger_init().logger_core.buf") != FSL_ERR_SUCCESS)
-    {
-        fsl_err = FSL_ERR_LOGGER_INIT_FAIL;
-        get_log_str_internal("Failed to Initialize Logger, Process Aborted", str_out,
-                FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_TERM_COLOR,
-                TRUE, FSL_LOG_LEVEL_FATAL, FSL_ERR_LOGGER_INIT_FAIL, __BASE_FILE__, __LINE__);
-        fprintf(stderr, "%s\n", str_out);
-        return fsl_err;
-    }
+        goto cleanup;
 
     logger_core.flag.gui_open = TRUE;
 
     fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+
+cleanup:
+
+    fsl_err = FSL_ERR_LOGGER_INIT_FAIL;
+    get_log_str_internal("Failed to Initialize Logger, Process Aborted", str_out,
+            FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_TERM_COLOR,
+            TRUE, FSL_LOG_LEVEL_FATAL, FSL_ERR_LOGGER_INIT_FAIL, __BASE_FILE__, __LINE__);
+    fprintf(stderr, "%s\n", str_out);
     return fsl_err;
 }
 
@@ -171,7 +192,6 @@ void fsl_logger_close(void)
     logger_core.flag.gui_open = FALSE;
 }
 
-#include <assert.h>
 void fsl_log_output_internal(u32 error_code, u32 flags, const str *src_file, u64 line,
         u8 level, const str *message)
 {
@@ -198,7 +218,8 @@ void fsl_log_output_internal(u32 error_code, u32 flags, const str *src_file, u64
             get_log_str_internal(str_in, str_out, FSL_FLAG_LOG_TAG | FSL_FLAG_LOG_DATE_TIME,
                     verbose, level, error_code, src_file, line);
 
-        log_entry = fsl_mem_handle_get_i(fsl_log_entry, logger_core.buf, logger_core.cursor);
+        log_entry = fsl_mem_handle_get(logger_core.buf);
+        log_entry = &log_entry[logger_core.cursor];
         snprintf(log_entry->message, strnlen(str_out, FSL_LOGGER_STRING_MAX), "%s", str_out);
         log_entry->color = logger_color_tab[level];
         logger_core.cursor = (logger_core.cursor + 1) % FSL_LOGGER_HISTORY_MAX;
@@ -219,7 +240,7 @@ static void get_log_str_internal(const str *str_in, str *str_out, u32 flags, b8 
     str str_time[FSL_TIME_STRING_MAX] = {0};
     str str_timestamp[FSL_TIME_STRING_MAX] = {0};
     str str_time_full[FSL_TIME_STRING_MAX] = {0};
-    str str_tag[32] = {0};
+    str str_tag[24] = {0};
     str str_file[FSL_STRING_MAX] = {0};
     str *str_nocolor = esc_code_none;
     str *str_color = esc_code_none;
@@ -229,11 +250,11 @@ static void get_log_str_internal(const str *str_in, str *str_out, u32 flags, b8 
     if (flags & FSL_FLAG_LOG_FULL_TIME)
     {
         if ((flags & FSL_FLAG_LOG_DATE_TIME) == FSL_FLAG_LOG_DATE_TIME)
-            fsl_get_time_str(str_time, "[%F %T]");
+            get_time_str_internal(str_time, "[%F %T]");
         else if (flags & FSL_FLAG_LOG_DATE)
-            fsl_get_time_str(str_time, "[%F]");
+            get_time_str_internal(str_time, "[%F]");
         else if (flags & FSL_FLAG_LOG_TIME)
-            fsl_get_time_str(str_time, "[%T]");
+            get_time_str_internal(str_time, "[%T]");
         if (flags & FSL_FLAG_LOG_TIMESTAMP)
             snprintf(str_timestamp, FSL_TIME_STRING_MAX, "[%"PRIu64"]", fsl_init_time);
 
@@ -247,9 +268,9 @@ static void get_log_str_internal(const str *str_in, str *str_out, u32 flags, b8 
     }
 
     if (level <= FSL_LOG_LEVEL_WARNING)
-        snprintf(str_tag, 32, "[%s][%"PRIu32"] ", log_tag[level], error_code);
+        snprintf(str_tag, 24, "[%s][%"PRIu32"] ", log_tag[level], error_code);
     else if (flags & FSL_FLAG_LOG_TAG)
-        snprintf(str_tag, 32, "[%s] ", log_tag[level]);
+        snprintf(str_tag, 24, "[%s] ", log_tag[level]);
 
     if (verbose)
         snprintf(str_file, FSL_STRING_MAX, "[%s:%"PRIu64"] ", src_file, line);
@@ -269,7 +290,7 @@ str *fsl_logger_stringf(const str *format, ...)
     static str buf[FSL_STRINGF_BUFFERS_MAX][FSL_STRING_MAX] = {0};
     static u64 index = 0;
     str *string = buf[index];
-    __builtin_va_list args;
+    __builtin_va_list args = {0};
 
     va_start(args, format);
     vsnprintf(string, FSL_STRING_MAX, format, args);
@@ -299,4 +320,13 @@ u32 append_file_internal(const fsl_fs_path *path, u64 size, void *buf)
     fwrite(buf, 1, size, file);
     fclose(file);
     return FSL_ERR_SUCCESS;
+}
+
+void get_time_str_internal(str *dst, const str *format)
+{
+    struct timespec ts;
+    struct tm *time_metadata = {0};
+    clock_gettime(CLOCK_REALTIME, &ts);
+    time_metadata = localtime(&ts.tv_sec);
+    strftime(dst, FSL_TIME_STRING_MAX, format, time_metadata);
 }

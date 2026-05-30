@@ -1,7 +1,7 @@
 #ifndef HHC_TERRAIN_H
 #define HHC_TERRAIN_H
 
-#include "src/common/types.h"
+#include "deps/fossil/common/types.h"
 
 #include "main.h"
 #include "assets.h"
@@ -22,7 +22,7 @@ enum biome_index
     BIOME_HILLS,
     BIOME_SANDSTORM,
     BIOME_DECAYING_LANDS,
-    BIOME_COUNT,
+    BIOME_COUNT
 }; /* biome_index */
 
 struct biome

@@ -1,20 +1,15 @@
 #ifndef HHC_ASSETS_H
 #define HHC_ASSETS_H
 
-#include "src/common/types.h"
-#include "src/common/limits.h"
-#include "src/shaders/shaders.h"
-
-#include "src/h/core.h"
-
-#include "common.h"
-#include "dir.h"
+#include "deps/fossil/common/types.h"
+#include "deps/fossil/assets/asset_types.h"
+#include "deps/fossil/memory/memory_types.h"
 
 #define FRICTION_BLOCK_SLIPPERY 0.02f
 #define FRICTION_BLOCK_WET      0.1f
 #define FRICTION_BLOCK_HARD     0.6f
 
-enum /* shader_index */
+enum shader_index
 {
     SHADER_DEFAULT,
     SHADER_SKYBOX,
@@ -26,7 +21,7 @@ enum /* shader_index */
     SHADER_COUNT
 }; /* shader_index */
 
-enum /* texture_index */
+enum texture_index
 {
     TEXTURE_CROSSHAIR,
     TEXTURE_ITEM_BAR,
@@ -38,7 +33,7 @@ enum /* texture_index */
     TEXTURE_COUNT
 }; /* texture_index */
 
-enum /* texture_block_index */
+enum texture_block_index
 {
     TEXTURE_BLOCK_GRASS_SIDE,
     TEXTURE_BLOCK_GRASS_TOP,
@@ -81,7 +76,7 @@ enum block_id
 
 enum block_state
 {
-    BLOCK_STATE_SOLID = 1,
+    BLOCK_STATE_SOLID = 1
 }; /* block_state */
 
 typedef struct block

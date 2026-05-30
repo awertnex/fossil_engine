@@ -25,13 +25,14 @@
 #include "common/diagnostics.h"
 #include "common/limits.h"
 #include "common/types.h"
+#include "assets/asset_types.h"
+#include "engine/engine.h"
+#include "engine/engine_assets.h"
 #include "logger/logger.h"
+#include "logger/logger_messages_internal.h"
 #include "memory/memory.h"
-#include "shaders/shaders.h"
+#include "shaders/shader_types.h"
 
-#include "h/core.h"
-#include "h/dir.h"
-#include "h/string.h"
 #include "h/ui.h"
 
 #include <string.h>
@@ -159,6 +160,8 @@ static void text_align_y_bottom_internal(u64 end, f32 height);
 
 static u32 text_init_internal(void)
 {
+    fsl_shader_program *shader_p = fsl_mem_handle_get(fsl_shader_buf);
+
     if (fsl_mem_map((void*)&text_core.buf, FSL_STRING_MAX * sizeof(struct fsl_text_data),
                 "text_init_internal().text_core.buf") != FSL_ERR_SUCCESS)
         goto cleanup;
@@ -211,7 +214,7 @@ static u32 text_init_internal(void)
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    ui_core.shader.text = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_TEXT);
+    ui_core.shader.text = &shader_p[FSL_SHADER_INDEX_TEXT];
     ui_core.uniform.text.font_size = glGetUniformLocation(ui_core.shader.text->asset.id, "font_size");
     ui_core.uniform.text.draw_shadow = glGetUniformLocation(ui_core.shader.text->asset.id, "draw_shadow");
     ui_core.uniform.text.shadow_color = glGetUniformLocation(ui_core.shader.text->asset.id, "shadow_color");
@@ -236,7 +239,7 @@ void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear)
     struct fsl_glyphf *g = NULL;
     u32 i = 0;
 
-    fsl_core_internal.fbo_bind();
+    fsl_fbo_bind();
 
     if (!length)
         length = FSL_STRING_MAX;
@@ -258,7 +261,7 @@ void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear)
     }
 
     if (text_core.font == NULL || font->asset.id != text_core.font->asset.id ||
-            render_size.x != render->size.x || render_size.y != render->size.y)
+            render_size.x != render_internal.size.x || render_size.y != render_internal.size.y)
     {
         text_core.font = font;
         text_core.font_size = size;
@@ -266,9 +269,9 @@ void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear)
         text_core.advance = 0.0f;
         text_core.cursor = 0;
 
-        scale = stbtt_ScaleForPixelHeight(&font->info, size);
-        text_core.text_scale.x = scale * render->ndc_scale.x;
-        text_core.text_scale.y = scale * render->ndc_scale.y;
+        scale = size / font->fheight;
+        text_core.text_scale.x = scale * render_internal.ndc_scale.x;
+        text_core.text_scale.y = scale * render_internal.ndc_scale.y;
 
         for (i = 0; i < FSL_GLYPH_MAX; ++i)
         {
@@ -283,11 +286,12 @@ void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear)
         }
     }
 
-    ui_core.shader.text = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_TEXT);
+    ui_core.shader.text = fsl_mem_handle_get(fsl_shader_buf);
+    ui_core.shader.text = &ui_core.shader.text[FSL_SHADER_INDEX_TEXT];
     glUseProgram(ui_core.shader.text->asset.id);
     glUniform2f(ui_core.uniform.text.font_size,
-            text_core.font_size * render->ndc_scale.x,
-            text_core.font_size * render->ndc_scale.y);
+            text_core.font_size * render_internal.ndc_scale.x,
+            text_core.font_size * render_internal.ndc_scale.y);
 
     glBindTexture(GL_TEXTURE_2D, text_core.font->asset.id);
     glDisable(GL_DEPTH_TEST);
@@ -308,7 +312,7 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
     u64 len = 0, i = 0;
     f32 descent = 0.0f, line_height = 0.0f;
     struct fsl_glyphf *g = NULL;
-    f32 _window_x = (f32)window_x * render->ndc_scale.x;
+    f32 _window_x = (f32)window_x * render_internal.ndc_scale.x;
     void (*align_x_func)(const str *, i64, f32) = &text_align_x_none_internal;
     void (*align_y_func)(u64, f32) = &text_align_y_none_internal;
 
@@ -361,8 +365,8 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
     else if (align_y == FSL_TEXT_ALIGN_BOTTOM)
         align_y_func = &text_align_y_bottom_internal;
 
-    pos_x *= render->ndc_scale.x;
-    pos_y *= render->ndc_scale.y;
+    pos_x *= render_internal.ndc_scale.x;
+    pos_y *= render_internal.ndc_scale.y;
     pos_y += text_core.font->scale.y * text_core.text_scale.y;
 
     descent = text_core.font->descent * text_core.text_scale.y;
@@ -501,8 +505,13 @@ f32 fsl_get_text_height(void)
 
 u32 fsl_ui_init(void)
 {
+    fsl_shader_program *shader_p = fsl_mem_handle_get(fsl_shader_buf);
+
     if (text_init_internal() != FSL_ERR_SUCCESS)
         return fsl_err;
+
+    ui_core.shader.ui = &shader_p[FSL_SHADER_INDEX_UI];
+    ui_core.shader.ui_9_slice = &shader_p[FSL_SHADER_INDEX_UI_9_SLICE];
 
     if (!ui_core.vao_loaded)
     {
@@ -557,7 +566,6 @@ u32 fsl_ui_init(void)
         ui_core.vao_loaded = TRUE;
     }
 
-    ui_core.shader.ui = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UI);
     ui_core.uniform.ui.position =
         glGetUniformLocation(ui_core.shader.ui->asset.id, "position");
     ui_core.uniform.ui.size =
@@ -571,7 +579,6 @@ u32 fsl_ui_init(void)
     ui_core.uniform.ui.tint =
         glGetUniformLocation(ui_core.shader.ui->asset.id, "tint");
 
-    ui_core.shader.ui_9_slice = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UI_9_SLICE);
     ui_core.uniform.nine_slice.tint =
         glGetUniformLocation(ui_core.shader.ui_9_slice->asset.id, "tint");
 
@@ -581,16 +588,17 @@ u32 fsl_ui_init(void)
 
 void fsl_ui_start(b8 nine_slice, b8 clear)
 {
-    fsl_core_internal.fbo_bind();
+    fsl_shader_program *shader_p = fsl_mem_handle_get(fsl_shader_buf);
+    fsl_fbo_bind();
 
     if (nine_slice)
     {
-        ui_core.shader.ui_9_slice = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UI_9_SLICE);
+        ui_core.shader.ui_9_slice = &shader_p[FSL_SHADER_INDEX_UI_9_SLICE];
         glUseProgram(ui_core.shader.ui_9_slice->asset.id);
     }
     else
     {
-        ui_core.shader.ui = fsl_mem_handle_get_i(fsl_shader_program, fsl_shader_buf, FSL_SHADER_INDEX_UI);
+        ui_core.shader.ui = &shader_p[FSL_SHADER_INDEX_UI];
         glUseProgram(ui_core.shader.ui->asset.id);
     }
 
@@ -601,8 +609,8 @@ void fsl_ui_start(b8 nine_slice, b8 clear)
 
 void fsl_ui_push_panel(i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, u32 tint)
 {
-    fsl_texture *texture = fsl_mem_handle_get_i(fsl_texture, fsl_texture_buf, FSL_TEXTURE_INDEX_PANEL_ACTIVE);
-    fsl_panel_nine_slice _panel = fsl_get_nine_slice(texture,
+    fsl_texture *texture = fsl_mem_handle_get(fsl_texture_buf);
+    fsl_panel_nine_slice _panel = fsl_get_nine_slice(&texture[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
             pos_x, pos_y, size_x, size_y, FSL_UI_SLICE_SIZE_DEFAULT);
 
     glBindBuffer(GL_ARRAY_BUFFER, ui_core.vbo_nine_slice);

@@ -1,8 +1,8 @@
 #ifndef HHC_COMMON_H
 #define HHC_COMMON_H
 
-#include "src/common/types.h"
-#include "src/memory/memory.h"
+#include "deps/fossil/common/types.h"
+#include "deps/fossil/memory/memory.h"
 
 #define GAME_VERSION_STABLE "-stable"
 #define GAME_VERSION_BETA   "-beta"
@@ -98,7 +98,7 @@
 
 /* ---- name formats -------------------------------------------------------- */
 
-#define FORMAT_FILE_NAME_HHCC "r.%d.%d.%d.hhcc"
+#define FORMAT_FILE_NAME_HHCC "%d.%d.%d.hhcr"
 
 /* ---- strings: death ------------------------------------------------------ */
 
@@ -121,7 +121,6 @@ enum mesh_index
 {
     MESH_SKYBOX,
     MESH_CUBE_OF_HAPPINESS,
-    MESH_PLAYER,
     MESH_GIZMO,
     MESH_COUNT
 }; /* mesh_index */

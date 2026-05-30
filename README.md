@@ -1,4 +1,4 @@
-# Fossil Engine
+# Fossil Engine - v0.9.0-beta
 
 **a game engine written in C89, with minimal dependencies.**
 
@@ -6,22 +6,22 @@
 
 - [buildtool v1.8.4-beta](https://github.com/awertnex/buildtool): build tool used to build the engine
 - [glfw v3.4](https://github.com/glfw/glfw): platform-independent windowing (headers modified)
-    - modifications: remove `__cplusplus` support guard, just to keep it completely C
+    - modifications: remove `__cplusplus` guard, just to keep it completely C
 - [glad v0.1.36](https://github.com/dav1dde/glad-web): OpenGL function loader (modified)
     - extensions: GL_ARB_bindless_texture
-    - modifications: remove `__cplusplus` support guard, just to keep it completely C
+    - modifications: remove `__cplusplus` guard, just to keep it completely C
 - [stb_truetype.h v1.26](https://github.com/nothings/stb/blob/master/stb_truetype.h): loading font data (modified)
     - modifications: change all // comments to /* */ block comments to support C89 standard
-- [dejavu-fonts v2.37](https://github.com/dejavu-fonts/dejavu-fonts): font of choice (modified)
+- [stb_image.h v2.30](https://github.com/nothings/stb/blob/master/stb_image.h): loading image data (modified)
+    - modifications: change all // comments to /* */ block comments to support C89 standard
+- [stb_image_write.h v1.26](https://github.com/nothings/stb/blob/master/stb_image_write.h): writing images (modified, unused)
+    - modifications: change all // comments to /* */ block comments to support C89 standard
+- [dejavu-fonts v2.37](https://github.com/dejavu-fonts/dejavu-fonts): fonts of choice (modified)
     - modifications:
         - (subset: U+0000-00ff): dejavu_sans_ansi.ttf
         - (subset: U+0000-00ff): dejavu_sans_bold_ansi.ttf
         - (subset: U+0000-00ff): dejavu_sans_mono_ansi.ttf
         - (subset: U+0000-00ff): dejavu_sans_mono_bold_ansi.ttf
-- [stb_image.h v2.30](https://github.com/nothings/stb/blob/master/stb_image.h): loading image data (modified)
-    - modifications: change all // comments to /* */ block comments to support C89 standard
-- [stb_image_write.h v1.26](https://github.com/nothings/stb/blob/master/stb_image_write.h): writing images (modified, unused)
-    - modifications: change all // comments to /* */ block comments to support C89 standard
 
 windows-specific:
 - [w64devkit v2.4.0](https://github.com/skeeto/w64devkit): not necessary for runtime, just for building from source
@@ -34,8 +34,8 @@ windows-specific:
 >- for release build, run `./build release`.
 >- if build successful, you can copy/move the files in `fossil/` into your project's root.
 >- files:
->   - `deps/`: required dependencies for development
->   - `fossil/`: required dependencies for runtime/deployment
+>   - `deps/`: required headers for development
+>   - `fossil/`: required libraries and files for runtime
 >   - `lib/`: required libraries for linking
 
 **linux x86_64:**
@@ -48,7 +48,7 @@ cd fossil_engine/
 ./build
 ```
 
-if you want, bootstrap buildtool:
+bootstrap buildtool (optional):
 
 ```bash
 cc build.c -o build
@@ -75,10 +75,10 @@ cd.exe fossil_engine
 ./build.exe
 ```
 
-if you want, bootstrap the build script:
+bootstrap buildtool (optional):
 
 ```command
-cc.exe build.c -o build.exe
+cc.exe build.c -o build
 ```
 
 additional build commands:

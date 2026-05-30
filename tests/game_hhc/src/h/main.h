@@ -1,11 +1,11 @@
 #ifndef HHC_H
 #define HHC_H
 
-#include "src/common/diagnostics.h"
-#include "src/common/types.h"
+#include "deps/fossil/common/diagnostics.h"
+#include "deps/fossil/common/types.h"
+#include "deps/fossil/engine/engine.h"
 
-#include "src/h/core.h"
-#include "src/h/ui.h"
+#include "deps/fossil/h/ui.h"
 
 #include "common.h"
 
@@ -13,25 +13,25 @@ struct hhc_core
 {
     struct /* flag */
     {
-        u64 paused: 1;
-        u64 hud: 1;
-        u64 debug: 1;
-        u64 super_debug: 1;
-        u64 fullscreen: 1;
-        u64 menu_open: 1;
-        u64 fps_cap: 1;
-        u64 parse_target: 1;
-        u64 world_loaded: 1;
-        u64 chunk_buf_dirty: 1;
+        b8 paused;
+        b8 hud;
+        b8 debug;
+        b8 super_debug;
+        b8 fullscreen;
+        b8 menu_open;
+        b8 fps_cap;
+        b8 parse_target;
+        b8 world_loaded;
+        b8 chunk_buf_dirty;
     } flag;
 
     struct /* debug */
     {
-        u64 trans_blocks: 1;
-        u64 chunk_bounds: 1;
-        u64 bounding_boxes: 1;
-        u64 chunk_gizmo: 1;
-        u64 chunk_queue_visualizer: 1;
+        b8 trans_blocks;
+        b8 chunk_bounds;
+        b8 bounding_boxes;
+        b8 chunk_gizmo;
+        b8 chunk_queue_visualizer;
     } debug;
 }; /* hhc_core */
 
@@ -70,7 +70,7 @@ struct hhc_uniform
 {
     struct /* defaults */
     {
-        GLint offset;
+        GLint location;
         GLint scale;
         GLint mat_rotation;
         GLint mat_perspective;
@@ -149,10 +149,9 @@ struct hhc_uniform
 
 }; /* hhc_uniform */
 
+extern fsl_render *render;
 extern struct hhc_core core;
 extern struct hhc_settings settings;
-extern fsl_projection projection_world;
-extern fsl_projection projection_hud;
 extern fsl_font *font[FONT_COUNT];
 
 #endif /* HHC_MAIN_H */

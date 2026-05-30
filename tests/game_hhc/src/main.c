@@ -1,4 +1,4 @@
-#include "src/h/fossil_engine.h"
+#include "deps/fossil/fossil_engine.h"
 
 #include "h/main.h"
 #include "h/assets.h"
@@ -12,7 +12,7 @@
 #include "h/terrain.h"
 #include "h/world.h"
 
-#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
 #include <math.h>
@@ -20,11 +20,10 @@
 i32 scrool = 0;
 u32 *const GAME_ERR = (u32*)&fsl_err;
 fsl_mem_arena memory_arena_internal = {0};
+fsl_render *render = NULL;
 struct hhc_core core = {0};
 struct hhc_settings settings = {0};
 static struct hhc_uniform uniform = {0};
-fsl_projection projection_world = {0};
-fsl_projection projection_hud = {0};
 
 static player _player = {0};
 
@@ -62,17 +61,17 @@ static void draw_everything(void);
 
 static void callback_framebuffer_size(i32 size_x, i32 size_y)
 {
-    fsl_fbo *fbo_p = fsl_mem_handle_get(fsl_fbo, fbo);
+    fsl_fbo *fbo_p = fsl_mem_handle_get(fbo);
 
     _player.camera.ratio = (f32)size_x / (f32)size_y;
     _player.camera_hud.ratio = (f32)size_x / (f32)size_y;
 
-    fsl_fbo_realloc(&fbo_p[FBO_SKYBOX], FALSE, 4);
-    fsl_fbo_realloc(&fbo_p[FBO_WORLD], FALSE, 4);
-    fsl_fbo_realloc(&fbo_p[FBO_WORLD_MSAA], TRUE, 4);
-    fsl_fbo_realloc(&fbo_p[FBO_HUD], FALSE, 4);
-    fsl_fbo_realloc(&fbo_p[FBO_HUD_MSAA], TRUE, 4);
-    fsl_fbo_realloc(&fbo_p[FBO_POST_PROCESSING], FALSE, 4);
+    fsl_fbo_realloc(&fbo_p[FBO_SKYBOX], render->size.x, render->size.y, FALSE, 4);
+    fsl_fbo_realloc(&fbo_p[FBO_WORLD], render->size.x, render->size.y, FALSE, 4);
+    fsl_fbo_realloc(&fbo_p[FBO_WORLD_MSAA], render->size.x, render->size.y, TRUE, 4);
+    fsl_fbo_realloc(&fbo_p[FBO_HUD], render->size.x, render->size.y, FALSE, 4);
+    fsl_fbo_realloc(&fbo_p[FBO_HUD_MSAA], render->size.x, render->size.y, TRUE, 4);
+    fsl_fbo_realloc(&fbo_p[FBO_POST_PROCESSING], render->size.x, render->size.y, FALSE, 4);
 }
 
 static void callback_key(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -143,7 +142,7 @@ static u32 settings_init(void)
 
     settings.lerp_speed = SET_LERP_SPEED_DEFAULT;
 
-    settings.render_distance = 4;
+    settings.render_distance = 16;
     settings.chunk_buf_radius = settings.render_distance;
     settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
 
@@ -184,9 +183,9 @@ void settings_update(void)
 
 static void bind_shader_uniforms(void)
 {
-    fsl_shader_program *shader_p = fsl_mem_handle_get(fsl_shader_program, shader);
-    uniform.defaults.offset =
-        glGetUniformLocation(shader_p[SHADER_DEFAULT].asset.id, "offset");
+    fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
+    uniform.defaults.location =
+        glGetUniformLocation(shader_p[SHADER_DEFAULT].asset.id, "location");
     uniform.defaults.scale =
         glGetUniformLocation(shader_p[SHADER_DEFAULT].asset.id, "scale");
     uniform.defaults.mat_rotation =
@@ -297,14 +296,12 @@ static void bind_shader_uniforms(void)
 
 static void generate_standard_meshes(void)
 {
-    fsl_mesh *mesh_p = fsl_mem_handle_get(fsl_mesh, mesh);
-    fsl_asset_metadata metadata = {0};
+    fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
     u32 i = 0;
     const u32 VBO_LEN_SKYBOX =  120;
     const u32 EBO_LEN_SKYBOX =  36;
     const u32 VBO_LEN_COH =     24;
     const u32 EBO_LEN_COH =     36;
-    const u32 VBO_LEN_PLAYER =  216;
     const u32 VBO_LEN_GIZMO =   51;
     const u32 EBO_LEN_GIZMO =   90;
 
@@ -373,52 +370,6 @@ static void generate_standard_meshes(void)
         0, 1, 3, 3, 2, 0
     };
 
-    GLfloat vbo_data_player[] =
-    {
-        /* pos            normals */
-        1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, /* px */
-        1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-        1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-
-        0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, /* nx */
-        0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f,
-
-        0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, /* py */
-        0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-        1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-        1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-        1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-
-        0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, /* ny */
-        1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
-        1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,
-        1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
-
-        0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, /* pz */
-        0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-
-        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, /* nz */
-        1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-        1.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-        1.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-        0.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f
-    };
-
     const GLfloat THIC = 0.06f;
     GLfloat vbo_data_gizmo[] =
     {
@@ -465,46 +416,20 @@ static void generate_standard_meshes(void)
     if (fsl_mesh_generate(&mesh_p[MESH_SKYBOX], "Skybox", "skybox", NULL, NULL,
                 &fsl_attrib_vec3_vec2, GL_STATIC_DRAW,
                 VBO_LEN_SKYBOX, EBO_LEN_SKYBOX, vbo_data_skybox, ebo_data_skybox) != FSL_ERR_SUCCESS)
-    {
-        metadata = fsl_asset_get_metadata(mesh_p[MESH_SKYBOX].asset);
-        LOG_MESH_GENERATE(metadata.name_id);
         goto cleanup;
-    }
-    metadata = fsl_asset_get_metadata(mesh_p[MESH_SKYBOX].asset);
-    LOG_MESH_GENERATE(metadata.name_id);
 
     if (fsl_mesh_generate(&mesh_p[MESH_CUBE_OF_HAPPINESS], "Cube of Happiness", "cube_of_happiness", NULL, NULL,
                 &fsl_attrib_vec3, GL_STATIC_DRAW,
                 VBO_LEN_COH, EBO_LEN_COH, vbo_data_coh, ebo_data_coh) != FSL_ERR_SUCCESS)
-    {
-        metadata = fsl_asset_get_metadata(mesh_p[MESH_CUBE_OF_HAPPINESS].asset);
-        LOG_MESH_GENERATE(metadata.name_id);
         goto cleanup;
-    }
-    metadata = fsl_asset_get_metadata(mesh_p[MESH_CUBE_OF_HAPPINESS].asset);
-    LOG_MESH_GENERATE(metadata.name_id);
 
-    if (fsl_mesh_generate(&mesh_p[MESH_PLAYER], "Player", "player", NULL, NULL,
-                &fsl_attrib_vec3_vec3, GL_STATIC_DRAW,
-                VBO_LEN_PLAYER, 0, vbo_data_player, NULL) != FSL_ERR_SUCCESS)
-    {
-        metadata = fsl_asset_get_metadata(mesh_p[MESH_PLAYER].asset);
-        LOG_MESH_GENERATE(metadata.name_id);
+    if (fsl_mesh_load(&_player.mesh, "Player", "player", "player.obj", GAME_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
         goto cleanup;
-    }
-    metadata = fsl_asset_get_metadata(mesh_p[MESH_PLAYER].asset);
-    LOG_MESH_GENERATE(metadata.name_id);
 
     if (fsl_mesh_generate(&mesh_p[MESH_GIZMO], "Gizmo", "gizmo", NULL, NULL,
                 &fsl_attrib_vec3, GL_STATIC_DRAW,
                 VBO_LEN_GIZMO, EBO_LEN_GIZMO, vbo_data_gizmo, ebo_data_gizmo) != FSL_ERR_SUCCESS)
-    {
-        metadata = fsl_asset_get_metadata(mesh_p[MESH_GIZMO].asset);
-        LOG_MESH_GENERATE(metadata.name_id);
         goto cleanup;
-    }
-    metadata = fsl_asset_get_metadata(mesh_p[MESH_GIZMO].asset);
-    LOG_MESH_GENERATE(metadata.name_id);
 
     *GAME_ERR = FSL_ERR_SUCCESS;
     return;
@@ -517,13 +442,12 @@ cleanup:
 
 static void draw_everything(void)
 {
-    fsl_fbo *fbo_p = fsl_mem_handle_get(fsl_fbo, fbo);
-    fsl_texture *texture_p = fsl_mem_handle_get(fsl_texture, texture);
-    fsl_mesh *mesh_p = fsl_mem_handle_get(fsl_mesh, mesh);
-    fsl_shader_program *shader_p = fsl_mem_handle_get(fsl_shader_program, shader);
-    fsl_shader_program *fsl_shader_p = fsl_mem_handle_get(fsl_shader_program, fsl_shader_buf);
-    chunk **chunk_tab_p = fsl_mem_handle_get(chunk*, chunk_tab);
-    chunk ***CHUNK_ORDER_p = fsl_mem_handle_get(chunk**, CHUNK_ORDER);
+    fsl_fbo *fbo_p = fsl_mem_handle_get(fbo);
+    fsl_texture *texture_p = fsl_mem_handle_get(texture);
+    fsl_texture *fsl_texture_p = fsl_mem_handle_get(fsl_texture_buf);
+    fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
+    fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
+    fsl_shader_program *fsl_shader_p = fsl_mem_handle_get(fsl_shader_buf);
 
     f32 delay_in_hours = 6.0f;
     f32 sun_time = skybox_data.time * FSL_PI;
@@ -594,12 +518,12 @@ static void draw_everything(void)
     glUniform1f(uniform.skybox.texture_scale, 0.25f);
     glUniformMatrix4fv(uniform.skybox.mat_translation, 1, GL_FALSE, (GLfloat*)&translation);
     glUniformMatrix4fv(uniform.skybox.mat_rotation, 1, GL_FALSE,
-            (GLfloat*)&projection_world.rotation);
+            (GLfloat*)&_player.camera.projection.rotation);
     glUniformMatrix4fv(uniform.skybox.mat_sun_rotation, 1, GL_FALSE, (GLfloat*)&rotation);
     glUniformMatrix4fv(uniform.skybox.mat_orientation, 1, GL_FALSE,
-            (GLfloat*)&projection_world.orientation);
+            (GLfloat*)&_player.camera.projection.orientation);
     glUniformMatrix4fv(uniform.skybox.mat_projection, 1, GL_FALSE,
-            (GLfloat*)&projection_world.projection);
+            (GLfloat*)&_player.camera.projection.projection);
     glUniform3fv(uniform.skybox.sun_rotation, 1, (GLfloat*)&skybox_data.sun_rotation);
     glUniform3fv(uniform.skybox.sky_color, 1, (GLfloat*)&skybox_data.sky_color);
     glUniform3fv(uniform.skybox.horizon_color, 1, (GLfloat*)&skybox_data.horizon_color);
@@ -716,7 +640,7 @@ static void draw_everything(void)
 
     glUseProgram(shader_p[SHADER_VOXEL].asset.id);
     glUniformMatrix4fv(uniform.voxel.mat_perspective, 1, GL_FALSE,
-            (GLfloat*)&projection_world.perspective);
+            (GLfloat*)&_player.camera.projection.perspective);
     glUniform3f(uniform.voxel.camera_position,
             _player.camera.pos.x, _player.camera.pos.y, _player.camera.pos.z);
     glUniform3f(uniform.voxel.flashlight_position,
@@ -736,8 +660,8 @@ static void draw_everything(void)
     static chunk ***cursor = NULL;
     static chunk ***end = NULL;
     static chunk *ch = NULL;
-    cursor = &CHUNK_ORDER_p[CHUNKS_MAX[settings.render_distance] - 1];
-    for (; cursor >= CHUNK_ORDER_p; --cursor)
+    cursor = &CHUNK_ORDER.p[CHUNKS_MAX[settings.render_distance] - 1];
+    for (; cursor >= CHUNK_ORDER.p; --cursor)
     {
         ch = **cursor;
         if (!ch || !(ch->flag & FLAG_CHUNK_RENDER))
@@ -756,40 +680,24 @@ static void draw_everything(void)
 
     if (_player.camera_mode != PLAYER_CAMERA_MODE_1ST_PERSON)
     {
-
-        glUseProgram(shader_p[SHADER_DEFAULT].asset.id);
-        glUniform3fv(uniform.defaults.scale, 1, (GLfloat*)&_player.size);
-        glUniform3f(uniform.defaults.offset,
-                _player.pos.x, _player.pos.y, _player.pos.z);
-        glUniformMatrix4fv(uniform.defaults.mat_rotation, 1, GL_FALSE,
-                (GLfloat*)(f32[]){
-                _player.cos_yaw, _player.sin_yaw, 0.0f, 0.0f,
-                -_player.sin_yaw, _player.cos_yaw, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f});
-        glUniformMatrix4fv(uniform.defaults.mat_perspective, 1, GL_FALSE,
-                (GLfloat*)&projection_world.perspective);
-        glUniform3fv(uniform.defaults.sun_rotation, 1,
-                (GLfloat*)&skybox_data.sun_rotation);
-        glUniform3fv(uniform.defaults.sky_color, 1,
-                (GLfloat*)&skybox_data.sky_color);
-
-        glBindVertexArray(mesh_p[MESH_PLAYER].vao);
-        glDrawArrays(GL_TRIANGLES, 0, mesh_p[MESH_PLAYER].vbo_len);
+        fsl_mesh_draw(&_player.mesh, &_player.camera,
+                _player.pos.x, _player.pos.y, _player.pos.z,
+                _player.roll, _player.pitch, _player.yaw,
+                _player.scale.x, _player.scale.y, _player.scale.z);
     }
 
     /* ---- draw player target bounding box --------------------------------- */
 
     glUseProgram(shader_p[SHADER_BOUNDING_BOX].asset.id);
     glUniformMatrix4fv(uniform.bounding_box.mat_perspective, 1, GL_FALSE,
-            (GLfloat*)&projection_world.perspective);
+            (GLfloat*)&_player.camera.projection.perspective);
 
     if (core.flag.parse_target && core.flag.hud &&
-            chunk_tab_p[chunk_tab_index] &&
-            chunk_tab_p[chunk_tab_index]->block
-            [(i64)_player.target.z - chunk_tab_p[chunk_tab_index]->pos.z * CHUNK_DIAMETER]
-            [(i64)_player.target.y - chunk_tab_p[chunk_tab_index]->pos.y * CHUNK_DIAMETER]
-            [(i64)_player.target.x - chunk_tab_p[chunk_tab_index]->pos.x * CHUNK_DIAMETER])
+            chunk_tab.p[chunk_tab_index] &&
+            chunk_tab.p[chunk_tab_index]->block
+            [(i64)_player.target.z - chunk_tab.p[chunk_tab_index]->pos.z * CHUNK_DIAMETER]
+            [(i64)_player.target.y - chunk_tab.p[chunk_tab_index]->pos.y * CHUNK_DIAMETER]
+            [(i64)_player.target.x - chunk_tab.p[chunk_tab_index]->pos.x * CHUNK_DIAMETER])
     {
         glUniform3f(uniform.bounding_box.position,
                 (f32)(_player.target.x),
@@ -837,12 +745,12 @@ static void draw_everything(void)
     if (core.debug.chunk_queue_visualizer)
     {
         glUniformMatrix4fv(uniform.bounding_box.mat_perspective, 1, GL_FALSE,
-                (GLfloat*)&projection_world.perspective);
+                (GLfloat*)&_player.camera.projection.perspective);
         glUniform3f(uniform.bounding_box.size,
                 CHUNK_DIAMETER, CHUNK_DIAMETER, CHUNK_DIAMETER);
 
-        cursor = CHUNK_ORDER_p;
-        end = &CHUNK_ORDER_p[CHUNK_QUEUE[0].size];
+        cursor = CHUNK_ORDER.p;
+        end = &CHUNK_ORDER.p[CHUNK_QUEUE[0].size];
         for (; cursor < end; ++cursor)
         {
             ch = **cursor;
@@ -917,13 +825,13 @@ static void draw_everything(void)
 
         glUniform2fv(uniform.gizmo.ndc_scale, 1, (GLfloat*)&render->ndc_scale);
         glUniformMatrix4fv(uniform.gizmo.mat_translation, 1, GL_FALSE,
-                (GLfloat*)&projection_hud.target);
+                (GLfloat*)&_player.camera_hud.projection.target);
         glUniformMatrix4fv(uniform.gizmo.mat_rotation, 1, GL_FALSE,
-                (GLfloat*)&projection_hud.rotation);
+                (GLfloat*)&_player.camera_hud.projection.rotation);
         glUniformMatrix4fv(uniform.gizmo.mat_orientation, 1, GL_FALSE,
-                (GLfloat*)&projection_hud.orientation);
+                (GLfloat*)&_player.camera_hud.projection.orientation);
         glUniformMatrix4fv(uniform.gizmo.mat_projection, 1, GL_FALSE,
-                (GLfloat*)&projection_hud.projection);
+                (GLfloat*)&_player.camera_hud.projection.projection);
 
         glBindVertexArray(mesh_p[MESH_GIZMO].vao);
         glUniform3f(uniform.gizmo.color, 1.0f, 0.0f, 0.0f);
@@ -946,16 +854,16 @@ static void draw_everything(void)
         glUniform1i(uniform.gizmo_chunk.chunk_buf_diameter, settings.chunk_buf_diameter);
 
         glUniformMatrix4fv(uniform.gizmo_chunk.mat_translation,
-                1, GL_FALSE, (GLfloat*)&projection_hud.target);
+                1, GL_FALSE, (GLfloat*)&_player.camera_hud.projection.target);
 
         glUniformMatrix4fv(uniform.gizmo_chunk.mat_rotation,
-                1, GL_FALSE, (GLfloat*)&projection_hud.rotation);
+                1, GL_FALSE, (GLfloat*)&_player.camera_hud.projection.rotation);
 
         glUniformMatrix4fv(uniform.gizmo_chunk.mat_orientation,
-                1, GL_FALSE, (GLfloat*)&projection_hud.orientation);
+                1, GL_FALSE, (GLfloat*)&_player.camera_hud.projection.orientation);
 
         glUniformMatrix4fv(uniform.gizmo_chunk.mat_projection,
-                1, GL_FALSE, (GLfloat*)&projection_hud.projection);
+                1, GL_FALSE, (GLfloat*)&_player.camera_hud.projection.projection);
 
         v3f32 camera_position =
         {
@@ -1151,13 +1059,13 @@ static void draw_everything(void)
         fsl_log_entry *log_entry = NULL;
 
         fsl_ui_start(TRUE, FALSE);
-        fsl_ui_draw_nine_slice(fsl_mem_handle_get_i(fsl_texture, fsl_texture_buf, FSL_TEXTURE_INDEX_PANEL_INACTIVE),
+        fsl_ui_draw_nine_slice(&fsl_texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE],
                 10, render->size.y - logger_panel_height - 30,
                 render->size.x - 20, logger_panel_height + 20, 8, 0xffffff5f);
 
         fsl_text_start(font[FONT_MONO_BOLD], settings.font_size, 0, FALSE);
 
-        log_entry = fsl_mem_handle_get(fsl_log_entry, logger_core.buf);
+        log_entry = fsl_mem_handle_get(logger_core.buf);
         for (i = 20; i > 0; --i)
         {
             index = fsl_mod_i32(logger_core.cursor - i - scrool, FSL_LOGGER_HISTORY_MAX);
@@ -1267,6 +1175,9 @@ int main(int argc, char **argv)
     _player.size.x = 0.6f;
     _player.size.y = 0.6f;
     _player.size.z = 1.8f;
+    _player.scale.x = 1.0f;
+    _player.scale.y = 1.0f;
+    _player.scale.z = 1.0f;
     _player.eye_height = PLAYER_EYE_HEIGHT;
     _player.camera_mode = PLAYER_CAMERA_MODE_1ST_PERSON;
     _player.camera_distance = SET_CAMERA_DISTANCE_MAX;
@@ -1330,9 +1241,7 @@ cleanup:
     assets_free();
     chunking_free();
     rand_free();
-
     fsl_mem_arena_free(&memory_arena_internal, "main().memory_arena_internal");
-
     fsl_engine_close();
     return *GAME_ERR;
 }

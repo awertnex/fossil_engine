@@ -15,79 +15,30 @@
  */
 
 /*!
- *  @file core.h
+ *  @file engine.h
  *
- *  @brief engine init, running, close, windowing, opengl loading.
+ *  @brief main engine module header; engine init, running, close, windowing, opengl loading.
  */
 
-#ifndef FSL_CORE_H
-#define FSL_CORE_H
+#ifndef FSL_ENGINE_H
+#define FSL_ENGINE_H
 
 #include "../common/engine_info.h"
-#include "../common/common_values.h"
+#include "../common/limits.h"
 #include "../common/types.h"
-#include "assets.h"
+#include "../assets/asset_types.h"
 
-#include <deps/glad/glad.h>
 #define GLFW_INCLUDE_NONE
-#include <deps/glfw3.h>
+#include "../external/glfw3.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#   include <deps/stb_image.h>
-#   include <deps/stb_image_write.h>
-#pragma GCC diagnostic pop /* ignored "-Wpedantic" */
+typedef struct fsl_render fsl_render;
 
-/* ---- section: definitions ------------------------------------------------ */
-
-typedef struct fsl_core         fsl_core;
-typedef struct fsl_render       fsl_render;
-typedef struct fsl_camera       fsl_camera;
-typedef struct fsl_projection   fsl_projection;
-
-struct fsl_core
+enum fsl_engine_string_index
 {
-    struct /* flag */
-    {
-        b8 active;
-        b8 glfw_initialized;
-        b8 request_screenshot;
-        b8 request_engine_close;
-    } flag;
-
-    struct /* ubo */
-    {
-        GLuint ndc_scale;
-    } ubo;
-
-    /*!
-     *  @brief global fbo for rendering mostly ui elements.
-     *
-     *  @remark initialized in @ref fsl_engine_init().
-     */
-    fsl_fbo fbo;
-
-    /*!
-     *  @brief global fbo for rendering mostly ui elements, multisampled.
-     *
-     *  @remark initialized in @ref fsl_engine_init().
-     */
-    fsl_fbo fbo_msaa;
-
-    /*!
-     *  @brief function to bind a final framebuffer to draw to based on anti-aliasing setting.
-     *
-     *  @remark initialized in @ref fsl_engine_init().
-     */
-    void (*fbo_bind)(void);
-
-    /*!
-     *  @brief function to draw onto a final framebuffer based on anti-aliasing setting.
-     *
-     * @remark initialized in @ref fsl_engine_init().
-     */
-    void (*fbo_blit)(GLuint fbo);
-}; /* fsl_core */
+    FSL_ENGINE_STR_INDEX_TITLE, /* "ENGINE_NAME: ENGINE_VERSION" */
+    FSL_ENGINE_STR_INDEX_VERSION,
+    FSL_ENGINE_STR_INDEX_COUNT
+}; /* fsl_engine_string_index */
 
 struct fsl_render
 {
@@ -114,46 +65,16 @@ struct fsl_render
     u8 *screen_buf;
 }; /* fsl_render */
 
-struct fsl_camera
-{
-    v3f64 pos;
-    f64 roll, pitch, yaw;
-    f64 sin_roll, sin_pitch, sin_yaw;
-    f64 cos_roll, cos_pitch, cos_yaw;
-    f32 fovy;
-    f32 fovy_smooth;
-    f32 ratio;
-    f32 far;
-    f32 near;
-    f32 zoom;
-}; /* fsl_camera */
-
-struct fsl_projection
-{
-    m4f32 target;
-    m4f32 translation;
-    m4f32 rotation;
-    m4f32 orientation;
-    m4f32 view;
-    m4f32 projection;
-    m4f32 perspective;
-}; /* fsl_projection */
-
 /* ---- section: declarations ----------------------------------------------- */
 
 /*!
- *  @brief global core module.
+ *  @internal
  *
- *  @remark declared and initialized internally.
- */
-extern fsl_core fsl_core_internal;
-
-/*!
  *  @brief engine's default render.
  *
  *  @remark declared and initialized internally.
  */
-FSLAPI extern fsl_render *render;
+extern fsl_render render_internal;
 
 /* ---- section: signatures ------------------------------------------------- */
 
@@ -197,7 +118,7 @@ FSLAPI u32 fsl_engine_init(int argc, char **argv, const str *title,
 /*!
  *  @brief engine main loop check.
  *
- *  - update @ref fsl_render.time and @ref fsl_render.time_delta of the currently bound `fsl_render`.
+ *  - update @ref fsl_render.time and @ref fsl_render.time_delta of the currently bound @ref fsl_render.
  *
  *  @return `TRUE` unless @ref glfwWindowShouldClose() returns `FALSE` or
  *  @ref fsl_request_engine_close() has been called.
@@ -207,8 +128,8 @@ FSLAPI b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32));
 /*!
  *  @brief update render settings (e.g., render size).
  *
- *  - update @ref fsl_render.size of the currently bound `fsl_render` to window size.
- *  - update @ref fsl_render.ndc_scale of the currently bound `fsl_render`.
+ *  - update @ref fsl_render.size of the currently bound @ref fsl_render to window size.
+ *  - update @ref fsl_render.ndc_scale of the currently bound @ref fsl_render.
  *
  *  @remark called automatically from @ref fsl_engine_running().
  *
@@ -250,7 +171,7 @@ FSLAPI u32 fsl_engine_get_string(str *dst, enum fsl_engine_string_index type);
 FSLAPI u32 fsl_glfw_init(b8 multisample);
 
 /*!
- *  @brief initialize a new 'GLFW' window for the currently bound `fsl_render`.
+ *  @brief initialize a new 'GLFW' window for the currently bound @ref fsl_render.
  *
  *  @param title window/application title (if `NULL`, default title is used).
  *  @param size_x window width (if 0, @ref FSL_RENDER_WIDTH_DEFAULT is used).
@@ -272,7 +193,14 @@ FSLAPI u32 fsl_window_init(const str *title, i32 size_x, i32 size_y);
 FSLAPI u32 fsl_glad_init(void);
 
 /*!
- *  @brief switch engine's current bound `fsl_render` to `r`.
+ *  @brief get address of currently bound @ref fsl_render.
+ *
+ *  get metadata like render size, current process time, delta time and screen buffer.
+ */
+FSLAPI fsl_render *fsl_render_get(void);
+
+/*!
+ *  @brief switch engine's currently bound @ref fsl_render to `r`.
  */
 FSLAPI u32 fsl_change_render(fsl_render *r);
 
@@ -291,7 +219,7 @@ FSLAPI void fsl_request_screenshot(void);
  *  @param special_text string appended to file name, before file extension.
  *
  *  @remark if directory not found, screenshot is still saved at @ref fsl_render.screen_buf
- *  of the currently bound `fsl_render`.
+ *  of the currently bound @ref fsl_render.
  *
  *  @remark this function is a thin wrapper around an internal, heavier function that carries all the logic.
  *
@@ -300,39 +228,13 @@ FSLAPI void fsl_request_screenshot(void);
 FSLAPI u32 fsl_process_screenshot_request(const str *dir_screenshots, const str *special_text);
 
 /*!
+ *  @brief bind internal fbo for rendering.
+ */
+FSLAPI void fsl_fbo_bind(void);
+
+/*!
  *  @brief blit rendered internal fbo (e.g., text, ui elements) onto `fbo`.
  */
 FSLAPI void fsl_fbo_blit(GLuint fbo);
 
-/*!
- *  @brief update `sine` and `cosine` of camera roll, pitch and yaw.
- *
- *  @param roll enable/disable roll rotation.
- *
- *  @remark rotation limits:
- *      roll:  [  0, 360].
- *      pitch: [-90,  90].
- *      yaw:   [  0, 360].
- */
-FSLAPI void fsl_update_camera_movement(fsl_camera *camera, b8 roll);
-
-/*!
- *  @brief make perspective projection matrices from camera parameters.
- *
- *  - setup camera matrices for Z-up, right-handed coordinates and vertical fov (fovy):
- *      - +X: forward.
- *      - +Y: left.
- *      - +Z: up.
- *
- *  @param roll enable/disable roll rotation.
- */
-FSLAPI void fsl_update_projection_perspective(fsl_camera camera, fsl_projection *projection, b8 roll);
-
-/*!
- *  @brief get camera look-at angles from camera position and target position.
- *
- *  assign vertical angle to `pitch` and horizontal angle to `yaw`.
- */
-FSLAPI void fsl_get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f64 *yaw);
-
-#endif /* FSL_CORE_H */
+#endif /* FSL_ENGINE_H */

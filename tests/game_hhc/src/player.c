@@ -1,8 +1,9 @@
-#include "src/logger/logger.h"
+#include "deps/fossil/assets/assets.h"
+#include "deps/fossil/logger/logger.h"
 
-#include "src/h/collision.h"
-#include "src/h/math.h"
-#include "src/h/time.h"
+#include "deps/fossil/physics/collision.h"
+#include "deps/fossil/h/math.h"
+#include "deps/fossil/h/time.h"
 
 #include "h/chunking.h"
 #include "h/common.h"
@@ -119,7 +120,7 @@ void player_update(player *p, f64 dt)
 void player_collision_update(player *p, f64 dt)
 {
     chunk *ch = NULL;
-    block *block_cache = NULL;
+    block *block_p = fsl_mem_handle_get(blocks);
     u32 *_block = NULL;
     f32 speed;
     v3f32 displacement = {0};
@@ -228,8 +229,7 @@ void player_collision_update(player *p, f64 dt)
                                 p->flag &= ~FLAG_PLAYER_FLYING;
                             p->flag |= FLAG_PLAYER_CAN_JUMP;
 
-                            block_cache = fsl_mem_handle_get_i(block, blocks, *_block & MASK_BLOCK_ID);
-                            friction = block_cache->friction;
+                            friction = block_p[*_block & MASK_BLOCK_ID].friction;
                             p->friction.x = friction;
                             p->friction.y = friction;
                         }
@@ -362,22 +362,26 @@ void player_chunk_update(player *p)
 
 static void player_wrap_coordinates(player *p)
 {
-    i64 DIAMETER = WORLD_DIAMETER,
-        DIAMETER_V = WORLD_DIAMETER_VERTICAL,
-        WORLD_MARGIN = WORLD_RADIUS - SET_RENDER_DISTANCE_MAX * CHUNK_DIAMETER,
-        WORLD_MARGIN_V = WORLD_RADIUS_VERTICAL - SET_RENDER_DISTANCE_MAX * CHUNK_DIAMETER,
-        OVERFLOW_EDGE = WORLD_RADIUS + CHUNK_DIAMETER,
-        OVERFLOW_EDGE_V = WORLD_RADIUS_VERTICAL + CHUNK_DIAMETER;
+    const i64 DIAMETER = WORLD_DIAMETER;
+    const i64 DIAMETER_V = WORLD_DIAMETER_VERTICAL;
+    const i64 WORLD_MARGIN = WORLD_RADIUS - SET_RENDER_DISTANCE_MAX * CHUNK_DIAMETER;
+    const i64 WORLD_MARGIN_V = WORLD_RADIUS_VERTICAL - SET_RENDER_DISTANCE_MAX * CHUNK_DIAMETER;
+    const i64 OVERFLOW_EDGE = WORLD_RADIUS + CHUNK_DIAMETER;
+    const i64 OVERFLOW_EDGE_V = WORLD_RADIUS_VERTICAL + CHUNK_DIAMETER;
+    const v3f64 WORLD_VOLUME_MIN =
+    {
+        -(f64)(WORLD_DIAMETER + WORLD_RADIUS),
+        -(f64)(WORLD_DIAMETER + WORLD_RADIUS),
+        -(f64)(WORLD_DIAMETER_VERTICAL + WORLD_RADIUS_VERTICAL)
+    };
+    const v3f64 WORLD_VOLUME_MAX =
+    {
+        (f64)(WORLD_DIAMETER + WORLD_RADIUS),
+        (f64)(WORLD_DIAMETER + WORLD_RADIUS),
+        (f64)(WORLD_DIAMETER_VERTICAL + WORLD_RADIUS_VERTICAL)
+    };
 
-    if (!fsl_is_in_volume_f64(p->pos,
-                (v3f64){
-                -(f64)(WORLD_DIAMETER + WORLD_RADIUS),
-                -(f64)(WORLD_DIAMETER + WORLD_RADIUS),
-                -(f64)(WORLD_DIAMETER_VERTICAL + WORLD_RADIUS_VERTICAL)},
-                (v3f64){
-                (f64)(WORLD_DIAMETER + WORLD_RADIUS),
-                (f64)(WORLD_DIAMETER + WORLD_RADIUS),
-                (f64)(WORLD_DIAMETER_VERTICAL + WORLD_RADIUS_VERTICAL)}))
+    if (!fsl_is_in_volume_f64(p->pos, WORLD_VOLUME_MIN, WORLD_VOLUME_MAX))
         player_spawn(p, FALSE);
 
     /* ---- world margin ---------------------------------------------------- */
@@ -445,15 +449,16 @@ static void player_wrap_coordinates(player *p)
 
 void player_camera_movement_update(player *p, v2f64 mouse_delta, b8 use_mouse)
 {
-    f64 zoom = 0.0, sensitivity = settings.mouse_sensitivity,
-        SROL, CROL, SPCH, CPCH, SYAW, CYAW,
-        lookat_pitch, lookat_yaw;
-    v3f64 eye_pos =
-    {
-        p->pos.x,
-        p->pos.y,
-        p->pos.z + p->eye_height,
-    };
+    f64 zoom = 0.0;
+    f64 sensitivity = 0.0;
+    f64 SROL = {0}, CROL = {0}, SPCH = {0}, CPCH = {0}, SYAW = {0}, CYAW = {0};
+    f64 lookat_pitch = {0}, lookat_yaw = {0};
+    v3f64 eye_pos = {0};
+
+    sensitivity = settings.mouse_sensitivity;
+    eye_pos.x = p->pos.x;
+    eye_pos.y = p->pos.y;
+    eye_pos.z = p->pos.z + p->eye_height;
 
     if (use_mouse)
     {

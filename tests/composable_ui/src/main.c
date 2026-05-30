@@ -1,4 +1,4 @@
-#include "src/h/fossil_engine.h"
+#include "deps/fossil/fossil_engine.h"
 
 fsl_key_bind bind_quit = {0};
 
@@ -7,7 +7,7 @@ int main(int argc, char **argv)
     if (fsl_engine_init(argc, argv, NULL, 1280, 720, 0) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    bind_quit = fsl_key_bind_init(FSL_KEY_Q, 0, 0, 0, 0);
+    bind_quit = fsl_key_bind_init(FSL_KEY_Q, 0, 0, 0, 0, 0);
 
     while (fsl_engine_running(NULL))
     {

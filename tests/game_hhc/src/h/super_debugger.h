@@ -1,7 +1,7 @@
 #ifndef HHC_SUPER_DEBUGGER_H
 #define HHC_SUPER_DEBUGGER_H
 
-#include "src/common/types.h"
+#include "deps/fossil/common/types.h"
 
 #include "gui.h"
 

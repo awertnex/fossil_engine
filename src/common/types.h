@@ -54,16 +54,38 @@ typedef uint8_t     b8;
 typedef uint32_t    b32;
 
 /*!
+ *  @brief usually size of each index in an array, or total bytes for a single datum.
+ */
+typedef u64         fsl_size;
+
+/*!
+ *  @brief usually number of indices in an array, or total bytes for a single datum.
+ */
+typedef u64         fsl_len;
+
+/*!
+ *  @brief raw data capacity, in bytes.
+ */
+typedef u64         fsl_cap;
+
+/*!
  *  @brief relative or absolute file system path.
  */
 typedef str         fsl_fs_path;
+
+typedef struct fsl_array
+{
+    u64 cursor;     /* current usage */
+    fsl_cap cap;    /* current capacity of `buf`, in bytes */
+    void *buf;      /* raw data */
+} fsl_array;
 
 typedef struct fsl_buf
 {
     void **i;       /* members of `buf` */
     void *buf;      /* raw data */
-    u64 memb;       /* number of `i` members */
-    u64 size;       /* size of each member, in bytes */
+    fsl_size size;  /* size of each member, in bytes */
+    fsl_len memb;   /* number of `i` members */
     u64 cursor;     /* for iteration, optional */
     b8 loaded;
 } fsl_buf;
@@ -75,7 +97,7 @@ typedef struct fsl_key_value
     void **val;     /* members of `buf_val` */
     void *buf_key;  /* raw data */
     void *buf_val;  /* raw data */
-    u64 memb;       /* numbers of members */
+    fsl_len memb;   /* number of members */
     u64 size_key;   /* size of each key, in bytes */
     u64 size_val;   /* size of each val, in bytes */
 } fsl_key_value;

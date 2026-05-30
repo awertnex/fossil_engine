@@ -27,11 +27,33 @@
 #include "../common/types.h"
 
 #define FSL_PI          3.14159265358979323846
+#define FSL_HALF_PI     1.57079632679489661923
 #define FSL_DEG2RAD     (FSL_PI / 180.0)
 #define FSL_RAD2DEG     (180.0 / FSL_PI)
 #define FSL_GRAVITY     9.7803267715
 #define FSL_EPSILON     1e-5
+
+/*!
+ *  @brief can be used to shrink down big values when passed into trigonometrical
+ *  functions, especially when generating random floats, it decreases workload.
+ */
 #define FSL_RAND_SCALE  (FSL_PI / ~(~0u >> 1))
+
+typedef struct angle_f32
+{
+    f32 angle;
+    f32 sin;
+    f32 cos;
+    f32 tan;
+} angle_f32;
+
+typedef struct angle_f64
+{
+    f64 angle;
+    f64 sin;
+    f64 cos;
+    f64 tan;
+} angle_f64;
 
 FSLAPI v3f32 fsl_add_v3f32(v3f32 a, v3f32 b);
 FSLAPI v3f32 fsl_sub_v3f32(v3f32 a, v3f32 b);
@@ -60,7 +82,8 @@ FSLAPI v3f32 fsl_normalize_v3f32(v3f32 v);
 FSLAPI v3f64 fsl_normalize_v3f64(v3f64 v);
 FSLAPI f32 fsl_dot_v3f32(v3f32 a, v3f32 b);
 FSLAPI f64 fsl_dot_v3f64(v3f64 a, v3f64 b);
-FSLAPI f32 fsl_q_rsqrt(f32 n);
+FSLAPI angle_f32 fsl_angle_f32(f32 n);
+FSLAPI angle_f64 fsl_angle_f64(f64 n);
 FSLAPI u32 fsl_distance_v3i32(v3i32 a, v3i32 b);
 FSLAPI f32 fsl_distance_v3f32(v3f32 a, v3f32 b);
 FSLAPI f64 fsl_distance_v3f64(v3f64 a, v3f64 b);
@@ -74,6 +97,7 @@ FSLAPI b8 fsl_is_in_volume_i32(v3i32 v, v3i32 min, v3i32 max);
 FSLAPI b8 fsl_is_in_volume_f32(v3f32 v, v3f32 min, v3f32 max);
 FSLAPI b8 fsl_is_in_volume_i64(v3i64 v, v3i64 min, v3i64 max);
 FSLAPI b8 fsl_is_in_volume_f64(v3f64 v, v3f64 min, v3f64 max);
+FSLAPI m4f32 fsl_matrix_unit(void);
 FSLAPI m4f32 fsl_matrix_add(m4f32 a, m4f32 b);
 FSLAPI m4f32 fsl_matrix_subtract(m4f32 a, m4f32 b);
 FSLAPI m4f32 fsl_matrix_multiply(m4f32 a, m4f32 b);
@@ -85,7 +109,7 @@ FSLAPI v3f64 fsl_lerp_v3f64(v3f64 a, v3f64 b, f32 t);
 FSLAPI f32 fsl_easein_f32(f32 a, f32 b, f32 t);
 FSLAPI f32 fsl_easeout_f32(f32 a, f32 b, f32 t);
 FSLAPI f32 fsl_smoothstep_f32(f32 a, f32 b, f32 t);
-FSLAPI f32 fsl_rand_f32(i32 n);
+FSLAPI u32 fsl_rand_u32(u32 n);
 FSLAPI u64 fsl_rand_u64(u64 n);
 
 #endif /* FSL_MATH_H */

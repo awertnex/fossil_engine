@@ -1,7 +1,7 @@
-#include "src/common/limits.h"
-#include "src/memory/memory.h"
+#include "deps/fossil/common/limits.h"
+#include "deps/fossil/memory/memory.h"
 
-#include "src/h/dir.h"
+#include "deps/fossil/h/dir.h"
 
 #include "h/main.h"
 

@@ -1,17 +1,18 @@
 #ifndef HHC_CHUNKING_H
 #define HHC_CHUNKING_H
 
-#include "src/common/common.h"
-#include "src/common/types.h"
+#include "deps/fossil/common/common.h"
+#include "deps/fossil/common/types.h"
 
 #include "assets.h"
-#include "main.h"
+#include "common.h"
 
 #define CHUNK_DIAMETER  16
 #define CHUNK_LAYER     (CHUNK_DIAMETER * CHUNK_DIAMETER)
 #define CHUNK_VOLUME    (CHUNK_DIAMETER * CHUNK_DIAMETER * CHUNK_DIAMETER)
 
 #define CHUNK_REGION_DIAMETER   32
+#define CHUNK_REGION_VOLUME     (CHUNK_REGION_DIAMETER * CHUNK_REGION_DIAMETER * CHUNK_REGION_DIAMETER)
 
 #define WORLD_RADIUS            (2048 * CHUNK_DIAMETER)
 #define WORLD_RADIUS_VERTICAL   (64 * CHUNK_DIAMETER)
@@ -54,78 +55,76 @@
 #define CHUNK_COLOR_RENDER  fsl_color_v4_to_hex(0.24f, 0.47f, 0.3f, 1.0f)
 #define CHUNK_COLOR_FACTOR_INFLUENCE 0.1
 
-enum block_flag
-{
-    /*  63 [00000000 00000000 00000000 00000000] 32;
-     *  31 [00000000 00000001 00000000 00000000] 00; */
-    FLAG_BLOCK_FACE_PX =        0x0000000000010000,
+/* ---- section: block flag ------------------------------------------------- */
 
-    /*  63 [00000000 00000000 00000000 00000000] 32;
-     *  31 [00000000 00000010 00000000 00000000] 00; */
-    FLAG_BLOCK_FACE_NX =        0x0000000000020000,
+/*  63 [00000000 00000000 00000000 00000000] 32;
+ *  31 [00000000 00000001 00000000 00000000] 00; */
+#define FLAG_BLOCK_FACE_PX      0x0000000000010000
 
-    /*  63 [00000000 00000000 00000000 00000000] 32;
-     *  31 [00000000 00000100 00000000 00000000] 00; */
-    FLAG_BLOCK_FACE_PY =        0x0000000000040000,
+/*  63 [00000000 00000000 00000000 00000000] 32;
+ *  31 [00000000 00000010 00000000 00000000] 00; */
+#define FLAG_BLOCK_FACE_NX      0x0000000000020000
 
-    /*  63 [00000000 00000000 00000000 00000000] 32;
-     *  31 [00000000 00001000 00000000 00000000] 00; */
-    FLAG_BLOCK_FACE_NY =        0x0000000000080000,
+/*  63 [00000000 00000000 00000000 00000000] 32;
+ *  31 [00000000 00000100 00000000 00000000] 00; */
+#define FLAG_BLOCK_FACE_PY      0x0000000000040000
 
-    /*  63 [00000000 00000000 00000000 00000000] 32;
-     *  31 [00000000 00010000 00000000 00000000] 00; */
-    FLAG_BLOCK_FACE_PZ =        0x0000000000100000,
+/*  63 [00000000 00000000 00000000 00000000] 32;
+ *  31 [00000000 00001000 00000000 00000000] 00; */
+#define FLAG_BLOCK_FACE_NY      0x0000000000080000
 
-    /*  63 [00000000 00000000 00000000 00000000] 32;
-     *  31 [00000000 00100000 00000000 00000000] 00; */
-    FLAG_BLOCK_FACE_NZ =        0x0000000000200000,
+/*  63 [00000000 00000000 00000000 00000000] 32;
+ *  31 [00000000 00010000 00000000 00000000] 00; */
+#define FLAG_BLOCK_FACE_PZ      0x0000000000100000
 
-    /*!
-     *  @brief run-length encoding, for chunk serialization.
-     *
-     *  63 [00000000 00000000 00000000 00000000] 32;
-     *  31 [00000000 10000000 00000000 00000000] 00; */
-    FLAG_BLOCK_RLE =            0x0000000000800000,
-}; /* block_flag */
+/*  63 [00000000 00000000 00000000 00000000] 32;
+ *  31 [00000000 00100000 00000000 00000000] 00; */
+#define FLAG_BLOCK_FACE_NZ      0x0000000000200000
 
-enum block_mask
-{
-    /*  63 [00000000 00000000 00000000 00000000] 32;
-     *  31 [00000000 00000000 00111111 11111111] 00; */
-    MASK_BLOCK_DATA =           0x0000000000003fff,
+/*!
+ *  @brief run-length encoding, for chunk serialization.
+ *
+ *  63 [00000000 00000000 00000000 00000000] 32;
+ *  31 [00000000 00000000 10000000 00000000] 00; */
+#define FLAG_BLOCK_RLE          0x0000000000008000
 
-    /*  63 [00000000 00000000 00000000 00000000] 32;
-     *  31 [00000000 00000000 00000011 11111111] 00; */
-    MASK_BLOCK_ID =             0x00000000000003ff,
+/* ---- section: block mask ------------------------------------------------- */
 
-    /*  63 [00000000 00000000 00000000 00000000] 32;
-     *  31 [00000000 00000000 00111100 00000000] 00; */
-    MASK_BLOCK_STATE =          0x0000000000003c00,
+/*  63 [00000000 00000000 00000000 00000000] 32;
+ *  31 [00000000 00000000 00111111 11111111] 00; */
+#define MASK_BLOCK_DATA         0x0000000000003fff
 
-    /*  63 [00000000 00000000 00000000 00000000] 32;
-     *  31 [00000000 00111111 00000000 00000000] 00; */
-    MASK_BLOCK_FACES =          0x00000000003f0000,
+/*  63 [00000000 00000000 00000000 00000000] 32;
+ *  31 [00000000 00000000 00000011 11111111] 00; */
+#define MASK_BLOCK_ID           0x00000000000003ff
 
-    /*  63 [00000000 00000000 00000000 00000000] 32;
-     *  31 [00111111 00000000 00000000 00000000] 00; */
-    MASK_BLOCK_LIGHT =          0x000000003f000000,
+/*  63 [00000000 00000000 00000000 00000000] 32;
+ *  31 [00000000 00000000 00111100 00000000] 00; */
+#define MASK_BLOCK_STATE        0x0000000000003c00
 
-    /*  63 [00000000 00000000 00001111 11111111] 32;
-     *  31 [00000000 00000000 00000000 00000000] 00; */
-    MASK_BLOCK_COORDINATES =    0x00000fff00000000,
+/*  63 [00000000 00000000 00000000 00000000] 32;
+ *  31 [00000000 00111111 00000000 00000000] 00; */
+#define MASK_BLOCK_FACES        0x00000000003f0000
 
-    /*  63 [00000000 00000000 00000000 00001111] 32;
-     *  31 [00000000 00000000 00000000 00000000] 00; */
-    MASK_BLOCK_X =              0x0000000f00000000,
+/*  63 [00000000 00000000 00000000 00000000] 32;
+ *  31 [00111111 00000000 00000000 00000000] 00; */
+#define MASK_BLOCK_LIGHT        0x000000003f000000
 
-    /*  63 [00000000 00000000 00000000 11110000] 32;
-     *  31 [00000000 00000000 00000000 00000000] 00; */
-    MASK_BLOCK_Y =              0x000000f000000000,
+/*  63 [00000000 00000000 00001111 11111111] 32;
+ *  31 [00000000 00000000 00000000 00000000] 00; */
+#define MASK_BLOCK_COORDINATES  0x00000fff00000000
 
-    /*  63 [00000000 00000000 00001111 00000000] 32;
-     *  31 [00000000 00000000 00000000 00000000] 00; */
-    MASK_BLOCK_Z =              0x00000f0000000000,
-}; /* block_mask */
+/*  63 [00000000 00000000 00000000 00001111] 32;
+ *  31 [00000000 00000000 00000000 00000000] 00; */
+#define MASK_BLOCK_X            0x0000000f00000000
+
+/*  63 [00000000 00000000 00000000 11110000] 32;
+ *  31 [00000000 00000000 00000000 00000000] 00; */
+#define MASK_BLOCK_Y            0x000000f000000000
+
+/*  63 [00000000 00000000 00001111 00000000] 32;
+ *  31 [00000000 00000000 00000000 00000000] 00; */
+#define MASK_BLOCK_Z            0x00000f000000000
 
 enum block_shift
 {
@@ -137,7 +136,7 @@ enum block_shift
     SHIFT_BLOCK_COORDINATES =   32,
     SHIFT_BLOCK_X =             32,
     SHIFT_BLOCK_Y =             36,
-    SHIFT_BLOCK_Z =             40,
+    SHIFT_BLOCK_Z =             40
 }; /* block_shift */
 
 enum chunk_flag
@@ -148,11 +147,12 @@ enum chunk_flag
     FLAG_CHUNK_GENERATED =  0x08,
     FLAG_CHUNK_RENDER =     0x10,
     FLAG_CHUNK_MODIFIED =   0x20,
+    FLAG_CHUNK_IMPORTED =   0x40,
 
     /*!
      *  @brief chunk marking for @ref chunk_tab shifting logic.
      */
-    FLAG_CHUNK_EDGE =       0x40,
+    FLAG_CHUNK_EDGE =       0x80
 }; /* chunk_flag */
 
 enum chunk_shift_state
@@ -162,7 +162,7 @@ enum chunk_shift_state
     STATE_CHUNK_SHIFT_PY = 3,
     STATE_CHUNK_SHIFT_NY = 4,
     STATE_CHUNK_SHIFT_PZ = 5,
-    STATE_CHUNK_SHIFT_NZ = 6,
+    STATE_CHUNK_SHIFT_NZ = 6
 }; /* chunk_shift_state */
 
 typedef struct chunk
@@ -205,36 +205,36 @@ typedef struct chunk
     GLuint vbo;
     u64 vbo_len;
 
-    union /* block */
-    {
-        u32 block[CHUNK_DIAMETER][CHUNK_DIAMETER][CHUNK_DIAMETER];
-        u32 block_raw[CHUNK_DIAMETER * CHUNK_DIAMETER * CHUNK_DIAMETER];
-    }; /* block */
+    u32 block[CHUNK_DIAMETER][CHUNK_DIAMETER][CHUNK_DIAMETER];
 } chunk;
+
+typedef struct chunk_table
+{
+    fsl_mem_handle handle;
+    chunk **p;              /* cached pointer from `handle` */
+} chunk_table;
+
+typedef struct chunk_order
+{
+    fsl_mem_handle handle;
+    chunk ***p;
+} chunk_order;
 
 typedef struct chunk_queue
 {
     u32 id;
-    u32 count;          /* number of chunks queued */
-    u32 offset;         /* offset of queue into @ref CHUNK_ORDER */
+    u32 count;              /* number of chunks queued */
+    u32 offset;             /* offset of queue into @ref CHUNK_ORDER */
     u64 size;
-    u32 cursor;         /* parse position */
-    u32 rate_chunk;     /* number of chunks to process per frame */
-    u32 rate_block;     /* number of blocks to process per chunk per frame */
+    u32 cursor;             /* parse position */
+    u32 rate_chunk;         /* number of chunks to process per frame */
+    u32 rate_block;         /* number of blocks to process per chunk per frame */
     fsl_mem_handle queue;
+    chunk ***queue_p;       /* cached pointer from `queue` */
 } chunk_queue;
 
 #define GET_BLOCK_ID(block)     (block & MASK_BLOCK_ID)
 #define SET_BLOCK_ID(block, id) (block = (block & ~MASK_BLOCK_ID) | id)
-
-extern fsl_off CHUNK_ORDER_OFF;
-extern fsl_off chunk_tab_off;
-extern fsl_off chunk_buf_off;
-extern fsl_off CHUNK_QUEUE_0_OFF;
-extern fsl_off CHUNK_QUEUE_1_OFF;
-extern fsl_off CHUNK_QUEUE_2_OFF;
-extern fsl_off chunk_gizmo_loaded_off;
-extern fsl_off chunk_gizmo_render_off;
 
 /*!
  *  @brief look-up table to reduce redundant checks of untouched regions of `chunk_buf`.
@@ -256,10 +256,10 @@ extern u64 CHUNKS_MAX[CHUNK_BUF_RADIUS_MAX + 1];
  *
  *  `chunk_buf` addresses ordered by their positions in 3d space relative to player position.
  */
-extern fsl_mem_handle chunk_tab;
+extern chunk_table chunk_tab;
 
 /*!
- *  @brief player relative @ref chunk_tab access.
+ *  @brief player-relative @ref chunk_tab access.
  *
  *  @remark declared by the user.
  */
@@ -272,7 +272,7 @@ extern u32 chunk_tab_index;
  *
  *  @remark read-only, initialized internally in @ref chunking_init().
  */
-extern fsl_mem_handle CHUNK_ORDER;
+extern chunk_order CHUNK_ORDER;
 
 /*!
  *  @brief queues of chunks to be processed.

@@ -1,4 +1,4 @@
-#include <src/h/fossil_engine.h>
+#include "deps/fossil/fossil_engine.h"
 
 #define MARGIN 10
 
@@ -34,6 +34,8 @@ static struct /* core */
     b8 vao_loaded;
     panel_nine_slice panel;
 } core;
+
+fsl_render *render = NULL;
 
 panel_nine_slice get_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, i32 slice_size)
 {
@@ -167,7 +169,8 @@ panel_nine_slice get_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 
 void draw_nine_slice(void)
 {
     panel_nine_slice panel = {0};
-    fsl_texture *texture = fsl_mem_handle_get_i(fsl_texture, fsl_texture_buf, FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE);
+    fsl_texture *texture = fsl_mem_handle_get(fsl_texture_buf);
+    texture = &texture[FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE];
     panel = get_nine_slice(texture, MARGIN, MARGIN,
             render->size.x - MARGIN * 2, render->size.y - MARGIN * 2,
             render->time / 100000000UL);
@@ -189,7 +192,9 @@ int main(int argc, char **argv)
     if (fsl_engine_init(argc, argv, NULL, 1280, 720, 0) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    bind_quit = fsl_key_bind_init(FSL_KEY_Q, 0, 0, 0, 0);
+    render = fsl_render_get();
+
+    bind_quit = fsl_key_bind_init(FSL_KEY_Q, 0, 0, 0, 0, 0);
 
     if (
             fsl_asset_set_metadata(&nine_slice.asset, FSL_ASSET_SHADER_PROGRAM,

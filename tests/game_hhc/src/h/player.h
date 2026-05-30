@@ -1,7 +1,8 @@
 #ifndef HHC_PLAYER_H
 #define HHC_PLAYER_H
 
-#include "src/h/collision.h"
+#include "deps/fossil/physics/collision.h"
+#include "deps/fossil/assets/mesh/mesh.h"
 
 #include "common.h"
 #include "main.h"
@@ -48,7 +49,7 @@ enum player_flag
      */
     FLAG_PLAYER_OVERFLOW_PX =       0x00002000,
     FLAG_PLAYER_OVERFLOW_PY =       0x00004000,
-    FLAG_PLAYER_OVERFLOW_PZ =       0x00008000,
+    FLAG_PLAYER_OVERFLOW_PZ =       0x00008000
 }; /* player_flag */
 
 enum player_camera_mode
@@ -58,7 +59,7 @@ enum player_camera_mode
     PLAYER_CAMERA_MODE_3RD_PERSON_FRONT,
     PLAYER_CAMERA_MODE_STALKER,
     PLAYER_CAMERA_MODE_SPECTATOR,
-    PLAYER_CAMERA_MODE_COUNT,
+    PLAYER_CAMERA_MODE_COUNT
 }; /* player_camera_mode */
 
 enum player_menu_state
@@ -68,15 +69,16 @@ enum player_menu_state
     STATE_PLAYER_MENU_FURNACE,
     STATE_PLAYER_MENU_INVENTORY_SURVIVAL,
     STATE_PLAYER_MENU_INVENTORY_SANDBOX,
-    STATE_PLAYER_MENU_COUNT,
+    STATE_PLAYER_MENU_COUNT
 }; /* player_menu_state */
 
 typedef struct player
 {
     str name[64];                   /* in-game name */
-    u64 flag;                       /* enum: @ref player_flag */
+    u64 flag;                       /* enum @ref player_flag */
     v3f64 pos;                      /* coordinates in world */
     v3f64 pos_last;                 /* coordinates in world of previous frame */
+    v3f32 scale;
     v3f32 size;                     /* size (for collision detection) */
     v3f64 target;                   /* arm */
     v3f64 target_normal;
@@ -85,6 +87,7 @@ typedef struct player
     f32 sin_roll, sin_pitch, sin_yaw;
     f32 cos_roll, cos_pitch, cos_yaw;
     f32 eye_height;                 /* eye-level (camera height) */
+    fsl_mesh mesh;
 
     v3f32 input;                    /* raw user input */
     v3f32 acceleration;
@@ -97,10 +100,10 @@ typedef struct player
     fsl_camera camera;
     fsl_camera camera_hud;          /* for hud 3d elements */
     f32 camera_distance;            /* for camera collision detection */
-    u8 camera_mode;                 /* enum: @ref player_camera_mode */
+    u8 camera_mode;                 /* enum @ref player_camera_mode */
 
     /*!
-     *  @brief player at world edge, enum: @ref player_flag.
+     *  @brief player at world edge, enum @ref player_flag.
      */
     u8 overflow;
 
@@ -108,10 +111,10 @@ typedef struct player
     v3i32 ch_delta;                 /* previous chunk (named `ch` to avoid symbol clash with @ref chunk) */
 
     v3i64 spawn;                    /* spawn point */
-    u64 menu_state;                 /* enum: @ref player_menu_state */
+    u64 menu_state;                 /* enum @ref player_menu_state */
 
     /*!
-     *  @remark signed instead of unsigned so it's possible to navigate `hotbar_slots
+     *  @remark signed instead of unsigned so it's possible to navigate `hotbar_slots`
      *  when using mousewheel, used for wrapping around when out of range.
      */
     i32 hotbar_slot_selected;
@@ -120,7 +123,7 @@ typedef struct player
     u32 inventory_slots[PLAYER_INVENTORY_SLOTS_MAX];
 
     fsl_bounding_box bbox;
-    u32 death; /* enum: @ref player_death_reason */
+    u32 death; /* enum @ref player_death_reason */
 } player;
 
 /*!
@@ -163,7 +166,7 @@ fsl_bounding_box make_collision_capsule(fsl_bounding_box b, v3i32 ch, v3f32 velo
 void player_chunk_update(player *p);
 
 /*!
- *  @brief calculate camera rotations and mechanics based on `player->camera_mode`.
+ *  @brief calculate camera rotations and mechanics based on `p->camera_mode`.
  *
  *  @param use_mouse let mouse delta move the camera, useful for interacting
  *  with UI instead of player.

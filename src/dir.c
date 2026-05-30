@@ -23,19 +23,17 @@
 #include "common/diagnostics.h"
 #include "common/limits.h"
 #include "logger/logger.h"
+#include "logger/logger_messages_internal.h"
 #include "memory/memory.h"
 
 #include "h/dir.h"
 #include "h/process.h"
-#include "h/time.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <dirent.h>
 #include <unistd.h>
-#include <inttypes.h>
 #include <fcntl.h>
 #include <errno.h>
 
@@ -458,6 +456,7 @@ u32 fsl_copy_file(const fsl_fs_path *src, const fsl_fs_path *dst)
     return fsl_err;
 }
 
+/* TODO: make function `fsl_copy_dir()` copy empty directories. */
 u32 fsl_copy_dir(const fsl_fs_path *src, const fsl_fs_path *dst, b8 contents_only)
 {
     fsl_buf dir_contents = {0};
