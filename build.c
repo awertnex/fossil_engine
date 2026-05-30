@@ -153,6 +153,7 @@ int main(int argc, char **argv)
 
     if (
             copy_dir(DIR_SRC"common/",      DIR_DST DIR_DEPS DIR_DST, FALSE) != ERR_SUCCESS ||
+            copy_dir(DIR_SRC"external/buildtool/", DIR_DST DIR_DEPS DIR_DST"external/", FALSE) != ERR_SUCCESS ||
             copy_dir(DIR_SRC"h/",           DIR_DST DIR_DEPS DIR_DST, FALSE) != ERR_SUCCESS ||
             copy_file("LICENSE",            DIR_DST DIR_DEPS DIR_DST) != ERR_SUCCESS ||
             copy_file("version.txt",        DIR_DST DIR_DEPS DIR_DST) != ERR_SUCCESS ||
