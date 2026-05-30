@@ -98,7 +98,7 @@
 
 /* ---- name formats -------------------------------------------------------- */
 
-#define FORMAT_FILE_NAME_HHCC "r.%d.%d.%d.hhcc"
+#define FORMAT_FILE_NAME_HHCC "%d.%d.%d.hhcr"
 
 /* ---- strings: death ------------------------------------------------------ */
 

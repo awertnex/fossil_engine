@@ -192,7 +192,6 @@ void fsl_logger_close(void)
     logger_core.flag.gui_open = FALSE;
 }
 
-#include <assert.h>
 void fsl_log_output_internal(u32 error_code, u32 flags, const str *src_file, u64 line,
         u8 level, const str *message)
 {
@@ -241,7 +240,7 @@ static void get_log_str_internal(const str *str_in, str *str_out, u32 flags, b8 
     str str_time[FSL_TIME_STRING_MAX] = {0};
     str str_timestamp[FSL_TIME_STRING_MAX] = {0};
     str str_time_full[FSL_TIME_STRING_MAX] = {0};
-    str str_tag[32] = {0};
+    str str_tag[24] = {0};
     str str_file[FSL_STRING_MAX] = {0};
     str *str_nocolor = esc_code_none;
     str *str_color = esc_code_none;
@@ -269,9 +268,9 @@ static void get_log_str_internal(const str *str_in, str *str_out, u32 flags, b8 
     }
 
     if (level <= FSL_LOG_LEVEL_WARNING)
-        snprintf(str_tag, 32, "[%s][%"PRIu32"] ", log_tag[level], error_code);
+        snprintf(str_tag, 24, "[%s][%"PRIu32"] ", log_tag[level], error_code);
     else if (flags & FSL_FLAG_LOG_TAG)
-        snprintf(str_tag, 32, "[%s] ", log_tag[level]);
+        snprintf(str_tag, 24, "[%s] ", log_tag[level]);
 
     if (verbose)
         snprintf(str_file, FSL_STRING_MAX, "[%s:%"PRIu64"] ", src_file, line);
@@ -291,7 +290,7 @@ str *fsl_logger_stringf(const str *format, ...)
     static str buf[FSL_STRINGF_BUFFERS_MAX][FSL_STRING_MAX] = {0};
     static u64 index = 0;
     str *string = buf[index];
-    __builtin_va_list args;
+    __builtin_va_list args = {0};
 
     va_start(args, format);
     vsnprintf(string, FSL_STRING_MAX, format, args);

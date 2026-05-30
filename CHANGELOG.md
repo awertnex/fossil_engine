@@ -9,10 +9,14 @@
 ## v0.8.0-dev (current)
 
 #### changes
+- (2026 05 30): added fast trigonometry functions (not that accurate):
+                - `fsl_fast_sin_f32()` and `fsl_fast_sin_f64()`.
+                - `fsl_fast_cos_f32()` and `fsl_fast_cos_f64()`.
+                - `fsl_fast_tan_f32()` and `fsl_fast_tan_f64()`.
 - (2026 05 29): added math types `angle_f32` and `angle_f64` to store an angle
                 along with its cached sine, cosine and tangent values, and
                 functions `fsl_angle_f32()` and `fsl_angle_f64()` to calculate
-                all three with a single call to `sin()`.
+                all three.
 - (2026 05 29): added engine's mesh format 'Fossil Mesh' (.fmesh), now, loaded
                 meshes get automatically cooked into '.fmesh' for next time
                 and will be loaded instead when found.

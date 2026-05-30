@@ -1,4 +1,6 @@
+#include "deps/fossil/logger/logger.h"
 #include "deps/fossil/memory/memory.h"
+#include "deps/fossil/string/string.h"
 
 #include "deps/fossil/h/math.h"
 
@@ -16,20 +18,20 @@ f32 *RAND_TAB = {0};
 
 u32 rand_init(void)
 {
-    str file_name[FSL_PATH_CAP] = {0};
+    str path[FSL_PATH_CAP] = {0};
     f32 *file_contents = NULL;
     u64 file_len = 0;
-    i32 i;
+    u32 i = 0;
 
     if (fsl_mem_map((void*)&RAND_TAB, RAND_TAB_VOLUME * sizeof(f32),
                 "rand_init().RAND_TAB") != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    snprintf(file_name, FSL_PATH_CAP, "%slookup_rand_tab.bin", DIR_ROOT[DIR_LOOKUPS]);
+    snprintf(path, FSL_PATH_CAP, "%slookup_rand_tab.bin", DIR_ROOT[DIR_LOOKUPS]);
 
-    if (fsl_is_file_exists(file_name, FALSE) == FSL_ERR_SUCCESS)
+    if (fsl_is_file_exists(path, FALSE) == FSL_ERR_SUCCESS)
     {
-        file_len = fsl_get_file_contents(file_name, (void*)&file_contents, FALSE);
+        file_len = fsl_get_file_contents(path, (void*)&file_contents, FALSE);
         if (*GAME_ERR != FSL_ERR_SUCCESS || file_contents == NULL)
             goto cleanup;
 
@@ -43,12 +45,16 @@ u32 rand_init(void)
     {
 
         for (i = 0; i < RAND_TAB_VOLUME; ++i)
-            RAND_TAB[i] = fsl_rand_f32(i);
+            RAND_TAB[i] = sin((f64)fsl_rand_u64(i));
 
-        if (fsl_write_file(file_name, RAND_TAB_VOLUME * sizeof(f32),
+        if (fsl_write_file(path, RAND_TAB_VOLUME * sizeof(f32),
                     RAND_TAB, TRUE, FALSE) != FSL_ERR_SUCCESS)
             goto cleanup;
+
+        LOGSUCCESS(FSL_FLAG_LOG_NO_VERBOSE,
+                fsl_logger_stringf("`RAND_TAB` lookup '%s' Exported\n", path));
     }
+
 
     *GAME_ERR = FSL_ERR_SUCCESS;
     return *GAME_ERR;
@@ -82,9 +88,9 @@ v3f32 random_2d(i32 x, i32 y, u64 seed)
     a ^= b << S | b >> S;
     a *= 2048419325;
     land_final = (f64)a * FSL_RAND_SCALE;
-    result.x = sinf((f32)land_final);
-    result.y = cosf((f32)land_final);
-    result.z = sinf((f32)land_final + 0.25f);
+    result.x = sin(land_final);
+    result.y = sin(land_final + FSL_HALF_PI);
+    result.z = sin(land_final + FSL_PI);
     return result;
 }
 
@@ -105,9 +111,9 @@ v3f32 random_3d(i32 x, i32 y, i32 z, u64 seed)
     c ^= a << S | b >> S;
     c *= 3567382653;
     land_final = (f64)c * FSL_RAND_SCALE;
-    result.x = sinf((f32)land_final);
-    result.y = cosf((f32)land_final);
-    result.z = sinf((f32)land_final + 0.25f);
+    result.x = sin(land_final);
+    result.y = sin(land_final + FSL_HALF_PI);
+    result.z = sin(land_final + FSL_PI);
     return result;
 }
 
@@ -115,7 +121,7 @@ v3f32 random_3d(i32 x, i32 y, i32 z, u64 seed)
 
 f32 gradient_2d(f32 vx, f32 vy, i32 x, i32 y, u64 seed)
 {
-    v2f32 sample = {0};
+    v3f32 sample = {0};
     sample.x = RAND_TAB[(seed + (234 + x) * (672 + y)) % RAND_TAB_VOLUME];
     sample.y = RAND_TAB[(seed + (862 + y) * (873 + x)) % RAND_TAB_VOLUME];
     return (vx - x) * sample.x + (vy - y) * sample.y;
@@ -156,16 +162,14 @@ f32 perlin_noise_2d(v2i32 coordinates, f32 amplitude, f32 frequency, u64 seed)
 f32 perlin_noise_2d_ex(v2i32 coordinates, f32 intensity, f32 scale,
         u32 octaves, f32 intensity_persistence, f32 scale_persistence, u64 seed)
 {
-    u32 i = 0;
-    f32 land_final = 0.0f;
-    for (; i < octaves; ++i)
+    f32 result = 0.0f;
+    while (octaves--)
     {
-        land_final += perlin_noise_2d(coordinates, intensity, scale, seed);
+        result += perlin_noise_2d(coordinates, intensity, scale, seed);
         intensity *= intensity_persistence;
         scale *= scale_persistence;
     }
-
-    return land_final;
+    return result;
 }
 
 f32 perlin_noise_3d(v3i32 coordinates, f32 intensity, f32 scale, u64 seed)
@@ -212,16 +216,14 @@ f32 perlin_noise_3d(v3i32 coordinates, f32 intensity, f32 scale, u64 seed)
 f32 perlin_noise_3d_ex(v3i32 coordinates, f32 intensity, f32 scale,
         u32 octaves, f32 intensity_persistence, f32 scale_persistence, u64 seed)
 {
-    u32 i = 0;
-    f32 land_final = 0.0f;
-    for (; i < octaves; ++i)
+    f32 result = 0.0f;
+    while (octaves--)
     {
-        land_final += perlin_noise_3d(coordinates, intensity, scale, seed);
+        result += perlin_noise_3d(coordinates, intensity, scale, seed);
         intensity *= intensity_persistence;
         scale *= scale_persistence;
     }
-
-    return land_final;
+    return result;
 }
 
 terrain terrain_land(v3i32 coordinates)
@@ -346,10 +348,10 @@ terrain terrain_decaying_lands(v3i32 coordinates)
 
     crush = fabsf((((f32)coordinates.z - (WORLD_RADIUS_VERTICAL / 2)) / WORLD_RADIUS_VERTICAL) + 0.4f) * 0.8f;
 
-    gathering = perlin_noise_2d(coordinates_2d, 0.5f, 133.0f, world.seed + 75489);
+    gathering = perlin_noise_2d(coordinates_2d, 0.2f, 22.5f, world.seed + 75489);
 
     mountains = perlin_noise_2d_ex(coordinates_2d, 250.0f, 255.0f, 3, 0.8f, 0.8f, world.seed + 9584);
-    ridges = perlin_noise_2d(coordinates_2d, 10.0f, 12.0f + gathering, world.seed - 5873956);
+    ridges = perlin_noise_2d(coordinates_2d, 3.0f, 19.0f + gathering, world.seed - 5873956);
 
     cave_frequency = perlin_noise_3d_ex(coordinates, 1.0f, 208.0f, 2, 0.8f, 0.8f, world.seed + 57394);
     cave_spaghetti = perlin_noise_3d(coordinates, 1.0f, 22.0f, world.seed + 377779623);

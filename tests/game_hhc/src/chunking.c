@@ -104,12 +104,12 @@ static void chunk_mesh_update(u32 index, chunk *ch);
 /*!
  *  @internal
  */
-static void chunk_serialize_internal(chunk *ch);
+static void chunk_export_internal(chunk *ch);
 
 /*!
  *  @internal
  */
-static void chunk_deserialize_internal(const str *file_name, chunk *ch);
+static void chunk_import_internal(const fsl_fs_path *path, chunk *ch);
 
 /*!
  *  @internal
@@ -457,7 +457,7 @@ chunk_tab_shift:
         goto chunk_buf_push;
     }
 
-    /* this keeps chunk_buf from exploding on a `chunk_tab` shift */
+    /* this prevents `chunk_buf` from exploding when shifting `chunk_tab` */
     chunk_buf_cursor = 0;
 
     switch (AXIS)
@@ -922,15 +922,24 @@ static void block_break_internal(chunk *ch,
 
 static void chunk_generate(chunk **ch, u32 rate, terrain (*terrain_func)(v3i32))
 {
-    str file_name[FSL_PATH_CAP] = {0};
+    fsl_fs_path path[FSL_PATH_CAP] = {0};
+    chunk **chunk_tab_p = fsl_mem_handle_get(chunk_tab);
+    u32 index = ch - chunk_tab_p;
 
     if (!ch || !*ch || !terrain_func)
         return;
 
-    snprintf(file_name, FSL_PATH_CAP, GAME_DIR_NAME_WORLDS"%s/"GAME_DIR_WORLD_NAME_CHUNKS FORMAT_FILE_NAME_HHCC,
+    snprintf(path, FSL_PATH_CAP,
+            GAME_DIR_NAME_WORLDS"%s/"GAME_DIR_WORLD_NAME_CHUNKS FORMAT_FILE_NAME_HHCC,
             world.name, (*ch)->pos.x, (*ch)->pos.y, (*ch)->pos.z);
 
-    chunk_generate_internal(ch, rate, terrain_func);
+    if (fsl_is_file_exists(path, FALSE) == FSL_ERR_SUCCESS)
+    {
+        chunk_import_internal(path, *ch);
+        chunk_mesh_init(index, *ch);
+    }
+    else
+        chunk_generate_internal(ch, rate, terrain_func);
 }
 
 static void chunk_generate_internal(chunk **ch, u32 rate, terrain (*terrain_func)(v3i32))
@@ -1139,43 +1148,51 @@ static void chunk_mesh_update(u32 index, chunk *ch)
     chunk_gizmo_write_internal(index, ch);
 }
 
-/* TODO: make chunk_serialize() */
-static void chunk_serialize_internal(chunk *ch)
+static void chunk_export_internal(chunk *ch)
 {
-    str file_name[FSL_PATH_CAP] = {0};
+    fsl_fs_path path[FSL_PATH_CAP] = {0};
 
     if (ch->cursor < CHUNK_VOLUME)
         return;
 
-    snprintf(file_name, FSL_PATH_CAP, GAME_DIR_NAME_WORLDS"%s/"GAME_DIR_WORLD_NAME_CHUNKS FORMAT_FILE_NAME_HHCC,
-            world.name,
-            (i32)floorf((f32)ch->pos.x / CHUNK_REGION_DIAMETER),
-            (i32)floorf((f32)ch->pos.y / CHUNK_REGION_DIAMETER),
-            (i32)floorf((f32)ch->pos.z / CHUNK_REGION_DIAMETER));
-
-    snprintf(file_name, FSL_PATH_CAP, GAME_DIR_NAME_WORLDS"%s/"GAME_DIR_WORLD_NAME_CHUNKS FORMAT_FILE_NAME_HHCC,
+    snprintf(path, FSL_PATH_CAP,
+            GAME_DIR_NAME_WORLDS"%s/"GAME_DIR_WORLD_NAME_CHUNKS FORMAT_FILE_NAME_HHCC,
             world.name, ch->pos.x, ch->pos.y, ch->pos.z);
 
-    fsl_write_file(file_name, CHUNK_VOLUME * sizeof(u32), ch->block, TRUE, FALSE);
+    fsl_write_file(path, CHUNK_VOLUME * sizeof(u32), ch->block, TRUE, FALSE);
 }
 
-/* TODO: make chunk_deserialize_internal() */
-static void chunk_deserialize_internal(const str *file_name, chunk *ch)
+static void chunk_import_internal(const fsl_fs_path *path, chunk *ch)
 {
-    str str_file_name[FSL_ID_CAP] = {0};
-    str *cursor = str_file_name + 2;
+    FILE *file = NULL;
+    str file_name[FSL_ID_CAP] = {0};
+    str *cursor = file_name;
+    i64 pos_cache[3] = {0};
+    u32 i = 0;
 
-    fsl_get_base_name(file_name, str_file_name, FSL_ID_CAP);
+    fsl_get_base_name(path, file_name, FSL_ID_CAP);
 
-    cursor = strchr(cursor, '.') + 1;
-    ch->pos.x = atoi(cursor);
-    cursor = strchr(cursor, '.') + 1;
-    ch->pos.y = atoi(cursor);
-    cursor = strchr(cursor, '.') + 1;
-    ch->pos.z = atoi(cursor);
+    for (; i < 3; ++i)
+    {
+        fsl_convert_str_to_i64(cursor, &pos_cache[i]);
+        cursor = strchr(cursor, '.') + 1;
+        if (!cursor)
+            break;
+    }
+
+    ch->flag = (FLAG_CHUNK_LOADED | FLAG_CHUNK_GENERATED | FLAG_CHUNK_RENDER);
+    ch->pos.x = pos_cache[0];
+    ch->pos.y = pos_cache[1];
+    ch->pos.z = pos_cache[2];
 
     ch->cursor = CHUNK_VOLUME;
-    fsl_get_file_contents(file_name, (void*)&ch->block, FALSE);
+
+    file = fopen(path, "rb");
+    fseek(file, 0, SEEK_END);
+    i = ftell(file);
+    fseek(file, 0, SEEK_SET);
+    fread(ch->block, 1, i, file);
+    fclose(file);
 }
 
 static void chunk_buf_push_internal(u32 index, v3i32 player_chunk_delta)
@@ -1195,7 +1212,8 @@ static void chunk_buf_push_internal(u32 index, v3i32 player_chunk_delta)
 
     ch = &chunk_buf_p[chunk_buf_cursor];
     end = &chunk_buf_p[CHUNKS_MAX[settings.render_distance]];
-    for (; ch < end; ++ch)
+    while (ch < end)
+    {
         if (!(ch->flag & FLAG_CHUNK_LOADED))
         {
             if (ch->vbo) glDeleteBuffers(1, &ch->vbo);
@@ -1236,6 +1254,8 @@ static void chunk_buf_push_internal(u32 index, v3i32 player_chunk_delta)
             ++chunk_buf_cursor;
             return;
         }
+        ch++;
+    }
 
     LOGERROR(FSL_ERR_BUFFER_FULL,
             FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
@@ -1320,6 +1340,7 @@ generate_and_mesh:
             else chunk_generate(queue[i], rate_block, &terrain_decaying_lands);
             if (!((*queue[i])->flag & FLAG_CHUNK_DIRTY))
             {
+                chunk_export_internal(*queue[i]);
                 (*queue[i])->flag &= ~FLAG_CHUNK_QUEUED;
                 queue[i] = NULL;
                 if (q->count > 0) --q->count;

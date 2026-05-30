@@ -32,6 +32,11 @@
 #define FSL_RAD2DEG     (180.0 / FSL_PI)
 #define FSL_GRAVITY     9.7803267715
 #define FSL_EPSILON     1e-5
+
+/*!
+ *  @brief can be used to shrink down big values when passed into trigonometrical
+ *  functions, especially when generating random floats, it decreases workload.
+ */
 #define FSL_RAND_SCALE  (FSL_PI / ~(~0u >> 1))
 
 typedef struct angle_f32
@@ -110,7 +115,7 @@ FSLAPI v3f64 fsl_lerp_v3f64(v3f64 a, v3f64 b, f32 t);
 FSLAPI f32 fsl_easein_f32(f32 a, f32 b, f32 t);
 FSLAPI f32 fsl_easeout_f32(f32 a, f32 b, f32 t);
 FSLAPI f32 fsl_smoothstep_f32(f32 a, f32 b, f32 t);
-FSLAPI f32 fsl_rand_f32(i32 n);
+FSLAPI u32 fsl_rand_u32(u32 n);
 FSLAPI u64 fsl_rand_u64(u64 n);
 
 #endif /* FSL_MATH_H */

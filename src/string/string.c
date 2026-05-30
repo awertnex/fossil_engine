@@ -60,7 +60,7 @@ str *fsl_stringf(const str *format, ...)
     str *string = buf[index];
     str *trunc = NULL;
     int cursor = 0;
-    __builtin_va_list args;
+    __builtin_va_list args = {0};
 
     va_start(args, format);
     cursor = vsnprintf(string, FSL_OUT_STRING_MAX, format, args);
@@ -83,7 +83,7 @@ str *stringf_internal(const str *format, ...)
     str *string = buf[index];
     str *trunc = NULL;
     int cursor = 0;
-    __builtin_va_list args;
+    __builtin_va_list args = {0};
 
     va_start(args, format);
     cursor = vsnprintf(string, FSL_OUT_STRING_MAX, format, args);
@@ -389,6 +389,25 @@ u32 fsl_convert_u64_to_str(str *dst, u64 size, u64 n)
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
+}
+
+u64 fsl_rle(const void *data, fsl_size size, fsl_cap len)
+{
+    u64 i = 0;
+    u64 j = 0;
+    u8 *p = data;
+    u8 *pn = data;
+    while (len--)
+    {
+        for (i = 0; i < size; ++i)
+        {
+            if (p[i] != pn[i])
+                return j;
+        }
+        pn += size;
+        ++j;
+    }
+    return j;
 }
 
 u64 fsl_hash_djb2_u64(const void *data, fsl_cap len)

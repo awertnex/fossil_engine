@@ -145,6 +145,16 @@ FSLAPI u32 fsl_convert_i32_to_str(str *dst, i32 size, i32 n);
 FSLAPI u32 fsl_convert_u64_to_str(str *dst, u64 size, u64 n);
 
 /*!
+ *  @brief use 'run-length-encoding' (RLE) algorithm on `data` using the first datum.
+ *
+ *  @param size size of each element in `data`.
+ *  @param len number of elements in `data`.
+ *
+ *  @return run-length (1 = one occurrence), zero (0) on failure.
+ */
+FSLAPI u64 fsl_rle(const void *data, fsl_size size, fsl_len len);
+
+/*!
  *  @brief create basic 'djb2' hash from `data`.
  *
  *  @param len data size, in bytes (0 auto-detects size, useful for strings).

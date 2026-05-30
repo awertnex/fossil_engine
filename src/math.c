@@ -210,9 +210,8 @@ angle_f32 fsl_angle_f32(f32 n)
     angle_f32 angle = {0};
     angle.angle = n;
     angle.sin = sinf(n);
-    angle.cos = angle.sin + FSL_HALF_PI;
-    if (angle.cos > 1.0f)
-        angle.cos -= 1.0f;
+    angle.cos = sinf(n + FSL_HALF_PI);
+    angle.tan = tanf(n);
     return angle;
 }
 
@@ -221,15 +220,13 @@ angle_f64 fsl_angle_f64(f64 n)
     angle_f64 angle = {0};
     angle.angle = n;
     angle.sin = sin(n);
-    angle.cos = angle.sin + FSL_HALF_PI;
-    if (angle.cos > 1.0f)
-        angle.cos -= 1.0f;
+    angle.cos = sin(n + FSL_HALF_PI);
+    angle.tan = tan(n);
     return angle;
 }
 
 f32 fsl_fast_sin_f32(f32 n)
 {
-    i32 index = n;
 }
 
 f64 fsl_fast_sin_f64(f64 n)
@@ -466,32 +463,27 @@ f32 fsl_smoothstep_f32(f32 a, f32 b, f32 t)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshift-count-overflow"
 
-f32 fsl_rand_f32(i32 n)
+u32 fsl_rand_u32(u32 n)
 {
     const u32 S = 32;
-    u32 a = (i32)n + 234678493574;
-    u32 b = (i32)n - 879763936541;
-
+    u32 a = n + 234678493574;
+    u32 b = n - 879763936541;
     a *= 3284157443;
     b ^= a << S | a >> S;
     b *= 1911520717;
     a ^= b << S | b >> S;
-    a *= 2048419325;
-
-    return sin((f32)a * FSL_RAND_SCALE);
+    return a * 2048419325;
 }
 
 u64 fsl_rand_u64(u64 n)
 {
-    const u64 S = 63;
-    u64 a = (i64)n + 234678493574;
-    u64 b = (i64)n - 879763936541;
-
+    const u64 S = 64;
+    u64 a = n + 234678493574;
+    u64 b = n - 879763936541;
     a *= 3284157443;
     b ^= a << S | a >> S;
     b *= 1911520717;
     a ^= b << S | b >> S;
-
     return a * 2048419325;
 }
 
