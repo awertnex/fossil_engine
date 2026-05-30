@@ -155,9 +155,11 @@ int main(int argc, char **argv)
             copy_dir(DIR_SRC"common/",      DIR_DST DIR_DEPS DIR_DST, FALSE) != ERR_SUCCESS ||
             copy_dir(DIR_SRC"h/",           DIR_DST DIR_DEPS DIR_DST, FALSE) != ERR_SUCCESS ||
             copy_file("LICENSE",            DIR_DST DIR_DEPS DIR_DST) != ERR_SUCCESS ||
+            copy_file("version.txt",        DIR_DST DIR_DEPS DIR_DST) != ERR_SUCCESS ||
 
             copy_dir("assets/",             DIR_DST DIR_DST DIR_DST, FALSE) != ERR_SUCCESS ||
             copy_file("LICENSE",            DIR_DST DIR_DST DIR_DST) != ERR_SUCCESS ||
+            copy_file("version.txt",        DIR_DST DIR_DST DIR_DST) != ERR_SUCCESS ||
 
             copy_dir("lib/"PLATFORM,        DIR_DST "lib/", TRUE) != ERR_SUCCESS ||
             copy_dir("lib/"PLATFORM,        DIR_DST DIR_DST, TRUE) != ERR_SUCCESS)

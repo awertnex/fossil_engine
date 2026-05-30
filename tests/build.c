@@ -103,6 +103,8 @@ int main(int argc, char **argv)
 
 u32 build_game(int argc, char **argv)
 {
+    LOGWARNING(0, FALSE, "THIS VERSION SAVES CHUNKS AS SEPARATE FILES ON DISK, VERY DISK-HEAVY AND PERFORMANCE INTENSIVE\n\n");
+
     if (is_dir_exists(DIR_SRC_GAME, TRUE) != ERR_SUCCESS)
         return build_err;
 

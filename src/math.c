@@ -181,30 +181,6 @@ f64 fsl_dot_v3f64(v3f64 a, v3f64 b)
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuninitialized"
-#pragma GCC diagnostic ignored "-Wstrict-aliasing"
-#pragma GCC diagnostic ignored "-Warray-bounds"
-
-f32 q_rsqrt(f32 n)
-{
-    i64 i;
-    f32 x2, y;
-    const f32 threehalfs = 1.5f;
-
-    x2 = n * 0.5f;
-    y = n;
-    i = *(i64*)&y;                          /* evil floating point bit hack */
-    i = 0x5f3759df - (i >> 1);              /* what the fuck? */
-    y = *(f32*)&i;
-    y = y * (threehalfs - (x2 * y * y));    /* 1st iteration */
-    y = y * (threehalfs - (x2 * y * y));    /* 2nd iteration, can be removed */
-
-    return y;
-}
-
-#pragma GCC diagnostic pop
-
 angle_f32 fsl_angle_f32(f32 n)
 {
     angle_f32 angle = {0};
@@ -223,30 +199,6 @@ angle_f64 fsl_angle_f64(f64 n)
     angle.cos = sin(n + FSL_HALF_PI);
     angle.tan = tan(n);
     return angle;
-}
-
-f32 fsl_fast_sin_f32(f32 n)
-{
-}
-
-f64 fsl_fast_sin_f64(f64 n)
-{
-}
-
-f32 fsl_fast_cos_f32(f32 n)
-{
-}
-
-f64 fsl_fast_cos_f64(f64 n)
-{
-}
-
-f32 fsl_fast_tan_f32(f32 n)
-{
-}
-
-f64 fsl_fast_tan_f64(f64 n)
-{
 }
 
 u32 fsl_distance_v3i32(v3i32 a, v3i32 b)

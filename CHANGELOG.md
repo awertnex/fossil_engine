@@ -6,13 +6,9 @@
    at engine version v0.3.3-beta (2026 01 24), which makes v0.3.4-beta the
    first version of the engine as standalone in this repo
 
-## v0.8.0-dev (current)
+## v0.9.0-beta (2026 05 31)
 
 #### changes
-- (2026 05 30): added fast trigonometry functions (not that accurate):
-                - `fsl_fast_sin_f32()` and `fsl_fast_sin_f64()`.
-                - `fsl_fast_cos_f32()` and `fsl_fast_cos_f64()`.
-                - `fsl_fast_tan_f32()` and `fsl_fast_tan_f64()`.
 - (2026 05 29): added math types `angle_f32` and `angle_f64` to store an angle
                 along with its cached sine, cosine and tangent values, and
                 functions `fsl_angle_f32()` and `fsl_angle_f64()` to calculate
@@ -52,6 +48,11 @@
                 order to use assets module externally.
 - (2026 05 12): added parameters `size_x` and `size_y` to functions
                 `fsl_fbo_init()` and `fsl_fbo_realloc()`.
+
+#### bugs and flaws
+- function `fsl_mem_arena_pop()` removes the member but doesn't use the freelist.
+- test 'game_hhc' saves chunks as separate files on disk, in one directory,
+  which is very taxing for file I/O.
 
 - - -
 ## v0.8.0-beta (2026 05 11)

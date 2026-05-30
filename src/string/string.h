@@ -152,7 +152,7 @@ FSLAPI u32 fsl_convert_u64_to_str(str *dst, u64 size, u64 n);
  *
  *  @return run-length (1 = one occurrence), zero (0) on failure.
  */
-FSLAPI u64 fsl_rle(const void *data, fsl_size size, fsl_len len);
+FSLAPI u64 fsl_rle(void *data, fsl_size size, fsl_len len);
 
 /*!
  *  @brief create basic 'djb2' hash from `data`.
@@ -161,7 +161,7 @@ FSLAPI u64 fsl_rle(const void *data, fsl_size size, fsl_len len);
  *
  *  @return hash.
  */
-FSLAPI u64 fsl_hash_djb2_u64(const void *data, fsl_cap len);
+FSLAPI u64 fsl_hash_djb2_u64(void *data, fsl_cap len);
 
 /*!
  *  @brief create basic 'FNV-1a' hash from `data`.
@@ -170,7 +170,7 @@ FSLAPI u64 fsl_hash_djb2_u64(const void *data, fsl_cap len);
  *
  *  @return hash.
  */
-FSLAPI u64 fsl_hash_fnv1a_u64(const void *data, fsl_cap len);
+FSLAPI u64 fsl_hash_fnv1a_u64(void *data, fsl_cap len);
 
 /*!
  *  @brief find an unsigned 64-bit hash within `buf` that matches `hash`.

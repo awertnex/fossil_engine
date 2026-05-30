@@ -391,7 +391,7 @@ u32 fsl_convert_u64_to_str(str *dst, u64 size, u64 n)
     return fsl_err;
 }
 
-u64 fsl_rle(const void *data, fsl_size size, fsl_cap len)
+u64 fsl_rle(void *data, fsl_size size, fsl_cap len)
 {
     u64 i = 0;
     u64 j = 0;
@@ -410,7 +410,7 @@ u64 fsl_rle(const void *data, fsl_size size, fsl_cap len)
     return j;
 }
 
-u64 fsl_hash_djb2_u64(const void *data, fsl_cap len)
+u64 fsl_hash_djb2_u64(void *data, fsl_cap len)
 {
     u8* d = (u8*)data;
     u64 i = 0;
@@ -420,16 +420,13 @@ u64 fsl_hash_djb2_u64(const void *data, fsl_cap len)
     return h;
 }
 
-u64 fsl_hash_fnv1a_u64(const void *data, fsl_cap len)
+u64 fsl_hash_fnv1a_u64(void *data, fsl_cap len)
 {
     u8 *d = (u8*)data;
     u64 i = 0;
     u64 h = 2166136261;
     for (i = 0; (len && i < len) || *d; ++i, ++d)
-    {
-        h ^= *d;
-        h *= 16777619;
-    }
+        h = (h ^ *d) * 16777619;
     return h;
 }
 

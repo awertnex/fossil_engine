@@ -141,8 +141,11 @@ static void chunk_buf_pop_internal(u32 index);
 
 /*!
  *  @internal
+ *
+ *  @param len number of slots in `q->queue_p`, usually it's `q->size`, but
+ *  render distance can be smaller than what the last queue can hold.
  */
-static void chunk_queue_update_internal(chunk_queue *q);
+static void chunk_queue_update_internal(chunk_queue *q, fsl_len len);
 
 u32 chunking_init(void)
 {
@@ -427,12 +430,12 @@ void chunking_update(v3i32 player_chunk, v3i32 *player_chunk_delta)
     i8 INCREMENT = 0;
     i32 RENDER_DISTANCE = 0;
 
-    chunk_queue_update_internal(&CHUNK_QUEUE[0]);
+    chunk_queue_update_internal(&CHUNK_QUEUE[0], CHUNK_QUEUE[0].offset + CHUNK_QUEUE[0].size);
     if (!CHUNK_QUEUE[0].count && CHUNK_QUEUE[1].size)
     {
-        chunk_queue_update_internal(&CHUNK_QUEUE[1]);
+        chunk_queue_update_internal(&CHUNK_QUEUE[1], CHUNK_QUEUE[1].offset + CHUNK_QUEUE[1].size);
         if (!CHUNK_QUEUE[1].count && CHUNK_QUEUE[2].size)
-            chunk_queue_update_internal(&CHUNK_QUEUE[2]);
+            chunk_queue_update_internal(&CHUNK_QUEUE[2], CHUNKS_MAX[settings.render_distance]);
     }
 
     if (!core.flag.chunk_buf_dirty)
@@ -710,7 +713,6 @@ void block_place(u32 index, i32 x, i32 y, i32 z, v3f64 normal, enum block_id blo
         nz = *(ch - settings.chunk_buf_layer);
 
     block_place_internal(*ch, px, nx, py, ny, pz, nz, chunk_tab_coordinates, x, y, z, block_id);
-    (*ch)->flag |= FLAG_CHUNK_MODIFIED;
 }
 
 static void block_place_internal(chunk *ch,
@@ -731,7 +733,7 @@ static void block_place_internal(chunk *ch,
                 px && px->block[z][y][0])
         {
             px->block[z][y][0] &= ~FLAG_BLOCK_FACE_NX;
-            px->flag |= FLAG_CHUNK_DIRTY;
+            px->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
         }
         else ch->block[z][y][x] |= FLAG_BLOCK_FACE_PX;
     }
@@ -745,7 +747,7 @@ static void block_place_internal(chunk *ch,
                 nx && nx->block[z][y][CHUNK_DIAMETER - 1])
         {
             nx->block[z][y][CHUNK_DIAMETER - 1] &= ~FLAG_BLOCK_FACE_PX;
-            nx->flag |= FLAG_CHUNK_DIRTY;
+            nx->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
         }
         else ch->block[z][y][x] |= FLAG_BLOCK_FACE_NX;
     }
@@ -759,7 +761,7 @@ static void block_place_internal(chunk *ch,
                 py && py->block[z][0][x])
         {
             py->block[z][0][x] &= ~FLAG_BLOCK_FACE_NY;
-            py->flag |= FLAG_CHUNK_DIRTY;
+            py->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
         }
         else ch->block[z][y][x] |= FLAG_BLOCK_FACE_PY;
     }
@@ -773,7 +775,7 @@ static void block_place_internal(chunk *ch,
                 ny && ny->block[z][CHUNK_DIAMETER - 1][x])
         {
             ny->block[z][CHUNK_DIAMETER - 1][x] &= ~FLAG_BLOCK_FACE_PY;
-            ny->flag |= FLAG_CHUNK_DIRTY;
+            ny->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
         }
         else ch->block[z][y][x] |= FLAG_BLOCK_FACE_NY;
     }
@@ -787,7 +789,7 @@ static void block_place_internal(chunk *ch,
                 pz && pz->block[0][y][x])
         {
             pz->block[0][y][x] &= ~FLAG_BLOCK_FACE_NZ;
-            pz->flag |= FLAG_CHUNK_DIRTY;
+            pz->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
         }
         else ch->block[z][y][x] |= FLAG_BLOCK_FACE_PZ;
     }
@@ -801,7 +803,7 @@ static void block_place_internal(chunk *ch,
                 nz && nz->block[CHUNK_DIAMETER - 1][y][x])
         {
             nz->block[CHUNK_DIAMETER - 1][y][x] &= ~FLAG_BLOCK_FACE_PZ;
-            nz->flag |= FLAG_CHUNK_DIRTY;
+            nz->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
         }
         else ch->block[z][y][x] |= FLAG_BLOCK_FACE_NZ;
     }
@@ -809,7 +811,7 @@ static void block_place_internal(chunk *ch,
         ch->block[z - 1][y][x] &= ~FLAG_BLOCK_FACE_PZ;
     else ch->block[z][y][x] |= FLAG_BLOCK_FACE_NZ;
 
-    ch->flag |= FLAG_CHUNK_DIRTY;
+    ch->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
 }
 
 void block_break(u32 index, i32 x, i32 y, i32 z)
@@ -861,7 +863,7 @@ static void block_break_internal(chunk *ch,
                 px && px->block[z][y][0])
         {
             px->block[z][y][0] |= FLAG_BLOCK_FACE_NX;
-            px->flag |= FLAG_CHUNK_DIRTY;
+            px->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
         }
     }
     else if (ch->block[z][y][x + 1])
@@ -873,7 +875,7 @@ static void block_break_internal(chunk *ch,
                 nx && nx->block[z][y][CHUNK_DIAMETER - 1])
         {
             nx->block[z][y][CHUNK_DIAMETER - 1] |= FLAG_BLOCK_FACE_PX;
-            nx->flag |= FLAG_CHUNK_DIRTY;
+            nx->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
         }
     }
     else if (ch->block[z][y][x - 1])
@@ -885,7 +887,7 @@ static void block_break_internal(chunk *ch,
                 py && py->block[z][0][x])
         {
             py->block[z][0][x] |= FLAG_BLOCK_FACE_NY;
-            py->flag |= FLAG_CHUNK_DIRTY;
+            py->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
         }
     }
     else if (ch->block[z][y + 1][x])
@@ -897,7 +899,7 @@ static void block_break_internal(chunk *ch,
                 ny && ny->block[z][CHUNK_DIAMETER - 1][x])
         {
             ny->block[z][CHUNK_DIAMETER - 1][x] |= FLAG_BLOCK_FACE_PY;
-            ny->flag |= FLAG_CHUNK_DIRTY;
+            ny->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
         }
     }
     else if (ch->block[z][y - 1][x])
@@ -909,7 +911,7 @@ static void block_break_internal(chunk *ch,
                 pz && pz->block[0][y][x])
         {
             pz->block[0][y][x] |= FLAG_BLOCK_FACE_NZ;
-            pz->flag |= FLAG_CHUNK_DIRTY;
+            pz->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
         }
     }
     else if (ch->block[z + 1][y][x])
@@ -921,14 +923,14 @@ static void block_break_internal(chunk *ch,
                 nz && nz->block[CHUNK_DIAMETER - 1][y][x])
         {
             nz->block[CHUNK_DIAMETER - 1][y][x] |= FLAG_BLOCK_FACE_PZ;
-            nz->flag |= FLAG_CHUNK_DIRTY;
+            nz->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
         }
     }
     else if (ch->block[z - 1][y][x])
         ch->block[z - 1][y][x] |= FLAG_BLOCK_FACE_PZ;
 
     ch->block[z][y][x] = 0;
-    ch->flag |= FLAG_CHUNK_DIRTY;
+    ch->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
 }
 
 static void chunk_generate(chunk **ch, u32 rate, terrain (*terrain_func)(v3i32))
@@ -1328,12 +1330,11 @@ static void chunk_buf_pop_internal(u32 index)
     chunk_tab.p[index] = NULL;
 }
 
-static void chunk_queue_update_internal(chunk_queue *q)
+static void chunk_queue_update_internal(chunk_queue *q, fsl_len len)
 {
     chunk ***ch = &CHUNK_ORDER.p[q->offset];
     chunk ***end = NULL;
     chunk *cache = NULL;
-    u32 i = 0;
     u64 size = q->size;
     u32 cursor = q->cursor;
     u32 rate_chunk = q->rate_chunk;
@@ -1350,9 +1351,7 @@ static void chunk_queue_update_internal(chunk_queue *q)
 
     /* ---- push chunk queue ------------------------------------------------ */
 
-    if (q->id == CHUNK_QUEUE_LAST_ID)
-        end = CHUNK_ORDER.p + CHUNKS_MAX[settings.render_distance];
-    else end = CHUNK_ORDER.p + q->offset + size;
+    end = CHUNK_ORDER.p + len;
     for (; ch < end && q->count < size; ++ch)
     {
         if (**ch && ((**ch)->flag & FLAG_CHUNK_DIRTY) &&
@@ -1367,25 +1366,31 @@ static void chunk_queue_update_internal(chunk_queue *q)
     }
 
     q->cursor = cursor;
-    if (!q->count) return;
+    if (!q->count)
+        return;
 
 generate_and_mesh:
 
-    for (i = 0; i < size && rate_chunk; ++i)
-        if (q->queue_p[i])
+    ch = q->queue_p;
+    end = ch + q->size;
+    for (; ch < end && rate_chunk; ++ch)
+        if (*ch)
         {
-            cache = *q->queue_p[i];
+            cache = **ch;
             if (cache->flag & FLAG_CHUNK_GENERATED)
-                chunk_mesh_update(q->queue_p[i] - chunk_tab.p, cache);
-            else chunk_generate(q->queue_p[i], rate_block, &terrain_decaying_lands);
+                chunk_mesh_update(*ch - chunk_tab.p, cache);
+            else
+                chunk_generate(*ch, rate_block, &terrain_decaying_lands);
 
             if (!(cache->flag & FLAG_CHUNK_DIRTY))
             {
                 if (cache->flag & FLAG_CHUNK_MODIFIED)
-                    chunk_export_internal(*q->queue_p[i]);
+                    chunk_export_internal(cache);
                 cache->flag &= ~FLAG_CHUNK_QUEUED;
-                q->queue_p[i] = NULL;
-                if (q->count > 0) --q->count;
+                *ch = NULL;
+
+                if (q->count > 0)
+                    --q->count;
             }
 
             if (cache->flag & FLAG_CHUNK_IMPORTED)

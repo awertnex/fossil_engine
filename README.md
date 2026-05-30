@@ -1,4 +1,4 @@
-# Fossil Engine
+# Fossil Engine - v0.9.0-beta
 
 **a game engine written in C89, with minimal dependencies.**
 
@@ -6,10 +6,10 @@
 
 - [buildtool v1.8.4-beta](https://github.com/awertnex/buildtool): build tool used to build the engine
 - [glfw v3.4](https://github.com/glfw/glfw): platform-independent windowing (headers modified)
-    - modifications: remove `__cplusplus` support guard, just to keep it completely C
+    - modifications: remove `__cplusplus` guard, just to keep it completely C
 - [glad v0.1.36](https://github.com/dav1dde/glad-web): OpenGL function loader (modified)
     - extensions: GL_ARB_bindless_texture
-    - modifications: remove `__cplusplus` support guard, just to keep it completely C
+    - modifications: remove `__cplusplus` guard, just to keep it completely C
 - [stb_truetype.h v1.26](https://github.com/nothings/stb/blob/master/stb_truetype.h): loading font data (modified)
     - modifications: change all // comments to /* */ block comments to support C89 standard
 - [stb_image.h v2.30](https://github.com/nothings/stb/blob/master/stb_image.h): loading image data (modified)
@@ -35,7 +35,7 @@ windows-specific:
 >- if build successful, you can copy/move the files in `fossil/` into your project's root.
 >- files:
 >   - `deps/`: required headers for development
->   - `fossil/`: required stuff for runtime/deployment
+>   - `fossil/`: required libraries and files for runtime
 >   - `lib/`: required libraries for linking
 
 **linux x86_64:**
@@ -48,7 +48,7 @@ cd fossil_engine/
 ./build
 ```
 
-if you want, bootstrap buildtool:
+bootstrap buildtool (optional):
 
 ```bash
 cc build.c -o build
@@ -75,10 +75,10 @@ cd.exe fossil_engine
 ./build.exe
 ```
 
-if you want, bootstrap the build script:
+bootstrap buildtool (optional):
 
 ```command
-cc.exe build.c -o build.exe
+cc.exe build.c -o build
 ```
 
 additional build commands:
