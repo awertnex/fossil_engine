@@ -1028,7 +1028,10 @@ static void chunk_generate_internal(chunk **ch, u32 rate, terrain (*terrain_func
     _ch->cursor = x + y * CHUNK_DIAMETER + z * CHUNK_LAYER;
 
     if (_ch->cursor == CHUNK_VOLUME && !(_ch->flag & FLAG_CHUNK_GENERATED))
+    {
+        _ch->flag &= ~FLAG_CHUNK_MODIFIED;
         chunk_mesh_init(index, _ch);
+    }
 }
 
 static void chunk_mesh_init(u32 index, chunk *ch)
@@ -1157,6 +1160,8 @@ static void chunk_export_internal(chunk *ch)
     u16 j = 0;
     u32 rle = 0; /* run-length */
 
+    ch->flag &= ~FLAG_CHUNK_MODIFIED;
+
     snprintf(path, FSL_PATH_CAP,
             GAME_DIR_NAME_WORLDS"%s/"GAME_DIR_WORLD_NAME_CHUNKS FORMAT_FILE_NAME_HHCC,
             world.name, ch->pos.x, ch->pos.y, ch->pos.z);
@@ -1197,7 +1202,7 @@ static void chunk_import_internal(const fsl_fs_path *path, chunk *ch)
             break;
     }
 
-    ch->flag = (FLAG_CHUNK_LOADED | FLAG_CHUNK_GENERATED | FLAG_CHUNK_RENDER);
+    ch->flag = FLAG_CHUNK_LOADED | FLAG_CHUNK_DIRTY;
     ch->pos.x = pos_cache[0];
     ch->pos.y = pos_cache[1];
     ch->pos.z = pos_cache[2];
@@ -1371,7 +1376,8 @@ generate_and_mesh:
             else chunk_generate(queue[i], rate_block, &terrain_decaying_lands);
             if (!((*queue[i])->flag & FLAG_CHUNK_DIRTY))
             {
-                chunk_export_internal(*queue[i]);
+                if ((*queue[i])->flag & FLAG_CHUNK_MODIFIED)
+                    chunk_export_internal(*queue[i]);
                 (*queue[i])->flag &= ~FLAG_CHUNK_QUEUED;
                 queue[i] = NULL;
                 if (q->count > 0) --q->count;

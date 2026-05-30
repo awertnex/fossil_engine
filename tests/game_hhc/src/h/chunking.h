@@ -12,6 +12,7 @@
 #define CHUNK_VOLUME    (CHUNK_DIAMETER * CHUNK_DIAMETER * CHUNK_DIAMETER)
 
 #define CHUNK_REGION_DIAMETER   32
+#define CHUNK_REGION_VOLUME     (CHUNK_REGION_DIAMETER * CHUNK_REGION_DIAMETER * CHUNK_REGION_DIAMETER)
 
 #define WORLD_RADIUS            (2048 * CHUNK_DIAMETER)
 #define WORLD_RADIUS_VERTICAL   (64 * CHUNK_DIAMETER)
@@ -43,12 +44,12 @@
 /*!
  *  @brief number of chunks to process per frame.
  */
-#define CHUNK_PARSE_RATE_PRIORITY_LOW       64
+#define CHUNK_PARSE_RATE_PRIORITY_LOW       128
 #define CHUNK_PARSE_RATE_PRIORITY_MID       128
 #define CHUNK_PARSE_RATE_PRIORITY_HIGH      CHUNK_QUEUE_1ST_MAX
 
 /* number of blocks to process per chunk per frame */
-#define BLOCK_PARSE_RATE                    512
+#define BLOCK_PARSE_RATE                    4096
 
 #define CHUNK_COLOR_LOADED  fsl_color_v4_to_hex(0.70f, 0.01f, 0.02f, 0.39f)
 #define CHUNK_COLOR_RENDER  fsl_color_v4_to_hex(0.24f, 0.47f, 0.3f, 1.0f)
