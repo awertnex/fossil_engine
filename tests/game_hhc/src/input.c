@@ -150,7 +150,6 @@ void input_update(player *p)
 {
     fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
     u32 shader_err = FSL_ERR_SUCCESS;
-    chunk **chunk_tab_p = fsl_mem_handle_get(chunk_tab);
     u32 i = 0;
     f32 px = 0.0f;
     f32 nx = 0.0f;
@@ -247,21 +246,21 @@ void input_update(player *p)
         if (
                 !core.flag.chunk_buf_dirty &&
                 core.flag.parse_target &&
-                chunk_tab_p[chunk_tab_index])
+                chunk_tab.p[chunk_tab_index])
         {
             if (fsl_is_mouse_hold(bind_attack_or_destroy))
             {
                 block_break(chunk_tab_index,
-                        (i64)p->target.x - chunk_tab_p[chunk_tab_index]->pos.x * CHUNK_DIAMETER,
-                        (i64)p->target.y - chunk_tab_p[chunk_tab_index]->pos.y * CHUNK_DIAMETER,
-                        (i64)p->target.z - chunk_tab_p[chunk_tab_index]->pos.z * CHUNK_DIAMETER);
+                        (i64)p->target.x - chunk_tab.p[chunk_tab_index]->pos.x * CHUNK_DIAMETER,
+                        (i64)p->target.y - chunk_tab.p[chunk_tab_index]->pos.y * CHUNK_DIAMETER,
+                        (i64)p->target.z - chunk_tab.p[chunk_tab_index]->pos.z * CHUNK_DIAMETER);
             }
             if (fsl_is_mouse_press(bind_build_or_use))
             {
                 block_place(chunk_tab_index,
-                        (i64)p->target.x - chunk_tab_p[chunk_tab_index]->pos.x * CHUNK_DIAMETER,
-                        (i64)p->target.y - chunk_tab_p[chunk_tab_index]->pos.y * CHUNK_DIAMETER,
-                        (i64)p->target.z - chunk_tab_p[chunk_tab_index]->pos.z * CHUNK_DIAMETER,
+                        (i64)p->target.x - chunk_tab.p[chunk_tab_index]->pos.x * CHUNK_DIAMETER,
+                        (i64)p->target.y - chunk_tab.p[chunk_tab_index]->pos.y * CHUNK_DIAMETER,
+                        (i64)p->target.z - chunk_tab.p[chunk_tab_index]->pos.z * CHUNK_DIAMETER,
                         p->target_normal, p->hotbar_slots[p->hotbar_slot_selected]);
             }
 

@@ -44,12 +44,12 @@
 /*!
  *  @brief number of chunks to process per frame.
  */
-#define CHUNK_PARSE_RATE_PRIORITY_LOW       128
+#define CHUNK_PARSE_RATE_PRIORITY_LOW       64
 #define CHUNK_PARSE_RATE_PRIORITY_MID       128
 #define CHUNK_PARSE_RATE_PRIORITY_HIGH      CHUNK_QUEUE_1ST_MAX
 
 /* number of blocks to process per chunk per frame */
-#define BLOCK_PARSE_RATE                    4096
+#define BLOCK_PARSE_RATE                    512
 
 #define CHUNK_COLOR_LOADED  fsl_color_v4_to_hex(0.70f, 0.01f, 0.02f, 0.39f)
 #define CHUNK_COLOR_RENDER  fsl_color_v4_to_hex(0.24f, 0.47f, 0.3f, 1.0f)
@@ -147,11 +147,12 @@ enum chunk_flag
     FLAG_CHUNK_GENERATED =  0x08,
     FLAG_CHUNK_RENDER =     0x10,
     FLAG_CHUNK_MODIFIED =   0x20,
+    FLAG_CHUNK_IMPORTED =   0x40,
 
     /*!
      *  @brief chunk marking for @ref chunk_tab shifting logic.
      */
-    FLAG_CHUNK_EDGE =       0x40
+    FLAG_CHUNK_EDGE =       0x80
 }; /* chunk_flag */
 
 enum chunk_shift_state
@@ -207,16 +208,29 @@ typedef struct chunk
     u32 block[CHUNK_DIAMETER][CHUNK_DIAMETER][CHUNK_DIAMETER];
 } chunk;
 
+typedef struct chunk_table
+{
+    fsl_mem_handle handle;
+    chunk **p;              /* cached pointer from `handle` */
+} chunk_table;
+
+typedef struct chunk_order
+{
+    fsl_mem_handle handle;
+    chunk ***p;
+} chunk_order;
+
 typedef struct chunk_queue
 {
     u32 id;
-    u32 count;          /* number of chunks queued */
-    u32 offset;         /* offset of queue into @ref CHUNK_ORDER */
+    u32 count;              /* number of chunks queued */
+    u32 offset;             /* offset of queue into @ref CHUNK_ORDER */
     u64 size;
-    u32 cursor;         /* parse position */
-    u32 rate_chunk;     /* number of chunks to process per frame */
-    u32 rate_block;     /* number of blocks to process per chunk per frame */
+    u32 cursor;             /* parse position */
+    u32 rate_chunk;         /* number of chunks to process per frame */
+    u32 rate_block;         /* number of blocks to process per chunk per frame */
     fsl_mem_handle queue;
+    chunk ***queue_p;       /* cached pointer from `queue` */
 } chunk_queue;
 
 #define GET_BLOCK_ID(block)     (block & MASK_BLOCK_ID)
@@ -242,7 +256,7 @@ extern u64 CHUNKS_MAX[CHUNK_BUF_RADIUS_MAX + 1];
  *
  *  `chunk_buf` addresses ordered by their positions in 3d space relative to player position.
  */
-extern fsl_mem_handle chunk_tab;
+extern chunk_table chunk_tab;
 
 /*!
  *  @brief player-relative @ref chunk_tab access.
@@ -258,7 +272,7 @@ extern u32 chunk_tab_index;
  *
  *  @remark read-only, initialized internally in @ref chunking_init().
  */
-extern fsl_mem_handle CHUNK_ORDER;
+extern chunk_order CHUNK_ORDER;
 
 /*!
  *  @brief queues of chunks to be processed.

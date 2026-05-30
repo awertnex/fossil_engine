@@ -51,7 +51,7 @@ u32 fsl_mem_array_init_internal(fsl_array *array)
 {
     if (!array->buf)
     {
-        if (fsl_mem_alloc((void*)&array->buf, MEM_ALLOC_SIZE_MIN,
+        if (fsl_mem_map((void*)&array->buf, MEM_ALLOC_SIZE_MIN,
                     "fsl_mem_array_init_internal().array->buf") != FSL_ERR_SUCCESS)
             return fsl_err;
         array->cap = MEM_ALLOC_SIZE_MIN;
@@ -65,14 +65,14 @@ u32 fsl_mem_array_push_internal(fsl_array *array, void *data, u64 size)
 {
     void *buf_temp = NULL;
 
-    if (!array->buf && fsl_mem_alloc((void*)&array->buf, MEM_ALLOC_SIZE_MIN,
+    if (!array->buf && fsl_mem_map((void*)&array->buf, MEM_ALLOC_SIZE_MIN,
                 "fsl_mem_array_push_internal().array->buf") != FSL_ERR_SUCCESS)
         return fsl_err;
 
     if (size >= array->cap - array->cursor)
     {
         buf_temp = array->buf;
-        if (fsl_mem_realloc((void*)&buf_temp, array->cap * 2 + size,
+        if (fsl_mem_remap((void*)&buf_temp, array->cap, array->cap * 2 + size,
                     "fsl_mem_array_push_internal().array->buf") != FSL_ERR_SUCCESS)
             return fsl_err;
         array->cap = array->cap * 2 + size;
@@ -92,7 +92,7 @@ void fsl_mem_array_free_internal(fsl_array *array)
     fsl_array noarray = {0};
 
     if (array->buf)
-        fsl_mem_free((void*)&array->buf, array->cursor, "fsl_mem_array_free_internal().array->buf");
+        fsl_mem_unmap((void*)&array->buf, array->cursor, "fsl_mem_array_free_internal().array->buf");
     *array = noarray;
 }
 

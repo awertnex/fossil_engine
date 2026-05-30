@@ -142,7 +142,7 @@ static u32 settings_init(void)
 
     settings.lerp_speed = SET_LERP_SPEED_DEFAULT;
 
-    settings.render_distance = 16;
+    settings.render_distance = 12;
     settings.chunk_buf_radius = settings.render_distance;
     settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
 
@@ -448,8 +448,6 @@ static void draw_everything(void)
     fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
     fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
     fsl_shader_program *fsl_shader_p = fsl_mem_handle_get(fsl_shader_buf);
-    chunk **chunk_tab_p = fsl_mem_handle_get(chunk_tab);
-    chunk ***CHUNK_ORDER_p = fsl_mem_handle_get(CHUNK_ORDER);
 
     f32 delay_in_hours = 6.0f;
     f32 sun_time = skybox_data.time * FSL_PI;
@@ -662,8 +660,8 @@ static void draw_everything(void)
     static chunk ***cursor = NULL;
     static chunk ***end = NULL;
     static chunk *ch = NULL;
-    cursor = &CHUNK_ORDER_p[CHUNKS_MAX[settings.render_distance] - 1];
-    for (; cursor >= CHUNK_ORDER_p; --cursor)
+    cursor = &CHUNK_ORDER.p[CHUNKS_MAX[settings.render_distance] - 1];
+    for (; cursor >= CHUNK_ORDER.p; --cursor)
     {
         ch = **cursor;
         if (!ch || !(ch->flag & FLAG_CHUNK_RENDER))
@@ -695,11 +693,11 @@ static void draw_everything(void)
             (GLfloat*)&_player.camera.projection.perspective);
 
     if (core.flag.parse_target && core.flag.hud &&
-            chunk_tab_p[chunk_tab_index] &&
-            chunk_tab_p[chunk_tab_index]->block
-            [(i64)_player.target.z - chunk_tab_p[chunk_tab_index]->pos.z * CHUNK_DIAMETER]
-            [(i64)_player.target.y - chunk_tab_p[chunk_tab_index]->pos.y * CHUNK_DIAMETER]
-            [(i64)_player.target.x - chunk_tab_p[chunk_tab_index]->pos.x * CHUNK_DIAMETER])
+            chunk_tab.p[chunk_tab_index] &&
+            chunk_tab.p[chunk_tab_index]->block
+            [(i64)_player.target.z - chunk_tab.p[chunk_tab_index]->pos.z * CHUNK_DIAMETER]
+            [(i64)_player.target.y - chunk_tab.p[chunk_tab_index]->pos.y * CHUNK_DIAMETER]
+            [(i64)_player.target.x - chunk_tab.p[chunk_tab_index]->pos.x * CHUNK_DIAMETER])
     {
         glUniform3f(uniform.bounding_box.position,
                 (f32)(_player.target.x),
@@ -751,8 +749,8 @@ static void draw_everything(void)
         glUniform3f(uniform.bounding_box.size,
                 CHUNK_DIAMETER, CHUNK_DIAMETER, CHUNK_DIAMETER);
 
-        cursor = CHUNK_ORDER_p;
-        end = &CHUNK_ORDER_p[CHUNK_QUEUE[0].size];
+        cursor = CHUNK_ORDER.p;
+        end = &CHUNK_ORDER.p[CHUNK_QUEUE[0].size];
         for (; cursor < end; ++cursor)
         {
             ch = **cursor;
