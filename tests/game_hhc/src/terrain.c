@@ -1,13 +1,13 @@
 #include "deps/fossil/logger/logger.h"
+#include "deps/fossil/math/math.h"
+#include "deps/fossil/math/vector.h"
 #include "deps/fossil/memory/memory.h"
-#include "deps/fossil/string/string.h"
 
-#include "deps/fossil/h/math.h"
+#include "deps/fossil/h/dir.h"
 
 #include "h/chunking.h"
 #include "h/diagnostics.h"
 #include "h/dir.h"
-#include "h/main.h"
 #include "h/terrain.h"
 #include "h/world.h"
 

@@ -87,20 +87,6 @@ u32 assets_init(void)
     /* ---- shaders --------------------------------------------------------- */
 
     if (
-            fsl_asset_set_metadata(&shader_p[SHADER_DEFAULT].asset, FSL_ASSET_SHADER_PROGRAM,
-                "Default", "default", NULL, GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[SHADER_DEFAULT].vertex.asset, FSL_ASSET_SHADER,
-                "Default", "default", "default.vert", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[SHADER_DEFAULT].geometry.asset, FSL_ASSET_SHADER,
-                NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[SHADER_DEFAULT].fragment.asset, FSL_ASSET_SHADER,
-                "Default", "default", "default.frag", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
-        goto cleanup;
-
-    if (
             fsl_asset_set_metadata(&shader_p[SHADER_SKYBOX].asset, FSL_ASSET_SHADER_PROGRAM,
                 "Skybox", "skybox", NULL, GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
 

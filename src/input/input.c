@@ -26,6 +26,7 @@
 #include "../engine/engine.h"
 #include "../logger/logger.h"
 #include "../logger/logger_messages_internal.h"
+#include "../math/vector.h"
 
 #include "../h/time.h"
 

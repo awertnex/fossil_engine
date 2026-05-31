@@ -25,6 +25,7 @@
 
 #include "../common/engine_info.h"
 #include "../common/types.h"
+#include "../math/vector.h"
 
 #include "asset_types.h"
 #include "mesh/mesh.h"

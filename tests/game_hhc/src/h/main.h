@@ -1,11 +1,8 @@
 #ifndef HHC_H
 #define HHC_H
 
-#include "deps/fossil/common/diagnostics.h"
 #include "deps/fossil/common/types.h"
 #include "deps/fossil/engine/engine.h"
-
-#include "deps/fossil/h/ui.h"
 
 #include "common.h"
 

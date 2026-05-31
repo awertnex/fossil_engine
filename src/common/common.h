@@ -17,7 +17,7 @@
 /*!
  *  @file common.h
  *
- *  @brief main common header.
+ *  @brief main common header; include all common headers.
  */
 
 #ifndef FSL_COMMON_H
@@ -42,15 +42,5 @@
      ((u32)((g) * 0xff) << 0x10) | \
      ((u32)((b) * 0xff) << 0x08) | \
      ((u32)(a) * 0xff))
-
-/*!
- *  @brief convert 4-Byte hex color to RGBA color.
- *  @remark color range [0.0f, 1.0f].
- */
-#define fsl_color_hex_to_v4(n) (v4f32){ \
-    (f32)(((n) >> 0x18) & 0xff) / 0xff, \
-    (f32)(((n) >> 0x10) & 0xff) / 0xff, \
-    (f32)(((n) >> 0x08) & 0xff) / 0xff, \
-    (f32)(((n) >> 0x00) & 0xff) / 0xff}
 
 #endif /* FSL_COMMON_H */

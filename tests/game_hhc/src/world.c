@@ -2,10 +2,10 @@
 #include "deps/fossil/common/limits.h"
 #include "deps/fossil/assets/assets.h"
 #include "deps/fossil/logger/logger.h"
+#include "deps/fossil/math/math.h"
 #include "deps/fossil/string/string.h"
 
 #include "deps/fossil/h/dir.h"
-#include "deps/fossil/h/math.h"
 #include "deps/fossil/h/time.h"
 
 #include "h/chunking.h"
@@ -226,7 +226,7 @@ void world_update(player *p)
     player_target_update(p);
 
     chunking_update(p->ch, &p->ch_delta);
-    chunk_tab_index = get_chunk_index(p->ch, p->target);
+    chunk_tab.index = get_chunk_index(p->ch, p->target);
 
     fsl_update_projection_perspective(p->camera, &p->camera.projection, FALSE);
     fsl_update_projection_perspective(p->camera_hud, &p->camera_hud.projection, FALSE);

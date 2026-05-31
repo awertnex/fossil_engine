@@ -1,9 +1,10 @@
 #include "deps/fossil/logger/logger.h"
+#include "deps/fossil/math/math.h"
+#include "deps/fossil/math/trigonometry.h"
 #include "deps/fossil/shaders/shaders.h"
 #include "deps/fossil/shaders/shader_types.h"
 
 #include "deps/fossil/input/input.h"
-#include "deps/fossil/h/math.h"
 
 #include "h/assets.h"
 #include "h/chunking.h"
@@ -157,10 +158,10 @@ void input_update(player *p)
     f32 ny = 0.0f;
     f32 pz = 0.0f;
     f32 nz = 0.0f;
-    f32 spch = sin(p->pitch * FSL_DEG2RAD);
-    f32 cpch = cos(p->pitch * FSL_DEG2RAD);
-    f32 syaw = sin(p->yaw * FSL_DEG2RAD);
-    f32 cyaw = cos(p->yaw * FSL_DEG2RAD);
+    f32 spch = sin(p->pitch.angle * FSL_DEG2RAD);
+    f32 cpch = cos(p->pitch.angle * FSL_DEG2RAD);
+    f32 syaw = sin(p->yaw.angle * FSL_DEG2RAD);
+    f32 cyaw = cos(p->yaw.angle * FSL_DEG2RAD);
 
     p->input.x = 0.0f;
     p->input.y = 0.0f;
@@ -217,11 +218,11 @@ void input_update(player *p)
         {
             p->input.x =
                 (px - nx) * cyaw * cpch +
-                (py - ny) * -cos(p->yaw * FSL_DEG2RAD + FSL_PI / 2.0) +
+                (py - ny) * -cos(p->yaw.angle * FSL_DEG2RAD + FSL_PI / 2.0) +
                 (pz - nz) * cyaw * spch;
             p->input.y =
                 (px - nx) * -syaw * cpch +
-                (py - ny) * sin(p->yaw * FSL_DEG2RAD + FSL_PI / 2.0) +
+                (py - ny) * sin(p->yaw.angle * FSL_DEG2RAD + FSL_PI / 2.0) +
                 (pz - nz) * -syaw * spch;
             p->input.z =
                 (px - nx) * -spch +
@@ -231,10 +232,10 @@ void input_update(player *p)
         {
             p->input.x =
                 (px - nx) * cyaw +
-                (py - ny) * -cos(p->yaw * FSL_DEG2RAD + FSL_PI / 2.0);
+                (py - ny) * -cos(p->yaw.angle * FSL_DEG2RAD + FSL_PI / 2.0);
             p->input.y =
                 (px - nx) * -syaw +
-                (py - ny) * sin(p->yaw * FSL_DEG2RAD + FSL_PI / 2.0);
+                (py - ny) * sin(p->yaw.angle * FSL_DEG2RAD + FSL_PI / 2.0);
             p->input.z =
                 pz - nz;
         }
@@ -246,21 +247,21 @@ void input_update(player *p)
         if (
                 !core.flag.chunk_buf_dirty &&
                 core.flag.parse_target &&
-                chunk_tab.p[chunk_tab_index])
+                chunk_tab.p[chunk_tab.index])
         {
             if (fsl_is_mouse_hold(bind_attack_or_destroy))
             {
-                block_break(chunk_tab_index,
-                        (i64)p->target.x - chunk_tab.p[chunk_tab_index]->pos.x * CHUNK_DIAMETER,
-                        (i64)p->target.y - chunk_tab.p[chunk_tab_index]->pos.y * CHUNK_DIAMETER,
-                        (i64)p->target.z - chunk_tab.p[chunk_tab_index]->pos.z * CHUNK_DIAMETER);
+                block_break(chunk_tab.index,
+                        (i64)p->target.x - chunk_tab.p[chunk_tab.index]->pos.x * CHUNK_DIAMETER,
+                        (i64)p->target.y - chunk_tab.p[chunk_tab.index]->pos.y * CHUNK_DIAMETER,
+                        (i64)p->target.z - chunk_tab.p[chunk_tab.index]->pos.z * CHUNK_DIAMETER);
             }
             if (fsl_is_mouse_press(bind_build_or_use))
             {
-                block_place(chunk_tab_index,
-                        (i64)p->target.x - chunk_tab.p[chunk_tab_index]->pos.x * CHUNK_DIAMETER,
-                        (i64)p->target.y - chunk_tab.p[chunk_tab_index]->pos.y * CHUNK_DIAMETER,
-                        (i64)p->target.z - chunk_tab.p[chunk_tab_index]->pos.z * CHUNK_DIAMETER,
+                block_place(chunk_tab.index,
+                        (i64)p->target.x - chunk_tab.p[chunk_tab.index]->pos.x * CHUNK_DIAMETER,
+                        (i64)p->target.y - chunk_tab.p[chunk_tab.index]->pos.y * CHUNK_DIAMETER,
+                        (i64)p->target.z - chunk_tab.p[chunk_tab.index]->pos.z * CHUNK_DIAMETER,
                         p->target_normal, p->hotbar_slots[p->hotbar_slot_selected]);
             }
 

@@ -25,6 +25,9 @@
 
 #include "../common/limits.h"
 #include "../common/types.h"
+#include "../math/matrix.h"
+#include "../math/trigonometry.h"
+#include "../math/vector.h"
 #include "../memory/memory_types.h"
 
 #include "../external/glad/glad.h"
@@ -213,9 +216,9 @@ struct fsl_projection
 struct fsl_camera
 {
     v3f64 pos;
-    f64 roll, pitch, yaw;
-    f64 sin_roll, sin_pitch, sin_yaw;
-    f64 cos_roll, cos_pitch, cos_yaw;
+    angle_f64 roll;
+    angle_f64 pitch;
+    angle_f64 yaw;
     f32 fovy;
     f32 fovy_smooth;
     f32 ratio;

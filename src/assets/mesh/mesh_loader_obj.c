@@ -25,13 +25,11 @@
 #include "../../common/types.h"
 #include "../../logger/logger.h"
 #include "../../logger/logger_messages_internal.h"
+#include "../../math/math.h"
+#include "../../math/vector.h"
 #include "../../memory/memory.h"
 #include "../../string/string.h"
-#include "../../string/string_internal.h"
 
-#include "../../h/math.h"
-
-#include "mesh.h"
 #include "mesh_loader_internal.h"
 
 #include "../../external/glad/glad.h"

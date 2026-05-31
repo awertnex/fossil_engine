@@ -184,19 +184,6 @@ void settings_update(void)
 static void bind_shader_uniforms(void)
 {
     fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
-    uniform.defaults.location =
-        glGetUniformLocation(shader_p[SHADER_DEFAULT].asset.id, "location");
-    uniform.defaults.scale =
-        glGetUniformLocation(shader_p[SHADER_DEFAULT].asset.id, "scale");
-    uniform.defaults.mat_rotation =
-        glGetUniformLocation(shader_p[SHADER_DEFAULT].asset.id, "mat_rotation");
-    uniform.defaults.mat_perspective =
-        glGetUniformLocation(shader_p[SHADER_DEFAULT].asset.id, "mat_perspective");
-    uniform.defaults.sun_rotation =
-        glGetUniformLocation(shader_p[SHADER_DEFAULT].asset.id, "sun_rotation");
-    uniform.defaults.sky_color =
-        glGetUniformLocation(shader_p[SHADER_DEFAULT].asset.id, "sky_color");
-
     uniform.skybox.texture_scale =
         glGetUniformLocation(shader_p[SHADER_SKYBOX].asset.id, "texture_scale");
     uniform.skybox.mat_translation =
@@ -451,6 +438,7 @@ static void draw_everything(void)
 
     f32 delay_in_hours = 6.0f;
     f32 sun_time = skybox_data.time * FSL_PI;
+    f32 sun_angle = sun_time + 90.0f * FSL_DEG2RAD;
     f64 mid_day = 0.0f;
     f64 burn_cold = 0.0f;
     f64 burn = 0.0f;
@@ -560,7 +548,6 @@ static void draw_everything(void)
         1.0f,
     };
 
-    f32 angle = skybox_data.time * FSL_PI + 90.0f * FSL_DEG2RAD;
     rotation = (m4f32){
         cosf(FSL_PI / 2.0f), -sinf(FSL_PI / 2.0f), 0.0f, 0.0f,
         sinf(FSL_PI / 2.0f), cosf(FSL_PI / 2.0f), 0.0f, 0.0f,
@@ -570,9 +557,9 @@ static void draw_everything(void)
 
     rotation = fsl_matrix_multiply(rotation,
             (m4f32){
-            cosf(angle), 0.0f, sinf(angle), 0.0f,
+            cosf(sun_angle), 0.0f, sinf(sun_angle), 0.0f,
             0.0f, 1.0f, 0.0f, 0.0f,
-            -sinf(angle), 0.0f, cosf(angle), 0.0f,
+            -sinf(sun_angle), 0.0f, cosf(sun_angle), 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f,
             });
 
@@ -599,7 +586,7 @@ static void draw_everything(void)
         1.0f,
     };
 
-    angle = skybox_data.time * FSL_PI - 90.0f * FSL_DEG2RAD;
+    sun_angle = skybox_data.time * FSL_PI - 90.0f * FSL_DEG2RAD;
     rotation = (m4f32){
         cosf(FSL_PI / 2.0f), -sinf(FSL_PI / 2.0f), 0.0f, 0.0f,
         sinf(FSL_PI / 2.0f), cosf(FSL_PI / 2.0f), 0.0f, 0.0f,
@@ -609,9 +596,9 @@ static void draw_everything(void)
 
     rotation = fsl_matrix_multiply(rotation,
             (m4f32){
-            cosf(angle), 0.0f, sinf(angle), 0.0f,
+            cosf(sun_angle), 0.0f, sinf(sun_angle), 0.0f,
             0.0f, 1.0f, 0.0f, 0.0f,
-            -sinf(angle), 0.0f, cosf(angle), 0.0f,
+            -sinf(sun_angle), 0.0f, cosf(sun_angle), 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f,
             });
 
@@ -682,7 +669,7 @@ static void draw_everything(void)
     {
         fsl_mesh_draw(&_player.mesh, &_player.camera,
                 _player.pos.x, _player.pos.y, _player.pos.z,
-                _player.roll, _player.pitch, _player.yaw,
+                _player.roll.angle, _player.pitch.angle, _player.yaw.angle,
                 _player.scale.x, _player.scale.y, _player.scale.z);
     }
 
@@ -693,11 +680,11 @@ static void draw_everything(void)
             (GLfloat*)&_player.camera.projection.perspective);
 
     if (core.flag.parse_target && core.flag.hud &&
-            chunk_tab.p[chunk_tab_index] &&
-            chunk_tab.p[chunk_tab_index]->block
-            [(i64)_player.target.z - chunk_tab.p[chunk_tab_index]->pos.z * CHUNK_DIAMETER]
-            [(i64)_player.target.y - chunk_tab.p[chunk_tab_index]->pos.y * CHUNK_DIAMETER]
-            [(i64)_player.target.x - chunk_tab.p[chunk_tab_index]->pos.x * CHUNK_DIAMETER])
+            chunk_tab.p[chunk_tab.index] &&
+            chunk_tab.p[chunk_tab.index]->block
+            [(i64)_player.target.z - chunk_tab.p[chunk_tab.index]->pos.z * CHUNK_DIAMETER]
+            [(i64)_player.target.y - chunk_tab.p[chunk_tab.index]->pos.y * CHUNK_DIAMETER]
+            [(i64)_player.target.x - chunk_tab.p[chunk_tab.index]->pos.x * CHUNK_DIAMETER])
     {
         glUniform3f(uniform.bounding_box.position,
                 (f32)(_player.target.x),
@@ -867,19 +854,19 @@ static void draw_everything(void)
 
         v3f32 camera_position =
         {
-            -_player.camera.cos_yaw * _player.camera.cos_pitch,
-            _player.camera.sin_yaw * _player.camera.cos_pitch,
-            _player.camera.sin_pitch,
+            -_player.camera.yaw.cos * _player.camera.pitch.cos,
+            _player.camera.yaw.sin * _player.camera.pitch.cos,
+            _player.camera.pitch.sin,
         };
 
         glUniform3fv(uniform.gizmo_chunk.camera_position, 1, (GLfloat*)&camera_position);
         glUniform1f(uniform.gizmo_chunk.time, render->time);
 
         glDisable(GL_BLEND);
-        glBindVertexArray(chunk_gizmo_loaded_vao);
+        glBindVertexArray(chunk_gizmo_loaded.vao);
         glDrawArrays(GL_POINTS, 0, settings.chunk_buf_volume);
         glClear(GL_DEPTH_BUFFER_BIT);
-        glBindVertexArray(chunk_gizmo_render_vao);
+        glBindVertexArray(chunk_gizmo_render.vao);
         glDrawArrays(GL_POINTS, 0, settings.chunk_buf_volume);
         glEnable(GL_BLEND);
     }

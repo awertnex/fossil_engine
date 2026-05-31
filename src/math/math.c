@@ -20,7 +20,10 @@
  *  @brief math stuff.
  */
 
-#include "h/math.h"
+#include "math.h"
+#include "matrix.h"
+#include "trigonometry.h"
+#include "vector.h"
 
 #include <math.h>
 

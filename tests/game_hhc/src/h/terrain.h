@@ -3,7 +3,6 @@
 
 #include "deps/fossil/common/types.h"
 
-#include "main.h"
 #include "assets.h"
 #include "chunking.h"
 

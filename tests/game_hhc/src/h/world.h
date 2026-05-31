@@ -1,6 +1,8 @@
 #ifndef HHC_WORLD_H
 #define HHC_WORLD_H
 
+#include "deps/fossil/math/vector.h"
+
 #include "player.h"
 
 #define WORLD_TICK_SPEED        20.0

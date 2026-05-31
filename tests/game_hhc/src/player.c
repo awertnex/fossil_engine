@@ -2,14 +2,17 @@
 #include "deps/fossil/logger/logger.h"
 
 #include "deps/fossil/physics/collision.h"
-#include "deps/fossil/h/math.h"
+#include "deps/fossil/math/math.h"
+#include "deps/fossil/math/vector.h"
 #include "deps/fossil/h/time.h"
 
+#include "h/main.h"
 #include "h/chunking.h"
 #include "h/common.h"
 #include "h/player.h"
 #include "h/world.h"
 
+#include <stdio.h>
 #include <math.h>
 
 /*!
@@ -468,33 +471,33 @@ void player_camera_movement_update(player *p, v2f64 mouse_delta, b8 use_mouse)
         if (p->camera_mode != PLAYER_CAMERA_MODE_STALKER)
             sensitivity = settings.mouse_sensitivity / (zoom / FSL_CAMERA_ZOOM_SENSITIVITY + 1.0);
 
-        p->pitch += mouse_delta.y * sensitivity;
-        p->yaw += mouse_delta.x * sensitivity;
+        p->pitch.angle += mouse_delta.y * sensitivity;
+        p->yaw.angle += mouse_delta.x * sensitivity;
 
-        p->pitch = fsl_clamp_f64(p->pitch, -FSL_CAMERA_ANGLE_MAX, FSL_CAMERA_ANGLE_MAX);
-        p->yaw = fmod(p->yaw, FSL_CAMERA_RANGE_MAX);
-        if (p->yaw < 0.0)
-            p->yaw += FSL_CAMERA_RANGE_MAX;
+        p->pitch.angle = fsl_clamp_f64(p->pitch.angle, -FSL_CAMERA_ANGLE_MAX, FSL_CAMERA_ANGLE_MAX);
+        p->yaw.angle = fmod(p->yaw.angle, FSL_CAMERA_RANGE_MAX);
+        if (p->yaw.angle < 0.0)
+            p->yaw.angle += FSL_CAMERA_RANGE_MAX;
     }
 
-    SROL = sin(p->roll * FSL_DEG2RAD);
-    CROL = cos(p->roll * FSL_DEG2RAD);
-    SPCH = sin(p->pitch * FSL_DEG2RAD);
-    CPCH = cos(p->pitch * FSL_DEG2RAD);
-    SYAW = sin(p->yaw * FSL_DEG2RAD);
-    CYAW = cos(p->yaw * FSL_DEG2RAD);
-    p->sin_roll = SYAW;
-    p->cos_roll = CYAW;
-    p->sin_pitch = SPCH;
-    p->cos_pitch = CPCH;
-    p->sin_yaw = SYAW;
-    p->cos_yaw = CYAW;
-    p->camera.sin_roll = SROL;
-    p->camera.cos_roll = CROL;
-    p->camera.sin_pitch = SPCH;
-    p->camera.cos_pitch = CPCH;
-    p->camera.sin_yaw = SYAW;
-    p->camera.cos_yaw = CYAW;
+    SROL = sin(p->roll.angle * FSL_DEG2RAD);
+    CROL = cos(p->roll.angle * FSL_DEG2RAD);
+    SPCH = sin(p->pitch.angle * FSL_DEG2RAD);
+    CPCH = cos(p->pitch.angle * FSL_DEG2RAD);
+    SYAW = sin(p->yaw.angle * FSL_DEG2RAD);
+    CYAW = cos(p->yaw.angle * FSL_DEG2RAD);
+    p->roll.sin = SYAW;
+    p->roll.cos = CYAW;
+    p->pitch.sin = SPCH;
+    p->pitch.cos = CPCH;
+    p->yaw.sin = SYAW;
+    p->yaw.cos = CYAW;
+    p->camera.roll.sin = SROL;
+    p->camera.roll.cos = CROL;
+    p->camera.pitch.sin = SPCH;
+    p->camera.pitch.cos = CPCH;
+    p->camera.yaw.sin = SYAW;
+    p->camera.yaw.cos = CYAW;
 
     switch (p->camera_mode)
     {
@@ -515,18 +518,18 @@ void player_camera_movement_update(player *p, v2f64 mouse_delta, b8 use_mouse)
             p->camera.pos.y = p->pos.y - SYAW * CPCH * p->camera_distance;
             p->camera.pos.z = p->pos.z + p->eye_height - SPCH * p->camera_distance;
 
-            p->camera.sin_pitch = -SPCH;
-            p->camera.sin_yaw = sin((p->yaw + FSL_CAMERA_RANGE_MAX / 2.0) * FSL_DEG2RAD);
-            p->camera.cos_yaw = cos((p->yaw + FSL_CAMERA_RANGE_MAX / 2.0) * FSL_DEG2RAD);
+            p->camera.pitch.sin = -SPCH;
+            p->camera.yaw.sin = sin((p->yaw.angle + FSL_CAMERA_RANGE_MAX / 2.0) * FSL_DEG2RAD);
+            p->camera.yaw.cos = cos((p->yaw.angle + FSL_CAMERA_RANGE_MAX / 2.0) * FSL_DEG2RAD);
             break;
 
         case PLAYER_CAMERA_MODE_STALKER:
             fsl_get_camera_lookat_angles(p->camera.pos, eye_pos, &lookat_pitch, &lookat_yaw);
 
-            p->camera.sin_pitch = sin(lookat_pitch);
-            p->camera.cos_pitch = cos(lookat_pitch);
-            p->camera.sin_yaw = sin(lookat_yaw + (FSL_CAMERA_RANGE_MAX / 2.0) * FSL_DEG2RAD);
-            p->camera.cos_yaw = cos(lookat_yaw + (FSL_CAMERA_RANGE_MAX / 2.0) * FSL_DEG2RAD);
+            p->camera.pitch.sin = sin(lookat_pitch);
+            p->camera.pitch.cos = cos(lookat_pitch);
+            p->camera.yaw.sin = sin(lookat_yaw + (FSL_CAMERA_RANGE_MAX / 2.0) * FSL_DEG2RAD);
+            p->camera.yaw.cos = cos(lookat_yaw + (FSL_CAMERA_RANGE_MAX / 2.0) * FSL_DEG2RAD);
             break;
 
             /* TODO: make the spectator camera mode */
@@ -534,20 +537,20 @@ void player_camera_movement_update(player *p, v2f64 mouse_delta, b8 use_mouse)
             break;
     }
 
-    p->camera_hud.sin_pitch = p->camera.sin_pitch;
-    p->camera_hud.cos_pitch = p->camera.cos_pitch;
-    p->camera_hud.sin_yaw = p->camera.sin_yaw;
-    p->camera_hud.cos_yaw = p->camera.cos_yaw;
+    p->camera_hud.pitch.sin = p->camera.pitch.sin;
+    p->camera_hud.pitch.cos = p->camera.pitch.cos;
+    p->camera_hud.yaw.sin = p->camera.yaw.sin;
+    p->camera_hud.yaw.cos = p->camera.yaw.cos;
 }
 
 void player_target_update(player *p)
 {
     const v3i64 WORLD_VOLUME_MIN = {-WORLD_DIAMETER, -WORLD_DIAMETER, -WORLD_DIAMETER_VERTICAL};
     const v3i64 WORLD_VOLUME_MAX = {WORLD_DIAMETER, WORLD_DIAMETER, WORLD_DIAMETER_VERTICAL};
-    f64 SPCH = p->sin_pitch;
-    f64 CPCH = p->cos_pitch;
-    f64 SYAW = p->sin_yaw;
-    f64 CYAW = p->cos_yaw;
+    f64 SPCH = p->pitch.sin;
+    f64 CPCH = p->pitch.cos;
+    f64 SYAW = p->yaw.sin;
+    f64 CYAW = p->yaw.cos;
     v3f64 eye_pos = {0};
     v3i64 block_pos = {0};
     v3i64 target = {0};

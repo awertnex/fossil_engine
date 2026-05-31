@@ -119,6 +119,7 @@ u32 build_game(int argc, char **argv)
         cmd_push(&cmd, "-Wall");
         cmd_push(&cmd, "-Wextra");
         cmd_push(&cmd, "-Wformat-truncation=0");
+        cmd_push(&cmd, "-Wpedantic");
         cmd_push(&cmd, "-ggdb");
     }
 

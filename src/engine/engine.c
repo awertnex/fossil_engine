@@ -32,10 +32,11 @@
 #include "../logger/logger.h"
 #include "../logger/logger_messages_internal.h"
 #include "../memory/memory.h"
+#include "../math/math.h"
+#include "../math/vector.h"
 #include "../shaders/shader_types.h"
 
 #include "../h/dir.h"
-#include "../h/math.h"
 #include "../h/process.h"
 #include "../h/time.h"
 #include "../h/ui.h"

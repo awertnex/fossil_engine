@@ -27,12 +27,13 @@
 #include "../../engine/engine_assets.h"
 #include "../../logger/logger.h"
 #include "../../logger/logger_messages_internal.h"
+#include "../../math/math.h"
+#include "../../math/vector.h"
 #include "../../memory/memory.h"
 #include "../../shaders/shader_types.h"
 #include "../../string/string_internal.h"
 
 #include "../../h/dir.h"
-#include "../../h/math.h"
 
 #include "mesh.h"
 #include "mesh_loader_internal.h"

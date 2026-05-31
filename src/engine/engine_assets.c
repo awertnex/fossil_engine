@@ -20,7 +20,6 @@
  *  @brief loading and unloading engine's default assets.
  */
 
-#include "../common/common_values.h"
 #include "../common/config.h"
 #include "../common/diagnostics.h"
 #include "../common/types.h"
@@ -29,7 +28,6 @@
 #include "../shaders/shader_types.h"
 #include "../shaders/shaders.h"
 
-#include "engine.h"
 #include "engine_assets.h"
 
 #include <stdio.h>

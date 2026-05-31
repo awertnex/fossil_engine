@@ -26,10 +26,13 @@
 #include "../common/types.h"
 #include "../logger/logger.h"
 #include "../logger/logger_messages_internal.h"
+#include "../math/math.h"
+#include "../math/matrix.h"
+#include "../math/trigonometry.h"
+#include "../math/vector.h"
 #include "../memory/memory.h"
 
 #include "../h/dir.h"
-#include "../h/math.h"
 
 #include "assets.h"
 
@@ -672,33 +675,33 @@ void fsl_update_camera_movement(fsl_camera *camera, b8 roll)
 {
     if (roll)
     {
-        camera->roll = fmod(camera->roll, FSL_CAMERA_RANGE_MAX);
-        if (camera->roll < 0.0) camera->roll += FSL_CAMERA_RANGE_MAX;
+        camera->roll.angle = fmod(camera->roll.angle, FSL_CAMERA_RANGE_MAX);
+        if (camera->roll.angle < 0.0) camera->roll.angle += FSL_CAMERA_RANGE_MAX;
     }
-    else camera->roll = 0.0;
+    else camera->roll.angle = 0.0;
 
-    camera->pitch = fsl_clamp_f64(camera->pitch, -FSL_CAMERA_ANGLE_MAX, FSL_CAMERA_ANGLE_MAX);
-    camera->yaw = fmod(camera->yaw, FSL_CAMERA_RANGE_MAX);
-    if (camera->yaw < 0.0) camera->yaw += FSL_CAMERA_RANGE_MAX;
+    camera->pitch.angle = fsl_clamp_f64(camera->pitch.angle, -FSL_CAMERA_ANGLE_MAX, FSL_CAMERA_ANGLE_MAX);
+    camera->yaw.angle = fmod(camera->yaw.angle, FSL_CAMERA_RANGE_MAX);
+    if (camera->yaw.angle < 0.0) camera->yaw.angle += FSL_CAMERA_RANGE_MAX;
 
-    camera->sin_roll = sin(camera->roll * FSL_DEG2RAD);
-    camera->cos_roll = cos(camera->roll * FSL_DEG2RAD);
-    camera->sin_pitch = sin(camera->pitch * FSL_DEG2RAD);
-    camera->cos_pitch = cos(camera->pitch * FSL_DEG2RAD);
-    camera->sin_yaw = sin(camera->yaw * FSL_DEG2RAD);
-    camera->cos_yaw = cos(camera->yaw * FSL_DEG2RAD);
+    camera->roll.sin = sin(camera->roll.angle * FSL_DEG2RAD);
+    camera->roll.cos = cos(camera->roll.angle * FSL_DEG2RAD);
+    camera->pitch.sin = sin(camera->pitch.angle * FSL_DEG2RAD);
+    camera->pitch.cos = cos(camera->pitch.angle * FSL_DEG2RAD);
+    camera->yaw.sin = sin(camera->yaw.angle * FSL_DEG2RAD);
+    camera->yaw.cos = cos(camera->yaw.angle * FSL_DEG2RAD);
 
     fsl_update_projection_perspective(*camera, &camera->projection, roll);
 }
 
 void fsl_update_projection_perspective(fsl_camera camera, fsl_projection *projection, b8 roll)
 {
-    const f32 SROL = camera.sin_roll;
-    const f32 CROL = camera.cos_roll;
-    const f32 SPCH = camera.sin_pitch;
-    const f32 CPCH = camera.cos_pitch;
-    const f32 SYAW = camera.sin_yaw;
-    const f32 CYAW = camera.cos_yaw;
+    const f32 SROL = camera.roll.sin;
+    const f32 CROL = camera.roll.cos;
+    const f32 SPCH = camera.pitch.sin;
+    const f32 CPCH = camera.pitch.cos;
+    const f32 SYAW = camera.yaw.sin;
+    const f32 CYAW = camera.yaw.cos;
     f32 ratio = 0.0f;
     f32 fovy = 0.0f;
     f32 far = 0.0f;
@@ -761,6 +764,7 @@ void fsl_update_projection_perspective(fsl_camera camera, fsl_projection *projec
 
     /* ---- rotation: roll -------------------------------------------------- */
 
+    /* TODO: try to fix 'roll' rotation in camera projection matrix */
     if (roll)
     {
         mat_roll.a11 = 1.0f;

@@ -2,6 +2,7 @@
 #define HHC_SUPER_DEBUGGER_H
 
 #include "deps/fossil/common/types.h"
+#include "deps/fossil/math/vector.h"
 
 #include "gui.h"
 

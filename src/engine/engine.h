@@ -27,6 +27,7 @@
 #include "../common/limits.h"
 #include "../common/types.h"
 #include "../assets/asset_types.h"
+#include "../math/vector.h"
 
 #define GLFW_INCLUDE_NONE
 #include "../external/glfw3.h"

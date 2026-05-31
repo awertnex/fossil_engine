@@ -39,13 +39,13 @@ static str str_files[][CMD_SIZE] =
     DIR_SRC"engine/engine_assets.c",
     DIR_SRC"input/input.c",
     DIR_SRC"logger/logger.c",
+    DIR_SRC"math/math.c",
     DIR_SRC"memory/memory.c",
     DIR_SRC"physics/collision.c",
     DIR_SRC"shaders/shaders.c",
     DIR_SRC"shaders/shader_pre_processor.c",
     DIR_SRC"string/string.c",
     DIR_SRC"dir.c",
-    DIR_SRC"math.c",
     DIR_SRC FSL_FILE_NAME_PLATFORM,
     DIR_SRC"time.c",
     DIR_SRC"ui.c"
@@ -64,6 +64,7 @@ static str str_make_dir[][CMD_SIZE] =
     DIR_DST DIR_DEPS DIR_DST"external/",
     DIR_DST DIR_DEPS DIR_DST"external/glad/",
     DIR_DST DIR_DEPS DIR_DST"logger/",
+    DIR_DST DIR_DEPS DIR_DST"math/",
     DIR_DST DIR_DEPS DIR_DST"memory/",
     DIR_DST DIR_DEPS DIR_DST"physics/",
     DIR_DST DIR_DEPS DIR_DST"shaders/",
@@ -76,7 +77,7 @@ static str str_make_dir[][CMD_SIZE] =
     DIR_DST "lib/"
 };
 
-static str *copy_targets[][32] =
+static str *copy_targets[][48] =
 {
     {DIR_SRC"external/glfw3.h",             DIR_DST DIR_DEPS DIR_DST"external/"},
     {DIR_SRC"external/glad/glad.h",         DIR_DST DIR_DEPS DIR_DST"external/glad/"},
@@ -90,6 +91,10 @@ static str *copy_targets[][32] =
     {DIR_SRC"engine/engine_assets.h",       DIR_DST DIR_DEPS DIR_DST"engine/"},
     {DIR_SRC"input/input.h",                DIR_DST DIR_DEPS DIR_DST"input/"},
     {DIR_SRC"logger/logger.h",              DIR_DST DIR_DEPS DIR_DST"logger/"},
+    {DIR_SRC"math/math.h",                  DIR_DST DIR_DEPS DIR_DST"math/"},
+    {DIR_SRC"math/matrix.h",                DIR_DST DIR_DEPS DIR_DST"math/"},
+    {DIR_SRC"math/trigonometry.h",          DIR_DST DIR_DEPS DIR_DST"math/"},
+    {DIR_SRC"math/vector.h",                DIR_DST DIR_DEPS DIR_DST"math/"},
     {DIR_SRC"memory/memory.h",              DIR_DST DIR_DEPS DIR_DST"memory/"},
     {DIR_SRC"memory/memory_types.h",        DIR_DST DIR_DEPS DIR_DST"memory/"},
     {DIR_SRC"physics/collision.h",          DIR_DST DIR_DEPS DIR_DST"physics/"},

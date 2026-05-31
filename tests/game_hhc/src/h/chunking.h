@@ -3,6 +3,7 @@
 
 #include "deps/fossil/common/common.h"
 #include "deps/fossil/common/types.h"
+#include "deps/fossil/math/vector.h"
 
 #include "assets.h"
 #include "common.h"
@@ -208,18 +209,36 @@ typedef struct chunk
     u32 block[CHUNK_DIAMETER][CHUNK_DIAMETER][CHUNK_DIAMETER];
 } chunk;
 
+/*!
+ *  @brief chunk pointer look-up table that points to @ref chunk_buffer.p addresses.
+ *
+ *  @ref chunk_buffer.p addresses ordered by their positions in 3d space relative to player position.
+ */
 typedef struct chunk_table
 {
+    /*!
+     *  @brief position of first empty slot in @ref chunk_buf.
+     */
+    u32 index;
+
     fsl_mem_handle handle;
     chunk **p;              /* cached pointer from `handle` */
 } chunk_table;
 
+/*!
+ *  @brief chunk pointer pointer look-up table that points to @ref chunk_table.p addresses.
+ *
+ *  @ref chunk_table.p addresses ordered by distance from @ref chunk_tab center in ascending order.
+ */
 typedef struct chunk_order
 {
     fsl_mem_handle handle;
     chunk ***p;
 } chunk_order;
 
+/*!
+ *  @brief queue of chunks to be processed.
+ */
 typedef struct chunk_queue
 {
     u32 id;
@@ -232,6 +251,21 @@ typedef struct chunk_queue
     fsl_mem_handle queue;
     chunk ***queue_p;       /* cached pointer from `queue` */
 } chunk_queue;
+
+/*!
+ *  @brief chunk gizmo render buffer data for chunk colors.
+ *
+ *  for rendering chunk gizmo in one draw call.
+ *
+ *  format: 0xxxyyzz00, 0xrrggbbaa.
+ */
+typedef struct chunk_gizmo
+{
+    GLuint vao;
+    GLuint vbo;
+    fsl_mem_handle handle;
+    v2u32 *p;               /* cached pointer from `handle` */
+} chunk_gizmo;
 
 #define GET_BLOCK_ID(block)     (block & MASK_BLOCK_ID)
 #define SET_BLOCK_ID(block, id) (block = (block & ~MASK_BLOCK_ID) | id)
@@ -251,11 +285,6 @@ typedef struct chunk_queue
  */
 extern u64 CHUNKS_MAX[CHUNK_BUF_RADIUS_MAX + 1];
 
-/*!
- *  @brief chunk pointer look-up table that points to `chunk_buf` addresses.
- *
- *  `chunk_buf` addresses ordered by their positions in 3d space relative to player position.
- */
 extern chunk_table chunk_tab;
 
 /*!
@@ -265,44 +294,18 @@ extern chunk_table chunk_tab;
  */
 extern u32 chunk_tab_index;
 
-/*!
- *  @brief chunk pointer pointer look-up table that points to @ref chunk_tab addresses.
- *
- *  @ref chunk_tab addresses ordered by distance from @ref chunk_tab center in ascending order.
- *
- *  @remark read-only, initialized internally in @ref chunking_init().
- */
 extern chunk_order CHUNK_ORDER;
-
-/*!
- *  @brief queues of chunks to be processed.
- *
- *  @remark read-only, updated internally in @ref chunking_update().
- */
 extern chunk_queue CHUNK_QUEUE[CHUNK_QUEUES_MAX];
 
 /*!
- *  @brief chunk gizmo render buffer data for opaque chunk colors.
- *
- *  for rendering chunk gizmo in one draw call.
- *
- *  format: 0xxxyyzz00, 0xrrggbbaa.
+ *  @brief buffer data for opaque chunk colors.
  */
-extern fsl_mem_handle chunk_gizmo_loaded;
+extern chunk_gizmo chunk_gizmo_loaded;
 
 /*!
- *  @brief chunk gizmo render buffer data for transparent chunk colors.
- *
- *  for rendering chunk gizmo in one draw call.
- *
- *  format: 0xxxyyzz00, 0xrrggbbaa.
+ *  @brief buffer data for transparent chunk colors.
  */
-extern fsl_mem_handle chunk_gizmo_render;
-
-extern GLuint chunk_gizmo_loaded_vao;
-extern GLuint chunk_gizmo_loaded_vbo;
-extern GLuint chunk_gizmo_render_vao;
-extern GLuint chunk_gizmo_render_vbo;
+extern chunk_gizmo chunk_gizmo_render;
 
 /*!
  *  @brief initialize chunking resources.

@@ -11,7 +11,6 @@
 
 enum shader_index
 {
-    SHADER_DEFAULT,
     SHADER_SKYBOX,
     SHADER_GIZMO,
     SHADER_GIZMO_CHUNK,

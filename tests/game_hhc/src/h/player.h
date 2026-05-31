@@ -3,9 +3,8 @@
 
 #include "deps/fossil/physics/collision.h"
 #include "deps/fossil/assets/mesh/mesh.h"
-
-#include "common.h"
-#include "main.h"
+#include "deps/fossil/math/trigonometry.h"
+#include "deps/fossil/math/vector.h"
 
 #define PLAYER_REACH_DISTANCE_MAX   5.0f
 #define PLAYER_HOTBAR_SLOTS_MAX     10
@@ -83,9 +82,7 @@ typedef struct player
     v3f64 target;                   /* arm */
     v3f64 target_normal;
 
-    f64 roll, pitch, yaw;
-    f32 sin_roll, sin_pitch, sin_yaw;
-    f32 cos_roll, cos_pitch, cos_yaw;
+    angle_f64 roll, pitch, yaw;
     f32 eye_height;                 /* eye-level (camera height) */
     fsl_mesh mesh;
 
