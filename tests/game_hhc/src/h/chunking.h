@@ -217,7 +217,7 @@ typedef struct chunk
 typedef struct chunk_table
 {
     /*!
-     *  @brief position of first empty slot in @ref chunk_buf.
+     *  @brief index into @ref chunk_table.p.
      */
     u32 index;
 
@@ -237,19 +237,30 @@ typedef struct chunk_order
 } chunk_order;
 
 /*!
+ *  @brief used to gather chunk address in @chunk_buf.p and its corresponding
+ *  index in @ref chunk_tab.p.
+ */
+typedef struct chunk_cache
+{
+    chunk *ch;
+    u32 index;
+} chunk_cache;
+
+/*!
  *  @brief queue of chunks to be processed.
  */
 typedef struct chunk_queue
 {
-    u32 id;
-    u32 count;              /* number of chunks queued */
-    u32 offset;             /* offset of queue into @ref CHUNK_ORDER */
-    u64 size;
-    u32 cursor;             /* parse position */
+    u32 id;                 /* queue ID */
+    fsl_len count;          /* number of chunks queued */
+    u32 offset;             /* offset of queue into @ref chunk_order.p */
+    fsl_len len;            /* number of members in `queue_p` */
+    u32 cursor_push;        /* push position */
+    u32 cursor_pop;         /* pop position */
     u32 rate_chunk;         /* number of chunks to process per frame */
-    u32 rate_block;         /* number of blocks to process per chunk per frame */
+    u32 rate_block;         /* number of blocks to process per chunk */
     fsl_mem_handle queue;
-    chunk ***queue_p;       /* cached pointer from `queue` */
+    chunk_cache *queue_p;   /* cached pointer from `queue` */
 } chunk_queue;
 
 /*!
@@ -271,7 +282,7 @@ typedef struct chunk_gizmo
 #define SET_BLOCK_ID(block, id) (block = (block & ~MASK_BLOCK_ID) | id)
 
 /*!
- *  @brief look-up table to reduce redundant checks of untouched regions of `chunk_buf`.
+ *  @brief look-up table to reduce redundant checking of untouched indices of @ref chunk_buf.
  *
  *  the sphere of chunks around @ref chunk_tab center are the only chunks that get processed,
  *  and since @ref CHUNK_ORDER is a look-up that orders @ref chunk_tab addresses based on

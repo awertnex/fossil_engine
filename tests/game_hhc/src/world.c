@@ -17,7 +17,6 @@
 #include "h/world.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
@@ -35,6 +34,8 @@ u32 world_init(str *name, u64 seed, player *p)
 
     if (chunking_init() != FSL_ERR_SUCCESS)
         return *GAME_ERR;
+
+    world.terrain_func = terrain_decaying_lands;
 
     world.gravity = FSL_GRAVITY * 3.0f;
 
@@ -172,7 +173,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
         file_len = fsl_get_file_contents(string[0], (void*)&file_contents, TRUE);
         if (*GAME_ERR != FSL_ERR_SUCCESS || !file_contents)
             return *GAME_ERR;
-        seed = (u64)strtoul(file_contents, NULL, 10);
+        fsl_convert_str_to_u64(file_contents, &seed);
         fsl_mem_free((void*)&file_contents, file_len, "world_load().file_contents");
     }
     else
@@ -225,8 +226,13 @@ void world_update(player *p)
     player_camera_movement_update(p, render->mouse_delta, use_mouse);
     player_target_update(p);
 
-    chunking_update(p->ch, &p->ch_delta);
-    chunk_tab.index = get_chunk_index(p->ch, p->target);
+    if (MODE_INTERNAL_LOAD_CHUNKS &&
+            fsl_is_dir_exists(fsl_stringf("%s"GAME_DIR_WORLD_NAME_CHUNKS,
+                    world.path), TRUE) == FSL_ERR_SUCCESS)
+    {
+        chunking_update(p->ch, &p->ch_delta);
+        chunk_tab.index = get_chunk_index(p->ch, p->target);
+    }
 
     fsl_update_projection_perspective(p->camera, &p->camera.projection, FALSE);
     fsl_update_projection_perspective(p->camera_hud, &p->camera_hud.projection, FALSE);

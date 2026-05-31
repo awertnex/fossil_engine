@@ -4,6 +4,7 @@
 #include "deps/fossil/math/vector.h"
 
 #include "player.h"
+#include "terrain.h"
 
 #define WORLD_TICK_SPEED        20.0
 
@@ -20,6 +21,7 @@ typedef struct world_info
     u64 tick;
     u64 tick_start;
     u64 days;
+    terrain (*terrain_func)(v3i32 coordinates);
 
     f32 gravity;
     v3f32 drag;

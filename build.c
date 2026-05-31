@@ -74,7 +74,8 @@ static str str_make_dir[][CMD_SIZE] =
     DIR_DST DIR_DST DIR_DST,
     DIR_DST DIR_DST DIR_DST"logs/",
 
-    DIR_DST "lib/"
+    DIR_DST "lib/",
+    DIR_DST "lib/"PLATFORM
 };
 
 static str *copy_targets[][48] =
@@ -168,7 +169,7 @@ int main(int argc, char **argv)
             copy_file("LICENSE",            DIR_DST DIR_DST DIR_DST) != ERR_SUCCESS ||
             copy_file("version.txt",        DIR_DST DIR_DST DIR_DST) != ERR_SUCCESS ||
 
-            copy_dir("lib/"PLATFORM,        DIR_DST "lib/", TRUE) != ERR_SUCCESS ||
+            copy_dir("lib/"PLATFORM,        DIR_DST "lib/"PLATFORM, TRUE) != ERR_SUCCESS ||
             copy_dir("lib/"PLATFORM,        DIR_DST DIR_DST, TRUE) != ERR_SUCCESS)
         cmd_fail(&cmd);
 

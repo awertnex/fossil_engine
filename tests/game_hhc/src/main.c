@@ -633,7 +633,7 @@ static void draw_everything(void)
                 CHUNK_DIAMETER, CHUNK_DIAMETER, CHUNK_DIAMETER);
 
         cursor = CHUNK_ORDER.p;
-        end = &CHUNK_ORDER.p[CHUNK_QUEUE[0].size];
+        end = &CHUNK_ORDER.p[CHUNK_QUEUE[0].len];
         for (; cursor < end; ++cursor)
         {
             ch = **cursor;
@@ -648,9 +648,9 @@ static void draw_everything(void)
             glDrawElements(GL_LINE_STRIP, 24, GL_UNSIGNED_INT, 0);
         }
 
-        if (CHUNK_QUEUE[1].size)
+        if (CHUNK_QUEUE[1].len)
         {
-            end += CHUNK_QUEUE[1].size;
+            end += CHUNK_QUEUE[1].len;
             for (; cursor < end; ++cursor)
             {
                 ch = **cursor;
@@ -666,9 +666,9 @@ static void draw_everything(void)
             }
         }
 
-        if (CHUNK_QUEUE[2].size)
+        if (CHUNK_QUEUE[2].len)
         {
-            end += CHUNK_QUEUE[2].size;
+            end += CHUNK_QUEUE[2].len;
             for (; cursor < end; ++cursor)
             {
                 ch = **cursor;
@@ -876,13 +876,18 @@ static void draw_everything(void)
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
 
         fsl_text_push(fsl_stringf(
-                    "CHUNK QUEUE 0 [%d/%"PRIu64"]\n"
-                    "CHUNK QUEUE 1 [%d/%"PRIu64"]\n"
-                    "CHUNK QUEUE 2 [%d/%"PRIu64"]\n"
-                    "TOTAL CHUNKS [%"PRIu64"]\n",
-                    CHUNK_QUEUE[0].count, CHUNK_QUEUE[0].size,
-                    CHUNK_QUEUE[1].count, CHUNK_QUEUE[1].size,
-                    CHUNK_QUEUE[2].count, CHUNK_QUEUE[2].size,
+                    "CHUNK QUEUE 0 [%7d/%-7"PRIu64"][push/pop: %7"PRIu64"/%-7"PRIu64"]\n"
+                    "CHUNK QUEUE 1 [%7d/%-7"PRIu64"][push/pop: %7"PRIu64"/%-7"PRIu64"]\n"
+                    "CHUNK QUEUE 2 [%7d/%-7"PRIu64"][push/pop: %7"PRIu64"/%-7"PRIu64"]\n"
+                    "TOTAL CHUNKS                            [%15"PRIu64"]\n",
+                    CHUNK_QUEUE[0].count, CHUNK_QUEUE[0].len,
+                    CHUNK_QUEUE[0].cursor_pop, CHUNK_QUEUE[0].cursor_push,
+
+                    CHUNK_QUEUE[1].count, CHUNK_QUEUE[1].len,
+                    CHUNK_QUEUE[1].cursor_pop, CHUNK_QUEUE[1].cursor_push,
+
+                    CHUNK_QUEUE[2].count, CHUNK_QUEUE[2].len,
+                    CHUNK_QUEUE[2].cursor_pop, CHUNK_QUEUE[2].cursor_push,
                     CHUNKS_MAX[settings.render_distance]),
                 render->size.x - SET_MARGIN, SET_MARGIN,
                 FSL_TEXT_ALIGN_RIGHT, 0, 0,
