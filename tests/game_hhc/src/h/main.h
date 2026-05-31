@@ -94,7 +94,6 @@ struct hhc_uniform
 
     struct /* gizmo */
     {
-        GLint ndc_scale;
         GLint mat_translation;
         GLint mat_rotation;
         GLint mat_orientation;

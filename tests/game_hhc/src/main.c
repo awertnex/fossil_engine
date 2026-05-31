@@ -58,6 +58,7 @@ static u32 settings_init(void);
 
 void settings_update(void);
 static void draw_everything(void);
+static void draw_gizmo(f32 pos_x, f32 pos_y);
 
 static void callback_framebuffer_size(i32 size_x, i32 size_y)
 {
@@ -211,8 +212,6 @@ static void bind_shader_uniforms(void)
     uniform.skybox.render_layer =
         glGetUniformLocation(shader_p[SHADER_SKYBOX].asset.id, "render_layer");
 
-    uniform.gizmo.ndc_scale =
-        glGetUniformLocation(shader_p[SHADER_GIZMO].asset.id, "ndc_scale");
     uniform.gizmo.mat_translation =
         glGetUniformLocation(shader_p[SHADER_GIZMO].asset.id, "mat_translation");
     uniform.gizmo.mat_rotation =
@@ -285,8 +284,6 @@ static void generate_standard_meshes(void)
     u32 i = 0;
     const u32 VBO_LEN_COH =     24;
     const u32 EBO_LEN_COH =     36;
-    const u32 VBO_LEN_GIZMO =   51;
-    const u32 EBO_LEN_GIZMO =   90;
 
     GLfloat vbo_data_coh[] =
     {
@@ -308,49 +305,6 @@ static void generate_standard_meshes(void)
         2, 6, 4, 4, 0, 2,
         4, 6, 7, 7, 5, 4,
         0, 1, 3, 3, 2, 0
-    };
-
-    const GLfloat THIC = 0.06f;
-    GLfloat vbo_data_gizmo[] =
-    {
-        0.0f, 0.0f, 0.0f,
-        THIC, THIC, 0.0f,
-        THIC, 0.0f, THIC,
-        0.0f, THIC, THIC,
-        1.0f, 0.0f, 0.0f,
-        1.0f, THIC, 0.0f,
-        1.0f, 0.0f, THIC,
-        0.0f, 1.0f, 0.0f,
-        THIC, 1.0f, 0.0f,
-        0.0f, 1.0f, THIC,
-        0.0f, 0.0f, 1.0f,
-        THIC, 0.0f, 1.0f,
-        0.0f, THIC, 1.0f,
-        THIC, THIC, THIC,
-        1.0f, THIC, THIC,
-        THIC, 1.0f, THIC,
-        THIC, THIC, 1.0f
-    };
-
-    GLuint ebo_data_gizmo[] =
-    {
-        0, 2, 6, 6, 4, 0,
-        0, 4, 5, 5, 1, 0,
-        1, 5, 14, 14, 13, 1,
-        2, 13, 14, 14, 6, 2,
-        4, 6, 14, 14, 5, 4,
-
-        0, 7, 9, 9, 3, 0,
-        0, 1, 8, 8, 7, 0,
-        1, 13, 15, 15, 8, 1,
-        3, 9, 15, 15, 13, 3,
-        7, 8, 15, 15, 9, 7,
-
-        0, 3, 12, 12, 10, 0,
-        0, 10, 11, 11, 2, 0,
-        2, 11, 16, 16, 13, 2,
-        13, 16, 12, 12, 3, 13,
-        10, 12, 16, 16, 11, 10
     };
 
     if (fsl_mesh_load(&_player.mesh, "Player", "player", "player.obj", GAME_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
@@ -750,30 +704,12 @@ static void draw_everything(void)
 
     if (core.flag.hud && core.flag.debug)
     {
-        glUseProgram(shader_p[SHADER_GIZMO].asset.id);
-
-        glUniform2fv(uniform.gizmo.ndc_scale, 1, (GLfloat*)&render->ndc_scale);
-        glUniformMatrix4fv(uniform.gizmo.mat_translation, 1, GL_FALSE,
-                (GLfloat*)&_player.camera_hud.projection.target);
-        glUniformMatrix4fv(uniform.gizmo.mat_rotation, 1, GL_FALSE,
-                (GLfloat*)&_player.camera_hud.projection.rotation);
-        glUniformMatrix4fv(uniform.gizmo.mat_orientation, 1, GL_FALSE,
-                (GLfloat*)&_player.camera_hud.projection.orientation);
-        glUniformMatrix4fv(uniform.gizmo.mat_projection, 1, GL_FALSE,
-                (GLfloat*)&_player.camera_hud.projection.projection);
-
-        glBindVertexArray(mesh_p[MESH_GIZMO].vao);
-        glUniform3f(uniform.gizmo.color, 1.0f, 0.0f, 0.0f);
-        glDrawElements(GL_TRIANGLES, 30, GL_UNSIGNED_INT, (void*)0);
-        glUniform3f(uniform.gizmo.color, 0.0f, 1.0f, 0.0f);
-        glDrawElements(GL_TRIANGLES, 30, GL_UNSIGNED_INT, (void*)(30 * sizeof(GLuint)));
-        glUniform3f(uniform.gizmo.color, 0.0f, 0.0f, 1.0f);
-        glDrawElements(GL_TRIANGLES, 30, GL_UNSIGNED_INT, (void*)(60 * sizeof(GLuint)));
+        draw_gizmo(render->size.x / 2.0f, render->size.y / 2.0f);
     }
 
     /* ---- draw hud chunk gizmo -------------------------------------------- */
 
-    if (core.debug.chunk_gizmo && core.flag.hud)
+    if (core.flag.hud && core.debug.chunk_gizmo)
     {
         glClear(GL_DEPTH_BUFFER_BIT);
         glUseProgram(shader_p[SHADER_GIZMO_CHUNK].asset.id);
@@ -1041,6 +977,35 @@ static void draw_everything(void)
 
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+static void draw_gizmo(f32 pos_x, f32 pos_y)
+{
+    fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
+    fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
+    m4f32 transform = {0};
+
+    transform.a11 = 1.0f;
+    transform.a22 = 1.0f;
+    transform.a33 = 1.0f;
+    transform.a41 = pos_x;
+    transform.a42 = pos_y;
+    transform.a44 = 1.0f;
+
+    glUseProgram(shader_p[SHADER_GIZMO].asset.id);
+
+    glUniformMatrix4fv(uniform.gizmo.mat_translation, 1, GL_FALSE,
+            (GLfloat*)&_player.camera_hud.projection.target);
+    glUniformMatrix4fv(uniform.gizmo.mat_rotation, 1, GL_FALSE,
+            (GLfloat*)&_player.camera_hud.projection.rotation);
+    glUniformMatrix4fv(uniform.gizmo.mat_orientation, 1, GL_FALSE,
+            (GLfloat*)&_player.camera_hud.projection.orientation);
+    glUniformMatrix4fv(uniform.gizmo.mat_projection, 1, GL_FALSE,
+            (GLfloat*)&_player.camera_hud.projection.projection);
+
+    glBindVertexArray(mesh_p[MESH_GIZMO].vao);
+    glUniform3f(uniform.gizmo.color, 1.0f, 0.0f, 0.0f);
+    glDrawElements(GL_TRIANGLES, 30, GL_UNSIGNED_INT, 0);
 }
 
 int main(int argc, char **argv)
