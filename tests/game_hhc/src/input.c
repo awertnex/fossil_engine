@@ -420,6 +420,6 @@ void input_update(player *p)
                     "Shaders Reloaded!\n");
         else
             LOGERROR(shader_err, FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                    "Failed to Reload Shaders");
+                    "Failed to Reload Shaders\n");
     }
 }

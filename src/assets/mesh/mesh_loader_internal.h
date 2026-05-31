@@ -24,7 +24,6 @@
 #define FSL_MESH_LOADER_INTERNAL_H
 
 #include "../../common/types.h"
-#include "mesh.h"
 
 #define MESH_FILE_ID "fsl_mesh"
 

@@ -31,6 +31,8 @@
 
 #include "../../h/dir.h"
 
+#include "../asset_types.h"
+
 #include "mesh_loader_internal.h"
 
 #include <stdio.h>

@@ -20,7 +20,6 @@
  *  @brief mesh loading, generating, unloading and mesh file formats.
  */
 
-#include "../../common/common_values.h"
 #include "../../common/config.h"
 #include "../../common/diagnostics.h"
 #include "../../common/types.h"
@@ -29,8 +28,7 @@
 #include "../../logger/logger.h"
 #include "../../logger/logger_messages_internal.h"
 #include "../../memory/memory.h"
-#include "../../shaders/shaders.h"
-#include "../../string/string.h"
+#include "../../shaders/shader_types.h"
 #include "../../string/string_internal.h"
 
 #include "../../h/dir.h"
@@ -141,6 +139,7 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
     fsl_array vertex_buf = {0};
     fsl_array index_buf = {0};
     u32 i = 0;
+    b8 is_cooked = FALSE;
 
     if (!mesh)
     {
@@ -151,16 +150,9 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
     }
 
     snprintf(path_temp, FSL_PATH_CAP, "%s%s", path, file);
-    if (fsl_is_file_exists(path_temp, FALSE) != FSL_ERR_SUCCESS)
-    {
-        LOGERROR(FSL_ERR_MESH_LOAD_FAIL,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Load Mesh", path_temp, "File Not Found"));
-        return fsl_err;
-    }
-
     snprintf(file_temp, FSL_ID_CAP, "%s", file);
-    if (mesh_is_cooked(path_temp))
+    is_cooked = mesh_is_cooked(path_temp);
+    if (is_cooked)
     {
         extension = strrchr(file_temp, '.');
         if (extension)
@@ -168,12 +160,23 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
             ++extension;
             snprintf(extension, strlen(FSL_FILE_FORMAT_NAME_FOSSIL_MESH) + 1, "%s", FSL_FILE_FORMAT_NAME_FOSSIL_MESH);
         }
+
         extension = strrchr(path_temp, '.');
         if (extension)
         {
             ++extension;
             snprintf(extension, strlen(FSL_FILE_FORMAT_NAME_FOSSIL_MESH) + 1, "%s", FSL_FILE_FORMAT_NAME_FOSSIL_MESH);
         }
+    }
+
+
+    if (!is_cooked && fsl_is_file_exists(path_temp, FALSE) != FSL_ERR_SUCCESS)
+    {
+        snprintf(path_temp, FSL_PATH_CAP, "%s%s", path, file);
+        LOGERROR(FSL_ERR_MESH_LOAD_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                MSG_ACTION_SUBJECT_REASON_ERROR("Load Mesh", path_temp, "File Not Found"));
+        return fsl_err;
     }
 
 fallback:
