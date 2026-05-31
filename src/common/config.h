@@ -26,6 +26,7 @@
 #define FSL_DIR_NAME_FONTS      "fossil/assets/fonts/"
 #define FSL_DIR_NAME_TEXTURES   "fossil/assets/textures/"
 #define FSL_DIR_NAME_SHADERS    "fossil/assets/shaders/"
+#define FSL_DIR_NAME_MODELS     "fossil/assets/models/"
 #define FSL_DIR_NAME_LOGS       "fossil/logs/"
 
 #define FSL_FILE_NAME_LOG_ERROR "log_error.log"

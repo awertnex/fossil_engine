@@ -7,7 +7,7 @@ uniform sampler2D texture_sun;
 uniform int render_layer;
 uniform vec3 sky_color;
 uniform vec3 horizon_color;
-in vec2 tex_coords;
+in vec2 uv;
 out vec4 color;
 vec4 sun;
 
@@ -21,9 +21,9 @@ void main()
     switch (render_layer)
     {
         case 0:
-            float sky_val = texture(texture_sky, tex_coords).r;
-            float horizon_val = texture(texture_horizon, tex_coords).r;
-            vec4 stars = texture(texture_stars, tex_coords);
+            float sky_val = texture(texture_sky, uv).r;
+            float horizon_val = texture(texture_horizon, uv).r;
+            vec4 stars = texture(texture_stars, uv);
 
             color = vec4(sky_color * (1.0 - horizon_val), 1.0) +
                 vec4(horizon_color * horizon_val, 1.0);
@@ -32,12 +32,12 @@ void main()
             break;
 
         case 1:
-            sun = texture(texture_sun, tex_coords);
+            sun = texture(texture_sun, uv);
             color = vec4(sun.rgb * sun.a, sun.a);
             break;
 
         case 2:
-            sun = texture(texture_sun, tex_coords);
+            sun = texture(texture_sun, uv);
             color = vec4(sun.rgb * sun.a, sun.a) * (1.0 - sky_brightness);
             break;
     }

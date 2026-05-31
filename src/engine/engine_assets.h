@@ -58,6 +58,12 @@ enum fsl_texture_index
     FSL_TEXTURE_INDEX_COUNT
 }; /* fsl_texture_index */
 
+enum fsl_mesh_index
+{
+    FSL_MESH_INDEX_SKYBOX,
+    FSL_MESH_INDEX_COUNT
+}; /* fsl_mesh_index */
+
 /* ---- section: declarations ----------------------------------------------- */
 
 /*!
@@ -80,6 +86,13 @@ FSLAPI extern fsl_mem_handle fsl_shader_buf;
  *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
  */
 FSLAPI extern fsl_mem_handle fsl_font_buf;
+
+/*!
+ *  @brief engine's default meshes.
+ *
+ *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
+ */
+FSLAPI extern fsl_mem_handle fsl_mesh_buf;
 
 /*!
  *  @brief engine's default unit quad, with texture coordinates.

@@ -158,10 +158,10 @@ void input_update(player *p)
     f32 ny = 0.0f;
     f32 pz = 0.0f;
     f32 nz = 0.0f;
-    f32 spch = sin(p->pitch.angle * FSL_DEG2RAD);
-    f32 cpch = cos(p->pitch.angle * FSL_DEG2RAD);
-    f32 syaw = sin(p->yaw.angle * FSL_DEG2RAD);
-    f32 cyaw = cos(p->yaw.angle * FSL_DEG2RAD);
+    f32 spch = sin(p->transform.rot.y * FSL_DEG2RAD);
+    f32 cpch = cos(p->transform.rot.y * FSL_DEG2RAD);
+    f32 syaw = sin(p->transform.rot.z * FSL_DEG2RAD);
+    f32 cyaw = cos(p->transform.rot.z * FSL_DEG2RAD);
 
     p->input.x = 0.0f;
     p->input.y = 0.0f;
@@ -218,11 +218,11 @@ void input_update(player *p)
         {
             p->input.x =
                 (px - nx) * cyaw * cpch +
-                (py - ny) * -cos(p->yaw.angle * FSL_DEG2RAD + FSL_PI / 2.0) +
+                (py - ny) * -cos(p->transform.rot.z * FSL_DEG2RAD + FSL_PI / 2.0) +
                 (pz - nz) * cyaw * spch;
             p->input.y =
                 (px - nx) * -syaw * cpch +
-                (py - ny) * sin(p->yaw.angle * FSL_DEG2RAD + FSL_PI / 2.0) +
+                (py - ny) * sin(p->transform.rot.z * FSL_DEG2RAD + FSL_PI / 2.0) +
                 (pz - nz) * -syaw * spch;
             p->input.z =
                 (px - nx) * -spch +
@@ -232,10 +232,10 @@ void input_update(player *p)
         {
             p->input.x =
                 (px - nx) * cyaw +
-                (py - ny) * -cos(p->yaw.angle * FSL_DEG2RAD + FSL_PI / 2.0);
+                (py - ny) * -cos(p->transform.rot.z * FSL_DEG2RAD + FSL_PI / 2.0);
             p->input.y =
                 (px - nx) * -syaw +
-                (py - ny) * sin(p->yaw.angle * FSL_DEG2RAD + FSL_PI / 2.0);
+                (py - ny) * sin(p->transform.rot.z * FSL_DEG2RAD + FSL_PI / 2.0);
             p->input.z =
                 pz - nz;
         }

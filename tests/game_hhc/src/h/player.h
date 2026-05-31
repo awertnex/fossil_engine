@@ -1,10 +1,11 @@
 #ifndef HHC_PLAYER_H
 #define HHC_PLAYER_H
 
-#include "deps/fossil/physics/collision.h"
 #include "deps/fossil/assets/mesh/mesh.h"
 #include "deps/fossil/math/trigonometry.h"
 #include "deps/fossil/math/vector.h"
+#include "deps/fossil/physics/collision.h"
+#include "deps/fossil/physics/physics_types.h"
 
 #define PLAYER_REACH_DISTANCE_MAX   5.0f
 #define PLAYER_HOTBAR_SLOTS_MAX     10
@@ -75,9 +76,8 @@ typedef struct player
 {
     str name[64];                   /* in-game name */
     u64 flag;                       /* enum @ref player_flag */
-    v3f64 pos;                      /* coordinates in world */
-    v3f64 pos_last;                 /* coordinates in world of previous frame */
-    v3f32 scale;
+    transform_v3f64 transform;
+    transform_v3f64 transform_last;
     v3f32 size;                     /* size (for collision detection) */
     v3f64 target;                   /* arm */
     v3f64 target_normal;

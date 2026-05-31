@@ -77,7 +77,6 @@ struct hhc_uniform
 
     struct /* skybox */
     {
-        GLint texture_scale;
         GLint mat_translation;
         GLint mat_rotation;
         GLint mat_sun_rotation;

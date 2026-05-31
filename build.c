@@ -98,6 +98,7 @@ static str *copy_targets[][48] =
     {DIR_SRC"memory/memory.h",              DIR_DST DIR_DEPS DIR_DST"memory/"},
     {DIR_SRC"memory/memory_types.h",        DIR_DST DIR_DEPS DIR_DST"memory/"},
     {DIR_SRC"physics/collision.h",          DIR_DST DIR_DEPS DIR_DST"physics/"},
+    {DIR_SRC"physics/physics_types.h",      DIR_DST DIR_DEPS DIR_DST"physics/"},
     {DIR_SRC"shaders/shader_types.h",       DIR_DST DIR_DEPS DIR_DST"shaders/"},
     {DIR_SRC"shaders/shaders.h",            DIR_DST DIR_DEPS DIR_DST"shaders/"},
     {DIR_SRC"string/string.h",              DIR_DST DIR_DEPS DIR_DST"string/"}

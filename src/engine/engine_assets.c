@@ -37,6 +37,7 @@
 fsl_mem_handle fsl_texture_buf = {0};
 fsl_mem_handle fsl_shader_buf = {0};
 fsl_mem_handle fsl_font_buf = {0};
+fsl_mem_handle fsl_mesh_buf = {0};
 fsl_mesh fsl_mesh_unit_quad = {0};
 
 /* ---- section: implementation --------------------------------------------- */
@@ -47,6 +48,7 @@ u32 fsl_assets_init(void)
     fsl_texture *texture_p = NULL;
     fsl_shader_program *shader_p = NULL;
     fsl_font *font_p = NULL;
+    fsl_mesh *mesh_p = NULL;
 
     /* ---- engine textures ------------------------------------------------- */
 
@@ -59,10 +61,14 @@ u32 fsl_assets_init(void)
     if (fsl_mem_arena_push(&mem_arena_internal, &fsl_font_buf,
                 FSL_FONT_INDEX_COUNT * sizeof(fsl_font), "fsl_assets_init().fsl_font_buf") != FSL_ERR_SUCCESS)
         goto cleanup;
+    if (fsl_mem_arena_push(&mem_arena_internal, &fsl_mesh_buf,
+                FSL_MESH_INDEX_COUNT * sizeof(fsl_mesh), "fsl_assets_init().fsl_mesh_buf") != FSL_ERR_SUCCESS)
+        goto cleanup;
 
     texture_p = fsl_mem_handle_get(fsl_texture_buf);
     shader_p = fsl_mem_handle_get(fsl_shader_buf);
     font_p = fsl_mem_handle_get(fsl_font_buf);
+    mesh_p = fsl_mem_handle_get(fsl_mesh_buf);
 
     if (fsl_texture_init(&texture_p[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
                 "Panel Active", "panel_active", "panel_active.png", FSL_DIR_NAME_TEXTURES,
@@ -91,8 +97,11 @@ u32 fsl_assets_init(void)
 
     /* ---- engine meshes --------------------------------------------------- */
 
+    if (fsl_mesh_load(&mesh_p[FSL_MESH_INDEX_SKYBOX], "Skybox", "skybox", "skybox.obj", FSL_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
     if (fsl_asset_set_metadata(&fsl_mesh_unit_quad.asset, FSL_ASSET_MESH, "Unit Quad", "unit_quad", NULL, NULL) != FSL_ERR_SUCCESS)
-        return fsl_err;
+        goto cleanup;
 
     /* ---- engine shaders -------------------------------------------------- */
 
