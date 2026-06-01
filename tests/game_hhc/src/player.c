@@ -236,9 +236,12 @@ void player_collision_update(player *p, f64 dt)
                 for (x = START.x; x >= MIN.x && x < MAX.x; x += INCREMENT.x)
                 {
                     ch = get_chunk_resolved(settings.chunk_tab_center, x, y, z);
-                    if (!ch || !(ch->flag & FLAG_CHUNK_GENERATED)) continue;
+                    if (!ch || !(ch->flag & FLAG_CHUNK_GENERATED))
+                        continue;
+
                     _block = get_block_resolved(ch, x, y, z);
-                    if (!_block || !*_block) continue;
+                    if (!_block || !*_block)
+                        continue;
 
                     block_box.pos.x = (f64)((i64)ch->pos.x * CHUNK_DIAMETER + fsl_mod_i32(x, CHUNK_DIAMETER));
                     block_box.pos.y = (f64)((i64)ch->pos.y * CHUNK_DIAMETER + fsl_mod_i32(y, CHUNK_DIAMETER));
@@ -671,9 +674,13 @@ void player_target_update(player *p)
         y = block_pos.y - p->ch.y * CHUNK_DIAMETER;
         z = block_pos.z - p->ch.z * CHUNK_DIAMETER;
         ch = get_chunk_resolved(settings.chunk_tab_center, x, y, z);
-        if (!ch || !(ch->flag & FLAG_CHUNK_GENERATED)) continue;
+        if (!ch || !(ch->flag & FLAG_CHUNK_GENERATED))
+            continue;
+
         _block = get_block_resolved(ch, x, y, z);
-        if (!_block || !*_block) continue;
+        if (!_block || !*_block)
+            continue;
+
         hit = TRUE;
         break;
     }

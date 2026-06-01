@@ -154,14 +154,15 @@ enum chunk_flag
     FLAG_CHUNK_LOADED =     0x01,
     FLAG_CHUNK_DIRTY =      0x02,
     FLAG_CHUNK_GENERATED =  0x04,
-    FLAG_CHUNK_RENDER =     0x08,
-    FLAG_CHUNK_MODIFIED =   0x10,
-    FLAG_CHUNK_IMPORTED =   0x20,
+    FLAG_CHUNK_MESHED =     0x08,
+    FLAG_CHUNK_RENDER =     0x10,
+    FLAG_CHUNK_MODIFIED =   0x20,
+    FLAG_CHUNK_IMPORTED =   0x40,
 
     /*!
      *  @brief chunk marking for @ref chunk_tab shifting logic.
      */
-    FLAG_CHUNK_EDGE =       0x40
+    FLAG_CHUNK_EDGE =       0x80
 }; /* chunk_flag */
 
 enum chunk_shift_state

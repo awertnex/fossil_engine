@@ -557,7 +557,7 @@ static void draw_everything(void)
     {
         ch = **cursor;
         if (!ch || !(ch->flag & FLAG_CHUNK_RENDER))
-                continue;
+            continue;
 
         glUniform3f(uniform.voxel.chunk_position,
                 (f32)(ch->pos.x * CHUNK_DIAMETER),
