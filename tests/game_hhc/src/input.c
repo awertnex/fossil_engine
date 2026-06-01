@@ -245,7 +245,6 @@ void input_update(player *p)
         /* ---- gameplay ---------------------------------------------------- */
 
         if (
-                !core.flag.chunk_buf_dirty &&
                 core.flag.parse_target &&
                 chunk_tab.p[chunk_tab.index])
         {
@@ -265,6 +264,7 @@ void input_update(player *p)
                         p->target_normal, p->hotbar_slots[p->hotbar_slot_selected]);
             }
 
+            /* TODO: make 'sample_block' (pick block) logic */
             if (fsl_is_key_press(bind_sample_block)) {}
         }
 

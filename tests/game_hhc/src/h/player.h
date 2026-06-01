@@ -157,14 +157,6 @@ void player_bounding_box_update(player *p);
 fsl_bounding_box make_collision_capsule(fsl_bounding_box b, v3i32 ch, v3f32 velocity);
 
 /*!
- *  @brief update player chunk deltas.
- *
- *  calculate current chunk and delta chunk, and determine whether
- *  @ref core.flag.chunk_buf_dirty should be set or not.
- */
-void player_chunk_update(player *p);
-
-/*!
  *  @brief calculate camera rotations and mechanics based on `p->camera_mode`.
  *
  *  @param use_mouse let mouse delta move the camera, useful for interacting

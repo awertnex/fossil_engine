@@ -20,7 +20,6 @@ struct hhc_core
         b8 parse_target;
         b8 world_loaded;
         b8 chunks_initialized;
-        b8 chunk_buf_dirty;
     } flag;
 
     struct /* debug */

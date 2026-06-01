@@ -216,7 +216,7 @@ typedef struct chunk
     u32 index;
 
     /*!
-     *  @brief ID of @ref chunk_job that enqueued this chunk.
+     *  @brief ID of @ref chunk_queue that enqueued this chunk.
      */
     u32 queue_id;
 

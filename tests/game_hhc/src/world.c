@@ -41,11 +41,9 @@ u32 world_init(str *name, u64 seed, player *p)
 
     set_player_spawn(p, 0, 0, -30);
     player_spawn(p, TRUE);
-    player_chunk_update(p);
 
     core.flag.hud = 1;
     core.flag.world_loaded = 1;
-    core.flag.chunk_buf_dirty = 1;
     disable_cursor;
     center_cursor;
 

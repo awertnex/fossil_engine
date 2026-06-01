@@ -162,9 +162,12 @@ void player_update(player *p, f64 dt)
                 SET_LERP_SPEED_FOV_MODE, dt);
 
     player_bounding_box_update(p);
-    player_collision_update(p, dt);
+    if (MODE_INTERNAL_COLLIDE)
+        player_collision_update(p, dt);
     player_wrap_coordinates(p);
-    player_chunk_update(p);
+    p->ch.x = floorf((f32)p->transform.pos.x / CHUNK_DIAMETER);
+    p->ch.y = floorf((f32)p->transform.pos.y / CHUNK_DIAMETER);
+    p->ch.z = floorf((f32)p->transform.pos.z / CHUNK_DIAMETER);
 }
 
 void player_collision_update(player *p, f64 dt)
@@ -190,8 +193,6 @@ void player_collision_update(player *p, f64 dt)
     v3i32 INCREMENT = {1, 1, 1};
     b8 resolved = TRUE;
     u32 max_axis = 0;
-
-    if (!MODE_INTERNAL_COLLIDE) return;
 
     displacement.x = p->velocity.x * dt;
     displacement.y = p->velocity.y * dt;
@@ -395,19 +396,6 @@ fsl_bounding_box make_collision_capsule(fsl_bounding_box b, v3i32 ch, v3f32 velo
     result.size.y = ceil(size.y);
     result.size.z = ceil(size.z);
     return result;
-}
-
-void player_chunk_update(player *p)
-{
-    p->ch.x = floorf((f32)p->transform.pos.x / CHUNK_DIAMETER);
-    p->ch.y = floorf((f32)p->transform.pos.y / CHUNK_DIAMETER);
-    p->ch.z = floorf((f32)p->transform.pos.z / CHUNK_DIAMETER);
-
-    if (
-            p->ch_delta.x - p->ch.x ||
-            p->ch_delta.y - p->ch.y ||
-            p->ch_delta.z - p->ch.z)
-        core.flag.chunk_buf_dirty = 1;
 }
 
 static void player_wrap_coordinates(player *p)

@@ -56,6 +56,15 @@ chunk_gizmo chunk_gizmo_render = {0};
 /* ---- section: signatures ------------------------------------------------- */
 
 /*!
+ *  @internal.
+ *
+ *  @brief get block faces based on neighboring blocks.
+ */
+static void block_get_faces_internal(chunk *ch,
+        chunk *px, chunk *nx, chunk *py, chunk *ny, chunk *pz, chunk *nz,
+        v3u32 chunk_tab_coordinates, i32 x, i32 y, i32 z);
+
+/*!
  *  @internal
  */
 static void block_place_internal(chunk *ch,
@@ -451,14 +460,14 @@ void chunking_update(v3i32 player_chunk, v3i32 *player_chunk_delta)
             CHUNKS_MAX[settings.render_distance],
             TRUE, !CHUNK_QUEUE[1].count && CHUNK_QUEUE[2].len);
 
-    if (!core.flag.chunk_buf_dirty)
-        return;
-
-chunk_tab_shift:
-
     DELTA.x = player_chunk.x - player_chunk_delta->x;
     DELTA.y = player_chunk.y - player_chunk_delta->y;
     DELTA.z = player_chunk.z - player_chunk_delta->z;
+
+    if (!(DELTA.x || DELTA.y || DELTA.z))
+        return;
+
+chunk_tab_shift:
 
     AXIS =
         DELTA.x > 0 ? STATE_CHUNK_SHIFT_PX :
@@ -649,14 +658,13 @@ chunk_tab_shift:
         }
     }
 
-    if (core.flag.chunk_buf_dirty)
+    if (DELTA.x || DELTA.y || DELTA.z)
     {
-        if (DELTA.x || DELTA.y || DELTA.z)
-            goto chunk_tab_shift;
-        else
-            core.flag.chunk_buf_dirty = 0;
+        DELTA.x = player_chunk.x - player_chunk_delta->x;
+        DELTA.y = player_chunk.y - player_chunk_delta->y;
+        DELTA.z = player_chunk.z - player_chunk_delta->z;
+        goto chunk_tab_shift;
     }
-
 
 chunk_buf_push:
 
@@ -668,8 +676,6 @@ chunk_buf_push:
             chunk_buf_push_internal(chunk_push_index, *player_chunk_delta);
         }
     }
-
-    core.flag.chunk_buf_dirty = 0;
 }
 
 void chunking_free(void)
@@ -699,6 +705,97 @@ void chunking_free(void)
                 "chunking_init().memory_arena_chunking_internal");
 }
 
+static void block_get_faces_internal(chunk *ch,
+        chunk *px, chunk *nx, chunk *py, chunk *ny, chunk *pz, chunk *nz,
+        v3u32 chunk_tab_coordinates, i32 x, i32 y, i32 z)
+{
+    if (x == CHUNK_DIAMETER - 1)
+    {
+        if (chunk_tab_coordinates.x != settings.chunk_buf_diameter - 1 &&
+                px && px->block[z][y][0] & FLAG_BLOCK_FACE_NX)
+        {
+            px->block[z][y][0] &= ~FLAG_BLOCK_FACE_NX;
+            px->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
+        }
+        else ch->block[z][y][x] |= FLAG_BLOCK_FACE_PX;
+    }
+    else if (ch->block[z][y][x + 1])
+        ch->block[z][y][x + 1] &= ~FLAG_BLOCK_FACE_NX;
+    else ch->block[z][y][x] |= FLAG_BLOCK_FACE_PX;
+
+    if (x == 0)
+    {
+        if (chunk_tab_coordinates.x != 0 &&
+                nx && nx->block[z][y][CHUNK_DIAMETER - 1] & FLAG_BLOCK_FACE_PX)
+        {
+            nx->block[z][y][CHUNK_DIAMETER - 1] &= ~FLAG_BLOCK_FACE_PX;
+            nx->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
+        }
+        else ch->block[z][y][x] |= FLAG_BLOCK_FACE_NX;
+    }
+    else if (ch->block[z][y][x - 1])
+        ch->block[z][y][x - 1] &= ~FLAG_BLOCK_FACE_PX;
+    else ch->block[z][y][x] |= FLAG_BLOCK_FACE_NX;
+
+    if (y == CHUNK_DIAMETER - 1)
+    {
+        if (chunk_tab_coordinates.y != settings.chunk_buf_diameter - 1 &&
+                py && py->block[z][0][x] & FLAG_BLOCK_FACE_NY)
+        {
+            py->block[z][0][x] &= ~FLAG_BLOCK_FACE_NY;
+            py->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
+        }
+        else ch->block[z][y][x] |= FLAG_BLOCK_FACE_PY;
+    }
+    else if (ch->block[z][y + 1][x])
+        ch->block[z][y + 1][x] &= ~FLAG_BLOCK_FACE_NY;
+    else ch->block[z][y][x] |= FLAG_BLOCK_FACE_PY;
+
+    if (y == 0)
+    {
+        if (chunk_tab_coordinates.y != 0 &&
+                ny && ny->block[z][CHUNK_DIAMETER - 1][x] & FLAG_BLOCK_FACE_PY)
+        {
+            ny->block[z][CHUNK_DIAMETER - 1][x] &= ~FLAG_BLOCK_FACE_PY;
+            ny->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
+        }
+        else ch->block[z][y][x] |= FLAG_BLOCK_FACE_NY;
+    }
+    else if (ch->block[z][y - 1][x])
+        ch->block[z][y - 1][x] &= ~FLAG_BLOCK_FACE_PY;
+    else ch->block[z][y][x] |= FLAG_BLOCK_FACE_NY;
+
+    if (z == CHUNK_DIAMETER - 1)
+    {
+        if (chunk_tab_coordinates.z != settings.chunk_buf_diameter - 1 &&
+                pz && pz->block[0][y][x] & FLAG_BLOCK_FACE_NZ)
+        {
+            pz->block[0][y][x] &= ~FLAG_BLOCK_FACE_NZ;
+            pz->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
+        }
+        else ch->block[z][y][x] |= FLAG_BLOCK_FACE_PZ;
+    }
+    else if (ch->block[z + 1][y][x])
+        ch->block[z + 1][y][x] &= ~FLAG_BLOCK_FACE_NZ;
+    else ch->block[z][y][x] |= FLAG_BLOCK_FACE_PZ;
+
+    if (z == 0)
+    {
+        if (chunk_tab_coordinates.z != 0 &&
+                nz && nz->block[CHUNK_DIAMETER - 1][y][x] & FLAG_BLOCK_FACE_PZ)
+        {
+            nz->block[CHUNK_DIAMETER - 1][y][x] &= ~FLAG_BLOCK_FACE_PZ;
+            nz->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
+        }
+        else ch->block[z][y][x] |= FLAG_BLOCK_FACE_NZ;
+    }
+    else if (ch->block[z - 1][y][x])
+        ch->block[z - 1][y][x] &= ~FLAG_BLOCK_FACE_PZ;
+    else ch->block[z][y][x] |= FLAG_BLOCK_FACE_NZ;
+
+    ch->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
+}
+
 void block_place(u32 index, i32 x, i32 y, i32 z, v3f64 normal, enum block_id block_id)
 {
     chunk **ch = NULL;
@@ -710,7 +807,8 @@ void block_place(u32 index, i32 x, i32 y, i32 z, v3f64 normal, enum block_id blo
     chunk *nz = NULL;
     v3u32 chunk_tab_coordinates = {0};
 
-    if (!(normal.x != 0.0f || normal.y != 0.0f || normal.z != 0.0f)) return;
+    if (!(normal.x != 0.0f || normal.y != 0.0f || normal.z != 0.0f))
+        return;
 
     x += (i32)normal.x;
     y += (i32)normal.y;
@@ -749,97 +847,40 @@ static void block_place_internal(chunk *ch,
         chunk *px, chunk *nx, chunk *py, chunk *ny, chunk *pz, chunk *nz,
         v3u32 chunk_tab_coordinates, i32 x, i32 y, i32 z, enum block_id block_id)
 {
-    u32 *block = NULL;
-
     x = fsl_mod_i32(x, CHUNK_DIAMETER);
     y = fsl_mod_i32(y, CHUNK_DIAMETER);
     z = fsl_mod_i32(z, CHUNK_DIAMETER);
-    block = &ch->block[z][y][x];
-    SET_BLOCK_ID(*block, block_id);
+    SET_BLOCK_ID(ch->block[z][y][x], block_id);
 
-    if (x == CHUNK_DIAMETER - 1)
-    {
-        if (chunk_tab_coordinates.x != settings.chunk_buf_diameter - 1 &&
-                px && px->block[z][y][0])
-        {
-            px->block[z][y][0] &= ~FLAG_BLOCK_FACE_NX;
-            px->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
-        }
-        else ch->block[z][y][x] |= FLAG_BLOCK_FACE_PX;
-    }
-    else if (ch->block[z][y][x + 1])
-        ch->block[z][y][x + 1] &= ~FLAG_BLOCK_FACE_NX;
-    else ch->block[z][y][x] |= FLAG_BLOCK_FACE_PX;
+    if (x == CHUNK_DIAMETER - 1 &&
+            chunk_tab_coordinates.x != settings.chunk_buf_diameter - 1 &&
+            px && px->block[z][y][0])
+        px->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
 
-    if (x == 0)
-    {
-        if (chunk_tab_coordinates.x != 0 &&
-                nx && nx->block[z][y][CHUNK_DIAMETER - 1])
-        {
-            nx->block[z][y][CHUNK_DIAMETER - 1] &= ~FLAG_BLOCK_FACE_PX;
-            nx->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
-        }
-        else ch->block[z][y][x] |= FLAG_BLOCK_FACE_NX;
-    }
-    else if (ch->block[z][y][x - 1])
-        ch->block[z][y][x - 1] &= ~FLAG_BLOCK_FACE_PX;
-    else ch->block[z][y][x] |= FLAG_BLOCK_FACE_NX;
+    if (x == 0 &&
+            chunk_tab_coordinates.x != 0 &&
+            nx && nx->block[z][y][CHUNK_DIAMETER - 1])
+        nx->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
 
-    if (y == CHUNK_DIAMETER - 1)
-    {
-        if (chunk_tab_coordinates.y != settings.chunk_buf_diameter - 1 &&
-                py && py->block[z][0][x])
-        {
-            py->block[z][0][x] &= ~FLAG_BLOCK_FACE_NY;
-            py->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
-        }
-        else ch->block[z][y][x] |= FLAG_BLOCK_FACE_PY;
-    }
-    else if (ch->block[z][y + 1][x])
-        ch->block[z][y + 1][x] &= ~FLAG_BLOCK_FACE_NY;
-    else ch->block[z][y][x] |= FLAG_BLOCK_FACE_PY;
+    if (y == CHUNK_DIAMETER - 1 &&
+            chunk_tab_coordinates.y != settings.chunk_buf_diameter - 1 &&
+            py && py->block[z][0][x])
+        py->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
 
-    if (y == 0)
-    {
-        if (chunk_tab_coordinates.y != 0 &&
-                ny && ny->block[z][CHUNK_DIAMETER - 1][x])
-        {
-            ny->block[z][CHUNK_DIAMETER - 1][x] &= ~FLAG_BLOCK_FACE_PY;
-            ny->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
-        }
-        else ch->block[z][y][x] |= FLAG_BLOCK_FACE_NY;
-    }
-    else if (ch->block[z][y - 1][x])
-        ch->block[z][y - 1][x] &= ~FLAG_BLOCK_FACE_PY;
-    else ch->block[z][y][x] |= FLAG_BLOCK_FACE_NY;
+    if (y == 0 &&
+            chunk_tab_coordinates.y != 0 &&
+            ny && ny->block[z][CHUNK_DIAMETER - 1][x])
+        ny->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
 
-    if (z == CHUNK_DIAMETER - 1)
-    {
-        if (chunk_tab_coordinates.z != settings.chunk_buf_diameter - 1 &&
-                pz && pz->block[0][y][x])
-        {
-            pz->block[0][y][x] &= ~FLAG_BLOCK_FACE_NZ;
-            pz->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
-        }
-        else ch->block[z][y][x] |= FLAG_BLOCK_FACE_PZ;
-    }
-    else if (ch->block[z + 1][y][x])
-        ch->block[z + 1][y][x] &= ~FLAG_BLOCK_FACE_NZ;
-    else ch->block[z][y][x] |= FLAG_BLOCK_FACE_PZ;
+    if (z == CHUNK_DIAMETER - 1 &&
+            chunk_tab_coordinates.z != settings.chunk_buf_diameter - 1 &&
+            pz && pz->block[0][y][x])
+        pz->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
 
-    if (z == 0)
-    {
-        if (chunk_tab_coordinates.z != 0 &&
-                nz && nz->block[CHUNK_DIAMETER - 1][y][x])
-        {
-            nz->block[CHUNK_DIAMETER - 1][y][x] &= ~FLAG_BLOCK_FACE_PZ;
-            nz->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
-        }
-        else ch->block[z][y][x] |= FLAG_BLOCK_FACE_NZ;
-    }
-    else if (ch->block[z - 1][y][x])
-        ch->block[z - 1][y][x] &= ~FLAG_BLOCK_FACE_PZ;
-    else ch->block[z][y][x] |= FLAG_BLOCK_FACE_NZ;
+    if (z == 0 &&
+            chunk_tab_coordinates.z != 0 &&
+            nz && nz->block[CHUNK_DIAMETER - 1][y][x])
+        nz->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
 
     ch->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
 }
@@ -1030,8 +1071,7 @@ static void chunk_generate_internal(chunk *ch, u32 rate)
 
                 if (terrain_info.block_id)
                 {
-                    block_place_internal(ch, px, nx, py, ny, pz, nz,
-                            chunk_tab_coordinates, x, y, z, terrain_info.block_id);
+                    block_place_internal(ch, px, nx, py, ny, pz, nz, chunk_tab_coordinates, x, y, z, terrain_info.block_id);
                     ch->block[z][y][x] |= terrain_info.block_light;
 
                     if (z == 0)
@@ -1061,10 +1101,7 @@ static void chunk_generate_internal(chunk *ch, u32 rate)
     ch->cursor = x + y * CHUNK_DIAMETER + z * CHUNK_LAYER;
 
     if (ch->cursor == CHUNK_VOLUME && !(ch->flag & FLAG_CHUNK_GENERATED))
-    {
-        ch->flag |= FLAG_CHUNK_MODIFIED;
         chunk_mesh_init(ch);
-    }
 }
 
 static void chunk_mesh_init(chunk *ch)
@@ -1081,19 +1118,51 @@ static void chunk_mesh_init(chunk *ch)
     v3u64 pos;
     b8 should_render = FALSE;
 
+    chunk *px = NULL;
+    chunk *nx = NULL;
+    chunk *py = NULL;
+    chunk *ny = NULL;
+    chunk *pz = NULL;
+    chunk *nz = NULL;
+    v3u32 chunk_tab_coordinates = {0};
+
+    chunk_tab_coordinates.x = ch->index % settings.chunk_buf_diameter;
+    chunk_tab_coordinates.y = (ch->index / settings.chunk_buf_diameter) % settings.chunk_buf_diameter;
+    chunk_tab_coordinates.z = ch->index / settings.chunk_buf_layer;
+
+    if (chunk_tab_coordinates.x < settings.chunk_buf_diameter - 1)
+        px = chunk_tab.p[ch->index + 1];
+    if (chunk_tab_coordinates.x > 0)
+        nx = chunk_tab.p[ch->index - 1];
+    if (chunk_tab_coordinates.y < settings.chunk_buf_diameter - 1)
+        py = chunk_tab.p[ch->index + settings.chunk_buf_diameter];
+    if (chunk_tab_coordinates.y > 0)
+        ny = chunk_tab.p[ch->index - settings.chunk_buf_diameter];
+    if (chunk_tab_coordinates.z < settings.chunk_buf_diameter - 1)
+        pz = chunk_tab.p[ch->index + settings.chunk_buf_layer];
+    if (chunk_tab_coordinates.z > 0)
+        nz = chunk_tab.p[ch->index - settings.chunk_buf_layer];
+
     for (; i < end; ++i)
-        if (*i & MASK_BLOCK_FACES)
+    {
+        if (*i & MASK_BLOCK_ID)
         {
-            should_render = TRUE;
             block_index = CHUNK_VOLUME - (end - i);
             pos.x = block_index % CHUNK_DIAMETER;
             pos.y = (block_index / CHUNK_DIAMETER) % CHUNK_DIAMETER;
             pos.z = block_index / CHUNK_LAYER;
-            *(cursor++) = *i |
-                (pos.x & 0xf) << SHIFT_BLOCK_X |
-                (pos.y & 0xf) << SHIFT_BLOCK_Y |
-                (pos.z & 0xf) << SHIFT_BLOCK_Z;
+            block_get_faces_internal(ch, px, nx, py, ny, pz, nz,
+                    chunk_tab_coordinates, pos.x, pos.y, pos.z);
+            if (*i & MASK_BLOCK_FACES)
+            {
+                should_render = TRUE;
+                *(cursor++) = *i |
+                    (pos.x & 0xf) << SHIFT_BLOCK_X |
+                    (pos.y & 0xf) << SHIFT_BLOCK_Y |
+                    (pos.z & 0xf) << SHIFT_BLOCK_Z;
+            }
         }
+    }
     cur_buf = (cur_buf + 1) % BLOCK_BUFFERS_MAX;
     buf_len = cursor - buf;
 
@@ -1138,6 +1207,14 @@ static void chunk_mesh_update(chunk *ch)
     static u64 buffer[BLOCK_BUFFERS_MAX][CHUNK_VOLUME] = {0};
     static u64 cur_buf = 0;
 
+    chunk *px = NULL;
+    chunk *nx = NULL;
+    chunk *py = NULL;
+    chunk *ny = NULL;
+    chunk *pz = NULL;
+    chunk *nz = NULL;
+    v3u32 chunk_tab_coordinates = {0};
+
     u64 *buf = &buffer[cur_buf][0];
     u64 buf_len = 0;
     u64 *cursor = buf;
@@ -1147,22 +1224,43 @@ static void chunk_mesh_update(chunk *ch)
     v3u64 pos;
     b8 should_render = FALSE;
 
-    if (!ch->vbo || !ch->vao)
-        return;
+    chunk_tab_coordinates.x = ch->index % settings.chunk_buf_diameter;
+    chunk_tab_coordinates.y = (ch->index / settings.chunk_buf_diameter) % settings.chunk_buf_diameter;
+    chunk_tab_coordinates.z = ch->index / settings.chunk_buf_layer;
+
+    if (chunk_tab_coordinates.x < settings.chunk_buf_diameter - 1)
+        px = chunk_tab.p[ch->index + 1];
+    if (chunk_tab_coordinates.x > 0)
+        nx = chunk_tab.p[ch->index - 1];
+    if (chunk_tab_coordinates.y < settings.chunk_buf_diameter - 1)
+        py = chunk_tab.p[ch->index + settings.chunk_buf_diameter];
+    if (chunk_tab_coordinates.y > 0)
+        ny = chunk_tab.p[ch->index - settings.chunk_buf_diameter];
+    if (chunk_tab_coordinates.z < settings.chunk_buf_diameter - 1)
+        pz = chunk_tab.p[ch->index + settings.chunk_buf_layer];
+    if (chunk_tab_coordinates.z > 0)
+        nz = chunk_tab.p[ch->index - settings.chunk_buf_layer];
 
     for (; i < end; ++i)
-        if (*i & MASK_BLOCK_FACES)
+    {
+        if (*i & MASK_BLOCK_ID)
         {
-            should_render = TRUE;
             block_index = CHUNK_VOLUME - (end - i);
             pos.x = block_index % CHUNK_DIAMETER;
             pos.y = (block_index / CHUNK_DIAMETER) % CHUNK_DIAMETER;
             pos.z = block_index / CHUNK_LAYER;
-            *(cursor++) = *i |
-                (pos.x & 0xf) << SHIFT_BLOCK_X |
-                (pos.y & 0xf) << SHIFT_BLOCK_Y |
-                (pos.z & 0xf) << SHIFT_BLOCK_Z;
+            block_get_faces_internal(ch, px, nx, py, ny, pz, nz,
+                    chunk_tab_coordinates, pos.x, pos.y, pos.z);
+            if (*i & MASK_BLOCK_FACES)
+            {
+                should_render = TRUE;
+                *(cursor++) = *i |
+                    (pos.x & 0xf) << SHIFT_BLOCK_X |
+                    (pos.y & 0xf) << SHIFT_BLOCK_Y |
+                    (pos.z & 0xf) << SHIFT_BLOCK_Z;
+            }
         }
+    }
     cur_buf = (cur_buf + 1) % BLOCK_BUFFERS_MAX;
     buf_len = cursor - buf;
     ch->vbo_len = buf_len;
@@ -1289,6 +1387,7 @@ static void chunk_buf_push_internal(u32 index, v3i32 player_chunk_delta)
             {
                 glDeleteBuffers(1, &ch->vbo);
                 glDeleteVertexArrays(1, &ch->vao);
+                ch->vbo_len = 0;
             }
             *ch = nochunk;
 
