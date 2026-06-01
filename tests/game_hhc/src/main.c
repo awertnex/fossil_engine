@@ -57,8 +57,10 @@ static void generate_standard_meshes(void);
 static u32 settings_init(void);
 
 void settings_update(void);
-static void draw_everything(void);
 static void draw_gizmo(f32 pos_x, f32 pos_y);
+static void draw_chunk_queue_visualizer(chunk_queue q, fsl_mesh *mesh_bounding_box,
+        f32 color_r, f32 color_g, f32 color_b);
+static void draw_everything(void);
 
 static void callback_framebuffer_size(i32 size_x, i32 size_y)
 {
@@ -325,6 +327,63 @@ cleanup:
 
     for (i = 0; i < MESH_COUNT; ++i)
         fsl_mesh_free(&mesh_p[i]);
+}
+
+static void draw_gizmo(f32 pos_x, f32 pos_y)
+{
+    fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
+    fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
+    m4f32 transform = {0};
+
+    transform.a11 = 1.0f;
+    transform.a22 = 1.0f;
+    transform.a33 = 1.0f;
+    transform.a41 = pos_x;
+    transform.a42 = pos_y;
+    transform.a44 = 1.0f;
+
+    glUseProgram(shader_p[SHADER_GIZMO].asset.id);
+
+    glUniformMatrix4fv(uniform.gizmo.mat_translation, 1, GL_FALSE,
+            (GLfloat*)&_player.camera_hud.projection.target);
+    glUniformMatrix4fv(uniform.gizmo.mat_rotation, 1, GL_FALSE,
+            (GLfloat*)&_player.camera_hud.projection.rotation);
+    glUniformMatrix4fv(uniform.gizmo.mat_orientation, 1, GL_FALSE,
+            (GLfloat*)&_player.camera_hud.projection.orientation);
+    glUniformMatrix4fv(uniform.gizmo.mat_projection, 1, GL_FALSE,
+            (GLfloat*)&_player.camera_hud.projection.projection);
+
+    glBindVertexArray(mesh_p[MESH_GIZMO].vao);
+    glUniform3f(uniform.gizmo.color, 1.0f, 0.0f, 0.0f);
+    glDrawElements(GL_TRIANGLES, 30, GL_UNSIGNED_INT, 0);
+}
+
+static void draw_chunk_queue_visualizer(chunk_queue q, fsl_mesh *mesh_bounding_box,
+        f32 color_r, f32 color_g, f32 color_b)
+{
+    u32 pop = q.cursor_pop;
+    u32 count = q.count;
+
+    glUniformMatrix4fv(uniform.bounding_box.mat_perspective, 1, GL_FALSE,
+            (GLfloat*)&_player.camera.projection.perspective);
+    glUniform3f(uniform.bounding_box.size,
+            CHUNK_DIAMETER, CHUNK_DIAMETER, CHUNK_DIAMETER);
+
+    while (count--)
+    {
+        glUniform3f(uniform.bounding_box.position,
+                (f32)(q.queue_p[pop].ch->pos.x * CHUNK_DIAMETER),
+                (f32)(q.queue_p[pop].ch->pos.y * CHUNK_DIAMETER),
+                (f32)(q.queue_p[pop].ch->pos.z * CHUNK_DIAMETER));
+
+        glUniform4f(uniform.bounding_box.color, color_r, color_g, color_b, 1.0f);
+        glBindVertexArray(mesh_bounding_box->vao);
+        glDrawElements(GL_LINE_STRIP, 24, GL_UNSIGNED_INT, 0);
+
+        ++pop;
+        if (pop == q.len)
+            pop = 0;
+    }
 }
 
 static void draw_everything(void)
@@ -623,66 +682,16 @@ static void draw_everything(void)
         glDrawElements(GL_LINE_STRIP, 24, GL_UNSIGNED_INT, 0);
     }
 
-    /* ---- draw player chunk queue visualizer ------------------------------ */
+    /* ---- draw chunk queue visualizer ------------------------------------- */
 
     if (core.debug.chunk_queue_visualizer)
     {
-        glUniformMatrix4fv(uniform.bounding_box.mat_perspective, 1, GL_FALSE,
-                (GLfloat*)&_player.camera.projection.perspective);
-        glUniform3f(uniform.bounding_box.size,
-                CHUNK_DIAMETER, CHUNK_DIAMETER, CHUNK_DIAMETER);
-
-        cursor = CHUNK_ORDER.p;
-        end = &CHUNK_ORDER.p[CHUNK_QUEUE[0].len];
-        for (; cursor < end; ++cursor)
-        {
-            ch = **cursor;
-            if (!ch || !(ch->flag & FLAG_CHUNK_QUEUED)) continue;
-            glUniform3f(uniform.bounding_box.position,
-                    (f32)(ch->pos.x * CHUNK_DIAMETER),
-                    (f32)(ch->pos.y * CHUNK_DIAMETER),
-                    (f32)(ch->pos.z * CHUNK_DIAMETER));
-
-            glUniform4f(uniform.bounding_box.color, 0.6f, 0.9f, 0.3f, 1.0f);
-            glBindVertexArray(mesh_p[MESH_CUBE_OF_HAPPINESS].vao);
-            glDrawElements(GL_LINE_STRIP, 24, GL_UNSIGNED_INT, 0);
-        }
-
-        if (CHUNK_QUEUE[1].len)
-        {
-            end += CHUNK_QUEUE[1].len;
-            for (; cursor < end; ++cursor)
-            {
-                ch = **cursor;
-                if (!(ch->flag & FLAG_CHUNK_QUEUED)) continue;
-                glUniform3f(uniform.bounding_box.position,
-                        (f32)(ch->pos.x * CHUNK_DIAMETER),
-                        (f32)(ch->pos.y * CHUNK_DIAMETER),
-                        (f32)(ch->pos.z * CHUNK_DIAMETER));
-
-                glUniform4f(uniform.bounding_box.color, 0.9f, 0.6f, 0.3f, 1.0f);
-                glBindVertexArray(mesh_p[MESH_CUBE_OF_HAPPINESS].vao);
-                glDrawElements(GL_LINE_STRIP, 24, GL_UNSIGNED_INT, 0);
-            }
-        }
-
-        if (CHUNK_QUEUE[2].len)
-        {
-            end += CHUNK_QUEUE[2].len;
-            for (; cursor < end; ++cursor)
-            {
-                ch = **cursor;
-                if (!ch || !(ch->flag & FLAG_CHUNK_QUEUED)) continue;
-                glUniform3f(uniform.bounding_box.position,
-                        (f32)(ch->pos.x * CHUNK_DIAMETER),
-                        (f32)(ch->pos.y * CHUNK_DIAMETER),
-                        (f32)(ch->pos.z * CHUNK_DIAMETER));
-
-                glUniform4f(uniform.bounding_box.color, 0.9f, 0.3f, 0.3f, 1.0f);
-                glBindVertexArray(mesh_p[MESH_CUBE_OF_HAPPINESS].vao);
-                glDrawElements(GL_LINE_STRIP, 24, GL_UNSIGNED_INT, 0);
-            }
-        }
+        draw_chunk_queue_visualizer(CHUNK_QUEUE[0], &mesh_p[MESH_CUBE_OF_HAPPINESS],
+                0.6f, 0.9f, 0.3f);
+        draw_chunk_queue_visualizer(CHUNK_QUEUE[1], &mesh_p[MESH_CUBE_OF_HAPPINESS],
+                0.9f, 0.6f, 0.3f);
+        draw_chunk_queue_visualizer(CHUNK_QUEUE[2], &mesh_p[MESH_CUBE_OF_HAPPINESS],
+                0.9f, 0.3f, 0.3f);
     }
 
     if (settings.anti_aliasing)
@@ -876,10 +885,10 @@ static void draw_everything(void)
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
 
         fsl_text_push(fsl_stringf(
-                    "CHUNK QUEUE 0 [%7d/%-7"PRIu64"][push/pop: %7"PRIu64"/%-7"PRIu64"]\n"
-                    "CHUNK QUEUE 1 [%7d/%-7"PRIu64"][push/pop: %7"PRIu64"/%-7"PRIu64"]\n"
-                    "CHUNK QUEUE 2 [%7d/%-7"PRIu64"][push/pop: %7"PRIu64"/%-7"PRIu64"]\n"
-                    "TOTAL CHUNKS                            [%15"PRIu64"]\n",
+                    "CHUNK QUEUE 0 [%7d/%-7"PRIu64"][pop/push: %7"PRIu64"/%-7"PRIu64"]\n"
+                    "CHUNK QUEUE 1 [%7d/%-7"PRIu64"][pop/push: %7"PRIu64"/%-7"PRIu64"]\n"
+                    "CHUNK QUEUE 2 [%7d/%-7"PRIu64"][pop/push: %7"PRIu64"/%-7"PRIu64"]\n"
+                    "TOTAL CHUNKS  [%15"PRIu64"]                           \n",
                     CHUNK_QUEUE[0].count, CHUNK_QUEUE[0].len,
                     CHUNK_QUEUE[0].cursor_pop, CHUNK_QUEUE[0].cursor_push,
 
@@ -982,35 +991,6 @@ static void draw_everything(void)
 
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-static void draw_gizmo(f32 pos_x, f32 pos_y)
-{
-    fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
-    fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
-    m4f32 transform = {0};
-
-    transform.a11 = 1.0f;
-    transform.a22 = 1.0f;
-    transform.a33 = 1.0f;
-    transform.a41 = pos_x;
-    transform.a42 = pos_y;
-    transform.a44 = 1.0f;
-
-    glUseProgram(shader_p[SHADER_GIZMO].asset.id);
-
-    glUniformMatrix4fv(uniform.gizmo.mat_translation, 1, GL_FALSE,
-            (GLfloat*)&_player.camera_hud.projection.target);
-    glUniformMatrix4fv(uniform.gizmo.mat_rotation, 1, GL_FALSE,
-            (GLfloat*)&_player.camera_hud.projection.rotation);
-    glUniformMatrix4fv(uniform.gizmo.mat_orientation, 1, GL_FALSE,
-            (GLfloat*)&_player.camera_hud.projection.orientation);
-    glUniformMatrix4fv(uniform.gizmo.mat_projection, 1, GL_FALSE,
-            (GLfloat*)&_player.camera_hud.projection.projection);
-
-    glBindVertexArray(mesh_p[MESH_GIZMO].vao);
-    glUniform3f(uniform.gizmo.color, 1.0f, 0.0f, 0.0f);
-    glDrawElements(GL_TRIANGLES, 30, GL_UNSIGNED_INT, 0);
 }
 
 int main(int argc, char **argv)

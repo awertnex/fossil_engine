@@ -272,6 +272,7 @@ typedef struct chunk_queue
  */
 typedef struct chunk_gizmo
 {
+    b8 initialized;
     GLuint vao;
     GLuint vbo;
     fsl_mem_handle handle;

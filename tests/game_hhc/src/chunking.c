@@ -143,10 +143,20 @@ static void chunk_buf_pop_internal(u32 index);
 /*!
  *  @internal
  *
- *  @param len number of slots in `q->queue_p`, usually it's `q->size`, but
- *  render distance can be smaller than what the last queue can hold.
+ *  @param len number of chunks from @ref chunk_order.p this queue is allowed to parse.
  */
 static void chunk_queue_update_internal(chunk_queue *q, fsl_len len);
+
+/*!
+ *  @internal
+ *
+ *  @brief flush all enqueued chunks out of `q->queue_p` and reset cursors.
+ *
+ *  @note when @ref chunk_table shifts, the indices of enqueued chunks represent
+ *  the wrong indices within @ref chunk_table, so, they need to be flushed in order
+ *  to not process the wrong chunk.
+ */
+static void chunk_queue_reset_internal(chunk_queue *q);
 
 /* ---- section: implementation --------------------------------------------- */
 
@@ -408,6 +418,8 @@ u32 chunking_init(void)
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    chunk_gizmo_loaded.initialized = TRUE;
+    chunk_gizmo_render.initialized = TRUE;
     core.flag.chunks_initialized = TRUE;
 
     *GAME_ERR = FSL_ERR_SUCCESS;
@@ -459,6 +471,10 @@ void chunking_update(v3i32 player_chunk, v3i32 *player_chunk_delta)
     if (!core.flag.chunk_buf_dirty)
         return;
 
+    chunk_queue_reset_internal(&CHUNK_QUEUE[0]);
+    chunk_queue_reset_internal(&CHUNK_QUEUE[1]);
+    chunk_queue_reset_internal(&CHUNK_QUEUE[2]);
+
 chunk_tab_shift:
 
     DELTA.x = player_chunk.x - player_chunk_delta->x;
@@ -483,7 +499,10 @@ chunk_tab_shift:
     {
         cursor = &CHUNK_ORDER.p[CHUNKS_MAX[settings.render_distance] - 1];
         for (; cursor >= CHUNK_ORDER.p; --cursor)
-            if (**cursor) chunk_buf_pop_internal(*cursor - chunk_tab.p);
+        {
+            if (**cursor)
+                chunk_buf_pop_internal(*cursor - chunk_tab.p);
+        }
 
         *player_chunk_delta = player_chunk;
         goto chunk_buf_push;
@@ -580,7 +599,7 @@ chunk_tab_shift:
         }
     }
 
-    /* ---- shift 'chunk_tab' ----------------------------------------------- */
+    /* ---- shift `chunk_tab` ----------------------------------------------- */
 
     for (i = (INCREMENT == 1) ? 0 : settings.chunk_buf_volume - 1;
             i < settings.chunk_buf_volume && i >= 0; i += INCREMENT)
@@ -660,6 +679,7 @@ chunk_tab_shift:
             core.flag.chunk_buf_dirty = 0;
     }
 
+
 chunk_buf_push:
 
     for (i = 0; i < (i64)CHUNKS_MAX[settings.render_distance]; ++i)
@@ -683,10 +703,18 @@ void chunking_free(void)
                 chunk_buf_pop_internal(i);
     }
 
-    if (chunk_gizmo_loaded.vao) glDeleteVertexArrays(1, &chunk_gizmo_loaded.vao);
-    if (chunk_gizmo_loaded.vbo) glDeleteBuffers(1, &chunk_gizmo_loaded.vbo);
-    if (chunk_gizmo_render.vao) glDeleteVertexArrays(1, &chunk_gizmo_render.vao);
-    if (chunk_gizmo_render.vbo) glDeleteBuffers(1, &chunk_gizmo_render.vbo);
+    if (chunk_gizmo_loaded.initialized)
+    {
+        chunk_gizmo_loaded.initialized = FALSE;
+        glDeleteBuffers(1, &chunk_gizmo_loaded.vbo);
+        glDeleteVertexArrays(1, &chunk_gizmo_loaded.vao);
+    }
+    if (chunk_gizmo_render.initialized)
+    {
+        chunk_gizmo_render.initialized = FALSE;
+        glDeleteVertexArrays(1, &chunk_gizmo_render.vao);
+        glDeleteBuffers(1, &chunk_gizmo_render.vbo);
+    }
 
     fsl_mem_arena_free(&memory_arena_chunking_internal,
                 "chunking_init().memory_arena_chunking_internal");
@@ -1089,10 +1117,14 @@ static void chunk_mesh_init(chunk_cache ch)
         }
     cur_buf = (cur_buf + 1) % BLOCK_BUFFERS_MAX;
     buf_len = cursor - buf;
-    ch.ch->vbo_len = buf_len;
 
-    if (!ch.ch->vao) glGenVertexArrays(1, &ch.ch->vao);
-    if (!ch.ch->vbo) glGenBuffers(1, &ch.ch->vbo);
+    if (!ch.ch->vbo_len)
+    {
+        glGenVertexArrays(1, &ch.ch->vao);
+        glGenBuffers(1, &ch.ch->vbo);
+    }
+
+    ch.ch->vbo_len = buf_len;
 
     glBindVertexArray(ch.ch->vao);
     glBindBuffer(GL_ARRAY_BUFFER, ch.ch->vbo);
@@ -1274,8 +1306,11 @@ static void chunk_buf_push_internal(u32 index, v3i32 player_chunk_delta)
     {
         if (!(ch->flag & FLAG_CHUNK_LOADED))
         {
-            if (ch->vbo) glDeleteBuffers(1, &ch->vbo);
-            if (ch->vao) glDeleteVertexArrays(1, &ch->vao);
+            if (ch->vbo_len)
+            {
+                glDeleteBuffers(1, &ch->vbo);
+                glDeleteVertexArrays(1, &ch->vao);
+            }
             *ch = nochunk;
 
             ch->pos.x = player_chunk_delta.x + chunk_tab_coordinates.x - settings.chunk_buf_radius;
@@ -1329,15 +1364,11 @@ static void chunk_buf_pop_internal(u32 index)
     cache.index = index;
     chunk_gizmo_write_internal(cache);
 
-    if (cache.ch->vbo)
+    if (cache.ch->vbo_len)
     {
         glDeleteBuffers(1, &cache.ch->vbo);
-        cache.ch->vbo = 0;
-    }
-    if (cache.ch->vao)
-    {
         glDeleteVertexArrays(1, &cache.ch->vao);
-        cache.ch->vao = 0;
+        cache.ch->vbo_len = 0;
     }
 
     cache.ch->flag = 0;
@@ -1352,10 +1383,11 @@ static void chunk_queue_update_internal(chunk_queue *q, fsl_len len)
     chunk ***end = NULL;
     chunk_cache cache = {0};
     u64 queue_len = q->len;
-    u32 cursor_push = q->cursor_push;
-    u32 cursor_pop = q->cursor_pop;
+    u32 push = q->cursor_push;
+    u32 pop = q->cursor_pop;
     u32 rate_chunk = q->rate_chunk;
     u32 rate_block = q->rate_block;
+    u32 i = 0;
 
     /* ---- push chunk queue ------------------------------------------------ */
 
@@ -1366,25 +1398,27 @@ static void chunk_queue_update_internal(chunk_queue *q, fsl_len len)
         cache.ch = **ch;
         if (cache.ch && (cache.ch->flag & FLAG_CHUNK_DIRTY) &&
                 !(cache.ch->flag & FLAG_CHUNK_QUEUED) &&
-                !q->queue_p[cursor_push].ch)
+                !q->queue_p[push].ch)
         {
             cache.ch->flag |= FLAG_CHUNK_QUEUED;
-            q->queue_p[cursor_push].ch = cache.ch;
-            q->queue_p[cursor_push].index = *ch - chunk_tab.p;
+            q->queue_p[push].ch = cache.ch;
+            q->queue_p[push].index = *ch - chunk_tab.p;
             ++q->count;
-            cursor_push = (cursor_push + 1) % queue_len;
+            ++push;
+            if (push == queue_len)
+                push = 0;
         }
     }
 
-    q->cursor_push = cursor_push;
+    q->cursor_push = push;
 
     /* ---- pop chunk queue ------------------------------------------------- */
 
-    while (q->count && rate_chunk)
+    for (i = 0; q->count && rate_chunk && i < queue_len; ++i)
     {
-        if (q->queue_p[cursor_pop].ch)
+        if (q->queue_p[pop].ch)
         {
-            cache = q->queue_p[cursor_pop];
+            cache = q->queue_p[pop];
             if (cache.ch->flag & FLAG_CHUNK_GENERATED)
                 chunk_mesh_update(cache);
             else
@@ -1395,9 +1429,11 @@ static void chunk_queue_update_internal(chunk_queue *q, fsl_len len)
                 if (cache.ch->flag & FLAG_CHUNK_MODIFIED)
                     chunk_export_internal(cache.ch);
                 cache.ch->flag &= ~FLAG_CHUNK_QUEUED;
-                q->queue_p[cursor_pop].ch = NULL;
+                q->queue_p[pop].ch = NULL;
                 --q->count;
-                cursor_pop = (cursor_pop + 1) % queue_len;
+                ++pop;
+                if (pop == queue_len)
+                    pop = 0;
             }
 
             if (cache.ch->flag & FLAG_CHUNK_IMPORTED)
@@ -1406,10 +1442,33 @@ static void chunk_queue_update_internal(chunk_queue *q, fsl_len len)
                 --rate_chunk;
         }
         else
-            cursor_pop = (cursor_pop + 1) % queue_len;
+        {
+            ++pop;
+            if (pop == queue_len)
+                pop = 0;
+        }
     }
 
-    q->cursor_pop = cursor_pop;
+    q->cursor_pop = pop;
+}
+
+static void chunk_queue_reset_internal(chunk_queue *q)
+{
+    u32 pop = q->cursor_pop;
+    u32 count = q->count;
+
+    while (count)
+    {
+        q->queue_p[pop].ch->flag &= ~FLAG_CHUNK_QUEUED;
+        q->queue_p[pop].ch = NULL;
+        ++pop;
+        if (pop == q->len)
+            pop = 0;
+        --count;
+    }
+
+    q->count = count;
+    q->cursor_pop = pop;
 }
 
 static void chunk_gizmo_write_internal(chunk_cache ch)
