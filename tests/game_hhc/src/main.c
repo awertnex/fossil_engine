@@ -551,7 +551,6 @@ static void draw_everything(void)
         glUniform1f(uniform.voxel.opacity, 1.0f);
 
     static chunk ***cursor = NULL;
-    static chunk ***end = NULL;
     static chunk *ch = NULL;
     cursor = &CHUNK_ORDER.p[CHUNKS_MAX[settings.render_distance] - 1];
     for (; cursor >= CHUNK_ORDER.p; --cursor)

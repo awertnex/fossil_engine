@@ -27,14 +27,23 @@
 #define CHUNK_BUF_LAYER_MAX     (CHUNK_BUF_DIAMETER_MAX * CHUNK_BUF_DIAMETER_MAX)
 #define CHUNK_BUF_VOLUME_MAX    (CHUNK_BUF_DIAMETER_MAX * CHUNK_BUF_DIAMETER_MAX * CHUNK_BUF_DIAMETER_MAX)
 
-#define CHUNK_QUEUE_1ST_ID      0
-#define CHUNK_QUEUE_2ND_ID      1
-#define CHUNK_QUEUE_3RD_ID      2
-#define CHUNK_QUEUE_LAST_ID     CHUNK_QUEUE_3RD_ID
-#define CHUNK_QUEUE_1ST_MAX     256
-#define CHUNK_QUEUE_2ND_MAX     4096
-#define CHUNK_QUEUE_3RD_MAX     16384
-#define CHUNK_QUEUES_MAX        3
+typedef enum chunk_queue_id
+{
+    CHUNK_QUEUE_ID_NONE,
+    CHUNK_QUEUE_ID_1ST,
+    CHUNK_QUEUE_ID_2ND,
+    CHUNK_QUEUE_ID_3RD
+} chunk_queue_id;
+
+#define CHUNK_QUEUE_ID_LAST     CHUNK_QUEUE_3RD_ID
+
+enum chunk_queue_len
+{
+    CHUNK_QUEUE_1ST_MAX = 256,
+    CHUNK_QUEUE_2ND_MAX = 4096,
+    CHUNK_QUEUE_3RD_MAX = 16384,
+    CHUNK_QUEUES_MAX = 3
+}; /* chunk_queue_len */
 
 /*!
  *  @brief count of temporary static buffers in internal functions
@@ -144,16 +153,15 @@ enum chunk_flag
 {
     FLAG_CHUNK_LOADED =     0x01,
     FLAG_CHUNK_DIRTY =      0x02,
-    FLAG_CHUNK_QUEUED =     0x04,
-    FLAG_CHUNK_GENERATED =  0x08,
-    FLAG_CHUNK_RENDER =     0x10,
-    FLAG_CHUNK_MODIFIED =   0x20,
-    FLAG_CHUNK_IMPORTED =   0x40,
+    FLAG_CHUNK_GENERATED =  0x04,
+    FLAG_CHUNK_RENDER =     0x08,
+    FLAG_CHUNK_MODIFIED =   0x10,
+    FLAG_CHUNK_IMPORTED =   0x20,
 
     /*!
      *  @brief chunk marking for @ref chunk_tab shifting logic.
      */
-    FLAG_CHUNK_EDGE =       0x80
+    FLAG_CHUNK_EDGE =       0x40
 }; /* chunk_flag */
 
 enum chunk_shift_state
@@ -251,7 +259,7 @@ typedef struct chunk_order
  */
 typedef struct chunk_queue
 {
-    u32 id;                 /* queue ID */
+    chunk_queue_id id;      /* queue ID */
     fsl_len count;          /* number of chunks queued */
     u32 offset;             /* offset of queue into @ref chunk_order.p */
     fsl_len len;            /* number of members in `queue_p` */

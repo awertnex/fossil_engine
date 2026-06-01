@@ -79,14 +79,14 @@ static void block_break_internal(chunk *ch,
  *  @remark calls @ref chunk_mesh_init() when done generating.
  *  @remark must be called before @ref chunk_mesh_update().
  */
-static void chunk_generate(chunk *ch, u32 rate);
+static void chunk_load(chunk *ch, u32 rate);
 
 /*!
  *  @internal
  *
  *  @brief generate chunk blocks.
  *
- *  automatically called from @ref chunk_generate().
+ *  automatically called from @ref chunk_load().
  *
  *  @param rate number of blocks to process per chunk per frame.
  *
@@ -141,17 +141,6 @@ static void chunk_buf_pop_internal(chunk *ch);
  */
 static void chunk_queue_update_internal(chunk_queue *q, fsl_len len,
         b8 should_push, b8 should_pop);
-
-/*!
- *  @internal
- *
- *  @brief flush all enqueued chunks out of `q->queue_p` and reset cursors.
- *
- *  @note when @ref chunk_table shifts, the indices of enqueued chunks represent
- *  the wrong indices within @ref chunk_table, so, they need to be flushed in order
- *  to not process the wrong chunk.
- */
-static void chunk_queue_reset_internal(chunk_queue *q);
 
 /* ---- section: implementation --------------------------------------------- */
 
@@ -356,7 +345,7 @@ u32 chunking_init(void)
 
     /* ---- init chunk parsing priority queues ------------------------------ */
 
-    CHUNK_QUEUE[0].id = CHUNK_QUEUE_1ST_ID;
+    CHUNK_QUEUE[0].id = CHUNK_QUEUE_ID_1ST;
     CHUNK_QUEUE[0].offset = 0;
     CHUNK_QUEUE[0].len =
         (u64)fsl_clamp_i64(CHUNKS_MAX[settings.render_distance],
@@ -364,7 +353,7 @@ u32 chunking_init(void)
     CHUNK_QUEUE[0].rate_chunk = CHUNK_PARSE_RATE_PRIORITY_HIGH;
     CHUNK_QUEUE[0].rate_block = BLOCK_PARSE_RATE;
 
-    CHUNK_QUEUE[1].id = CHUNK_QUEUE_2ND_ID;
+    CHUNK_QUEUE[1].id = CHUNK_QUEUE_ID_2ND;
     CHUNK_QUEUE[1].offset = CHUNK_QUEUE_1ST_MAX;
     CHUNK_QUEUE[1].len =
         (u64)fsl_clamp_i64(CHUNKS_MAX[settings.render_distance] -
@@ -372,7 +361,7 @@ u32 chunking_init(void)
     CHUNK_QUEUE[1].rate_chunk = CHUNK_PARSE_RATE_PRIORITY_MID;
     CHUNK_QUEUE[1].rate_block = BLOCK_PARSE_RATE;
 
-    CHUNK_QUEUE[2].id = CHUNK_QUEUE_3RD_ID;
+    CHUNK_QUEUE[2].id = CHUNK_QUEUE_ID_3RD;
     CHUNK_QUEUE[2].offset = CHUNK_QUEUE_1ST_MAX + CHUNK_QUEUE_2ND_MAX;
     CHUNK_QUEUE[2].len =
         (u64)fsl_clamp_i64(CHUNKS_MAX[settings.render_distance] -
@@ -656,7 +645,7 @@ chunk_tab_shift:
             if (chunk_tab.p[i]->flag & FLAG_CHUNK_EDGE)
                 chunk_tab.p[target_index] = NULL;
 
-            chunk_tab.p[i]->flag &= ~(FLAG_CHUNK_EDGE | FLAG_CHUNK_QUEUED);
+            chunk_tab.p[i]->flag &= ~FLAG_CHUNK_EDGE;
         }
     }
 
@@ -974,7 +963,7 @@ static void block_break_internal(chunk *ch,
     ch->flag |= FLAG_CHUNK_DIRTY | FLAG_CHUNK_MODIFIED;
 }
 
-static void chunk_generate(chunk *ch, u32 rate)
+static void chunk_load(chunk *ch, u32 rate)
 {
     fsl_fs_path path[FSL_PATH_CAP] = {0};
 
@@ -1369,8 +1358,8 @@ static void chunk_buf_pop_internal(chunk *ch)
 static void chunk_queue_update_internal(chunk_queue *q, fsl_len len,
         b8 should_push, b8 should_pop)
 {
-    chunk ***start = NULL;
-    chunk ***end = NULL;
+    chunk ***start = &CHUNK_ORDER.p[q->offset];
+    chunk ***end = CHUNK_ORDER.p + len;
     chunk *ch = NULL;
     u32 queue_len = q->len;
     u32 push = q->cursor_push;
@@ -1378,37 +1367,28 @@ static void chunk_queue_update_internal(chunk_queue *q, fsl_len len,
     u32 rate_chunk = q->rate_chunk;
     u32 rate_block = q->rate_block;
     u32 i = 0;
-    b8 can_push = FALSE;
 
     if (!should_push)
         goto pop;
 
     /* ---- push chunk queue ------------------------------------------------ */
 
-    start = &CHUNK_ORDER.p[q->offset];
-    end = CHUNK_ORDER.p + len;
     for (; start < end && q->count < queue_len; ++start)
     {
         if (**start)
         {
             ch = **start;
-            can_push =
-                ch->flag & FLAG_CHUNK_DIRTY &&
-                !(ch->flag & FLAG_CHUNK_QUEUED) &&
-                !q->queue_p[push];
-
-            can_push += (ch->queue_id >= q->id && can_push);
-        }
-
-        if (can_push)
-        {
-            ch->flag |= FLAG_CHUNK_QUEUED;
-            ch->queue_id = q->id;
-            q->queue_p[push] = ch;
-            ++q->count;
-            ++push;
-            if (push == queue_len)
-                push = 0;
+            if (ch->flag & FLAG_CHUNK_DIRTY &&
+                    (!ch->queue_id || ch->queue_id > q->id) &&
+                    !q->queue_p[push])
+            {
+                ch->queue_id = q->id;
+                q->queue_p[push] = ch;
+                ++q->count;
+                ++push;
+                if (push == queue_len)
+                    push = 0;
+            }
         }
     }
 
@@ -1421,7 +1401,7 @@ pop:
     if (!should_pop)
         return;
 
-    for (; q->count && rate_chunk && i < queue_len; ++i)
+    for (i = 0; q->count && rate_chunk && i < queue_len; ++i)
     {
         if (q->queue_p[pop])
         {
@@ -1437,18 +1417,16 @@ pop:
                 continue;
             }
 
-
             if (ch->flag & FLAG_CHUNK_GENERATED)
                 chunk_mesh_update(ch);
             else
-                chunk_generate(ch, rate_block);
+                chunk_load(ch, rate_block);
 
             if (!(ch->flag & FLAG_CHUNK_DIRTY))
             {
                 if (ch->flag & FLAG_CHUNK_MODIFIED)
                     chunk_export_internal(ch);
 
-                ch->flag &= ~FLAG_CHUNK_QUEUED;
                 ch->queue_id = 0;
                 q->queue_p[pop] = NULL;
                 --q->count;
@@ -1467,24 +1445,6 @@ pop:
             pop = 0;
     }
 
-    q->cursor_pop = pop;
-}
-
-static void chunk_queue_reset_internal(chunk_queue *q)
-{
-    u32 pop = q->cursor_pop;
-    u32 count = q->count;
-
-    while (count--)
-    {
-        q->queue_p[pop]->flag &= ~FLAG_CHUNK_QUEUED;
-        q->queue_p[pop] = NULL;
-        ++pop;
-        if (pop == q->len)
-            pop = 0;
-    }
-
-    q->count = 0;
     q->cursor_pop = pop;
 }
 
