@@ -47,7 +47,6 @@ static void callback_key(GLFWwindow *window, int key, int scancode, int action, 
 static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset);
 
 static void bind_shader_uniforms(void);
-static void generate_standard_meshes(void);
 
 /*!
  *  @internal
@@ -280,55 +279,6 @@ static void bind_shader_uniforms(void)
         glGetUniformLocation(shader_p[SHADER_BOUNDING_BOX].asset.id, "box_color");
 }
 
-static void generate_standard_meshes(void)
-{
-    fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
-    u32 i = 0;
-    const u32 VBO_LEN_COH =     24;
-    const u32 EBO_LEN_COH =     36;
-
-    GLfloat vbo_data_coh[] =
-    {
-        0.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f,
-        1.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f,
-        1.0f, 0.0f, 1.0f,
-        0.0f, 1.0f, 1.0f,
-        1.0f, 1.0f, 1.0f
-    };
-
-    GLuint ebo_data_coh[] =
-    {
-        0, 4, 5, 5, 1, 0,
-        1, 5, 7, 7, 3, 1,
-        3, 7, 6, 6, 2, 3,
-        2, 6, 4, 4, 0, 2,
-        4, 6, 7, 7, 5, 4,
-        0, 1, 3, 3, 2, 0
-    };
-
-    if (fsl_mesh_load(&_player.mesh, "Player", "player", "player.obj", GAME_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
-        goto cleanup;
-
-    if (fsl_mesh_generate(&mesh_p[MESH_CUBE_OF_HAPPINESS], "Cube of Happiness", "cube_of_happiness", NULL, NULL,
-                &fsl_attrib_vec3, GL_STATIC_DRAW,
-                VBO_LEN_COH, EBO_LEN_COH, vbo_data_coh, ebo_data_coh) != FSL_ERR_SUCCESS)
-        goto cleanup;
-
-    if (fsl_mesh_load(&mesh_p[MESH_GIZMO], "Gizmo", "gizmo", "gizmo.obj", GAME_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
-        goto cleanup;
-
-    *GAME_ERR = FSL_ERR_SUCCESS;
-    return;
-
-cleanup:
-
-    for (i = 0; i < MESH_COUNT; ++i)
-        fsl_mesh_free(&mesh_p[i]);
-}
-
 static void draw_gizmo(f32 pos_x, f32 pos_y)
 {
     fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
@@ -376,7 +326,8 @@ static void draw_chunk_queue_visualizer(chunk_queue q, fsl_mesh *mesh_bounding_b
                 (f32)(q.queue_p[pop].ch->pos.y * CHUNK_DIAMETER),
                 (f32)(q.queue_p[pop].ch->pos.z * CHUNK_DIAMETER));
 
-        glUniform4f(uniform.bounding_box.color, color_r, color_g, color_b, 1.0f);
+        glUniform4f(uniform.bounding_box.color, color_r, color_g, color_b,
+                SET_CHUNK_QUEUE_VISUALIZER_OPACITY);
         glBindVertexArray(mesh_bounding_box->vao);
         glDrawElements(GL_LINE_STRIP, 24, GL_UNSIGNED_INT, 0);
 
@@ -686,6 +637,8 @@ static void draw_everything(void)
 
     if (core.debug.chunk_queue_visualizer)
     {
+        glClear(GL_DEPTH_BUFFER_BIT);
+
         draw_chunk_queue_visualizer(CHUNK_QUEUE[0], &mesh_p[MESH_CUBE_OF_HAPPINESS],
                 0.6f, 0.9f, 0.3f);
         draw_chunk_queue_visualizer(CHUNK_QUEUE[1], &mesh_p[MESH_CUBE_OF_HAPPINESS],
@@ -1048,41 +1001,9 @@ int main(int argc, char **argv)
     init_super_debugger(render->size);
     */
 
-    /* ---- initialize player ----------------------------------------------- */
+    /* ---- end set graphics ------------------------------------------------ */
 
-    snprintf(_player.name, FSL_ID_CAP, "%s", "Lily");
-    _player.size.x = 0.6f;
-    _player.size.y = 0.6f;
-    _player.size.z = 1.8f;
-    _player.transform.scale.x = 1.0f;
-    _player.transform.scale.y = 1.0f;
-    _player.transform.scale.z = 1.0f;
-    _player.eye_height = PLAYER_EYE_HEIGHT;
-    _player.camera_mode = PLAYER_CAMERA_MODE_1ST_PERSON;
-    _player.camera_distance = SET_CAMERA_DISTANCE_MAX;
-
-    _player.menu_state = 0;
-    _player.hotbar_slots[0] = BLOCK_GRASS;
-    _player.hotbar_slots[1] = BLOCK_DIRT;
-    _player.hotbar_slots[2] = BLOCK_STONE;
-    _player.hotbar_slots[3] = BLOCK_SAND;
-    _player.hotbar_slots[4] = BLOCK_GLASS;
-    _player.hotbar_slots[5] = BLOCK_WOOD_OAK_LOG;
-    _player.hotbar_slots[6] = BLOCK_WOOD_BIRCH_LOG;
-    _player.hotbar_slots[7] = BLOCK_WOOD_CHERRY_LOG;
-
-    _player.camera.fovy = settings.fov;
-    _player.camera.fovy_smooth = 0.0f;
-    _player.camera.ratio = (f32)render->size.x / render->size.y;
-    _player.camera.far = FSL_CAMERA_CLIP_FAR_OPTIMAL;
-    _player.camera.near = FSL_CAMERA_CLIP_NEAR_DEFAULT;
-
-    _player.camera_hud.fovy = (f32)SET_FOV_DEFAULT;
-    _player.camera_hud.fovy_smooth = (f32)SET_FOV_DEFAULT;
-    _player.camera_hud.ratio = (f32)render->size.x / render->size.y;
-    _player.camera_hud.far = FSL_CAMERA_CLIP_FAR_UI;
-    _player.camera_hud.near = FSL_CAMERA_CLIP_NEAR_DEFAULT;
-
+    player_init(&_player, "Lily");
     input_init();
     bind_shader_uniforms();
 
@@ -1095,8 +1016,6 @@ section_world_loaded:
     if (!core.flag.world_loaded &&
             world_init("Poop Consistency Tester", 0, &_player) != FSL_ERR_SUCCESS)
             goto cleanup;
-
-    generate_standard_meshes();
 
     while (fsl_engine_running(&callback_framebuffer_size))
     {

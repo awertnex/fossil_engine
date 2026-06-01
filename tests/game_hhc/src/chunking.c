@@ -145,7 +145,8 @@ static void chunk_buf_pop_internal(u32 index);
  *
  *  @param len number of chunks from @ref chunk_order.p this queue is allowed to parse.
  */
-static void chunk_queue_update_internal(chunk_queue *q, fsl_len len);
+static void chunk_queue_update_internal(chunk_queue *q, fsl_len len,
+        b8 should_push, b8 should_pop);
 
 /*!
  *  @internal
@@ -456,17 +457,16 @@ void chunking_update(v3i32 player_chunk, v3i32 *player_chunk_delta)
     chunk_cache cache = {0};
 
     chunk_queue_update_internal(&CHUNK_QUEUE[0],
-            CHUNK_QUEUE[0].offset + CHUNK_QUEUE[0].len);
+            CHUNK_QUEUE[0].offset + CHUNK_QUEUE[0].len,
+            TRUE, TRUE);
 
-    if (!CHUNK_QUEUE[0].count && CHUNK_QUEUE[1].len)
-    {
-        chunk_queue_update_internal(&CHUNK_QUEUE[1],
-                CHUNK_QUEUE[1].offset + CHUNK_QUEUE[1].len);
+    chunk_queue_update_internal(&CHUNK_QUEUE[1],
+            CHUNK_QUEUE[1].offset + CHUNK_QUEUE[1].len,
+            TRUE, !CHUNK_QUEUE[0].count && CHUNK_QUEUE[1].len);
 
-        if (!CHUNK_QUEUE[1].count && CHUNK_QUEUE[2].len)
-            chunk_queue_update_internal(&CHUNK_QUEUE[2],
-                    CHUNKS_MAX[settings.render_distance]);
-    }
+    chunk_queue_update_internal(&CHUNK_QUEUE[2],
+            CHUNKS_MAX[settings.render_distance],
+            TRUE, !CHUNK_QUEUE[1].count && CHUNK_QUEUE[2].len);
 
     if (!core.flag.chunk_buf_dirty)
         return;
@@ -1210,10 +1210,10 @@ static void chunk_mesh_update(chunk_cache ch)
 static void chunk_export_internal(chunk *ch)
 {
     fsl_fs_path path[FSL_PATH_CAP] = {0};
-    u32 buf[CHUNK_VOLUME] = {0};
+    static u32 buf[CHUNK_VOLUME] = {0};
     u32 *blocks = (u32*)ch->block;
-    u16 i = 0;
-    u16 j = 0;
+    u32 i = 0;
+    u32 j = 0;
     u32 rle = 0; /* run-length */
 
     ch->flag &= ~FLAG_CHUNK_MODIFIED;
@@ -1242,10 +1242,10 @@ static void chunk_import_internal(const fsl_fs_path *path, chunk *ch)
     str file_name[FSL_ID_CAP] = {0};
     str *cursor = file_name;
     i64 pos_cache[3] = {0};
-    u32 buf[CHUNK_VOLUME] = {0};
+    static u32 buf[CHUNK_VOLUME] = {0};
     u32 *blocks = (u32*)ch->block;
-    u16 i = 0;
-    u16 j = 0;
+    u32 i = 0;
+    u32 j = 0;
     u32 rle = 0;
 
     fsl_get_base_name(path, file_name, FSL_ID_CAP);
@@ -1272,7 +1272,7 @@ static void chunk_import_internal(const fsl_fs_path *path, chunk *ch)
     fread(buf, 1, i, file);
     fclose(file);
 
-    for (i = 0; j < CHUNK_VOLUME; ++i)
+    for (i = 0; i < CHUNK_VOLUME && j < CHUNK_VOLUME; ++i)
     {
         if (buf[i] & FLAG_BLOCK_RLE)
         {
@@ -1377,17 +1377,21 @@ static void chunk_buf_pop_internal(u32 index)
     chunk_tab.p[index] = NULL;
 }
 
-static void chunk_queue_update_internal(chunk_queue *q, fsl_len len)
+static void chunk_queue_update_internal(chunk_queue *q, fsl_len len,
+        b8 should_push, b8 should_pop)
 {
     chunk ***ch = NULL;
     chunk ***end = NULL;
     chunk_cache cache = {0};
-    u64 queue_len = q->len;
+    u32 queue_len = q->len;
     u32 push = q->cursor_push;
     u32 pop = q->cursor_pop;
     u32 rate_chunk = q->rate_chunk;
     u32 rate_block = q->rate_block;
     u32 i = 0;
+
+    if (!should_push)
+        goto pop;
 
     /* ---- push chunk queue ------------------------------------------------ */
 
@@ -1414,6 +1418,11 @@ static void chunk_queue_update_internal(chunk_queue *q, fsl_len len)
 
     /* ---- pop chunk queue ------------------------------------------------- */
 
+pop:
+
+    if (!should_pop)
+        return;
+
     for (i = 0; q->count && rate_chunk && i < queue_len; ++i)
     {
         if (q->queue_p[pop].ch)
@@ -1432,8 +1441,6 @@ static void chunk_queue_update_internal(chunk_queue *q, fsl_len len)
                 q->queue_p[pop].ch = NULL;
                 --q->count;
                 ++pop;
-                if (pop == queue_len)
-                    pop = 0;
             }
 
             if (cache.ch->flag & FLAG_CHUNK_IMPORTED)
@@ -1442,11 +1449,10 @@ static void chunk_queue_update_internal(chunk_queue *q, fsl_len len)
                 --rate_chunk;
         }
         else
-        {
             ++pop;
-            if (pop == queue_len)
-                pop = 0;
-        }
+
+        if (pop == queue_len)
+            pop = 0;
     }
 
     q->cursor_pop = pop;
@@ -1457,17 +1463,16 @@ static void chunk_queue_reset_internal(chunk_queue *q)
     u32 pop = q->cursor_pop;
     u32 count = q->count;
 
-    while (count)
+    while (count--)
     {
         q->queue_p[pop].ch->flag &= ~FLAG_CHUNK_QUEUED;
         q->queue_p[pop].ch = NULL;
         ++pop;
         if (pop == q->len)
             pop = 0;
-        --count;
     }
 
-    q->count = count;
+    q->count = 0;
     q->cursor_pop = pop;
 }
 

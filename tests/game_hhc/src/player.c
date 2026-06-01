@@ -9,6 +9,7 @@
 #include "h/main.h"
 #include "h/chunking.h"
 #include "h/common.h"
+#include "h/diagnostics.h"
 #include "h/player.h"
 #include "h/world.h"
 
@@ -23,6 +24,52 @@
  *  teleport player to the other side of the world if they cross a world edge.
  */
 static void player_wrap_coordinates(player *p);
+
+u32 player_init(player *p, const str *name)
+{
+    player noplayer = {0};
+
+    *p = noplayer;
+
+    if (fsl_mesh_load(&p->mesh, "Player", "player", "player.obj", GAME_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
+        return *GAME_ERR;
+
+    snprintf(p->name, FSL_ID_CAP, "%s", name);
+    p->size.x = 0.6f;
+    p->size.y = 0.6f;
+    p->size.z = 1.8f;
+    p->transform.scale.x = 1.0f;
+    p->transform.scale.y = 1.0f;
+    p->transform.scale.z = 1.0f;
+    p->eye_height = PLAYER_EYE_HEIGHT;
+    p->camera_mode = PLAYER_CAMERA_MODE_1ST_PERSON;
+    p->camera_distance = SET_CAMERA_DISTANCE_MAX;
+
+    p->menu_state = 0;
+    p->hotbar_slots[0] = BLOCK_GRASS;
+    p->hotbar_slots[1] = BLOCK_DIRT;
+    p->hotbar_slots[2] = BLOCK_STONE;
+    p->hotbar_slots[3] = BLOCK_SAND;
+    p->hotbar_slots[4] = BLOCK_GLASS;
+    p->hotbar_slots[5] = BLOCK_WOOD_OAK_LOG;
+    p->hotbar_slots[6] = BLOCK_WOOD_BIRCH_LOG;
+    p->hotbar_slots[7] = BLOCK_WOOD_CHERRY_LOG;
+
+    p->camera.fovy = settings.fov;
+    p->camera.fovy_smooth = 0.0f;
+    p->camera.ratio = (f32)render->size.x / render->size.y;
+    p->camera.far = FSL_CAMERA_CLIP_FAR_OPTIMAL;
+    p->camera.near = FSL_CAMERA_CLIP_NEAR_DEFAULT;
+
+    p->camera_hud.fovy = (f32)SET_FOV_DEFAULT;
+    p->camera_hud.fovy_smooth = (f32)SET_FOV_DEFAULT;
+    p->camera_hud.ratio = (f32)render->size.x / render->size.y;
+    p->camera_hud.far = FSL_CAMERA_CLIP_FAR_UI;
+    p->camera_hud.near = FSL_CAMERA_CLIP_NEAR_DEFAULT;
+
+    *GAME_ERR = FSL_ERR_SUCCESS;
+    return *GAME_ERR;
+}
 
 void player_update(player *p, f64 dt)
 {

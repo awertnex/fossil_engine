@@ -30,10 +30,36 @@ u32 assets_init(void)
     u32 j = 0;
     fsl_fbo *fbo_p = NULL;
     fsl_texture *texture_p = NULL;
+    fsl_mesh *mesh_p = NULL;
     fsl_shader_program *shader_p = NULL;
     block *blocks_p = NULL;
     fsl_texture *block_textures_p = NULL;
     fsl_font *font_p = NULL;
+
+    const u32 VBO_LEN_COH = 24;
+    const u32 EBO_LEN_COH = 36;
+
+    GLfloat vbo_data_coh[] =
+    {
+        0.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f,
+        1.0f, 0.0f, 1.0f,
+        0.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f
+    };
+
+    GLuint ebo_data_coh[] =
+    {
+        0, 4, 5, 5, 1, 0,
+        1, 5, 7, 7, 3, 1,
+        3, 7, 6, 6, 2, 3,
+        2, 6, 4, 4, 0, 2,
+        4, 6, 7, 7, 5, 4,
+        0, 1, 3, 3, 2, 0
+    };
 
     font_p = fsl_mem_handle_get(fsl_font_buf);
     font[FONT_REG] =        &font_p[FSL_FONT_INDEX_DEJAVU_SANS];
@@ -69,6 +95,7 @@ u32 assets_init(void)
 
     fbo_p = fsl_mem_handle_get(fbo);
     texture_p = fsl_mem_handle_get(texture);
+    mesh_p = fsl_mem_handle_get(mesh);
     shader_p = fsl_mem_handle_get(shader);
     block_textures_p = fsl_mem_handle_get(block_textures);
     blocks_p = fsl_mem_handle_get(blocks);
@@ -173,6 +200,16 @@ u32 assets_init(void)
     for (i = 0; i < SHADER_COUNT; ++i)
         if (fsl_shader_program_init(&shader_p[i]) != FSL_ERR_SUCCESS)
             goto cleanup;
+
+    /* ---- meshes ---------------------------------------------------------- */
+
+    if (fsl_mesh_generate(&mesh_p[MESH_CUBE_OF_HAPPINESS], "Cube of Happiness", "cube_of_happiness", NULL, NULL,
+                &fsl_attrib_vec3, GL_STATIC_DRAW,
+                VBO_LEN_COH, EBO_LEN_COH, vbo_data_coh, ebo_data_coh) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    if (fsl_mesh_load(&mesh_p[MESH_GIZMO], "Gizmo", "gizmo", "gizmo.obj", GAME_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
+        goto cleanup;
 
     /* ---- textures -------------------------------------------------------- */
 

@@ -123,6 +123,8 @@ typedef struct player
     u32 death; /* enum @ref player_death_reason */
 } player;
 
+u32 player_init(player *p, const str *name);
+
 /*!
  *  @brief update everything related to a player.
  *
