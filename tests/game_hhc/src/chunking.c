@@ -1441,6 +1441,8 @@ pop:
                 q->queue_p[pop].ch = NULL;
                 --q->count;
                 ++pop;
+                if (pop == queue_len)
+                    pop = 0;
             }
 
             if (cache.ch->flag & FLAG_CHUNK_IMPORTED)
@@ -1448,11 +1450,6 @@ pop:
             else
                 --rate_chunk;
         }
-        else
-            ++pop;
-
-        if (pop == queue_len)
-            pop = 0;
     }
 
     q->cursor_pop = pop;
