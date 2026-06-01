@@ -322,9 +322,9 @@ static void draw_chunk_queue_visualizer(chunk_queue q, fsl_mesh *mesh_bounding_b
     while (count--)
     {
         glUniform3f(uniform.bounding_box.position,
-                (f32)(q.queue_p[pop].ch->pos.x * CHUNK_DIAMETER),
-                (f32)(q.queue_p[pop].ch->pos.y * CHUNK_DIAMETER),
-                (f32)(q.queue_p[pop].ch->pos.z * CHUNK_DIAMETER));
+                (f32)(q.queue_p[pop]->pos.x * CHUNK_DIAMETER),
+                (f32)(q.queue_p[pop]->pos.y * CHUNK_DIAMETER),
+                (f32)(q.queue_p[pop]->pos.z * CHUNK_DIAMETER));
 
         glUniform4f(uniform.bounding_box.color, color_r, color_g, color_b,
                 SET_CHUNK_QUEUE_VISUALIZER_OPACITY);

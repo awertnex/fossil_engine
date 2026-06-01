@@ -202,6 +202,16 @@ typedef struct chunk
      */
     u32 cursor;
 
+    /*!
+     *  @brief chunk's own index in @ref chunk_table.p.
+     */
+    u32 index;
+
+    /*!
+     *  @brief ID of @ref chunk_job that enqueued this chunk.
+     */
+    u32 queue_id;
+
     GLuint vao;
     GLuint vbo;
     u64 vbo_len;
@@ -237,16 +247,6 @@ typedef struct chunk_order
 } chunk_order;
 
 /*!
- *  @brief used to gather chunk address in @chunk_buf.p and its corresponding
- *  index in @ref chunk_tab.p.
- */
-typedef struct chunk_cache
-{
-    chunk *ch;
-    u32 index;
-} chunk_cache;
-
-/*!
  *  @brief queue of chunks to be processed.
  */
 typedef struct chunk_queue
@@ -260,7 +260,7 @@ typedef struct chunk_queue
     u32 rate_chunk;         /* number of chunks to process per frame */
     u32 rate_block;         /* number of blocks to process per chunk */
     fsl_mem_handle queue;
-    chunk_cache *queue_p;   /* cached pointer from `queue` */
+    chunk **queue_p;        /* cached pointer from `queue` */
 } chunk_queue;
 
 /*!
