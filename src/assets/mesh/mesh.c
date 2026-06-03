@@ -261,12 +261,12 @@ cleanup:
     return fsl_err;
 }
 
-void fsl_mesh_draw(fsl_mesh *mesh, fsl_camera *camera,
+void fsl_mesh_draw(const fsl_mesh *mesh, const fsl_camera *camera,
         f32 pos_x, f32 pos_y, f32 pos_z,
         f32 roll, f32 pitch, f32 yaw,
         f32 scale_x, f32 scale_y, f32 scale_z)
 {
-    fsl_shader_program *shader = NULL;
+    fsl_shader_program *shader = fsl_mem_handle_get(fsl_shader_buf);
     f32 SROL = 0.0f, CROL = 0.0f, SPCH = 0.0f, CPCH = 0.0f, SYAW = 0.0f, CYAW = 0.0f;
     m4f32 transform = {0};
     m4f32 location = {0};
@@ -274,8 +274,6 @@ void fsl_mesh_draw(fsl_mesh *mesh, fsl_camera *camera,
     m4f32 rotation_pitch = {0};
     m4f32 rotation_yaw = {0};
     m4f32 scale = {0};
-
-    shader = fsl_mem_handle_get(fsl_shader_buf);
 
     SROL = sinf(roll * FSL_DEG2RAD);
     CROL = cosf(roll * FSL_DEG2RAD);

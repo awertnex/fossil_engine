@@ -7,6 +7,8 @@
 #include "deps/fossil/physics/collision.h"
 #include "deps/fossil/physics/physics_types.h"
 
+#include "raycast.h"
+
 #define PLAYER_REACH_DISTANCE_MAX   5.0f
 #define PLAYER_HOTBAR_SLOTS_MAX     10
 #define PLAYER_INVENTORY_SLOTS_MAX  (PLAYER_HOTBAR_SLOTS_MAX * 4)
@@ -80,7 +82,6 @@ typedef struct player
     transform_v3f64 transform_last;
     v3f32 size;                     /* size (for collision detection) */
     v3f64 target;                   /* arm */
-    v3f64 target_normal;
 
     angle_f64 roll, pitch, yaw;
     f32 eye_height;                 /* eye-level (camera height) */
@@ -95,7 +96,19 @@ typedef struct player
     f32 health;
 
     fsl_camera camera;
-    fsl_camera camera_hud;          /* for hud 3d elements */
+
+    /*!
+     *  @brief camera for HUD 3D elements (e.g., 3D gizmo (<F3>), chunk gizmo (<Alt + G>).
+     */
+    fsl_camera camera_hud;
+
+    /*!
+     *  @brief for items display on screen, while `camera_hud` is for HUD 3D elements
+     *  that move relative to player rotation, `camera_items` is stationary and
+     *  orthographic, used to draw items in item slots and in containers.
+     */
+    fsl_camera camera_items;
+
     f32 camera_distance;            /* for camera collision detection */
     u8 camera_mode;                 /* enum @ref player_camera_mode */
 
@@ -106,6 +119,7 @@ typedef struct player
 
     v3i32 ch;                       /* current chunk (named `ch` to avoid symbol clash with @ref chunk) */
     v3i32 ch_delta;                 /* previous chunk (named `ch` to avoid symbol clash with @ref chunk) */
+    block_hit hit;                  /* information about the currently targeted block */
 
     v3i64 spawn;                    /* spawn point */
     u64 menu_state;                 /* enum @ref player_menu_state */

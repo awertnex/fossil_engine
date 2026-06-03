@@ -10,17 +10,7 @@ layout (std140, binding = 0) uniform ubo_ndc_scale
     vec2 ndc_scale;
 };
 
-uniform mat4 mat_translation;
-uniform mat4 mat_rotation;
-uniform mat4 mat_orientation;
-uniform mat4 mat_projection;
-
 void main()
 {
-    gl_Position =
-        mat_projection *
-        mat_orientation *
-        mat_rotation *
-        mat_translation *
-        vec4(a_pos * ndc_scale.y * 20.0, 1.0);
+    gl_Position = a_transform * vec4(a_pos * ndc_scale.y * 10.0, 1.0);
 }

@@ -168,7 +168,6 @@ u32 build_text_rendering(int argc, char **argv)
     cmd_push(&cmd, "-Wformat-truncation=0");
     cmd_push(&cmd, "-ggdb");
     cmd_push(&cmd, DIR_SRC_TEXT_RENDERING"main.c");
-    cmd_push(&cmd, "-I"DIR_DEPS);
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
     cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
@@ -202,7 +201,6 @@ u32 build_nine_slice(int argc, char **argv)
     cmd_push(&cmd, "-Wpedantic");
     cmd_push(&cmd, "-ggdb");
     cmd_push(&cmd, DIR_SRC_NINE_SLICE"main.c");
-    cmd_push(&cmd, "-I"DIR_DEPS);
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
     cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
@@ -237,7 +235,6 @@ u32 build_composable_ui(int argc, char **argv)
     cmd_push(&cmd, "-Wformat-truncation=0");
     cmd_push(&cmd, "-ggdb");
     cmd_push(&cmd, DIR_SRC_COMPOSABLE_UI"main.c");
-    cmd_push(&cmd, "-I"DIR_DEPS);
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
     cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);

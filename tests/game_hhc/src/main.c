@@ -57,7 +57,7 @@ static u32 settings_init(void);
 
 void settings_update(void);
 static void draw_gizmo(f32 pos_x, f32 pos_y);
-static void draw_chunk_queue_visualizer(chunk_queue q, fsl_mesh *mesh_bounding_box,
+static void draw_chunk_scheduler_visualizer(chunk_scheduler sched, const fsl_mesh *mesh_bounding_box,
         f32 color_r, f32 color_g, f32 color_b);
 static void draw_everything(void);
 
@@ -213,14 +213,6 @@ static void bind_shader_uniforms(void)
     uniform.skybox.render_layer =
         glGetUniformLocation(shader_p[SHADER_SKYBOX].asset.id, "render_layer");
 
-    uniform.gizmo.mat_translation =
-        glGetUniformLocation(shader_p[SHADER_GIZMO].asset.id, "mat_translation");
-    uniform.gizmo.mat_rotation =
-        glGetUniformLocation(shader_p[SHADER_GIZMO].asset.id, "mat_rotation");
-    uniform.gizmo.mat_orientation =
-        glGetUniformLocation(shader_p[SHADER_GIZMO].asset.id, "mat_orientation");
-    uniform.gizmo.mat_projection =
-        glGetUniformLocation(shader_p[SHADER_GIZMO].asset.id, "mat_projection");
     uniform.gizmo.color =
         glGetUniformLocation(shader_p[SHADER_GIZMO].asset.id, "gizmo_color");
 
@@ -285,34 +277,28 @@ static void draw_gizmo(f32 pos_x, f32 pos_y)
     fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
     m4f32 transform = {0};
 
-    transform.a11 = 1.0f;
-    transform.a22 = 1.0f;
-    transform.a33 = 1.0f;
-    transform.a41 = pos_x;
-    transform.a42 = pos_y;
-    transform.a44 = 1.0f;
+    transform = _player.camera_hud.projection.projection;
+    transform = fsl_matrix_multiply(_player.camera_hud.projection.orientation, transform);
+    transform = fsl_matrix_multiply(_player.camera_hud.projection.rotation, transform);
+    transform = fsl_matrix_multiply(_player.camera_hud.projection.target, transform);
 
     glUseProgram(shader_p[SHADER_GIZMO].asset.id);
 
-    glUniformMatrix4fv(uniform.gizmo.mat_translation, 1, GL_FALSE,
-            (GLfloat*)&_player.camera_hud.projection.target);
-    glUniformMatrix4fv(uniform.gizmo.mat_rotation, 1, GL_FALSE,
-            (GLfloat*)&_player.camera_hud.projection.rotation);
-    glUniformMatrix4fv(uniform.gizmo.mat_orientation, 1, GL_FALSE,
-            (GLfloat*)&_player.camera_hud.projection.orientation);
-    glUniformMatrix4fv(uniform.gizmo.mat_projection, 1, GL_FALSE,
-            (GLfloat*)&_player.camera_hud.projection.projection);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh_p[MESH_GIZMO].transform_buf.id);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(m4f32), &transform, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glBindVertexArray(mesh_p[MESH_GIZMO].vao);
     glUniform3f(uniform.gizmo.color, 1.0f, 0.0f, 0.0f);
-    glDrawElements(GL_TRIANGLES, 30, GL_UNSIGNED_INT, 0);
+    glDrawElementsInstanced(GL_TRIANGLES, mesh_p[MESH_GIZMO].index_buf.len,
+            GL_UNSIGNED_INT, NULL, 1);
 }
 
-static void draw_chunk_queue_visualizer(chunk_queue q, fsl_mesh *mesh_bounding_box,
+static void draw_chunk_scheduler_visualizer(chunk_scheduler sched, const fsl_mesh *mesh_bounding_box,
         f32 color_r, f32 color_g, f32 color_b)
 {
-    u32 pop = q.cursor_pop;
-    u32 count = q.count;
+    u32 pop = sched.cursor_pop;
+    u32 count = sched.count;
 
     glUniformMatrix4fv(uniform.bounding_box.mat_perspective, 1, GL_FALSE,
             (GLfloat*)&_player.camera.projection.perspective);
@@ -322,23 +308,24 @@ static void draw_chunk_queue_visualizer(chunk_queue q, fsl_mesh *mesh_bounding_b
     while (count--)
     {
         glUniform3f(uniform.bounding_box.position,
-                (f32)(q.queue_p[pop]->pos.x * CHUNK_DIAMETER),
-                (f32)(q.queue_p[pop]->pos.y * CHUNK_DIAMETER),
-                (f32)(q.queue_p[pop]->pos.z * CHUNK_DIAMETER));
+                (f32)(sched.p[pop]->pos.x * CHUNK_DIAMETER),
+                (f32)(sched.p[pop]->pos.y * CHUNK_DIAMETER),
+                (f32)(sched.p[pop]->pos.z * CHUNK_DIAMETER));
 
         glUniform4f(uniform.bounding_box.color, color_r, color_g, color_b,
-                SET_CHUNK_QUEUE_VISUALIZER_OPACITY);
+                SET_CHUNK_SCHEDULER_VISUALIZER_OPACITY);
         glBindVertexArray(mesh_bounding_box->vao);
         glDrawElements(GL_LINE_STRIP, 24, GL_UNSIGNED_INT, 0);
 
         ++pop;
-        if (pop == q.len)
+        if (pop == sched.len)
             pop = 0;
     }
 }
 
 static void draw_everything(void)
 {
+    static str engine_version[FSL_ID_CAP] = {0};
     fsl_fbo *fbo_p = fsl_mem_handle_get(fbo);
     fsl_texture *texture_p = fsl_mem_handle_get(texture);
     fsl_texture *fsl_texture_p = fsl_mem_handle_get(fsl_texture_buf);
@@ -346,6 +333,9 @@ static void draw_everything(void)
     fsl_mesh *fsl_mesh_p = fsl_mem_handle_get(fsl_mesh_buf);
     fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
     fsl_shader_program *fsl_shader_p = fsl_mem_handle_get(fsl_shader_buf);
+    block *blocks_p = fsl_mem_handle_get(blocks);
+    fsl_asset_metadata metadata = {0};
+    u32 block_id = 0;
 
     f32 delay_in_hours = 6.0f;
     f32 sun_time = skybox_data.time * FSL_PI;
@@ -584,17 +574,12 @@ static void draw_everything(void)
     glUniformMatrix4fv(uniform.bounding_box.mat_perspective, 1, GL_FALSE,
             (GLfloat*)&_player.camera.projection.perspective);
 
-    if (core.flag.parse_target && core.flag.hud &&
-            chunk_tab.p[chunk_tab.index] &&
-            chunk_tab.p[chunk_tab.index]->block
-            [(i64)_player.target.z - chunk_tab.p[chunk_tab.index]->pos.z * CHUNK_DIAMETER]
-            [(i64)_player.target.y - chunk_tab.p[chunk_tab.index]->pos.y * CHUNK_DIAMETER]
-            [(i64)_player.target.x - chunk_tab.p[chunk_tab.index]->pos.x * CHUNK_DIAMETER])
+    if (_player.hit.block && core.flag.hud)
     {
         glUniform3f(uniform.bounding_box.position,
-                (f32)(_player.target.x),
-                (f32)(_player.target.y),
-                (f32)(_player.target.z));
+                (f32)_player.hit.pos.x,
+                (f32)_player.hit.pos.y,
+                (f32)_player.hit.pos.z);
         glUniform3f(uniform.bounding_box.size, 1.0f, 1.0f, 1.0f);
         glUniform4f(uniform.bounding_box.color, 0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -602,14 +587,17 @@ static void draw_everything(void)
         glDrawElements(GL_LINE_STRIP, 24, GL_UNSIGNED_INT, 0);
     }
 
+     glUniformMatrix4fv(uniform.bounding_box.mat_perspective, 1, GL_FALSE,
+             (GLfloat*)&_player.camera.projection.perspective);
+ 
     /* ---- draw player chunk bounding box ---------------------------------- */
 
     if (core.debug.chunk_bounds)
     {
         glUniform3f(uniform.bounding_box.position,
-                (f32)(_player.ch.x * CHUNK_DIAMETER),
-                (f32)(_player.ch.y * CHUNK_DIAMETER),
-                (f32)(_player.ch.z * CHUNK_DIAMETER));
+                (f32)_player.ch.x * CHUNK_DIAMETER,
+                (f32)_player.ch.y * CHUNK_DIAMETER,
+                (f32)_player.ch.z * CHUNK_DIAMETER);
         glUniform3f(uniform.bounding_box.size,
                 CHUNK_DIAMETER, CHUNK_DIAMETER, CHUNK_DIAMETER);
         glUniform4f(uniform.bounding_box.color, 0.9f, 0.6f, 0.3f, 1.0f);
@@ -632,17 +620,17 @@ static void draw_everything(void)
         glDrawElements(GL_LINE_STRIP, 24, GL_UNSIGNED_INT, 0);
     }
 
-    /* ---- draw chunk queue visualizer ------------------------------------- */
+    /* ---- draw chunk scheduler visualizer --------------------------------- */
 
-    if (core.debug.chunk_queue_visualizer)
+    if (core.debug.chunk_scheduler_visualizer)
     {
         glClear(GL_DEPTH_BUFFER_BIT);
 
-        draw_chunk_queue_visualizer(CHUNK_QUEUE[0], &mesh_p[MESH_CUBE_OF_HAPPINESS],
+        draw_chunk_scheduler_visualizer(chunk_sched[0], &mesh_p[MESH_CUBE_OF_HAPPINESS],
                 0.6f, 0.9f, 0.3f);
-        draw_chunk_queue_visualizer(CHUNK_QUEUE[1], &mesh_p[MESH_CUBE_OF_HAPPINESS],
+        draw_chunk_scheduler_visualizer(chunk_sched[1], &mesh_p[MESH_CUBE_OF_HAPPINESS],
                 0.9f, 0.6f, 0.3f);
-        draw_chunk_queue_visualizer(CHUNK_QUEUE[2], &mesh_p[MESH_CUBE_OF_HAPPINESS],
+        draw_chunk_scheduler_visualizer(chunk_sched[2], &mesh_p[MESH_CUBE_OF_HAPPINESS],
                 0.9f, 0.3f, 0.3f);
     }
 
@@ -664,9 +652,7 @@ static void draw_everything(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     if (core.flag.hud && core.flag.debug)
-    {
         draw_gizmo(render->size.x / 2.0f, render->size.y / 2.0f);
-    }
 
     /* ---- draw hud chunk gizmo -------------------------------------------- */
 
@@ -732,6 +718,13 @@ static void draw_everything(void)
         fsl_ui_draw(&texture_p[TEXTURE_ITEM_BAR], render->size.x / 2, render->size.y,
                 texture_p[TEXTURE_ITEM_BAR].size.x * 2,
                 texture_p[TEXTURE_ITEM_BAR].size.y * 2,
+                84.5f, 18.0f, 0, 0, 0xffffffff);
+
+        fsl_ui_draw(&texture_p[TEXTURE_ITEM_BAR_SELECTED],
+                render->size.x / 2 - 2 + _player.hotbar_slot_selected * 34,
+                render->size.y - 2,
+                texture_p[TEXTURE_ITEM_BAR_SELECTED].size.x * 2,
+                texture_p[TEXTURE_ITEM_BAR_SELECTED].size.y * 2,
                 84.5f, 18.0f, 0, 0, 0xffffffff);
     }
 
@@ -834,21 +827,36 @@ static void draw_everything(void)
                 SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 COLOR_DIAGNOSTIC_INFO);
 
+        if (_player.hit.hit)
+        {
+            block_id = GET_BLOCK_ID(*_player.hit.block);
+            metadata = fsl_asset_get_metadata(blocks_p[block_id].asset);
+            fsl_text_push(fsl_stringf(
+                        "TARGET      [%u][%s]\n"
+                        "XYZ         [%"PRId64" %"PRId64" %"PRId64"]\n",
+                        block_id,
+                        metadata.name,
+                        _player.hit.pos.x, _player.hit.pos.y, _player.hit.pos.z),
+                    SET_MARGIN, SET_MARGIN,
+                    0, 0, 0,
+                    COLOR_TEXT_DEFAULT);
+        }
+
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
 
         fsl_text_push(fsl_stringf(
-                    "CHUNK QUEUE 0 [%7d/%-7"PRIu64"][pop/push: %7"PRIu64"/%-7"PRIu64"]\n"
-                    "CHUNK QUEUE 1 [%7d/%-7"PRIu64"][pop/push: %7"PRIu64"/%-7"PRIu64"]\n"
-                    "CHUNK QUEUE 2 [%7d/%-7"PRIu64"][pop/push: %7"PRIu64"/%-7"PRIu64"]\n"
+                    "CHUNK SCHEDULER 0 [%7d/%-7"PRIu64"][pop/push: %7"PRIu64"/%-7"PRIu64"]\n"
+                    "CHUNK SCHEDULER 1 [%7d/%-7"PRIu64"][pop/push: %7"PRIu64"/%-7"PRIu64"]\n"
+                    "CHUNK SCHEDULER 2 [%7d/%-7"PRIu64"][pop/push: %7"PRIu64"/%-7"PRIu64"]\n"
                     "TOTAL CHUNKS  [%15"PRIu64"]                           \n",
-                    CHUNK_QUEUE[0].count, CHUNK_QUEUE[0].len,
-                    CHUNK_QUEUE[0].cursor_pop, CHUNK_QUEUE[0].cursor_push,
+                    chunk_sched[0].count, chunk_sched[0].len,
+                    chunk_sched[0].cursor_pop, chunk_sched[0].cursor_push,
 
-                    CHUNK_QUEUE[1].count, CHUNK_QUEUE[1].len,
-                    CHUNK_QUEUE[1].cursor_pop, CHUNK_QUEUE[1].cursor_push,
+                    chunk_sched[1].count, chunk_sched[1].len,
+                    chunk_sched[1].cursor_pop, chunk_sched[1].cursor_push,
 
-                    CHUNK_QUEUE[2].count, CHUNK_QUEUE[2].len,
-                    CHUNK_QUEUE[2].cursor_pop, CHUNK_QUEUE[2].cursor_push,
+                    chunk_sched[2].count, chunk_sched[2].len,
+                    chunk_sched[2].cursor_pop, chunk_sched[2].cursor_push,
                     CHUNKS_MAX[settings.render_distance]),
                 render->size.x - SET_MARGIN, SET_MARGIN,
                 FSL_TEXT_ALIGN_RIGHT, 0, 0,
@@ -857,8 +865,7 @@ static void draw_everything(void)
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
         fsl_text_start(font[FONT_MONO], FSL_FONT_SIZE_DEFAULT, 0, FALSE);
 
-        static str temp[FSL_ID_CAP] = {0};
-        fsl_engine_get_string(temp, FSL_ENGINE_STR_INDEX_VERSION);
+        fsl_engine_get_string(engine_version, FSL_ENGINE_STR_INDEX_VERSION);
         fsl_text_push(fsl_stringf(
                     "Game:     %s %s\n"
                     "Author:   %s\n"
@@ -868,7 +875,8 @@ static void draw_everything(void)
                     "Vendor:   %s\n"
                     "Renderer: %s\n",
                     GAME_NAME, GAME_VERSION,
-                    FSL_ENGINE_NAME, temp, FSL_ENGINE_AUTHOR,
+                    FSL_ENGINE_AUTHOR,
+                    FSL_ENGINE_NAME, engine_version,
                     glGetString(GL_VERSION),
                     glGetString(GL_SHADING_LANGUAGE_VERSION),
                     glGetString(GL_VENDOR),

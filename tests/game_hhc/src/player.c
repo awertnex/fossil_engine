@@ -1,9 +1,10 @@
+#include "deps/fossil/common/config.h"
 #include "deps/fossil/assets/assets.h"
 #include "deps/fossil/logger/logger.h"
-
-#include "deps/fossil/physics/collision.h"
 #include "deps/fossil/math/math.h"
 #include "deps/fossil/math/vector.h"
+#include "deps/fossil/physics/collision.h"
+
 #include "deps/fossil/h/time.h"
 
 #include "h/main.h"
@@ -583,123 +584,19 @@ void player_camera_movement_update(player *p, v2f64 mouse_delta, b8 use_mouse)
 
 void player_target_update(player *p)
 {
-    const v3i64 WORLD_VOLUME_MIN = {-WORLD_DIAMETER, -WORLD_DIAMETER, -WORLD_DIAMETER_VERTICAL};
-    const v3i64 WORLD_VOLUME_MAX = {WORLD_DIAMETER, WORLD_DIAMETER, WORLD_DIAMETER_VERTICAL};
-    f64 SPCH = p->pitch.sin;
-    f64 CPCH = p->pitch.cos;
-    f64 SYAW = p->yaw.sin;
-    f64 CYAW = p->yaw.cos;
-    v3f64 eye_pos = {0};
-    v3i64 block_pos = {0};
-    v3i64 target = {0};
-    v3f64 direction = {0};
-    v3f64 delta = {0};
-    v3f64 distance = {0};
-    v3f64 normal = {0};
-    v3i32 step = {1, 1, 1};
-    b8 hit = FALSE;
-    chunk *ch = NULL;
-    u32 *_block = NULL;
-    i32 x = 0;
-    i32 y = 0;
-    i32 z = 0;
+    v3f64 start = {0};
+    v3f64 end = {0};
 
-    eye_pos.x = p->transform.pos.x;
-    eye_pos.y = p->transform.pos.y;
-    eye_pos.z = p->transform.pos.z + p->eye_height;
-    block_pos.x = (i64)floor(eye_pos.x);
-    block_pos.y = (i64)floor(eye_pos.y);
-    block_pos.z = (i64)floor(eye_pos.z);
-    target.x = (i64)p->target.x;
-    target.y = (i64)p->target.y;
-    target.z = (i64)p->target.z;
-    direction.x = CYAW * CPCH;
-    direction.y = -SYAW * CPCH;
-    direction.z = -SPCH;
-    delta.x = direction.x == 0.0 ? INFINITY : fabs(1.0 / direction.x);
-    delta.y = direction.y == 0.0 ? INFINITY : fabs(1.0 / direction.y);
-    delta.z = direction.z == 0.0 ? INFINITY : fabs(1.0 / direction.z);
+    start.x = p->transform.pos.x;
+    start.y = p->transform.pos.y;
+    start.z = p->transform.pos.z + p->eye_height;
+    end.x = start.x + p->yaw.cos * p->pitch.cos;
+    end.y = start.y - p->yaw.sin * p->pitch.cos;
+    end.z = start.z - p->pitch.sin;
 
-    if (direction.x < 0.0f)
-    {
-        distance.x = (eye_pos.x - block_pos.x) * delta.x;
-        step.x = -1;
-    }
-    else distance.x = (block_pos.x + 1.0 - eye_pos.x) * delta.x;
-
-    if (direction.y < 0.0f)
-    {
-        distance.y = (eye_pos.y - block_pos.y) * delta.y;
-        step.y = -1;
-    }
-    else distance.y = (block_pos.y + 1.0 - eye_pos.y) * delta.y;
-
-    if (direction.z < 0.0f)
-    {
-        distance.z = (eye_pos.z - block_pos.z) * delta.z;
-        step.z = -1;
-    }
-    else distance.z = (block_pos.z + 1.0 - eye_pos.z) * delta.z;
-
-    while (fsl_min_v3f64(distance) < settings.reach_distance)
-    {
-        switch (fsl_min_axis_v3f64(distance))
-        {
-            case 1:
-                block_pos.x += step.x;
-                distance.x += delta.x;
-                normal.x = -step.x;
-                normal.y = 0.0;
-                normal.z = 0.0;
-                break;
-
-            case 2:
-                block_pos.y += step.y;
-                distance.y += delta.y;
-                normal.x = 0.0;
-                normal.y = -step.y;
-                normal.z = 0.0;
-                break;
-
-            case 3:
-                block_pos.z += step.z;
-                distance.z += delta.z;
-                normal.x = 0.0;
-                normal.y = 0.0;
-                normal.z = -step.z;
-                break;
-        }
-
-        x = block_pos.x - p->ch.x * CHUNK_DIAMETER;
-        y = block_pos.y - p->ch.y * CHUNK_DIAMETER;
-        z = block_pos.z - p->ch.z * CHUNK_DIAMETER;
-        ch = get_chunk_resolved(settings.chunk_tab_center, x, y, z);
-        if (!ch || !(ch->flag & FLAG_CHUNK_GENERATED))
-            continue;
-
-        _block = get_block_resolved(ch, x, y, z);
-        if (!_block || !*_block)
-            continue;
-
-        hit = TRUE;
-        break;
-    }
-
-    if (hit && fsl_is_in_volume_i64(target, WORLD_VOLUME_MIN, WORLD_VOLUME_MAX))
-    {
-        core.flag.parse_target = 1;
-        p->target.x = (f64)block_pos.x;
-        p->target.y = (f64)block_pos.y;
-        p->target.z = (f64)block_pos.z;
-        p->target_normal = normal;
-    }
-    else
-    {
-        core.flag.parse_target = 0;
-        p->target_normal.x = 0.0;
-        p->target_normal.y = 0.0;
-        p->target_normal.z = 0.0;
-    }
+    p->hit = block_hit_get(p->transform.pos,
+            start.x, start.y, start.z, end.x, end.y, end.z,
+            settings.reach_distance);
 }
 
 void set_player_pos(player *p, f64 x, f64 y, f64 z)

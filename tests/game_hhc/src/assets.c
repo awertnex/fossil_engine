@@ -222,6 +222,10 @@ u32 assets_init(void)
                 "Item Bar", "item_bar", "item_bar.png", GAME_DIR_NAME_GUI,
                 GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS ||
 
+            fsl_texture_init(&texture_p[TEXTURE_ITEM_BAR_SELECTED],
+                "Item Bar Selected", "item_bar_selected", "item_bar_selected.png", GAME_DIR_NAME_GUI,
+                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS ||
+
             fsl_texture_init(&texture_p[TEXTURE_SKYBOX_VAL],
                 "Skybox Val", "skybox_val", "skybox_val.png", GAME_DIR_NAME_ENV,
                 GL_RED, GL_NEAREST, FSL_COLOR_CHANNELS_GRAY, FALSE, FALSE) != FSL_ERR_SUCCESS ||
@@ -384,17 +388,6 @@ void blocks_init(void)
     fsl_asset_set_metadata(&blocks_p[BLOCK_NONE].asset, FSL_ASSET_CUSTOM,
             "None", "none", NULL, NULL);
 
-    fsl_asset_set_metadata(&blocks_p[BLOCK_BLOOD].asset, FSL_ASSET_CUSTOM,
-            "Blood Block", "block_blood", "block_blood", NULL);
-    blocks_p[BLOCK_BLOOD].state = BLOCK_STATE_SOLID;
-    blocks_p[BLOCK_BLOOD].texture_index[0] = TEXTURE_BLOCK_BLOOD;
-    blocks_p[BLOCK_BLOOD].texture_index[1] = TEXTURE_BLOCK_BLOOD;
-    blocks_p[BLOCK_BLOOD].texture_index[2] = TEXTURE_BLOCK_BLOOD;
-    blocks_p[BLOCK_BLOOD].texture_index[3] = TEXTURE_BLOCK_BLOOD;
-    blocks_p[BLOCK_BLOOD].texture_index[4] = TEXTURE_BLOCK_BLOOD;
-    blocks_p[BLOCK_BLOOD].texture_index[5] = TEXTURE_BLOCK_BLOOD;
-    blocks_p[BLOCK_BLOOD].friction = FRICTION_BLOCK_WET;
-
     fsl_asset_set_metadata(&blocks_p[BLOCK_GRASS].asset, FSL_ASSET_CUSTOM,
             "Grass Block", "block_grass", "block_grass", NULL);
     blocks_p[BLOCK_GRASS].state = BLOCK_STATE_SOLID;
@@ -526,6 +519,17 @@ void blocks_init(void)
     blocks_p[BLOCK_WOOD_OAK_PLANKS].texture_index[4] = TEXTURE_BLOCK_WOOD_OAK_PLANKS;
     blocks_p[BLOCK_WOOD_OAK_PLANKS].texture_index[5] = TEXTURE_BLOCK_WOOD_OAK_PLANKS;
     blocks_p[BLOCK_WOOD_OAK_PLANKS].friction = FRICTION_BLOCK_HARD;
+
+    fsl_asset_set_metadata(&blocks_p[BLOCK_BLOOD].asset, FSL_ASSET_CUSTOM,
+            "Blood Block", "block_blood", "block_blood", NULL);
+    blocks_p[BLOCK_BLOOD].state = BLOCK_STATE_SOLID;
+    blocks_p[BLOCK_BLOOD].texture_index[0] = TEXTURE_BLOCK_BLOOD;
+    blocks_p[BLOCK_BLOOD].texture_index[1] = TEXTURE_BLOCK_BLOOD;
+    blocks_p[BLOCK_BLOOD].texture_index[2] = TEXTURE_BLOCK_BLOOD;
+    blocks_p[BLOCK_BLOOD].texture_index[3] = TEXTURE_BLOCK_BLOOD;
+    blocks_p[BLOCK_BLOOD].texture_index[4] = TEXTURE_BLOCK_BLOOD;
+    blocks_p[BLOCK_BLOOD].texture_index[5] = TEXTURE_BLOCK_BLOOD;
+    blocks_p[BLOCK_BLOOD].friction = FRICTION_BLOCK_WET;
 }
 
 /* ---- special_blocks ------------------------------------------------------ */

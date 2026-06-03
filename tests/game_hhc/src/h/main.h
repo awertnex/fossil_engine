@@ -17,7 +17,6 @@ struct hhc_core
         b8 fullscreen;
         b8 menu_open;
         b8 fps_cap;
-        b8 parse_target;
         b8 world_loaded;
         b8 chunks_initialized;
     } flag;
@@ -28,7 +27,7 @@ struct hhc_core
         b8 chunk_bounds;
         b8 bounding_boxes;
         b8 chunk_gizmo;
-        b8 chunk_queue_visualizer;
+        b8 chunk_scheduler_visualizer;
     } debug;
 }; /* hhc_core */
 
@@ -94,10 +93,6 @@ struct hhc_uniform
 
     struct /* gizmo */
     {
-        GLint mat_translation;
-        GLint mat_rotation;
-        GLint mat_orientation;
-        GLint mat_projection;
         GLint color;
     } gizmo;
 
