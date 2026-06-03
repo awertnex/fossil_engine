@@ -19,9 +19,9 @@
 /*!
  *  @brief budget of work given to each @ref chunk_scheduler to be consumed each frame.
  */
-#define CHUNK_PARSE_RATE_PRIORITY_LOW 4096
-#define CHUNK_PARSE_RATE_PRIORITY_MID 8192
-#define CHUNK_PARSE_RATE_PRIORITY_HIGH 16384
+#define CHUNK_PARSE_RATE_PRIORITY_LOW 16384
+#define CHUNK_PARSE_RATE_PRIORITY_MID 32768
+#define CHUNK_PARSE_RATE_PRIORITY_HIGH 65536
 
 /*!
  *  @brief number of blocks to process per chunk per frame.
@@ -35,10 +35,10 @@ typedef enum chunk_scheduler_cost
 {
     CHUNK_PARSE_COST_PUSH = 4,
     CHUNK_PARSE_COST_POP = 4,
-    CHUNK_PARSE_COST_IMPORT = 8,
-    CHUNK_PARSE_COST_EXPORT = 8,
-    CHUNK_PARSE_COST_MESHING = 16,
-    CHUNK_PARSE_COST_GENERATION = 64
+    CHUNK_PARSE_COST_IMPORT = 16,
+    CHUNK_PARSE_COST_EXPORT = 16,
+    CHUNK_PARSE_COST_MESHING = 64,
+    CHUNK_PARSE_COST_GENERATION = 256
 } chunk_scheduler_cost;
 
 /* ---- section: block flag ------------------------------------------------- */
