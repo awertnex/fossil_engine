@@ -77,6 +77,6 @@ void input_init(void);
  *  @remark only updates player flags, no parameters are updated except for
  *  `p->input`.
  */
-void input_update(player *p);
+void input_update(hhc_player *p);
 
 #endif /* HHC_INPUT_H */

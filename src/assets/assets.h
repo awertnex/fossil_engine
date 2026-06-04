@@ -139,16 +139,15 @@ FSLAPI u32 fsl_font_init(fsl_font *font, u32 resolution,
 FSLAPI void fsl_font_free(fsl_font *font);
 
 /*!
- *  @brief update `sine` and `cosine` of camera roll, pitch and yaw.
- *
- *  @param roll enable/disable roll rotation.
+ *  @brief update camera position and rotation (in degrees).
  *
  *  @remark rotation limits:
  *      roll:  [  0, 360].
  *      pitch: [-90,  90].
  *      yaw:   [  0, 360].
  */
-FSLAPI void fsl_update_camera_movement(fsl_camera *camera, b8 roll);
+FSLAPI void fsl_update_camera_movement(fsl_camera *camera,
+        f64 pos_x, f64 pos_y, f64 pos_z, f64 roll, f64 pitch, f64 yaw);
 
 /*!
  *  @brief make perspective projection matrices from camera parameters.

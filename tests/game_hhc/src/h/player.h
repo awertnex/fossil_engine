@@ -74,7 +74,7 @@ enum player_menu_state
     STATE_PLAYER_MENU_COUNT
 }; /* player_menu_state */
 
-typedef struct player
+typedef struct hhc_player
 {
     str name[64];                   /* in-game name */
     u64 flag;                       /* enum @ref player_flag */
@@ -98,16 +98,16 @@ typedef struct player
     fsl_camera camera;
 
     /*!
-     *  @brief camera for HUD 3D elements (e.g., 3D gizmo (<F3>), chunk gizmo (<Alt + G>).
+     *  @brief camera for HUD 3D elements responsive to player movement
+     *  (e.g., 3D gizmo (<F3>), chunk gizmo (<Alt + G>).
      */
     fsl_camera camera_hud;
 
     /*!
-     *  @brief for items display on screen, while `camera_hud` is for HUD 3D elements
-     *  that move relative to player rotation, `camera_items` is stationary and
-     *  orthographic, used to draw items in item slots and in containers.
+     *  @brief camera for UI elements non-responsive to player movement
+     *  (e.g., items in item slots).
      */
-    fsl_camera camera_items;
+    fsl_camera camera_ui;
 
     f32 camera_distance;            /* for camera collision detection */
     u8 camera_mode;                 /* enum @ref player_camera_mode */
@@ -135,9 +135,9 @@ typedef struct player
 
     fsl_bounding_box bbox;
     u32 death; /* enum @ref player_death_reason */
-} player;
+} hhc_player;
 
-u32 player_init(player *p, const str *name);
+u32 player_init(hhc_player *p, const str *name);
 
 /*!
  *  @brief update everything related to a player.
@@ -152,10 +152,10 @@ u32 player_init(player *p, const str *name);
  *  5. update player current chunk.
  *  6. make entire chunk buffer dirty if player crosses a chunk boundary.
  */
-void player_update(player *p, f64 dt);
+void player_update(hhc_player *p, f64 dt);
 
-void player_collision_update(player *p, f64 dt);
-void player_bounding_box_update(player *p);
+void player_collision_update(hhc_player *p, f64 dt);
+void player_bounding_box_update(hhc_player *p);
 
 /*!
  *  @brief make a collision capsule for collision detection.
@@ -176,31 +176,31 @@ fsl_bounding_box make_collision_capsule(fsl_bounding_box b, v3i32 ch, v3f32 velo
  *  @param use_mouse let mouse delta move the camera, useful for interacting
  *  with UI instead of player.
  */
-void player_camera_movement_update(player *p, v2f64 mouse_delta, b8 use_mouse);
+void player_camera_movement_update(hhc_player *p, v2f64 mouse_delta, b8 use_mouse);
 
-void player_target_update(player *p);
-void set_player_pos(player *p, f64 x, f64 y, f64 z);
-void set_player_block(player *p, i64 x, i64 y, i64 z);
+void player_target_update(hhc_player *p);
+void set_player_pos(hhc_player *p, f64 x, f64 y, f64 z);
+void set_player_block(hhc_player *p, i64 x, i64 y, i64 z);
 
 /*!
  *  @brief set player spawn point.
  */
-void set_player_spawn(player *p, i64 x, i64 y, i64 z);
+void set_player_spawn(hhc_player *p, i64 x, i64 y, i64 z);
 
 /*!
  *  @brief re-spawn player.
  *
  *  @param hard `TRUE` will reset all player stats, `FALSE` will only teleport to spawn.
  */
-void player_spawn(player *p, b8 hard);
+void player_spawn(hhc_player *p, b8 hard);
 
-void player_kill(player *p);
+void player_kill(hhc_player *p);
 
 /*!
  *  @brief get random string from string buffers in @ref common.c for player death reason.
  *
  *  @return `NULL` on failure.
  */
-str *get_death_str(player *p);
+str *get_death_str(hhc_player *p);
 
 #endif /* HHC_PLAYER_H */

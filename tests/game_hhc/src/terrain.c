@@ -5,7 +5,8 @@
 
 #include "deps/fossil/h/dir.h"
 
-#include "h/chunking.h"
+#include "chunking/chunking.h"
+
 #include "h/diagnostics.h"
 #include "h/dir.h"
 #include "h/terrain.h"
@@ -13,6 +14,16 @@
 
 #include <stdio.h>
 #include <math.h>
+
+#define TERRAIN_SEA_LEVEL           0
+#define TERRAIN_CAVE_LEVEL          (WORLD_RADIUS_VERTICAL / 2)
+#define TERRAIN_SQUISH_MAGNITUDE    0.03f
+
+#define TERRAIN_SEED_DEFAULT 0
+
+#define RAND_TAB_DIAMETER   128
+#define RAND_TAB_LAYER      (RAND_TAB_DIAMETER * RAND_TAB_DIAMETER)
+#define RAND_TAB_VOLUME     (RAND_TAB_DIAMETER * RAND_TAB_DIAMETER * RAND_TAB_DIAMETER)
 
 f32 *RAND_TAB = {0};
 

@@ -4,17 +4,6 @@
 #include "deps/fossil/common/types.h"
 
 #include "assets.h"
-#include "chunking.h"
-
-#define TERRAIN_SEA_LEVEL           0
-#define TERRAIN_CAVE_LEVEL          (WORLD_RADIUS_VERTICAL / 2)
-#define TERRAIN_SQUISH_MAGNITUDE    0.03f
-
-#define TERRAIN_SEED_DEFAULT 0
-
-#define RAND_TAB_DIAMETER   128
-#define RAND_TAB_LAYER      (RAND_TAB_DIAMETER * RAND_TAB_DIAMETER)
-#define RAND_TAB_VOLUME     (RAND_TAB_DIAMETER * RAND_TAB_DIAMETER * RAND_TAB_DIAMETER)
 
 enum biome_index
 {

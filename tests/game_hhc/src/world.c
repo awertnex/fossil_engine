@@ -8,7 +8,8 @@
 #include "deps/fossil/h/dir.h"
 #include "deps/fossil/h/time.h"
 
-#include "h/chunking.h"
+#include "chunking/chunking.h"
+
 #include "h/common.h"
 #include "h/diagnostics.h"
 #include "h/dir.h"
@@ -22,7 +23,7 @@
 
 world_info world = {0};
 
-u32 world_init(str *name, u64 seed, player *p)
+u32 world_init(str *name, u64 seed, hhc_player *p)
 {
     world_dir_init(name);
     if (*GAME_ERR != FSL_ERR_SUCCESS && *GAME_ERR != HHC_ERR_WORLD_EXISTS)
@@ -198,6 +199,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
     /* ---- other stuff ----------------------------------------------------- */
 
     core.debug.chunk_gizmo = 1;
+    core.debug.chunk_scheduler_visualizer = 1;
 
     LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
             fsl_logger_stringf("World Loaded '%s'\n", world_name));
@@ -206,7 +208,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
     return *GAME_ERR;
 }
 
-void world_update(player *p)
+void world_update(hhc_player *p)
 {
     /* player camera shouldn't move when a menu is open,
      * so we pass this to the camera function.
@@ -234,4 +236,5 @@ void world_update(player *p)
 
     fsl_update_projection_perspective(p->camera, &p->camera.projection, FALSE);
     fsl_update_projection_perspective(p->camera_hud, &p->camera_hud.projection, FALSE);
+    fsl_update_projection_perspective(p->camera_ui, &p->camera_ui.projection, FALSE);
 }

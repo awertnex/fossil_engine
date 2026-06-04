@@ -1,13 +1,13 @@
+#include "deps/fossil/input/input.h"
 #include "deps/fossil/logger/logger.h"
 #include "deps/fossil/math/math.h"
 #include "deps/fossil/math/trigonometry.h"
 #include "deps/fossil/shaders/shaders.h"
 #include "deps/fossil/shaders/shader_types.h"
 
-#include "deps/fossil/input/input.h"
+#include "chunking/chunking.h"
 
 #include "h/assets.h"
-#include "h/chunking.h"
 #include "h/gui.h"
 #include "h/input.h"
 #include "h/player.h"
@@ -147,7 +147,7 @@ void input_init(void)
     fsl_input_context_set(input_context_gameplay);
 }
 
-void input_update(player *p)
+void input_update(hhc_player *p)
 {
     fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
     u32 shader_err = FSL_ERR_SUCCESS;

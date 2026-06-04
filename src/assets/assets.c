@@ -671,18 +671,21 @@ void fsl_font_free(fsl_font *font)
 
 /* ---- section: camera ----------------------------------------------------- */
 
-void fsl_update_camera_movement(fsl_camera *camera, b8 roll)
+void fsl_update_camera_movement(fsl_camera *camera,
+        f64 pos_x, f64 pos_y, f64 pos_z, f64 roll, f64 pitch, f64 yaw)
 {
-    if (roll)
-    {
-        camera->roll.angle = fmod(camera->roll.angle, FSL_CAMERA_RANGE_MAX);
-        if (camera->roll.angle < 0.0) camera->roll.angle += FSL_CAMERA_RANGE_MAX;
-    }
-    else camera->roll.angle = 0.0;
+    camera->pos.x = pos_x;
+    camera->pos.y = pos_y;
+    camera->pos.z = pos_z;
 
-    camera->pitch.angle = fsl_clamp_f64(camera->pitch.angle, -FSL_CAMERA_ANGLE_MAX, FSL_CAMERA_ANGLE_MAX);
-    camera->yaw.angle = fmod(camera->yaw.angle, FSL_CAMERA_RANGE_MAX);
-    if (camera->yaw.angle < 0.0) camera->yaw.angle += FSL_CAMERA_RANGE_MAX;
+    camera->roll.angle = fmod(roll, FSL_CAMERA_RANGE_MAX);
+    if (camera->roll.angle < 0.0)
+        camera->roll.angle += FSL_CAMERA_RANGE_MAX;
+
+    camera->pitch.angle = fsl_clamp_f64(pitch, -FSL_CAMERA_ANGLE_MAX, FSL_CAMERA_ANGLE_MAX);
+    camera->yaw.angle = fmod(yaw, FSL_CAMERA_RANGE_MAX);
+    if (camera->yaw.angle < 0.0)
+        camera->yaw.angle += FSL_CAMERA_RANGE_MAX;
 
     camera->roll.sin = sin(camera->roll.angle * FSL_DEG2RAD);
     camera->roll.cos = cos(camera->roll.angle * FSL_DEG2RAD);
@@ -691,7 +694,7 @@ void fsl_update_camera_movement(fsl_camera *camera, b8 roll)
     camera->yaw.sin = sin(camera->yaw.angle * FSL_DEG2RAD);
     camera->yaw.cos = cos(camera->yaw.angle * FSL_DEG2RAD);
 
-    fsl_update_projection_perspective(*camera, &camera->projection, roll);
+    fsl_update_projection_perspective(*camera, &camera->projection, FALSE);
 }
 
 void fsl_update_projection_perspective(fsl_camera camera, fsl_projection *projection, b8 roll)
@@ -709,9 +712,9 @@ void fsl_update_projection_perspective(fsl_camera camera, fsl_projection *projec
     f32 clip = 0.0f;
     f32 offset = 0.0f;
     fsl_projection noprojection = {0};
-    m4f32 mat_roll = {0};
-    m4f32 mat_pitch = {0};
-    m4f32 mat_yaw = {0};
+    m4f32 rotation_roll = {0};
+    m4f32 rotation_pitch = {0};
+    m4f32 rotation_yaw = {0};
 
     *projection = noprojection;
 
@@ -744,37 +747,37 @@ void fsl_update_projection_perspective(fsl_camera camera, fsl_projection *projec
 
     /* ---- rotation: yaw --------------------------------------------------- */
 
-    mat_yaw.a11 = CYAW;
-    mat_yaw.a12 = SYAW;
-    mat_yaw.a21 = -SYAW;
-    mat_yaw.a22 = CYAW;
-    mat_yaw.a33 = 1.0f;
-    mat_yaw.a44 = 1.0f;
+    rotation_yaw.a11 = CYAW;
+    rotation_yaw.a12 = SYAW;
+    rotation_yaw.a21 = -SYAW;
+    rotation_yaw.a22 = CYAW;
+    rotation_yaw.a33 = 1.0f;
+    rotation_yaw.a44 = 1.0f;
 
     /* ---- rotation: pitch ------------------------------------------------- */
 
-    mat_pitch.a11 = CPCH;
-    mat_pitch.a13 = SPCH;
-    mat_pitch.a22 = 1.0f;
-    mat_pitch.a31 = -SPCH;
-    mat_pitch.a33 = CPCH;
-    mat_pitch.a44 = 1.0f;
+    rotation_pitch.a11 = CPCH;
+    rotation_pitch.a13 = SPCH;
+    rotation_pitch.a22 = 1.0f;
+    rotation_pitch.a31 = -SPCH;
+    rotation_pitch.a33 = CPCH;
+    rotation_pitch.a44 = 1.0f;
 
-    projection->rotation = fsl_matrix_multiply(mat_yaw, mat_pitch);
+    projection->rotation = fsl_matrix_multiply(rotation_yaw, rotation_pitch);
 
     /* ---- rotation: roll -------------------------------------------------- */
 
     /* TODO: try to fix 'roll' rotation in camera projection matrix */
     if (roll)
     {
-        mat_roll.a11 = 1.0f;
-        mat_roll.a22 = CROL;
-        mat_roll.a23 = SROL;
-        mat_roll.a32 = -SROL;
-        mat_roll.a33 = CROL;
-        mat_roll.a44 = 1.0f;
+        rotation_roll.a11 = 1.0f;
+        rotation_roll.a22 = CROL;
+        rotation_roll.a23 = SROL;
+        rotation_roll.a32 = -SROL;
+        rotation_roll.a33 = CROL;
+        rotation_roll.a44 = 1.0f;
 
-        projection->rotation = fsl_matrix_multiply(projection->rotation, mat_roll);
+        projection->rotation = fsl_matrix_multiply(projection->rotation, rotation_roll);
     }
 
     /* ---- orientation: z-up ----------------------------------------------- */
@@ -804,12 +807,15 @@ void fsl_get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f6
 {
     v3f64 direction = {0};
 
-    camera_pos.x -= target.x;
-    camera_pos.y -= target.y;
-    camera_pos.z -= target.z;
+    target.x -= camera_pos.x;
+    target.y -= camera_pos.y;
+    target.z -= camera_pos.z;
 
-    direction = fsl_normalize_v3f64(camera_pos);
+    direction = fsl_normalize_v3f64(target);
 
-    *pitch = atan2(direction.z, sqrt(direction.x * direction.x + direction.y * direction.y));
+    *pitch = atan2(-direction.z, sqrt(direction.x * direction.x + direction.y * direction.y));
     *yaw = atan2(-direction.y, direction.x);
+
+    *pitch *= FSL_RAD2DEG;
+    *yaw *= FSL_RAD2DEG;
 }

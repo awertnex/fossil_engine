@@ -41,7 +41,7 @@ extern world_info world;
  *
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
-u32 world_init(str *name, u64 seed, player *p);
+u32 world_init(str *name, u64 seed, hhc_player *p);
 
 /*!
  *  @brief initialize world directory structure.
@@ -70,6 +70,6 @@ u32 world_dir_init(const str *world_name);
  */
 u32 world_load(world_info *world, const str *world_name, u64 seed);
 
-void world_update(player *p);
+void world_update(hhc_player *p);
 
 #endif /* HHC_WORLD_H */

@@ -86,6 +86,23 @@ extern u8 state_menu_depth;
 extern b8 is_menu_ready;
 extern u8 buttons[BTN_COUNT];
 
+/*!
+ *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
+ */
+u32 gui_init(void);
+
+void gui_free(void);
+
+/*!
+ *  @brief bind correct resources to start drawing UI items.
+ */
+void gui_start_ui_items(void);
+
+/*!
+ *  @brief draw UI item (e.g., hotbar items, container items).
+ */
+void gui_draw_ui_item(i32 pos_x, i32 pos_y);
+
 #if 0 /* TODO: undef */
 void update_menus(v2f32 render_size);
 void draw_hud();

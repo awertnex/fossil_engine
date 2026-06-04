@@ -1,8 +1,11 @@
 #include "deps/fossil/fossil_engine.h"
 
 #include "h/main.h"
+
+#include "chunking/chunking.h"
+#include "chunking/chunking_debug_tools.h"
+
 #include "h/assets.h"
-#include "h/chunking.h"
 #include "h/common.h"
 #include "h/diagnostics.h"
 #include "h/dir.h"
@@ -23,9 +26,8 @@ fsl_mem_arena memory_arena_internal = {0};
 fsl_render *render = NULL;
 struct hhc_core core = {0};
 struct hhc_settings settings = {0};
-static struct hhc_uniform uniform = {0};
-
-static player _player = {0};
+struct hhc_uniform uniform = {0};
+static hhc_player player = {0};
 
 static struct /* skybox_data */
 {
@@ -57,16 +59,14 @@ static u32 settings_init(void);
 
 void settings_update(void);
 static void draw_gizmo(f32 pos_x, f32 pos_y);
-static void draw_chunk_scheduler_visualizer(chunk_scheduler sched, const fsl_mesh *mesh_bounding_box,
-        f32 color_r, f32 color_g, f32 color_b);
 static void draw_everything(void);
 
 static void callback_framebuffer_size(i32 size_x, i32 size_y)
 {
     fsl_fbo *fbo_p = fsl_mem_handle_get(fbo);
 
-    _player.camera.ratio = (f32)size_x / (f32)size_y;
-    _player.camera_hud.ratio = (f32)size_x / (f32)size_y;
+    player.camera.ratio = (f32)size_x / (f32)size_y;
+    player.camera_hud.ratio = (f32)size_x / (f32)size_y;
 
     fsl_fbo_realloc(&fbo_p[FBO_SKYBOX], render->size.x, render->size.y, FALSE, 4);
     fsl_fbo_realloc(&fbo_p[FBO_WORLD], render->size.x, render->size.y, FALSE, 4);
@@ -91,16 +91,16 @@ static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset)
     (void)window;
     (void)xoffset;
 
-    if (_player.flag & FLAG_PLAYER_ZOOMER)
-        _player.camera.zoom =
-            fsl_clamp_f64(_player.camera.zoom + yoffset * FSL_CAMERA_ZOOM_SPEED, 0.0f, FSL_CAMERA_ZOOM_MAX);
+    if (player.flag & FLAG_PLAYER_ZOOMER)
+        player.camera.zoom =
+            fsl_clamp_f64(player.camera.zoom + yoffset * FSL_CAMERA_ZOOM_SPEED, 0.0f, FSL_CAMERA_ZOOM_MAX);
     else
     {
-        _player.hotbar_slot_selected -= (i64)yoffset;
-        if (_player.hotbar_slot_selected >= PLAYER_HOTBAR_SLOTS_MAX)
-            _player.hotbar_slot_selected = 0;
-        else if (_player.hotbar_slot_selected < 0)
-            _player.hotbar_slot_selected = PLAYER_HOTBAR_SLOTS_MAX - 1;
+        player.hotbar_slot_selected -= (i64)yoffset;
+        if (player.hotbar_slot_selected >= PLAYER_HOTBAR_SLOTS_MAX)
+            player.hotbar_slot_selected = 0;
+        else if (player.hotbar_slot_selected < 0)
+            player.hotbar_slot_selected = PLAYER_HOTBAR_SLOTS_MAX - 1;
     }
 
     if (core.flag.super_debug)
@@ -277,10 +277,10 @@ static void draw_gizmo(f32 pos_x, f32 pos_y)
     fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
     m4f32 transform = {0};
 
-    transform = _player.camera_hud.projection.projection;
-    transform = fsl_matrix_multiply(_player.camera_hud.projection.orientation, transform);
-    transform = fsl_matrix_multiply(_player.camera_hud.projection.rotation, transform);
-    transform = fsl_matrix_multiply(_player.camera_hud.projection.target, transform);
+    transform = player.camera_hud.projection.projection;
+    transform = fsl_matrix_multiply(player.camera_hud.projection.orientation, transform);
+    transform = fsl_matrix_multiply(player.camera_hud.projection.rotation, transform);
+    transform = fsl_matrix_multiply(player.camera_hud.projection.target, transform);
 
     glUseProgram(shader_p[SHADER_GIZMO].asset.id);
 
@@ -292,35 +292,6 @@ static void draw_gizmo(f32 pos_x, f32 pos_y)
     glUniform3f(uniform.gizmo.color, 1.0f, 0.0f, 0.0f);
     glDrawElementsInstanced(GL_TRIANGLES, mesh_p[MESH_GIZMO].index_buf.len,
             GL_UNSIGNED_INT, NULL, 1);
-}
-
-static void draw_chunk_scheduler_visualizer(chunk_scheduler sched, const fsl_mesh *mesh_bounding_box,
-        f32 color_r, f32 color_g, f32 color_b)
-{
-    u32 pop = sched.cursor_pop;
-    u32 count = sched.count;
-
-    glUniformMatrix4fv(uniform.bounding_box.mat_perspective, 1, GL_FALSE,
-            (GLfloat*)&_player.camera.projection.perspective);
-    glUniform3f(uniform.bounding_box.size,
-            CHUNK_DIAMETER, CHUNK_DIAMETER, CHUNK_DIAMETER);
-
-    while (count--)
-    {
-        glUniform3f(uniform.bounding_box.position,
-                (f32)(sched.p[pop]->pos.x * CHUNK_DIAMETER),
-                (f32)(sched.p[pop]->pos.y * CHUNK_DIAMETER),
-                (f32)(sched.p[pop]->pos.z * CHUNK_DIAMETER));
-
-        glUniform4f(uniform.bounding_box.color, color_r, color_g, color_b,
-                SET_CHUNK_SCHEDULER_VISUALIZER_OPACITY);
-        glBindVertexArray(mesh_bounding_box->vao);
-        glDrawElements(GL_LINE_STRIP, 24, GL_UNSIGNED_INT, 0);
-
-        ++pop;
-        if (pop == sched.len)
-            pop = 0;
-    }
 }
 
 static void draw_everything(void)
@@ -406,12 +377,12 @@ static void draw_everything(void)
 
     glUniformMatrix4fv(uniform.skybox.mat_translation, 1, GL_FALSE, (GLfloat*)&translation);
     glUniformMatrix4fv(uniform.skybox.mat_rotation, 1, GL_FALSE,
-            (GLfloat*)&_player.camera.projection.rotation);
+            (GLfloat*)&player.camera.projection.rotation);
     glUniformMatrix4fv(uniform.skybox.mat_sun_rotation, 1, GL_FALSE, (GLfloat*)&rotation);
     glUniformMatrix4fv(uniform.skybox.mat_orientation, 1, GL_FALSE,
-            (GLfloat*)&_player.camera.projection.orientation);
+            (GLfloat*)&player.camera.projection.orientation);
     glUniformMatrix4fv(uniform.skybox.mat_projection, 1, GL_FALSE,
-            (GLfloat*)&_player.camera.projection.projection);
+            (GLfloat*)&player.camera.projection.projection);
     glUniform3fv(uniform.skybox.sun_rotation, 1, (GLfloat*)&skybox_data.sun_rotation);
     glUniform3fv(uniform.skybox.sky_color, 1, (GLfloat*)&skybox_data.sky_color);
     glUniform3fv(uniform.skybox.horizon_color, 1, (GLfloat*)&skybox_data.horizon_color);
@@ -524,15 +495,15 @@ static void draw_everything(void)
 
     glUseProgram(shader_p[SHADER_VOXEL].asset.id);
     glUniformMatrix4fv(uniform.voxel.mat_perspective, 1, GL_FALSE,
-            (GLfloat*)&_player.camera.projection.perspective);
+            (GLfloat*)&player.camera.projection.perspective);
     glUniform3f(uniform.voxel.camera_position,
-            _player.camera.pos.x, _player.camera.pos.y, _player.camera.pos.z);
+            player.camera.pos.x, player.camera.pos.y, player.camera.pos.z);
     glUniform3f(uniform.voxel.flashlight_position,
-            _player.transform.pos.x, _player.transform.pos.y, _player.transform.pos.z + _player.eye_height);
+            player.transform.pos.x, player.transform.pos.y, player.transform.pos.z + player.eye_height);
     glUniform3fv(uniform.voxel.sun_rotation, 1, (GLfloat*)&skybox_data.sun_rotation);
     glUniform3fv(uniform.voxel.sky_light, 1, (GLfloat*)&skybox_data.sky_light);
     glUniform3fv(uniform.voxel.moon_light, 1, (GLfloat*)&skybox_data.moon_light);
-    glUniform1f(uniform.voxel.toggle_flashlight, _player.flag & FLAG_PLAYER_FLASHLIGHT ? 1.0f : 0.0f);
+    glUniform1f(uniform.voxel.toggle_flashlight, player.flag & FLAG_PLAYER_FLASHLIGHT ? 1.0f : 0.0f);
     glUniform1i(uniform.voxel.render_distance, settings.render_distance * CHUNK_DIAMETER);
 
     if (core.debug.trans_blocks)
@@ -540,8 +511,8 @@ static void draw_everything(void)
     else
         glUniform1f(uniform.voxel.opacity, 1.0f);
 
-    static chunk ***cursor = NULL;
-    static chunk *ch = NULL;
+    static hhc_chunk ***cursor = NULL;
+    static hhc_chunk *ch = NULL;
     cursor = &CHUNK_ORDER.p[CHUNKS_MAX[settings.render_distance] - 1];
     for (; cursor >= CHUNK_ORDER.p; --cursor)
     {
@@ -560,26 +531,26 @@ static void draw_everything(void)
 
     /* ---- draw player ----------------------------------------------------- */
 
-    if (_player.camera_mode != PLAYER_CAMERA_MODE_1ST_PERSON)
+    if (player.camera_mode != PLAYER_CAMERA_MODE_1ST_PERSON)
     {
-        fsl_mesh_draw(&_player.mesh, &_player.camera,
-                _player.transform.pos.x, _player.transform.pos.y, _player.transform.pos.z,
-                _player.transform.rot.x, _player.transform.rot.y, _player.transform.rot.z,
-                _player.transform.scale.x, _player.transform.scale.y, _player.transform.scale.z);
+        fsl_mesh_draw(&player.mesh, &player.camera,
+                player.transform.pos.x, player.transform.pos.y, player.transform.pos.z,
+                player.transform.rot.x, player.transform.rot.y, player.transform.rot.z,
+                player.transform.scale.x, player.transform.scale.y, player.transform.scale.z);
     }
 
     /* ---- draw player target bounding box --------------------------------- */
 
     glUseProgram(shader_p[SHADER_BOUNDING_BOX].asset.id);
     glUniformMatrix4fv(uniform.bounding_box.mat_perspective, 1, GL_FALSE,
-            (GLfloat*)&_player.camera.projection.perspective);
+            (GLfloat*)&player.camera.projection.perspective);
 
-    if (_player.hit.block && core.flag.hud)
+    if (player.hit.block && core.flag.hud)
     {
         glUniform3f(uniform.bounding_box.position,
-                (f32)_player.hit.pos.x,
-                (f32)_player.hit.pos.y,
-                (f32)_player.hit.pos.z);
+                (f32)player.hit.pos.x,
+                (f32)player.hit.pos.y,
+                (f32)player.hit.pos.z);
         glUniform3f(uniform.bounding_box.size, 1.0f, 1.0f, 1.0f);
         glUniform4f(uniform.bounding_box.color, 0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -588,16 +559,16 @@ static void draw_everything(void)
     }
 
      glUniformMatrix4fv(uniform.bounding_box.mat_perspective, 1, GL_FALSE,
-             (GLfloat*)&_player.camera.projection.perspective);
+             (GLfloat*)&player.camera.projection.perspective);
  
     /* ---- draw player chunk bounding box ---------------------------------- */
 
     if (core.debug.chunk_bounds)
     {
         glUniform3f(uniform.bounding_box.position,
-                (f32)_player.ch.x * CHUNK_DIAMETER,
-                (f32)_player.ch.y * CHUNK_DIAMETER,
-                (f32)_player.ch.z * CHUNK_DIAMETER);
+                (f32)player.ch.x * CHUNK_DIAMETER,
+                (f32)player.ch.y * CHUNK_DIAMETER,
+                (f32)player.ch.z * CHUNK_DIAMETER);
         glUniform3f(uniform.bounding_box.size,
                 CHUNK_DIAMETER, CHUNK_DIAMETER, CHUNK_DIAMETER);
         glUniform4f(uniform.bounding_box.color, 0.9f, 0.6f, 0.3f, 1.0f);
@@ -611,9 +582,9 @@ static void draw_everything(void)
     if (core.debug.bounding_boxes)
     {
         glUniform3f(uniform.bounding_box.position,
-                _player.bbox.pos.x, _player.bbox.pos.y, _player.bbox.pos.z);
+                player.bbox.pos.x, player.bbox.pos.y, player.bbox.pos.z);
         glUniform3f(uniform.bounding_box.size,
-                _player.bbox.size.x, _player.bbox.size.y, _player.bbox.size.z);
+                player.bbox.size.x, player.bbox.size.y, player.bbox.size.z);
         glUniform4f(uniform.bounding_box.color, 1.0f, 0.3f, 0.2f, 1.0f);
 
         glBindVertexArray(mesh_p[MESH_CUBE_OF_HAPPINESS].vao);
@@ -626,12 +597,7 @@ static void draw_everything(void)
     {
         glClear(GL_DEPTH_BUFFER_BIT);
 
-        draw_chunk_scheduler_visualizer(chunk_sched[0], &mesh_p[MESH_CUBE_OF_HAPPINESS],
-                0.6f, 0.9f, 0.3f);
-        draw_chunk_scheduler_visualizer(chunk_sched[1], &mesh_p[MESH_CUBE_OF_HAPPINESS],
-                0.9f, 0.6f, 0.3f);
-        draw_chunk_scheduler_visualizer(chunk_sched[2], &mesh_p[MESH_CUBE_OF_HAPPINESS],
-                0.9f, 0.3f, 0.3f);
+        chunk_debug_draw_scheduler_visualizer(&player.camera, 0.5f);
     }
 
     if (settings.anti_aliasing)
@@ -666,22 +632,22 @@ static void draw_everything(void)
         glUniform1i(uniform.gizmo_chunk.chunk_buf_diameter, settings.chunk_buf_diameter);
 
         glUniformMatrix4fv(uniform.gizmo_chunk.mat_translation,
-                1, GL_FALSE, (GLfloat*)&_player.camera_hud.projection.target);
+                1, GL_FALSE, (GLfloat*)&player.camera_hud.projection.target);
 
         glUniformMatrix4fv(uniform.gizmo_chunk.mat_rotation,
-                1, GL_FALSE, (GLfloat*)&_player.camera_hud.projection.rotation);
+                1, GL_FALSE, (GLfloat*)&player.camera_hud.projection.rotation);
 
         glUniformMatrix4fv(uniform.gizmo_chunk.mat_orientation,
-                1, GL_FALSE, (GLfloat*)&_player.camera_hud.projection.orientation);
+                1, GL_FALSE, (GLfloat*)&player.camera_hud.projection.orientation);
 
         glUniformMatrix4fv(uniform.gizmo_chunk.mat_projection,
-                1, GL_FALSE, (GLfloat*)&_player.camera_hud.projection.projection);
+                1, GL_FALSE, (GLfloat*)&player.camera_hud.projection.projection);
 
         v3f32 camera_position =
         {
-            -_player.camera.yaw.cos * _player.camera.pitch.cos,
-            _player.camera.yaw.sin * _player.camera.pitch.cos,
-            _player.camera.pitch.sin,
+            -player.camera.yaw.cos * player.camera.pitch.cos,
+            player.camera.yaw.sin * player.camera.pitch.cos,
+            player.camera.pitch.sin,
         };
 
         glUniform3fv(uniform.gizmo_chunk.camera_position, 1, (GLfloat*)&camera_position);
@@ -721,7 +687,7 @@ static void draw_everything(void)
                 84.5f, 18.0f, 0, 0, 0xffffffff);
 
         fsl_ui_draw(&texture_p[TEXTURE_ITEM_BAR_SELECTED],
-                render->size.x / 2 - 2 + _player.hotbar_slot_selected * 34,
+                render->size.x / 2 - 2 + player.hotbar_slot_selected * 34,
                 render->size.y - 2,
                 texture_p[TEXTURE_ITEM_BAR_SELECTED].size.x * 2,
                 texture_p[TEXTURE_ITEM_BAR_SELECTED].size.y * 2,
@@ -760,54 +726,54 @@ static void draw_everything(void)
                     "ACCELERATION[%5.2f %5.2f %5.2f]\n"
                     "VELOCITY    [%5.2f %5.2f %5.2f]\n"
                     "SPEED       [%5.2f]\n",
-                    _player.transform.pos.x, _player.transform.pos.y, _player.transform.pos.z,
-                    floor(_player.transform.pos.x),
-                    floor(_player.transform.pos.y),
-                    floor(_player.transform.pos.z),
-                    _player.ch.x, _player.ch.y, _player.ch.z,
-                    floorf((f32)_player.ch.x / CHUNK_REGION_DIAMETER),
-                    floorf((f32)_player.ch.y / CHUNK_REGION_DIAMETER),
-                    floorf((f32)_player.ch.z / CHUNK_REGION_DIAMETER),
-                    _player.transform.rot.y, _player.transform.rot.z,
-                    _player.acceleration.x, _player.acceleration.y, _player.acceleration.z,
-                    _player.velocity.x, _player.velocity.y, _player.velocity.z,
-                    _player.speed),
+                    player.transform.pos.x, player.transform.pos.y, player.transform.pos.z,
+                    floor(player.transform.pos.x),
+                    floor(player.transform.pos.y),
+                    floor(player.transform.pos.z),
+                    player.ch.x, player.ch.y, player.ch.z,
+                    floorf((f32)player.ch.x / CHUNK_REGION_DIAMETER),
+                    floorf((f32)player.ch.y / CHUNK_REGION_DIAMETER),
+                    floorf((f32)player.ch.z / CHUNK_REGION_DIAMETER),
+                    player.transform.rot.y, player.transform.rot.z,
+                    player.acceleration.x, player.acceleration.y, player.acceleration.z,
+                    player.velocity.x, player.velocity.y, player.velocity.z,
+                    player.speed),
                 SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 COLOR_TEXT_DEFAULT);
 
         fsl_text_push(fsl_stringf(
                     "OVERFLOW    [%s %s %s]\r",
-                    (_player.flag & FLAG_PLAYER_OVERFLOW_X) ?
-                    (_player.flag & FLAG_PLAYER_OVERFLOW_PX) ?
+                    (player.flag & FLAG_PLAYER_OVERFLOW_X) ?
+                    (player.flag & FLAG_PLAYER_OVERFLOW_PX) ?
                     "        " : "        " : "NONE",
-                    (_player.flag & FLAG_PLAYER_OVERFLOW_Y) ?
-                    (_player.flag & FLAG_PLAYER_OVERFLOW_PY) ?
+                    (player.flag & FLAG_PLAYER_OVERFLOW_Y) ?
+                    (player.flag & FLAG_PLAYER_OVERFLOW_PY) ?
                     "        " : "        " : "NONE",
-                    (_player.flag & FLAG_PLAYER_OVERFLOW_Z) ?
-                    (_player.flag & FLAG_PLAYER_OVERFLOW_PZ) ?
+                    (player.flag & FLAG_PLAYER_OVERFLOW_Z) ?
+                    (player.flag & FLAG_PLAYER_OVERFLOW_PZ) ?
                     "        " : "        " : "NONE"),
                 SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 COLOR_DIAGNOSTIC_NONE);
 
         fsl_text_push(fsl_stringf(
                     "             %s %s %s\r",
-                    (_player.flag & FLAG_PLAYER_OVERFLOW_X) &&
-                    (_player.flag & FLAG_PLAYER_OVERFLOW_PX) ? "POSITIVE" : "    ",
-                    (_player.flag & FLAG_PLAYER_OVERFLOW_Y) &&
-                    (_player.flag & FLAG_PLAYER_OVERFLOW_PY) ? "POSITIVE" : "    ",
-                    (_player.flag & FLAG_PLAYER_OVERFLOW_Z) &&
-                    (_player.flag & FLAG_PLAYER_OVERFLOW_PZ) ? "POSITIVE" : "    "),
+                    (player.flag & FLAG_PLAYER_OVERFLOW_X) &&
+                    (player.flag & FLAG_PLAYER_OVERFLOW_PX) ? "POSITIVE" : "    ",
+                    (player.flag & FLAG_PLAYER_OVERFLOW_Y) &&
+                    (player.flag & FLAG_PLAYER_OVERFLOW_PY) ? "POSITIVE" : "    ",
+                    (player.flag & FLAG_PLAYER_OVERFLOW_Z) &&
+                    (player.flag & FLAG_PLAYER_OVERFLOW_PZ) ? "POSITIVE" : "    "),
                 SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 FSL_DIAGNOSTIC_COLOR_SUCCESS);
 
         fsl_text_push(fsl_stringf(
                     "             %s %s %s\n",
-                    (_player.flag & FLAG_PLAYER_OVERFLOW_X) &&
-                    !(_player.flag & FLAG_PLAYER_OVERFLOW_PX) ? "NEGATIVE" : "    ",
-                    (_player.flag & FLAG_PLAYER_OVERFLOW_Y) &&
-                    !(_player.flag & FLAG_PLAYER_OVERFLOW_PY) ? "NEGATIVE" : "    ",
-                    (_player.flag & FLAG_PLAYER_OVERFLOW_Z) &&
-                    !(_player.flag & FLAG_PLAYER_OVERFLOW_PZ) ? "NEGATIVE" : "    "),
+                    (player.flag & FLAG_PLAYER_OVERFLOW_X) &&
+                    !(player.flag & FLAG_PLAYER_OVERFLOW_PX) ? "NEGATIVE" : "    ",
+                    (player.flag & FLAG_PLAYER_OVERFLOW_Y) &&
+                    !(player.flag & FLAG_PLAYER_OVERFLOW_PY) ? "NEGATIVE" : "    ",
+                    (player.flag & FLAG_PLAYER_OVERFLOW_Z) &&
+                    !(player.flag & FLAG_PLAYER_OVERFLOW_PZ) ? "NEGATIVE" : "    "),
                 SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 FSL_DIAGNOSTIC_COLOR_ERROR);
 
@@ -827,16 +793,16 @@ static void draw_everything(void)
                 SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 COLOR_DIAGNOSTIC_INFO);
 
-        if (_player.hit.hit)
+        if (player.hit.hit)
         {
-            block_id = GET_BLOCK_ID(*_player.hit.block);
+            block_id = GET_BLOCK_ID(*player.hit.block);
             metadata = fsl_asset_get_metadata(blocks_p[block_id].asset);
             fsl_text_push(fsl_stringf(
                         "TARGET      [%u][%s]\n"
                         "XYZ         [%"PRId64" %"PRId64" %"PRId64"]\n",
                         block_id,
                         metadata.name,
-                        _player.hit.pos.x, _player.hit.pos.y, _player.hit.pos.z),
+                        player.hit.pos.x, player.hit.pos.y, player.hit.pos.z),
                     SET_MARGIN, SET_MARGIN,
                     0, 0, 0,
                     COLOR_TEXT_DEFAULT);
@@ -845,9 +811,9 @@ static void draw_everything(void)
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
 
         fsl_text_push(fsl_stringf(
-                    "CHUNK SCHEDULER 0 [%7d/%-7"PRIu64"][pop/push: %7"PRIu64"/%-7"PRIu64"]\n"
                     "CHUNK SCHEDULER 1 [%7d/%-7"PRIu64"][pop/push: %7"PRIu64"/%-7"PRIu64"]\n"
                     "CHUNK SCHEDULER 2 [%7d/%-7"PRIu64"][pop/push: %7"PRIu64"/%-7"PRIu64"]\n"
+                    "CHUNK SCHEDULER 3 [%7d/%-7"PRIu64"][pop/push: %7"PRIu64"/%-7"PRIu64"]\n"
                     "TOTAL CHUNKS  [%15"PRIu64"]                           \n",
                     chunk_sched[0].count, chunk_sched[0].len,
                     chunk_sched[0].cursor_pop, chunk_sched[0].cursor_push,
@@ -962,7 +928,7 @@ int main(int argc, char **argv)
 
 #ifndef HHC_RELEASE_BUILD
     LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-            fsl_logger_stringf("%s\n", "DEBUG BUILD"));
+            "DEBUG BUILD\n");
 
     glfwSetWindowPos(render->window, 1920 - render->size.x, 24);
 #endif /* HHC_RELEASE_BUILD */
@@ -971,7 +937,7 @@ int main(int argc, char **argv)
     {
         LOGWARNING(HHC_ERR_COLLISIONS_DISABLED,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                fsl_logger_stringf("%s\n", "'MODE_INTERNAL_COLLIDE' Disabled"));
+                "'MODE_INTERNAL_COLLIDE' Disabled\n");
     }
 
     if (rand_init() != FSL_ERR_SUCCESS ||
@@ -985,11 +951,11 @@ int main(int argc, char **argv)
     {
         glfwSetInputMode(render->window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
         LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                fsl_logger_stringf("%s\n", "GLFW: Raw Mouse Motion Enabled"));
+                "GLFW: Raw Mouse Motion Enabled\n");
     }
     else LOGERROR(FSL_ERR_GLFW,
             FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-            fsl_logger_stringf("%s\n", "GLFW: Raw Mouse Motion Not Supported"));
+            "GLFW: Raw Mouse Motion Not Supported\n");
 
     /* ---- set callbacks --------------------------------------------------- */
 
@@ -1003,6 +969,8 @@ int main(int argc, char **argv)
 
     if (assets_init() != FSL_ERR_SUCCESS)
         goto cleanup;
+    if (gui_init() != FSL_ERR_SUCCESS)
+        goto cleanup;
 
     /*temp off
     init_super_debugger(render->size);
@@ -1010,7 +978,7 @@ int main(int argc, char **argv)
 
     /* ---- end set graphics ------------------------------------------------ */
 
-    player_init(&_player, "Lily");
+    player_init(&player, "Lily");
     input_init();
     bind_shader_uniforms();
 
@@ -1021,14 +989,14 @@ section_menu_pause:
 section_world_loaded:
 
     if (!core.flag.world_loaded &&
-            world_init("Poop Consistency Tester", 0, &_player) != FSL_ERR_SUCCESS)
+            world_init("Poop Consistency Tester", 0, &player) != FSL_ERR_SUCCESS)
             goto cleanup;
 
     while (fsl_engine_running(&callback_framebuffer_size))
     {
-        input_update(&_player);
+        input_update(&player);
         settings_update();
-        world_update(&_player);
+        world_update(&player);
         draw_everything();
 
         fsl_process_screenshot_request(GAME_DIR_NAME_SCREENSHOTS, world.name);
@@ -1043,6 +1011,7 @@ section_world_loaded:
 
 cleanup:
 
+    gui_free();
     assets_free();
     chunking_free();
     rand_free();

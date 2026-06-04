@@ -124,8 +124,9 @@ u32 build_game(int argc, char **argv)
     }
 
     cmd_push(&cmd, DIR_SRC_GAME"main.c");
+    cmd_push(&cmd, DIR_SRC_GAME"chunking/chunking.c");
+    cmd_push(&cmd, DIR_SRC_GAME"chunking/chunking_debug_tools.c");
     cmd_push(&cmd, DIR_SRC_GAME"assets.c");
-    cmd_push(&cmd, DIR_SRC_GAME"chunking.c");
     cmd_push(&cmd, DIR_SRC_GAME"common.c");
     cmd_push(&cmd, DIR_SRC_GAME"dir.c");
     cmd_push(&cmd, DIR_SRC_GAME"gui.c");

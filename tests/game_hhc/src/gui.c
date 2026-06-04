@@ -1,10 +1,16 @@
+#include "deps/fossil/common/config.h"
 #include "deps/fossil/common/diagnostics.h"
+#include "deps/fossil/assets/asset_types.h"
+#include "deps/fossil/assets/mesh/mesh.h"
 #include "deps/fossil/engine/engine.h"
+#include "deps/fossil/engine/engine_assets.h"
 #include "deps/fossil/logger/logger.h"
 #include "deps/fossil/memory/memory.h"
+#include "deps/fossil/shaders/shaders.h"
 #include "deps/fossil/string/string.h"
 
 #include "h/common.h"
+#include "h/diagnostics.h"
 #include "h/main.h"
 #include "h/gui.h"
 #include "h/dir.h"
@@ -13,6 +19,14 @@
 #include <string.h>
 #include <math.h>
 
+typedef struct ui_item_data
+{
+    fsl_mesh mesh_unit_cube;
+    fsl_shader_program *shader;
+    fsl_camera camera;
+} ui_item_data;
+
+static ui_item_data ui_item_data_internal = {0};
 u16 menu_index_cur;
 u16 menu_layer[5] = {0};
 u8 state_menu_depth = 0;
@@ -21,12 +35,63 @@ u8 buttons[BTN_COUNT];
 
 u32 gui_init(void)
 {
+    u32 button_count = BTN_COUNT;
+
+    if (fsl_mesh_load(&ui_item_data_internal.mesh_unit_cube,
+                "Unit Cube", "unit_cube", "unit_cube.obj", GAME_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
+        return *GAME_ERR;
+
+    ui_item_data_internal.shader = fsl_mem_handle_get(fsl_shader_buf);
+    ui_item_data_internal.shader = &ui_item_data_internal.shader[FSL_SHADER_INDEX_OBJECT];
+
+    ui_item_data_internal.camera.fovy = 45.0f;
+    ui_item_data_internal.camera.fovy_smooth = 45.0f;
+    ui_item_data_internal.camera.ratio = (f32)render->size.x / render->size.y;
+    ui_item_data_internal.camera.far = FSL_CAMERA_CLIP_FAR_UI;
+    ui_item_data_internal.camera.near = FSL_CAMERA_CLIP_NEAR_DEFAULT;
+
     /*
     game_menu_pos = setting.render_size.y / 3; // TODO: figure this out
     menu_index_cur = MENU_TITLE;
-    memset(buttons, 0, BTN_COUNT);
      */
-    return FSL_ERR_SUCCESS;
+
+    while (button_count--)
+        buttons[button_count] = 0;
+
+    return *GAME_ERR;
+}
+
+void gui_free(void)
+{
+    fsl_mesh_free(&ui_item_data_internal.mesh_unit_cube);
+}
+
+void gui_start_ui_items(void)
+{
+    ui_item_data_internal.shader = fsl_mem_handle_get(fsl_shader_buf);
+    ui_item_data_internal.shader = &ui_item_data_internal.shader[FSL_SHADER_INDEX_OBJECT];
+    ui_item_data_internal.camera.ratio = (f32)render->size.x / render->size.y;
+}
+
+void gui_draw_ui_item(i32 pos_x, i32 pos_y)
+{
+    m4f32 transform = {0};
+
+    transform = ui_item_data_internal.camera.projection.projection;
+    transform = fsl_matrix_multiply(ui_item_data_internal.camera.projection.orientation, transform);
+    transform = fsl_matrix_multiply(ui_item_data_internal.camera.projection.rotation, transform);
+    transform = fsl_matrix_multiply(ui_item_data_internal.camera.projection.target, transform);
+
+    glUseProgram(ui_item_data_internal.shader->asset.id);
+
+    glBindBuffer(GL_ARRAY_BUFFER, ui_item_data_internal.mesh_unit_cube.transform_buf.id);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(m4f32), &transform, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glBindVertexArray(ui_item_data_internal.mesh_unit_cube.vao);
+    glDrawElementsInstanced(GL_TRIANGLES, ui_item_data_internal.mesh_unit_cube.index_buf.len,
+            GL_UNSIGNED_INT, NULL, 1);
+    glBindVertexArray(0);
 }
 
 #ifdef FUCK /* TODO: undef FUCK */

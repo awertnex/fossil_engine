@@ -4,9 +4,9 @@
 #include "deps/fossil/common/types.h"
 #include "deps/fossil/math/vector.h"
 
-#include "assets.h"
-#include "common.h"
-#include "raycast.h"
+#include "../h/assets.h"
+#include "../h/common.h"
+#include "../h/raycast.h"
 
 #define CHUNK_DIAMETER  16
 #define CHUNK_LAYER     (CHUNK_DIAMETER * CHUNK_DIAMETER)
@@ -112,7 +112,7 @@ enum chunk_flag
     FLAG_CHUNK_EDGE =       0x20
 }; /* chunk_flag */
 
-typedef struct chunk
+typedef struct hhc_chunk
 {
     u8 flag; /* enum: chunk_flag */
     v3i16 pos; /* world position / @ref CHUNK_DIAMETER */
@@ -163,7 +163,7 @@ typedef struct chunk
     u64 vbo_len;
 
     u32 block[CHUNK_DIAMETER][CHUNK_DIAMETER][CHUNK_DIAMETER];
-} chunk;
+} hhc_chunk;
 
 /*!
  *  @brief chunk pointer look-up table that points to @ref chunk_buffer.p addresses.
@@ -178,7 +178,7 @@ typedef struct chunk_table
     u32 index;
 
     fsl_mem_handle handle;
-    chunk **p;              /* cached pointer from `handle` */
+    hhc_chunk **p;          /* cached pointer from `handle` */
 } chunk_table;
 
 /*!
@@ -189,7 +189,7 @@ typedef struct chunk_table
 typedef struct chunk_order
 {
     fsl_mem_handle handle;
-    chunk ***p;
+    hhc_chunk ***p;
 } chunk_order;
 
 /*!
@@ -206,7 +206,7 @@ typedef struct chunk_scheduler
     u32 rate_chunk;         /* number of chunks to process per frame */
     u32 rate_block;         /* number of blocks to process per chunk */
     fsl_mem_handle schedule;
-    chunk **p;        /* cached pointer from `scheduler` */
+    hhc_chunk **p;        /* cached pointer from `scheduler` */
 } chunk_scheduler;
 
 /*!
@@ -313,7 +313,7 @@ void block_break(block_hit hit);
  *  @return block address in chunk if `x`, `y` and `z` are within chunk bounds and
  *  return the correct block in the neighboring chunk otherwise.
  */
-u32 *get_block_resolved(chunk *ch, i32 x, i32 y, i32 z);
+u32 *get_block_resolved(hhc_chunk *ch, i32 x, i32 y, i32 z);
 
 /*!
  *  @brief get chunk relative to position.
@@ -321,7 +321,7 @@ u32 *get_block_resolved(chunk *ch, i32 x, i32 y, i32 z);
  *  @return chunk at index if `x`, `y` and `z` are within chunk bounds and
  *  return the correct neighboring chunk otherwise.
  */
-chunk *get_chunk_resolved(u32 index, i32 x, i32 y, i32 z);
+hhc_chunk *get_chunk_resolved(u32 index, i32 x, i32 y, i32 z);
 
 /*!
  *  @brief get index of chunk in @ref chunk_tab by world coordinates relative to chunk position.

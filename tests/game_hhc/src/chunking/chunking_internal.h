@@ -97,7 +97,7 @@ typedef struct chunk_buffer
     u64 cursor;
 
     fsl_mem_handle handle;
-    chunk *p;               /* cached pointer from `handle` */
+    hhc_chunk *p;           /* cached pointer from `handle` */
 } chunk_buffer;
 
 /* ---- section: signatures ------------------------------------------------- */
@@ -107,26 +107,32 @@ typedef struct chunk_buffer
  *
  *  @return block with modified faces.
  */
-u32 block_get_faces_internal(const chunk *ch,
-        const chunk *px, const chunk *nx,
-        const chunk *py, const chunk *ny,
-        const chunk *pz, const chunk *nz,
+u32 block_get_faces_internal(const hhc_chunk *ch,
+        const hhc_chunk *px, const hhc_chunk *nx,
+        const hhc_chunk *py, const hhc_chunk *ny,
+        const hhc_chunk *pz, const hhc_chunk *nz,
         i32 x, i32 y, i32 z);
 
-void block_add_internal(chunk *ch,
-        chunk *px, chunk *nx, chunk *py, chunk *ny, chunk *pz, chunk *nz,
+void block_add_internal(hhc_chunk *ch,
+        hhc_chunk *px, hhc_chunk *nx,
+        hhc_chunk *py, hhc_chunk *ny,
+        hhc_chunk *pz, hhc_chunk *nz,
         i32 x, i32 y, i32 z, enum block_id block_id);
 
-void block_remove_internal(chunk *ch,
-        chunk *px, chunk *nx, chunk *py, chunk *ny, chunk *pz, chunk *nz,
+void block_remove_internal(hhc_chunk *ch,
+        hhc_chunk *px, hhc_chunk *nx,
+        hhc_chunk *py, hhc_chunk *ny,
+        hhc_chunk *pz, hhc_chunk *nz,
         i32 x, i32 y, i32 z);
 
 /*!
  *  @brief execute block logic on the block based on its ID (e.g., make grass
  *  turn to dirt when under another block).
  */
-void block_evaluate_internal(chunk *ch,
-        chunk *px, chunk *nx, chunk *py, chunk *ny, chunk *pz, chunk *nz,
+void block_evaluate_internal(hhc_chunk *ch,
+        hhc_chunk *px, hhc_chunk *nx,
+        hhc_chunk *py, hhc_chunk *ny,
+        hhc_chunk *pz, hhc_chunk *nz,
         i32 x, i32 y, i32 z, enum block_id block_id);
 
 /*!
@@ -139,7 +145,7 @@ void block_evaluate_internal(chunk *ch,
  *
  *  @return cost of operation (used in @ref chunk_scheduler_update_internal()).
  */
-chunk_scheduler_cost chunk_load_internal(chunk *ch, u32 rate);
+chunk_scheduler_cost chunk_load_internal(hhc_chunk *ch, u32 rate);
 
 /*!
  *  @brief generate chunk blocks.
@@ -153,33 +159,38 @@ chunk_scheduler_cost chunk_load_internal(chunk *ch, u32 rate);
  *
  *  @return cost of operation (used in @ref chunk_scheduler_update_internal()).
  */
-chunk_scheduler_cost chunk_generate_internal(chunk *ch, u32 rate);
+chunk_scheduler_cost chunk_generate_internal(hhc_chunk *ch, u32 rate);
 
 /*!
  *  @return cost of operation (used in @ref chunk_scheduler_update_internal()).
  */
-chunk_scheduler_cost chunk_mesh_update_internal(chunk *ch);
+chunk_scheduler_cost chunk_mesh_update_internal(hhc_chunk *ch);
 
 /*!
  *  @brief write chunk into disk.
+ *
+ *  @return cost of operation (used in @ref chunk_scheduler_update_internal()).
  */
-chunk_scheduler_cost chunk_export_internal(chunk *ch);
+chunk_scheduler_cost chunk_export_internal(hhc_chunk *ch);
 
 /*!
  *  @brief read chunk from disk.
  *
  *  @return cost of operation (used in @ref chunk_scheduler_update_internal()).
  */
-chunk_scheduler_cost chunk_import_internal(const fsl_fs_path *path, chunk *ch);
+chunk_scheduler_cost chunk_import_internal(const fsl_fs_path *path, hhc_chunk *ch);
 
 void chunk_buf_push_internal(u32 index, v3i32 player_chunk_delta);
-void chunk_buf_pop_internal(chunk *ch);
-void chunk_gizmo_write_internal(chunk *ch);
+void chunk_buf_pop_internal(hhc_chunk *ch);
 
+void chunk_scheduler_set_parameters_internal(chunk_scheduler *sched, chunk_scheduler_id id,
+        u64 offset, fsl_len len, u32 rate_chunk);
 /*!
  *  @param len number of chunks from @ref chunk_order.p this scheduler is allowed to parse.
  */
 void chunk_scheduler_update_internal(chunk_scheduler *sched, fsl_len len,
         b8 should_push, b8 should_pop);
+
+void chunk_gizmo_write_internal(hhc_chunk *ch);
 
 #endif /* HHC_CHUNKING_INTERNAL_H */
