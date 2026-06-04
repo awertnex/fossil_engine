@@ -985,7 +985,7 @@ chunk_scheduler_cost chunk_load_internal(hhc_chunk *ch, u32 rate)
 
 chunk_scheduler_cost chunk_generate_internal(hhc_chunk *ch, u32 rate)
 {
-    chunk_scheduler_cost cost = 0;
+    chunk_scheduler_cost cost = rate;
     hhc_chunk *px = NULL;
     hhc_chunk *nx = NULL;
     hhc_chunk *py = NULL;
@@ -1054,7 +1054,8 @@ chunk_scheduler_cost chunk_generate_internal(hhc_chunk *ch, u32 rate)
     }
     ch->cursor = x + y * CHUNK_DIAMETER + z * CHUNK_LAYER;
 
-    return CHUNK_PARSE_COST_GENERATION;
+    cost -= rate;
+    return cost;
 }
 
 chunk_scheduler_cost chunk_mesh_update_internal(hhc_chunk *ch)
@@ -1370,7 +1371,7 @@ void chunk_scheduler_update_internal(chunk_scheduler *sched, fsl_len len,
         {
             ch = **start;
             if (ch->flag & FLAG_CHUNK_DIRTY &&
-                    (!ch->sched_id || ch->sched_id > sched->id) &&
+                    ch->sched_id != sched->id &&
                     !sched->p[push])
             {
                 ch->sched_id = sched->id;
@@ -1384,7 +1385,9 @@ void chunk_scheduler_update_internal(chunk_scheduler *sched, fsl_len len,
         }
     }
 
+    /* DISABLED IN v0.9.0-dev: better to use one budget for both push and pop loops per frame.
     rate_chunk = sched->rate_chunk;
+    */
     sched->cursor_push = push;
 
     /* ---- pop chunk scheduler --------------------------------------------- */

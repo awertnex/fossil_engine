@@ -33,12 +33,12 @@
  */
 typedef enum chunk_scheduler_cost
 {
+    CHUNK_PARSE_COST_SCAN = 1,
     CHUNK_PARSE_COST_PUSH = 4,
     CHUNK_PARSE_COST_POP = 4,
     CHUNK_PARSE_COST_IMPORT = 16,
     CHUNK_PARSE_COST_EXPORT = 16,
     CHUNK_PARSE_COST_MESHING = 64,
-    CHUNK_PARSE_COST_GENERATION = 256
 } chunk_scheduler_cost;
 
 /* ---- section: block flag ------------------------------------------------- */

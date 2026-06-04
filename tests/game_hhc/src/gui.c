@@ -20,17 +20,18 @@
 #include <string.h>
 #include <math.h>
 
+#define UI_ITEM_PITCH -20.0f
+#define UI_ITEM_YAW 50.0f
 #define UI_ITEM_SCALE 32.0f
 
-typedef struct ui_item_data
+struct /* ui_item_data_internal */
 {
     fsl_mesh mesh_unit_cube;
     fsl_shader_program shader;
     fsl_camera camera;
     f64 camera_distance;
-} ui_item_data;
+} ui_item_data_internal = {0};
 
-static ui_item_data ui_item_data_internal = {0};
 u16 menu_index_cur;
 u16 menu_layer[5] = {0};
 u8 state_menu_depth = 0;
@@ -65,10 +66,13 @@ u32 gui_init(void)
     while (button_count--)
         buttons[button_count] = 0;
 
+    *GAME_ERR = FSL_ERR_SUCCESS;
     return *GAME_ERR;
 
 cleanup:
+
     gui_free();
+    return *GAME_ERR;
 }
 
 void gui_free(void)
@@ -89,8 +93,8 @@ void gui_start_ui_items(void)
 
 void gui_draw_ui_item(f32 pos_x, f32 pos_y)
 {
-    f32 pitch = -20.0f;
-    f32 yaw = 50.0f;
+    f32 pitch = UI_ITEM_PITCH;
+    f32 yaw = UI_ITEM_YAW;
     f32 SROL = 0.0f, CROL = 0.0f, SPCH = 0.0f, CPCH = 0.0f, SYAW = 0.0f, CYAW = 0.0f;
     m4f32 transform = {0};
     m4f32 rotation_pitch = {0};

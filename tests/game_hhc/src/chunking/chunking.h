@@ -203,6 +203,7 @@ typedef struct chunk_scheduler
     fsl_len len;            /* number of members in `p` */
     u32 cursor_push;        /* push position */
     u32 cursor_pop;         /* pop position */
+    u32 cursor_scan;        /* dirty chunk scanner */
     u32 rate_chunk;         /* number of chunks to process per frame */
     u32 rate_block;         /* number of blocks to process per chunk */
     fsl_mem_handle schedule;

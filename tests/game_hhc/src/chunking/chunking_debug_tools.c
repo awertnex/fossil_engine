@@ -18,15 +18,18 @@ void chunk_debug_draw_scheduler_visualizer(const fsl_camera *camera, f32 opacity
 {
     fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
 
-    chunk_debug_draw_scheduler_visualizer_internal(chunk_sched[1],
-            &mesh_p[MESH_CUBE_OF_HAPPINESS], camera,
-            0.9f, 0.6f, 0.3f, opacity);
-    chunk_debug_draw_scheduler_visualizer_internal(chunk_sched[1],
-            &mesh_p[MESH_CUBE_OF_HAPPINESS], camera,
-            0.9f, 0.6f, 0.3f, opacity);
+    glClear(GL_DEPTH_BUFFER_BIT);
     chunk_debug_draw_scheduler_visualizer_internal(chunk_sched[2],
             &mesh_p[MESH_CUBE_OF_HAPPINESS], camera,
             0.9f, 0.3f, 0.3f, opacity);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    chunk_debug_draw_scheduler_visualizer_internal(chunk_sched[1],
+            &mesh_p[MESH_CUBE_OF_HAPPINESS], camera,
+            0.9f, 0.6f, 0.3f, opacity);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    chunk_debug_draw_scheduler_visualizer_internal(chunk_sched[0],
+            &mesh_p[MESH_CUBE_OF_HAPPINESS], camera,
+            0.9f, 0.6f, 0.3f, opacity);
 }
 
 static void chunk_debug_draw_scheduler_visualizer_internal(chunk_scheduler sched,

@@ -234,7 +234,6 @@ void world_update(hhc_player *p)
         chunk_tab.index = get_chunk_index(p->ch, p->target);
     }
 
-    fsl_update_projection_perspective(p->camera, &p->camera.projection, FALSE);
     fsl_update_projection_perspective(p->camera_hud, &p->camera_hud.projection, FALSE);
     fsl_update_projection_perspective(p->camera_ui, &p->camera_ui.projection, FALSE);
 }

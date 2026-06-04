@@ -553,7 +553,7 @@ static void draw_everything(void)
     {
         fsl_mesh_draw(&player.mesh, &player.camera,
                 player.transform.pos.x, player.transform.pos.y, player.transform.pos.z,
-                player.transform.rot.x, player.transform.rot.y, player.transform.rot.z,
+                0.0f, 0.0f, player.transform.rot.z,
                 player.transform.scale.x, player.transform.scale.y, player.transform.scale.z);
     }
 
@@ -612,11 +612,7 @@ static void draw_everything(void)
     /* ---- draw chunk scheduler visualizer --------------------------------- */
 
     if (core.debug.chunk_scheduler_visualizer)
-    {
-        glClear(GL_DEPTH_BUFFER_BIT);
-
         chunk_debug_draw_scheduler_visualizer(&player.camera, 0.5f);
-    }
 
     if (settings.anti_aliasing)
     {
