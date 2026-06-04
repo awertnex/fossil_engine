@@ -25,7 +25,7 @@
 typedef struct ui_item_data
 {
     fsl_mesh mesh_unit_cube;
-    fsl_shader_program *shader;
+    fsl_shader_program shader;
     fsl_camera camera;
     f64 camera_distance;
 } ui_item_data;
@@ -45,8 +45,9 @@ u32 gui_init(void)
                 "Unit Cube", "unit_cube", "unit_cube.obj", GAME_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
         return *GAME_ERR;
 
-    ui_item_data_internal.shader = fsl_mem_handle_get(fsl_shader_buf);
-    ui_item_data_internal.shader = &ui_item_data_internal.shader[FSL_SHADER_INDEX_OBJECT];
+    if (fsl_shader_program_init_ex(&ui_item_data_internal.shader, "UI Item", "ui_item",
+                "ui_item.vert", NULL, "ui_item.frag", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+        goto cleanup;
 
     ui_item_data_internal.camera.fovy = 35.0f;
     ui_item_data_internal.camera.fovy_smooth = 35.0f;
@@ -65,17 +66,20 @@ u32 gui_init(void)
         buttons[button_count] = 0;
 
     return *GAME_ERR;
+
+cleanup:
+    gui_free();
 }
 
 void gui_free(void)
 {
     fsl_mesh_free(&ui_item_data_internal.mesh_unit_cube);
+    fsl_shader_program_free(&ui_item_data_internal.shader);
 }
 
 void gui_start_ui_items(void)
 {
-    ui_item_data_internal.shader = fsl_mem_handle_get(fsl_shader_buf);
-    glUseProgram(ui_item_data_internal.shader[FSL_SHADER_INDEX_OBJECT].asset.id);
+    glUseProgram(ui_item_data_internal.shader.asset.id);
 
     ui_item_data_internal.camera.ratio = (f32)render->size.x / render->size.y;
     fsl_update_camera_movement(&ui_item_data_internal.camera,

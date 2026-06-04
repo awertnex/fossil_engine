@@ -60,6 +60,23 @@ FSLAPI void fsl_shader_free(fsl_shader *shader);
 FSLAPI u32 fsl_shader_program_init(fsl_shader_program *program);
 
 /*!
+ *  @brief initialize a shader program explicitly.
+ *
+ *  instead of calling @ref fsl_asset_set_metadata() on all shaders before
+ *  calling @ref fsl_shader_program_init(), this function combines these calls.
+ *
+ *  it is good practice to use this for init time while using @ref fsl_shader_program_init()
+ *  for refresh/reload time, because this function modifies metadata in place,
+ *  but still calls @ref fsl_shader_program_init().
+ */
+FSLAPI u32 fsl_shader_program_init_ex(fsl_shader_program *program,
+        const fsl_name *name, const fsl_name_id *name_id,
+        const fsl_file *file_shader_vertex,
+        const fsl_file *file_shader_geometry,
+        const fsl_file *file_shader_fragment,
+        const fsl_path *path);
+
+/*!
  *  @brief unload a shader program.
  */
 FSLAPI void fsl_shader_program_free(fsl_shader_program *program);

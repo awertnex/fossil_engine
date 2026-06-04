@@ -221,6 +221,36 @@ cleanup:
     return fsl_err;
 }
 
+u32 fsl_shader_program_init_ex(fsl_shader_program *program,
+        const fsl_name *name, const fsl_name_id *name_id,
+        const fsl_file *file_shader_vertex,
+        const fsl_file *file_shader_geometry,
+        const fsl_file *file_shader_fragment,
+        const fsl_path *path)
+{
+    if (fsl_asset_set_metadata(&program->asset, FSL_ASSET_SHADER_PROGRAM, name, name_id,
+                NULL, NULL) != FSL_ERR_SUCCESS)
+        return fsl_err;
+
+    if (fsl_asset_set_metadata(&program->vertex.asset, FSL_ASSET_SHADER, name, name_id,
+                file_shader_vertex, path) != FSL_ERR_SUCCESS)
+        return fsl_err;
+
+    if (fsl_asset_set_metadata(&program->geometry.asset, FSL_ASSET_SHADER, name, name_id,
+                file_shader_geometry, path) != FSL_ERR_SUCCESS)
+        return fsl_err;
+
+    if (fsl_asset_set_metadata(&program->fragment.asset, FSL_ASSET_SHADER, name, name_id,
+                file_shader_fragment, path) != FSL_ERR_SUCCESS)
+        return fsl_err;
+
+    if (fsl_shader_program_init(program) != FSL_ERR_SUCCESS)
+        return fsl_err;
+
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+}
+
 void fsl_shader_program_free(fsl_shader_program *program)
 {
     fsl_shader_program noprogram = {0};
