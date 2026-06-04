@@ -93,8 +93,9 @@
 
 /* ---- file names ---------------------------------------------------------- */
 
-#define GAME_FILE_NAME_SETTINGS     "settings.txt"
-#define GAME_FILE_NAME_WORLD_SEED   "seed.txt"
+#define GAME_FILE_NAME_SETTINGS         "settings.txt"
+#define GAME_FILE_NAME_WORLD_METADATA   "metadata.txt"
+#define GAME_FILE_NAME_WORLD_SEED       "seed.txt"
 
 /* ---- name formats -------------------------------------------------------- */
 

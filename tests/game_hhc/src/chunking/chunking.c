@@ -994,6 +994,7 @@ chunk_scheduler_cost chunk_generate_internal(hhc_chunk *ch, u32 rate)
     hhc_chunk *nz = NULL;
     v3u32 chunk_tab_coordinates = {0};
     v3i32 coordinates = {0};
+    v3i32 block_pos_offset = {0};
     terrain terrain_info = {0};
     i32 x = 0, y = 0, z = 0;
 
@@ -1003,6 +1004,10 @@ chunk_scheduler_cost chunk_generate_internal(hhc_chunk *ch, u32 rate)
         cost = chunk_mesh_update_internal(ch);
         return cost;
     }
+
+    block_pos_offset.x = ch->pos.x * CHUNK_DIAMETER;
+    block_pos_offset.y = ch->pos.y * CHUNK_DIAMETER;
+    block_pos_offset.z = ch->pos.z * CHUNK_DIAMETER;
 
     chunk_tab_coordinates.x = ch->index % settings.chunk_buf_diameter;
     chunk_tab_coordinates.y = (ch->index / settings.chunk_buf_diameter) % settings.chunk_buf_diameter;
@@ -1027,31 +1032,35 @@ chunk_scheduler_cost chunk_generate_internal(hhc_chunk *ch, u32 rate)
 
     /* x, y and z reset at the end of their loops because they should first pick up from
      * where `ch->cursor` left off last time. */
-    for (; z < CHUNK_DIAMETER && rate; ++z)
+    for (; z < CHUNK_DIAMETER; ++z)
     {
-        coordinates.z = z + ch->pos.z * CHUNK_DIAMETER;
-        for (; y < CHUNK_DIAMETER && rate; ++y)
+        coordinates.z = z + block_pos_offset.z;
+        for (; y < CHUNK_DIAMETER; ++y)
         {
-            coordinates.y = y + ch->pos.y * CHUNK_DIAMETER;
-            for (; x < CHUNK_DIAMETER && rate; ++x)
+            coordinates.y = y + block_pos_offset.y;
+            for (; x < CHUNK_DIAMETER; ++x)
             {
-                coordinates.x = x + ch->pos.x * CHUNK_DIAMETER;
+                coordinates.x = x + block_pos_offset.x;
 
                 /* heavy perlin-noise calls function */
                 terrain_info = world.terrain_func(coordinates);
 
                 if (terrain_info.block_id)
                 {
-                    block_add_internal(ch, px, nx, py, ny, pz, nz, x, y, z,
-                            terrain_info.block_id);
+                    block_add_internal(ch, px, nx, py, ny, pz, nz, x, y, z, terrain_info.block_id);
                     ch->block[z][y][x] |= terrain_info.block_light;
                 }
                 --rate;
+                if (!rate)
+                    goto finished_generation;
             }
             x = 0;
         }
         y = 0;
     }
+
+finished_generation:
+
     ch->cursor = x + y * CHUNK_DIAMETER + z * CHUNK_LAYER;
 
     cost -= rate;

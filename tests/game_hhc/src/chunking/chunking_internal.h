@@ -5,14 +5,14 @@
 
 /* ---- section: definitions ------------------------------------------------ */
 
-#define CHUNK_COLOR_LOADED  fsl_color_v4_to_hex(0.70f, 0.01f, 0.02f, 0.39f)
-#define CHUNK_COLOR_RENDER  fsl_color_v4_to_hex(0.24f, 0.47f, 0.3f, 1.0f)
+#define CHUNK_COLOR_LOADED fsl_color_v4_to_hex(0.70f, 0.01f, 0.02f, 0.39f)
+#define CHUNK_COLOR_RENDER fsl_color_v4_to_hex(0.24f, 0.47f, 0.3f, 1.0f)
 #define CHUNK_COLOR_FACTOR_INFLUENCE 0.1
 
 /*!
  *  @brief count of temporary static buffers in function @ref chunk_mesh_update_internal().
  */
-#define BLOCK_BUFFERS_MAX       2
+#define BLOCK_BUFFERS_MAX 2
 
 /* ---- section: chunk scheduler config ------------------------------------- */
 
@@ -38,7 +38,7 @@ typedef enum chunk_scheduler_cost
     CHUNK_PARSE_COST_POP = 4,
     CHUNK_PARSE_COST_IMPORT = 16,
     CHUNK_PARSE_COST_EXPORT = 16,
-    CHUNK_PARSE_COST_MESHING = 64,
+    CHUNK_PARSE_COST_MESHING = 64
 } chunk_scheduler_cost;
 
 /* ---- section: block flag ------------------------------------------------- */
