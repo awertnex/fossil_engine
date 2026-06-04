@@ -806,16 +806,15 @@ void fsl_update_projection_perspective(fsl_camera camera, fsl_projection *projec
 void fsl_get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f64 *yaw)
 {
     v3f64 direction = {0};
+    f64 delta = 0.0;
 
     target.x -= camera_pos.x;
     target.y -= camera_pos.y;
     target.z -= camera_pos.z;
 
     direction = fsl_normalize_v3f64(target);
+    delta = sqrt(direction.x * direction.x + direction.y * direction.y);
 
-    *pitch = atan2(-direction.z, sqrt(direction.x * direction.x + direction.y * direction.y));
-    *yaw = atan2(-direction.y, direction.x);
-
-    *pitch *= FSL_RAD2DEG;
-    *yaw *= FSL_RAD2DEG;
+    *pitch = atan2(-direction.z, delta) * FSL_RAD2DEG;
+    *yaw = atan2(-direction.y, direction.x) * FSL_RAD2DEG;
 }

@@ -317,6 +317,7 @@ void fsl_mesh_draw(const fsl_mesh *mesh, const fsl_camera *camera,
     scale.a44 = 1.0f;
 
     transform = fsl_matrix_multiply(scale, location);
+    transform = fsl_matrix_multiply(rotation_pitch, transform);
     transform = fsl_matrix_multiply(rotation_yaw, transform);
     transform = fsl_matrix_multiply(transform, camera->projection.perspective);
 
@@ -326,10 +327,7 @@ void fsl_mesh_draw(const fsl_mesh *mesh, const fsl_camera *camera,
 
     glUseProgram(shader[FSL_SHADER_INDEX_OBJECT].asset.id);
     glBindVertexArray(mesh->vao);
-    if (mesh->index_buf.initialized)
-        glDrawElementsInstanced(GL_TRIANGLES, mesh->index_buf.len, GL_UNSIGNED_INT, NULL, 1);
-    else
-        glDrawArraysInstanced(GL_TRIANGLES, 0, mesh->vertex_buf.len, 1);
+    glDrawElementsInstanced(GL_TRIANGLES, mesh->index_buf.len, GL_UNSIGNED_INT, NULL, 1);
 }
 
 u32 fsl_mesh_generate(fsl_mesh *mesh,

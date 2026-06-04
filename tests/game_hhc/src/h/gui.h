@@ -101,7 +101,7 @@ void gui_start_ui_items(void);
 /*!
  *  @brief draw UI item (e.g., hotbar items, container items).
  */
-void gui_draw_ui_item(i32 pos_x, i32 pos_y);
+void gui_draw_ui_item(f32 pos_x, f32 pos_y);
 
 #if 0 /* TODO: undef */
 void update_menus(v2f32 render_size);

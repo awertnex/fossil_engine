@@ -58,7 +58,8 @@ static void bind_shader_uniforms(void);
 static u32 settings_init(void);
 
 void settings_update(void);
-static void draw_gizmo(f32 pos_x, f32 pos_y);
+static void draw_gizmo(void);
+static void draw_hotbar_items(void);
 static void draw_everything(void);
 
 static void callback_framebuffer_size(i32 size_x, i32 size_y)
@@ -271,7 +272,7 @@ static void bind_shader_uniforms(void)
         glGetUniformLocation(shader_p[SHADER_BOUNDING_BOX].asset.id, "box_color");
 }
 
-static void draw_gizmo(f32 pos_x, f32 pos_y)
+static void draw_gizmo(void)
 {
     fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
     fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
@@ -292,6 +293,23 @@ static void draw_gizmo(f32 pos_x, f32 pos_y)
     glUniform3f(uniform.gizmo.color, 1.0f, 0.0f, 0.0f);
     glDrawElementsInstanced(GL_TRIANGLES, mesh_p[MESH_GIZMO].index_buf.len,
             GL_UNSIGNED_INT, NULL, 1);
+}
+
+static void draw_hotbar_items(void)
+{
+    u32 i = 0;
+
+    gui_start_ui_items();
+
+    for (i = 0; i < PLAYER_HOTBAR_SLOTS_MAX; ++i)
+    {
+        if (player.hotbar_slots[i])
+        {
+            gui_draw_ui_item(i * 34.0f +
+                    (f32)render->size.x / 2.0f - 84.5f * 2.0f,
+                    4.0f);
+        }
+    }
 }
 
 static void draw_everything(void)
@@ -618,7 +636,7 @@ static void draw_everything(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     if (core.flag.hud && core.flag.debug)
-        draw_gizmo(render->size.x / 2.0f, render->size.y / 2.0f);
+        draw_gizmo();
 
     /* ---- draw hud chunk gizmo -------------------------------------------- */
 
@@ -692,6 +710,10 @@ static void draw_everything(void)
                 texture_p[TEXTURE_ITEM_BAR_SELECTED].size.x * 2,
                 texture_p[TEXTURE_ITEM_BAR_SELECTED].size.y * 2,
                 84.5f, 18.0f, 0, 0, 0xffffffff);
+
+        /* ---- draw item bar items ----------------------------------------- */
+
+        draw_hotbar_items();
     }
 
     /* ---- draw debug info ------------------------------------------------- */

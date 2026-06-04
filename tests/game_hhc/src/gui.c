@@ -5,6 +5,7 @@
 #include "deps/fossil/engine/engine.h"
 #include "deps/fossil/engine/engine_assets.h"
 #include "deps/fossil/logger/logger.h"
+#include "deps/fossil/math/math.h"
 #include "deps/fossil/memory/memory.h"
 #include "deps/fossil/shaders/shaders.h"
 #include "deps/fossil/string/string.h"
@@ -19,11 +20,14 @@
 #include <string.h>
 #include <math.h>
 
+#define UI_ITEM_SCALE 32.0f
+
 typedef struct ui_item_data
 {
     fsl_mesh mesh_unit_cube;
     fsl_shader_program *shader;
     fsl_camera camera;
+    f64 camera_distance;
 } ui_item_data;
 
 static ui_item_data ui_item_data_internal = {0};
@@ -44,11 +48,13 @@ u32 gui_init(void)
     ui_item_data_internal.shader = fsl_mem_handle_get(fsl_shader_buf);
     ui_item_data_internal.shader = &ui_item_data_internal.shader[FSL_SHADER_INDEX_OBJECT];
 
-    ui_item_data_internal.camera.fovy = 45.0f;
-    ui_item_data_internal.camera.fovy_smooth = 45.0f;
+    ui_item_data_internal.camera.fovy = 35.0f;
+    ui_item_data_internal.camera.fovy_smooth = 35.0f;
     ui_item_data_internal.camera.ratio = (f32)render->size.x / render->size.y;
     ui_item_data_internal.camera.far = FSL_CAMERA_CLIP_FAR_UI;
     ui_item_data_internal.camera.near = FSL_CAMERA_CLIP_NEAR_DEFAULT;
+
+    ui_item_data_internal.camera_distance = 3.0;
 
     /*
     game_menu_pos = setting.render_size.y / 3; // TODO: figure this out
@@ -69,20 +75,63 @@ void gui_free(void)
 void gui_start_ui_items(void)
 {
     ui_item_data_internal.shader = fsl_mem_handle_get(fsl_shader_buf);
-    ui_item_data_internal.shader = &ui_item_data_internal.shader[FSL_SHADER_INDEX_OBJECT];
+    glUseProgram(ui_item_data_internal.shader[FSL_SHADER_INDEX_OBJECT].asset.id);
+
     ui_item_data_internal.camera.ratio = (f32)render->size.x / render->size.y;
+    fsl_update_camera_movement(&ui_item_data_internal.camera,
+            -ui_item_data_internal.camera_distance, 0.0, 0.0,
+            0.0, 0.0, 0.0);
 }
 
-void gui_draw_ui_item(i32 pos_x, i32 pos_y)
+void gui_draw_ui_item(f32 pos_x, f32 pos_y)
 {
+    f32 pitch = -20.0f;
+    f32 yaw = 50.0f;
+    f32 SROL = 0.0f, CROL = 0.0f, SPCH = 0.0f, CPCH = 0.0f, SYAW = 0.0f, CYAW = 0.0f;
     m4f32 transform = {0};
+    m4f32 rotation_pitch = {0};
+    m4f32 rotation_yaw = {0};
+    m4f32 scale = {0};
+    m4f32 offset = {0};
 
-    transform = ui_item_data_internal.camera.projection.projection;
-    transform = fsl_matrix_multiply(ui_item_data_internal.camera.projection.orientation, transform);
-    transform = fsl_matrix_multiply(ui_item_data_internal.camera.projection.rotation, transform);
-    transform = fsl_matrix_multiply(ui_item_data_internal.camera.projection.target, transform);
+    SPCH = sinf(pitch * FSL_DEG2RAD);
+    CPCH = cosf(pitch * FSL_DEG2RAD);
+    SYAW = sinf(yaw * FSL_DEG2RAD);
+    CYAW = cosf(yaw * FSL_DEG2RAD);
 
-    glUseProgram(ui_item_data_internal.shader->asset.id);
+    rotation_pitch.a11 = CPCH;
+    rotation_pitch.a13 = -SPCH;
+    rotation_pitch.a22 = 1.0f;
+    rotation_pitch.a31 = SPCH;
+    rotation_pitch.a33 = CPCH;
+    rotation_pitch.a44 = 1.0f;
+
+    rotation_yaw.a11 = CYAW;
+    rotation_yaw.a12 = -SYAW;
+    rotation_yaw.a21 = SYAW;
+    rotation_yaw.a22 = CYAW;
+    rotation_yaw.a33 = 1.0f;
+    rotation_yaw.a44 = 1.0f;
+
+    scale.a11 = 1.0f;
+    scale.a22 = 1.0f;
+    scale.a33 = 1.0f;
+    scale.a44 = render->size.y / UI_ITEM_SCALE;
+
+    offset.a11 = 1.0f;
+    offset.a22 = 1.0f;
+    offset.a33 = 1.0f;
+    offset.a41 = ((f32)(-render->size.x + UI_ITEM_SCALE) / 2.0 + pos_x) * render->ndc_scale.x;
+    offset.a42 = ((f32)(-render->size.y + UI_ITEM_SCALE) / 2.0 + pos_y) * render->ndc_scale.y;
+    offset.a44 = 1.0f;
+
+    /* 3D space */
+    transform = fsl_matrix_multiply(rotation_yaw, rotation_pitch);
+    transform = fsl_matrix_multiply(transform, ui_item_data_internal.camera.projection.perspective);
+
+    /* UI space */
+    transform = fsl_matrix_multiply(scale, transform);
+    transform = fsl_matrix_multiply(transform, offset);
 
     glBindBuffer(GL_ARRAY_BUFFER, ui_item_data_internal.mesh_unit_cube.transform_buf.id);
     glBufferData(GL_ARRAY_BUFFER, sizeof(m4f32), &transform, GL_DYNAMIC_DRAW);
@@ -90,8 +139,7 @@ void gui_draw_ui_item(i32 pos_x, i32 pos_y)
 
     glBindVertexArray(ui_item_data_internal.mesh_unit_cube.vao);
     glDrawElementsInstanced(GL_TRIANGLES, ui_item_data_internal.mesh_unit_cube.index_buf.len,
-            GL_UNSIGNED_INT, NULL, 1);
-    glBindVertexArray(0);
+        GL_UNSIGNED_INT, NULL, 1);
 }
 
 #ifdef FUCK /* TODO: undef FUCK */
