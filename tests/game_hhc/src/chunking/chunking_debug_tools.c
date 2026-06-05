@@ -10,7 +10,7 @@
 #include "chunking.h"
 #include "chunking_debug_tools.h"
 
-static void chunk_debug_draw_scheduler_visualizer_internal(chunk_scheduler sched,
+static void chunk_debug_draw_scheduler_visualizer_internal(hhc_chunk_scheduler sched,
         const fsl_mesh *mesh_bounding_box, const fsl_camera *camera,
         f32 color_r, f32 color_g, f32 color_b, f32 color_a);
 
@@ -32,7 +32,7 @@ void chunk_debug_draw_scheduler_visualizer(const fsl_camera *camera, f32 opacity
             0.9f, 0.6f, 0.3f, opacity);
 }
 
-static void chunk_debug_draw_scheduler_visualizer_internal(chunk_scheduler sched,
+static void chunk_debug_draw_scheduler_visualizer_internal(hhc_chunk_scheduler sched,
         const fsl_mesh *mesh_bounding_box, const fsl_camera *camera,
         f32 color_r, f32 color_g, f32 color_b, f32 color_a)
 {

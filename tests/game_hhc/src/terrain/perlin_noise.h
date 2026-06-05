@@ -1,31 +1,11 @@
-#ifndef HHC_TERRAIN_H
-#define HHC_TERRAIN_H
+#ifndef HHC_PERLIN_NOISE_H
+#define HHC_PERLIN_NOISE_H
 
 #include "deps/fossil/common/types.h"
 
-#include "assets.h"
-
-enum biome_index
-{
-    BIOME_HILLS,
-    BIOME_SANDSTORM,
-    BIOME_DECAYING_LANDS,
-    BIOME_COUNT
-}; /* biome_index */
-
-struct biome
-{
-    f32 temperature;
-    f32 humidity;
-    f32 life;
-}; /* biome */
-
-typedef struct terrain
-{
-    enum biome_index biome;
-    enum block_id block_id;
-    u32 block_light;
-} terrain;
+#define RAND_TAB_DIAMETER   128
+#define RAND_TAB_LAYER      (RAND_TAB_DIAMETER * RAND_TAB_DIAMETER)
+#define RAND_TAB_VOLUME     (RAND_TAB_DIAMETER * RAND_TAB_DIAMETER * RAND_TAB_DIAMETER)
 
 /*!
  *  @brief random number look-up table.
@@ -118,14 +98,4 @@ f32 perlin_noise_3d(v3i32 coordinates, f32 intensity, f32 scale, u64 seed);
 f32 perlin_noise_3d_ex(v3i32 coordinates, f32 intensity, f32 scale,
         u32 octaves, f32 intensity_persistence, f32 scale_persistence, u64 seed);
 
-/*!
- *  @brief default terrain of mountains valleys, caves and biomes.
- *
- *  @return terrain info (e.g., block ID at specified coordinates).
- */
-terrain terrain_land(v3i32 coordinates);
-
-terrain terrain_decaying_lands(v3i32 coordinates);
-terrain terrain_biome_blend_test(v3i32 coordinates);
-
-#endif /* HHC_TERRAIN_H */
+#endif /* HHC_PERLIN_NOISE_H */

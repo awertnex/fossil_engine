@@ -126,13 +126,14 @@ u32 build_game(int argc, char **argv)
     cmd_push(&cmd, DIR_SRC_GAME"main.c");
     cmd_push(&cmd, DIR_SRC_GAME"chunking/chunking.c");
     cmd_push(&cmd, DIR_SRC_GAME"chunking/chunking_debug_tools.c");
+    cmd_push(&cmd, DIR_SRC_GAME"terrain/perlin_noise.c");
+    cmd_push(&cmd, DIR_SRC_GAME"terrain/terrain.c");
     cmd_push(&cmd, DIR_SRC_GAME"assets.c");
     cmd_push(&cmd, DIR_SRC_GAME"common.c");
     cmd_push(&cmd, DIR_SRC_GAME"dir.c");
     cmd_push(&cmd, DIR_SRC_GAME"gui.c");
     cmd_push(&cmd, DIR_SRC_GAME"input.c");
     cmd_push(&cmd, DIR_SRC_GAME"player.c");
-    cmd_push(&cmd, DIR_SRC_GAME"terrain.c");
     cmd_push(&cmd, DIR_SRC_GAME"world.c");
     cmd_push(&cmd, "-I"DIR_DEPS);
     cmd_push(&cmd, "-std=c89");

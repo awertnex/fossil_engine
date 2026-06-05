@@ -1,45 +1,14 @@
 #ifndef HHC_CHUNKING_INTERNAL_H
 #define HHC_CHUNKING_INTERNAL_H
 
-#include "deps/fossil/common/common.h"
+#include "chunk_scheduler.h"
 
 /* ---- section: definitions ------------------------------------------------ */
-
-#define CHUNK_COLOR_LOADED fsl_color_v4_to_hex(0.70f, 0.01f, 0.02f, 0.39f)
-#define CHUNK_COLOR_RENDER fsl_color_v4_to_hex(0.24f, 0.47f, 0.3f, 1.0f)
-#define CHUNK_COLOR_FACTOR_INFLUENCE 0.1
 
 /*!
  *  @brief count of temporary static buffers in function @ref chunk_mesh_update_internal().
  */
 #define BLOCK_BUFFERS_MAX 2
-
-/* ---- section: chunk scheduler config ------------------------------------- */
-
-/*!
- *  @brief budget of work given to each @ref chunk_scheduler to be consumed each frame.
- */
-#define CHUNK_PARSE_RATE_PRIORITY_LOW 16384
-#define CHUNK_PARSE_RATE_PRIORITY_MID 32768
-#define CHUNK_PARSE_RATE_PRIORITY_HIGH 65536
-
-/*!
- *  @brief number of blocks to process per chunk per frame.
- */
-#define BLOCK_PARSE_RATE 512
-
-/*!
- *  @brief cost of work requested by chunks in a @ref chunk_scheduler.
- */
-typedef enum chunk_scheduler_cost
-{
-    CHUNK_PARSE_COST_SCAN = 1,
-    CHUNK_PARSE_COST_PUSH = 4,
-    CHUNK_PARSE_COST_POP = 4,
-    CHUNK_PARSE_COST_IMPORT = 16,
-    CHUNK_PARSE_COST_EXPORT = 16,
-    CHUNK_PARSE_COST_MESHING = 64
-} chunk_scheduler_cost;
 
 /* ---- section: block flag ------------------------------------------------- */
 
@@ -89,7 +58,7 @@ enum chunk_shift_state
 /*!
  *  @brief chunk buffer, raw chunk data.
  */
-typedef struct chunk_buffer
+typedef struct hhc_chunk_buffer
 {
     /*!
      *  @brief position of first empty slot in `p`.
@@ -98,7 +67,7 @@ typedef struct chunk_buffer
 
     fsl_mem_handle handle;
     hhc_chunk *p;           /* cached pointer from `handle` */
-} chunk_buffer;
+} hhc_chunk_buffer;
 
 /* ---- section: signatures ------------------------------------------------- */
 
@@ -138,57 +107,58 @@ void block_evaluate_internal(hhc_chunk *ch,
 /*!
  *  @brief generate chunk blocks.
  *
- *  @param rate number of blocks to process per chunk per frame.
- *
  *  @remark calls @ref chunk_mesh_update_internal() when done generating.
  *  @remark must be called before @ref chunk_mesh_update_internal().
  *
  *  @return cost of operation (used in @ref chunk_scheduler_update_internal()).
  */
-chunk_scheduler_cost chunk_load_internal(hhc_chunk *ch, u32 rate);
+chunk_work_cost chunk_load_internal(hhc_chunk *ch, chunk_scheduler_budget budget);
 
 /*!
  *  @brief generate chunk blocks.
  *
  *  automatically called from @ref chunk_load_internal().
  *
- *  @param rate number of blocks to process per chunk per frame.
- *
  *  @remark calls @ref chunk_mesh_update_internal() when done generating.
  *  @remark must be called before @ref chunk_mesh_update_internal().
  *
  *  @return cost of operation (used in @ref chunk_scheduler_update_internal()).
  */
-chunk_scheduler_cost chunk_generate_internal(hhc_chunk *ch, u32 rate);
+chunk_work_cost chunk_generate_internal(hhc_chunk *ch, chunk_scheduler_budget budget);
 
 /*!
  *  @return cost of operation (used in @ref chunk_scheduler_update_internal()).
  */
-chunk_scheduler_cost chunk_mesh_update_internal(hhc_chunk *ch);
+chunk_work_cost chunk_mesh_update_internal(hhc_chunk *ch);
 
 /*!
  *  @brief write chunk into disk.
  *
  *  @return cost of operation (used in @ref chunk_scheduler_update_internal()).
  */
-chunk_scheduler_cost chunk_export_internal(hhc_chunk *ch);
+chunk_work_cost chunk_export_internal(hhc_chunk *ch);
 
 /*!
  *  @brief read chunk from disk.
  *
  *  @return cost of operation (used in @ref chunk_scheduler_update_internal()).
  */
-chunk_scheduler_cost chunk_import_internal(const fsl_fs_path *path, hhc_chunk *ch);
+chunk_work_cost chunk_import_internal(const fsl_fs_path *path, hhc_chunk *ch);
 
 void chunk_buf_push_internal(u32 index, v3i32 player_chunk_delta);
 void chunk_buf_pop_internal(hhc_chunk *ch);
 
-void chunk_scheduler_set_parameters_internal(chunk_scheduler *sched, chunk_scheduler_id id,
-        u64 offset, fsl_len len, u32 rate_chunk);
+/*!
+ *  @brief initialize chunk scheduler resources.
+ *
+ *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
+ */
+u32 chunk_scheduler_init_internal(hhc_chunk_scheduler *sched, chunk_scheduler_id id,
+        u64 offset, chunk_scheduler_radius radius, chunk_scheduler_budget budget);
 /*!
  *  @param len number of chunks from @ref chunk_order.p this scheduler is allowed to parse.
  */
-void chunk_scheduler_update_internal(chunk_scheduler *sched, fsl_len len,
+void chunk_scheduler_update_internal(hhc_chunk_scheduler *sched, fsl_len len,
         b8 should_push, b8 should_pop);
 
 void chunk_gizmo_write_internal(hhc_chunk *ch);

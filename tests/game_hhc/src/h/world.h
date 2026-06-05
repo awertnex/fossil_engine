@@ -3,8 +3,9 @@
 
 #include "deps/fossil/math/vector.h"
 
+#include "../terrain/terrain.h"
+
 #include "player.h"
-#include "terrain.h"
 
 #define WORLD_TICK_SPEED        20.0
 

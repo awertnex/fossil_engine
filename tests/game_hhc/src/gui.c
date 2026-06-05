@@ -1,6 +1,7 @@
 #include "deps/fossil/common/config.h"
 #include "deps/fossil/common/diagnostics.h"
 #include "deps/fossil/assets/asset_types.h"
+#include "deps/fossil/assets/assets.h"
 #include "deps/fossil/assets/mesh/mesh.h"
 #include "deps/fossil/engine/engine.h"
 #include "deps/fossil/engine/engine_assets.h"
@@ -95,7 +96,7 @@ void gui_draw_ui_item(f32 pos_x, f32 pos_y)
 {
     f32 pitch = UI_ITEM_PITCH;
     f32 yaw = UI_ITEM_YAW;
-    f32 SROL = 0.0f, CROL = 0.0f, SPCH = 0.0f, CPCH = 0.0f, SYAW = 0.0f, CYAW = 0.0f;
+    f32 SPCH = 0.0f, CPCH = 0.0f, SYAW = 0.0f, CYAW = 0.0f;
     m4f32 transform = {0};
     m4f32 rotation_pitch = {0};
     m4f32 rotation_yaw = {0};

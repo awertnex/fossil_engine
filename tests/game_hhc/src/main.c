@@ -4,6 +4,8 @@
 
 #include "chunking/chunking.h"
 #include "chunking/chunking_debug_tools.h"
+#include "terrain/terrain.h"
+#include "terrain/perlin_noise.h"
 
 #include "h/assets.h"
 #include "h/common.h"
@@ -12,7 +14,6 @@
 #include "h/gui.h"
 #include "h/input.h"
 #include "h/player.h"
-#include "h/terrain.h"
 #include "h/world.h"
 
 #include <stdio.h>
@@ -315,6 +316,8 @@ static void draw_hotbar_items(void)
 static void draw_everything(void)
 {
     static str engine_version[FSL_ID_CAP] = {0};
+    static hhc_chunk ***cursor = NULL;
+    static hhc_chunk *ch = NULL;
     fsl_fbo *fbo_p = fsl_mem_handle_get(fbo);
     fsl_texture *texture_p = fsl_mem_handle_get(texture);
     fsl_texture *fsl_texture_p = fsl_mem_handle_get(fsl_texture_buf);
@@ -529,10 +532,8 @@ static void draw_everything(void)
     else
         glUniform1f(uniform.voxel.opacity, 1.0f);
 
-    static hhc_chunk ***cursor = NULL;
-    static hhc_chunk *ch = NULL;
-    cursor = &CHUNK_ORDER.p[CHUNKS_MAX[settings.render_distance] - 1];
-    for (; cursor >= CHUNK_ORDER.p; --cursor)
+    cursor = &chunk_order.p[chunks_max[settings.render_distance] - 1];
+    for (; cursor >= chunk_order.p; --cursor)
     {
         ch = **cursor;
         if (!ch || !(ch->flag & FLAG_CHUNK_RENDER))
@@ -841,7 +842,7 @@ static void draw_everything(void)
 
                     chunk_sched[2].count, chunk_sched[2].len,
                     chunk_sched[2].cursor_pop, chunk_sched[2].cursor_push,
-                    CHUNKS_MAX[settings.render_distance]),
+                    chunks_max[settings.render_distance]),
                 render->size.x - SET_MARGIN, SET_MARGIN,
                 FSL_TEXT_ALIGN_RIGHT, 0, 0,
                 COLOR_TEXT_DEFAULT);
