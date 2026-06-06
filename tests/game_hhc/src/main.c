@@ -537,16 +537,15 @@ static void draw_everything(void)
     for (; cursor >= chunk_order.p; --cursor)
     {
         ch = **cursor;
-        if (!ch || !(ch->flag & FLAG_CHUNK_RENDER))
-            continue;
-
-        glUniform3f(uniform.voxel.chunk_position,
-                (f32)(ch->pos.x * CHUNK_DIAMETER),
-                (f32)(ch->pos.y * CHUNK_DIAMETER),
-                (f32)(ch->pos.z * CHUNK_DIAMETER));
-
-        glBindVertexArray(ch->vao);
-        glDrawArrays(GL_POINTS, 0, ch->vbo_len);
+        if (ch && ch->flag & FLAG_CHUNK_VISIBLE)
+        {
+            glUniform3f(uniform.voxel.chunk_position,
+                    (f32)(ch->pos.x * CHUNK_DIAMETER),
+                    (f32)(ch->pos.y * CHUNK_DIAMETER),
+                    (f32)(ch->pos.z * CHUNK_DIAMETER));
+            glBindVertexArray(ch->vao);
+            glDrawArrays(GL_POINTS, 0, ch->vbo_len);
+        }
     }
 
     /* ---- draw player ----------------------------------------------------- */

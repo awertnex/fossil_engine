@@ -167,7 +167,7 @@ terrain terrain_decaying_lands(v3i32 coordinates)
     if (land_final < (f32)coordinates.z || cave_final > crush)
         result.block_id = 0;
 
-    result.cost = CHUNK_WORK_COST_BLOCK_GENERATION;
+    result.cost = CHUNK_WORK_COST_GENERATE_NON_AIR;
     return result;
 }
 

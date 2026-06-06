@@ -85,7 +85,7 @@ enum chunk_flag
     FLAG_CHUNK_LOADED =     0x01,
     FLAG_CHUNK_DIRTY =      0x02,
     FLAG_CHUNK_GENERATED =  0x04,
-    FLAG_CHUNK_RENDER =     0x08,
+    FLAG_CHUNK_VISIBLE =    0x08,
     FLAG_CHUNK_IMPORTED =   0x10,
 
     /*!

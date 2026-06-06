@@ -8,14 +8,15 @@
 #include "deps/fossil/h/dir.h"
 
 #include "../h/assets.h"
-#include "chunk_scheduler.h"
-#include "chunking.h"
-#include "chunking_internal.h"
 #include "../h/common.h"
 #include "../h/diagnostics.h"
 #include "../h/main.h"
 #include "../terrain/terrain.h"
 #include "../h/world.h"
+
+#include "chunking.h"
+#include "chunking_internal.h"
+#include "chunk_scheduler.h"
 
 #include <stdio.h>
 #include <inttypes.h>
@@ -67,11 +68,11 @@ u32 chunking_init(void)
                 "chunking_init().chunk_buf.handle") != FSL_ERR_SUCCESS ||
 
             fsl_mem_arena_push(&memory_arena_chunking_internal, &chunk_gizmo_loaded.handle,
-                CHUNK_BUF_VOLUME_MAX * sizeof(v2u32),
+                chunk_order.len[SET_RENDER_DISTANCE_MAX] * sizeof(v2u32),
                 "chunking_init().chunk_gizmo_loaded.handle") != FSL_ERR_SUCCESS ||
 
             fsl_mem_arena_push(&memory_arena_chunking_internal, &chunk_gizmo_render.handle,
-                CHUNK_BUF_VOLUME_MAX * sizeof(v2u32),
+                chunk_order.len[SET_RENDER_DISTANCE_MAX] * sizeof(v2u32),
                 "chunking_init().chunk_gizmo_render.handle") != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -542,7 +543,7 @@ chunk_tab_shift:
 
         if (is_on_edge)
         {
-            chunk_tab.p[i]->flag &= ~(FLAG_CHUNK_LOADED | FLAG_CHUNK_RENDER);
+            chunk_tab.p[i]->flag &= ~(FLAG_CHUNK_LOADED | FLAG_CHUNK_VISIBLE);
             chunk_tab.p[i]->color = 0;
             if (chunk_tab.p[mirror_index])
                 chunk_tab.p[mirror_index]->flag |= FLAG_CHUNK_EDGE;
@@ -1153,6 +1154,7 @@ finish_generation:
 
 chunk_work_cost chunk_mesh_update_internal(hhc_chunk *ch)
 {
+    chunk_work_cost cost = 0;
     static u64 buffer[BLOCK_BUFFERS_MAX][CHUNK_VOLUME] = {0};
     static u64 cur_buf = 0;
 
@@ -1208,13 +1210,17 @@ chunk_work_cost chunk_mesh_update_internal(hhc_chunk *ch)
                     (pos.y & 0xf) << SHIFT_BLOCK_Y |
                     (pos.z & 0xf) << SHIFT_BLOCK_Z;
             }
+
+            cost += CHUNK_WORK_COST_MESH_NON_AIR;
         }
+        else
+            cost += CHUNK_WORK_COST_MESH_AIR;
     }
     cur_buf = (cur_buf + 1) % BLOCK_BUFFERS_MAX;
 
     if (should_render)
     {
-        ch->flag |= FLAG_CHUNK_RENDER;
+        ch->flag |= FLAG_CHUNK_VISIBLE;
         ch->color = CHUNK_COLOR_RENDER;
 
         if (ch->vbo_len)
@@ -1246,14 +1252,14 @@ chunk_work_cost chunk_mesh_update_internal(hhc_chunk *ch)
     }
     else
     {
-        ch->flag &= ~FLAG_CHUNK_RENDER;
+        ch->flag &= ~FLAG_CHUNK_VISIBLE;
         ch->color = CHUNK_COLOR_LOADED;
     }
 
     ch->flag &= ~FLAG_CHUNK_DIRTY;
     chunk_gizmo_write_internal(ch);
 
-    return CHUNK_WORK_COST_MESHING;
+    return cost;
 }
 
 chunk_work_cost chunk_export_internal(hhc_chunk *ch)
@@ -1320,6 +1326,9 @@ chunk_work_cost chunk_import_internal(const fsl_fs_path *path, hhc_chunk *ch)
     fread(buf, 1, i, file);
     fclose(file);
 
+    if (i == 8 && buf[0] & FLAG_BLOCK_RLE && !buf[1])
+        return CHUNK_WORK_COST_IMPORT_AIR;
+
     for (i = 0; i < CHUNK_VOLUME && j < CHUNK_VOLUME; ++i)
     {
         if (buf[i] & FLAG_BLOCK_RLE)
@@ -1336,7 +1345,7 @@ chunk_work_cost chunk_import_internal(const fsl_fs_path *path, hhc_chunk *ch)
 
     ch->cursor = j;
 
-    return CHUNK_WORK_COST_IMPORT;
+    return CHUNK_WORK_COST_IMPORT_NON_AIR;
 }
 
 void chunk_buf_push_internal(u32 index, v3i32 player_chunk_delta)
@@ -1463,8 +1472,6 @@ void chunk_scheduler_update_internal(hhc_chunk_scheduler *sched, fsl_len len,
     if (!should_push)
         goto pop;
 
-    /* ---- push chunk scheduler -------------------------------------------- */
-
     start = &chunk_order.p[sched->offset];
     end = chunk_order.p + len;
     for (; start < end && budget > 0 && sched->count < sched_len; ++start)
@@ -1484,15 +1491,12 @@ void chunk_scheduler_update_internal(hhc_chunk_scheduler *sched, fsl_len len,
                     push = 0;
                 budget -= CHUNK_WORK_COST_PUSH;
             }
+            budget -= CHUNK_WORK_COST_SCAN;
         }
+        budget -= CHUNK_WORK_COST_SCAN;
     }
 
-    /* DISABLED IN v0.9.0-dev: better to use one budget for both push and pop loops per frame.
-    budget = sched->budget;
-    */
     sched->cursor_push = push;
-
-    /* ---- pop chunk scheduler --------------------------------------------- */
 
 pop:
 
@@ -1566,7 +1570,7 @@ void chunk_gizmo_write_internal(hhc_chunk *ch)
     chunk_color.y = (chunk_color.y + ((ch->color_variant >> 0x10) & 0xff)) / 2;
     chunk_color.z = (chunk_color.z + ((ch->color_variant >> 0x08) & 0xff)) / 2;
 
-    if (ch->flag & FLAG_CHUNK_RENDER)
+    if (ch->flag & FLAG_CHUNK_VISIBLE)
     {
         chunk_gizmo_render.p[ch->index].x =
             (chunk_pos.x << 0x18) | (chunk_pos.y << 0x10) | (chunk_pos.z << 0x08);
