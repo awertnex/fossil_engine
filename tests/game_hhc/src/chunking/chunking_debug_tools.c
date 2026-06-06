@@ -9,6 +9,7 @@
 
 #include "chunking.h"
 #include "chunking_debug_tools.h"
+#include "chunking_internal.h"
 
 static void chunk_debug_draw_scheduler_visualizer_internal(hhc_chunk_scheduler sched,
         const fsl_mesh *mesh_bounding_box, const fsl_camera *camera,

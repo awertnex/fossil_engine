@@ -14,9 +14,9 @@
 #include "../terrain/terrain.h"
 #include "../h/world.h"
 
+#include "chunk_scheduler.h"
 #include "chunking.h"
 #include "chunking_internal.h"
-#include "chunk_scheduler.h"
 
 #include <stdio.h>
 #include <inttypes.h>
@@ -39,6 +39,7 @@ static hhc_chunk_buffer chunk_buf = {0};
 hhc_chunk_table chunk_tab = {0};
 hhc_chunk_order chunk_order = {0};
 hhc_chunk_scheduler chunk_sched[CHUNK_SCHEDULERS_MAX] = {0};
+hhc_chunk_draw chunk_draw[CHUNK_SCHEDULERS_MAX] = {0};
 hhc_chunk_gizmo chunk_gizmo_loaded = {0};
 hhc_chunk_gizmo chunk_gizmo_render = {0};
 
@@ -1165,6 +1166,7 @@ chunk_work_cost chunk_mesh_update_internal(hhc_chunk *ch)
     hhc_chunk *pz = NULL;
     hhc_chunk *nz = NULL;
     v3u32 chunk_tab_coordinates = {0};
+    v3f32 chunk_pos = {0};
 
     u64 *buf = &buffer[cur_buf][0];
     u64 *cursor = buf;
@@ -1210,32 +1212,35 @@ chunk_work_cost chunk_mesh_update_internal(hhc_chunk *ch)
                     (pos.y & 0xf) << SHIFT_BLOCK_Y |
                     (pos.z & 0xf) << SHIFT_BLOCK_Z;
             }
-
             cost += CHUNK_WORK_COST_MESH_NON_AIR;
         }
         else
             cost += CHUNK_WORK_COST_MESH_AIR;
     }
-    cur_buf = (cur_buf + 1) % BLOCK_BUFFERS_MAX;
+
+    ++cur_buf;
+    if (cur_buf >= BLOCK_BUFFERS_MAX)
+        cur_buf = 0;
 
     if (should_render)
     {
         ch->flag |= FLAG_CHUNK_VISIBLE;
         ch->color = CHUNK_COLOR_RENDER;
 
-        if (ch->vbo_len)
+        if (!ch->mesh.initialized)
         {
-            glBindBuffer(GL_ARRAY_BUFFER, ch->vbo);
-            glBufferData(GL_ARRAY_BUFFER, (cursor - buf) * sizeof(u64), buf, GL_DYNAMIC_DRAW);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-        }
-        else
-        {
-            glGenVertexArrays(1, &ch->vao);
-            glGenBuffers(1, &ch->vbo);
+            ch->mesh.initialized = TRUE;
 
-            glBindVertexArray(ch->vao);
-            glBindBuffer(GL_ARRAY_BUFFER, ch->vbo);
+            chunk_pos.x = (f32)ch->pos.x * CHUNK_DIAMETER;
+            chunk_pos.y = (f32)ch->pos.y * CHUNK_DIAMETER;
+            chunk_pos.z = (f32)ch->pos.z * CHUNK_DIAMETER;
+
+            glGenVertexArrays(1, &ch->mesh.vao);
+            glGenBuffers(1, &ch->mesh.vbo);
+            glGenBuffers(1, &ch->mesh.vbo_transform);
+
+            glBindVertexArray(ch->mesh.vao);
+            glBindBuffer(GL_ARRAY_BUFFER, ch->mesh.vbo);
             glBufferData(GL_ARRAY_BUFFER, (cursor - buf) * sizeof(u64), buf, GL_DYNAMIC_DRAW);
 
             glEnableVertexAttribArray(0);
@@ -1244,16 +1249,37 @@ chunk_work_cost chunk_mesh_update_internal(hhc_chunk *ch)
             glEnableVertexAttribArray(1);
             glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, sizeof(u64), (void*)sizeof(u32));
 
+            glBindBuffer(GL_ARRAY_BUFFER, ch->mesh.vbo_transform);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(v3f32), &chunk_pos, GL_STATIC_DRAW);
+
+            glEnableVertexAttribArray(2);
+            glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(v3f32), (void*)0);
+            glVertexAttribDivisor(2, 1);
+
             glBindVertexArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
         }
+        else
+        {
+            glBindBuffer(GL_ARRAY_BUFFER, ch->mesh.vbo);
+            glBufferData(GL_ARRAY_BUFFER, (cursor - buf) * sizeof(u64), buf, GL_DYNAMIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+        }
 
-        ch->vbo_len = cursor - buf;
+        ch->mesh.vbo_len = cursor - buf;
     }
     else
     {
         ch->flag &= ~FLAG_CHUNK_VISIBLE;
         ch->color = CHUNK_COLOR_LOADED;
+
+        if (ch->mesh.initialized)
+        {
+            ch->mesh.initialized = FALSE;
+            glDeleteBuffers(1, &ch->mesh.vbo_transform);
+            glDeleteBuffers(1, &ch->mesh.vbo);
+            glDeleteVertexArrays(1, &ch->mesh.vao);
+        }
     }
 
     ch->flag &= ~FLAG_CHUNK_DIRTY;
@@ -1367,11 +1393,12 @@ void chunk_buf_push_internal(u32 index, v3i32 player_chunk_delta)
     {
         if (!(ch->flag & FLAG_CHUNK_LOADED))
         {
-            if (ch->vbo_len)
+            if (ch->mesh.initialized)
             {
-                glDeleteBuffers(1, &ch->vbo);
-                glDeleteVertexArrays(1, &ch->vao);
-                ch->vbo_len = 0;
+                ch->mesh.initialized = FALSE;
+                glDeleteBuffers(1, &ch->mesh.vbo_transform);
+                glDeleteBuffers(1, &ch->mesh.vbo);
+                glDeleteVertexArrays(1, &ch->mesh.vao);
             }
             *ch = nochunk;
 
@@ -1425,11 +1452,12 @@ void chunk_buf_pop_internal(hhc_chunk *ch)
 
     chunk_gizmo_write_internal(ch);
 
-    if (ch->vbo_len)
+    if (ch->mesh.initialized)
     {
-        glDeleteBuffers(1, &ch->vbo);
-        glDeleteVertexArrays(1, &ch->vao);
-        ch->vbo_len = 0;
+        ch->mesh.initialized = FALSE;
+        glDeleteBuffers(1, &ch->mesh.vbo_transform);
+        glDeleteBuffers(1, &ch->mesh.vbo);
+        glDeleteVertexArrays(1, &ch->mesh.vao);
     }
 
     ch->flag = 0;
@@ -1461,11 +1489,11 @@ void chunk_scheduler_update_internal(hhc_chunk_scheduler *sched, fsl_len len,
         b8 should_push, b8 should_pop)
 {
     hhc_chunk ***start = NULL;
-    hhc_chunk ***end = NULL;
     hhc_chunk *ch = NULL;
     u32 sched_len = sched->len;
     u32 push = sched->cursor_push;
     u32 pop = sched->cursor_pop;
+    u32 scan = sched->cursor_scan;
     i32 budget = sched->budget;
     u32 i = 0;
 
@@ -1473,12 +1501,11 @@ void chunk_scheduler_update_internal(hhc_chunk_scheduler *sched, fsl_len len,
         goto pop;
 
     start = &chunk_order.p[sched->offset];
-    end = chunk_order.p + len;
-    for (; start < end && budget > 0 && sched->count < sched_len; ++start)
+    for (i = 0; sched->count < sched_len && budget > 0 && i < sched_len; ++i)
     {
-        if (**start)
+        if (*start[scan])
         {
-            ch = **start;
+            ch = *start[scan];
             if (ch->flag & FLAG_CHUNK_DIRTY &&
                     ch->sched_id != sched->id &&
                     !sched->p[push])
@@ -1491,19 +1518,23 @@ void chunk_scheduler_update_internal(hhc_chunk_scheduler *sched, fsl_len len,
                     push = 0;
                 budget -= CHUNK_WORK_COST_PUSH;
             }
-            budget -= CHUNK_WORK_COST_SCAN;
         }
+
+        ++scan;
+        if (scan >= sched_len)
+            scan = 0;
         budget -= CHUNK_WORK_COST_SCAN;
     }
 
     sched->cursor_push = push;
+    sched->cursor_scan = scan;
 
 pop:
 
     if (!should_pop)
         return;
 
-    for (; sched->count && budget > 0 && i < sched_len; ++i)
+    for (i = 0; sched->count && budget > 0 && i < sched_len; ++i)
     {
         if (sched->p[pop])
         {
@@ -1550,6 +1581,14 @@ pop:
     }
 
     sched->cursor_pop = pop;
+}
+
+void chunk_draw_update_internal(hhc_chunk_draw *draw)
+{
+    hhc_chunk **start = NULL;
+    u32 draw_len = draw->len;
+    u32 scan = draw->cursor_scan;
+    u32 i = 0;
 }
 
 void chunk_gizmo_write_internal(hhc_chunk *ch)

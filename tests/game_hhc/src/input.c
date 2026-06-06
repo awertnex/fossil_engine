@@ -244,9 +244,9 @@ void input_update(hhc_player *p)
 
         /* ---- gameplay ---------------------------------------------------- */
 
-        if (p->hit.hit && chunk_tab.p[chunk_tab.index])
+        if (p->hit.hit)
         {
-            if (fsl_is_mouse_hold(bind_attack_or_destroy))
+            if (fsl_is_mouse_press(bind_attack_or_destroy))
             {
                 block_break(p->hit);
             }

@@ -79,6 +79,27 @@ typedef struct hhc_chunk_buffer
     hhc_chunk *p;           /* cached pointer from `handle` */
 } hhc_chunk_buffer;
 
+/*!
+ *  @brief schedule of chunks to be processed.
+ */
+struct hhc_chunk_scheduler
+{
+    chunk_scheduler_id id;  /* scheduler ID */
+    fsl_len count;          /* number of chunks scheduled */
+    u32 offset;             /* offset of scheduler into @ref chunk_order.p */
+    fsl_len len;            /* number of members in `p` */
+    u32 cursor_push;        /* push position */
+    u32 cursor_pop;         /* pop position */
+    u32 cursor_scan;        /* dirty chunk scanner */
+    chunk_scheduler_budget budget;
+    fsl_mem_handle schedule;
+    hhc_chunk **p;        /* cached pointer from `schedule` */
+}; /* hhc_chunk_scheduler */
+
+/* ---- section: declarations ----------------------------------------------- */
+
+extern hhc_chunk_scheduler chunk_sched[CHUNK_SCHEDULERS_MAX];
+
 /* ---- section: signatures ------------------------------------------------- */
 
 u32 chunks_max_init_internal(void);

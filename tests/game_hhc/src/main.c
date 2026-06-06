@@ -3,6 +3,7 @@
 #include "h/main.h"
 
 #include "chunking/chunking.h"
+#include "chunking/chunking_internal.h"
 #include "chunking/chunking_debug_tools.h"
 #include "terrain/terrain.h"
 #include "terrain/perlin_noise.h"
@@ -61,6 +62,7 @@ static u32 settings_init(void);
 void settings_update(void);
 static void draw_gizmo(void);
 static void draw_hotbar_items(void);
+static void draw_world(void);
 static void draw_everything(void);
 
 static void callback_framebuffer_size(i32 size_x, i32 size_y)
@@ -93,7 +95,9 @@ static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset)
     (void)window;
     (void)xoffset;
 
-    if (player.flag & FLAG_PLAYER_ZOOMER)
+    if (core.flag.super_debug)
+        scrool = fsl_clamp_i32(scrool + (i32)yoffset * SET_CONSOLE_SCROLL_SPEED, 0, logger_core.cursor);
+    else if (player.flag & FLAG_PLAYER_ZOOMER)
         player.camera.zoom =
             fsl_clamp_f64(player.camera.zoom + yoffset * FSL_CAMERA_ZOOM_SPEED, 0.0f, FSL_CAMERA_ZOOM_MAX);
     else
@@ -104,9 +108,6 @@ static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset)
         else if (player.hotbar_slot_selected < 0)
             player.hotbar_slot_selected = PLAYER_HOTBAR_SLOTS_MAX - 1;
     }
-
-    if (core.flag.super_debug)
-        scrool = fsl_clamp_i32(scrool + (i32)yoffset * SET_CONSOLE_SCROLL_SPEED, 0, logger_core.cursor);
 }
 
 static u32 settings_init(void)
@@ -314,11 +315,47 @@ static void draw_hotbar_items(void)
     }
 }
 
+static void draw_world(void)
+{
+    fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
+    static hhc_chunk ***cursor = NULL;
+    static hhc_chunk *ch = NULL;
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    glUseProgram(shader_p[SHADER_VOXEL].asset.id);
+    glUniformMatrix4fv(uniform.voxel.mat_perspective, 1, GL_FALSE,
+            (GLfloat*)&player.camera.projection.perspective);
+    glUniform3f(uniform.voxel.camera_position,
+            player.camera.pos.x, player.camera.pos.y, player.camera.pos.z);
+    glUniform3f(uniform.voxel.flashlight_position,
+            player.transform.pos.x, player.transform.pos.y, player.transform.pos.z + player.eye_height);
+    glUniform3fv(uniform.voxel.sun_rotation, 1, (GLfloat*)&skybox_data.sun_rotation);
+    glUniform3fv(uniform.voxel.sky_light, 1, (GLfloat*)&skybox_data.sky_light);
+    glUniform3fv(uniform.voxel.moon_light, 1, (GLfloat*)&skybox_data.moon_light);
+    glUniform1f(uniform.voxel.toggle_flashlight, player.flag & FLAG_PLAYER_FLASHLIGHT ? 1.0f : 0.0f);
+    glUniform1i(uniform.voxel.render_distance, settings.render_distance * CHUNK_DIAMETER);
+
+    if (core.debug.trans_blocks)
+        glUniform1f(uniform.voxel.opacity, 0.7f);
+    else
+        glUniform1f(uniform.voxel.opacity, 1.0f);
+
+    cursor = &chunk_order.p[chunk_order.len[settings.render_distance] - 1];
+    for (; cursor >= chunk_order.p; --cursor)
+    {
+        ch = **cursor;
+        if (ch && ch->flag & FLAG_CHUNK_VISIBLE)
+        {
+            glBindVertexArray(ch->mesh.vao);
+            glDrawArraysInstanced(GL_POINTS, 0, ch->mesh.vbo_len, 1);
+        }
+    }
+}
+
 static void draw_everything(void)
 {
     static str engine_version[FSL_ID_CAP] = {0};
-    static hhc_chunk ***cursor = NULL;
-    static hhc_chunk *ch = NULL;
     fsl_fbo *fbo_p = fsl_mem_handle_get(fbo);
     fsl_texture *texture_p = fsl_mem_handle_get(texture);
     fsl_texture *fsl_texture_p = fsl_mem_handle_get(fsl_texture_buf);
@@ -513,40 +550,7 @@ static void draw_everything(void)
 
     /* ---- draw world ------------------------------------------------------ */
 
-    glClear(GL_DEPTH_BUFFER_BIT);
-
-    glUseProgram(shader_p[SHADER_VOXEL].asset.id);
-    glUniformMatrix4fv(uniform.voxel.mat_perspective, 1, GL_FALSE,
-            (GLfloat*)&player.camera.projection.perspective);
-    glUniform3f(uniform.voxel.camera_position,
-            player.camera.pos.x, player.camera.pos.y, player.camera.pos.z);
-    glUniform3f(uniform.voxel.flashlight_position,
-            player.transform.pos.x, player.transform.pos.y, player.transform.pos.z + player.eye_height);
-    glUniform3fv(uniform.voxel.sun_rotation, 1, (GLfloat*)&skybox_data.sun_rotation);
-    glUniform3fv(uniform.voxel.sky_light, 1, (GLfloat*)&skybox_data.sky_light);
-    glUniform3fv(uniform.voxel.moon_light, 1, (GLfloat*)&skybox_data.moon_light);
-    glUniform1f(uniform.voxel.toggle_flashlight, player.flag & FLAG_PLAYER_FLASHLIGHT ? 1.0f : 0.0f);
-    glUniform1i(uniform.voxel.render_distance, settings.render_distance * CHUNK_DIAMETER);
-
-    if (core.debug.trans_blocks)
-        glUniform1f(uniform.voxel.opacity, 0.7f);
-    else
-        glUniform1f(uniform.voxel.opacity, 1.0f);
-
-    cursor = &chunk_order.p[chunk_order.len[settings.render_distance] - 1];
-    for (; cursor >= chunk_order.p; --cursor)
-    {
-        ch = **cursor;
-        if (ch && ch->flag & FLAG_CHUNK_VISIBLE)
-        {
-            glUniform3f(uniform.voxel.chunk_position,
-                    (f32)(ch->pos.x * CHUNK_DIAMETER),
-                    (f32)(ch->pos.y * CHUNK_DIAMETER),
-                    (f32)(ch->pos.z * CHUNK_DIAMETER));
-            glBindVertexArray(ch->vao);
-            glDrawArrays(GL_POINTS, 0, ch->vbo_len);
-        }
-    }
+    draw_world();
 
     /* ---- draw player ----------------------------------------------------- */
 

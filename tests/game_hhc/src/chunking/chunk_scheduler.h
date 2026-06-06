@@ -2,7 +2,7 @@
 #define HHC_CHUNK_SCHEDULER_H
 
 /*!
- *  defined in 'chunking.h'.
+ *  defined in 'chunking_internal.h'.
  */
 typedef struct hhc_chunk_scheduler hhc_chunk_scheduler;
 

@@ -82,17 +82,26 @@ enum block_shift
 
 enum chunk_flag
 {
-    FLAG_CHUNK_LOADED =     0x01,
-    FLAG_CHUNK_DIRTY =      0x02,
-    FLAG_CHUNK_GENERATED =  0x04,
-    FLAG_CHUNK_VISIBLE =    0x08,
-    FLAG_CHUNK_IMPORTED =   0x10,
+    FLAG_CHUNK_LOADED =     (1 << 0),
+    FLAG_CHUNK_DIRTY =      (1 << 1),
+    FLAG_CHUNK_GENERATED =  (1 << 2),
+    FLAG_CHUNK_VISIBLE =    (1 << 3),
+    FLAG_CHUNK_IMPORTED =   (1 << 4),
 
     /*!
      *  @brief chunk marking for @ref chunk_tab shifting logic.
      */
-    FLAG_CHUNK_EDGE =       0x20
+    FLAG_CHUNK_EDGE =       (1 << 5)
 }; /* chunk_flag */
+
+typedef struct hhc_chunk_mesh
+{
+    b8 initialized;
+    GLuint vao;
+    GLuint vbo;
+    u32 vbo_len;
+    GLuint vbo_transform; /* len: sizeof(v3f32) */
+} hhc_chunk_mesh;
 
 typedef struct hhc_chunk
 {
@@ -140,10 +149,7 @@ typedef struct hhc_chunk
      */
     chunk_scheduler_id sched_id;
 
-    GLuint vao;
-    GLuint vbo;
-    u64 vbo_len;
-
+    hhc_chunk_mesh mesh;
     u32 block[CHUNK_DIAMETER][CHUNK_DIAMETER][CHUNK_DIAMETER];
 } hhc_chunk;
 
@@ -194,21 +200,24 @@ typedef struct hhc_chunk_order
 } hhc_chunk_order;
 
 /*!
- *  @brief schedule of chunks to be processed.
+ *  @brief buffer of drawable chunks.
+ *
+ *  there are as many chunk-draw buffers as there are chunk schedulers.
+ *
+ *  @ref chunk_order is traversed backwards, visible chunks are pushed to this buffer,
+ *  that way, further chunks are drawn first.
+ *
+ *  @remark updated on a fixed time-step.
  */
-struct hhc_chunk_scheduler
+typedef struct hhc_chunk_draw
 {
-    chunk_scheduler_id id;  /* scheduler ID */
     fsl_len count;          /* number of chunks scheduled */
     u32 offset;             /* offset of scheduler into @ref chunk_order.p */
     fsl_len len;            /* number of members in `p` */
-    u32 cursor_push;        /* push position */
-    u32 cursor_pop;         /* pop position */
     u32 cursor_scan;        /* dirty chunk scanner */
-    chunk_scheduler_budget budget;
-    fsl_mem_handle schedule;
-    hhc_chunk **p;        /* cached pointer from `schedule` */
-}; /* hhc_chunk_scheduler */
+    fsl_mem_handle handle;
+    hhc_chunk_mesh *p;      /* cached pointer from `handle` */
+} hhc_chunk_draw;
 
 /*!
  *  @brief chunk gizmo render buffer data for chunk colors.
@@ -231,7 +240,6 @@ typedef struct hhc_chunk_gizmo
 
 extern hhc_chunk_table chunk_tab;
 extern hhc_chunk_order chunk_order;
-extern hhc_chunk_scheduler chunk_sched[CHUNK_SCHEDULERS_MAX];
 
 /*!
  *  @brief buffer data for opaque chunk colors.
