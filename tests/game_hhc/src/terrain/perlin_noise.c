@@ -5,6 +5,7 @@
 
 #include "deps/fossil/h/dir.h"
 
+#include "../h/common.h"
 #include "../h/diagnostics.h"
 #include "../h/dir.h"
 
@@ -26,7 +27,7 @@ u32 rand_init(void)
                 "rand_init().RAND_TAB") != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    snprintf(path, FSL_PATH_CAP, "%slookup_rand_tab.bin", DIR_ROOT[DIR_LOOKUPS]);
+    snprintf(path, FSL_PATH_CAP, "%s" GAME_FILE_NAME_LOOKUP_RAND_TAB, DIR_ROOT[DIR_LOOKUPS]);
 
     if (fsl_is_file_exists(path, FALSE) == FSL_ERR_SUCCESS)
     {
@@ -51,7 +52,7 @@ u32 rand_init(void)
             goto cleanup;
 
         LOGSUCCESS(FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("`RAND_TAB` lookup '%s' Exported\n", path));
+                fsl_logger_stringf("`RAND_TAB` Lookup '%s' Exported\n", path));
     }
 
 

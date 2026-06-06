@@ -1,4 +1,4 @@
-#include "../../fossil/deps/fossil/fossil_engine.h"
+#include "../../../fossil/deps/fossil/fossil_engine.h"
 
 fsl_key_bind bind_quit = {0};
 

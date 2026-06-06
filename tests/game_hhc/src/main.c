@@ -151,7 +151,8 @@ static u32 settings_init(void)
     settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
 
     settings.chunk_buf_layer =
-        settings.chunk_buf_diameter * settings.chunk_buf_diameter;
+        settings.chunk_buf_diameter *
+        settings.chunk_buf_diameter;
 
     settings.chunk_buf_volume =
         settings.chunk_buf_diameter *
@@ -532,7 +533,7 @@ static void draw_everything(void)
     else
         glUniform1f(uniform.voxel.opacity, 1.0f);
 
-    cursor = &chunk_order.p[chunks_max[settings.render_distance] - 1];
+    cursor = &chunk_order.p[chunk_order.len[settings.render_distance] - 1];
     for (; cursor >= chunk_order.p; --cursor)
     {
         ch = **cursor;
@@ -842,7 +843,7 @@ static void draw_everything(void)
 
                     chunk_sched[2].count, chunk_sched[2].len,
                     chunk_sched[2].cursor_pop, chunk_sched[2].cursor_push,
-                    chunks_max[settings.render_distance]),
+                    chunk_order.len[settings.render_distance]),
                 render->size.x - SET_MARGIN, SET_MARGIN,
                 FSL_TEXT_ALIGN_RIGHT, 0, 0,
                 COLOR_TEXT_DEFAULT);

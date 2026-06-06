@@ -172,6 +172,25 @@ typedef struct hhc_chunk_order
 {
     fsl_mem_handle handle;
     hhc_chunk ***p;
+
+    /*!
+     *  @brief look-up table to reduce redundant checking of untouched indices of @ref chunk_tab
+     *  and @ref chunk_order.
+     *
+     *  1-based indexing, so to use render-distance as an index.
+     *
+     *  the sphere of chunks around @ref chunk_tab center are the only chunks that ever
+     *  get processed, and since @ref chunk_order is a look-up that orders @ref chunk_tab
+     *  addresses by their distance from that table's center, it becomes easy to iterate
+     *  from @ref chunk_order.p[0] to @ref chunk_order.p[chunk_order.len[render_distance]]
+     *  and get exactly that sphere.
+     *
+     *  @remark index 0 of this array is always 0 since render distance of 0 is not
+     *  possible (it's possible, but goofy).
+     *
+     *  @remark read-only, initialized internally in @ref chunking_init().
+     */
+    u32 len[SET_RENDER_DISTANCE_MAX + 1];
 } hhc_chunk_order;
 
 /*!
@@ -209,23 +228,6 @@ typedef struct hhc_chunk_gizmo
 
 #define GET_BLOCK_ID(block)     (block & MASK_BLOCK_ID)
 #define SET_BLOCK_ID(block, id) (block = (block & ~MASK_BLOCK_ID) | id)
-
-/*!
- *  @brief look-up table to reduce redundant checking of untouched indices of @ref chunk_buf.
- *
- *  1-based indexing, so to use render-distance as an index.
- *
- *  the sphere of chunks around @ref chunk_tab center are the only chunks that ever get processed,
- *  and since @ref chunk_order is a look-up that orders @ref chunk_tab addresses by
- *  distance from that table's center, it becomes easy to iterate from @ref chunk_order[0]
- *  to @ref chunk_order[chunks_max[render_distance]] and get exactly that sphere.
- *
- *  @remark index 0 of this array is always 0 since render distance of 0 is not
- *  possible (it's possible, but goofy).
- *
- *  @remark read-only, initialized internally in @ref chunking_init().
- */
-extern u64 chunks_max[CHUNK_BUF_RADIUS_MAX + 1];
 
 extern hhc_chunk_table chunk_tab;
 extern hhc_chunk_order chunk_order;
@@ -301,6 +303,8 @@ u32 *get_block_resolved(hhc_chunk *ch, i32 x, i32 y, i32 z);
 
 /*!
  *  @brief get chunk relative to position.
+ *
+ *  @remark this function breaks at render-distance of 1.
  *
  *  @return chunk at index if `x`, `y` and `z` are within chunk bounds and
  *  return the correct neighboring chunk otherwise.

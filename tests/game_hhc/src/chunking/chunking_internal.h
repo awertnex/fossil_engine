@@ -1,6 +1,11 @@
 #ifndef HHC_CHUNKING_INTERNAL_H
 #define HHC_CHUNKING_INTERNAL_H
 
+#include "deps/fossil/common/types.h"
+#include "deps/fossil/math/vector.h"
+
+#include "../h/common.h"
+
 #include "chunk_scheduler.h"
 
 /* ---- section: definitions ------------------------------------------------ */
@@ -9,6 +14,11 @@
  *  @brief count of temporary static buffers in function @ref chunk_mesh_update_internal().
  */
 #define BLOCK_BUFFERS_MAX 2
+
+/*!
+ *  @remark an entry for each render distance, one u32 for offset and one for size.
+ */
+#define CHUNK_ORDER_LOOKUP_OFFSET_TABLE_SIZE ((SET_RENDER_DISTANCE_MAX + 1) * sizeof(u32) * 2)
 
 /* ---- section: block flag ------------------------------------------------- */
 
@@ -70,6 +80,24 @@ typedef struct hhc_chunk_buffer
 } hhc_chunk_buffer;
 
 /* ---- section: signatures ------------------------------------------------- */
+
+u32 chunks_max_init_internal(void);
+
+/*!
+ *  @brief initialize @ref chunk_order.
+ *
+ *  write lookup to disk, and load if exists.
+ *
+ *  format:
+ *      offset-table:   offset of each lookup into file, after compression, in bytes,
+ *      |               size of table is "(SET_RENDER_DISTANCE_MAX + 1) * 4 bytes * 2".
+ *      | - entries:    4 bytes for offset, 4 bytes for size, after compression, in bytes.
+ *
+ *      data:           a flat u32 array of index values.
+ *
+ *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
+ */
+u32 chunk_order_init_internal(void);
 
 /*!
  *  @brief get block faces based on neighboring blocks.
