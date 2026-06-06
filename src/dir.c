@@ -238,12 +238,13 @@ cleanup:
 
 fsl_buf fsl_get_dir_contents(const fsl_fs_path *path)
 {
+    fsl_buf nobuf = {0};
+
     str *dir_name_absolute = NULL;
     str dir_name_absolute_usable[FSL_PATH_CAP] = {0};
     str entry_name_full[FSL_PATH_CAP] = {0};
     DIR *dir = NULL;
     struct dirent *entry = {0};
-    fsl_buf nobuf = {0};
     fsl_buf contents = {0};
     u64 i = 0;
 
@@ -274,7 +275,19 @@ fsl_buf fsl_get_dir_contents(const fsl_fs_path *path)
     /* subtract for '.' and '..' */
     contents.memb -= 2;
 
-    if (!contents.memb || fsl_mem_alloc_buf(&contents, contents.memb,
+    if (!contents.memb)
+    {
+        closedir(dir);
+        if (dir_name_absolute)
+            fsl_mem_free((void*)&dir_name_absolute, strlen(dir_name_absolute),
+                    "fsl_get_dir_contents().dir_name_absolute");
+        fsl_mem_free_buf(&contents, "fsl_get_dir_contents().contents");
+
+        fsl_err = FSL_ERR_DIR_EMPTY;
+        return nobuf;
+    }
+
+    if (fsl_mem_alloc_buf(&contents, contents.memb,
                 FSL_ID_CAP, "fsl_get_dir_contents().contents") != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -307,8 +320,9 @@ cleanup:
     if (dir)
         closedir(dir);
 
-    fsl_mem_free((void*)&dir_name_absolute, strlen(dir_name_absolute),
-            "fsl_get_dir_contents().dir_name_absolute");
+    if (dir_name_absolute)
+        fsl_mem_free((void*)&dir_name_absolute, strlen(dir_name_absolute),
+                "fsl_get_dir_contents().dir_name_absolute");
     fsl_mem_free_buf(&contents, "fsl_get_dir_contents().contents");
     return nobuf;
 }
@@ -465,6 +479,7 @@ u32 fsl_copy_dir(const fsl_fs_path *src, const fsl_fs_path *dst, b8 contents_onl
     str in_dir[FSL_PATH_CAP] = {0};
     str out_dir[FSL_PATH_CAP] = {0};
     u64 i = 0;
+    b8 is_empty = FALSE;
     struct stat stats = {0};
     struct timespec ts[2] = {0};
 
@@ -472,7 +487,9 @@ u32 fsl_copy_dir(const fsl_fs_path *src, const fsl_fs_path *dst, b8 contents_onl
         return fsl_err;
 
     dir_contents = fsl_get_dir_contents(src);
-    if (!dir_contents.loaded)
+    if (contents_only && (fsl_err == FSL_ERR_DIR_EMPTY || !dir_contents.loaded))
+        return fsl_err;
+    else if (fsl_err != FSL_ERR_SUCCESS && fsl_err != FSL_ERR_DIR_EMPTY)
         return fsl_err;
 
     snprintf(str_src, FSL_PATH_CAP, "%s", src);
@@ -490,23 +507,8 @@ u32 fsl_copy_dir(const fsl_fs_path *src, const fsl_fs_path *dst, b8 contents_onl
         fsl_posix_slash(str_dst);
         fsl_make_dir(str_dst);
     }
-    else fsl_make_dir(str_dst);
-
-    for (i = 0; i < dir_contents.memb; ++i)
-    {
-        snprintf(in_dir, FSL_PATH_CAP - 1, "%s%s", str_src, (str*)dir_contents.i[i]);
-        snprintf(out_dir, FSL_PATH_CAP - 1, "%s%s", str_dst, (str*)dir_contents.i[i]);
-
-        if (fsl_is_dir(in_dir) == FSL_ERR_SUCCESS)
-        {
-            fsl_copy_dir(in_dir, out_dir, TRUE);
-            continue;
-        }
-        fsl_copy_file(in_dir, out_dir);
-    }
-
-    LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_DIR_COPY(src, str_dst));
+    else
+        fsl_make_dir(str_dst);
 
     if (fsl_stat(str_src, &stats) == 0)
         fsl_chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
@@ -528,6 +530,22 @@ u32 fsl_copy_dir(const fsl_fs_path *src, const fsl_fs_path *dst, b8 contents_onl
     ts[0] = stats.st_atim;
     ts[1] = stats.st_mtim;
     utimensat(AT_FDCWD, str_dst, ts, 0);
+
+    for (i = 0; i < dir_contents.memb; ++i)
+    {
+        snprintf(in_dir, FSL_PATH_CAP, "%s%s", str_src, (str*)dir_contents.i[i]);
+        snprintf(out_dir, FSL_PATH_CAP, "%s%s", str_dst, (str*)dir_contents.i[i]);
+
+        if (fsl_is_dir(in_dir) == FSL_ERR_SUCCESS)
+        {
+            fsl_copy_dir(in_dir, out_dir, FALSE);
+            continue;
+        }
+        fsl_copy_file(in_dir, out_dir);
+    }
+
+    LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+            MSG_DIR_COPY(src, str_dst));
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;

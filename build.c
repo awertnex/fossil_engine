@@ -1,3 +1,5 @@
+#include "src/common/engine_info.h"
+
 #include "src/external/buildtool/buildtool.h"
 #include "src/h/buildtool_config.h"
 
