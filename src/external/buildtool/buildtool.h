@@ -26,6 +26,20 @@
 
 /* ---- section: changelog -------------------------------------------------- */
 
+/*  v1.8.5 (2026 06 07):
+ *      - (2026 06 07): tidy code-base.
+ *      - (2026 06 07): change all "_<name>" symbol names to "<name>_internal".
+ *      - (2026 06 07): change type `_buf` to `bt_buf`.
+ *      - (2026 06 07): change `printf()` calls to `fprintf()` calls and print
+ *                      everything to `stderr`.
+ *      - (2026 06 07): make function `copy_dir()` copy empty directories.
+ *      - (2026 06 07): remove headers 'limits.h' and 'linux/limits.h',
+ *                      use new limits `NAME_CAP` and `PATH_CAP` instead.
+ *      - (2026 06 07): make function `build_init()` copy all arguments passed
+ *                      so the build command can survive self-rebuild.
+ *      - (2026 06 07): first stable version.
+ */
+
 /*  v1.8.4-beta (2026 04 29):
  *      - (2026 04 29): Add debug mode for buildtool (via command "btdebug")
  */
@@ -185,7 +199,7 @@
  *          if (build_init(argc, argv, "build.c", "build") != 0)
  *              cmd_fail(NULL); // free resources and return error code
  *
- *          cmd_push(NULL, // NULL to use internal cmd `_cmd`
+ *          cmd_push(NULL, // NULL to use internal cmd `cmd_internal`
  *                  "gcc");
  *          cmd_push(NULL, "examples/example2_main.c");
  *          cmd_push(NULL, "examples/example2_util.c");
@@ -193,7 +207,7 @@
  *          cmd_push(NULL, "example2");
  *          cmd_ready(NULL); // finalize command (important for configuring based on platform).
  *
- *          if (exec(&_cmd, "example2_build()._cmd") != 0)
+ *          if (exec(&cmd_internal, "example2_build().cmd_internal") != 0)
  *              cmd_fail(NULL);
  *
  *          cmd_free(NULL); // (NULL to free internal resources)
@@ -217,7 +231,7 @@
  *  - build.c: -----------------------------------------------------------------
  *      #include "buildtool/buildtool.h"
  *
- *      _buf cmd = {0}; // the command to execute
+ *      bt_buf cmd = {0}; // the command to execute
  *
  *      int main(int argc, char **argv)
  *      {
@@ -275,8 +289,8 @@
 
 #define BUILDTOOL_VERSION_MAJOR 1
 #define BUILDTOOL_VERSION_MINOR 8
-#define BUILDTOOL_VERSION_PATCH 4
-#define BUILDTOOL_VERSION_BUILD BUILDTOOL_VERSION_BETA
+#define BUILDTOOL_VERSION_PATCH 5
+#define BUILDTOOL_VERSION_BUILD BUILDTOOL_VERSION_STABLE
 
 #define COMPILER "cc"EXE
 #define CMD_MEMB 64
@@ -306,14 +320,14 @@ static str str_build_src[CMD_SIZE] = {0};
 static str str_build_bin[CMD_SIZE] = {0};
 static str str_build_bin_new[CMD_SIZE] = {0};
 static str str_build_bin_old[CMD_SIZE] = {0};
-static _buf _cmd = {0};
-static _buf args = {0};
+static bt_buf cmd_internal = {0};
+static bt_buf args = {0};
 
 /* ---- section: signatures ------------------------------------------------- */
 
 /*! @brief initialize build.
  *
- *  - allocate resources for @ref _cmd and other internals.
+ *  - allocate resources for @ref cmd_internal and other internals.
  *  - parse commands in `argv`, with no particular order:
  *      -v, --version   show version and exit.
  *      help            show help and exit.
@@ -357,45 +371,45 @@ static u32 cmd_exec(u64 n, ...);
 
 /*! @brief allocate resources for `cmd` if not initialized.
  *
- *  @param cmd cmd to initialize, if `NULL`, @ref _cmd is used.
+ *  @param cmd cmd to initialize, if `NULL`, @ref cmd_internal is used.
  */
-static void cmd_init(_buf *cmd);
+static void cmd_init(bt_buf *cmd);
 
 /*! @brief push arguments to the build command.
  *
- *  @param cmd cmd to push to, if `NULL`, @ref _cmd is used.
+ *  @param cmd cmd to push to, if `NULL`, @ref cmd_internal is used.
  *
  *  @remark `cmd` will be initialized if it isn't.
  */
-static void cmd_push(_buf *cmd, const str *string);
+static void cmd_push(bt_buf *cmd, const str *string);
 
 /*! @brief finalize build command for execution.
  *
- *  @param cmd cmd to finalize, if `NULL`, @ref _cmd is used.
+ *  @param cmd cmd to finalize, if `NULL`, @ref cmd_internal is used.
  *
  *  @remark must be called after loading `cmd` with all arguments and before @ref exec().
  */
-static void cmd_ready(_buf *cmd);
+static void cmd_ready(bt_buf *cmd);
 
-static void cmd_free(_buf *cmd);
+static void cmd_free(bt_buf *cmd);
 
 /*! @remark can force-terminate process.
  *
- *  @param cmd cmd to show, if `NULL`, @ref _cmd is used.
+ *  @param cmd cmd to show, if `NULL`, @ref cmd_internal is used.
  */
-static void cmd_fail(_buf *cmd);
+static void cmd_fail(bt_buf *cmd);
 
 /*! @brief show build command in list format.
  *
- *  @param cmd cmd to show, if `NULL`, @ref _cmd is used.
+ *  @param cmd cmd to show, if `NULL`, @ref cmd_internal is used.
  */
-static void cmd_show(_buf *cmd);
+static void cmd_show(bt_buf *cmd);
 
 /*! @brief show build command in raw format.
  *
- *  @param cmd cmd to show, if `NULL`, @ref _cmd is used.
+ *  @param cmd cmd to show, if `NULL`, @ref cmd_internal is used.
  */
-static void cmd_raw(_buf *cmd);
+static void cmd_raw(bt_buf *cmd);
 
 static void help(void);
 static void print_version(void);
@@ -404,6 +418,8 @@ static void print_version(void);
 
 u32 build_init(int argc, char **argv, const str *build_src_name, const str *build_bin_name)
 {
+    u32 i = 0;
+
     if (find_token("help", argc, argv))
         help();
 
@@ -420,10 +436,16 @@ u32 build_init(int argc, char **argv, const str *build_src_name, const str *buil
         change_dir(DIR_BUILDTOOL_BIN_ROOT);
     }
 
-    cmd_push(&args, argv[0]);
+    for (i = 0; i < argc; ++i)
+        cmd_push(&args, argv[i]);
+    cmd_ready(&args);
 
-    if (find_token("show", argc, argv)) flag |= FLAG_CMD_SHOW;
-    if (find_token("raw", argc, argv)) flag |= FLAG_CMD_RAW;
+    if (find_token("show", argc, argv))
+        flag |= FLAG_CMD_SHOW;
+
+    if (find_token("raw", argc, argv))
+        flag |= FLAG_CMD_RAW;
+
     if (find_token("btdebug", argc, argv))
     {
         flag |= FLAG_SELF_BUILD_DEBUG;
@@ -440,21 +462,21 @@ u32 build_init(int argc, char **argv, const str *build_src_name, const str *buil
     if (flag & FLAG_SELF_BUILD_DEBUG || find_token("self", argc, argv))
     {
         LOGINFO(FALSE,
-                logger_stringf("%s\n", "Rebuilding Self.."));
+                "Rebuilding Self..\n");
         self_rebuild((char**)args.i, FALSE);
     }
 
     if (STD != 89)
     {
         LOGINFO(FALSE,
-                logger_stringf("%s\n", "Rebuilding Self With -std=c89.."));
+                "Rebuilding Self With -std=c89..\n");
         self_rebuild((char**)args.i, TRUE);
     }
 
     if (is_build_source_changed() == ERR_SUCCESS)
     {
         LOGINFO(FALSE,
-                logger_stringf("%s\n", "Rebuilding Self.."));
+                "Rebuilding Self..\n");
         self_rebuild((char**)args.i, TRUE);
     }
 
@@ -474,7 +496,7 @@ u32 is_build_source_changed(void)
     else
     {
         LOGERROR(ERR_FILE_NOT_FOUND, FALSE,
-                logger_stringf("%s\n", "Build Source File Not Found"));
+                "Build Source File Not Found\n");
         return build_err;
     }
 
@@ -483,7 +505,7 @@ u32 is_build_source_changed(void)
     else
     {
         LOGERROR(ERR_FILE_NOT_FOUND, FALSE,
-                logger_stringf("%s\n", "File 'build" EXE "' Not Found"));
+                "File 'build"EXE"' Not Found\n");
         return build_err;
     }
 
@@ -496,26 +518,26 @@ u32 is_build_source_changed(void)
 
 void self_rebuild(char **argv, b8 should_rebuild)
 {
-    cmd_push(&_cmd, COMPILER);
-    cmd_push(&_cmd, "-std=c89");
-    cmd_push(&_cmd, stringf("-ffile-prefix-map=%s=", DIR_BUILDTOOL_BIN_ROOT));
+    cmd_push(&cmd_internal, COMPILER);
+    cmd_push(&cmd_internal, "-std=c89");
+    cmd_push(&cmd_internal, stringf("-ffile-prefix-map=%s=", DIR_BUILDTOOL_BIN_ROOT));
     if (flag & FLAG_SELF_BUILD_DEBUG)
     {
-        cmd_push(&_cmd, "-Wall");
-        cmd_push(&_cmd, "-Wextra");
-        cmd_push(&_cmd, "-Wpedantic");
-        cmd_push(&_cmd, "-Wformat-truncation=0");
-        cmd_push(&_cmd, "-ggdb");
+        cmd_push(&cmd_internal, "-Wall");
+        cmd_push(&cmd_internal, "-Wextra");
+        cmd_push(&cmd_internal, "-Wpedantic");
+        cmd_push(&cmd_internal, "-Wformat-truncation=0");
+        cmd_push(&cmd_internal, "-ggdb");
     }
-    cmd_push(&_cmd, str_build_src);
-    cmd_push(&_cmd, "-o");
-    cmd_push(&_cmd, str_build_bin_new);
-    cmd_ready(&_cmd);
+    cmd_push(&cmd_internal, str_build_src);
+    cmd_push(&cmd_internal, "-o");
+    cmd_push(&cmd_internal, str_build_bin_new);
+    cmd_ready(&cmd_internal);
 
-    if (exec(&_cmd, "self_rebuild()") == ERR_SUCCESS)
+    if (exec(&cmd_internal, "self_rebuild()") == ERR_SUCCESS)
     {
         LOGSUCCESS(FALSE,
-                logger_stringf("%s\n", "Self Rebuild Success"));
+                "Self Rebuild Success\n");
         rename(str_build_bin, str_build_bin_old);
         rename(str_build_bin_new, str_build_bin);
         remove(str_build_bin_old);
@@ -524,24 +546,24 @@ void self_rebuild(char **argv, b8 should_rebuild)
         {
             execvp(argv[0], (str *const *)argv);
             LOGFATAL(ERR_EXECVP_FAIL, FALSE,
-                    logger_stringf("%s\n", "'build" EXE "' Failed, Process Aborted"));
-            cmd_fail(&_cmd);
+                    "'build"EXE"' Failed, Process Aborted\n");
+            cmd_fail(&cmd_internal);
         }
         else
         {
-            cmd_free(&_cmd);
+            cmd_free(&cmd_internal);
             _exit(ERR_SUCCESS);
         }
     }
 
     LOGFATAL(build_err, FALSE,
-            logger_stringf("%s\n", "Self-Rebuild Failed, Process Aborted"));
-    cmd_fail(&_cmd);
+            "Self-Rebuild Failed, Process Aborted\n");
+    cmd_fail(&cmd_internal);
 }
 
 u32 cmd_exec(u64 n, ...)
 {
-    _buf cmd = {0};
+    bt_buf cmd = {0};
     __builtin_va_list va;
     u64 i = 0;
     str *temp = NULL;
@@ -550,19 +572,23 @@ u32 cmd_exec(u64 n, ...)
 
     va_start(va, n);
     if (n)
+    {
         for (i = 0; i < n; ++i)
         {
             temp = va_arg(va, str *);
             if (temp == NULL) break;
             cmd_push(&cmd, temp);
         }
+    }
     else
+    {
         for (;;)
         {
             temp = va_arg(va, str *);
             if (temp == NULL) break;
             cmd_push(&cmd, temp);
         }
+    }
     va_end(va);
 
     cmd_ready(&cmd);
@@ -582,12 +608,12 @@ cleanup:
     return build_err;
 }
 
-void cmd_init(_buf *cmd)
+void cmd_init(bt_buf *cmd)
 {
     if (!cmd)
     {
         LOGFATAL(ERR_POINTER_NULL, TRUE,
-                logger_stringf("%s\n", "Failed to Initialize 'cmd', Pointer NULL, Process Aborted\n"));
+                "Failed to Initialize 'cmd', Pointer NULL, Process Aborted\n");
         cmd_fail(cmd);
     }
 
@@ -598,61 +624,66 @@ void cmd_init(_buf *cmd)
         cmd_fail(cmd);
 }
 
-void cmd_push(_buf *cmd, const str *string)
+void cmd_push(bt_buf *cmd, const str *string)
 {
-    _buf *_cmdp = cmd;
-    if (!cmd)
-        _cmdp = &_cmd;
+    bt_buf *cmdp = cmd;
 
-    cmd_init(_cmdp);
+    if (!cmd)
+        cmdp = &cmd_internal;
+
+    cmd_init(cmdp);
 
     if (!string || !string[0])
         return;
 
-    if (!_cmdp->loaded && mem_alloc_buf(_cmdp, CMD_MEMB, CMD_SIZE, "cmd_push()._cmdp") != ERR_SUCCESS)
-        cmd_fail(_cmdp);
+    if (!cmdp->loaded && mem_alloc_buf(cmdp, CMD_MEMB, CMD_SIZE, "cmd_push().cmdp") != ERR_SUCCESS)
+        cmd_fail(cmdp);
 
-    if (_cmdp->cursor >= _cmdp->memb)
+    if (cmdp->cursor >= cmdp->memb)
     {
         LOGERROR(ERR_BUFFER_FULL, FALSE,
-                logger_stringf("%s\n", "cmd Full"));
+                "cmd Full\n");
         return;
     }
 
-    if (strlen(string) >= _cmdp->size)
+    if (strlen(string) >= cmdp->size)
     {
         LOGERROR(ERR_STRING_TOO_LONG, FALSE,
-                logger_stringf("Failed to Push String '%s' to cmd.i[%"PRIu64"], String Too Long\n", string, _cmdp->cursor));
+                logger_stringf("Failed to Push String '%s' to cmd.i[%"PRIu64"], String Too Long\n", string, cmdp->cursor));
         return;
     }
 
     LOGTRACE(FALSE,
-            logger_stringf("Pushing String '%s' to cmd.i[%"PRIu64"]..\n", string, _cmdp->cursor));
-    strncpy(_cmdp->i[_cmdp->cursor++], string, CMD_SIZE);
+            logger_stringf("Pushing String '%s' to cmd.i[%"PRIu64"]..\n", string, cmdp->cursor));
+    strncpy(cmdp->i[cmdp->cursor++], string, CMD_SIZE);
 }
 
-void cmd_ready(_buf *cmd)
+void cmd_ready(bt_buf *cmd)
 {
-    _buf *_cmdp = cmd;
-    if (!cmd)
-        _cmdp = &_cmd;
+    bt_buf *cmdp = cmd;
 
-#if PLATFORM_LINUX
-    _cmdp->i[_cmdp->cursor] = NULL;
+    if (!cmd)
+        cmdp = &cmd_internal;
+
+#if defined(PLATFORM_LINUX)
+    cmdp->i[cmdp->cursor] = NULL;
 #endif
 
-    if (flag & FLAG_CMD_SHOW) cmd_show(_cmdp);
-    if (flag & FLAG_CMD_RAW) cmd_raw(_cmdp);
+    if (flag & FLAG_CMD_SHOW)
+        cmd_show(cmdp);
+
+    if (flag & FLAG_CMD_RAW)
+        cmd_raw(cmdp);
 }
 
-void cmd_free(_buf *cmd)
+void cmd_free(bt_buf *cmd)
 {
     if (!cmd)
     {
-        mem_free_buf(&_cmd, "cmd_free()._cmd");
+        mem_free_buf(&cmd_internal, "cmd_free().cmd_internal");
         mem_free_buf(&args, "cmd_free().args");
         mem_free((void*)&DIR_BUILDTOOL_BIN_ROOT, CMD_SIZE, "cmd_free().DIR_BUILDTOOL_BIN_ROOT");
-        _cmd.cursor = 0;
+        cmd_internal.cursor = 0;
         args.cursor = 0;
     }
     else
@@ -662,64 +693,69 @@ void cmd_free(_buf *cmd)
     }
 }
 
-void cmd_fail(_buf *cmd)
+void cmd_fail(bt_buf *cmd)
 {
-    _buf *_cmdp = cmd;
-    if (!_cmdp)
-        _cmdp = &_cmd;
+    bt_buf *cmdp = cmd;
 
-    if (_cmdp)
+    if (!cmdp)
+        cmdp = &cmd_internal;
+
+    if (cmdp)
     {
-        if (flag & FLAG_CMD_SHOW) cmd_show(_cmdp);
-        if (flag & FLAG_CMD_RAW) cmd_raw(_cmdp);
+        if (flag & FLAG_CMD_SHOW)
+            cmd_show(cmdp);
+
+        if (flag & FLAG_CMD_RAW)
+            cmd_raw(cmdp);
     }
 
-    cmd_free(_cmdp);
+    cmd_free(cmdp);
     _exit(build_err);
 }
 
-void cmd_show(_buf *cmd)
+void cmd_show(bt_buf *cmd)
 {
     u32 i = 0;
-    _buf *_cmdp = cmd;
+    bt_buf *cmdp = cmd;
+
     if (!cmd)
-        _cmdp = &_cmd;
+        cmdp = &cmd_internal;
 
     flag &= ~FLAG_CMD_SHOW;
 
-    printf("\nCMD:\n");
+    fprintf(stderr, "\nCMD:\n");
     for (i = 0; i < CMD_MEMB; ++i)
     {
-        if (!_cmdp->i[i]) break;
-        printf("    %.3d: %s\n", i, (str*)_cmdp->i[i]);
+        if (!cmdp->i[i]) break;
+        fprintf(stderr, "    %.3d: %s\n", i, (str*)cmdp->i[i]);
     }
 
     if (!(flag & FLAG_CMD_RAW))
-        putchar('\n');
+        fputc('\n', stderr);
 }
 
-void cmd_raw(_buf *cmd)
+void cmd_raw(bt_buf *cmd)
 {
     u32 i = 0;
-    _buf *_cmdp = cmd;
+    bt_buf *cmdp = cmd;
     if (!cmd)
-        _cmdp = &_cmd;
+        cmdp = &cmd_internal;
 
     flag &= ~FLAG_CMD_RAW;
 
-    printf("\nCMD RAW:\n");
+    fprintf(stderr, "\nCMD RAW:\n");
     for (i = 0; i < CMD_MEMB; ++i)
     {
-        if (!_cmdp->i[i]) break;
-        printf("%s ", (str*)_cmdp->i[i]);
+        if (!cmdp->i[i]) break;
+        fprintf(stderr, "%s ", (str*)cmdp->i[i]);
     }
 
-    printf("%s", "\n\n");
+    fprintf(stderr, "%s", "\n\n");
 }
 
 void help(void)
 {
-    printf("%s",
+    fprintf(stderr, "%s",
             "Usage: ./build [options]...\n"
             "Options:\n"
             "    help       print this help\n"
@@ -732,7 +768,7 @@ void help(void)
 
 void print_version(void)
 {
-    printf("buildtool - v%u.%u.%u%s\n",
+    fprintf(stderr, "buildtool - v%u.%u.%u%s\n",
             BUILDTOOL_VERSION_MAJOR,
             BUILDTOOL_VERSION_MINOR,
             BUILDTOOL_VERSION_PATCH,

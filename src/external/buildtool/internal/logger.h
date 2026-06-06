@@ -43,46 +43,46 @@ enum log_level
 }; /* log_level */
 
 #define LOGFATAL(err, verbose, message) \
-    _log_output(err, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_FATAL, message)
+    log_output_internal(err, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_FATAL, message)
 
 #define LOGERROR(err, verbose, message) \
-    _log_output(err, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_ERROR, message)
+    log_output_internal(err, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_ERROR, message)
 
 #define LOGWARNING(err, verbose, message) \
-    _log_output(err, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_WARNING, message)
+    log_output_internal(err, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_WARNING, message)
 
 #define LOGSUCCESS(verbose, message) \
-    _log_output(ERR_SUCCESS, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_SUCCESS, message)
+    log_output_internal(ERR_SUCCESS, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_SUCCESS, message)
 
 #define LOGINFO(verbose, message) \
-    _log_output(ERR_SUCCESS, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_INFO, message)
+    log_output_internal(ERR_SUCCESS, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_INFO, message)
 
 #define LOGDEBUG(verbose, message) \
-    _log_output(ERR_SUCCESS, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_DEBUG, message)
+    log_output_internal(ERR_SUCCESS, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_DEBUG, message)
 
 #define LOGTRACE(verbose, message) \
-    _log_output(ERR_SUCCESS, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_TRACE, message)
+    log_output_internal(ERR_SUCCESS, verbose, __BASE_FILE__, __LINE__, LOGLEVEL_TRACE, message)
 
 #define LOGFATALEX(err, verbose, file, line, message) \
-    _log_output(err, verbose, file, line, LOGLEVEL_FATAL, message)
+    log_output_internal(err, verbose, file, line, LOGLEVEL_FATAL, message)
 
 #define LOGERROREX(err, verbose, file, line, message) \
-    _log_output(err, verbose, file, line, LOGLEVEL_ERROR, message)
+    log_output_internal(err, verbose, file, line, LOGLEVEL_ERROR, message)
 
 #define LOGWARNINGEX(err, verbose, file, line, message) \
-    _log_output(err, verbose, file, line, LOGLEVEL_WARNING, message)
+    log_output_internal(err, verbose, file, line, LOGLEVEL_WARNING, message)
 
 #define LOGSUCCESSEX(verbose, file, line, message) \
-    _log_output(ERR_SUCCESS, verbose, file, line, LOGLEVEL_SUCCESS, message)
+    log_output_internal(ERR_SUCCESS, verbose, file, line, LOGLEVEL_SUCCESS, message)
 
 #define LOGINFOEX(verbose, file, line, message) \
-    _log_output(ERR_SUCCESS, verbose, file, line, LOGLEVEL_INFO, message)
+    log_output_internal(ERR_SUCCESS, verbose, file, line, LOGLEVEL_INFO, message)
 
 #define LOGDEBUGEX(verbose, file, line, message) \
-    _log_output(ERR_SUCCESS, verbose, file, line, LOGLEVEL_DEBUG, message)
+    log_output_internal(ERR_SUCCESS, verbose, file, line, LOGLEVEL_DEBUG, message)
 
 #define LOGTRACEEX(verbose, file, line, message) \
-    _log_output(ERR_SUCCESS, verbose, file, line, LOGLEVEL_TRACE, message)
+    log_output_internal(ERR_SUCCESS, verbose, file, line, LOGLEVEL_TRACE, message)
 
 /* ---- section: declarations ----------------------------------------------- */
 
@@ -115,18 +115,18 @@ static str *esc_code_color[LOGLEVEL_COUNT] =
 
 /*! -- INTERNAL USE ONLY --;
  */
-extern void _log_output(u32 error_code, b8 verbose, const str *file, u64 line, u8 level, const str *message);
+extern void log_output_internal(u32 error_code, b8 verbose, const str *file, u64 line, u8 level, const str *message);
 
 /*! -- INTERNAL USE ONLY --;
  */
-extern void _get_log_str(const str *str_in, str *str_out, b8 verbose,
+extern void get_log_str_internal(const str *str_in, str *str_out, b8 verbose,
         u8 level, u32 error_code, const str *file, u64 line);
 
 extern str *logger_stringf(const str *format, ...);
 
 /* ---- section: implementation --------------------------------------------- */
 
-void _log_output(u32 error_code, b8 verbose, const str *file, u64 line, u8 level, const str *message)
+void log_output_internal(u32 error_code, b8 verbose, const str *file, u64 line, u8 level, const str *message)
 {
     str str_in[STRING_MAX] = {0};
     str str_out[OUT_STRING_MAX] = {0};
@@ -136,11 +136,11 @@ void _log_output(u32 error_code, b8 verbose, const str *file, u64 line, u8 level
     if (level > log_level_max) return;
 
     snprintf(str_in, STRING_MAX, "%s", message);
-    _get_log_str(str_in, str_out, verbose, level, error_code, file, line);
+    get_log_str_internal(str_in, str_out, verbose, level, error_code, file, line);
     fprintf(stderr, "%s", str_out);
 }
 
-void _get_log_str(const str *str_in, str *str_out, b8 verbose,
+void get_log_str_internal(const str *str_in, str *str_out, b8 verbose,
         u8 level, u32 error_code, const str *file, u64 line)
 {
     str str_time[TIME_STRING_MAX] = {0};

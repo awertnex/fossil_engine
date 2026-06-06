@@ -14,6 +14,7 @@
 ## v0.9.0-beta (2026 05 31)
 
 #### changes
+- (2026 06 07): added copying of empty directories to function `fsl_copy_dir()`.
 - (2026 05 29): added math types `angle_f32` and `angle_f64` to store an angle
                 along with its cached sine, cosine and tangent values, and
                 functions `fsl_angle_f32()` and `fsl_angle_f64()` to calculate

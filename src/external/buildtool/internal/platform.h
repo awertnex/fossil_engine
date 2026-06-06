@@ -29,7 +29,7 @@
 #include "logger.h"
 #include "memory.h"
 
-#if PLATFORM_LINUX
+#if defined(PLATFORM_LINUX)
 #   include "platform_linux.h"
 #else
 #   include "platform_win.h"
@@ -89,9 +89,9 @@ extern u64 get_file_contents(const str *name, void **dst, u64 size, b8 terminate
 
 /*! @brief get directory entries at `name`.
  *
- *  @return `(_buf){0}` on failure and @ref build_err is set accordingly.
+ *  @return `(bt_buf){0}` on failure and @ref build_err is set accordingly.
  */
-extern _buf get_dir_contents(const str *name);
+extern bt_buf get_dir_contents(const str *name);
 
 /*! @brief copy `src` into `dst`, preserve permissions and modification time.
  *
@@ -130,7 +130,7 @@ extern str *get_path_absolute(const str *name);
  *
  *  @return non-zero on failure and @ref build_err is set accordingly.
  */
-extern u32 _get_path_absolute(const str *path, str *path_real);
+extern u32 get_path_absolute_internal(const str *path, str *path_real);
 
 /*! @brief get calloc'd string of executable's path, slash (`/`) and null (`\0`) terminated.
  *
@@ -146,7 +146,7 @@ extern str *get_path_bin_root(void);
  *
  *  @return non-zero on failure and @ref build_err is set accordingly.
  */
-extern u32 _get_path_bin_root(str *path);
+extern u32 get_path_bin_root_internal(str *path);
 
 /*! @brief execute command in a separate child process (based on @ref execvp()).
  *
@@ -157,7 +157,7 @@ extern u32 _get_path_bin_root(str *path);
  *
  *  @return non-zero on failure and @ref build_err is set accordingly.
  */
-extern u32 exec(_buf *cmd, str *cmd_name);
+extern u32 exec(bt_buf *cmd, str *cmd_name);
 
 /*! @brief append @ref SLASH_NATIVE onto `path` if `path` not ending in @ref SLASH_NATIVE, null (`\n`) terminated.
  *
@@ -350,30 +350,31 @@ cleanup:
     return 0;
 }
 
-_buf get_dir_contents(const str *name)
+bt_buf get_dir_contents(const str *name)
 {
+    bt_buf nobuf = {0};
     str *dir_name_absolute = NULL;
-    str dir_name_absolute_usable[PATH_MAX] = {0};
-    str entry_name_full[PATH_MAX] = {0};
+    str dir_name_absolute_usable[PATH_CAP] = {0};
+    str entry_name_full[PATH_CAP] = {0};
     DIR *dir = NULL;
     struct dirent *entry = {0};
-    _buf contents = {0};
+    bt_buf contents = {0};
     u64 i = 0;
 
     if (!name)
     {
         build_err = ERR_POINTER_NULL;
-        return contents;
+        return nobuf;
     }
 
     if (is_dir_exists(name, TRUE) != ERR_SUCCESS)
-        return contents;
+        return nobuf;
 
     dir_name_absolute = get_path_absolute(name);
     if (!dir_name_absolute)
         goto cleanup;
 
-    snprintf(dir_name_absolute_usable, PATH_MAX, "%s", dir_name_absolute);
+    snprintf(dir_name_absolute_usable, PATH_CAP, "%s", dir_name_absolute);
 
     dir = opendir(dir_name_absolute);
     if (!dir)
@@ -388,8 +389,20 @@ _buf get_dir_contents(const str *name)
     /* subtract for '.' and '..' */
     contents.memb -= 2;
 
-    if (!contents.memb || mem_alloc_buf(&contents, contents.memb,
-                NAME_MAX, "get_dir_contents().dir_contents") != ERR_SUCCESS)
+    if (!contents.memb)
+    {
+        closedir(dir);
+        if (dir_name_absolute)
+            mem_free((void*)&dir_name_absolute, strlen(dir_name_absolute),
+                    "get_dir_contents().dir_name_absolute");
+        mem_free_buf((void*)&contents, "get_dir_contents().dir_contents");
+
+        build_err = ERR_DIR_EMPTY;
+        return nobuf;
+    }
+
+    if (mem_alloc_buf(&contents, contents.memb,
+                ID_CAP, "get_dir_contents().dir_contents") != ERR_SUCCESS)
         goto cleanup;
 
     rewinddir(dir);
@@ -400,9 +413,9 @@ _buf get_dir_contents(const str *name)
                 !strncmp(entry->d_name, "..\0", 3))
             continue;
 
-        contents.i[i] = (u8*)contents.buf + i * NAME_MAX;
-        memcpy(contents.i[i], entry->d_name, NAME_MAX - 1);
-        snprintf(entry_name_full, PATH_MAX, "%s%s", dir_name_absolute_usable, entry->d_name);
+        contents.i[i] = (u8*)contents.buf + i * ID_CAP;
+        memcpy(contents.i[i], entry->d_name, ID_CAP - 1);
+        snprintf(entry_name_full, PATH_CAP, "%s%s", dir_name_absolute_usable, entry->d_name);
 
         if (is_dir(entry_name_full) == ERR_SUCCESS)
             check_slash(contents.i[i]);
@@ -418,17 +431,20 @@ _buf get_dir_contents(const str *name)
 
 cleanup:
 
-    if (dir) closedir(dir);
-    mem_free((void*)&dir_name_absolute, strlen(dir_name_absolute),
-            "get_dir_contents().dir_name_absolute");
+    if (dir)
+        closedir(dir);
+
+    if (dir_name_absolute)
+        mem_free((void*)&dir_name_absolute, strlen(dir_name_absolute),
+                "get_dir_contents().dir_name_absolute");
     mem_free_buf((void*)&contents, "get_dir_contents().dir_contents");
-    return contents;
+    return nobuf;
 }
 
 u32 copy_file(const str *src, const str *dst)
 {
-    str str_dst[PATH_MAX] = {0};
-    str str_lnk[PATH_MAX] = {0}; /* if is symlink, store symlink's link in this buffer */
+    str str_dst[PATH_CAP] = {0};
+    str str_lnk[PATH_CAP] = {0}; /* if is symlink, store symlink's link in this buffer */
     str *in_file = NULL;
     FILE *out_file = NULL;
     u64 len = 0;
@@ -439,12 +455,12 @@ u32 copy_file(const str *src, const str *dst)
     if (is_file_exists(src, TRUE) != ERR_SUCCESS)
             return build_err;
 
-    snprintf(str_dst, PATH_MAX, "%s", dst);
+    snprintf(str_dst, PATH_CAP, "%s", dst);
 
     if (is_dir(dst) == ERR_SUCCESS)
     {
         check_slash(str_dst);
-        get_base_name(src, str_dst + strlen(str_dst), PATH_MAX);
+        get_base_name(src, str_dst + strlen(str_dst), PATH_CAP);
         posix_slash(str_dst);
     }
 
@@ -481,21 +497,20 @@ u32 copy_file(const str *src, const str *dst)
             else
             {
                 LOGWARNING(ERR_FILE_STAT_FAIL, FALSE,
-                        logger_stringf("Failed to Copy File Permissions '%s' -> '%s', 'bt_stat()' Failed\n",
-                        src, str_dst));
+                        logger_stringf("Failed to Copy File Permissions '%s' -> '%s', 'bt_stat()' Failed\n", src, str_dst));
                 return build_err;
             }
             break;
 
         case FILE_TYPE_LNK:
-            if (readlink(src, str_lnk, PATH_MAX - 1) < 1)
+            if (readlink(src, str_lnk, PATH_CAP - 1) < 1)
             {
                 LOGERROR(ERR_FILE_OPEN_FAIL, FALSE,
                         logger_stringf("Failed to Copy Symlink '%s' -> '%s'\n", src, str_dst));
                 return build_err;
             }
 
-            str_lnk[strnlen(str_lnk, PATH_MAX - 1)] = '\0';
+            str_lnk[strnlen(str_lnk, PATH_CAP - 1)] = '\0';
 
             if (is_file_exists(str_dst, FALSE) == ERR_SUCCESS)
                 remove(str_dst);
@@ -510,8 +525,7 @@ u32 copy_file(const str *src, const str *dst)
             else
             {
                 LOGWARNING(ERR_FILE_STAT_FAIL, FALSE,
-                        logger_stringf("Failed to Copy File Permissions '%s' -> '%s', 'bt_stat()' Failed\n",
-                        src, str_dst));
+                        logger_stringf("Failed to Copy File Permissions '%s' -> '%s', 'bt_stat()' Failed\n", src, str_dst));
                 return build_err;
             }
             break;
@@ -537,11 +551,11 @@ u32 copy_file(const str *src, const str *dst)
 
 u32 copy_dir(const str *src, const str *dst, b8 contents_only)
 {
-    _buf dir_contents = {0};
-    str str_src[PATH_MAX] = {0};
-    str str_dst[PATH_MAX] = {0};
-    str in_dir[PATH_MAX] = {0};
-    str out_dir[PATH_MAX] = {0};
+    bt_buf dir_contents = {0};
+    str str_src[PATH_CAP] = {0};
+    str str_dst[PATH_CAP] = {0};
+    str in_dir[PATH_CAP] = {0};
+    str out_dir[PATH_CAP] = {0};
     u64 i = 0;
     struct stat stats = {0};
     struct timespec ts[2] = {0};
@@ -550,20 +564,22 @@ u32 copy_dir(const str *src, const str *dst, b8 contents_only)
         return build_err;
 
     dir_contents = get_dir_contents(src);
-    if (!dir_contents.loaded)
+    if (contents_only && (build_err == ERR_DIR_EMPTY || !dir_contents.loaded))
+        return build_err;
+    else if (build_err != ERR_SUCCESS && build_err != ERR_DIR_EMPTY)
         return build_err;
 
-    snprintf(str_src, PATH_MAX, "%s", src);
+    snprintf(str_src, PATH_CAP, "%s", src);
     check_slash(str_src);
     posix_slash(str_src);
 
-    snprintf(str_dst, PATH_MAX, "%s", dst);
+    snprintf(str_dst, PATH_CAP, "%s", dst);
     check_slash(str_dst);
     posix_slash(str_dst);
 
     if (is_dir_exists(str_dst, FALSE) == ERR_SUCCESS && !contents_only)
     {
-        get_base_name(str_src, str_dst + strlen(str_dst), PATH_MAX - strlen(str_dst));
+        get_base_name(str_src, str_dst + strlen(str_dst), PATH_CAP - strlen(str_dst));
         check_slash(str_dst);
         posix_slash(str_dst);
         make_dir(str_dst);
@@ -572,12 +588,12 @@ u32 copy_dir(const str *src, const str *dst, b8 contents_only)
 
     for (i = 0; i < dir_contents.memb; ++i)
     {
-        snprintf(in_dir, PATH_MAX - 1, "%s%s", str_src, (str*)dir_contents.i[i]);
-        snprintf(out_dir, PATH_MAX - 1, "%s%s", str_dst, (str*)dir_contents.i[i]);
+        snprintf(in_dir, PATH_CAP - 1, "%s%s", str_src, (str*)dir_contents.i[i]);
+        snprintf(out_dir, PATH_CAP - 1, "%s%s", str_dst, (str*)dir_contents.i[i]);
 
         if (is_dir(in_dir) == ERR_SUCCESS)
         {
-            copy_dir(in_dir, out_dir, TRUE);
+            copy_dir(in_dir, out_dir, FALSE);
             continue;
         }
         copy_file(in_dir, out_dir);
@@ -590,8 +606,7 @@ u32 copy_dir(const str *src, const str *dst, b8 contents_only)
         bt_chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
     else
         LOGWARNING(ERR_FILE_STAT_FAIL, FALSE,
-                logger_stringf("Failed to Copy Directory Permissions '%s' -> '%s', 'bt_stat()' Failed\n",
-                str_src, str_dst));
+                logger_stringf("Failed to Copy Directory Permissions '%s' -> '%s', 'bt_stat()' Failed\n", str_src, str_dst));
 
     if (stats.st_atim.tv_nsec == 0)
         stats.st_atim.tv_nsec = 1;
@@ -613,21 +628,21 @@ u32 copy_dir(const str *src, const str *dst, b8 contents_only)
 
 str *get_path_absolute(const str *name)
 {
-    str path_absolute[PATH_MAX] = {0};
+    str path_absolute[PATH_CAP] = {0};
     str *result = NULL;
     u64 len = 0;
 
-    if (strlen(name) >= PATH_MAX - 1)
+    if (strlen(name) >= PATH_CAP - 1)
     {
         LOGERROR(ERR_GET_PATH_ABSOLUTE_FAIL, TRUE,
-                logger_stringf("%s\n", "Failed to Get Absolute Path, Path Too Long"));
+                "Failed to Get Absolute Path, Path Too Long\n");
         return NULL;
     }
 
     if (is_dir_exists(name, TRUE) != ERR_SUCCESS)
         return NULL;
 
-    if (_get_path_absolute(name, path_absolute) != ERR_SUCCESS)
+    if (get_path_absolute_internal(name, path_absolute) != ERR_SUCCESS)
         return NULL;
 
     len = strlen(path_absolute) + 1;
@@ -645,16 +660,16 @@ str *get_path_absolute(const str *name)
 
 str *get_path_bin_root(void)
 {
-    str path_bin_root[PATH_MAX] = {0};
+    str path_bin_root[PATH_CAP] = {0};
     str *result = NULL;
     u64 len = 0;
     char *last_slash = NULL;
 
-    if (_get_path_bin_root(path_bin_root) != ERR_SUCCESS)
+    if (get_path_bin_root_internal(path_bin_root) != ERR_SUCCESS)
         return NULL;
 
     len = strlen(path_bin_root) + 1;
-    if (len >= PATH_MAX - 1)
+    if (len >= PATH_CAP - 1)
     {
         LOGFATAL(ERR_PATH_TOO_LONG, TRUE,
                 logger_stringf("Path Too Long '%s', Process Aborted\n", path_bin_root));
@@ -662,7 +677,7 @@ str *get_path_bin_root(void)
     }
 
     path_bin_root[len] = 0;
-    if (mem_alloc((void*)&result, PATH_MAX,
+    if (mem_alloc((void*)&result, PATH_CAP,
                 "get_path_bin_root().path_bin_root") != ERR_SUCCESS)
         return NULL;
 
@@ -689,7 +704,7 @@ void check_slash(str *path)
     }
 
     len = strlen(path);
-    if (len >= PATH_MAX - 1)
+    if (len >= PATH_CAP - 1)
     {
         build_err = ERR_PATH_TOO_LONG;
         return;
@@ -731,7 +746,7 @@ u32 get_base_name(const str *path, str *dst, u64 size)
 {
     i64 i = 0;
     u64 len = 0;
-    str path_resolved[PATH_MAX] = {0};
+    str path_resolved[PATH_CAP] = {0};
 
     if (size == 0)
     {
@@ -743,19 +758,19 @@ u32 get_base_name(const str *path, str *dst, u64 size)
     if (!path || !path[0] || !dst)
     {
         LOGERROR(ERR_POINTER_NULL, TRUE,
-                logger_stringf("%s\n", "Failed to Get Base Name, Pointer NULL"));
+                "Failed to Get Base Name, Pointer NULL\n");
         return build_err;
     }
 
     len = strlen(path);
-    if (len >= PATH_MAX - 1)
+    if (len >= PATH_CAP - 1)
     {
         LOGERROR(ERR_PATH_TOO_LONG, TRUE,
                 logger_stringf("Failed to Get Base Name of '%s', Path Too Long\n", path));
         return build_err;
     }
 
-    snprintf(path_resolved, PATH_MAX, "%s", path);
+    snprintf(path_resolved, PATH_CAP, "%s", path);
     posix_slash(path_resolved);
 
     i = (i64)len - 1;

@@ -7,7 +7,7 @@
 #define DIR_DEPS "deps/"
 #define DIR_DST "fossil/" /* your project name */
 
-_buf cmd = {0};
+bt_buf cmd = {0};
 
 static str str_cflags[][CMD_SIZE] =
 {

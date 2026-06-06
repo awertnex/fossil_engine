@@ -37,7 +37,7 @@
 
 /* ---- section: implementation --------------------------------------------- */
 
-u32 _get_path_absolute(const str *path, str *path_real)
+u32 get_path_absolute_internal(const str *path, str *path_real)
 {
     if (!realpath(path, path_real))
     {
@@ -49,22 +49,22 @@ u32 _get_path_absolute(const str *path, str *path_real)
     return build_err;
 }
 
-u32 _get_path_bin_root(str *path)
+u32 get_path_bin_root_internal(str *path)
 {
-    if (readlink("/proc/self/exe", path, PATH_MAX) < 1)
+    if (readlink("/proc/self/exe", path, PATH_CAP) < 1)
     {
         LOGFATAL(ERR_GET_PATH_BIN_ROOT_FAIL, FALSE,
-                logger_stringf("%s\n", "Failed 'get_path_bin_root()', Process Aborted"));
+                "Failed 'get_path_bin_root()', Process Aborted\n");
         return build_err;
     }
 
-    path[strnlen(path, PATH_MAX - 1)] = '\0';
+    path[strnlen(path, PATH_CAP - 1)] = '\0';
 
     build_err = ERR_SUCCESS;
     return build_err;
 }
 
-u32 exec(_buf *cmd, str *cmd_name)
+u32 exec(bt_buf *cmd, str *cmd_name)
 {
     pid_t pid = fork();
     int status, exit_code = 0, sig;

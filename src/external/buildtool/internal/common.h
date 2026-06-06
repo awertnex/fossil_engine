@@ -29,10 +29,7 @@
 /* ---- section: definitions ------------------------------------------------ */
 
 #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
-#   define NAME_MAX 255
-#   include <limits.h>
-
-#   define PLATFORM_WIN 1
+#   define PLATFORM_WIN
 #   define PLATFORM "win"
 #   define EXE ".exe"
 #   define RUNTIME_PATH "%CD%"
@@ -46,10 +43,9 @@
 #   define bt_chmod(name, n) _chmod(name, n)
 #elif defined(__linux__) || defined(__linux)
 #   define _GNU_SOURCE
-#   include <linux/limits.h>
 #   include <sys/time.h>
 
-#   define PLATFORM_LINUX 1
+#   define PLATFORM_LINUX
 #   define PLATFORM "linux"
 #   define EXE ""
 #   define RUNTIME_PATH "$ORIGIN"
@@ -110,7 +106,7 @@ typedef char        str;
 typedef uint8_t     b8;
 typedef uint32_t    b32;
 
-typedef struct _buf
+typedef struct bt_buf
 {
     b8 loaded;
     void **i;       /* members of `buf` */
@@ -118,7 +114,7 @@ typedef struct _buf
     u64 memb;       /* number of `i` members */
     u64 size;       /* size of each member in bytes */
     u64 cursor;     /* for iteration, optional */
-} _buf;
+} bt_buf;
 
 /* ---- section: definitions ------------------------------------------------ */
 
@@ -126,6 +122,8 @@ typedef struct _buf
 #define OUT_STRING_MAX  (STRING_MAX + 256)
 #define TIME_STRING_MAX 256
 #define STRINGF_BUFFERS_MAX 8
+#define ID_CAP          256
+#define PATH_CAP        4096
 
 enum file_type_index
 {
@@ -199,10 +197,10 @@ u64 find_token(str *arg, int argc, char **argv)
 void get_time_str(str *dst, const str *format)
 {
     struct timespec ts = {0};
-    struct tm *_tm = {0};
+    struct tm *time_metadata = {0};
     clock_gettime(CLOCK_REALTIME, &ts);
-    _tm = localtime(&ts.tv_sec);
-    strftime(dst, TIME_STRING_MAX, format, _tm);
+    time_metadata = localtime(&ts.tv_sec);
+    strftime(dst, TIME_STRING_MAX, format, time_metadata);
 }
 
 #endif /* BUILDTOOL_COMMON_H */

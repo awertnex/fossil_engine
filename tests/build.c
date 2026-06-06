@@ -30,7 +30,7 @@ typedef struct fsl_test_info
     u32 (*build_func)(int argc, char **argv);
 } fsl_test_info;
 
-_buf cmd = {0}; /* build cmd */
+bt_buf cmd = {0}; /* build cmd */
 
 u32 build_game(int argc, char **argv);
 u32 build_text_rendering(int argc, char **argv);
