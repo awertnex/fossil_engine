@@ -23,10 +23,11 @@
 #ifndef FSL_COMMON_H
 #define FSL_COMMON_H
 
-#include "engine_info.h"
+#include "api.h"
 #include "common_values.h"
 #include "config.h"
 #include "diagnostics.h"
+#include "engine_info.h"
 #include "limits.h"
 #include "session.h"
 #include "types.h"

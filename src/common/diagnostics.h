@@ -23,7 +23,7 @@
 #ifndef FSL_DIAGNOSTICS_H
 #define FSL_DIAGNOSTICS_H
 
-#include "engine_info.h"
+#include "api.h"
 #include "types.h"
 
 #define FSL_DIAGNOSTIC_COLOR_DEFAULT        0xecececff

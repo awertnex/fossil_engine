@@ -23,7 +23,7 @@
 #ifndef FSL_DIR_H
 #define FSL_DIR_H
 
-#include "../common/engine_info.h"
+#include "../common/api.h"
 #include "../common/types.h"
 
 enum fsl_file_type_index

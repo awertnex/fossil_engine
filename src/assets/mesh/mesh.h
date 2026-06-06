@@ -23,7 +23,7 @@
 #ifndef FSL_MESH_H
 #define FSL_MESH_H
 
-#include "../../common/engine_info.h"
+#include "../../common/api.h"
 #include "../../common/types.h"
 #include "../../memory/memory_types.h"
 #include "../asset_types.h"

@@ -23,7 +23,7 @@
 #ifndef FSL_MATH_TRIGONOMETRY_H
 #define FSL_MATH_TRIGONOMETRY_H
 
-#include "../common/engine_info.h"
+#include "../common/api.h"
 #include "../common/types.h"
 
 typedef struct angle_f32

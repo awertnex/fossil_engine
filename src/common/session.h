@@ -23,7 +23,7 @@
 #ifndef FSL_SESSION_H
 #define FSL_SESSION_H
 
-#include "engine_info.h"
+#include "api.h"
 #include "types.h"
 
 /*!

@@ -23,7 +23,7 @@
  *  @brief collision detection and collision data types.
  */
 
-#include "../common/engine_info.h"
+#include "../common/api.h"
 #include "../common/types.h"
 
 #define FSL_COLLISION_EPSILON 1e-5

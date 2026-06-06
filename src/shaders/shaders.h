@@ -24,7 +24,7 @@
 #ifndef FSL_SHADERS_H
 #define FSL_SHADERS_H
 
-#include "../common/engine_info.h"
+#include "../common/api.h"
 #include "../common/types.h"
 
 #include "shader_types.h"

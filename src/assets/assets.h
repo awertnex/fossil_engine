@@ -23,7 +23,7 @@
 #ifndef FSL_ASSETS_H
 #define FSL_ASSETS_H
 
-#include "../common/engine_info.h"
+#include "../common/api.h"
 #include "../common/types.h"
 #include "../math/vector.h"
 

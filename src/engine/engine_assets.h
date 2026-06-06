@@ -23,7 +23,7 @@
 #ifndef FSL_ENGINE_ASSETS_H
 #define FSL_ENGINE_ASSETS_H
 
-#include "../common/engine_info.h"
+#include "../common/api.h"
 #include "../common/types.h"
 #include "../assets/mesh/mesh.h"
 #include "../memory/memory_types.h"

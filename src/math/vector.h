@@ -23,7 +23,7 @@
 #ifndef FSL_MATH_VECTOR_H
 #define FSL_MATH_VECTOR_H
 
-#include "../common/engine_info.h"
+#include "../common/api.h"
 #include "../common/types.h"
 
 /* ---- vector2u ------------------------------------------------------------ */
