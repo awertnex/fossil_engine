@@ -62,7 +62,7 @@ extern fsl_key_bind bind_toggle_trans_blocks;
 extern fsl_key_bind bind_toggle_chunk_bounds;
 extern fsl_key_bind bind_toggle_bounding_boxes;
 extern fsl_key_bind bind_toggle_chunk_gizmo;
-extern fsl_key_bind bind_toggle_chunk_queue_visualizer;
+extern fsl_key_bind bind_toggle_chunk_scheduler_visualizer;
 
 /*!
  *  @brief setup all key binding values and rules.
@@ -77,6 +77,6 @@ void input_init(void);
  *  @remark only updates player flags, no parameters are updated except for
  *  `p->input`.
  */
-void input_update(player *p);
+void input_update(hhc_player *p);
 
 #endif /* HHC_INPUT_H */

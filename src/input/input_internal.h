@@ -323,4 +323,5 @@ static str *fsl_keyboard_key_name[FSL_KEYBOARD_KEYS_MAX] =
     "<rsuper>",
     "<menu>"
 }; /* fsl_keyboard_tab */
+
 #endif /* FSL_INPUT_INTERNAL_H */

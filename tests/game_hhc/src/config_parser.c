@@ -5,29 +5,23 @@
 
 #include "h/main.h"
 
-#include <string.h>
+#include <stdio.h>
 
 str allowed_chars[126] =
     "          \n  \r                    \"         "
     ",-  0123456789   =                                 _ "
     "abcdefghijklmnopqrstuvwxyz{ }";
 
-enum TokenIndex
+enum hhc_token_index
 {
-    TOKEN_MOUSE_SENSITIVITY,
-    TOKEN_FOV,
-    TOKEN_RENDER_DISTANCE,
-    TOKEN_TARGET_FPS,
-    TOKEN_COUNT,
-};
+    HHC_TOKEN_MOUSE_SENSITIVITY,
+    HHC_TOKEN_FOV,
+    HHC_TOKEN_RENDER_DISTANCE,
+    HHC_TOKEN_TARGET_FPS,
+    HHC_TOKEN_COUNT
+}; /* hhc_token_index */
 
-str tokens[TOKEN_COUNT][FSL_ID_CAP] =
-{
-    [TOKEN_MOUSE_SENSITIVITY] = "mouse_sensitivity",
-    [TOKEN_FOV] = "fov",
-    [TOKEN_RENDER_DISTANCE] = "render_distance",
-    [TOKEN_TARGET_FPS] = "target_fps",
-};
+str tokens[HHC_TOKEN_COUNT][FSL_ID_CAP] = {0};
 
 void parse_config(void)
 {
@@ -36,15 +30,20 @@ void parse_config(void)
     u32 i = 0;
     u64 file_len = fsl_get_file_contents("Heaven-Hell Continuum/config/settings.txt",
             (void*)&file_contents, TRUE);
-    if (fsl_err != FSL_ERR_SUCCESS || !file_contents)
+
+    snprintf(tokens[HHC_TOKEN_MOUSE_SENSITIVITY], FSL_ID_CAP, "%s", "mouse_sensitivity");
+    snprintf(tokens[HHC_TOKEN_FOV], FSL_ID_CAP, "%s", "fov");
+    snprintf(tokens[HHC_TOKEN_RENDER_DISTANCE], FSL_ID_CAP, "%s", "render_distance");
+    snprintf(tokens[HHC_TOKEN_TARGET_FPS], FSL_ID_CAP, "%s", "target_fps");
+
+    if (!file_contents)
         return;
 
-    for (i = 0; i < file_len; ++i)
+    while (i++ < file_len && file_contents[i] < 127 &&
+            file_contents[i] == accepted_chars[file_contents[i]])
     {
-        if (file_contents[i] > 126 || file_contents[i] != accepted_chars[file_contents[i]])
-            continue;
-
     }
 
-    fsl_mem_free((void*)&file_contents, file_len, "parse_config().file_contents");
+    if (file_len)
+        fsl_mem_free((void*)&file_contents, file_len, "parse_config().file_contents");
 }

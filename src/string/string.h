@@ -23,7 +23,7 @@
 #ifndef FSL_STRING_H
 #define FSL_STRING_H
 
-#include "../common/engine_info.h"
+#include "../common/api.h"
 #include "../common/types.h"
 
 /*!

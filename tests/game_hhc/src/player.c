@@ -1,15 +1,22 @@
+#include "deps/fossil/common/config.h"
 #include "deps/fossil/assets/assets.h"
 #include "deps/fossil/logger/logger.h"
-
+#include "deps/fossil/math/math.h"
+#include "deps/fossil/math/vector.h"
 #include "deps/fossil/physics/collision.h"
-#include "deps/fossil/h/math.h"
+
 #include "deps/fossil/h/time.h"
 
-#include "h/chunking.h"
+#include "h/main.h"
+
+#include "chunking/chunking.h"
+
 #include "h/common.h"
+#include "h/diagnostics.h"
 #include "h/player.h"
 #include "h/world.h"
 
+#include <stdio.h>
 #include <math.h>
 
 /*!
@@ -19,9 +26,55 @@
  *
  *  teleport player to the other side of the world if they cross a world edge.
  */
-static void player_wrap_coordinates(player *p);
+static void player_wrap_coordinates(hhc_player *p);
 
-void player_update(player *p, f64 dt)
+u32 player_init(hhc_player *p, const str *name)
+{
+    hhc_player noplayer = {0};
+
+    *p = noplayer;
+
+    if (fsl_mesh_load(&p->mesh, "Player", "player", "player.obj", GAME_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
+        return *GAME_ERR;
+
+    snprintf(p->name, FSL_ID_CAP, "%s", name);
+    p->size.x = 0.6f;
+    p->size.y = 0.6f;
+    p->size.z = 1.8f;
+    p->transform.scale.x = 1.0f;
+    p->transform.scale.y = 1.0f;
+    p->transform.scale.z = 1.0f;
+    p->eye_height = PLAYER_EYE_HEIGHT;
+    p->camera_mode = PLAYER_CAMERA_MODE_1ST_PERSON;
+    p->camera_distance = SET_CAMERA_DISTANCE_MAX;
+
+    p->menu_state = 0;
+    p->hotbar_slots[0] = BLOCK_GRASS;
+    p->hotbar_slots[1] = BLOCK_DIRT;
+    p->hotbar_slots[2] = BLOCK_STONE;
+    p->hotbar_slots[3] = BLOCK_SAND;
+    p->hotbar_slots[4] = BLOCK_GLASS;
+    p->hotbar_slots[5] = BLOCK_WOOD_OAK_LOG;
+    p->hotbar_slots[6] = BLOCK_WOOD_BIRCH_LOG;
+    p->hotbar_slots[7] = BLOCK_WOOD_CHERRY_LOG;
+
+    p->camera.fovy = settings.fov;
+    p->camera.fovy_smooth = 0.0f;
+    p->camera.ratio = (f32)render->size.x / render->size.y;
+    p->camera.far = FSL_CAMERA_CLIP_FAR_OPTIMAL;
+    p->camera.near = FSL_CAMERA_CLIP_NEAR_DEFAULT;
+
+    p->camera_hud.fovy = (f32)SET_FOV_DEFAULT;
+    p->camera_hud.fovy_smooth = (f32)SET_FOV_DEFAULT;
+    p->camera_hud.ratio = (f32)render->size.x / render->size.y;
+    p->camera_hud.far = FSL_CAMERA_CLIP_FAR_UI;
+    p->camera_hud.near = FSL_CAMERA_CLIP_NEAR_DEFAULT;
+
+    *GAME_ERR = FSL_ERR_SUCCESS;
+    return *GAME_ERR;
+}
+
+void player_update(hhc_player *p, f64 dt)
 {
     v3f32 gravity = {0};
     v3f32 drag = {0};
@@ -97,9 +150,9 @@ void player_update(player *p, f64 dt)
     p->velocity.y += (p->acceleration.y + damping.y + gravity.y) * dt;
     p->velocity.z += (p->acceleration.z + damping.z + gravity.z) * dt;
 
-    p->pos.x += p->velocity.x * dt;
-    p->pos.y += p->velocity.y * dt;
-    p->pos.z += p->velocity.z * dt;
+    p->transform.pos.x += p->velocity.x * dt;
+    p->transform.pos.y += p->velocity.y * dt;
+    p->transform.pos.z += p->velocity.z * dt;
 
     p->friction.x = 0.0f;
     p->friction.y = 0.0f;
@@ -112,14 +165,17 @@ void player_update(player *p, f64 dt)
                 SET_LERP_SPEED_FOV_MODE, dt);
 
     player_bounding_box_update(p);
-    player_collision_update(p, dt);
+    if (MODE_INTERNAL_COLLIDE)
+        player_collision_update(p, dt);
     player_wrap_coordinates(p);
-    player_chunk_update(p);
+    p->ch.x = floorf((f32)p->transform.pos.x / CHUNK_DIAMETER);
+    p->ch.y = floorf((f32)p->transform.pos.y / CHUNK_DIAMETER);
+    p->ch.z = floorf((f32)p->transform.pos.z / CHUNK_DIAMETER);
 }
 
-void player_collision_update(player *p, f64 dt)
+void player_collision_update(hhc_player *p, f64 dt)
 {
-    chunk *ch = NULL;
+    hhc_chunk *ch = NULL;
     block *block_p = fsl_mem_handle_get(blocks);
     u32 *_block = NULL;
     f32 speed;
@@ -140,8 +196,6 @@ void player_collision_update(player *p, f64 dt)
     v3i32 INCREMENT = {1, 1, 1};
     b8 resolved = TRUE;
     u32 max_axis = 0;
-
-    if (!MODE_INTERNAL_COLLIDE) return;
 
     displacement.x = p->velocity.x * dt;
     displacement.y = p->velocity.y * dt;
@@ -185,9 +239,12 @@ void player_collision_update(player *p, f64 dt)
                 for (x = START.x; x >= MIN.x && x < MAX.x; x += INCREMENT.x)
                 {
                     ch = get_chunk_resolved(settings.chunk_tab_center, x, y, z);
-                    if (!ch || !(ch->flag & FLAG_CHUNK_GENERATED)) continue;
+                    if (!ch || !(ch->flag & FLAG_CHUNK_GENERATED))
+                        continue;
+
                     _block = get_block_resolved(ch, x, y, z);
-                    if (!_block || !*_block) continue;
+                    if (!_block || !*_block)
+                        continue;
 
                     block_box.pos.x = (f64)((i64)ch->pos.x * CHUNK_DIAMETER + fsl_mod_i32(x, CHUNK_DIAMETER));
                     block_box.pos.y = (f64)((i64)ch->pos.y * CHUNK_DIAMETER + fsl_mod_i32(y, CHUNK_DIAMETER));
@@ -203,9 +260,9 @@ void player_collision_update(player *p, f64 dt)
                     {
                         /* ---- resolution ---------------------------------- */
 
-                        p->pos.x += displacement.x * time + normal.x * FSL_COLLISION_EPSILON;
-                        p->pos.y += displacement.y * time + normal.y * FSL_COLLISION_EPSILON;
-                        p->pos.z += displacement.z * time + normal.z * FSL_COLLISION_EPSILON;
+                        p->transform.pos.x += displacement.x * time + normal.x * FSL_COLLISION_EPSILON;
+                        p->transform.pos.y += displacement.y * time + normal.y * FSL_COLLISION_EPSILON;
+                        p->transform.pos.z += displacement.z * time + normal.z * FSL_COLLISION_EPSILON;
 
                         dot = fsl_dot_v3f32(displacement, normal);
                         if (dot < 0.0f)
@@ -215,9 +272,9 @@ void player_collision_update(player *p, f64 dt)
                             displacement.z -= dot * normal.z;
                         }
 
-                        p->pos.x -= displacement.x * time;
-                        p->pos.y -= displacement.y * time;
-                        p->pos.z -= displacement.z * time;
+                        p->transform.pos.x -= displacement.x * time;
+                        p->transform.pos.y -= displacement.y * time;
+                        p->transform.pos.z -= displacement.z * time;
 
                         p->velocity.x = displacement.x / dt;
                         p->velocity.y = displacement.y / dt;
@@ -229,7 +286,7 @@ void player_collision_update(player *p, f64 dt)
                                 p->flag &= ~FLAG_PLAYER_FLYING;
                             p->flag |= FLAG_PLAYER_CAN_JUMP;
 
-                            friction = block_p[*_block & MASK_BLOCK_ID].friction;
+                            friction = block_p[GET_BLOCK_ID(*_block)].friction;
                             p->friction.x = friction;
                             p->friction.y = friction;
                         }
@@ -267,13 +324,13 @@ void player_collision_update(player *p, f64 dt)
     }
 }
 
-void player_bounding_box_update(player *p)
+void player_bounding_box_update(hhc_player *p)
 {
     if (p->flag & FLAG_PLAYER_FLYING && p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
     {
-        p->bbox.pos.x = p->pos.x - p->size.x * 0.5f;
-        p->bbox.pos.y = p->pos.y - p->size.x * 0.5f; /* `size.x` here to link 'x' and 'y' to one size */
-        p->bbox.pos.z = p->pos.z + p->eye_height - p->size.x * 0.5f;
+        p->bbox.pos.x = p->transform.pos.x - p->size.x * 0.5f;
+        p->bbox.pos.y = p->transform.pos.y - p->size.x * 0.5f; /* `size.x` here to link 'x' and 'y' to one size */
+        p->bbox.pos.z = p->transform.pos.z + p->eye_height - p->size.x * 0.5f;
 
         /* size for all axes is `size.x` intentionally because we want cube bbox */
         p->bbox.size.x = p->size.x;
@@ -282,9 +339,9 @@ void player_bounding_box_update(player *p)
     }
     else
     {
-        p->bbox.pos.x = p->pos.x - p->size.x * 0.5f;
-        p->bbox.pos.y = p->pos.y - p->size.y * 0.5f;
-        p->bbox.pos.z = p->pos.z;
+        p->bbox.pos.x = p->transform.pos.x - p->size.x * 0.5f;
+        p->bbox.pos.y = p->transform.pos.y - p->size.y * 0.5f;
+        p->bbox.pos.z = p->transform.pos.z;
         p->bbox.size.x = p->size.x;
         p->bbox.size.y = p->size.y;
         p->bbox.size.z = p->size.z;
@@ -347,20 +404,7 @@ fsl_bounding_box make_collision_capsule(fsl_bounding_box b, v3i32 ch, v3f32 velo
     return result;
 }
 
-void player_chunk_update(player *p)
-{
-    p->ch.x = floorf((f32)p->pos.x / CHUNK_DIAMETER);
-    p->ch.y = floorf((f32)p->pos.y / CHUNK_DIAMETER);
-    p->ch.z = floorf((f32)p->pos.z / CHUNK_DIAMETER);
-
-    if (
-            p->ch_delta.x - p->ch.x ||
-            p->ch_delta.y - p->ch.y ||
-            p->ch_delta.z - p->ch.z)
-        core.flag.chunk_buf_dirty = 1;
-}
-
-static void player_wrap_coordinates(player *p)
+static void player_wrap_coordinates(hhc_player *p)
 {
     const i64 DIAMETER = WORLD_DIAMETER;
     const i64 DIAMETER_V = WORLD_DIAMETER_VERTICAL;
@@ -381,32 +425,32 @@ static void player_wrap_coordinates(player *p)
         (f64)(WORLD_DIAMETER_VERTICAL + WORLD_RADIUS_VERTICAL)
     };
 
-    if (!fsl_is_in_volume_f64(p->pos, WORLD_VOLUME_MIN, WORLD_VOLUME_MAX))
+    if (!fsl_is_in_volume_f64(p->transform.pos, WORLD_VOLUME_MIN, WORLD_VOLUME_MAX))
         player_spawn(p, FALSE);
 
     /* ---- world margin ---------------------------------------------------- */
 
-    if (p->pos.x > WORLD_MARGIN)
+    if (p->transform.pos.x > WORLD_MARGIN)
         p->flag |= FLAG_PLAYER_OVERFLOW_X | FLAG_PLAYER_OVERFLOW_PX;
-    else if (p->pos.x < -WORLD_MARGIN)
+    else if (p->transform.pos.x < -WORLD_MARGIN)
     {
         p->flag |= FLAG_PLAYER_OVERFLOW_X;
         p->flag &= ~FLAG_PLAYER_OVERFLOW_PX;
     }
     else p->flag &= ~(FLAG_PLAYER_OVERFLOW_X | FLAG_PLAYER_OVERFLOW_PX);
 
-    if (p->pos.y > WORLD_MARGIN)
+    if (p->transform.pos.y > WORLD_MARGIN)
         p->flag |= FLAG_PLAYER_OVERFLOW_Y | FLAG_PLAYER_OVERFLOW_PY;
-    else if (p->pos.y < -WORLD_MARGIN)
+    else if (p->transform.pos.y < -WORLD_MARGIN)
     {
         p->flag |= FLAG_PLAYER_OVERFLOW_Y;
         p->flag &= ~FLAG_PLAYER_OVERFLOW_PY;
     }
     else p->flag &= ~(FLAG_PLAYER_OVERFLOW_Y | FLAG_PLAYER_OVERFLOW_PY);
 
-    if (p->pos.z > WORLD_MARGIN_V)
+    if (p->transform.pos.z > WORLD_MARGIN_V)
         p->flag |= FLAG_PLAYER_OVERFLOW_Z | FLAG_PLAYER_OVERFLOW_PZ;
-    else if (p->pos.z < -WORLD_MARGIN_V)
+    else if (p->transform.pos.z < -WORLD_MARGIN_V)
     {
         p->flag |= FLAG_PLAYER_OVERFLOW_Z;
         p->flag &= ~FLAG_PLAYER_OVERFLOW_PZ;
@@ -415,50 +459,49 @@ static void player_wrap_coordinates(player *p)
 
     /* ---- overflow edge --------------------------------------------------- */
 
-    if (p->pos.x > OVERFLOW_EDGE)
+    if (p->transform.pos.x > OVERFLOW_EDGE)
     {
-        p->pos.x -= DIAMETER;
-        p->pos_last.x -= DIAMETER;
+        p->transform.pos.x -= DIAMETER;
+        p->transform_last.pos.x -= DIAMETER;
     }
-    if (p->pos.x < -OVERFLOW_EDGE)
+    if (p->transform.pos.x < -OVERFLOW_EDGE)
     {
-        p->pos.x += DIAMETER;
-        p->pos_last.x += DIAMETER;
+        p->transform.pos.x += DIAMETER;
+        p->transform_last.pos.x += DIAMETER;
     }
-    if (p->pos.y > OVERFLOW_EDGE)
+    if (p->transform.pos.y > OVERFLOW_EDGE)
     {
-        p->pos.y -= DIAMETER;
-        p->pos_last.y -= DIAMETER;
+        p->transform.pos.y -= DIAMETER;
+        p->transform_last.pos.y -= DIAMETER;
     }
-    if (p->pos.y < -OVERFLOW_EDGE)
+    if (p->transform.pos.y < -OVERFLOW_EDGE)
     {
-        p->pos.y += DIAMETER;
-        p->pos_last.y += DIAMETER;
+        p->transform.pos.y += DIAMETER;
+        p->transform_last.pos.y += DIAMETER;
     }
-    if (p->pos.z > OVERFLOW_EDGE_V)
+    if (p->transform.pos.z > OVERFLOW_EDGE_V)
     {
-        p->pos.z -= DIAMETER_V;
-        p->pos_last.z -= DIAMETER_V;
+        p->transform.pos.z -= DIAMETER_V;
+        p->transform_last.pos.z -= DIAMETER_V;
     }
-    if (p->pos.z < -OVERFLOW_EDGE_V)
+    if (p->transform.pos.z < -OVERFLOW_EDGE_V)
     {
-        p->pos.z += DIAMETER_V;
-        p->pos_last.z += DIAMETER_V;
+        p->transform.pos.z += DIAMETER_V;
+        p->transform_last.pos.z += DIAMETER_V;
     }
 }
 
-void player_camera_movement_update(player *p, v2f64 mouse_delta, b8 use_mouse)
+void player_camera_movement_update(hhc_player *p, v2f64 mouse_delta, b8 use_mouse)
 {
     f64 zoom = 0.0;
     f64 sensitivity = 0.0;
     f64 SROL = {0}, CROL = {0}, SPCH = {0}, CPCH = {0}, SYAW = {0}, CYAW = {0};
-    f64 lookat_pitch = {0}, lookat_yaw = {0};
     v3f64 eye_pos = {0};
 
     sensitivity = settings.mouse_sensitivity;
-    eye_pos.x = p->pos.x;
-    eye_pos.y = p->pos.y;
-    eye_pos.z = p->pos.z + p->eye_height;
+    eye_pos.x = p->transform.pos.x;
+    eye_pos.y = p->transform.pos.y;
+    eye_pos.z = p->transform.pos.z + p->eye_height;
 
     if (use_mouse)
     {
@@ -468,65 +511,74 @@ void player_camera_movement_update(player *p, v2f64 mouse_delta, b8 use_mouse)
         if (p->camera_mode != PLAYER_CAMERA_MODE_STALKER)
             sensitivity = settings.mouse_sensitivity / (zoom / FSL_CAMERA_ZOOM_SENSITIVITY + 1.0);
 
-        p->pitch += mouse_delta.y * sensitivity;
-        p->yaw += mouse_delta.x * sensitivity;
+        p->transform.rot.y += mouse_delta.y * sensitivity;
+        p->transform.rot.z += mouse_delta.x * sensitivity;
 
-        p->pitch = fsl_clamp_f64(p->pitch, -FSL_CAMERA_ANGLE_MAX, FSL_CAMERA_ANGLE_MAX);
-        p->yaw = fmod(p->yaw, FSL_CAMERA_RANGE_MAX);
-        if (p->yaw < 0.0)
-            p->yaw += FSL_CAMERA_RANGE_MAX;
+        p->transform.rot.y = fsl_clamp_f64(p->transform.rot.y, -FSL_CAMERA_ANGLE_MAX, FSL_CAMERA_ANGLE_MAX);
+        p->transform.rot.z = fmod(p->transform.rot.z, FSL_CAMERA_RANGE_MAX);
+        if (p->transform.rot.z < 0.0)
+            p->transform.rot.z += FSL_CAMERA_RANGE_MAX;
     }
 
-    SROL = sin(p->roll * FSL_DEG2RAD);
-    CROL = cos(p->roll * FSL_DEG2RAD);
-    SPCH = sin(p->pitch * FSL_DEG2RAD);
-    CPCH = cos(p->pitch * FSL_DEG2RAD);
-    SYAW = sin(p->yaw * FSL_DEG2RAD);
-    CYAW = cos(p->yaw * FSL_DEG2RAD);
-    p->sin_roll = SYAW;
-    p->cos_roll = CYAW;
-    p->sin_pitch = SPCH;
-    p->cos_pitch = CPCH;
-    p->sin_yaw = SYAW;
-    p->cos_yaw = CYAW;
-    p->camera.sin_roll = SROL;
-    p->camera.cos_roll = CROL;
-    p->camera.sin_pitch = SPCH;
-    p->camera.cos_pitch = CPCH;
-    p->camera.sin_yaw = SYAW;
-    p->camera.cos_yaw = CYAW;
+    SROL = sin(p->transform.rot.x * FSL_DEG2RAD);
+    CROL = cos(p->transform.rot.x * FSL_DEG2RAD);
+    SPCH = sin(p->transform.rot.y * FSL_DEG2RAD);
+    CPCH = cos(p->transform.rot.y * FSL_DEG2RAD);
+    SYAW = sin(p->transform.rot.z * FSL_DEG2RAD);
+    CYAW = cos(p->transform.rot.z * FSL_DEG2RAD);
+    p->roll.sin = SYAW;
+    p->roll.cos = CYAW;
+    p->pitch.sin = SPCH;
+    p->pitch.cos = CPCH;
+    p->yaw.sin = SYAW;
+    p->yaw.cos = CYAW;
+    p->camera.roll.sin = SROL;
+    p->camera.roll.cos = CROL;
+    p->camera.pitch.sin = SPCH;
+    p->camera.pitch.cos = CPCH;
+    p->camera.yaw.sin = SYAW;
+    p->camera.yaw.cos = CYAW;
 
     switch (p->camera_mode)
     {
         case PLAYER_CAMERA_MODE_1ST_PERSON:
-            p->camera.pos.x = p->pos.x;
-            p->camera.pos.y = p->pos.y;
-            p->camera.pos.z = p->pos.z + p->eye_height;
+            fsl_camera_movement_update(&p->camera,
+                    p->transform.pos.x,
+                    p->transform.pos.y,
+                    p->transform.pos.z + p->eye_height,
+                    p->transform.rot.x,
+                    p->transform.rot.y,
+                    p->transform.rot.z);
             break;
 
         case PLAYER_CAMERA_MODE_3RD_PERSON:
-            p->camera.pos.x = p->pos.x - CYAW * CPCH * p->camera_distance;
-            p->camera.pos.y = p->pos.y + SYAW * CPCH * p->camera_distance;
-            p->camera.pos.z = p->pos.z + p->eye_height + SPCH * p->camera_distance;
+            fsl_camera_movement_update(&p->camera,
+                    p->transform.pos.x - CYAW * CPCH * p->camera_distance,
+                    p->transform.pos.y + SYAW * CPCH * p->camera_distance,
+                    p->transform.pos.z + p->eye_height + SPCH * p->camera_distance,
+                    p->transform.rot.x,
+                    p->transform.rot.y,
+                    p->transform.rot.z);
             break;
 
         case PLAYER_CAMERA_MODE_3RD_PERSON_FRONT:
-            p->camera.pos.x = p->pos.x + CYAW * CPCH * p->camera_distance;
-            p->camera.pos.y = p->pos.y - SYAW * CPCH * p->camera_distance;
-            p->camera.pos.z = p->pos.z + p->eye_height - SPCH * p->camera_distance;
-
-            p->camera.sin_pitch = -SPCH;
-            p->camera.sin_yaw = sin((p->yaw + FSL_CAMERA_RANGE_MAX / 2.0) * FSL_DEG2RAD);
-            p->camera.cos_yaw = cos((p->yaw + FSL_CAMERA_RANGE_MAX / 2.0) * FSL_DEG2RAD);
+            fsl_camera_movement_update(&p->camera,
+                    p->transform.pos.x + CYAW * CPCH * p->camera_distance,
+                    p->transform.pos.y - SYAW * CPCH * p->camera_distance,
+                    p->transform.pos.z + p->eye_height - SPCH * p->camera_distance,
+                    p->transform.rot.x,
+                    -p->transform.rot.y,
+                    p->transform.rot.z + FSL_CAMERA_RANGE_MAX / 2.0);
             break;
 
         case PLAYER_CAMERA_MODE_STALKER:
-            fsl_get_camera_lookat_angles(p->camera.pos, eye_pos, &lookat_pitch, &lookat_yaw);
-
-            p->camera.sin_pitch = sin(lookat_pitch);
-            p->camera.cos_pitch = cos(lookat_pitch);
-            p->camera.sin_yaw = sin(lookat_yaw + (FSL_CAMERA_RANGE_MAX / 2.0) * FSL_DEG2RAD);
-            p->camera.cos_yaw = cos(lookat_yaw + (FSL_CAMERA_RANGE_MAX / 2.0) * FSL_DEG2RAD);
+            fsl_camera_lookat_update(&p->camera,
+                    p->camera.pos.x,
+                    p->camera.pos.y,
+                    p->camera.pos.z,
+                    eye_pos.x,
+                    eye_pos.y,
+                    eye_pos.z);
             break;
 
             /* TODO: make the spectator camera mode */
@@ -534,156 +586,58 @@ void player_camera_movement_update(player *p, v2f64 mouse_delta, b8 use_mouse)
             break;
     }
 
-    p->camera_hud.sin_pitch = p->camera.sin_pitch;
-    p->camera_hud.cos_pitch = p->camera.cos_pitch;
-    p->camera_hud.sin_yaw = p->camera.sin_yaw;
-    p->camera_hud.cos_yaw = p->camera.cos_yaw;
+    p->camera_hud.pitch.sin = p->camera.pitch.sin;
+    p->camera_hud.pitch.cos = p->camera.pitch.cos;
+    p->camera_hud.yaw.sin = p->camera.yaw.sin;
+    p->camera_hud.yaw.cos = p->camera.yaw.cos;
+
+    /* ---- camera_ui ------------------------------------------------------- */
 }
 
-void player_target_update(player *p)
+void player_target_update(hhc_player *p)
 {
-    const v3i64 WORLD_VOLUME_MIN = {-WORLD_DIAMETER, -WORLD_DIAMETER, -WORLD_DIAMETER_VERTICAL};
-    const v3i64 WORLD_VOLUME_MAX = {WORLD_DIAMETER, WORLD_DIAMETER, WORLD_DIAMETER_VERTICAL};
-    f64 SPCH = p->sin_pitch;
-    f64 CPCH = p->cos_pitch;
-    f64 SYAW = p->sin_yaw;
-    f64 CYAW = p->cos_yaw;
-    v3f64 eye_pos = {0};
-    v3i64 block_pos = {0};
-    v3i64 target = {0};
-    v3f64 direction = {0};
-    v3f64 delta = {0};
-    v3f64 distance = {0};
-    v3f64 normal = {0};
-    v3i32 step = {1, 1, 1};
-    b8 hit = FALSE;
-    chunk *ch = NULL;
-    u32 *_block = NULL;
-    i32 x = 0;
-    i32 y = 0;
-    i32 z = 0;
+    v3f64 start = {0};
+    v3f64 end = {0};
 
-    eye_pos.x = p->pos.x;
-    eye_pos.y = p->pos.y;
-    eye_pos.z = p->pos.z + p->eye_height;
-    block_pos.x = (i64)floor(eye_pos.x);
-    block_pos.y = (i64)floor(eye_pos.y);
-    block_pos.z = (i64)floor(eye_pos.z);
-    target.x = (i64)p->target.x;
-    target.y = (i64)p->target.y;
-    target.z = (i64)p->target.z;
-    direction.x = CYAW * CPCH;
-    direction.y = -SYAW * CPCH;
-    direction.z = -SPCH;
-    delta.x = direction.x == 0.0 ? INFINITY : fabs(1.0 / direction.x);
-    delta.y = direction.y == 0.0 ? INFINITY : fabs(1.0 / direction.y);
-    delta.z = direction.z == 0.0 ? INFINITY : fabs(1.0 / direction.z);
+    start.x = p->transform.pos.x;
+    start.y = p->transform.pos.y;
+    start.z = p->transform.pos.z + p->eye_height;
+    end.x = start.x + p->yaw.cos * p->pitch.cos;
+    end.y = start.y - p->yaw.sin * p->pitch.cos;
+    end.z = start.z - p->pitch.sin;
 
-    if (direction.x < 0.0f)
-    {
-        distance.x = (eye_pos.x - block_pos.x) * delta.x;
-        step.x = -1;
-    }
-    else distance.x = (block_pos.x + 1.0 - eye_pos.x) * delta.x;
-
-    if (direction.y < 0.0f)
-    {
-        distance.y = (eye_pos.y - block_pos.y) * delta.y;
-        step.y = -1;
-    }
-    else distance.y = (block_pos.y + 1.0 - eye_pos.y) * delta.y;
-
-    if (direction.z < 0.0f)
-    {
-        distance.z = (eye_pos.z - block_pos.z) * delta.z;
-        step.z = -1;
-    }
-    else distance.z = (block_pos.z + 1.0 - eye_pos.z) * delta.z;
-
-    while (fsl_min_v3f64(distance) < settings.reach_distance)
-    {
-        switch (fsl_min_axis_v3f64(distance))
-        {
-            case 1:
-                block_pos.x += step.x;
-                distance.x += delta.x;
-                normal.x = -step.x;
-                normal.y = 0.0;
-                normal.z = 0.0;
-                break;
-
-            case 2:
-                block_pos.y += step.y;
-                distance.y += delta.y;
-                normal.x = 0.0;
-                normal.y = -step.y;
-                normal.z = 0.0;
-                break;
-
-            case 3:
-                block_pos.z += step.z;
-                distance.z += delta.z;
-                normal.x = 0.0;
-                normal.y = 0.0;
-                normal.z = -step.z;
-                break;
-        }
-
-        x = block_pos.x - p->ch.x * CHUNK_DIAMETER;
-        y = block_pos.y - p->ch.y * CHUNK_DIAMETER;
-        z = block_pos.z - p->ch.z * CHUNK_DIAMETER;
-        ch = get_chunk_resolved(settings.chunk_tab_center, x, y, z);
-        if (!ch || !(ch->flag & FLAG_CHUNK_GENERATED)) continue;
-        _block = get_block_resolved(ch, x, y, z);
-        if (!_block || !*_block) continue;
-        hit = TRUE;
-        break;
-    }
-
-    if (hit && fsl_is_in_volume_i64(target, WORLD_VOLUME_MIN, WORLD_VOLUME_MAX))
-    {
-        core.flag.parse_target = 1;
-        p->target.x = (f64)block_pos.x;
-        p->target.y = (f64)block_pos.y;
-        p->target.z = (f64)block_pos.z;
-        p->target_normal = normal;
-    }
-    else
-    {
-        core.flag.parse_target = 0;
-        p->target_normal.x = 0.0;
-        p->target_normal.y = 0.0;
-        p->target_normal.z = 0.0;
-    }
+    p->hit = block_hit_get(p->transform.pos,
+            start.x, start.y, start.z, end.x, end.y, end.z,
+            settings.reach_distance);
 }
 
-void set_player_pos(player *p, f64 x, f64 y, f64 z)
+void set_player_pos(hhc_player *p, f64 x, f64 y, f64 z)
 {
-    p->pos.x = x;
-    p->pos.y = y;
-    p->pos.z = z;
+    p->transform.pos.x = x;
+    p->transform.pos.y = y;
+    p->transform.pos.z = z;
     p->velocity.x = 0.0;
     p->velocity.y = 0.0;
     p->velocity.z = 0.0;
-    p->pos_last = p->pos;
+    p->transform_last.pos = p->transform.pos;
 }
 
-void set_player_block(player *p, i64 x, i64 y, i64 z)
+void set_player_block(hhc_player *p, i64 x, i64 y, i64 z)
 {
-    p->pos.x = (f64)x + 0.5f;
-    p->pos.y = (f64)y + 0.5f;
-    p->pos.z = (f64)z + 0.5f;
-    p->pos_last = p->pos;
+    p->transform.pos.x = (f64)x + 0.5f;
+    p->transform.pos.y = (f64)y + 0.5f;
+    p->transform.pos.z = (f64)z + 0.5f;
+    p->transform_last.pos = p->transform.pos;
 }
 
-void set_player_spawn(player *p, i64 x, i64 y, i64 z)
+void set_player_spawn(hhc_player *p, i64 x, i64 y, i64 z)
 {
     p->spawn.x = x;
     p->spawn.y = y;
     p->spawn.z = z;
 }
 
-void player_spawn(player *p, b8 hard)
+void player_spawn(hhc_player *p, b8 hard)
 {
     set_player_pos(p,
             p->spawn.x + 0.5f,
@@ -694,7 +648,7 @@ void player_spawn(player *p, b8 hard)
     p->flag &= ~(FLAG_PLAYER_FLYING | FLAG_PLAYER_HUNGRY | FLAG_PLAYER_DEAD);
 }
 
-void player_kill(player *p)
+void player_kill(hhc_player *p)
 {
     p->velocity.x = 0.0;
     p->velocity.y = 0.0;
@@ -709,7 +663,7 @@ void player_kill(player *p)
             fsl_logger_stringf("%s %s\n", p->name, get_death_str(p)));
 }
 
-str *get_death_str(player *p)
+str *get_death_str(hhc_player *p)
 {
     u64 index = fsl_rand_u64(fsl_get_time_raw_usec()) % DEATH_STRINGS_MAX[p->death];
 

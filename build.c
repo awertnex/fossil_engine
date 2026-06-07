@@ -1,3 +1,5 @@
+#include "src/common/engine_info.h"
+
 #include "src/external/buildtool/buildtool.h"
 #include "src/h/buildtool_config.h"
 
@@ -5,7 +7,7 @@
 #define DIR_DEPS "deps/"
 #define DIR_DST "fossil/" /* your project name */
 
-_buf cmd = {0};
+bt_buf cmd = {0};
 
 static str str_cflags[][CMD_SIZE] =
 {
@@ -39,13 +41,13 @@ static str str_files[][CMD_SIZE] =
     DIR_SRC"engine/engine_assets.c",
     DIR_SRC"input/input.c",
     DIR_SRC"logger/logger.c",
+    DIR_SRC"math/math.c",
     DIR_SRC"memory/memory.c",
     DIR_SRC"physics/collision.c",
     DIR_SRC"shaders/shaders.c",
     DIR_SRC"shaders/shader_pre_processor.c",
     DIR_SRC"string/string.c",
     DIR_SRC"dir.c",
-    DIR_SRC"math.c",
     DIR_SRC FSL_FILE_NAME_PLATFORM,
     DIR_SRC"time.c",
     DIR_SRC"ui.c"
@@ -64,6 +66,7 @@ static str str_make_dir[][CMD_SIZE] =
     DIR_DST DIR_DEPS DIR_DST"external/",
     DIR_DST DIR_DEPS DIR_DST"external/glad/",
     DIR_DST DIR_DEPS DIR_DST"logger/",
+    DIR_DST DIR_DEPS DIR_DST"math/",
     DIR_DST DIR_DEPS DIR_DST"memory/",
     DIR_DST DIR_DEPS DIR_DST"physics/",
     DIR_DST DIR_DEPS DIR_DST"shaders/",
@@ -73,10 +76,11 @@ static str str_make_dir[][CMD_SIZE] =
     DIR_DST DIR_DST DIR_DST,
     DIR_DST DIR_DST DIR_DST"logs/",
 
-    DIR_DST "lib/"
+    DIR_DST "lib/",
+    DIR_DST "lib/"PLATFORM
 };
 
-static str *copy_targets[][32] =
+static str *copy_targets[][48] =
 {
     {DIR_SRC"external/glfw3.h",             DIR_DST DIR_DEPS DIR_DST"external/"},
     {DIR_SRC"external/glad/glad.h",         DIR_DST DIR_DEPS DIR_DST"external/glad/"},
@@ -90,9 +94,14 @@ static str *copy_targets[][32] =
     {DIR_SRC"engine/engine_assets.h",       DIR_DST DIR_DEPS DIR_DST"engine/"},
     {DIR_SRC"input/input.h",                DIR_DST DIR_DEPS DIR_DST"input/"},
     {DIR_SRC"logger/logger.h",              DIR_DST DIR_DEPS DIR_DST"logger/"},
+    {DIR_SRC"math/math.h",                  DIR_DST DIR_DEPS DIR_DST"math/"},
+    {DIR_SRC"math/matrix.h",                DIR_DST DIR_DEPS DIR_DST"math/"},
+    {DIR_SRC"math/trigonometry.h",          DIR_DST DIR_DEPS DIR_DST"math/"},
+    {DIR_SRC"math/vector.h",                DIR_DST DIR_DEPS DIR_DST"math/"},
     {DIR_SRC"memory/memory.h",              DIR_DST DIR_DEPS DIR_DST"memory/"},
     {DIR_SRC"memory/memory_types.h",        DIR_DST DIR_DEPS DIR_DST"memory/"},
     {DIR_SRC"physics/collision.h",          DIR_DST DIR_DEPS DIR_DST"physics/"},
+    {DIR_SRC"physics/physics_types.h",      DIR_DST DIR_DEPS DIR_DST"physics/"},
     {DIR_SRC"shaders/shader_types.h",       DIR_DST DIR_DEPS DIR_DST"shaders/"},
     {DIR_SRC"shaders/shaders.h",            DIR_DST DIR_DEPS DIR_DST"shaders/"},
     {DIR_SRC"string/string.h",              DIR_DST DIR_DEPS DIR_DST"string/"}
@@ -153,6 +162,7 @@ int main(int argc, char **argv)
 
     if (
             copy_dir(DIR_SRC"common/",      DIR_DST DIR_DEPS DIR_DST, FALSE) != ERR_SUCCESS ||
+            copy_dir(DIR_SRC"external/buildtool/", DIR_DST DIR_DEPS DIR_DST"external/", FALSE) != ERR_SUCCESS ||
             copy_dir(DIR_SRC"h/",           DIR_DST DIR_DEPS DIR_DST, FALSE) != ERR_SUCCESS ||
             copy_file("LICENSE",            DIR_DST DIR_DEPS DIR_DST) != ERR_SUCCESS ||
             copy_file("version.txt",        DIR_DST DIR_DEPS DIR_DST) != ERR_SUCCESS ||
@@ -161,7 +171,7 @@ int main(int argc, char **argv)
             copy_file("LICENSE",            DIR_DST DIR_DST DIR_DST) != ERR_SUCCESS ||
             copy_file("version.txt",        DIR_DST DIR_DST DIR_DST) != ERR_SUCCESS ||
 
-            copy_dir("lib/"PLATFORM,        DIR_DST "lib/", TRUE) != ERR_SUCCESS ||
+            copy_dir("lib/"PLATFORM,        DIR_DST "lib/"PLATFORM, TRUE) != ERR_SUCCESS ||
             copy_dir("lib/"PLATFORM,        DIR_DST DIR_DST, TRUE) != ERR_SUCCESS)
         cmd_fail(&cmd);
 

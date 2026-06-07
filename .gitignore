@@ -1,4 +1,3 @@
-fossil/
-test.sh
-tests/*/out/
-deps
+/fossil/
+/tests/*/out/
+/deps

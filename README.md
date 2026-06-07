@@ -1,10 +1,10 @@
-# Fossil Engine - v0.9.0-beta
+# Fossil Engine - v0.10.0-beta
 
 **a game engine written in C89, with minimal dependencies.**
 
 ## Dependencies (already bundled)
 
-- [buildtool v1.8.4-beta](https://github.com/awertnex/buildtool): build tool used to build the engine
+- [buildtool v1.8.7](https://github.com/awertnex/buildtool): build tool used to build the engine
 - [glfw v3.4](https://github.com/glfw/glfw): platform-independent windowing (headers modified)
     - modifications: remove `__cplusplus` guard, just to keep it completely C
 - [glad v0.1.36](https://github.com/dav1dde/glad-web): OpenGL function loader (modified)

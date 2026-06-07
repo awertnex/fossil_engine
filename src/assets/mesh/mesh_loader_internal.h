@@ -24,7 +24,7 @@
 #define FSL_MESH_LOADER_INTERNAL_H
 
 #include "../../common/types.h"
-#include "mesh.h"
+#include "../../math/vector.h"
 
 #define MESH_FILE_ID "fsl_mesh"
 
@@ -74,7 +74,7 @@ b8 mesh_is_cooked(const fsl_fs_path *path);
 /*!
  *  @internal
  *
- *  @brief load a 'Fossil Mesh' (.fmesh) mesh from disk into specified buffers.
+ *  @brief load a 'Fossil Mesh' (.fmesh) file from disk into specified buffers.
  *
  *  @remark buffers must be `NULL`, will be allocated via @ref fsl_mem_array_init()
  *  and should be copied and freed using @ref fsl_mem_array_free().

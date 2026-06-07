@@ -26,7 +26,7 @@
 #ifndef FSL_BUILDTOOL_CONFIG_H
 #define FSL_BUILDTOOL_CONFIG_H
 
-#include "../common/engine_info.h"
+#include "../common/api.h"
 #include "../external/buildtool/buildtool.h"
 
 #if defined(FSL_PLATFORM_WIN)
@@ -91,35 +91,35 @@
  *
  *  @param cmd cmd to push engine's required libs to, if `NULL`, internal cmd is used.
  */
-static void fsl_engine_link_libs(_buf *cmd);
+static void fsl_engine_link_libs(bt_buf *cmd);
 
 /*!
  *  @brief link engine's dependencies with the including software for run time.
  *
  *  @param cmd cmd to push application's runtime path to, if `NULL`, internal cmd is used.
  */
-static void fsl_engine_set_runtime_path(_buf *cmd);
+static void fsl_engine_set_runtime_path(bt_buf *cmd);
 
 /* ---- section: implementation --------------------------------------------- */
 
-void fsl_engine_link_libs(_buf *cmd)
+void fsl_engine_link_libs(bt_buf *cmd)
 {
     u32 i = 0;
-    _buf *_cmdp = cmd;
+    bt_buf *cmdp = cmd;
     if (!cmd)
-        _cmdp = &_cmd;
+        cmdp = &cmd_internal;
 
     for (i = 0; i < arr_len(fsl_str_libs); ++i)
-        cmd_push(_cmdp, fsl_str_libs[i]);
+        cmd_push(cmdp, fsl_str_libs[i]);
 }
 
-void fsl_engine_set_runtime_path(_buf *cmd)
+void fsl_engine_set_runtime_path(bt_buf *cmd)
 {
-    _buf *_cmdp = cmd;
+    bt_buf *cmdp = cmd;
     if (!cmd)
-        _cmdp = &_cmd;
+        cmdp = &cmd_internal;
 
-    cmd_push(_cmdp, "-Wl,-rpath=" RUNTIME_PATH);
+    cmd_push(cmdp, "-Wl,-rpath=" RUNTIME_PATH);
 }
 
 #endif /* FSL_BUILDTOOL_CONFIG_H */

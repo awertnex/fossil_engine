@@ -3,8 +3,6 @@
 
 #include "deps/fossil/common/types.h"
 
-#include "deps/fossil/h/dir.h"
-
 #define DIR_MAX 128
 
 enum directory_index

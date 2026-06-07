@@ -20,7 +20,6 @@
  *  @brief loading and unloading engine's default assets.
  */
 
-#include "../common/common_values.h"
 #include "../common/config.h"
 #include "../common/diagnostics.h"
 #include "../common/types.h"
@@ -29,7 +28,6 @@
 #include "../shaders/shader_types.h"
 #include "../shaders/shaders.h"
 
-#include "engine.h"
 #include "engine_assets.h"
 
 #include <stdio.h>
@@ -39,32 +37,37 @@
 fsl_mem_handle fsl_texture_buf = {0};
 fsl_mem_handle fsl_shader_buf = {0};
 fsl_mem_handle fsl_font_buf = {0};
+fsl_mem_handle fsl_mesh_buf = {0};
 fsl_mesh fsl_mesh_unit_quad = {0};
 
 /* ---- section: implementation --------------------------------------------- */
 
-u32 fsl_assets_init(void)
+u32 fsl_engine_assets_init(void)
 {
-    i32 i = 0;
     fsl_texture *texture_p = NULL;
     fsl_shader_program *shader_p = NULL;
     fsl_font *font_p = NULL;
+    fsl_mesh *mesh_p = NULL;
 
     /* ---- engine textures ------------------------------------------------- */
 
     if (fsl_mem_arena_push(&mem_arena_internal, &fsl_texture_buf,
-                FSL_TEXTURE_INDEX_COUNT * sizeof(fsl_texture), "fsl_assets_init().fsl_texture_buf") != FSL_ERR_SUCCESS)
+                FSL_TEXTURE_INDEX_COUNT * sizeof(fsl_texture), "fsl_engine_assets_init().fsl_texture_buf") != FSL_ERR_SUCCESS)
         goto cleanup;
     if (fsl_mem_arena_push(&mem_arena_internal, &fsl_shader_buf,
-                FSL_SHADER_INDEX_COUNT * sizeof(fsl_shader_program), "fsl_assets_init().fsl_shader_buf") != FSL_ERR_SUCCESS)
+                FSL_SHADER_INDEX_COUNT * sizeof(fsl_shader_program), "fsl_engine_assets_init().fsl_shader_buf") != FSL_ERR_SUCCESS)
         goto cleanup;
     if (fsl_mem_arena_push(&mem_arena_internal, &fsl_font_buf,
-                FSL_FONT_INDEX_COUNT * sizeof(fsl_font), "fsl_assets_init().fsl_font_buf") != FSL_ERR_SUCCESS)
+                FSL_FONT_INDEX_COUNT * sizeof(fsl_font), "fsl_engine_assets_init().fsl_font_buf") != FSL_ERR_SUCCESS)
+        goto cleanup;
+    if (fsl_mem_arena_push(&mem_arena_internal, &fsl_mesh_buf,
+                FSL_MESH_INDEX_COUNT * sizeof(fsl_mesh), "fsl_engine_assets_init().fsl_mesh_buf") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     texture_p = fsl_mem_handle_get(fsl_texture_buf);
     shader_p = fsl_mem_handle_get(fsl_shader_buf);
     font_p = fsl_mem_handle_get(fsl_font_buf);
+    mesh_p = fsl_mem_handle_get(fsl_mesh_buf);
 
     if (fsl_texture_init(&texture_p[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
                 "Panel Active", "panel_active", "panel_active.png", FSL_DIR_NAME_TEXTURES,
@@ -93,84 +96,38 @@ u32 fsl_assets_init(void)
 
     /* ---- engine meshes --------------------------------------------------- */
 
+    if (fsl_mesh_load(&mesh_p[FSL_MESH_INDEX_SKYBOX], "Skybox", "skybox", "skybox.obj", FSL_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
     if (fsl_asset_set_metadata(&fsl_mesh_unit_quad.asset, FSL_ASSET_MESH, "Unit Quad", "unit_quad", NULL, NULL) != FSL_ERR_SUCCESS)
-        return fsl_err;
+        goto cleanup;
 
     /* ---- engine shaders -------------------------------------------------- */
 
-    if (
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_UNIT_QUAD].asset, FSL_ASSET_SHADER_PROGRAM,
-                "Unit Quad", "unit_quad", NULL, NULL) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_UNIT_QUAD].vertex.asset, FSL_ASSET_SHADER,
-                "Unit Quad", "unit_quad", "unit_quad.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_UNIT_QUAD].geometry.asset, FSL_ASSET_SHADER,
-                NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_UNIT_QUAD].fragment.asset, FSL_ASSET_SHADER,
-                "Unit Quad", "unit_quad", "unit_quad.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+    if (fsl_shader_program_init_ex(&shader_p[FSL_SHADER_INDEX_UNIT_QUAD],
+                "Unit Quad", "unit_quad", "unit_quad.vert", NULL, "unit_quad.frag",
+                FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    if (
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_TEXT].asset, FSL_ASSET_SHADER_PROGRAM,
-                "Text", "text", NULL, NULL) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_TEXT].vertex.asset, FSL_ASSET_SHADER,
-                "Text", "text", "text.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_TEXT].geometry.asset, FSL_ASSET_SHADER,
-                NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_TEXT].fragment.asset, FSL_ASSET_SHADER,
-                "Text", "text", "text.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+    if (fsl_shader_program_init_ex(&shader_p[FSL_SHADER_INDEX_TEXT],
+                "Text", "text", "text.vert", NULL, "text.frag",
+                FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    if (
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_UI].asset, FSL_ASSET_SHADER_PROGRAM,
-                "UI", "ui", NULL, NULL) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_UI].vertex.asset, FSL_ASSET_SHADER,
-                "UI", "ui", "ui.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_UI].geometry.asset, FSL_ASSET_SHADER,
-                NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_UI].fragment.asset, FSL_ASSET_SHADER,
-                "UI", "ui", "ui.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+    if (fsl_shader_program_init_ex(&shader_p[FSL_SHADER_INDEX_UI],
+                "UI", "ui", "ui.vert", NULL, "ui.frag",
+                FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    if (
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_UI_9_SLICE].asset, FSL_ASSET_SHADER_PROGRAM,
-                "UI 9-Slice", "ui_9_slice", NULL, NULL) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_UI_9_SLICE].vertex.asset, FSL_ASSET_SHADER,
-                "UI 9-Slice", "ui_9_slice", "ui_9_slice.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_UI_9_SLICE].geometry.asset, FSL_ASSET_SHADER,
-                NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_UI_9_SLICE].fragment.asset, FSL_ASSET_SHADER,
-                "UI 9-Slice", "ui_9_slice", "ui_9_slice.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+    if (fsl_shader_program_init_ex(&shader_p[FSL_SHADER_INDEX_UI_9_SLICE],
+                "UI 9-Slice", "ui_9_slice", "ui_9_slice.vert", NULL, "ui_9_slice.frag",
+                FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    if (
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_OBJECT].asset, FSL_ASSET_SHADER_PROGRAM,
-                "Object", "object", NULL, NULL) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_OBJECT].vertex.asset, FSL_ASSET_SHADER,
-                "Object", "object", "object.vert", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_OBJECT].geometry.asset, FSL_ASSET_SHADER,
-                NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[FSL_SHADER_INDEX_OBJECT].fragment.asset, FSL_ASSET_SHADER,
-                "Object", "object", "object.frag", FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+    if (fsl_shader_program_init_ex(&shader_p[FSL_SHADER_INDEX_OBJECT],
+                "Object", "object", "object.vert", NULL, "object.frag",
+                FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
         goto cleanup;
-
-    for (i = 0; i < FSL_SHADER_INDEX_COUNT; ++i)
-        if (fsl_shader_program_init(&shader_p[i]) != FSL_ERR_SUCCESS)
-            goto cleanup;
 
     /* ---- engine fonts ---------------------------------------------------- */
 

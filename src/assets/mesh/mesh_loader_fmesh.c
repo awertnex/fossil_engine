@@ -17,7 +17,7 @@
 /*!
  *  @file mesh_loader_fmesh.c
  *
- *  @brief Fossil Mesh (.fmesh) mesh file parsing and loading.
+ *  @brief engine's mesh format 'Fossil Mesh' (.fmesh) file parsing and loading.
  */
 
 #include "../../common/config.h"
@@ -30,6 +30,8 @@
 #include "../../string/string.h"
 
 #include "../../h/dir.h"
+
+#include "../asset_types.h"
 
 #include "mesh_loader_internal.h"
 

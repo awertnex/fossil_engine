@@ -23,7 +23,7 @@
 #ifndef FSL_MESH_H
 #define FSL_MESH_H
 
-#include "../../common/engine_info.h"
+#include "../../common/api.h"
 #include "../../common/types.h"
 #include "../../memory/memory_types.h"
 #include "../asset_types.h"
@@ -37,13 +37,13 @@ struct fsl_mesh
     fsl_asset asset;
     GLuint vao;
 
-    GLuint vbo;                 /* -- DEPRECATED IN v0.8.0-dev -- */
-    GLuint vbo_len;             /* -- DEPRECATED IN v0.8.0-dev -- */
-    fsl_mem_handle vbo_data;    /* -- DEPRECATED IN v0.8.0-dev -- */
+    GLuint vbo;                 /* -- DEPRECATED IN v0.9.0-beta -- */
+    GLuint vbo_len;             /* -- DEPRECATED IN v0.9.0-beta -- */
+    fsl_mem_handle vbo_data;    /* -- DEPRECATED IN v0.9.0-beta -- */
 
-    GLuint ebo;                 /* -- DEPRECATED IN v0.8.0-dev -- */
-    GLuint ebo_len;             /* -- DEPRECATED IN v0.8.0-dev -- */
-    fsl_mem_handle ebo_data;    /* -- DEPRECATED IN v0.8.0-dev -- */
+    GLuint ebo;                 /* -- DEPRECATED IN v0.9.0-beta -- */
+    GLuint ebo_len;             /* -- DEPRECATED IN v0.9.0-beta -- */
+    fsl_mem_handle ebo_data;    /* -- DEPRECATED IN v0.9.0-beta -- */
 
     /*!
      *  @brief mesh vertex data.
@@ -64,6 +64,12 @@ struct fsl_mesh
 /*!
  *  @brief load mesh from file into VRAM.
  *
+ *  additionally, convert file into a cooked asset for easier loading next time,
+ *  in 'Fossil Mesh' (.fmesh) format.
+ *
+ *  - if cooked version of file found, it will be loaded regardless of file
+ *    extension specified, even if original file not found.
+ *
  *  @param mesh pointer to `fsl_mesh` to store mesh data into.
  *
  *  @param name asset display name (optional) (@ref fsl_asset_set_metadata() parameter).
@@ -82,9 +88,9 @@ FSLAPI u32 fsl_mesh_load(fsl_mesh *mesh,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path);
 
 /*!
- *  @brief draw mesh using `camera` parameters at specified transforms.
+ *  @brief draw mesh through the lens of `camera` at specified transforms.
  */
-FSLAPI void fsl_mesh_draw(fsl_mesh *mesh, fsl_camera *camera,
+FSLAPI void fsl_mesh_draw(const fsl_mesh *mesh, const fsl_camera *camera,
         f32 pos_x, f32 pos_y, f32 pos_z,
         f32 roll, f32 pitch, f32 yaw,
         f32 scale_x, f32 scale_y, f32 scale_z);

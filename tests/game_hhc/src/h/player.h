@@ -1,11 +1,13 @@
 #ifndef HHC_PLAYER_H
 #define HHC_PLAYER_H
 
-#include "deps/fossil/physics/collision.h"
 #include "deps/fossil/assets/mesh/mesh.h"
+#include "deps/fossil/math/trigonometry.h"
+#include "deps/fossil/math/vector.h"
+#include "deps/fossil/physics/collision.h"
+#include "deps/fossil/physics/physics_types.h"
 
-#include "common.h"
-#include "main.h"
+#include "raycast.h"
 
 #define PLAYER_REACH_DISTANCE_MAX   5.0f
 #define PLAYER_HOTBAR_SLOTS_MAX     10
@@ -72,20 +74,16 @@ enum player_menu_state
     STATE_PLAYER_MENU_COUNT
 }; /* player_menu_state */
 
-typedef struct player
+typedef struct hhc_player
 {
     str name[64];                   /* in-game name */
     u64 flag;                       /* enum @ref player_flag */
-    v3f64 pos;                      /* coordinates in world */
-    v3f64 pos_last;                 /* coordinates in world of previous frame */
-    v3f32 scale;
+    transform_v3f64 transform;
+    transform_v3f64 transform_last;
     v3f32 size;                     /* size (for collision detection) */
     v3f64 target;                   /* arm */
-    v3f64 target_normal;
 
-    f64 roll, pitch, yaw;
-    f32 sin_roll, sin_pitch, sin_yaw;
-    f32 cos_roll, cos_pitch, cos_yaw;
+    angle_f64 roll, pitch, yaw;
     f32 eye_height;                 /* eye-level (camera height) */
     fsl_mesh mesh;
 
@@ -98,7 +96,19 @@ typedef struct player
     f32 health;
 
     fsl_camera camera;
-    fsl_camera camera_hud;          /* for hud 3d elements */
+
+    /*!
+     *  @brief camera for HUD 3D elements responsive to player movement
+     *  (e.g., 3D gizmo (<F3>), chunk gizmo (<Alt + G>).
+     */
+    fsl_camera camera_hud;
+
+    /*!
+     *  @brief camera for UI elements non-responsive to player movement
+     *  (e.g., items in item slots).
+     */
+    fsl_camera camera_ui;
+
     f32 camera_distance;            /* for camera collision detection */
     u8 camera_mode;                 /* enum @ref player_camera_mode */
 
@@ -109,6 +119,7 @@ typedef struct player
 
     v3i32 ch;                       /* current chunk (named `ch` to avoid symbol clash with @ref chunk) */
     v3i32 ch_delta;                 /* previous chunk (named `ch` to avoid symbol clash with @ref chunk) */
+    block_hit hit;                  /* information about the currently targeted block */
 
     v3i64 spawn;                    /* spawn point */
     u64 menu_state;                 /* enum @ref player_menu_state */
@@ -124,7 +135,9 @@ typedef struct player
 
     fsl_bounding_box bbox;
     u32 death; /* enum @ref player_death_reason */
-} player;
+} hhc_player;
+
+u32 player_init(hhc_player *p, const str *name);
 
 /*!
  *  @brief update everything related to a player.
@@ -139,10 +152,10 @@ typedef struct player
  *  5. update player current chunk.
  *  6. make entire chunk buffer dirty if player crosses a chunk boundary.
  */
-void player_update(player *p, f64 dt);
+void player_update(hhc_player *p, f64 dt);
 
-void player_collision_update(player *p, f64 dt);
-void player_bounding_box_update(player *p);
+void player_collision_update(hhc_player *p, f64 dt);
+void player_bounding_box_update(hhc_player *p);
 
 /*!
  *  @brief make a collision capsule for collision detection.
@@ -158,44 +171,36 @@ void player_bounding_box_update(player *p);
 fsl_bounding_box make_collision_capsule(fsl_bounding_box b, v3i32 ch, v3f32 velocity);
 
 /*!
- *  @brief update player chunk deltas.
- *
- *  calculate current chunk and delta chunk, and determine whether
- *  @ref core.flag.chunk_buf_dirty should be set or not.
- */
-void player_chunk_update(player *p);
-
-/*!
  *  @brief calculate camera rotations and mechanics based on `p->camera_mode`.
  *
  *  @param use_mouse let mouse delta move the camera, useful for interacting
  *  with UI instead of player.
  */
-void player_camera_movement_update(player *p, v2f64 mouse_delta, b8 use_mouse);
+void player_camera_movement_update(hhc_player *p, v2f64 mouse_delta, b8 use_mouse);
 
-void player_target_update(player *p);
-void set_player_pos(player *p, f64 x, f64 y, f64 z);
-void set_player_block(player *p, i64 x, i64 y, i64 z);
+void player_target_update(hhc_player *p);
+void set_player_pos(hhc_player *p, f64 x, f64 y, f64 z);
+void set_player_block(hhc_player *p, i64 x, i64 y, i64 z);
 
 /*!
  *  @brief set player spawn point.
  */
-void set_player_spawn(player *p, i64 x, i64 y, i64 z);
+void set_player_spawn(hhc_player *p, i64 x, i64 y, i64 z);
 
 /*!
  *  @brief re-spawn player.
  *
  *  @param hard `TRUE` will reset all player stats, `FALSE` will only teleport to spawn.
  */
-void player_spawn(player *p, b8 hard);
+void player_spawn(hhc_player *p, b8 hard);
 
-void player_kill(player *p);
+void player_kill(hhc_player *p);
 
 /*!
  *  @brief get random string from string buffers in @ref common.c for player death reason.
  *
  *  @return `NULL` on failure.
  */
-str *get_death_str(player *p);
+str *get_death_str(hhc_player *p);
 
 #endif /* HHC_PLAYER_H */

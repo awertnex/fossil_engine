@@ -30,7 +30,7 @@ typedef struct fsl_test_info
     u32 (*build_func)(int argc, char **argv);
 } fsl_test_info;
 
-_buf cmd = {0}; /* build cmd */
+bt_buf cmd = {0}; /* build cmd */
 
 u32 build_game(int argc, char **argv);
 u32 build_text_rendering(int argc, char **argv);
@@ -119,18 +119,21 @@ u32 build_game(int argc, char **argv)
         cmd_push(&cmd, "-Wall");
         cmd_push(&cmd, "-Wextra");
         cmd_push(&cmd, "-Wformat-truncation=0");
+        cmd_push(&cmd, "-Wpedantic");
         cmd_push(&cmd, "-ggdb");
     }
 
     cmd_push(&cmd, DIR_SRC_GAME"main.c");
+    cmd_push(&cmd, DIR_SRC_GAME"chunking/chunking.c");
+    cmd_push(&cmd, DIR_SRC_GAME"chunking/chunking_debug_tools.c");
+    cmd_push(&cmd, DIR_SRC_GAME"terrain/perlin_noise.c");
+    cmd_push(&cmd, DIR_SRC_GAME"terrain/terrain.c");
     cmd_push(&cmd, DIR_SRC_GAME"assets.c");
-    cmd_push(&cmd, DIR_SRC_GAME"chunking.c");
     cmd_push(&cmd, DIR_SRC_GAME"common.c");
     cmd_push(&cmd, DIR_SRC_GAME"dir.c");
     cmd_push(&cmd, DIR_SRC_GAME"gui.c");
     cmd_push(&cmd, DIR_SRC_GAME"input.c");
     cmd_push(&cmd, DIR_SRC_GAME"player.c");
-    cmd_push(&cmd, DIR_SRC_GAME"terrain.c");
     cmd_push(&cmd, DIR_SRC_GAME"world.c");
     cmd_push(&cmd, "-I"DIR_DEPS);
     cmd_push(&cmd, "-std=c89");
@@ -167,7 +170,6 @@ u32 build_text_rendering(int argc, char **argv)
     cmd_push(&cmd, "-Wformat-truncation=0");
     cmd_push(&cmd, "-ggdb");
     cmd_push(&cmd, DIR_SRC_TEXT_RENDERING"main.c");
-    cmd_push(&cmd, "-I"DIR_DEPS);
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
     cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
@@ -201,7 +203,6 @@ u32 build_nine_slice(int argc, char **argv)
     cmd_push(&cmd, "-Wpedantic");
     cmd_push(&cmd, "-ggdb");
     cmd_push(&cmd, DIR_SRC_NINE_SLICE"main.c");
-    cmd_push(&cmd, "-I"DIR_DEPS);
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
     cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
@@ -236,7 +237,6 @@ u32 build_composable_ui(int argc, char **argv)
     cmd_push(&cmd, "-Wformat-truncation=0");
     cmd_push(&cmd, "-ggdb");
     cmd_push(&cmd, DIR_SRC_COMPOSABLE_UI"main.c");
-    cmd_push(&cmd, "-I"DIR_DEPS);
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
     cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);

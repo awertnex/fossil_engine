@@ -30,10 +30,36 @@ u32 assets_init(void)
     u32 j = 0;
     fsl_fbo *fbo_p = NULL;
     fsl_texture *texture_p = NULL;
+    fsl_mesh *mesh_p = NULL;
     fsl_shader_program *shader_p = NULL;
     block *blocks_p = NULL;
     fsl_texture *block_textures_p = NULL;
     fsl_font *font_p = NULL;
+
+    const u32 VBO_LEN_COH = 24;
+    const u32 EBO_LEN_COH = 36;
+
+    GLfloat vbo_data_coh[] =
+    {
+        0.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f,
+        1.0f, 0.0f, 1.0f,
+        0.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f
+    };
+
+    GLuint ebo_data_coh[] =
+    {
+        0, 4, 5, 5, 1, 0,
+        1, 5, 7, 7, 3, 1,
+        3, 7, 6, 6, 2, 3,
+        2, 6, 4, 4, 0, 2,
+        4, 6, 7, 7, 5, 4,
+        0, 1, 3, 3, 2, 0
+    };
 
     font_p = fsl_mem_handle_get(fsl_font_buf);
     font[FONT_REG] =        &font_p[FSL_FONT_INDEX_DEJAVU_SANS];
@@ -69,6 +95,7 @@ u32 assets_init(void)
 
     fbo_p = fsl_mem_handle_get(fbo);
     texture_p = fsl_mem_handle_get(texture);
+    mesh_p = fsl_mem_handle_get(mesh);
     shader_p = fsl_mem_handle_get(shader);
     block_textures_p = fsl_mem_handle_get(block_textures);
     blocks_p = fsl_mem_handle_get(blocks);
@@ -85,20 +112,6 @@ u32 assets_init(void)
         goto cleanup;
 
     /* ---- shaders --------------------------------------------------------- */
-
-    if (
-            fsl_asset_set_metadata(&shader_p[SHADER_DEFAULT].asset, FSL_ASSET_SHADER_PROGRAM,
-                "Default", "default", NULL, GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[SHADER_DEFAULT].vertex.asset, FSL_ASSET_SHADER,
-                "Default", "default", "default.vert", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[SHADER_DEFAULT].geometry.asset, FSL_ASSET_SHADER,
-                NULL, "NULL", NULL, NULL) != FSL_ERR_SUCCESS ||
-
-            fsl_asset_set_metadata(&shader_p[SHADER_DEFAULT].fragment.asset, FSL_ASSET_SHADER,
-                "Default", "default", "default.frag", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
-        goto cleanup;
 
     if (
             fsl_asset_set_metadata(&shader_p[SHADER_SKYBOX].asset, FSL_ASSET_SHADER_PROGRAM,
@@ -188,6 +201,16 @@ u32 assets_init(void)
         if (fsl_shader_program_init(&shader_p[i]) != FSL_ERR_SUCCESS)
             goto cleanup;
 
+    /* ---- meshes ---------------------------------------------------------- */
+
+    if (fsl_mesh_generate(&mesh_p[MESH_CUBE_OF_HAPPINESS], "Cube of Happiness", "cube_of_happiness", NULL, NULL,
+                &fsl_attrib_vec3, GL_STATIC_DRAW,
+                VBO_LEN_COH, EBO_LEN_COH, vbo_data_coh, ebo_data_coh) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    if (fsl_mesh_load(&mesh_p[MESH_GIZMO], "Gizmo", "gizmo", "gizmo.obj", GAME_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
     /* ---- textures -------------------------------------------------------- */
 
     if (
@@ -197,6 +220,10 @@ u32 assets_init(void)
 
             fsl_texture_init(&texture_p[TEXTURE_ITEM_BAR],
                 "Item Bar", "item_bar", "item_bar.png", GAME_DIR_NAME_GUI,
+                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS ||
+
+            fsl_texture_init(&texture_p[TEXTURE_ITEM_BAR_SELECTED],
+                "Item Bar Selected", "item_bar_selected", "item_bar_selected.png", GAME_DIR_NAME_GUI,
                 GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS ||
 
             fsl_texture_init(&texture_p[TEXTURE_SKYBOX_VAL],
@@ -361,17 +388,6 @@ void blocks_init(void)
     fsl_asset_set_metadata(&blocks_p[BLOCK_NONE].asset, FSL_ASSET_CUSTOM,
             "None", "none", NULL, NULL);
 
-    fsl_asset_set_metadata(&blocks_p[BLOCK_BLOOD].asset, FSL_ASSET_CUSTOM,
-            "Blood Block", "block_blood", "block_blood", NULL);
-    blocks_p[BLOCK_BLOOD].state = BLOCK_STATE_SOLID;
-    blocks_p[BLOCK_BLOOD].texture_index[0] = TEXTURE_BLOCK_BLOOD;
-    blocks_p[BLOCK_BLOOD].texture_index[1] = TEXTURE_BLOCK_BLOOD;
-    blocks_p[BLOCK_BLOOD].texture_index[2] = TEXTURE_BLOCK_BLOOD;
-    blocks_p[BLOCK_BLOOD].texture_index[3] = TEXTURE_BLOCK_BLOOD;
-    blocks_p[BLOCK_BLOOD].texture_index[4] = TEXTURE_BLOCK_BLOOD;
-    blocks_p[BLOCK_BLOOD].texture_index[5] = TEXTURE_BLOCK_BLOOD;
-    blocks_p[BLOCK_BLOOD].friction = FRICTION_BLOCK_WET;
-
     fsl_asset_set_metadata(&blocks_p[BLOCK_GRASS].asset, FSL_ASSET_CUSTOM,
             "Grass Block", "block_grass", "block_grass", NULL);
     blocks_p[BLOCK_GRASS].state = BLOCK_STATE_SOLID;
@@ -503,6 +519,17 @@ void blocks_init(void)
     blocks_p[BLOCK_WOOD_OAK_PLANKS].texture_index[4] = TEXTURE_BLOCK_WOOD_OAK_PLANKS;
     blocks_p[BLOCK_WOOD_OAK_PLANKS].texture_index[5] = TEXTURE_BLOCK_WOOD_OAK_PLANKS;
     blocks_p[BLOCK_WOOD_OAK_PLANKS].friction = FRICTION_BLOCK_HARD;
+
+    fsl_asset_set_metadata(&blocks_p[BLOCK_BLOOD].asset, FSL_ASSET_CUSTOM,
+            "Blood Block", "block_blood", "block_blood", NULL);
+    blocks_p[BLOCK_BLOOD].state = BLOCK_STATE_SOLID;
+    blocks_p[BLOCK_BLOOD].texture_index[0] = TEXTURE_BLOCK_BLOOD;
+    blocks_p[BLOCK_BLOOD].texture_index[1] = TEXTURE_BLOCK_BLOOD;
+    blocks_p[BLOCK_BLOOD].texture_index[2] = TEXTURE_BLOCK_BLOOD;
+    blocks_p[BLOCK_BLOOD].texture_index[3] = TEXTURE_BLOCK_BLOOD;
+    blocks_p[BLOCK_BLOOD].texture_index[4] = TEXTURE_BLOCK_BLOOD;
+    blocks_p[BLOCK_BLOOD].texture_index[5] = TEXTURE_BLOCK_BLOOD;
+    blocks_p[BLOCK_BLOOD].friction = FRICTION_BLOCK_WET;
 }
 
 /* ---- special_blocks ------------------------------------------------------ */

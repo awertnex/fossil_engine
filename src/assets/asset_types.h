@@ -25,6 +25,9 @@
 
 #include "../common/limits.h"
 #include "../common/types.h"
+#include "../math/matrix.h"
+#include "../math/trigonometry.h"
+#include "../math/vector.h"
 #include "../memory/memory_types.h"
 
 #include "../external/glad/glad.h"
@@ -114,7 +117,7 @@ struct fsl_asset
     /*!
      *  @remark `TRUE` does not mean 'has metadata', it means whatever the asset
      *  requires to be fully initialized and usable is fulfilled
-     *  (e.g., texture is generated and uploaded to VRAM).
+     *  (e.g., texture generated and uploaded to VRAM).
      */
     b8 initialized;
 }; /* fsl_asset */
@@ -194,7 +197,7 @@ struct fsl_font
     f32 size;               /* global font size, for text uniformity */
     v2i32 scale;            /* biggest glyph bounding box size, in font units */
     u8* buf;                /* font file contents (used in runtime) */
-    u64 buf_len;            /* size allocated for @ref fsl_font.buf, in bytes */
+    u64 buf_len;            /* size allocated for `buf`, in bytes */
     fsl_mem_handle info;    /* used by @ref stbtt_InitFont() */
     fsl_glyph glyph[FSL_GLYPH_MAX];
 }; /* fsl_font */
@@ -213,9 +216,9 @@ struct fsl_projection
 struct fsl_camera
 {
     v3f64 pos;
-    f64 roll, pitch, yaw;
-    f64 sin_roll, sin_pitch, sin_yaw;
-    f64 cos_roll, cos_pitch, cos_yaw;
+    angle_f64 roll;
+    angle_f64 pitch;
+    angle_f64 yaw;
     f32 fovy;
     f32 fovy_smooth;
     f32 ratio;

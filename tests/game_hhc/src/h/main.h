@@ -1,11 +1,8 @@
 #ifndef HHC_H
 #define HHC_H
 
-#include "deps/fossil/common/diagnostics.h"
 #include "deps/fossil/common/types.h"
 #include "deps/fossil/engine/engine.h"
-
-#include "deps/fossil/h/ui.h"
 
 #include "common.h"
 
@@ -20,9 +17,8 @@ struct hhc_core
         b8 fullscreen;
         b8 menu_open;
         b8 fps_cap;
-        b8 parse_target;
         b8 world_loaded;
-        b8 chunk_buf_dirty;
+        b8 chunks_initialized;
     } flag;
 
     struct /* debug */
@@ -31,7 +27,7 @@ struct hhc_core
         b8 chunk_bounds;
         b8 bounding_boxes;
         b8 chunk_gizmo;
-        b8 chunk_queue_visualizer;
+        b8 chunk_scheduler_visualizer;
     } debug;
 }; /* hhc_core */
 
@@ -80,7 +76,6 @@ struct hhc_uniform
 
     struct /* skybox */
     {
-        GLint texture_scale;
         GLint mat_translation;
         GLint mat_rotation;
         GLint mat_sun_rotation;
@@ -98,11 +93,6 @@ struct hhc_uniform
 
     struct /* gizmo */
     {
-        GLint ndc_scale;
-        GLint mat_translation;
-        GLint mat_rotation;
-        GLint mat_orientation;
-        GLint mat_projection;
         GLint color;
     } gizmo;
 
@@ -152,6 +142,7 @@ struct hhc_uniform
 extern fsl_render *render;
 extern struct hhc_core core;
 extern struct hhc_settings settings;
+extern struct hhc_uniform uniform;
 extern fsl_font *font[FONT_COUNT];
 
 #endif /* HHC_MAIN_H */

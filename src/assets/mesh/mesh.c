@@ -20,7 +20,6 @@
  *  @brief mesh loading, generating, unloading and mesh file formats.
  */
 
-#include "../../common/common_values.h"
 #include "../../common/config.h"
 #include "../../common/diagnostics.h"
 #include "../../common/types.h"
@@ -28,13 +27,13 @@
 #include "../../engine/engine_assets.h"
 #include "../../logger/logger.h"
 #include "../../logger/logger_messages_internal.h"
+#include "../../math/math.h"
+#include "../../math/vector.h"
 #include "../../memory/memory.h"
-#include "../../shaders/shaders.h"
-#include "../../string/string.h"
+#include "../../shaders/shader_types.h"
 #include "../../string/string_internal.h"
 
 #include "../../h/dir.h"
-#include "../../h/math.h"
 
 #include "mesh.h"
 #include "mesh_loader_internal.h"
@@ -141,6 +140,7 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
     fsl_array vertex_buf = {0};
     fsl_array index_buf = {0};
     u32 i = 0;
+    b8 is_cooked = FALSE;
 
     if (!mesh)
     {
@@ -151,16 +151,9 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
     }
 
     snprintf(path_temp, FSL_PATH_CAP, "%s%s", path, file);
-    if (fsl_is_file_exists(path_temp, FALSE) != FSL_ERR_SUCCESS)
-    {
-        LOGERROR(FSL_ERR_MESH_LOAD_FAIL,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Load Mesh", path_temp, "File Not Found"));
-        return fsl_err;
-    }
-
     snprintf(file_temp, FSL_ID_CAP, "%s", file);
-    if (mesh_is_cooked(path_temp))
+    is_cooked = mesh_is_cooked(path_temp);
+    if (is_cooked)
     {
         extension = strrchr(file_temp, '.');
         if (extension)
@@ -168,12 +161,22 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
             ++extension;
             snprintf(extension, strlen(FSL_FILE_FORMAT_NAME_FOSSIL_MESH) + 1, "%s", FSL_FILE_FORMAT_NAME_FOSSIL_MESH);
         }
+
         extension = strrchr(path_temp, '.');
         if (extension)
         {
             ++extension;
             snprintf(extension, strlen(FSL_FILE_FORMAT_NAME_FOSSIL_MESH) + 1, "%s", FSL_FILE_FORMAT_NAME_FOSSIL_MESH);
         }
+    }
+
+    if (!is_cooked && fsl_is_file_exists(path_temp, FALSE) != FSL_ERR_SUCCESS)
+    {
+        snprintf(path_temp, FSL_PATH_CAP, "%s%s", path, file);
+        LOGERROR(FSL_ERR_MESH_LOAD_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                MSG_ACTION_SUBJECT_REASON_ERROR("Load Mesh", path_temp, "File Not Found"));
+        return fsl_err;
     }
 
 fallback:
@@ -257,12 +260,12 @@ cleanup:
     return fsl_err;
 }
 
-void fsl_mesh_draw(fsl_mesh *mesh, fsl_camera *camera,
+void fsl_mesh_draw(const fsl_mesh *mesh, const fsl_camera *camera,
         f32 pos_x, f32 pos_y, f32 pos_z,
         f32 roll, f32 pitch, f32 yaw,
         f32 scale_x, f32 scale_y, f32 scale_z)
 {
-    fsl_shader_program *shader = NULL;
+    fsl_shader_program *shader = fsl_mem_handle_get(fsl_shader_buf);
     f32 SROL = 0.0f, CROL = 0.0f, SPCH = 0.0f, CPCH = 0.0f, SYAW = 0.0f, CYAW = 0.0f;
     m4f32 transform = {0};
     m4f32 location = {0};
@@ -270,8 +273,6 @@ void fsl_mesh_draw(fsl_mesh *mesh, fsl_camera *camera,
     m4f32 rotation_pitch = {0};
     m4f32 rotation_yaw = {0};
     m4f32 scale = {0};
-
-    shader = fsl_mem_handle_get(fsl_shader_buf);
 
     SROL = sinf(roll * FSL_DEG2RAD);
     CROL = cosf(roll * FSL_DEG2RAD);
@@ -315,6 +316,7 @@ void fsl_mesh_draw(fsl_mesh *mesh, fsl_camera *camera,
     scale.a44 = 1.0f;
 
     transform = fsl_matrix_multiply(scale, location);
+    transform = fsl_matrix_multiply(rotation_pitch, transform);
     transform = fsl_matrix_multiply(rotation_yaw, transform);
     transform = fsl_matrix_multiply(transform, camera->projection.perspective);
 
@@ -324,10 +326,7 @@ void fsl_mesh_draw(fsl_mesh *mesh, fsl_camera *camera,
 
     glUseProgram(shader[FSL_SHADER_INDEX_OBJECT].asset.id);
     glBindVertexArray(mesh->vao);
-    if (mesh->index_buf.initialized)
-        glDrawElementsInstanced(GL_TRIANGLES, mesh->index_buf.len, GL_UNSIGNED_INT, NULL, 1);
-    else
-        glDrawArraysInstanced(GL_TRIANGLES, 0, mesh->vertex_buf.len, 1);
+    glDrawElementsInstanced(GL_TRIANGLES, mesh->index_buf.len, GL_UNSIGNED_INT, NULL, 1);
 }
 
 u32 fsl_mesh_generate(fsl_mesh *mesh,
@@ -498,14 +497,6 @@ void fsl_mesh_free(fsl_mesh *mesh)
     if (mesh == NULL)
         return;
 
-    if (mesh->asset.initialized)
-    {
-        mesh->asset.initialized = FALSE;
-        glDeleteBuffers(1, &mesh->ebo); /* -- DEPRECATED IN v0.8.0-dev -- */
-        glDeleteBuffers(1, &mesh->vbo); /* -- DEPRECATED IN v0.8.0-dev -- */
-        glDeleteVertexArrays(1, &mesh->vao); /* -- DEPRECATED IN v0.8.0-dev -- */
-    }
-
     if (mesh->vertex_buf.initialized)
         fsl_vbo_free(&mesh->vertex_buf);
 
@@ -514,6 +505,14 @@ void fsl_mesh_free(fsl_mesh *mesh)
 
     if (mesh->transform_buf.initialized)
         fsl_vbo_free(&mesh->transform_buf);
+
+    if (mesh->asset.initialized)
+    {
+        mesh->asset.initialized = FALSE;
+        glDeleteBuffers(1, &mesh->ebo); /* -- DEPRECATED IN v0.9.0-beta -- */
+        glDeleteBuffers(1, &mesh->vbo); /* -- DEPRECATED IN v0.9.0-beta -- */
+        glDeleteVertexArrays(1, &mesh->vao);
+    }
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             MSG_MESH_UNLOAD(fsl_mem_handle_get(mesh->asset.name_id)));

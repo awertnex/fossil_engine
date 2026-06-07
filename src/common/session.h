@@ -23,20 +23,29 @@
 #ifndef FSL_SESSION_H
 #define FSL_SESSION_H
 
-#include "engine_info.h"
+#include "api.h"
 #include "types.h"
 
-/*!
- *  @brief POSIX timestamp of the main process' start, in millisecond format.
- */
-extern u64 fsl_init_time;
+typedef struct fsl_engine_session fsl_engine_session;
+
+struct fsl_engine_session
+{
+    /*!
+     *  @brief POSIX timestamp of session's start, in millisecond format.
+     */
+    u64 init_time;
+
+    /*!
+     *  @brief running binary/executable's root directory.
+     *
+     *  @remark used to change current working dirctory to the running binary's.
+     */
+    str *bin_root;
+}; /* fsl_engine_session */
 
 /*!
- *  @brief project root directory.
- *
- *  @remark called from @ref fsl_engine_init() to change current working dirctory to the main process'.
- *  @remark declared and initialized internally.
+ *  @remark declared and initialized in @ref fsl_engine_init().
  */
-FSLAPI extern str *FSL_DIR_PROC_ROOT;
+FSLAPI extern fsl_engine_session FSL_SESSION;
 
 #endif /* FSL_SESSION_H */

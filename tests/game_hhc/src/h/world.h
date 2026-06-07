@@ -1,6 +1,10 @@
 #ifndef HHC_WORLD_H
 #define HHC_WORLD_H
 
+#include "deps/fossil/math/vector.h"
+
+#include "../terrain/terrain.h"
+
 #include "player.h"
 
 #define WORLD_TICK_SPEED        20.0
@@ -18,6 +22,7 @@ typedef struct world_info
     u64 tick;
     u64 tick_start;
     u64 days;
+    terrain (*terrain_func)(v3i32 coordinates);
 
     f32 gravity;
     v3f32 drag;
@@ -37,7 +42,7 @@ extern world_info world;
  *
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
-u32 world_init(str *name, u64 seed, player *p);
+u32 world_init(str *name, u64 seed, hhc_player *p);
 
 /*!
  *  @brief initialize world directory structure.
@@ -66,6 +71,6 @@ u32 world_dir_init(const str *world_name);
  */
 u32 world_load(world_info *world, const str *world_name, u64 seed);
 
-void world_update(player *p);
+void world_update(hhc_player *p);
 
 #endif /* HHC_WORLD_H */

@@ -88,6 +88,7 @@
 #define ERR_MEM_REMAP_FAIL              4152
 #define ERR_FILE_STAT_FAIL              4153
 #define ERR_READ_LINK_FAIL              4154
+#define ERR_DIR_EMPTY                   4155
 
 /*! @brief global variable for build-specific error codes.
  *

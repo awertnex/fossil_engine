@@ -1,3 +1,6 @@
+#ifndef FSL_COLLISION_H
+#define FSL_COLLISION_H
+
 /*!
  *  Copyright 2026 Lily Awertnex
  *
@@ -20,10 +23,7 @@
  *  @brief collision detection and collision data types.
  */
 
-#ifndef FSL_COLLISION_H
-#define FSL_COLLISION_H
-
-#include "../common/engine_info.h"
+#include "../common/api.h"
 #include "../common/types.h"
 
 #define FSL_COLLISION_EPSILON 1e-5

@@ -23,7 +23,7 @@
 #ifndef FSL_DIAGNOSTICS_H
 #define FSL_DIAGNOSTICS_H
 
-#include "engine_info.h"
+#include "api.h"
 #include "types.h"
 
 #define FSL_DIAGNOSTIC_COLOR_DEFAULT        0xecececff
@@ -101,6 +101,7 @@
 #define FSL_ERR_VBO_INIT_FAIL               4158
 #define FSL_ERR_FILE_FORMAT_INVALID         4159
 #define FSL_ERR_FILE_DATA_CORRUPT           4160
+#define FSL_ERR_DIR_EMPTY                   4161
 
 /*!
  *  @brief global variable for engine-specific error codes.

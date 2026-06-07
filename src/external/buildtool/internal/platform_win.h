@@ -36,9 +36,9 @@
 
 /* ---- section: implementation --------------------------------------------- */
 
-u32 _get_path_absolute(const str *path, str *path_real)
+u32 get_path_absolute_internal(const str *path, str *path_real)
 {
-    if (!GetFullPathNameA(path, PATH_MAX, path_real, NULL))
+    if (!GetFullPathNameA(path, PATH_CAP, path_real, NULL))
     {
         build_err = ERR_GET_PATH_ABSOLUTE_FAIL;
         return build_err;
@@ -49,16 +49,16 @@ u32 _get_path_absolute(const str *path, str *path_real)
     return build_err;
 }
 
-u32 _get_path_bin_root(str *path)
+u32 get_path_bin_root_internal(str *path)
 {
-    if (strlen(_pgmptr) + 1 >= PATH_MAX)
+    if (strlen(_pgmptr) + 1 >= PATH_CAP)
     {
         LOGFATAL(ERR_GET_PATH_BIN_ROOT_FAIL, FALSE,
-                logger_stringf("%s\n", "Failed 'get_path_bin_root()', Process Aborted"));
+                "Failed 'get_path_bin_root()', Process Aborted\n");
         return build_err;
     }
 
-    strncpy(path, _pgmptr, PATH_MAX);
+    strncpy(path, _pgmptr, PATH_CAP);
     retract_path(path);
     posix_slash(path);
 
@@ -66,7 +66,7 @@ u32 _get_path_bin_root(str *path)
     return build_err;
 }
 
-u32 exec(_buf *cmd, str *cmd_name)
+u32 exec(bt_buf *cmd, str *cmd_name)
 {
     STARTUPINFOA        startup_info = {0};
     PROCESS_INFORMATION process_info = {0};

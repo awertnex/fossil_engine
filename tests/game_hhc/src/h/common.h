@@ -93,8 +93,12 @@
 
 /* ---- file names ---------------------------------------------------------- */
 
-#define GAME_FILE_NAME_SETTINGS     "settings.txt"
-#define GAME_FILE_NAME_WORLD_SEED   "seed.txt"
+#define GAME_FILE_NAME_SETTINGS         "settings.txt"
+#define GAME_FILE_NAME_WORLD_METADATA   "metadata.txt"
+#define GAME_FILE_NAME_WORLD_SEED       "seed.txt"
+#define GAME_FILE_NAME_LOOKUP_CHUNK_ORDER "lookup_chunk_order.bin"
+#define GAME_FILE_NAME_LOOKUP_CHUNKS_MAX "lookup_chunks_max.bin"
+#define GAME_FILE_NAME_LOOKUP_RAND_TAB  "lookup_rand_tab.bin"
 
 /* ---- name formats -------------------------------------------------------- */
 
@@ -119,7 +123,6 @@
 
 enum mesh_index
 {
-    MESH_SKYBOX,
     MESH_CUBE_OF_HAPPINESS,
     MESH_GIZMO,
     MESH_COUNT

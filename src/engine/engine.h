@@ -23,10 +23,11 @@
 #ifndef FSL_ENGINE_H
 #define FSL_ENGINE_H
 
-#include "../common/engine_info.h"
+#include "../common/api.h"
 #include "../common/limits.h"
 #include "../common/types.h"
 #include "../assets/asset_types.h"
+#include "../math/vector.h"
 
 #define GLFW_INCLUDE_NONE
 #include "../external/glfw3.h"
@@ -49,7 +50,7 @@ struct fsl_render
     /*!
      *  @brief conversion from world-space to screen-space.
      *
-     *  @remark read-only, updated internally in @ref fsl_running().
+     *  @remark read-only, updated internally in @ref fsl_engine_running().
      */
     v2f32 ndc_scale;
 
@@ -72,7 +73,7 @@ struct fsl_render
  *
  *  @brief engine's default render.
  *
- *  @remark declared and initialized internally.
+ *  @remark declared and initialized internally, retrieve reference using @ref fsl_render_get().
  */
 extern fsl_render render_internal;
 
@@ -123,7 +124,7 @@ FSLAPI u32 fsl_engine_init(int argc, char **argv, const str *title,
  *  @return `TRUE` unless @ref glfwWindowShouldClose() returns `FALSE` or
  *  @ref fsl_request_engine_close() has been called.
  */
-FSLAPI b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32));
+FSLAPI b8 fsl_engine_running(void (*callback_framebuffer_size)(i32 size_x, i32 size_y));
 
 /*!
  *  @brief update render settings (e.g., render size).
@@ -135,7 +136,7 @@ FSLAPI b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32));
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_update_render_settings(void (*callback_framebuffer_size)(i32, i32));
+FSLAPI u32 fsl_update_render_settings(void (*callback_framebuffer_size)(i32 size_x, i32 size_y));
 
 /*!
  *  @brief send engine close request to then be processed by @ref fsl_engine_running().
@@ -228,12 +229,12 @@ FSLAPI void fsl_request_screenshot(void);
 FSLAPI u32 fsl_process_screenshot_request(const str *dir_screenshots, const str *special_text);
 
 /*!
- *  @brief bind internal fbo for rendering.
+ *  @brief bind internal framebuffer for rendering.
  */
 FSLAPI void fsl_fbo_bind(void);
 
 /*!
- *  @brief blit rendered internal fbo (e.g., text, ui elements) onto `fbo`.
+ *  @brief blit rendered internal framebuffer (e.g., text, ui elements) onto `fbo`.
  */
 FSLAPI void fsl_fbo_blit(GLuint fbo);
 

@@ -1,10 +1,18 @@
+#include "deps/fossil/common/config.h"
 #include "deps/fossil/common/diagnostics.h"
+#include "deps/fossil/assets/asset_types.h"
+#include "deps/fossil/assets/assets.h"
+#include "deps/fossil/assets/mesh/mesh.h"
 #include "deps/fossil/engine/engine.h"
+#include "deps/fossil/engine/engine_assets.h"
 #include "deps/fossil/logger/logger.h"
+#include "deps/fossil/math/math.h"
 #include "deps/fossil/memory/memory.h"
+#include "deps/fossil/shaders/shaders.h"
 #include "deps/fossil/string/string.h"
 
 #include "h/common.h"
+#include "h/diagnostics.h"
 #include "h/main.h"
 #include "h/gui.h"
 #include "h/dir.h"
@@ -12,6 +20,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+
+#define UI_ITEM_PITCH -20.0f
+#define UI_ITEM_YAW 50.0f
+#define UI_ITEM_SCALE 32.0f
+
+struct /* ui_item_data_internal */
+{
+    fsl_mesh mesh_unit_cube;
+    fsl_shader_program shader;
+    fsl_camera camera;
+    f64 camera_distance;
+} ui_item_data_internal = {0};
 
 u16 menu_index_cur;
 u16 menu_layer[5] = {0};
@@ -21,12 +41,114 @@ u8 buttons[BTN_COUNT];
 
 u32 gui_init(void)
 {
+    u32 button_count = BTN_COUNT;
+
+    if (fsl_mesh_load(&ui_item_data_internal.mesh_unit_cube,
+                "Unit Cube", "unit_cube", "unit_cube.obj", GAME_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
+        return *GAME_ERR;
+
+    if (fsl_shader_program_init_ex(&ui_item_data_internal.shader, "UI Item", "ui_item",
+                "ui_item.vert", NULL, "ui_item.frag", GAME_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    ui_item_data_internal.camera.fovy = 35.0f;
+    ui_item_data_internal.camera.fovy_smooth = 35.0f;
+    ui_item_data_internal.camera.ratio = (f32)render->size.x / render->size.y;
+    ui_item_data_internal.camera.far = FSL_CAMERA_CLIP_FAR_UI;
+    ui_item_data_internal.camera.near = FSL_CAMERA_CLIP_NEAR_DEFAULT;
+
+    ui_item_data_internal.camera_distance = 3.0;
+
     /*
     game_menu_pos = setting.render_size.y / 3; // TODO: figure this out
     menu_index_cur = MENU_TITLE;
-    memset(buttons, 0, BTN_COUNT);
      */
-    return FSL_ERR_SUCCESS;
+
+    while (button_count--)
+        buttons[button_count] = 0;
+
+    *GAME_ERR = FSL_ERR_SUCCESS;
+    return *GAME_ERR;
+
+cleanup:
+
+    gui_free();
+    return *GAME_ERR;
+}
+
+void gui_free(void)
+{
+    fsl_mesh_free(&ui_item_data_internal.mesh_unit_cube);
+    fsl_shader_program_free(&ui_item_data_internal.shader);
+}
+
+void gui_start_ui_items(void)
+{
+    glUseProgram(ui_item_data_internal.shader.asset.id);
+
+    ui_item_data_internal.camera.ratio = (f32)render->size.x / render->size.y;
+    fsl_camera_movement_update(&ui_item_data_internal.camera,
+            -ui_item_data_internal.camera_distance, 0.0, 0.0,
+            0.0, 0.0, 0.0);
+}
+
+void gui_draw_ui_item(f32 pos_x, f32 pos_y)
+{
+    f32 pitch = UI_ITEM_PITCH;
+    f32 yaw = UI_ITEM_YAW;
+    f32 SPCH = 0.0f, CPCH = 0.0f, SYAW = 0.0f, CYAW = 0.0f;
+    m4f32 transform = {0};
+    m4f32 rotation_pitch = {0};
+    m4f32 rotation_yaw = {0};
+    m4f32 scale = {0};
+    m4f32 offset = {0};
+
+    SPCH = sinf(pitch * FSL_DEG2RAD);
+    CPCH = cosf(pitch * FSL_DEG2RAD);
+    SYAW = sinf(yaw * FSL_DEG2RAD);
+    CYAW = cosf(yaw * FSL_DEG2RAD);
+
+    rotation_pitch.a11 = CPCH;
+    rotation_pitch.a13 = -SPCH;
+    rotation_pitch.a22 = 1.0f;
+    rotation_pitch.a31 = SPCH;
+    rotation_pitch.a33 = CPCH;
+    rotation_pitch.a44 = 1.0f;
+
+    rotation_yaw.a11 = CYAW;
+    rotation_yaw.a12 = -SYAW;
+    rotation_yaw.a21 = SYAW;
+    rotation_yaw.a22 = CYAW;
+    rotation_yaw.a33 = 1.0f;
+    rotation_yaw.a44 = 1.0f;
+
+    scale.a11 = 1.0f;
+    scale.a22 = 1.0f;
+    scale.a33 = 1.0f;
+    scale.a44 = render->size.y / UI_ITEM_SCALE;
+
+    offset.a11 = 1.0f;
+    offset.a22 = 1.0f;
+    offset.a33 = 1.0f;
+    offset.a41 = ((f32)(-render->size.x + UI_ITEM_SCALE) / 2.0 + pos_x) * render->ndc_scale.x;
+    offset.a42 = ((f32)(-render->size.y + UI_ITEM_SCALE) / 2.0 + pos_y) * render->ndc_scale.y;
+    offset.a44 = 1.0f;
+
+    /* 3D space */
+    transform = fsl_matrix_multiply(rotation_yaw, rotation_pitch);
+    transform = fsl_matrix_multiply(transform, ui_item_data_internal.camera.projection.perspective);
+
+    /* UI space */
+    transform = fsl_matrix_multiply(scale, transform);
+    transform = fsl_matrix_multiply(transform, offset);
+
+    glBindBuffer(GL_ARRAY_BUFFER, ui_item_data_internal.mesh_unit_cube.transform_buf.id);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(m4f32), &transform, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glBindVertexArray(ui_item_data_internal.mesh_unit_cube.vao);
+    glDrawElementsInstanced(GL_TRIANGLES, ui_item_data_internal.mesh_unit_cube.index_buf.len,
+        GL_UNSIGNED_INT, NULL, 1);
 }
 
 #ifdef FUCK /* TODO: undef FUCK */

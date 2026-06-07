@@ -35,22 +35,22 @@
 #define arr_len(arr) ((u64)sizeof(arr) / sizeof(arr[0]))
 
 #define mem_alloc(x, size, name) \
-    _mem_alloc(x, size, name, __BASE_FILE__, __LINE__)
+    mem_alloc_internal(x, size, name, __BASE_FILE__, __LINE__)
 
 #define mem_alloc_memb(x, memb, size, name) \
-    _mem_alloc_memb(x, memb, size, name, __BASE_FILE__, __LINE__)
+    mem_alloc_memb_internal(x, memb, size, name, __BASE_FILE__, __LINE__)
 
 #define mem_free(x, size, name) \
-    _mem_free(x, size, name, __BASE_FILE__, __LINE__)
+    mem_free_internal(x, size, name, __BASE_FILE__, __LINE__)
 
 #define mem_alloc_buf(x, memb, size, name) \
-    _mem_alloc_buf(x, memb, size, name, __BASE_FILE__, __LINE__)
+    mem_alloc_buf_internal(x, memb, size, name, __BASE_FILE__, __LINE__)
 
 #define mem_free_buf(x, name) \
-    _mem_free_buf(x, name, __BASE_FILE__, __LINE__)
+    mem_free_buf_internal(x, name, __BASE_FILE__, __LINE__)
 
 #define mem_clear(x, size, name) \
-    _mem_clear(x, size, name, __BASE_FILE__, __LINE__)
+    mem_clear_internal(x, size, name, __BASE_FILE__, __LINE__)
 
 /* ---- section: signatures ------------------------------------------------- */
 
@@ -61,7 +61,7 @@
  *
  *  @return non-zero on failure and @ref build_err is set accordingly.
  */
-extern u32 _mem_alloc(void **x, u64 size, const str *name, const str *file, u64 line);
+extern u32 mem_alloc_internal(void **x, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -71,14 +71,14 @@ extern u32 _mem_alloc(void **x, u64 size, const str *name, const str *file, u64 
  *
  *  @return non-zero on failure and @ref build_err is set accordingly.
  */
-extern u32 _mem_alloc_memb(void **x, u64 memb, u64 size, const str *name, const str *file, u64 line);
+extern u32 mem_alloc_memb_internal(void **x, u64 memb, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
  *  @param size size in bytes.
  *  @param name pointer name (for logging).
  */
-extern void _mem_free(void **x, u64 size, const str *name, const str *file, u64 line);
+extern void mem_free_internal(void **x, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -88,13 +88,13 @@ extern void _mem_free(void **x, u64 size, const str *name, const str *file, u64 
  *
  *  @return non-zero on failure and @ref build_err is set accordingly.
  */
-extern u32 _mem_alloc_buf(_buf *x, u64 memb, u64 size, const str *name, const str *file, u64 line);
+extern u32 mem_alloc_buf_internal(bt_buf *x, u64 memb, u64 size, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
  *  @param name pointer name (for logging).
  */
-extern void _mem_free_buf(_buf *x, const str *name, const str *file, u64 line);
+extern void mem_free_buf_internal(bt_buf *x, const str *name, const str *file, u64 line);
 
 /*! -- INTERNAL USE ONLY --;
  *
@@ -103,11 +103,11 @@ extern void _mem_free_buf(_buf *x, const str *name, const str *file, u64 line);
  *
  *  @return non-zero on failure and @ref build_err is set accordingly.
  */
-extern u32 _mem_clear(void **x, u64 size, const str *name, const str *file, u64 line);
+extern u32 mem_clear_internal(void **x, u64 size, const str *name, const str *file, u64 line);
 
 /* ---- section: implementation --------------------------------------------- */
 
-u32 _mem_alloc(void **x, u64 size, const str *name, const str *file, u64 line)
+u32 mem_alloc_internal(void **x, u64 size, const str *name, const str *file, u64 line)
 {
     if (*x)
     {
@@ -129,7 +129,7 @@ u32 _mem_alloc(void **x, u64 size, const str *name, const str *file, u64 line)
     return build_err;
 }
 
-u32 _mem_alloc_memb(void **x, u64 memb, u64 size, const str *name, const str *file, u64 line)
+u32 mem_alloc_memb_internal(void **x, u64 memb, u64 size, const str *name, const str *file, u64 line)
 {
     if (*x)
         return ERR_SUCCESS;
@@ -148,24 +148,24 @@ u32 _mem_alloc_memb(void **x, u64 memb, u64 size, const str *name, const str *fi
     return build_err;
 }
 
-void _mem_free(void **x, u64 size, const str *name, const str *file, u64 line)
+void mem_free_internal(void **x, u64 size, const str *name, const str *file, u64 line)
 {
     void *temp = NULL;
     if (!x || !*x)
         return;
 
     temp = *x;
-    _mem_clear(x, size, name, file, line);
+    mem_clear_internal(x, size, name, file, line);
     free(*x);
     *x = NULL;
     LOGTRACEEX(TRUE, file, line,
             logger_stringf("%s[%p] Memory Unloaded\n", name, temp));
 }
 
-u32 _mem_alloc_buf(_buf *x, u64 memb, u64 size, const str *name, const str *file, u64 line)
+u32 mem_alloc_buf_internal(bt_buf *x, u64 memb, u64 size, const str *name, const str *file, u64 line)
 {
-    str name_i[NAME_MAX] = {0};
-    str name_buf[NAME_MAX] = {0};
+    str name_i[ID_CAP] = {0};
+    str name_buf[ID_CAP] = {0};
     u64 i = 0;
 
     if (!x)
@@ -178,16 +178,16 @@ u32 _mem_alloc_buf(_buf *x, u64 memb, u64 size, const str *name, const str *file
     if (x->loaded || x->buf || x->i)
         return ERR_SUCCESS;
 
-    snprintf(name_i, NAME_MAX, "%s.i", name);
-    snprintf(name_buf, NAME_MAX, "%s.buf", name);
+    snprintf(name_i, ID_CAP, "%s.i", name);
+    snprintf(name_buf, ID_CAP, "%s.buf", name);
 
-    if (_mem_alloc_memb((void*)&x->i,
+    if (mem_alloc_memb_internal((void*)&x->i,
                 memb, sizeof(str*), name_i, file, line) != ERR_SUCCESS)
         return build_err;
 
-    if (_mem_alloc_memb((void*)&x->buf, memb, size, name_buf, file, line) != ERR_SUCCESS)
+    if (mem_alloc_memb_internal((void*)&x->buf, memb, size, name_buf, file, line) != ERR_SUCCESS)
     {
-        _mem_free((void*)&x->i, memb * sizeof(str*), name_i, file, line);
+        mem_free_internal((void*)&x->i, memb * sizeof(str*), name_i, file, line);
         return build_err;
     }
 
@@ -202,21 +202,21 @@ u32 _mem_alloc_buf(_buf *x, u64 memb, u64 size, const str *name, const str *file
     return build_err;
 }
 
-void _mem_free_buf(_buf *x, const str *name, const str *file, u64 line)
+void mem_free_buf_internal(bt_buf *x, const str *name, const str *file, u64 line)
 {
-    str name_i[NAME_MAX] = {0};
-    str name_buf[NAME_MAX] = {0};
+    str name_i[ID_CAP] = {0};
+    str name_buf[ID_CAP] = {0};
     void *temp = NULL;
 
     if (!x) return;
 
-    snprintf(name_i, NAME_MAX, "%s.i", name);
-    snprintf(name_buf, NAME_MAX, "%s.buf", name);
+    snprintf(name_i, ID_CAP, "%s.i", name);
+    snprintf(name_buf, ID_CAP, "%s.buf", name);
 
     if (x->i)
     {
         temp = x->i;
-        _mem_clear((void*)&x->i, x->memb * sizeof(str*), name_i, file, line);
+        mem_clear_internal((void*)&x->i, x->memb * sizeof(str*), name_i, file, line);
         free(x->i);
         LOGTRACEEX(TRUE, file, line,
                 logger_stringf("%s[%p] Memory Unloaded\n", name_i, temp));
@@ -226,7 +226,7 @@ void _mem_free_buf(_buf *x, const str *name, const str *file, u64 line)
     if (x->buf)
     {
         temp = x->buf;
-        _mem_clear((void*)&x->buf, x->memb * x->size, name_buf, file, line);
+        mem_clear_internal((void*)&x->buf, x->memb * x->size, name_buf, file, line);
         free(x->buf);
         LOGTRACEEX(TRUE, file, line,
                 logger_stringf("%s[%p] Memory Unloaded\n", name_buf, temp));
@@ -239,7 +239,7 @@ void _mem_free_buf(_buf *x, const str *name, const str *file, u64 line)
     x->cursor = 0;
 }
 
-u32 _mem_clear(void **x, u64 size, const str *name, const str *file, u64 line)
+u32 mem_clear_internal(void **x, u64 size, const str *name, const str *file, u64 line)
 {
     if (!x || !*x)
     {

@@ -2,13 +2,14 @@
 #include "deps/fossil/common/limits.h"
 #include "deps/fossil/assets/assets.h"
 #include "deps/fossil/logger/logger.h"
+#include "deps/fossil/math/math.h"
 #include "deps/fossil/string/string.h"
 
 #include "deps/fossil/h/dir.h"
-#include "deps/fossil/h/math.h"
 #include "deps/fossil/h/time.h"
 
-#include "h/chunking.h"
+#include "chunking/chunking.h"
+
 #include "h/common.h"
 #include "h/diagnostics.h"
 #include "h/dir.h"
@@ -17,13 +18,12 @@
 #include "h/world.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
 world_info world = {0};
 
-u32 world_init(str *name, u64 seed, player *p)
+u32 world_init(str *name, u64 seed, hhc_player *p)
 {
     world_dir_init(name);
     if (*GAME_ERR != FSL_ERR_SUCCESS && *GAME_ERR != HHC_ERR_WORLD_EXISTS)
@@ -36,15 +36,15 @@ u32 world_init(str *name, u64 seed, player *p)
     if (chunking_init() != FSL_ERR_SUCCESS)
         return *GAME_ERR;
 
+    world.terrain_func = terrain_decaying_lands;
+
     world.gravity = FSL_GRAVITY * 3.0f;
 
     set_player_spawn(p, 0, 0, -30);
     player_spawn(p, TRUE);
-    player_chunk_update(p);
 
     core.flag.hud = 1;
     core.flag.world_loaded = 1;
-    core.flag.chunk_buf_dirty = 1;
     disable_cursor;
     center_cursor;
 
@@ -71,7 +71,7 @@ u32 world_dir_init(const str *world_name)
         return *GAME_ERR;
     }
 
-    if (fsl_is_dir_exists(FSL_DIR_PROC_ROOT, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_is_dir_exists(FSL_SESSION.bin_root, TRUE) != FSL_ERR_SUCCESS)
     {
         LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
@@ -131,7 +131,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
         return *GAME_ERR;
     }
 
-    if (fsl_is_dir_exists(FSL_DIR_PROC_ROOT, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_is_dir_exists(FSL_SESSION.bin_root, TRUE) != FSL_ERR_SUCCESS)
     {
         LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
@@ -172,7 +172,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
         file_len = fsl_get_file_contents(string[0], (void*)&file_contents, TRUE);
         if (*GAME_ERR != FSL_ERR_SUCCESS || !file_contents)
             return *GAME_ERR;
-        seed = (u64)strtoul(file_contents, NULL, 10);
+        fsl_convert_str_to_u64(file_contents, &seed);
         fsl_mem_free((void*)&file_contents, file_len, "world_load().file_contents");
     }
     else
@@ -199,6 +199,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
     /* ---- other stuff ----------------------------------------------------- */
 
     core.debug.chunk_gizmo = 1;
+    core.debug.chunk_scheduler_visualizer = 1;
 
     LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
             fsl_logger_stringf("World Loaded '%s'\n", world_name));
@@ -207,7 +208,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
     return *GAME_ERR;
 }
 
-void world_update(player *p)
+void world_update(hhc_player *p)
 {
     /* player camera shouldn't move when a menu is open,
      * so we pass this to the camera function.
@@ -225,9 +226,14 @@ void world_update(player *p)
     player_camera_movement_update(p, render->mouse_delta, use_mouse);
     player_target_update(p);
 
-    chunking_update(p->ch, &p->ch_delta);
-    chunk_tab_index = get_chunk_index(p->ch, p->target);
+    if (MODE_INTERNAL_LOAD_CHUNKS &&
+            fsl_is_dir_exists(fsl_stringf("%s"GAME_DIR_WORLD_NAME_CHUNKS,
+                    world.path), TRUE) == FSL_ERR_SUCCESS)
+    {
+        chunking_update(p->ch, &p->ch_delta);
+        chunk_tab.index = get_chunk_index(p->ch, p->target);
+    }
 
-    fsl_update_projection_perspective(p->camera, &p->camera.projection, FALSE);
-    fsl_update_projection_perspective(p->camera_hud, &p->camera_hud.projection, FALSE);
+    fsl_projection_perspective_update(p->camera_hud, &p->camera_hud.projection, FALSE);
+    fsl_projection_perspective_update(p->camera_ui, &p->camera_ui.projection, FALSE);
 }

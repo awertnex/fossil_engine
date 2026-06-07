@@ -23,7 +23,7 @@
 #ifndef FSL_MEMORY_H
 #define FSL_MEMORY_H
 
-#include "../common/engine_info.h"
+#include "../common/api.h"
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
 

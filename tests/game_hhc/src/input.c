@@ -1,12 +1,13 @@
+#include "deps/fossil/input/input.h"
 #include "deps/fossil/logger/logger.h"
+#include "deps/fossil/math/math.h"
+#include "deps/fossil/math/trigonometry.h"
 #include "deps/fossil/shaders/shaders.h"
 #include "deps/fossil/shaders/shader_types.h"
 
-#include "deps/fossil/input/input.h"
-#include "deps/fossil/h/math.h"
+#include "chunking/chunking.h"
 
 #include "h/assets.h"
-#include "h/chunking.h"
 #include "h/gui.h"
 #include "h/input.h"
 #include "h/player.h"
@@ -69,7 +70,7 @@ fsl_key_bind bind_toggle_trans_blocks = {0};
 fsl_key_bind bind_toggle_chunk_bounds = {0};
 fsl_key_bind bind_toggle_bounding_boxes = {0};
 fsl_key_bind bind_toggle_chunk_gizmo = {0};
-fsl_key_bind bind_toggle_chunk_queue_visualizer = {0};
+fsl_key_bind bind_toggle_chunk_scheduler_visualizer = {0};
 
 void input_init(void)
 {
@@ -140,13 +141,13 @@ void input_init(void)
     bind_toggle_chunk_bounds = fsl_key_bind_init(FSL_KEY_C, 0, 0, bind_debug_mod, 0, 0);
     bind_toggle_bounding_boxes = fsl_key_bind_init(FSL_KEY_B, 0, 0, bind_debug_mod, 0, 0);
     bind_toggle_chunk_gizmo = fsl_key_bind_init(FSL_KEY_G, 0, 0, bind_debug_mod, 0, 0);
-    bind_toggle_chunk_queue_visualizer = fsl_key_bind_init(FSL_KEY_V, 0, 0, bind_debug_mod, 0, 0);
+    bind_toggle_chunk_scheduler_visualizer = fsl_key_bind_init(FSL_KEY_V, 0, 0, bind_debug_mod, 0, 0);
     bind_reload_shaders = fsl_key_bind_init(FSL_KEY_L, 0, FSL_CONTROL_LEFT, 0, 0, 0);
 
     fsl_input_context_set(input_context_gameplay);
 }
 
-void input_update(player *p)
+void input_update(hhc_player *p)
 {
     fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
     u32 shader_err = FSL_ERR_SUCCESS;
@@ -157,10 +158,10 @@ void input_update(player *p)
     f32 ny = 0.0f;
     f32 pz = 0.0f;
     f32 nz = 0.0f;
-    f32 spch = sin(p->pitch * FSL_DEG2RAD);
-    f32 cpch = cos(p->pitch * FSL_DEG2RAD);
-    f32 syaw = sin(p->yaw * FSL_DEG2RAD);
-    f32 cyaw = cos(p->yaw * FSL_DEG2RAD);
+    f32 spch = sin(p->transform.rot.y * FSL_DEG2RAD);
+    f32 cpch = cos(p->transform.rot.y * FSL_DEG2RAD);
+    f32 syaw = sin(p->transform.rot.z * FSL_DEG2RAD);
+    f32 cyaw = cos(p->transform.rot.z * FSL_DEG2RAD);
 
     p->input.x = 0.0f;
     p->input.y = 0.0f;
@@ -217,11 +218,11 @@ void input_update(player *p)
         {
             p->input.x =
                 (px - nx) * cyaw * cpch +
-                (py - ny) * -cos(p->yaw * FSL_DEG2RAD + FSL_PI / 2.0) +
+                (py - ny) * -cos(p->transform.rot.z * FSL_DEG2RAD + FSL_PI / 2.0) +
                 (pz - nz) * cyaw * spch;
             p->input.y =
                 (px - nx) * -syaw * cpch +
-                (py - ny) * sin(p->yaw * FSL_DEG2RAD + FSL_PI / 2.0) +
+                (py - ny) * sin(p->transform.rot.z * FSL_DEG2RAD + FSL_PI / 2.0) +
                 (pz - nz) * -syaw * spch;
             p->input.z =
                 (px - nx) * -spch +
@@ -231,10 +232,10 @@ void input_update(player *p)
         {
             p->input.x =
                 (px - nx) * cyaw +
-                (py - ny) * -cos(p->yaw * FSL_DEG2RAD + FSL_PI / 2.0);
+                (py - ny) * -cos(p->transform.rot.z * FSL_DEG2RAD + FSL_PI / 2.0);
             p->input.y =
                 (px - nx) * -syaw +
-                (py - ny) * sin(p->yaw * FSL_DEG2RAD + FSL_PI / 2.0);
+                (py - ny) * sin(p->transform.rot.z * FSL_DEG2RAD + FSL_PI / 2.0);
             p->input.z =
                 pz - nz;
         }
@@ -243,35 +244,30 @@ void input_update(player *p)
 
         /* ---- gameplay ---------------------------------------------------- */
 
-        if (
-                !core.flag.chunk_buf_dirty &&
-                core.flag.parse_target &&
-                chunk_tab.p[chunk_tab_index])
+        if (p->hit.hit)
         {
-            if (fsl_is_mouse_hold(bind_attack_or_destroy))
+            if (fsl_is_mouse_press(bind_attack_or_destroy))
             {
-                block_break(chunk_tab_index,
-                        (i64)p->target.x - chunk_tab.p[chunk_tab_index]->pos.x * CHUNK_DIAMETER,
-                        (i64)p->target.y - chunk_tab.p[chunk_tab_index]->pos.y * CHUNK_DIAMETER,
-                        (i64)p->target.z - chunk_tab.p[chunk_tab_index]->pos.z * CHUNK_DIAMETER);
-            }
-            if (fsl_is_mouse_press(bind_build_or_use))
-            {
-                block_place(chunk_tab_index,
-                        (i64)p->target.x - chunk_tab.p[chunk_tab_index]->pos.x * CHUNK_DIAMETER,
-                        (i64)p->target.y - chunk_tab.p[chunk_tab_index]->pos.y * CHUNK_DIAMETER,
-                        (i64)p->target.z - chunk_tab.p[chunk_tab_index]->pos.z * CHUNK_DIAMETER,
-                        p->target_normal, p->hotbar_slots[p->hotbar_slot_selected]);
+                block_break(p->hit);
             }
 
+            if (fsl_is_mouse_press(bind_build_or_use))
+            {
+                block_place(p->hit, p->hotbar_slots[p->hotbar_slot_selected]);
+            }
+
+            /* TODO: make 'sample_block' (pick block) logic */
             if (fsl_is_key_press(bind_sample_block)) {}
         }
 
         /* ---- inventory --------------------------------------------------- */
 
         for (i = 0; i < PLAYER_HOTBAR_SLOTS_MAX; ++i)
+        {
             if (fsl_is_key_press(bind_hotbar[0][i]) || fsl_is_key_press(bind_hotbar[1][i]))
-                p->hotbar_slot_selected = i;
+                p->hotbar_slot_selected = 
+                    fsl_mod_i32(i - 1, PLAYER_HOTBAR_SLOTS_MAX);
+        }
 
         if (fsl_is_key_press(bind_inventory))
         {
@@ -395,16 +391,16 @@ void input_update(player *p)
                     "View Chunk Gizmo Off\n");
     }
 
-    if (fsl_is_key_press(bind_toggle_chunk_queue_visualizer))
+    if (fsl_is_key_press(bind_toggle_chunk_scheduler_visualizer))
     {
-        core.debug.chunk_queue_visualizer ^= 1;
+        core.debug.chunk_scheduler_visualizer ^= 1;
 
-        if (core.debug.chunk_queue_visualizer)
+        if (core.debug.chunk_scheduler_visualizer)
             LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                    "View Chunk Queue Visualizer On\n");
+                    "View Chunk Scheduler Visualizer On\n");
         else
             LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                    "View Chunk Queue Visualizer Off\n");
+                    "View Chunk Scheduler Visualizer Off\n");
     }
 
     if (fsl_is_key_press(bind_reload_shaders))
@@ -420,6 +416,6 @@ void input_update(player *p)
                     "Shaders Reloaded!\n");
         else
             LOGERROR(shader_err, FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                    "Failed to Reload Shaders");
+                    "Failed to Reload Shaders\n");
     }
 }

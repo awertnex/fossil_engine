@@ -28,7 +28,7 @@
 
 #include "../external/glad/glad.h"
 
-#define FSL_SHADER_PRE_PROCESS_INCLUDE_RECURSION_MAX FSL_INCLUDE_RECURSION_MAX
+#define FSL_SHADER_PRE_PROCESSOR_INCLUDE_RECURSION_MAX 512
 
 /*!
  *  @internal
