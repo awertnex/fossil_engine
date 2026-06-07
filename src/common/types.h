@@ -75,7 +75,7 @@ typedef str         fsl_fs_path;
 
 typedef struct fsl_array
 {
-    u64 cursor;     /* current usage */
+    u64 cursor;     /* current usage, in bytes */
     fsl_cap cap;    /* current capacity of `buf`, in bytes */
     void *buf;      /* raw data */
 } fsl_array;

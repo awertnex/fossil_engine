@@ -593,10 +593,13 @@ u32 copy_dir(const str *src, const str *dst, b8 contents_only)
 
         if (is_dir(in_dir) == ERR_SUCCESS)
         {
-            copy_dir(in_dir, out_dir, FALSE);
-            continue;
+            if (is_dir_exists(out_dir, FALSE) == ERR_SUCCESS)
+                copy_dir(in_dir, out_dir, TRUE);
+            else
+                copy_dir(in_dir, out_dir, FALSE);
         }
-        copy_file(in_dir, out_dir);
+        else
+            copy_file(in_dir, out_dir);
     }
 
     LOGTRACE(FALSE,

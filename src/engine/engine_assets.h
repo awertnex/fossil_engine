@@ -69,35 +69,35 @@ enum fsl_mesh_index
 /*!
  *  @brief engine's default textures.
  *
- *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
+ *  @remark read-only, declared and initialized internally in @ref fsl_engine_assets_init().
  */
 FSLAPI extern fsl_mem_handle fsl_texture_buf;
 
 /*!
  *  @brief engine's default shaders.
  *
- *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
+ *  @remark read-only, declared and initialized internally in @ref fsl_engine_assets_init().
  */
 FSLAPI extern fsl_mem_handle fsl_shader_buf;
 
 /*!
  *  @brief engine's default fonts.
  *
- *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
+ *  @remark read-only, declared and initialized internally in @ref fsl_engine_assets_init().
  */
 FSLAPI extern fsl_mem_handle fsl_font_buf;
 
 /*!
  *  @brief engine's default meshes.
  *
- *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
+ *  @remark read-only, declared and initialized internally in @ref fsl_engine_assets_init().
  */
 FSLAPI extern fsl_mem_handle fsl_mesh_buf;
 
 /*!
  *  @brief engine's default unit quad, with texture coordinates.
  *
- *  @remark read-only, declared and initialized internally in @ref fsl_assets_init().
+ *  @remark read-only, declared and initialized internally in @ref fsl_engine_assets_init().
  */
 FSLAPI extern fsl_mesh fsl_mesh_unit_quad;
 
@@ -110,7 +110,7 @@ FSLAPI extern fsl_mesh fsl_mesh_unit_quad;
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 fsl_assets_init(void);
+u32 fsl_engine_assets_init(void);
 
 /*!
  *  @brief free all engine's internal assets.

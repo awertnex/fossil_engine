@@ -35,6 +35,7 @@
 #include "math/vector.h"
 #include "memory/memory.h"
 #include "physics/collision.h"
+#include "physics/physics_types.h"
 #include "shaders/shaders.h"
 #include "string/string.h"
 

@@ -256,7 +256,7 @@ static void get_log_str_internal(const str *str_in, str *str_out, u32 flags, b8 
         else if (flags & FSL_FLAG_LOG_TIME)
             get_time_str_internal(str_time, "[%T]");
         if (flags & FSL_FLAG_LOG_TIMESTAMP)
-            snprintf(str_timestamp, FSL_TIME_STRING_MAX, "[%"PRIu64"]", fsl_init_time);
+            snprintf(str_timestamp, FSL_TIME_STRING_MAX, "[%"PRIu64"]", FSL_SESSION.init_time);
 
         snprintf(str_time_full, FSL_TIME_STRING_MAX, "%s%s ", str_timestamp, str_time);
     }

@@ -29,13 +29,4 @@ enum fsl_flag
     FSL_FLAG_MULTISAMPLE =          0x0002  /* use 'GLFW' multisampling */
 }; /* fsl_flag */
 
-enum fsl_text_alignment
-{
-    FSL_TEXT_ALIGN_LEFT = 0,
-    FSL_TEXT_ALIGN_CENTER = 1,
-    FSL_TEXT_ALIGN_RIGHT = 2,
-    FSL_TEXT_ALIGN_TOP = 0,
-    FSL_TEXT_ALIGN_BOTTOM = 2
-}; /* fsl_text_alignment */
-
 #endif /* FSL_COMMON_VALUES_H */

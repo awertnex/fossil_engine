@@ -20,6 +20,7 @@
  *  @brief asset parsing, loading and unloading.
  */
 
+#include "../common/api.h"
 #include "../common/config.h"
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
@@ -28,7 +29,6 @@
 #include "../logger/logger_messages_internal.h"
 #include "../math/math.h"
 #include "../math/matrix.h"
-#include "../math/trigonometry.h"
 #include "../math/vector.h"
 #include "../memory/memory.h"
 
@@ -47,7 +47,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static f32 vbo_data_unit_quad_internal[] =
+static f32 vertex_buf_unit_quad_internal[] =
 {
     -1.0f, -1.0f, 0.0f, 0.0f,
     -1.0f, 1.0f, 0.0f, 1.0f,
@@ -131,7 +131,10 @@ u32 fsl_asset_set_metadata(fsl_asset *asset, fsl_asset_type type,
 
 cleanup:
 
-    /* TODO: use `fsl_mem_pop_arena()` when you make it */
+    fsl_mem_arena_pop(&asset->name, "fsl_asset_set_metadata().asset->name");
+    fsl_mem_arena_pop(&asset->name_id, "fsl_asset_set_metadata().asset->name_id");
+    fsl_mem_arena_pop(&asset->file, "fsl_asset_set_metadata().asset->file");
+    fsl_mem_arena_pop(&asset->path, "fsl_asset_set_metadata().asset->path");
     return fsl_err;
 }
 
@@ -152,7 +155,8 @@ FSLAPI u32 fsl_vbo_init(fsl_vbo *vbo, fsl_size size, fsl_len len, void *data,
     if (vbo->initialized)
         return FSL_ERR_SUCCESS;
 
-    if (!vbo->buf.arena && fsl_mem_arena_push(&mem_arena_sub_data_internal, &vbo->buf, size * len,
+    if (!vbo->buf.arena &&
+            fsl_mem_arena_push(&mem_arena_sub_data_internal, &vbo->buf, size * len,
                 "fsl_vbo_init().vbo->buf") != FSL_ERR_SUCCESS)
     {
         LOGERROR(FSL_ERR_VBO_INIT_FAIL,
@@ -185,6 +189,7 @@ FSLAPI u32 fsl_vbo_init(fsl_vbo *vbo, fsl_size size, fsl_len len, void *data,
     vbo->initialized = TRUE;
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             MSG_VBO_INIT(vbo->id, size * len));
+
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
@@ -217,12 +222,13 @@ u32 fsl_fbo_init(fsl_fbo *fbo, i32 size_x, i32 size_y, fsl_mesh *mesh_fbo,
         b8 multisample, u32 samples)
 {
     GLuint status = 0;
-    GLfloat *mesh_fbo_vbo_data = NULL;
+    GLfloat *mesh_fbo_vertex_buf = NULL;
 
-    if (!fbo || fbo->asset.initialized)
+    if (!fbo)
         goto mesh_fbo_init;
 
-    fbo->asset.type = FSL_ASSET_FBO;
+    if (!fbo->asset.initialized)
+        fbo->asset.type = FSL_ASSET_FBO;
 
     glGenFramebuffers(1, &fbo->fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
@@ -297,27 +303,26 @@ u32 fsl_fbo_init(fsl_fbo *fbo, i32 size_x, i32 size_y, fsl_mesh *mesh_fbo,
 
 mesh_fbo_init:
 
-    if (mesh_fbo == NULL || mesh_fbo->vbo_data.arena != NULL)
+    if (mesh_fbo == NULL || mesh_fbo->vertex_buf.buf.arena != NULL)
         return FSL_ERR_SUCCESS;
 
-    mesh_fbo->vbo_len = fsl_arr_len(vbo_data_unit_quad_internal);
-    if (fsl_mem_arena_push(&mem_arena_sub_data_internal, &mesh_fbo->vbo_data, sizeof(GLfloat) * mesh_fbo->vbo_len,
-                "fsl_fbo_init().mesh_fbo->vbo_data") != FSL_ERR_SUCCESS)
+    mesh_fbo->vertex_buf.size = sizeof(GLfloat);
+    mesh_fbo->vertex_buf.len = fsl_arr_len(vertex_buf_unit_quad_internal);
+    if (fsl_vbo_init(&mesh_fbo->vertex_buf, mesh_fbo->vertex_buf.size, mesh_fbo->vertex_buf.len,
+            vertex_buf_unit_quad_internal, GL_ARRAY_BUFFER, FSL_DRAW_TYPE_STATIC) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     fsl_asset_set_metadata(&mesh_fbo->asset, FSL_ASSET_MESH, "Unit Quad", "unit_quad", NULL, NULL);
-    mesh_fbo_vbo_data = fsl_mem_handle_get(mesh_fbo->vbo_data);
-    memcpy(mesh_fbo_vbo_data, vbo_data_unit_quad_internal, mesh_fbo->vbo_data.size);
+    mesh_fbo_vertex_buf = fsl_mem_handle_get(mesh_fbo->vertex_buf.buf);
+    memcpy(mesh_fbo_vertex_buf, vertex_buf_unit_quad_internal,
+            mesh_fbo->vertex_buf.size * mesh_fbo->vertex_buf.len);
 
     /* ---- bind mesh ------------------------------------------------------- */
 
     glGenVertexArrays(1, &mesh_fbo->vao);
-    glGenBuffers(1, &mesh_fbo->vbo);
 
     glBindVertexArray(mesh_fbo->vao);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh_fbo->vbo);
-    glBufferData(GL_ARRAY_BUFFER, mesh_fbo->vbo_len * sizeof(GLfloat),
-            fsl_mem_handle_get(mesh_fbo->vbo_data), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh_fbo->vertex_buf.id);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)0);
@@ -326,7 +331,6 @@ mesh_fbo_init:
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
 
     glBindVertexArray(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     mesh_fbo->asset.initialized = TRUE;
@@ -671,7 +675,7 @@ void fsl_font_free(fsl_font *font)
 
 /* ---- section: camera ----------------------------------------------------- */
 
-void fsl_update_camera_movement(fsl_camera *camera,
+void fsl_camera_movement_update(fsl_camera *camera,
         f64 pos_x, f64 pos_y, f64 pos_z, f64 roll, f64 pitch, f64 yaw)
 {
     camera->pos.x = pos_x;
@@ -694,11 +698,46 @@ void fsl_update_camera_movement(fsl_camera *camera,
     camera->yaw.sin = sin(camera->yaw.angle * FSL_DEG2RAD);
     camera->yaw.cos = cos(camera->yaw.angle * FSL_DEG2RAD);
 
-    fsl_update_projection_perspective(*camera, &camera->projection, FALSE);
+    fsl_projection_perspective_update(*camera, &camera->projection, FALSE);
 }
 
-void fsl_update_projection_perspective(fsl_camera camera, fsl_projection *projection, b8 roll)
+void fsl_camera_lookat_update(fsl_camera *camera,
+        f64 pos_x, f64 pos_y, f64 pos_z, f64 target_x, f64 target_y, f64 target_z)
 {
+    v3f64 target = {0};
+    f64 pitch = 0.0;
+    f64 yaw = 0.0;
+
+    camera->pos.x = pos_x;
+    camera->pos.y = pos_y;
+    camera->pos.z = pos_z;
+    target.x = target_x;
+    target.y = target_y;
+    target.z = target_z;
+
+    fsl_get_camera_lookat_angles(camera->pos, target, &pitch, &yaw);
+
+    camera->roll.angle = 0.0f;
+
+    camera->pitch.angle = fsl_clamp_f64(pitch, -FSL_CAMERA_ANGLE_MAX, FSL_CAMERA_ANGLE_MAX);
+    camera->yaw.angle = fmod(yaw, FSL_CAMERA_RANGE_MAX);
+    if (camera->yaw.angle < 0.0)
+        camera->yaw.angle += FSL_CAMERA_RANGE_MAX;
+
+    camera->roll.sin = sin(camera->roll.angle * FSL_DEG2RAD);
+    camera->roll.cos = cos(camera->roll.angle * FSL_DEG2RAD);
+    camera->pitch.sin = sin(camera->pitch.angle * FSL_DEG2RAD);
+    camera->pitch.cos = cos(camera->pitch.angle * FSL_DEG2RAD);
+    camera->yaw.sin = sin(camera->yaw.angle * FSL_DEG2RAD);
+    camera->yaw.cos = cos(camera->yaw.angle * FSL_DEG2RAD);
+
+    fsl_projection_perspective_update(*camera, &camera->projection, FALSE);
+}
+
+void fsl_projection_perspective_update(fsl_camera camera, fsl_projection *projection, b8 roll)
+{
+    fsl_projection noprojection = {0};
+
     const f32 SROL = camera.roll.sin;
     const f32 CROL = camera.roll.cos;
     const f32 SPCH = camera.pitch.sin;
@@ -711,7 +750,6 @@ void fsl_update_projection_perspective(fsl_camera camera, fsl_projection *projec
     f32 near = 0.0f;
     f32 clip = 0.0f;
     f32 offset = 0.0f;
-    fsl_projection noprojection = {0};
     m4f32 rotation_roll = {0};
     m4f32 rotation_pitch = {0};
     m4f32 rotation_yaw = {0};

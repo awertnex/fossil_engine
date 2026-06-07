@@ -71,7 +71,7 @@ u32 world_dir_init(const str *world_name)
         return *GAME_ERR;
     }
 
-    if (fsl_is_dir_exists(FSL_DIR_PROC_ROOT, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_is_dir_exists(FSL_SESSION.bin_root, TRUE) != FSL_ERR_SUCCESS)
     {
         LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
@@ -131,7 +131,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
         return *GAME_ERR;
     }
 
-    if (fsl_is_dir_exists(FSL_DIR_PROC_ROOT, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_is_dir_exists(FSL_SESSION.bin_root, TRUE) != FSL_ERR_SUCCESS)
     {
         LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
@@ -234,6 +234,6 @@ void world_update(hhc_player *p)
         chunk_tab.index = get_chunk_index(p->ch, p->target);
     }
 
-    fsl_update_projection_perspective(p->camera_hud, &p->camera_hud.projection, FALSE);
-    fsl_update_projection_perspective(p->camera_ui, &p->camera_ui.projection, FALSE);
+    fsl_projection_perspective_update(p->camera_hud, &p->camera_hud.projection, FALSE);
+    fsl_projection_perspective_update(p->camera_ui, &p->camera_ui.projection, FALSE);
 }

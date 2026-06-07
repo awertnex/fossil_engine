@@ -100,8 +100,7 @@ struct /* fsl_core */
     void (*fbo_blit)(GLuint fbo);
 } fsl_core;
 
-u64 fsl_init_time = 0;
-str *FSL_DIR_PROC_ROOT = NULL;
+fsl_engine_session FSL_SESSION = {0};
 u32 fsl_err = FSL_ERR_SUCCESS;
 fsl_render render_internal = {0};
 
@@ -151,9 +150,9 @@ u32 fsl_engine_init(int argc, char **argv, const str *title,
 
     fsl_core.flag.active = TRUE;
 
-    if (!fsl_init_time)
+    if (!FSL_SESSION.init_time)
     {
-        fsl_init_time = fsl_get_time_raw_usec();
+        FSL_SESSION.init_time = fsl_get_time_raw_usec();
         fsl_get_time_nsec(); /* initialize start time */
         fsl_get_time_nsecf(); /* initialize start time */
     }
@@ -176,18 +175,18 @@ u32 fsl_engine_init(int argc, char **argv, const str *title,
                 "fsl_engine_init().mem_arena_path_internal") != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    if (FSL_DIR_PROC_ROOT == NULL)
+    if (FSL_SESSION.bin_root == NULL)
     {
-        if (fsl_get_path_bin_root(&FSL_DIR_PROC_ROOT) != FSL_ERR_SUCCESS)
+        if (fsl_get_path_bin_root(&FSL_SESSION.bin_root) != FSL_ERR_SUCCESS)
             goto cleanup;
-        fsl_change_dir(FSL_DIR_PROC_ROOT);
+        fsl_change_dir(FSL_SESSION.bin_root);
     }
 
     if (
             fsl_glfw_init(flags & FSL_FLAG_MULTISAMPLE) != FSL_ERR_SUCCESS ||
             fsl_window_init(title, size_x, size_y) != FSL_ERR_SUCCESS ||
             fsl_glad_init() != FSL_ERR_SUCCESS ||
-            fsl_assets_init() != FSL_ERR_SUCCESS)
+            fsl_engine_assets_init() != FSL_ERR_SUCCESS)
         goto cleanup;
 
     glfwSwapInterval(0);
@@ -241,7 +240,7 @@ cleanup:
     return fsl_err;
 }
 
-b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32))
+b8 fsl_engine_running(void (*callback_framebuffer_size)(i32 size_x, i32 size_y))
 {
     static u64 time_last = 0;
     if (fsl_core.flag.active == FALSE ||
@@ -256,7 +255,8 @@ b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32))
     }
 
     render_internal.time = fsl_get_time_nsec();
-    if (!time_last) time_last = render_internal.time;
+    if (!time_last)
+        time_last = render_internal.time;
     render_internal.time_delta = render_internal.time - time_last;
     time_last = render_internal.time;
 
@@ -269,7 +269,7 @@ b8 fsl_engine_running(void (*callback_framebuffer_size)(i32, i32))
     return TRUE;
 }
 
-u32 fsl_update_render_settings(void (*callback_framebuffer_size)(i32, i32))
+u32 fsl_update_render_settings(void (*callback_framebuffer_size)(i32 size_x, i32 size_y))
 {
     static v2i32 size = {0};
 
@@ -341,7 +341,8 @@ void fsl_engine_close(void)
     fsl_mem_arena_free(&mem_arena_name_internal, "fsl_engine_close().mem_arena_name_internal");
     fsl_mem_free((void*)&render_internal.screen_buf, render_internal.size.x * render_internal.size.y * FSL_COLOR_CHANNELS_RGB,
             "fsl_engine_close().render_internal.screen_buf");
-    fsl_mem_free((void*)&FSL_DIR_PROC_ROOT, FSL_PATH_CAP, "fsl_engine_close().FSL_DIR_PROC_ROOT");
+    fsl_mem_free((void*)&FSL_SESSION.bin_root, FSL_PATH_CAP, "fsl_engine_close().FSL_SESSION.bin_root");
+    fsl_mem_arena_free(&mem_arena_sub_data_internal, "fsl_engine_close().mem_arena_sub_data_internal");
     fsl_mem_arena_free(&mem_arena_internal, "fsl_engine_close().mem_arena_internal");
     fsl_logger_close();
     fsl_err = fsl_err_temp;

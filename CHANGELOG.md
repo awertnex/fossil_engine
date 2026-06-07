@@ -7,6 +7,11 @@
    first version of the engine as standalone in this repo
 
 ## v0.9.0-dev (current)
+- (2026 06 07): made copying of a directory and a sub directory of the same name
+                not place them inside each other.
+- (2026 06 07): added copying of empty directories to function `fsl_copy_dir()`.
+- (2026 06 03): added new standard mesh 'skybox'.
+- (2026 06 02): added function `fsl_rle()` for run-length data compression.
 
 #### changes
 
@@ -14,7 +19,6 @@
 ## v0.9.0-beta (2026 05 31)
 
 #### changes
-- (2026 06 07): added copying of empty directories to function `fsl_copy_dir()`.
 - (2026 05 29): added math types `angle_f32` and `angle_f64` to store an angle
                 along with its cached sine, cosine and tangent values, and
                 functions `fsl_angle_f32()` and `fsl_angle_f64()` to calculate
@@ -25,7 +29,7 @@
 - (2026 05 27): deprecate `vbo_data` and `ebo_data` arrays in struct `fsl_mesh`.
 - (2026 05 27): added `fsl_vbo` data type and its initialization and freeing
                 functions.
-- (2026 05 27):   added string functions:
+- (2026 05 27): added string functions:
                 - `fsl_is_digit()`.
                 - `fsl_skip_spaces()`.
                 - `fsl_strip_non_printable()`.

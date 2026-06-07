@@ -496,7 +496,6 @@ void player_camera_movement_update(hhc_player *p, v2f64 mouse_delta, b8 use_mous
     f64 zoom = 0.0;
     f64 sensitivity = 0.0;
     f64 SROL = {0}, CROL = {0}, SPCH = {0}, CPCH = {0}, SYAW = {0}, CYAW = {0};
-    f64 lookat_pitch = {0}, lookat_yaw = {0};
     v3f64 eye_pos = {0};
 
     sensitivity = settings.mouse_sensitivity;
@@ -543,7 +542,7 @@ void player_camera_movement_update(hhc_player *p, v2f64 mouse_delta, b8 use_mous
     switch (p->camera_mode)
     {
         case PLAYER_CAMERA_MODE_1ST_PERSON:
-            fsl_update_camera_movement(&p->camera,
+            fsl_camera_movement_update(&p->camera,
                     p->transform.pos.x,
                     p->transform.pos.y,
                     p->transform.pos.z + p->eye_height,
@@ -553,7 +552,7 @@ void player_camera_movement_update(hhc_player *p, v2f64 mouse_delta, b8 use_mous
             break;
 
         case PLAYER_CAMERA_MODE_3RD_PERSON:
-            fsl_update_camera_movement(&p->camera,
+            fsl_camera_movement_update(&p->camera,
                     p->transform.pos.x - CYAW * CPCH * p->camera_distance,
                     p->transform.pos.y + SYAW * CPCH * p->camera_distance,
                     p->transform.pos.z + p->eye_height + SPCH * p->camera_distance,
@@ -563,7 +562,7 @@ void player_camera_movement_update(hhc_player *p, v2f64 mouse_delta, b8 use_mous
             break;
 
         case PLAYER_CAMERA_MODE_3RD_PERSON_FRONT:
-            fsl_update_camera_movement(&p->camera,
+            fsl_camera_movement_update(&p->camera,
                     p->transform.pos.x + CYAW * CPCH * p->camera_distance,
                     p->transform.pos.y - SYAW * CPCH * p->camera_distance,
                     p->transform.pos.z + p->eye_height - SPCH * p->camera_distance,
@@ -573,14 +572,13 @@ void player_camera_movement_update(hhc_player *p, v2f64 mouse_delta, b8 use_mous
             break;
 
         case PLAYER_CAMERA_MODE_STALKER:
-            fsl_get_camera_lookat_angles(p->camera.pos, eye_pos, &lookat_pitch, &lookat_yaw);
-            fsl_update_camera_movement(&p->camera,
+            fsl_camera_lookat_update(&p->camera,
                     p->camera.pos.x,
                     p->camera.pos.y,
                     p->camera.pos.z,
-                    p->transform.rot.x,
-                    lookat_pitch,
-                    lookat_yaw);
+                    eye_pos.x,
+                    eye_pos.y,
+                    eye_pos.z);
             break;
 
             /* TODO: make the spectator camera mode */

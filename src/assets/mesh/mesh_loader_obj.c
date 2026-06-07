@@ -37,16 +37,16 @@
 #include <stdio.h>
 #include <string.h>
 
-#define FSL_HASH_TABLE_MAX 8192
+#define HASH_TABLE_MAX 8192
 
-typedef struct fsl_hash_node fsl_hash_node;
+typedef struct hash_node hash_node;
 
-struct fsl_hash_node
+struct hash_node
 {
     u64 hash;
     u64 index;
-    fsl_hash_node *next;
-}; /* fsl_hash_node */
+    hash_node *next;
+}; /* hash_node */
 
 struct vertex_indices
 {
@@ -67,7 +67,7 @@ struct triangle_indices
  *
  *  @brief extract vertex index data from face vertex string (e.g., "f 1/2/4", "f v1/vt2/vn4").
  *
- *  supports negative indices, unspecified indices, tagged indices (e.g., "f v1/vt1/vn1")
+ *  support negative indices, unspecified indices, tagged indices (e.g., "f v1/vt1/vn1")
  *  and space-separated indices (e.g., "f 1 2 3").
  *
  *  @param pos_len number of elements in the raw vertex positions buffer.
@@ -82,8 +82,8 @@ static void get_vertex_indices_internal(str *token, struct vertex_indices *verte
 u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *index_dst)
 {
     FILE *file = NULL;
-    str line[FSL_STRING_MAX] = {0};
-    str *line_p = NULL;
+    str line_buf[FSL_STRING_MAX] = {0};
+    str *line = NULL;
     str *token = NULL;
     str *token_save[1] = {0};
     str delim[] = " ";
@@ -101,14 +101,14 @@ u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_a
     fsl_array uv_buf = {0};
     fsl_array normal_buf = {0};
 
-    fsl_hash_node *node_curr = NULL;
-    fsl_hash_node *node_new = NULL;
-    fsl_hash_node *hash_table = NULL;
+    hash_node *node_curr = NULL;
+    hash_node *node_new = NULL;
+    hash_node *hash_table = NULL;
     u64 bucket_index = 0;
     b8 hash_found = FALSE;
 
     if (
-            fsl_mem_map((void*)&hash_table, FSL_HASH_TABLE_MAX * sizeof(fsl_hash_node),
+            fsl_mem_map((void*)&hash_table, HASH_TABLE_MAX * sizeof(hash_node),
                 "mesh_load_obj_internal().hash_table") != FSL_ERR_SUCCESS ||
             fsl_mem_array_init(&vertex_buf) != FSL_ERR_SUCCESS ||
             fsl_mem_array_init(&uv_buf) != FSL_ERR_SUCCESS ||
@@ -124,15 +124,15 @@ u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_a
         return fsl_err;
     }
 
-    while (fgets(line, FSL_STRING_MAX, file) != NULL)
+    while (fgets(line_buf, FSL_STRING_MAX, file) != NULL)
     {
-        line_p = line;
-        fsl_strip_non_printable(line);
-        fsl_skip_spaces(&line_p);
-        if (!line_p[0] || line_p[0] == '#')
+        line = line_buf;
+        fsl_strip_non_printable(line_buf);
+        fsl_skip_spaces(&line);
+        if (!line[0] || line[0] == '#')
             continue;
 
-        token = strtok_r(line_p, delim, &token_save[0]);
+        token = strtok_r(line, delim, &token_save[0]);
 
         if (token[0] == 'v')
         {
@@ -202,7 +202,7 @@ u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_a
                         uv_buf.cursor / sizeof(v2f32),
                         normal_buf.cursor / sizeof(v3f32));
                 vertex_hash = fsl_hash_djb2_u64(&vertex_indices, 3 * sizeof(u32));
-                bucket_index = vertex_hash & (FSL_HASH_TABLE_MAX - 1);
+                bucket_index = vertex_hash & (HASH_TABLE_MAX - 1);
                 node_curr = &hash_table[bucket_index];
 
                 while (node_curr)
@@ -246,7 +246,7 @@ u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_a
     }
 
     fclose(file);
-    fsl_mem_unmap((void*)&hash_table, FSL_HASH_TABLE_MAX * sizeof(fsl_hash_node*),
+    fsl_mem_unmap((void*)&hash_table, HASH_TABLE_MAX * sizeof(hash_node*),
             "mesh_load_obj_internal().hash_table");
     fsl_mem_array_free(&vertex_buf);
     fsl_mem_array_free(&uv_buf);
@@ -259,7 +259,7 @@ cleanup:
 
     if (file)
         fclose(file);
-    fsl_mem_unmap((void*)&hash_table, FSL_HASH_TABLE_MAX * sizeof(fsl_hash_node*),
+    fsl_mem_unmap((void*)&hash_table, HASH_TABLE_MAX * sizeof(hash_node*),
             "mesh_load_obj_internal().hash_table");
     fsl_mem_array_free(vertex_dst);
     fsl_mem_array_free(index_dst);
@@ -286,6 +286,7 @@ static void get_vertex_indices_internal(str *token, struct vertex_indices *verte
     vertex->pos = 0;
     vertex->uv = 0;
     vertex->normal = 0;
+
     for (; i < 3; ++i, j = 0, sign = 1)
     {
         while(*p && *p != '/')
@@ -319,6 +320,7 @@ static void get_vertex_indices_internal(str *token, struct vertex_indices *verte
         if (*p == '/')
             ++p;
     }
+
     vertex->pos = (u32)index[0];
     vertex->uv = (u32)index[1];
     vertex->normal = (u32)index[2];

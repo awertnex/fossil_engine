@@ -190,14 +190,14 @@ u32 chunks_max_init_internal(void)
                 ++chunk_count;
         }
         chunk_order.len[i] = chunk_count;
-
-        if (fsl_write_file(path, (SET_RENDER_DISTANCE_MAX + 1) * sizeof(u32),
-                    chunk_order.len, TRUE, FALSE) != FSL_ERR_SUCCESS)
-            goto cleanup;
-
-        LOGSUCCESS(FSL_FLAG_LOG_NO_VERBOSE,
-                fsl_logger_stringf("`chunks_max` Look-up '%s' Exported\n", path));
     }
+
+    if (fsl_write_file(path, (SET_RENDER_DISTANCE_MAX + 1) * sizeof(u32),
+                chunk_order.len, TRUE, FALSE) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    LOGSUCCESS(FSL_FLAG_LOG_NO_VERBOSE,
+            fsl_logger_stringf("`chunks_max` Look-up '%s' Exported\n", path));
 
 load_from_disk:
 

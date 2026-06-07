@@ -87,7 +87,7 @@ void gui_start_ui_items(void)
     glUseProgram(ui_item_data_internal.shader.asset.id);
 
     ui_item_data_internal.camera.ratio = (f32)render->size.x / render->size.y;
-    fsl_update_camera_movement(&ui_item_data_internal.camera,
+    fsl_camera_movement_update(&ui_item_data_internal.camera,
             -ui_item_data_internal.camera_distance, 0.0, 0.0,
             0.0, 0.0, 0.0);
 }

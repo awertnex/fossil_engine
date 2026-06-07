@@ -6,7 +6,6 @@
 #include "h/main.h"
 
 #include <stdio.h>
-#include <string.h>
 
 str allowed_chars[126] =
     "          \n  \r                    \"         "

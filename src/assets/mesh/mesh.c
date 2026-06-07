@@ -170,7 +170,6 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
         }
     }
 
-
     if (!is_cooked && fsl_is_file_exists(path_temp, FALSE) != FSL_ERR_SUCCESS)
     {
         snprintf(path_temp, FSL_PATH_CAP, "%s%s", path, file);
@@ -498,14 +497,6 @@ void fsl_mesh_free(fsl_mesh *mesh)
     if (mesh == NULL)
         return;
 
-    if (mesh->asset.initialized)
-    {
-        mesh->asset.initialized = FALSE;
-        glDeleteBuffers(1, &mesh->ebo); /* -- DEPRECATED IN v0.8.0-dev -- */
-        glDeleteBuffers(1, &mesh->vbo); /* -- DEPRECATED IN v0.8.0-dev -- */
-        glDeleteVertexArrays(1, &mesh->vao); /* -- DEPRECATED IN v0.8.0-dev -- */
-    }
-
     if (mesh->vertex_buf.initialized)
         fsl_vbo_free(&mesh->vertex_buf);
 
@@ -514,6 +505,14 @@ void fsl_mesh_free(fsl_mesh *mesh)
 
     if (mesh->transform_buf.initialized)
         fsl_vbo_free(&mesh->transform_buf);
+
+    if (mesh->asset.initialized)
+    {
+        mesh->asset.initialized = FALSE;
+        glDeleteBuffers(1, &mesh->ebo); /* -- DEPRECATED IN v0.9.0-beta -- */
+        glDeleteBuffers(1, &mesh->vbo); /* -- DEPRECATED IN v0.9.0-beta -- */
+        glDeleteVertexArrays(1, &mesh->vao);
+    }
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
             MSG_MESH_UNLOAD(fsl_mem_handle_get(mesh->asset.name_id)));

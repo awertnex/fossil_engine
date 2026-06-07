@@ -38,13 +38,22 @@ typedef enum fsl_draw_type
     FSL_DRAW_TYPE_DYNAMIC
 } fsl_draw_type;
 
+enum fsl_text_alignment
+{
+    FSL_TEXT_ALIGN_LEFT = 0,
+    FSL_TEXT_ALIGN_CENTER = 1,
+    FSL_TEXT_ALIGN_RIGHT = 2,
+    FSL_TEXT_ALIGN_TOP = 0,
+    FSL_TEXT_ALIGN_BOTTOM = 2
+}; /* fsl_text_alignment */
+
 /*!
- *  @remark get asset metadata.
+ *  @brief get an asset's metadata (e.g., name, name_id, etc..).
  */
 FSLAPI fsl_asset_metadata fsl_asset_get_metadata(fsl_asset asset);
 
 /*!
- *  @brief initialize a single asset.
+ *  @brief set a single asset's metadata.
  *
  *  @param type asset type (enum @ref fsl_asset_type).
  *  @param name asset display name (optional).
@@ -57,7 +66,7 @@ FSLAPI fsl_asset_metadata fsl_asset_get_metadata(fsl_asset asset);
  *  @param file base file name (optional).
  *  @param path path to asset file without file name (optional).
  *
- *  @remark does not modify @ref asset.initialized.
+ *  @remark does not modify @ref asset->initialized.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -69,7 +78,8 @@ FSLAPI u32 fsl_asset_set_metadata(fsl_asset *asset, fsl_asset_type type,
  *  @param size size of each element in buffer.
  *  @param len number of elements in buffer.
  *
- *  @remark does not unbind buffer, @ref glBindBuffer() must be used to bind different buffer.
+ *  @remark does not unbind buffer when done, @ref glBindBuffer() must be used
+ *  to bind different buffer.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -146,8 +156,19 @@ FSLAPI void fsl_font_free(fsl_font *font);
  *      pitch: [-90,  90].
  *      yaw:   [  0, 360].
  */
-FSLAPI void fsl_update_camera_movement(fsl_camera *camera,
+FSLAPI void fsl_camera_movement_update(fsl_camera *camera,
         f64 pos_x, f64 pos_y, f64 pos_z, f64 roll, f64 pitch, f64 yaw);
+
+/*!
+ *  @brief update camera lookat angles looking from 'pos' at 'target'.
+ *
+ *  @remark rotation limits:
+ *      roll:  [  0, 360].
+ *      pitch: [-90,  90].
+ *      yaw:   [  0, 360].
+ */
+FSLAPI void fsl_camera_lookat_update(fsl_camera *camera,
+        f64 pos_x, f64 pos_y, f64 pos_z, f64 target_x, f64 target_y, f64 target_z);
 
 /*!
  *  @brief make perspective projection matrices from camera parameters.
@@ -157,13 +178,16 @@ FSLAPI void fsl_update_camera_movement(fsl_camera *camera,
  *      - +Y: left.
  *      - +Z: up.
  *
- *  @remark called automatically from @ref fsl_update_camera_movement().
+ *  @remark called automatically from @ref fsl_camera_movement_update().
  *
  *  @param roll enable/disable roll rotation.
  */
-FSLAPI void fsl_update_projection_perspective(fsl_camera camera, fsl_projection *projection, b8 roll);
+FSLAPI void fsl_projection_perspective_update(fsl_camera camera, fsl_projection *projection, b8 roll);
 
 /*!
+ *
+ *  -- DEPRECATED IN v0.8.0-dev --; use @ref fsl_camera_lookat_update().
+ *
  *  @brief get camera look-at angles from camera position and target position.
  *
  *  assign vertical angle to `pitch` and horizontal angle to `yaw`.

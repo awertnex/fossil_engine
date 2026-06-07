@@ -3,7 +3,7 @@
 
 #include "deps/fossil/common/types.h"
 
-#define RAND_TAB_DIAMETER   128
+#define RAND_TAB_DIAMETER   48
 #define RAND_TAB_LAYER      (RAND_TAB_DIAMETER * RAND_TAB_DIAMETER)
 #define RAND_TAB_VOLUME     (RAND_TAB_DIAMETER * RAND_TAB_DIAMETER * RAND_TAB_DIAMETER)
 

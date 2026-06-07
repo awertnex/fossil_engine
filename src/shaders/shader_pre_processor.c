@@ -50,7 +50,7 @@ static str *fsl_shader_pre_process_includes_internal(const str *path, u64 *file_
 
 str *fsl_shader_pre_process_internal(const str *path, u64 *file_len)
 {
-    return fsl_shader_pre_process_includes_internal(path, file_len, FSL_SHADER_PRE_PROCESS_INCLUDE_RECURSION_MAX);
+    return fsl_shader_pre_process_includes_internal(path, file_len, FSL_SHADER_PRE_PROCESSOR_INCLUDE_RECURSION_MAX);
 }
 
 static str *fsl_shader_pre_process_includes_internal(const str *path, u64 *file_len, u64 recursion_limit)
