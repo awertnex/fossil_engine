@@ -6,10 +6,16 @@
    at engine version v0.3.3-beta (2026 01 24), which makes v0.3.4-beta the
    first version of the engine as standalone in this repo
 
-## v0.9.0-dev (current)
+## v0.10.0-beta (2026 06 07)
 - (2026 06 07): made copying of a directory and a sub directory of the same name
                 not place them inside each other.
 - (2026 06 07): added copying of empty directories to function `fsl_copy_dir()`.
+- (2026 06 06): deprecated function `fsl_get_camera_lookat_angles()`.
+- (2026 06 06): added function `fsl_camera_lookat_update()`.
+- (2026 06 06): function `fsl_camera_movement_update()` now actually updates
+                camera perspective (calls `fsl_projection_perspective_update()`
+                automatically).
+- (2026 06 06): camera struct now has a projection `fsl_projection` in it.
 - (2026 06 03): added new standard mesh 'skybox'.
 - (2026 06 02): added function `fsl_rle()` for run-length data compression.
 
