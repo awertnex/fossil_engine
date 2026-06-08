@@ -219,37 +219,14 @@ typedef struct hhc_chunk_draw
     hhc_chunk_mesh *p;      /* cached pointer from `handle` */
 } hhc_chunk_draw;
 
-/*!
- *  @brief chunk gizmo render buffer data for chunk colors.
- *
- *  for rendering chunk gizmo in one draw call.
- *
- *  format: 0xxxyyzz00, 0xrrggbbaa.
- */
-typedef struct hhc_chunk_gizmo
-{
-    b8 initialized;
-    GLuint vao;
-    GLuint vbo;
-    fsl_mem_handle handle;
-    v2u32 *p;               /* cached pointer from `handle` */
-} hhc_chunk_gizmo;
-
 #define GET_BLOCK_ID(block)     (block & MASK_BLOCK_ID)
 #define SET_BLOCK_ID(block, id) (block = (block & ~MASK_BLOCK_ID) | id)
+#define GET_BLOCK_LIGHT(block)      ((block & MASK_BLOCK_LIGHT) >> SHIFT_BLOCK_LIGHT)
+#define SET_BLOCK_LIGHT(block, val) (block = (block & ~MASK_BLOCK_LIGHT) | (val << SHIFT_BLOCK_LIGHT))
+#define COPY_BLOCK_LIGHT(src, dst)  (src = (src & ~MASK_BLOCK_LIGHT) | (dst & MASK_BLOCK_LIGHT))
 
 extern hhc_chunk_table chunk_tab;
 extern hhc_chunk_order chunk_order;
-
-/*!
- *  @brief buffer data for opaque chunk colors.
- */
-extern hhc_chunk_gizmo chunk_gizmo_loaded;
-
-/*!
- *  @brief buffer data for transparent chunk colors.
- */
-extern hhc_chunk_gizmo chunk_gizmo_render;
 
 /*!
  *  @brief initialize chunking resources.
@@ -281,7 +258,7 @@ u32 chunking_init(void);
  *
  *  5. remove @ref core.flag.chunk_buf_dirty when no further processing is required.
  */
-void chunking_update(v3i32 player_chunk, v3i32 *player_chunk_delta);
+void chunking_update(v3i32 player_chunk, v3i32 *player_chunk_delta, block_hit hit);
 
 void chunking_free(void);
 
@@ -328,6 +305,6 @@ hhc_chunk *get_chunk_resolved(u32 index, i32 x, i32 y, i32 z);
  *  @return index into global array @ref chunk_tab.
  *  @return @ref settings.chunk_tab_center if index out of bounds.
  */
-u32 get_chunk_index(v3i32 chunk_pos, v3f64 pos);
+u32 get_chunk_index(v3i32 chunk_pos, v3i64 pos);
 
 #endif /* HHC_CHUNKING_H */

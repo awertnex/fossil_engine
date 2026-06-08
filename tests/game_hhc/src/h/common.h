@@ -4,21 +4,7 @@
 #include "deps/fossil/common/types.h"
 #include "deps/fossil/memory/memory.h"
 
-#define GAME_VERSION_STABLE "-stable"
-#define GAME_VERSION_BETA   "-beta"
-#define GAME_VERSION_ALPHA  "-alpha"
-#define GAME_VERSION_DEV    "-dev"
-
-#define GAME_AUTHOR         "Author: Lily Awertnex"
-#define GAME_NAME           "Heaven-Hell Continuum"
-#define GAME_VERSION        "0.4.0"GAME_VERSION_DEV
-#define GAME_TITLE          GAME_NAME": "GAME_VERSION
-
-#ifdef HHC_RELEASE_BUILD
-#   define GAME_RELEASE_BUILD 1
-#else
-#   define GAME_RELEASE_BUILD 0
-#endif /* HHC_RELEASE_BUILD */
+#include "game_info.h"
 
 /* ---- settings ------------------------------------------------------------ */
 
@@ -124,7 +110,7 @@
 enum mesh_index
 {
     MESH_CUBE_OF_HAPPINESS,
-    MESH_GIZMO,
+    MESH_GIZMO_AXIS,
     MESH_COUNT
 }; /* mesh_index */
 

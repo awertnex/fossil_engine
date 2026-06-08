@@ -7,6 +7,7 @@
 
 #include "chunking/chunking.h"
 
+#include "h/main.h"
 #include "h/assets.h"
 #include "h/gui.h"
 #include "h/input.h"

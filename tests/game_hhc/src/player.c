@@ -590,15 +590,21 @@ void player_camera_movement_update(hhc_player *p, v2f64 mouse_delta, b8 use_mous
     p->camera_hud.pitch.cos = p->camera.pitch.cos;
     p->camera_hud.yaw.sin = p->camera.yaw.sin;
     p->camera_hud.yaw.cos = p->camera.yaw.cos;
-
-    /* ---- camera_ui ------------------------------------------------------- */
 }
 
 void player_target_update(hhc_player *p)
 {
+    v3f64 delta = {0}; /* important to compensate for `chunk_tab` shifting */
+    v3f64 origin = {0};
     v3f64 start = {0};
     v3f64 end = {0};
 
+    delta.x = (p->ch_delta.x - p->ch.x) * CHUNK_DIAMETER;
+    delta.y = (p->ch_delta.y - p->ch.y) * CHUNK_DIAMETER;
+    delta.z = (p->ch_delta.z - p->ch.z) * CHUNK_DIAMETER;
+    origin.x = p->transform.pos.x;
+    origin.y = p->transform.pos.y;
+    origin.z = p->transform.pos.z;
     start.x = p->transform.pos.x;
     start.y = p->transform.pos.y;
     start.z = p->transform.pos.z + p->eye_height;

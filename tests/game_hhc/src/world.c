@@ -40,11 +40,11 @@ u32 world_init(str *name, u64 seed, hhc_player *p)
 
     world.gravity = FSL_GRAVITY * 3.0f;
 
-    set_player_spawn(p, 0, 0, -30);
+    set_player_spawn(p, 0, 0, -86);
     player_spawn(p, TRUE);
 
-    core.flag.hud = 1;
-    core.flag.world_loaded = 1;
+    core.flag.hud = TRUE;
+    core.flag.world_loaded = TRUE;
     disable_cursor;
     center_cursor;
 
@@ -198,8 +198,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
 
     /* ---- other stuff ----------------------------------------------------- */
 
-    core.debug.chunk_gizmo = 1;
-    core.debug.chunk_scheduler_visualizer = 1;
+    core.debug.chunk_gizmo = TRUE;
 
     LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
             fsl_logger_stringf("World Loaded '%s'\n", world_name));
@@ -213,7 +212,7 @@ void world_update(hhc_player *p)
     /* player camera shouldn't move when a menu is open,
      * so we pass this to the camera function.
      */
-    b8 use_mouse = !state_menu_depth && !core.flag.super_debug && !(p->flag & FLAG_PLAYER_DEAD);
+    b8 should_the_mouse_move_the_3d_camera = !state_menu_depth && !core.flag.super_debug && !(p->flag & FLAG_PLAYER_DEAD);
 
     world.tick = world.tick_start + (u64)((f64)render->time * FSL_NSEC2SEC * WORLD_TICK_SPEED);
     world.days = world.tick / SET_DAY_TICKS_MAX;
@@ -223,16 +222,13 @@ void world_update(hhc_player *p)
     else disable_cursor;
 
     player_update(p, 1.0 - exp(-1.0 * (f64)render->time_delta * FSL_NSEC2SEC));
-    player_camera_movement_update(p, render->mouse_delta, use_mouse);
-    player_target_update(p);
+    player_camera_movement_update(p, render->mouse_delta, should_the_mouse_move_the_3d_camera);
 
     if (MODE_INTERNAL_LOAD_CHUNKS &&
             fsl_is_dir_exists(fsl_stringf("%s"GAME_DIR_WORLD_NAME_CHUNKS,
                     world.path), TRUE) == FSL_ERR_SUCCESS)
-    {
-        chunking_update(p->ch, &p->ch_delta);
-        chunk_tab.index = get_chunk_index(p->ch, p->target);
-    }
+        chunking_update(p->ch, &p->ch_delta, p->hit);
+    player_target_update(p);
 
     fsl_projection_perspective_update(p->camera_hud, &p->camera_hud.projection, FALSE);
     fsl_projection_perspective_update(p->camera_ui, &p->camera_ui.projection, FALSE);

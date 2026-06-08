@@ -1,7 +1,7 @@
 #ifndef HHC_GUI_H
 #define HHC_GUI_H
 
-#include "main.h"
+#include "deps/fossil/common/types.h"
 
 #define show_cursor     glfwSetInputMode(render->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL)
 #define disable_cursor  glfwSetInputMode(render->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
