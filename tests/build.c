@@ -249,7 +249,9 @@ u32 build_composable_ui(int argc, char **argv)
     if (exec(&cmd, "build_composable_ui().cmd") != ERR_SUCCESS)
         cmd_fail(&cmd);
 
-    if (copy_dir(DIR_ROOT"fossil/fossil/", DIR_OUT_COMPOSABLE_UI, TRUE) != ERR_SUCCESS)
+    if (
+            copy_dir(DIR_ROOT"fossil/fossil/", DIR_OUT_COMPOSABLE_UI, TRUE) != ERR_SUCCESS ||
+            copy_dir(DIR_COMPOSABLE_UI"assets/", DIR_OUT_COMPOSABLE_UI, FALSE) != ERR_SUCCESS)
         cmd_fail(&cmd);
 
     build_err = ERR_SUCCESS;

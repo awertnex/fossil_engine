@@ -17,24 +17,24 @@
 /*!
  *  @file ui.c
  *
- *  @brief everything about drawing ui elements.
+ *  @brief initializing UI module.
  */
 
-#include "common/config.h"
-#include "common/diagnostics.h"
-#include "common/limits.h"
-#include "common/types.h"
-#include "assets/assets.h"
-#include "assets/asset_types.h"
-#include "engine/engine.h"
-#include "engine/engine_assets.h"
-#include "logger/logger.h"
-#include "logger/logger_messages_internal.h"
-#include "memory/memory.h"
-#include "math/vector.h"
-#include "shaders/shader_types.h"
+#include "../common/config.h"
+#include "../common/diagnostics.h"
+#include "../common/limits.h"
+#include "../common/types.h"
+#include "../assets/assets.h"
+#include "../assets/asset_types.h"
+#include "../engine/engine.h"
+#include "../engine/engine_assets.h"
+#include "../logger/logger.h"
+#include "../logger/logger_messages_internal.h"
+#include "../memory/memory.h"
+#include "../math/vector.h"
+#include "../shaders/shader_types.h"
 
-#include "h/ui.h"
+#include "ui_core.h"
 
 #include <string.h>
 

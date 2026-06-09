@@ -15,13 +15,13 @@
  */
 
 /*!
- *  @file ui.h
+ *  @file ui_core.h
  *
  *  @brief everything about drawing ui elements.
  */
 
-#ifndef FSL_UI_H
-#define FSL_UI_H
+#ifndef FSL_UI_CORE_H
+#define FSL_UI_CORE_H
 
 #include "../common/api.h"
 #include "../common/types.h"
@@ -146,6 +146,11 @@ FSLAPI void fsl_ui_render(void);
 /*!
  *  @brief draw a texture as a UI element.
  *
+ *  @param offset_x DEPRECATED IN v0.10.0-dev.
+ *  @param offset_y DEPRECATED IN v0.10.0-dev.
+ *  @param align_x DEPRECATED IN v0.10.0-dev.
+ *  @param align_y DEPRECATED IN v0.10.0-dev.
+ *
  *  @remark if `size_x` is 0, `texture->size.x` is used, and likewise for `size_y`.
  */
 FSLAPI void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
@@ -161,10 +166,11 @@ FSLAPI void fsl_ui_stop(void);
 
 FSLAPI void fsl_ui_free(void);
 
+
 /*!
  *  @brief make a 9-slice panel.
  */
 FSLAPI fsl_panel_nine_slice fsl_get_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
         i32 size_x, i32 size_y, i32 slice_size);
 
-#endif /* FSL_UI_H */
+#endif /* FSL_UI_CORE_H */

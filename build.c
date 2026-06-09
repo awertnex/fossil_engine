@@ -47,10 +47,11 @@ static str str_files[][CMD_SIZE] =
     DIR_SRC"shaders/shaders.c",
     DIR_SRC"shaders/shader_pre_processor.c",
     DIR_SRC"string/string.c",
+    DIR_SRC"ui/ui_core.c",
+    DIR_SRC"ui/ui_element.c",
     DIR_SRC"dir.c",
     DIR_SRC FSL_FILE_NAME_PLATFORM,
-    DIR_SRC"time.c",
-    DIR_SRC"ui.c"
+    DIR_SRC"time.c"
 };
 
 static str str_make_dir[][CMD_SIZE] =
@@ -71,6 +72,7 @@ static str str_make_dir[][CMD_SIZE] =
     DIR_DST DIR_DEPS DIR_DST"physics/",
     DIR_DST DIR_DEPS DIR_DST"shaders/",
     DIR_DST DIR_DEPS DIR_DST"string/",
+    DIR_DST DIR_DEPS DIR_DST"ui/",
 
     DIR_DST DIR_DST,
     DIR_DST DIR_DST DIR_DST,
@@ -104,7 +106,10 @@ static str *copy_targets[][48] =
     {DIR_SRC"physics/physics_types.h",      DIR_DST DIR_DEPS DIR_DST"physics/"},
     {DIR_SRC"shaders/shader_types.h",       DIR_DST DIR_DEPS DIR_DST"shaders/"},
     {DIR_SRC"shaders/shaders.h",            DIR_DST DIR_DEPS DIR_DST"shaders/"},
-    {DIR_SRC"string/string.h",              DIR_DST DIR_DEPS DIR_DST"string/"}
+    {DIR_SRC"string/string.h",              DIR_DST DIR_DEPS DIR_DST"string/"},
+    {DIR_SRC"ui/ui.h",                      DIR_DST DIR_DEPS DIR_DST"ui/"},
+    {DIR_SRC"ui/ui_core.h",                 DIR_DST DIR_DEPS DIR_DST"ui/"},
+    {DIR_SRC"ui/ui_types.h",                DIR_DST DIR_DEPS DIR_DST"ui/"}
 };
 
 int main(int argc, char **argv)
