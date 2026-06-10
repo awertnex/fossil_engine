@@ -100,13 +100,7 @@ terrain terrain_land(v3i32 coordinates)
         result.block_id = BLOCK_STONE;
         if (cave_final > crush)
             result.block_id = 0;
-
-        result.block_light = (u32)fsl_map_range_f64(
-                    fsl_clamp_f64((f64)coordinates.z, -64.0, 0.0),
-                    -64.0, 0.0, 2.0, 63.0) << SHIFT_BLOCK_LIGHT;
     }
-    else
-        result.block_light = 63 << SHIFT_BLOCK_LIGHT;
 
     if (land_final < (f32)coordinates.z || cave_entrances > 0.22f)
         result.block_id = 0;
@@ -140,7 +134,7 @@ terrain terrain_decaying_lands(v3i32 coordinates)
 
     gathering = perlin_noise_2d(coordinates_2d, 0.2f, 22.5f, world.seed + 75489);
 
-    mountains = perlin_noise_2d_ex(coordinates_2d, 250.0f, 255.0f, 3, 0.8f, 0.8f, world.seed + 9584);
+    mountains = perlin_noise_2d_ex(coordinates_2d, 170.0f, 255.0f, 3, 0.8f, 0.8f, world.seed + 9584);
     ridges = perlin_noise_2d(coordinates_2d, 3.0f, 19.0f + gathering, world.seed - 5873956);
 
     cave_frequency = perlin_noise_3d_ex(coordinates, 1.0f, 208.0f, 2, 0.8f, 0.8f, world.seed + 57394);
@@ -156,13 +150,7 @@ terrain terrain_decaying_lands(v3i32 coordinates)
     result.block_id = BLOCK_GRASS;
 
     if (cave_level > (f32)coordinates.z)
-    {
-        result.block_id = BLOCK_GRASS;
-        result.block_light = (u32)fsl_map_range_f64(
-                    fsl_clamp_f64((f64)coordinates.z, -64.0, 0.0),
-                    -64.0, 0.0, 0.0, 63.0) << SHIFT_BLOCK_LIGHT;
-    }
-    else result.block_light = 63 << SHIFT_BLOCK_LIGHT;
+        result.block_id = BLOCK_STONE;
 
     if (land_final < (f32)coordinates.z || cave_final > crush)
         result.block_id = 0;
@@ -231,8 +219,6 @@ terrain terrain_biome_blend_test(v3i32 coordinates)
     {
         result.block_id = BLOCK_STONE;
     }
-
-    result.block_light = 63 << SHIFT_BLOCK_LIGHT;
 
     if (biome_decaying_lands > crush || biome_decaying_lands_caves > crush)
         result.block_id = 0;

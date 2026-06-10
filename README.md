@@ -1,4 +1,4 @@
-# Fossil Engine - v0.10.0-beta
+# Fossil Engine - v0.10.1-beta
 
 **a game engine written in C89, with minimal dependencies.**
 
@@ -61,6 +61,7 @@ additional build commands:
 - `./build raw`: show build command in raw format
 - `./build self`: re-build buildtool
 - `./build release`: build as release
+- `./build btdebug`: show debug info for buildtool
 
 
 **windows (using any C compiler):**
@@ -88,6 +89,7 @@ additional build commands:
 - `./build.exe raw`: show build command in raw format
 - `./build.exe self`: re-build buildtool
 - `./build.exe release`: build as release
+- `./build.exe btdebug`: show debug info for buildtool
 
 ## Contributing:
 currently not accepting contributions since the project is in an early stage, but I will be opening contributions soon (saying this as of today: 24 Oct 2025)

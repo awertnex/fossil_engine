@@ -24,7 +24,6 @@ typedef struct terrain
 {
     enum biome_index biome;
     enum block_id block_id;
-    u32 block_light;
 
     /*!
      *  @brief cost of terrain generation done on this block.

@@ -6,7 +6,48 @@
    at engine version v0.3.3-beta (2026 01 24), which makes v0.3.4-beta the
    first version of the engine as standalone in this repo
 
+## v0.10.1-beta (2026 06 10)
+
+#### additions
+- (2026 06 09): added new UI module with panel-baking and easier drawing.
+
+#### fixes
+- (2026 06 10): fixed nonexistent alpha in UI shader.
+- (2026 06 09): fixed wrong alpha calculation in macro `fsl_color_v4_to_hex()`.
+
+#### deprecations
+- (2026 06 09): deprecated parameters `offset_x`, `offset_y`, `align_x` and
+                `align_y` in function `fsl_ui_draw()`, use new UI module
+                'src/ui/ui.h' instead:
+                    - function `ui_element_set_texture()` to set a texture for
+                      an element.
+                    - function `ui_element_set_uv()` to set UV coordinates of an
+                      element in its texture.
+                    - function `ui_element_set_position()` to position an
+                      element on screen.
+                    - `ui_element_set_size()` to set size of an element on
+                      screen.
+                    - `ui_element_set_scale()` to set scaling of an element for
+                      its 'scaled' parameters.
+                    - `ui_element_set_alignment()` to set align an element on
+                      screen in respect to its final position and size.
+                    - `ui_element_attach()` to attach a UI element to another
+                      (e.g., button in a menu).
+                    - `ui_element_draw()` to draw UI element and its children,
+                      recursively and in order of attachment.
+
+#### bugs and flaws
+- the 'obj' loader possibly has a bug due to hash-table collisions:
+    - sometimes faces disappear when ordered in specific ways in the obj file.
+- the 'obj' loader does not handle concave faces smartly, just loads them as
+  they are.
+- game UI is clunky right now because new UI API and didn't bother to change it,
+  yet.
+
+- - -
 ## v0.10.0-beta (2026 06 07)
+
+#### changes
 - (2026 06 07): made copying of a directory and a sub directory of the same name
                 not place them inside each other.
 - (2026 06 07): added copying of empty directories to function `fsl_copy_dir()`.
@@ -18,8 +59,6 @@
 - (2026 06 06): camera struct now has a projection `fsl_projection` in it.
 - (2026 06 03): added new standard mesh 'skybox'.
 - (2026 06 02): added function `fsl_rle()` for run-length data compression.
-
-#### changes
 
 - - -
 ## v0.9.0-beta (2026 05 31)

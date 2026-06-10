@@ -478,7 +478,6 @@ u32 fsl_copy_dir(const fsl_fs_path *src, const fsl_fs_path *dst, b8 contents_onl
     str in_dir[FSL_PATH_CAP] = {0};
     str out_dir[FSL_PATH_CAP] = {0};
     u64 i = 0;
-    b8 is_empty = FALSE;
     struct stat stats = {0};
     struct timespec ts[2] = {0};
 

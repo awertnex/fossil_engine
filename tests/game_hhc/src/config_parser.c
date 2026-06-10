@@ -3,8 +3,6 @@
 
 #include "deps/fossil/h/dir.h"
 
-#include "h/main.h"
-
 #include <stdio.h>
 
 str allowed_chars[126] =

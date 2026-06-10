@@ -5,9 +5,9 @@
 #include "chunking/chunking.h"
 #include "chunking/chunking_internal.h"
 #include "chunking/chunking_debug_tools.h"
-#include "terrain/terrain.h"
 #include "terrain/perlin_noise.h"
 
+#include "h/game_info.h"
 #include "h/assets.h"
 #include "h/common.h"
 #include "h/diagnostics.h"
@@ -22,6 +22,7 @@
 #include <inttypes.h>
 #include <math.h>
 
+fsl_ui_element element_item_bar = {0};
 i32 scrool = 0;
 u32 *const GAME_ERR = (u32*)&fsl_err;
 fsl_mem_arena memory_arena_internal = {0};
@@ -60,9 +61,9 @@ static void bind_shader_uniforms(void);
 static u32 settings_init(void);
 
 void settings_update(void);
-static void draw_gizmo(void);
 static void draw_hotbar_items(void);
 static void draw_world(void);
+static void draw_debug_gizmo_axis(void);
 static void draw_everything(void);
 
 static void callback_framebuffer_size(i32 size_x, i32 size_y)
@@ -182,9 +183,18 @@ static u32 settings_init(void)
 
 void settings_update(void)
 {
+    fsl_texture *texture_p = fsl_mem_handle_get(texture);
+
     if (fsl_on_time_interval(&refresh_interval.fps_string,
                 FSL_SEC2NSEC / SET_TEXT_REFRESH_INTERVAL, render->time))
         settings.fps = 1 / ((f64)render->time_delta * FSL_NSEC2SEC);
+
+    fsl_ui_element_set_texture(&element_item_bar, &texture_p[TEXTURE_ITEM_BAR]);
+    fsl_ui_element_set_uv(&element_item_bar, 0, 0, 169, 16);
+    fsl_ui_element_set_position(&element_item_bar, render->size.x / 2, render->size.y, 0, 0, 0, -2);
+    fsl_ui_element_set_size(&element_item_bar, 0, 0, element_item_bar.texture->size.x, element_item_bar.texture->size.y);
+    fsl_ui_element_set_scale(&element_item_bar, settings.gui_scale, settings.gui_scale);
+    fsl_ui_element_set_alignment(&element_item_bar, 0, 1);
 }
 
 static void bind_shader_uniforms(void)
@@ -218,7 +228,7 @@ static void bind_shader_uniforms(void)
         glGetUniformLocation(shader_p[SHADER_SKYBOX].asset.id, "render_layer");
 
     uniform.gizmo.color =
-        glGetUniformLocation(shader_p[SHADER_GIZMO].asset.id, "gizmo_color");
+        glGetUniformLocation(shader_p[SHADER_GIZMO_AXIS].asset.id, "gizmo_color");
 
     uniform.gizmo_chunk.gizmo_offset =
         glGetUniformLocation(shader_p[SHADER_GIZMO_CHUNK].asset.id, "gizmo_offset");
@@ -275,29 +285,6 @@ static void bind_shader_uniforms(void)
         glGetUniformLocation(shader_p[SHADER_BOUNDING_BOX].asset.id, "box_color");
 }
 
-static void draw_gizmo(void)
-{
-    fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
-    fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
-    m4f32 transform = {0};
-
-    transform = player.camera_hud.projection.projection;
-    transform = fsl_matrix_multiply(player.camera_hud.projection.orientation, transform);
-    transform = fsl_matrix_multiply(player.camera_hud.projection.rotation, transform);
-    transform = fsl_matrix_multiply(player.camera_hud.projection.target, transform);
-
-    glUseProgram(shader_p[SHADER_GIZMO].asset.id);
-
-    glBindBuffer(GL_ARRAY_BUFFER, mesh_p[MESH_GIZMO].transform_buf.id);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(m4f32), &transform, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindVertexArray(mesh_p[MESH_GIZMO].vao);
-    glUniform3f(uniform.gizmo.color, 1.0f, 0.0f, 0.0f);
-    glDrawElementsInstanced(GL_TRIANGLES, mesh_p[MESH_GIZMO].index_buf.len,
-            GL_UNSIGNED_INT, NULL, 1);
-}
-
 static void draw_hotbar_items(void)
 {
     u32 i = 0;
@@ -351,6 +338,29 @@ static void draw_world(void)
             glDrawArraysInstanced(GL_POINTS, 0, ch->mesh.vbo_len, 1);
         }
     }
+}
+
+static void draw_debug_gizmo_axis(void)
+{
+    fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
+    fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
+    m4f32 transform = {0};
+
+    transform = player.camera_hud.projection.projection;
+    transform = fsl_matrix_multiply(player.camera_hud.projection.orientation, transform);
+    transform = fsl_matrix_multiply(player.camera_hud.projection.rotation, transform);
+    transform = fsl_matrix_multiply(player.camera_hud.projection.target, transform);
+
+    glUseProgram(shader_p[SHADER_GIZMO_AXIS].asset.id);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mesh_p[MESH_GIZMO_AXIS].transform_buf.id);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(m4f32), &transform, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glBindVertexArray(mesh_p[MESH_GIZMO_AXIS].vao);
+    glUniform3f(uniform.gizmo.color, 1.0f, 0.0f, 0.0f);
+    glDrawElementsInstanced(GL_TRIANGLES, mesh_p[MESH_GIZMO_AXIS].index_buf.len,
+            GL_UNSIGNED_INT, NULL, 1);
 }
 
 static void draw_everything(void)
@@ -617,7 +627,7 @@ static void draw_everything(void)
     /* ---- draw chunk scheduler visualizer --------------------------------- */
 
     if (core.debug.chunk_scheduler_visualizer)
-        chunk_debug_draw_scheduler_visualizer(&player.camera, 0.5f);
+        chunk_debug_scheduler_visualizer_draw(&player.camera, 0.5f);
 
     if (settings.anti_aliasing)
     {
@@ -627,7 +637,7 @@ static void draw_everything(void)
                 render->size.x, render->size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
     }
 
-    /* ---- draw hud gizmo -------------------------------------------------- */
+    /* ---- draw hud gizmos ------------------------------------------------- */
 
     if (settings.anti_aliasing)
         glBindFramebuffer(GL_FRAMEBUFFER, fbo_p[FBO_HUD_MSAA].fbo);
@@ -636,49 +646,16 @@ static void draw_everything(void)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if (core.flag.hud && core.flag.debug)
-        draw_gizmo();
-
-    /* ---- draw hud chunk gizmo -------------------------------------------- */
-
-    if (core.flag.hud && core.debug.chunk_gizmo)
+    if (core.flag.hud)
     {
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glUseProgram(shader_p[SHADER_GIZMO_CHUNK].asset.id);
+        if (core.flag.debug)
+            draw_debug_gizmo_axis();
 
-        glUniform1f(uniform.gizmo_chunk.gizmo_offset, (f32)settings.chunk_buf_radius + 0.5f);
-        glUniform2iv(uniform.gizmo_chunk.render_size, 1, (GLint*)&render->size);
-        glUniform1i(uniform.gizmo_chunk.chunk_buf_diameter, settings.chunk_buf_diameter);
-
-        glUniformMatrix4fv(uniform.gizmo_chunk.mat_translation,
-                1, GL_FALSE, (GLfloat*)&player.camera_hud.projection.target);
-
-        glUniformMatrix4fv(uniform.gizmo_chunk.mat_rotation,
-                1, GL_FALSE, (GLfloat*)&player.camera_hud.projection.rotation);
-
-        glUniformMatrix4fv(uniform.gizmo_chunk.mat_orientation,
-                1, GL_FALSE, (GLfloat*)&player.camera_hud.projection.orientation);
-
-        glUniformMatrix4fv(uniform.gizmo_chunk.mat_projection,
-                1, GL_FALSE, (GLfloat*)&player.camera_hud.projection.projection);
-
-        v3f32 camera_position =
+        if (core.debug.chunk_gizmo)
         {
-            -player.camera.yaw.cos * player.camera.pitch.cos,
-            player.camera.yaw.sin * player.camera.pitch.cos,
-            player.camera.pitch.sin,
-        };
-
-        glUniform3fv(uniform.gizmo_chunk.camera_position, 1, (GLfloat*)&camera_position);
-        glUniform1f(uniform.gizmo_chunk.time, render->time);
-
-        glDisable(GL_BLEND);
-        glBindVertexArray(chunk_gizmo_loaded.vao);
-        glDrawArrays(GL_POINTS, 0, settings.chunk_buf_volume);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glBindVertexArray(chunk_gizmo_render.vao);
-        glDrawArrays(GL_POINTS, 0, settings.chunk_buf_volume);
-        glEnable(GL_BLEND);
+            glClear(GL_DEPTH_BUFFER_BIT);
+            chunk_debug_chunk_gizmo_draw(&player.camera_hud);
+        }
     }
 
     if (settings.anti_aliasing)
@@ -700,10 +677,7 @@ static void draw_everything(void)
                     0, 0,
                     0.0f, 0.0f, -1, -1, 0xffffffff);
 
-        fsl_ui_draw(&texture_p[TEXTURE_ITEM_BAR], render->size.x / 2, render->size.y,
-                texture_p[TEXTURE_ITEM_BAR].size.x * 2,
-                texture_p[TEXTURE_ITEM_BAR].size.y * 2,
-                84.5f, 18.0f, 0, 0, 0xffffffff);
+        fsl_ui_element_draw(&element_item_bar);
 
         fsl_ui_draw(&texture_p[TEXTURE_ITEM_BAR_SELECTED],
                 render->size.x / 2 - 2 + player.hotbar_slot_selected * 34,

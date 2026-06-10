@@ -17,7 +17,7 @@
 /*!
  *  @file input_internal.h
  *
- *  @brief input module internal definitions, so to keep verbose internals away from API code.
+ *  @brief input module internal definitions.
  */
 
 #ifndef FSL_INPUT_INTERNAL_H

@@ -38,11 +38,12 @@
 #include "physics/physics_types.h"
 #include "shaders/shaders.h"
 #include "string/string.h"
+#include "ui/ui.h"
+#include "ui/ui_core.h"
 
 #include "h/dir.h"
 #include "h/process.h"
 #include "h/super_debugger.h"
 #include "h/time.h"
-#include "h/ui.h"
 
 #endif /* FSL_FOSSIL_ENGINE_H */
