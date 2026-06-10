@@ -1,5 +1,4 @@
 #include "../../../fossil/deps/fossil/fossil_engine.h"
-#include "../../../fossil/deps/fossil/ui/ui_core.h"
 
 fsl_render *render = {0};
 fsl_key_bind bind_quit = {0};
@@ -19,11 +18,11 @@ v2i32 align = {0};
 void ui_update(void)
 {
     fsl_ui_start(FALSE, TRUE);
-    ui_element_set_position(&element, render->mouse_pos.x, render->mouse_pos.y, 0, 0, 0, 0);
-    ui_element_set_scale(&element, scale.x, scale.y);
-    ui_element_set_alignment(&element, align.x, align.y);
+    fsl_ui_element_set_position(&element, render->mouse_pos.x, render->mouse_pos.y, 0, 0, 0, 0);
+    fsl_ui_element_set_scale(&element, scale.x, scale.y);
+    fsl_ui_element_set_alignment(&element, align.x, align.y);
 
-    ui_element_draw(&element);
+    fsl_ui_element_draw(&element);
     fsl_ui_stop();
 
     fsl_fbo_blit(0);
@@ -55,12 +54,12 @@ int main(int argc, char **argv)
     align.x = -1;
     align.y = -1;
 
-    ui_element_set_texture(&element, &texture);
-    ui_element_set_uv(&element, 0, 0, 177, 177);
-    ui_element_set_position(&element, 0, 0, 0, 0, 0, 0);
-    ui_element_set_size(&element, 0, 0, texture.size.x, texture.size.x);
-    ui_element_set_scale(&element, scale.x, scale.y);
-    ui_element_set_alignment(&element, align.x, align.y);
+    fsl_ui_element_set_texture(&element, &texture);
+    fsl_ui_element_set_uv(&element, 0, 0, 177, 177);
+    fsl_ui_element_set_position(&element, 0, 0, 0, 0, 0, 0);
+    fsl_ui_element_set_size(&element, 0, 0, texture.size.x, texture.size.x);
+    fsl_ui_element_set_scale(&element, scale.x, scale.y);
+    fsl_ui_element_set_alignment(&element, align.x, align.y);
 
     while (fsl_engine_running(NULL))
     {

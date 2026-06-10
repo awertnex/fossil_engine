@@ -6,10 +6,10 @@
    at engine version v0.3.3-beta (2026 01 24), which makes v0.3.4-beta the
    first version of the engine as standalone in this repo
 
-## v0.10.0-dev (current)
+## v0.10.1-beta (2026 06 10)
 
 #### additions
-- (2026 06 09): added new UI module with panel-embedding and buttons.
+- (2026 06 09): added new UI module with panel-baking and easier drawing.
 
 #### fixes
 - (2026 06 10): fixed nonexistent alpha in UI shader.
@@ -37,7 +37,12 @@
                       recursively and in order of attachment.
 
 #### bugs and flaws
-- the 'obj' loader possibly has a bug due to hash-table collisions.
+- the 'obj' loader possibly has a bug due to hash-table collisions:
+    - sometimes faces disappear when ordered in specific ways in the obj file.
+- the 'obj' loader does not handle concave faces smartly, just loads them as
+  they are.
+- game UI is clunky right now because new UI API and didn't bother to change it,
+  yet.
 
 - - -
 ## v0.10.0-beta (2026 06 07)

@@ -27,7 +27,6 @@
 #include "../common/types.h"
 #include "../assets/asset_types.h"
 
-#include "ui_core.h"
 #include "ui_types.h"
 
 FSLAPI void fsl_ui_element_set_texture(fsl_ui_element *element, fsl_texture *texture);
@@ -96,7 +95,5 @@ FSLAPI void fsl_ui_element_set_alignment(fsl_ui_element *element, i32 align_x, i
  *  @param child element to attach.
  */
 FSLAPI void fsl_ui_element_attach(fsl_ui_element *parent, fsl_ui_element *child);
-
-FSLAPI void fsl_ui_element_draw(fsl_ui_element *element);
 
 #endif /* FSL_UI_H */

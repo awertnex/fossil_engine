@@ -89,14 +89,6 @@ void fsl_ui_element_attach(fsl_ui_element *parent, fsl_ui_element *child)
     child->parent = parent;
 }
 
-void fsl_ui_element_draw(fsl_ui_element *element)
-{
-    if (element->flag & FSL_FLAG_UI_DIRTY_TRANSFORM)
-        ui_element_bake_internal(element);
-
-    ui_element_draw_internal(element);
-}
-
 void ui_element_bake_internal(fsl_ui_element *element)
 {
     fsl_ui_sprite *s = &element->sprite;

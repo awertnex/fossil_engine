@@ -34,9 +34,4 @@
  */
 void ui_element_bake_internal(fsl_ui_element *element);
 
-/*!
- *  @brief draw UI element and its children, recursively and in order of attachment.
- */
-void ui_element_draw_internal(fsl_ui_element *element);
-
 #endif /* FSL_UI_ELEMENT_INTERNAL_H */

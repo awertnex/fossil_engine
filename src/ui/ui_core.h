@@ -26,7 +26,8 @@
 #include "../common/api.h"
 #include "../common/types.h"
 #include "../assets/asset_types.h"
-#include "../math/vector.h"
+
+#include "ui_types.h"
 
 /* ---- section: definitions ------------------------------------------------ */
 
@@ -35,22 +36,11 @@
 #define FSL_UI_SLICE_SIZE_DEFAULT 8
 
 /*!
- *  @brief one slice in a 9-slice panel.
- */
-typedef struct fsl_panel_slice
-{
-    v2f32 pos;
-    v2f32 size;
-    v2f32 tex_coords_pos;
-    v2f32 tex_coords_size;
-} fsl_panel_slice;
-
-/*!
  *  @brief one 9-slice panel.
  */
 typedef struct fsl_panel_nine_slice
 {
-    struct fsl_panel_slice slice[9];
+    fsl_ui_sprite slice[9];
 } fsl_panel_nine_slice;
 
 /* ---- section: signatures ------------------------------------------------- */
@@ -141,15 +131,15 @@ FSLAPI void fsl_ui_start(b8 nine_slice, b8 clear);
  */
 FSLAPI void fsl_ui_push_panel(i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, u32 tint);
 
-FSLAPI void fsl_ui_render(void);
+FSLAPI void fsl_ui_element_draw(fsl_ui_element *element);
 
 /*!
  *  @brief draw a texture as a UI element.
  *
- *  @param offset_x DEPRECATED IN v0.10.0-dev.
- *  @param offset_y DEPRECATED IN v0.10.0-dev.
- *  @param align_x DEPRECATED IN v0.10.0-dev.
- *  @param align_y DEPRECATED IN v0.10.0-dev.
+ *  @param offset_x DEPRECATED IN v0.10.1-beta.
+ *  @param offset_y DEPRECATED IN v0.10.1-beta.
+ *  @param align_x DEPRECATED IN v0.10.1-beta.
+ *  @param align_y DEPRECATED IN v0.10.1-beta.
  *
  *  @remark if `size_x` is 0, `texture->size.x` is used, and likewise for `size_y`.
  */
@@ -165,7 +155,6 @@ FSLAPI void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
 FSLAPI void fsl_ui_stop(void);
 
 FSLAPI void fsl_ui_free(void);
-
 
 /*!
  *  @brief make a 9-slice panel.

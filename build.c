@@ -47,7 +47,7 @@ static str str_files[][CMD_SIZE] =
     DIR_SRC"shaders/shaders.c",
     DIR_SRC"shaders/shader_pre_processor.c",
     DIR_SRC"string/string.c",
-    DIR_SRC"ui/ui_core.c",
+    DIR_SRC"ui/ui.c",
     DIR_SRC"ui/ui_element.c",
     DIR_SRC"dir.c",
     DIR_SRC FSL_FILE_NAME_PLATFORM,
