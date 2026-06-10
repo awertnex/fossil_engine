@@ -34,4 +34,6 @@
  */
 void ui_element_bake_internal(fsl_ui_element *element);
 
+void fsl_ui_element_draw(fsl_ui_element *element);
+
 #endif /* FSL_UI_ELEMENT_INTERNAL_H */

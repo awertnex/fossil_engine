@@ -96,9 +96,9 @@ struct fsl_ui_sprite
 
     /*!
      *  @brief alignment in respect to `pos`, `size` and `size_scaled`.
-     *  <= -1: left side of sprite is at `pos`.
+     *  <= -1: left-side/top of sprite is at `pos`.
      *  == 0: center of sprite is at `pos`.
-     *  >= 1: right side of sprite is at `pos`.
+     *  >= 1: right-side/bottom of sprite is at `pos`.
      */
     v2i32 align;
 

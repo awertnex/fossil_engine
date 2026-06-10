@@ -20,6 +20,10 @@
  *  @brief everything about drawing ui elements.
  */
 
+#include "../common/diagnostics.h"
+#include "../logger/logger.h"
+#include "../logger/logger_messages_internal.h"
+
 #include "ui.h"
 #include "ui_element_internal.h"
 #include "ui_types.h"
@@ -90,36 +94,33 @@ void ui_element_draw(fsl_ui_element *element)
     if (element->flag & FSL_FLAG_UI_DIRTY_TRANSFORM)
         ui_element_bake_internal(element);
 
-    fsl_ui_draw(element->texture,
-            element->sprite.pos_baked.x, element->sprite.pos_baked.y,
-            element->sprite.size_baked.x, element->sprite.size_baked.y,
-            0.0f, 0.0f, 0, 0, 0xffffffff);
+    fsl_ui_element_draw(element);
 }
 
 void ui_element_bake_internal(fsl_ui_element *element)
 {
     fsl_ui_sprite *s = &element->sprite;
     v2f32 texture_scale = {0};
-    v2f32 delta = {0};
-    v2f32 pos = {0};
+    v2f32 texture_ratio = {0};
     v2f32 size = {0};
+    v2f32 size_half = {0};
     v2f32 alignment = {0};
+    v2f32 pos = {0};
 
     element->flag &= ~FSL_FLAG_UI_DIRTY_TRANSFORM;
 
     texture_scale.x = 1.0f / element->texture->size.x;
     texture_scale.y = 1.0f / element->texture->size.y;
-    delta.x = element->texture->size.x - s->uv_size.x;
-    delta.y = element->texture->size.y - s->uv_size.y;
-
+    texture_ratio.x = (f32)s->uv_size.x / element->texture->size.x;
+    texture_ratio.y = (f32)s->uv_size.y / element->texture->size.y;
+    size.x = (s->size.x + s->size_scaled.x * s->scale.x) * texture_ratio.x;
+    size.y = (s->size.y + s->size_scaled.y * s->scale.y) * texture_ratio.y;
+    size_half.x = size.x / 2.0f;
+    size_half.y = size.y / 2.0f;
+    alignment.x = size_half.x + s->align.x * size_half.x;
+    alignment.y = size_half.y + s->align.y * size_half.y;
     pos.x = s->pos.x + s->offset.x + s->offset_scaled.x * s->scale.x;
     pos.y = s->pos.y + s->offset.y + s->offset_scaled.y * s->scale.y;
-    size.x = s->size.x + s->size_scaled.x * s->scale.x;
-    size.y = s->size.y + s->size_scaled.y * s->scale.y;
-    alignment.x = (size.x - delta.x * s->scale.x) / 2.0f;
-    alignment.x += s->align.x * alignment.x;
-    alignment.y = (size.y - delta.y * s->scale.y) / 2.0f;
-    alignment.y += s->align.y * alignment.y;
 
     s->uv_pos_baked.x = s->uv_pos.x * texture_scale.x;
     s->uv_pos_baked.y = s->uv_pos.y * texture_scale.y;

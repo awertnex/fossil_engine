@@ -161,4 +161,8 @@
 #define MSG_INPUT_KEY_BIND_ATTACH(key, shift, ctrl, alt, super, context) fsl_logger_stringf("Key Bind [%s%s%s%s%s] Attached to Input Context [%u]\n", key, shift, ctrl, alt, super, context)
 #define MSG_INPUT_CONTEXT_SET(context_old, context_new)     fsl_logger_stringf("Input Context Set [%u -> %u]\n", context_old, context_new)
 
+/* ---- section: ui --------------------------------------------------------- */
+
+#define MSG_UI_ELEMENT_BAKE(pos_x, pos_y, size_x, size_y)   fsl_logger_stringf("Element Baked [pos.x: %.1f, pos.y: %.1f][size.x: %.1f, size.y: %.1f]\n", pos_x, pos_y, size_x, size_y)
+
 #endif /* FSL_LOGGER_MESSAGE_H */

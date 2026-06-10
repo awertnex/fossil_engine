@@ -8,7 +8,35 @@
 
 ## v0.10.0-dev (current)
 
-#### changes
+#### additions
+- (2026 06 09): added new UI module with panel-embedding and buttons.
+
+#### fixes
+- (2026 06 09): fixed wrong alpha calculation in macro `fsl_color_v4_to_hex()`.
+
+#### deprecations
+- (2026 06 09): deprecated parameters `offset_x`, `offset_y`, `align_x` and
+                `align_y` in function `fsl_ui_draw()`, use new UI module
+                'src/ui/ui.h' instead:
+                    - function `ui_element_set_texture()` to set a texture for
+                      an element.
+                    - function `ui_element_set_uv()` to set UV coordinates of an
+                      element in its texture.
+                    - function `ui_element_set_position()` to position an
+                      element on screen.
+                    - `ui_element_set_size()` to set size of an element on
+                      screen.
+                    - `ui_element_set_scale()` to set scaling of an element for
+                      its 'scaled' parameters.
+                    - `ui_element_set_alignment()` to set align an element on
+                      screen in respect to its final position and size.
+                    - `ui_element_attach()` to attach a UI element to another
+                      (e.g., button in a menu).
+                    - `ui_element_draw()` to draw UI element and its children,
+                      recursively and in order of attachment.
+
+#### bugs and flaws
+- the 'obj' loader possibly has a bug due to hash-table collisions.
 
 - - -
 ## v0.10.0-beta (2026 06 07)

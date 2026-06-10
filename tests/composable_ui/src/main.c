@@ -1,4 +1,5 @@
 #include "../../../fossil/deps/fossil/fossil_engine.h"
+#include "../../../fossil/deps/fossil/ui/ui_core.h"
 
 fsl_render *render = {0};
 fsl_key_bind bind_quit = {0};
@@ -21,6 +22,7 @@ void ui_update(void)
     ui_element_set_position(&element, render->mouse_pos.x, render->mouse_pos.y, 0, 0, 0, 0);
     ui_element_set_scale(&element, scale.x, scale.y);
     ui_element_set_alignment(&element, align.x, align.y);
+
     ui_element_draw(&element);
     fsl_ui_stop();
 

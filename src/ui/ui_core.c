@@ -35,6 +35,7 @@
 #include "../shaders/shader_types.h"
 
 #include "ui_core.h"
+#include "ui_types.h"
 
 #include <string.h>
 
@@ -119,6 +120,8 @@ static struct ui_core
             GLint texture_size;
             GLint offset;
             GLint alignment;
+            GLint uv_pos; /* temp, for testing */
+            GLint uv_size; /* temp, for testing */
             GLint tint;
         } ui;
 
@@ -571,6 +574,10 @@ u32 fsl_ui_init(void)
         glGetUniformLocation(ui_core.shader.ui->asset.id, "position");
     ui_core.uniform.ui.size =
         glGetUniformLocation(ui_core.shader.ui->asset.id, "size");
+    ui_core.uniform.ui.uv_pos =
+        glGetUniformLocation(ui_core.shader.ui->asset.id, "uv_pos");
+    ui_core.uniform.ui.uv_size =
+        glGetUniformLocation(ui_core.shader.ui->asset.id, "uv_size");
     ui_core.uniform.ui.texture_size =
         glGetUniformLocation(ui_core.shader.ui->asset.id, "texture_size");
     ui_core.uniform.ui.offset =
@@ -618,6 +625,27 @@ void fsl_ui_push_panel(i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, u32 tint)
     glBufferData(GL_ARRAY_BUFFER, ui_core.panel_count * sizeof(fsl_panel_nine_slice),
             ui_core.panel_buf, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void fsl_ui_element_draw(fsl_ui_element *element)
+{
+    glUniform2f(ui_core.uniform.ui.position,
+            element->sprite.pos_baked.x,
+            element->sprite.pos_baked.y);
+    glUniform2f(ui_core.uniform.ui.size,
+            element->sprite.size_baked.x,
+            element->sprite.size_baked.y);
+    glUniform2f(ui_core.uniform.ui.uv_pos,
+            element->sprite.uv_pos_baked.x,
+            element->sprite.uv_pos_baked.y);
+    glUniform2f(ui_core.uniform.ui.uv_size,
+            element->sprite.uv_size_baked.x,
+            element->sprite.uv_size_baked.y);
+    glUniform4f(ui_core.uniform.ui.tint, 1.0f, 1.0f, 1.0f, 1.0f);
+
+    glBindVertexArray(ui_core.vao);
+    glBindTexture(GL_TEXTURE_2D, element->texture->asset.id);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
 void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
