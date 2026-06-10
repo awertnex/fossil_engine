@@ -627,7 +627,7 @@ void fsl_ui_push_panel(i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, u32 tint)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void fsl_ui_element_draw(fsl_ui_element *element)
+void ui_element_draw_internal(fsl_ui_element *element)
 {
     glUniform2f(ui_core.uniform.ui.position,
             element->sprite.pos_baked.x,

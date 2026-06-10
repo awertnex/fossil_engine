@@ -189,12 +189,12 @@ void settings_update(void)
                 FSL_SEC2NSEC / SET_TEXT_REFRESH_INTERVAL, render->time))
         settings.fps = 1 / ((f64)render->time_delta * FSL_NSEC2SEC);
 
-    ui_element_set_texture(&element_item_bar, &texture_p[TEXTURE_ITEM_BAR]);
-    ui_element_set_uv(&element_item_bar, 0, 0, 169, 16);
-    ui_element_set_position(&element_item_bar, render->size.x / 2, render->size.y, 0, 0, 0, -2);
-    ui_element_set_size(&element_item_bar, 0, 0, element_item_bar.texture->size.x, element_item_bar.texture->size.y);
-    ui_element_set_scale(&element_item_bar, settings.gui_scale, settings.gui_scale);
-    ui_element_set_alignment(&element_item_bar, 0, 1);
+    fsl_ui_element_set_texture(&element_item_bar, &texture_p[TEXTURE_ITEM_BAR]);
+    fsl_ui_element_set_uv(&element_item_bar, 0, 0, 169, 16);
+    fsl_ui_element_set_position(&element_item_bar, render->size.x / 2, render->size.y, 0, 0, 0, -2);
+    fsl_ui_element_set_size(&element_item_bar, 0, 0, element_item_bar.texture->size.x, element_item_bar.texture->size.y);
+    fsl_ui_element_set_scale(&element_item_bar, settings.gui_scale, settings.gui_scale);
+    fsl_ui_element_set_alignment(&element_item_bar, 0, 1);
 }
 
 static void bind_shader_uniforms(void)
@@ -677,7 +677,7 @@ static void draw_everything(void)
                     0, 0,
                     0.0f, 0.0f, -1, -1, 0xffffffff);
 
-        ui_element_draw(&element_item_bar);
+        fsl_ui_element_draw(&element_item_bar);
 
         fsl_ui_draw(&texture_p[TEXTURE_ITEM_BAR_SELECTED],
                 render->size.x / 2 - 2 + player.hotbar_slot_selected * 34,

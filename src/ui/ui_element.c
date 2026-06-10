@@ -28,14 +28,14 @@
 #include "ui_element_internal.h"
 #include "ui_types.h"
 
-void ui_element_set_texture(fsl_ui_element *element, fsl_texture *texture)
+void fsl_ui_element_set_texture(fsl_ui_element *element, fsl_texture *texture)
 {
     element->flag |= FSL_FLAG_UI_VISIBLE;
     element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
     element->texture = texture;
 }
 
-void ui_element_set_uv(fsl_ui_element *element,
+void fsl_ui_element_set_uv(fsl_ui_element *element,
         i32 uv_pos_x, i32 uv_pos_y, i32 uv_size_x, i32 uv_size_y)
 {
     element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
@@ -45,7 +45,7 @@ void ui_element_set_uv(fsl_ui_element *element,
     element->sprite.uv_size.y = uv_size_y;
 }
 
-void ui_element_set_position(fsl_ui_element *element, i32 pos_x, i32 pos_y,
+void fsl_ui_element_set_position(fsl_ui_element *element, i32 pos_x, i32 pos_y,
         i32 offset_x, i32 offset_y, i32 offset_scaled_x, i32 offset_scaled_y)
 {
     element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
@@ -57,7 +57,7 @@ void ui_element_set_position(fsl_ui_element *element, i32 pos_x, i32 pos_y,
     element->sprite.offset_scaled.y = offset_scaled_y;
 }
 
-void ui_element_set_size(fsl_ui_element *element,
+void fsl_ui_element_set_size(fsl_ui_element *element,
         i32 size_x, i32 size_y, i32 size_scaled_x, i32 size_scaled_y)
 {
     element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
@@ -67,21 +67,21 @@ void ui_element_set_size(fsl_ui_element *element,
     element->sprite.size_scaled.y = size_scaled_y;
 }
 
-void ui_element_set_scale(fsl_ui_element *element, f32 scale_x, f32 scale_y)
+void fsl_ui_element_set_scale(fsl_ui_element *element, f32 scale_x, f32 scale_y)
 {
     element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
     element->sprite.scale.x = scale_x;
     element->sprite.scale.y = scale_y;
 }
 
-void ui_element_set_alignment(fsl_ui_element *element, i32 align_x, i32 align_y)
+void fsl_ui_element_set_alignment(fsl_ui_element *element, i32 align_x, i32 align_y)
 {
     element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
     element->sprite.align.x = align_x;
     element->sprite.align.y = align_y;
 }
 
-void ui_element_attach(fsl_ui_element *parent, fsl_ui_element *child)
+void fsl_ui_element_attach(fsl_ui_element *parent, fsl_ui_element *child)
 {
     parent->flag |= FSL_FLAG_UI_DIRTY_CHILDREN;
     child->flag |= FSL_FLAG_UI_DIRTY_PARENT;
@@ -89,12 +89,12 @@ void ui_element_attach(fsl_ui_element *parent, fsl_ui_element *child)
     child->parent = parent;
 }
 
-void ui_element_draw(fsl_ui_element *element)
+void fsl_ui_element_draw(fsl_ui_element *element)
 {
     if (element->flag & FSL_FLAG_UI_DIRTY_TRANSFORM)
         ui_element_bake_internal(element);
 
-    fsl_ui_element_draw(element);
+    ui_element_draw_internal(element);
 }
 
 void ui_element_bake_internal(fsl_ui_element *element)
