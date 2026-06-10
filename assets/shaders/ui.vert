@@ -17,6 +17,7 @@ out vec2 vs_uv;
 void main()
 {
     gl_Position =
+        /* align to top left of screen */
         vec4(-1.0, 1.0, 0.0, 0.0) +
         vec4(position.x * ndc_scale.x, -position.y * ndc_scale.y, 0.0, 0.0) +
         vec4(a_pos * size * ndc_scale, 0.0, 1.0);

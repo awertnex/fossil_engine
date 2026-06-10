@@ -12,6 +12,7 @@
 - (2026 06 09): added new UI module with panel-embedding and buttons.
 
 #### fixes
+- (2026 06 10): fixed nonexistent alpha in UI shader.
 - (2026 06 09): fixed wrong alpha calculation in macro `fsl_color_v4_to_hex()`.
 
 #### deprecations

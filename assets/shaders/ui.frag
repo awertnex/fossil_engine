@@ -7,5 +7,6 @@ out vec4 color;
 
 void main()
 {
-    color = texture(texture_image, vs_uv) * tint;
+    color = texture(texture_image, vs_uv);
+    color = color * color.a * tint;
 }
