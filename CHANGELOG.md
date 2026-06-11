@@ -6,6 +6,33 @@
    at engine version v0.3.3-beta (2026 01 24), which makes v0.3.4-beta the
    first version of the engine as standalone in this repo
 
+## v0.10.1-dev (current)
+
+#### changes
+- changed size parameter in UI element drawing from UV-relative to constant
+  pixel size.
+- changed parameter `usage` in function `fsl_mesh_generate()` to `draw_type`,
+  with type `fsl_draw_type`.
+
+#### additions
+- added UI element attachment and position following of parent.
+- added UI element detachment from parent.
+
+#### deletions
+- removed deprecations from v0.9.0-beta:
+    - struct `fsl_mesh` parameters `vbo`, `vbo_len`, `vbo_data`, `ebo`,
+      `ebo_len` and `ebo_data`.
+- removed deprecated function `fsl_get_camera_lookat_angles()`.
+
+#### bugs and flaws
+- the 'obj' loader possibly has a bug due to hash-table collisions:
+    - sometimes faces disappear when ordered in specific ways in the obj file.
+- the 'obj' loader does not handle concave faces smartly, just loads them as
+  they are.
+- game UI is clunky right now because new UI API and didn't bother to change it,
+  yet.
+
+- - -
 ## v0.10.1-beta (2026 06 10)
 
 #### additions

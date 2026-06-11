@@ -32,6 +32,6 @@
  *
  *  @remark called automaically from @ref ui_element_draw().
  */
-void ui_element_bake_internal(fsl_ui_element *element);
+void ui_element_bake_internal(fsl_ui_element *element, v2f32 ndc_scale);
 
 #endif /* FSL_UI_ELEMENT_INTERNAL_H */

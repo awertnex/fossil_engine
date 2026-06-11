@@ -116,13 +116,10 @@ static struct ui_core
 
         struct /* ui */
         {
-            GLint position;
-            GLint size;
-            GLint texture_size;
-            GLint offset;
-            GLint alignment;
             GLint uv_pos; /* temp, for testing */
             GLint uv_size; /* temp, for testing */
+            GLint pos;
+            GLint size;
             GLint tint;
         } ui;
 
@@ -144,6 +141,8 @@ static f32 vbo_data_unit_quad_internal[] =
     1.0f, 0.0f, 1.0f, 0.0f,
     1.0f, -1.0f, 1.0f, 1.0f
 };
+
+fsl_render *render = NULL;
 
 /* ---- section: signatures ------------------------------------------------- */
 
@@ -512,6 +511,8 @@ u32 fsl_ui_init(void)
 {
     fsl_shader_program *shader_p = fsl_mem_handle_get(fsl_shader_buf);
 
+    render = fsl_render_get();
+
     if (text_init_internal() != FSL_ERR_SUCCESS)
         return fsl_err;
 
@@ -547,22 +548,22 @@ u32 fsl_ui_init(void)
 
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
-                sizeof(fsl_ui_sprite), (void*)0);
+                sizeof(fsl_ui_transform), (void*)0);
         glVertexAttribDivisor(2, 1);
 
         glEnableVertexAttribArray(3);
         glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE,
-                sizeof(fsl_ui_sprite), (void*)(2 * sizeof(f32)));
+                sizeof(fsl_ui_transform), (void*)(2 * sizeof(f32)));
         glVertexAttribDivisor(3, 1);
 
         glEnableVertexAttribArray(4);
         glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE,
-                sizeof(fsl_ui_sprite), (void*)(4 * sizeof(f32)));
+                sizeof(fsl_ui_transform), (void*)(4 * sizeof(f32)));
         glVertexAttribDivisor(4, 1);
 
         glEnableVertexAttribArray(5);
         glVertexAttribPointer(5, 2, GL_FLOAT, GL_FALSE,
-                sizeof(fsl_ui_sprite), (void*)(6 * sizeof(f32)));
+                sizeof(fsl_ui_transform), (void*)(6 * sizeof(f32)));
         glVertexAttribDivisor(5, 1);
 
         glBindVertexArray(0);
@@ -571,20 +572,14 @@ u32 fsl_ui_init(void)
         ui_core.vao_loaded = TRUE;
     }
 
-    ui_core.uniform.ui.position =
-        glGetUniformLocation(ui_core.shader.ui->asset.id, "position");
-    ui_core.uniform.ui.size =
-        glGetUniformLocation(ui_core.shader.ui->asset.id, "size");
     ui_core.uniform.ui.uv_pos =
         glGetUniformLocation(ui_core.shader.ui->asset.id, "uv_pos");
     ui_core.uniform.ui.uv_size =
         glGetUniformLocation(ui_core.shader.ui->asset.id, "uv_size");
-    ui_core.uniform.ui.texture_size =
-        glGetUniformLocation(ui_core.shader.ui->asset.id, "texture_size");
-    ui_core.uniform.ui.offset =
-        glGetUniformLocation(ui_core.shader.ui->asset.id, "offset");
-    ui_core.uniform.ui.alignment =
-        glGetUniformLocation(ui_core.shader.ui->asset.id, "alignment");
+    ui_core.uniform.ui.pos =
+        glGetUniformLocation(ui_core.shader.ui->asset.id, "pos");
+    ui_core.uniform.ui.size =
+        glGetUniformLocation(ui_core.shader.ui->asset.id, "size");
     ui_core.uniform.ui.tint =
         glGetUniformLocation(ui_core.shader.ui->asset.id, "tint");
 
@@ -630,21 +625,30 @@ void fsl_ui_push_panel(i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, u32 tint)
 
 void fsl_ui_element_draw(fsl_ui_element *element)
 {
-    if (element->flag & FSL_FLAG_UI_DIRTY_TRANSFORM)
-        ui_element_bake_internal(element);
+    v2f32 pos = {0};
 
-    glUniform2f(ui_core.uniform.ui.position,
-            element->sprite.pos_baked.x,
-            element->sprite.pos_baked.y);
-    glUniform2f(ui_core.uniform.ui.size,
-            element->sprite.size_baked.x,
-            element->sprite.size_baked.y);
+    if (element->flag & FSL_FLAG_UI_DIRTY_TRANSFORM)
+        ui_element_bake_internal(element, render->ndc_scale);
+
+    pos.x = element->transform.pos_baked.x;
+    pos.y = element->transform.pos_baked.y;
+
+    if (element->parent)
+    {
+        pos.x += element->parent->transform.pos_baked.x;
+        pos.y += element->parent->transform.pos_baked.y;
+    }
+
     glUniform2f(ui_core.uniform.ui.uv_pos,
-            element->sprite.uv_pos_baked.x,
-            element->sprite.uv_pos_baked.y);
+            element->transform.uv_pos_baked.x,
+            element->transform.uv_pos_baked.y);
     glUniform2f(ui_core.uniform.ui.uv_size,
-            element->sprite.uv_size_baked.x,
-            element->sprite.uv_size_baked.y);
+            element->transform.uv_size_baked.x,
+            element->transform.uv_size_baked.y);
+    glUniform2f(ui_core.uniform.ui.pos, pos.x - 1.0f, 1.0f - pos.y);
+    glUniform2f(ui_core.uniform.ui.size,
+            element->transform.size_baked.x,
+            element->transform.size_baked.y);
     glUniform4f(ui_core.uniform.ui.tint, 1.0f, 1.0f, 1.0f, 1.0f);
 
     glBindVertexArray(ui_core.vao);
@@ -662,11 +666,8 @@ void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 siz
     (void)align_x;
     (void)align_y;
 
-    glUniform2i(ui_core.uniform.ui.position, pos_x, pos_y);
+    glUniform2i(ui_core.uniform.ui.pos, pos_x, pos_y);
     glUniform2i(ui_core.uniform.ui.size, size_x, size_y);
-    glUniform2i(ui_core.uniform.ui.texture_size, texture->size.x, texture->size.y);
-    glUniform2f(ui_core.uniform.ui.offset, offset_x, offset_y);
-    glUniform2i(ui_core.uniform.ui.alignment, align_x, align_y);
     glUniform4f(ui_core.uniform.ui.tint,
             (f32)((tint >> 0x18) & 0xff) / 0xff,
             (f32)((tint >> 0x10) & 0xff) / 0xff,

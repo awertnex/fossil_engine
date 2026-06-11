@@ -10,19 +10,23 @@ fsl_key_bind bind_align_left = {0};
 fsl_key_bind bind_align_right = {0};
 fsl_key_bind bind_align_up = {0};
 fsl_key_bind bind_align_down = {0};
+fsl_key_bind bind_element_attach = {0};
 fsl_texture texture = {0};
-fsl_ui_element element = {0};
+fsl_ui_element element_parent = {0};
+fsl_ui_element element_child = {0};
 v2f32 scale = {0};
 v2i32 align = {0};
 
+#include <stdio.h>
 void ui_update(void)
 {
     fsl_ui_start(FALSE, TRUE);
-    fsl_ui_element_set_position(&element, render->mouse_pos.x, render->mouse_pos.y, 0, 0, 0, 0);
-    fsl_ui_element_set_scale(&element, scale.x, scale.y);
-    fsl_ui_element_set_alignment(&element, align.x, align.y);
+    fsl_ui_element_set_position(&element_parent, render->mouse_pos.x, render->mouse_pos.y, 0, 0, 0, 0);
+    fsl_ui_element_set_scale(&element_parent, scale.x, scale.y);
+    fsl_ui_element_set_alignment(&element_parent, align.x, align.y);
 
-    fsl_ui_element_draw(&element);
+    fsl_ui_element_draw(&element_parent);
+    fsl_ui_element_draw(&element_child);
     fsl_ui_stop();
 
     fsl_fbo_blit(0);
@@ -48,18 +52,26 @@ int main(int argc, char **argv)
     bind_align_right = fsl_key_bind_init(FSL_KEY_RIGHT, 0, 0, 0, 0, 0);
     bind_align_up = fsl_key_bind_init(FSL_KEY_UP, 0, 0, 0, 0, 0);
     bind_align_down = fsl_key_bind_init(FSL_KEY_DOWN, 0, 0, 0, 0, 0);
+    bind_element_attach = fsl_key_bind_init(FSL_KEY_ENTER, 0, 0, 0, 0, 0);
 
     scale.x = 1.0f;
     scale.y = 1.0f;
     align.x = -1;
     align.y = -1;
 
-    fsl_ui_element_set_texture(&element, &texture);
-    fsl_ui_element_set_uv(&element, 0, 0, 177, 177);
-    fsl_ui_element_set_position(&element, 0, 0, 0, 0, 0, 0);
-    fsl_ui_element_set_size(&element, 0, 0, texture.size.x, texture.size.x);
-    fsl_ui_element_set_scale(&element, scale.x, scale.y);
-    fsl_ui_element_set_alignment(&element, align.x, align.y);
+    fsl_ui_element_set_texture(&element_parent, &texture);
+    fsl_ui_element_set_uv(&element_parent, 0, 0, 177, 177);
+    fsl_ui_element_set_position(&element_parent, 0, 0, 0, 0, 0, 0);
+    fsl_ui_element_set_size(&element_parent, 0, 0, 177, 177);
+    fsl_ui_element_set_scale(&element_parent, scale.x, scale.y);
+    fsl_ui_element_set_alignment(&element_parent, align.x, align.y);
+
+    fsl_ui_element_set_texture(&element_child, &texture);
+    fsl_ui_element_set_uv(&element_child, 0, 0, 177, 177);
+    fsl_ui_element_set_position(&element_child, 0, 0, 0, 0, 0, 0);
+    fsl_ui_element_set_size(&element_child, 0, 0, texture.size.x, texture.size.y);
+    fsl_ui_element_set_scale(&element_child, 1.0f, 1.0f);
+    fsl_ui_element_set_alignment(&element_child, -1, -1);
 
     while (fsl_engine_running(NULL))
     {
@@ -87,6 +99,14 @@ int main(int argc, char **argv)
             align.y += 1;
         if (fsl_is_key_press(bind_align_down))
             align.y -= 1;
+
+        if (fsl_is_key_press(bind_element_attach))
+        {
+            if (element_child.parent)
+                fsl_ui_element_detach(&element_child);
+            else
+                fsl_ui_element_attach(&element_parent, &element_child);
+        }
 
         if (fsl_is_key_press(bind_quit))
             fsl_request_engine_close();

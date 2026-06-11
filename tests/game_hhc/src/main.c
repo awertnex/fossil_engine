@@ -192,7 +192,7 @@ void settings_update(void)
     fsl_ui_element_set_texture(&element_item_bar, &texture_p[TEXTURE_ITEM_BAR]);
     fsl_ui_element_set_uv(&element_item_bar, 0, 0, 169, 16);
     fsl_ui_element_set_position(&element_item_bar, render->size.x / 2, render->size.y, 0, 0, 0, -2);
-    fsl_ui_element_set_size(&element_item_bar, 0, 0, element_item_bar.texture->size.x, element_item_bar.texture->size.y);
+    fsl_ui_element_set_size(&element_item_bar, 0, 0, 169, 16);
     fsl_ui_element_set_scale(&element_item_bar, settings.gui_scale, settings.gui_scale);
     fsl_ui_element_set_alignment(&element_item_bar, 0, 1);
 }

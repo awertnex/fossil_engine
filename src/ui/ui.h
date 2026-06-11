@@ -51,10 +51,10 @@ FSLAPI void fsl_ui_element_set_uv(fsl_ui_element *element,
  *  @param offset_y vertical offset from position, in pixels.
  *
  *  @param offset_scaled_x horizontal offset from position, in pixels (scales with
- *  `element->sprite.scale`).
+ *  `element->transform.scale`).
  *
  *  @param offset_scaled_y vertical offset from position, in pixels (scales with
- *  `element->sprite.scale`).
+ *  `element->transform.scale`).
  */
 FSLAPI void fsl_ui_element_set_position(fsl_ui_element *element, i32 pos_x, i32 pos_y,
         i32 offset_x, i32 offset_y, i32 offset_scaled_x, i32 offset_scaled_y);
@@ -64,8 +64,8 @@ FSLAPI void fsl_ui_element_set_position(fsl_ui_element *element, i32 pos_x, i32 
  *
  *  @param size_x width on screen, in pixels.
  *  @param size_y height on screen, in pixels.
- *  @param size_scaled_x width on screen, in pixels (scales with `element->sprite.scale`).
- *  @param size_scaled_y height on screen, in pixels (scales with `element->sprite.scale`).
+ *  @param size_scaled_x width on screen, in pixels (scales with `element->transform.scale`).
+ *  @param size_scaled_y height on screen, in pixels (scales with `element->transform.scale`).
  */
 FSLAPI void fsl_ui_element_set_size(fsl_ui_element *element,
         i32 size_x, i32 size_y, i32 size_scaled_x, i32 size_scaled_y);
@@ -73,27 +73,39 @@ FSLAPI void fsl_ui_element_set_size(fsl_ui_element *element,
 /*!
  *  @brief set scaling of `element` for its 'scaled' parameters.
  *
- *  @param scale_x horizontal gui scaling, for sprite's 'scaled' parameters.
- *  @param scale_y vertical gui scaling, for sprite's 'scaled' parameters.
+ *  @param scale_x horizontal gui scaling, for 'scaled' parameters.
+ *  @param scale_y vertical gui scaling, for 'scaled' parameters.
  */
 FSLAPI void fsl_ui_element_set_scale(fsl_ui_element *element, f32 scale_x, f32 scale_y);
 
 /*!
  *  @brief set alignment of `element`.
  *
- *  @param align_x horizontal alignment in respect to its sprite position and size.
- *  @param align_y vertical alignment in respect to its sprite position and size.
+ *  @param align_x horizontal alignment in respect to element's position and size.
+ *  @param align_y vertical alignment in respect to element's position and size.
+ *
+ *  format:
+ *      <= -1: left-side/top is at position.
+ *      == 0: center is at position.
+ *      >= 1: right-side/bottom is at position.
  */
 FSLAPI void fsl_ui_element_set_alignment(fsl_ui_element *element, i32 align_x, i32 align_y);
 
 /*!
  *  @brief attach a UI element to another (e.g., button in a menu).
  *
- *  - `child` will draw using `parent` parameters + its own parameters as delta.
+ *  - `child` will draw using `parent` baked transform + its own baked transform.
  *
  *  @param parent element to attach to.
  *  @param child element to attach.
  */
 FSLAPI void fsl_ui_element_attach(fsl_ui_element *parent, fsl_ui_element *child);
+
+/*!
+ *  @brief detach a UI element from its parent (e.g., button in a menu).
+ *
+ *  @param child element to detach from their parent.
+ */
+FSLAPI void fsl_ui_element_detach(fsl_ui_element *child);
 
 #endif /* FSL_UI_H */

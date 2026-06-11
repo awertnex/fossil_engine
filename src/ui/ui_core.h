@@ -40,7 +40,7 @@
  */
 typedef struct fsl_panel_nine_slice
 {
-    fsl_ui_sprite slice[9];
+    fsl_ui_transform slice[9];
 } fsl_panel_nine_slice;
 
 /* ---- section: signatures ------------------------------------------------- */

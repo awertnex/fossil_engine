@@ -30,7 +30,7 @@
 
 typedef struct fsl_ui_event     fsl_ui_event;
 typedef struct fsl_ui_callback  fsl_ui_callback;
-typedef struct fsl_ui_sprite    fsl_ui_sprite;
+typedef struct fsl_ui_transform    fsl_ui_transform;
 typedef struct fsl_ui_element   fsl_ui_element;
 
 /* ---- section: definitions ------------------------------------------------ */
@@ -83,7 +83,7 @@ struct fsl_ui_callback
     void *data;
 }; /* fsl_ui_callback */
 
-struct fsl_ui_sprite
+struct fsl_ui_transform
 {
     v2i32 uv_pos;           /* position in texture, in pixels */
     v2i32 uv_size;          /* size in texture, in pixels */
@@ -92,13 +92,13 @@ struct fsl_ui_sprite
     v2i32 offset_scaled;    /* offset on screen from `pos`, in pixels (scales with `scale`) */
     v2i32 size;             /* size on screen, in pixels */
     v2i32 size_scaled;      /* size on screen, in pixels (scales with `scale`) */
-    v2f32 scale;            /* gui scaling, for sprite's 'scaled' parameters */
+    v2f32 scale;            /* gui scaling, for 'scaled' parameters */
 
     /*!
      *  @brief alignment in respect to `pos`, `size` and `size_scaled`.
-     *  <= -1: left-side/top of sprite is at `pos`.
-     *  == 0: center of sprite is at `pos`.
-     *  >= 1: right-side/bottom of sprite is at `pos`.
+     *  <= -1: left-side/top is at `pos`.
+     *  == 0: center is at `pos`.
+     *  >= 1: right-side/bottom is at `pos`.
      */
     v2i32 align;
 
@@ -106,7 +106,7 @@ struct fsl_ui_sprite
     v2f32 uv_size_baked;    /* absolute, baked size in texture, in UV coordinates */
     v2f32 pos_baked;        /* baked, absolute position on screen, in pixels */
     v2f32 size_baked;       /* baked, absolute size on screen, in pixels */
-}; /* fsl_ui_sprite */
+}; /* fsl_ui_transform */
 
 /* ---- section: definitions: elements -------------------------------------- */
 
@@ -114,7 +114,7 @@ struct fsl_ui_element
 {
     fsl_ui_element_type type;
     fsl_texture *texture;
-    fsl_ui_sprite sprite;
+    fsl_ui_transform transform;
 
     u32 flag; /* enum @ref fsl_ui_element_flag */
     i32 layer;
