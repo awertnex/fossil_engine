@@ -1,10 +1,11 @@
 # changelog
 
 >**NOTE:**
->- history is mixed with the repo "awertnex/heaven-hell_continuum" since
-   this engine originated from the making of that game and later was moved here
-   at engine version v0.3.3-beta (2026 01 24), which makes v0.3.4-beta the
-   first version of the engine as standalone in this repo
+>- history is mixed with the repo
+   "https://github.com/awertnex/heaven-hell_continuum.git" since this engine
+   originated from the making of that game and later was moved here at engine
+   version v0.3.3-beta (2026 01 24), which makes v0.3.4-beta the first version
+   of the engine as standalone in this repo
 
 ## v0.10.1-dev (current)
 
@@ -23,6 +24,7 @@
     - struct `fsl_mesh` parameters `vbo`, `vbo_len`, `vbo_data`, `ebo`,
       `ebo_len` and `ebo_data`.
 - removed deprecated function `fsl_get_camera_lookat_angles()`.
+- removed deprecated shader 'ui_deprecated'.
 
 #### bugs and flaws
 - the 'obj' loader possibly has a bug due to hash-table collisions:

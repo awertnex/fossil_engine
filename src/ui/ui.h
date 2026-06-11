@@ -17,7 +17,7 @@
 /*!
  *  @file ui.h
  *
- *  @brief main UI module header.
+ *  @brief main UI module header; creating menus and drawing UI elements.
  */
 
 #ifndef FSL_UI_H
@@ -28,84 +28,157 @@
 #include "../assets/asset_types.h"
 
 #include "ui_types.h"
+#include "ui_element.h"
 
-FSLAPI void fsl_ui_element_set_texture(fsl_ui_element *element, fsl_texture *texture);
+/* ---- section: definitions ------------------------------------------------ */
 
-/*!
- *  @brief set UV coordinates of `element` in its texture.
- *
- *  @param pos_x horizontal position in texture, in pixels.
- *  @param pos_y vertical position in texture, in pixels.
- *  @param size_x width in texture, in pixels.
- *  @param size_y height in texture, in pixels.
- */
-FSLAPI void fsl_ui_element_set_uv(fsl_ui_element *element,
-        i32 pos_x, i32 pos_y, i32 size_x, i32 size_y);
+#define FSL_UI_PANEL_GAP_DEFAULT 10
+#define FSL_UI_PANEL_PADDING_DEFAULT 10
+#define FSL_UI_SLICE_SIZE_DEFAULT 8
 
 /*!
- *  @brief set position of `element` on screen.
- *
- *  @param pos_x horizontal position on screen, in pixels.
- *  @param pos_y vertical position on screen, in pixels.
- *  @param offset_x horizontal offset from position, in pixels.
- *  @param offset_y vertical offset from position, in pixels.
- *
- *  @param offset_scaled_x horizontal offset from position, in pixels (scales with
- *  `element->transform.scale`).
- *
- *  @param offset_scaled_y vertical offset from position, in pixels (scales with
- *  `element->transform.scale`).
+ *  @brief one 9-slice panel.
  */
-FSLAPI void fsl_ui_element_set_position(fsl_ui_element *element, i32 pos_x, i32 pos_y,
-        i32 offset_x, i32 offset_y, i32 offset_scaled_x, i32 offset_scaled_y);
+typedef struct fsl_ui_panel_9_slice
+{
+    fsl_ui_transform slice[9];
+} fsl_ui_panel_9_slice;
+
+typedef struct fsl_ui_drawable_quad
+{
+    v2f32 uv_pos;
+    v2f32 uv_size;
+    v2f32 pos;
+    v2f32 size;
+} fsl_ui_drawable_quad;
 
 /*!
- *  @brief set size of `element` on screen.
+ *  @brief one 9-slice panel.
  *
- *  @param size_x width on screen, in pixels.
- *  @param size_y height on screen, in pixels.
- *  @param size_scaled_x width on screen, in pixels (scales with `element->transform.scale`).
- *  @param size_scaled_y height on screen, in pixels (scales with `element->transform.scale`).
+ *  -- DEPRECATED IN v0.10.0-beta --;
  */
-FSLAPI void fsl_ui_element_set_size(fsl_ui_element *element,
-        i32 size_x, i32 size_y, i32 size_scaled_x, i32 size_scaled_y);
+typedef struct fsl_panel_nine_slice
+{
+    fsl_ui_drawable_quad slice[9];
+} fsl_panel_nine_slice;
+
+/* ---- section: signatures ------------------------------------------------- */
 
 /*!
- *  @brief set scaling of `element` for its 'scaled' parameters.
+ *  @brief start text rendering batch.
  *
- *  @param scale_x horizontal gui scaling, for 'scaled' parameters.
- *  @param scale_y vertical gui scaling, for 'scaled' parameters.
+ *  @param size font height, in pixels.
+ *
+ *  @param length pre-allocate buffer for string (if 0, @ref FSL_STRING_MAX is allocated).
+ *  @param clear clear the framebuffer before rendering.
+ *
+ *  @remark disables @ref GL_DEPTH_TEST, @ref fsl_text_stop() re-enables it.
+ *  @remark can re-allocate `fbo` with `multisample` setting used in @ref fsl_text_init().
  */
-FSLAPI void fsl_ui_element_set_scale(fsl_ui_element *element, f32 scale_x, f32 scale_y);
+FSLAPI void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear);
 
 /*!
- *  @brief set alignment of `element`.
+ *  @brief push string's glyph metrics, position, alignment and color to internal text queue.
  *
- *  @param align_x horizontal alignment in respect to element's position and size.
- *  @param align_y vertical alignment in respect to element's position and size.
+ *  @param align_x enum @ref fsl_text_alignment:
+ *      FSL_TEXT_ALIGN_RIGHT.
+ *      FSL_TEXT_ALIGN_CENTER.
+ *      FSL_TEXT_ALIGN_LEFT.
  *
- *  format:
- *      <= -1: left-side/top is at position.
- *      == 0: center is at position.
- *      >= 1: right-side/bottom is at position.
+ *  @param align_y enum @ref fsl_text_alignment:
+ *      FSL_TEXT_ALIGN_TOP.
+ *      FSL_TEXT_ALIGN_CENTER.
+ *      FSL_TEXT_ALIGN_BOTTOM.
+ *
+ *  @param window_x restrict text width to specified window size.
+ *
+ *  @param color text color, format: 0xrrggbbaa.
+ *
+ *  @remark default alignment is top left (0, 0).
+ *
+ *  @remark the macros @ref fsl_color_hex_to_v4(), @ref fsl_color_v4_to_hex() can be
+ *  used to convert from u32 hex color to v4f32 color and vice-versa.
+ *
+ *  @remark can be called multiple times within a text rendering batch.
  */
-FSLAPI void fsl_ui_element_set_alignment(fsl_ui_element *element, i32 align_x, i32 align_y);
+FSLAPI void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y,
+        i32 window_x, u32 color);
 
 /*!
- *  @brief attach a UI element to another (e.g., button in a menu).
+ *  @brief render text to framebuffer.
  *
- *  - `child` will draw using `parent` baked transform + its own baked transform.
+ *  @param shadow_color shadow color (if `shadow` is `TRUE`) (optional),
+ *  format: 0xrrggbbaa.
  *
- *  @param parent element to attach to.
- *  @param child element to attach.
+ *  @remark the macros @ref fsl_color_hex_to_v4(), @ref fsl_color_v4_to_hex() can be
+ *  used to convert from `u32` hex color to `v4f32` color and vice-versa.
+ *
+ *  @remark can be called multiple times within a text rendering batch.
  */
-FSLAPI void fsl_ui_element_attach(fsl_ui_element *parent, fsl_ui_element *child);
+FSLAPI void fsl_text_render(b8 shadow, u32 shadow_color);
 
 /*!
- *  @brief detach a UI element from its parent (e.g., button in a menu).
+ *  @brief get total string height of current rendering batch.
  *
- *  @param child element to detach from their parent.
+ *  @remark call before @ref fsl_text_render().
  */
-FSLAPI void fsl_ui_element_detach(fsl_ui_element *child);
+FSLAPI f32 fsl_get_text_height(void);
+
+/*!
+ *  @brief initialize ui.
+ *
+ *  @remark must be called after @ref fsl_engine_init().
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+FSLAPI u32 fsl_ui_init(void);
+
+/*!
+ *  @brief start ui rendering batch.
+ *
+ *  @param nine_slice use a nine_slice shader
+ *  (ui elements with separate edge and corner slices of a texture).
+ *
+ *  @param clear clear the currently bound framebuffer before rendering.
+ *
+ *  @remark disable @ref GL_DEPTH_TEST, @ref fsl_ui_stop() re-enables it.
+ */
+FSLAPI void fsl_ui_start(b8 nine_slice, b8 clear);
+
+/*!
+ *  @brief push default engine panel onto internal panel buffer.
+ */
+FSLAPI void fsl_ui_push_panel(i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, u32 tint);
+
+FSLAPI void fsl_ui_element_draw(fsl_ui_element *element);
+
+/*!
+ *  @brief draw a texture as a UI element.
+ *
+ *  @param offset_x DEPRECATED IN v0.10.1-beta.
+ *  @param offset_y DEPRECATED IN v0.10.1-beta.
+ *  @param align_x DEPRECATED IN v0.10.1-beta.
+ *  @param align_y DEPRECATED IN v0.10.1-beta.
+ *
+ *  @remark if `size_x` is 0, `texture->size.x` is used, and likewise for `size_y`.
+ */
+FSLAPI void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
+        f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint);
+
+FSLAPI void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
+        i32 size_x, i32 size_y, i32 slice_size, u32 tint);
+
+/*!
+ *  @remark enable @ref GL_DEPTH_TEST.
+ */
+FSLAPI void fsl_ui_stop(void);
+
+FSLAPI void fsl_ui_free(void);
+
+/*!
+ *  @brief make a 9-slice panel.
+ */
+FSLAPI fsl_panel_nine_slice fsl_get_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
+        i32 size_x, i32 size_y, i32 slice_size);
 
 #endif /* FSL_UI_H */

@@ -148,7 +148,7 @@ static u32 settings_init(void)
 
     settings.lerp_speed = SET_LERP_SPEED_DEFAULT;
 
-    settings.render_distance = 16;
+    settings.render_distance = SET_RENDER_DISTANCE_DEFAULT;
     settings.chunk_buf_radius = settings.render_distance;
     settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
 

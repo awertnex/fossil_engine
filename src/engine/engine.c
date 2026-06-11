@@ -35,7 +35,7 @@
 #include "../math/math.h"
 #include "../math/vector.h"
 #include "../shaders/shader_types.h"
-#include "../ui/ui_core.h"
+#include "../ui/ui.h"
 
 #include "../h/dir.h"
 #include "../h/process.h"

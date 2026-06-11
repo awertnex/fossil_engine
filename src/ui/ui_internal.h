@@ -15,15 +15,30 @@
  */
 
 /*!
- *  @file ui_element_internal.h
+ *  @file ui_internal.h
  *
- *  @brief UI element internal definitions.
+ *  @brief UI internal definitions.
  */
 
-#ifndef FSL_UI_ELEMENT_INTERNAL_H
-#define FSL_UI_ELEMENT_INTERNAL_H
+#ifndef FSL_UI_INTERNAL_H
+#define FSL_UI_INTERNAL_H
 
-#include "ui_types.h"
+#include "../common/types.h"
+#include "ui_element.h"
+
+/*!
+ *  @brief init text rendering settings (and engine default fonts at @ref fsl_font_buf).
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+u32 ui_text_init_internal(void);
+
+void ui_text_align_x_none_internal(const str *text, i64 i, f32 advance);
+void ui_text_align_x_center_internal(const str *text, i64 i, f32 advance);
+void ui_text_align_x_right_internal(const str *text, i64 i, f32 advance);
+void ui_text_align_y_none_internal(u64 end, f32 height);
+void ui_text_align_y_center_internal(u64 end, f32 height);
+void ui_text_align_y_bottom_internal(u64 end, f32 height);
 
 /*!
  *  @internal
@@ -34,4 +49,4 @@
  */
 void ui_element_bake_internal(fsl_ui_element *element, v2f32 ndc_scale);
 
-#endif /* FSL_UI_ELEMENT_INTERNAL_H */
+#endif /* FSL_UI_INTERNAL_H */

@@ -31,28 +31,6 @@
 typedef struct fsl_ui_event     fsl_ui_event;
 typedef struct fsl_ui_callback  fsl_ui_callback;
 typedef struct fsl_ui_transform    fsl_ui_transform;
-typedef struct fsl_ui_element   fsl_ui_element;
-
-/* ---- section: definitions ------------------------------------------------ */
-
-enum fsl_ui_element_flag
-{
-    FSL_FLAG_UI_ACTIVE,
-    FSL_FLAG_UI_VISIBLE,
-    FSL_FLAG_UI_DIRTY_TRANSFORM,
-    FSL_FLAG_UI_DIRTY_PARENT,
-    FSL_FLAG_UI_DIRTY_CHILDREN
-}; /* fsl_ui_element_flag */
-
-typedef enum fsl_ui_element_type
-{
-    FSL_UI_ELEMENT_TYPE_NONE,
-    FSL_UI_ELEMENT_TYPE_CONTAINER,
-    FSL_UI_ELEMENT_TYPE_PANEL,
-    FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE,
-    FSL_UI_ELEMENT_TYPE_BUTTON,
-    FSL_UI_ELEMENT_TYPE_COUNT
-} fsl_ui_element_type;
 
 typedef enum fsl_ui_event_type
 {
@@ -107,21 +85,5 @@ struct fsl_ui_transform
     v2f32 pos_baked;        /* baked, absolute position on screen, in pixels */
     v2f32 size_baked;       /* baked, absolute size on screen, in pixels */
 }; /* fsl_ui_transform */
-
-/* ---- section: definitions: elements -------------------------------------- */
-
-struct fsl_ui_element
-{
-    fsl_ui_element_type type;
-    fsl_texture *texture;
-    fsl_ui_transform transform;
-
-    u32 flag; /* enum @ref fsl_ui_element_flag */
-    i32 layer;
-    fsl_ui_callback action[FSL_UI_EVENT_TYPE_COUNT];
-    fsl_ui_element *parent;
-    fsl_mem_handle children_buf;
-    fsl_ui_element **children;  /* cached pointer from `children_buf` */
-}; /* fsl_ui_element */
 
 #endif /* FSL_UI_TYPES_H */

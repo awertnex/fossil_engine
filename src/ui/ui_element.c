@@ -24,8 +24,7 @@
 #include "../logger/logger.h"
 #include "../logger/logger_messages_internal.h"
 
-#include "ui.h"
-#include "ui_element_internal.h"
+#include "ui_internal.h"
 #include "ui_types.h"
 
 void fsl_ui_element_set_texture(fsl_ui_element *element, fsl_texture *texture)
@@ -129,4 +128,7 @@ void ui_element_bake_internal(fsl_ui_element *element, v2f32 ndc_scale)
     s->pos_baked.y = (pos.y - alignment.y) * ndc_scale.y;
     s->size_baked.x = size.x * ndc_scale.x;
     s->size_baked.y = size.y * ndc_scale.y;
+
+    LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+            MSG_UI_ELEMENT_BAKE(s->pos_baked.x, s->pos_baked.y, s->size_baked.x, s->size_baked.y));
 }

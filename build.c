@@ -108,7 +108,7 @@ static str *copy_targets[][48] =
     {DIR_SRC"shaders/shaders.h",            DIR_DST DIR_DEPS DIR_DST"shaders/"},
     {DIR_SRC"string/string.h",              DIR_DST DIR_DEPS DIR_DST"string/"},
     {DIR_SRC"ui/ui.h",                      DIR_DST DIR_DEPS DIR_DST"ui/"},
-    {DIR_SRC"ui/ui_core.h",                 DIR_DST DIR_DEPS DIR_DST"ui/"},
+    {DIR_SRC"ui/ui_element.h",              DIR_DST DIR_DEPS DIR_DST"ui/"},
     {DIR_SRC"ui/ui_types.h",                DIR_DST DIR_DEPS DIR_DST"ui/"}
 };
 
