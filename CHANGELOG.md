@@ -14,17 +14,30 @@
   pixel size.
 - changed parameter `usage` in function `fsl_mesh_generate()` to `draw_type`,
   with type `fsl_draw_type`.
+- changed UI drawing from using uniforms to pass position and size to uploading
+  position and size to a dynamic vertex buffer.
 
 #### additions
 - added UI element attachment and position following of parent.
 - added UI element detachment from parent.
+- added UI event listening and callback attachment to elements:
+    - added ENTER, HOVER, LEAVE, CLICK, HOLD and RELEASE event listening and
+      handling.
+    - added function `fsl_ui_element_set_callback()` for attaching callbacks to
+      elements (listening happens within function `fsl_ui_element_draw()`).
 
 #### deletions
-- removed deprecations from v0.9.0-beta:
+- removed deprecations from v0.9.0-beta and earlier:
     - struct `fsl_mesh` parameters `vbo`, `vbo_len`, `vbo_data`, `ebo`,
       `ebo_len` and `ebo_data`.
-- removed deprecated function `fsl_get_camera_lookat_angles()`.
-- removed deprecated shader 'ui_deprecated'.
+    - function `fsl_get_camera_lookat_angles()`.
+    - shader 'ui_deprecated'.
+
+#### deprecations
+- deprecated parameter `nine_slice` in function `fsl_ui_start()`.
+- deprecated shader `ui_9_slice`, shader `ui` will be used instead.
+- deprecated functions `fsl_key_bind_attach()` and `fsl_input_context_set()`.
+- deprecated parameter `context` in function `fsl_key_bind_init()`.
 
 #### bugs and flaws
 - the 'obj' loader possibly has a bug due to hash-table collisions:

@@ -28,7 +28,7 @@
 #include "../common/session.h"
 #include "../common/types.h"
 #include "../assets/assets.h"
-#include "../input/input.h"
+#include "../input/input_internal.h"
 #include "../logger/logger.h"
 #include "../logger/logger_messages_internal.h"
 #include "../memory/memory.h"
@@ -262,8 +262,8 @@ b8 fsl_engine_running(void (*callback_framebuffer_size)(i32 size_x, i32 size_y))
 
     glfwSwapBuffers(render_internal.window);
     glfwPollEvents();
-    fsl_update_mouse_movement();
-    fsl_update_key_states();
+    input_mouse_movement_update_internal();
+    input_key_states_update_internal();
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     return TRUE;

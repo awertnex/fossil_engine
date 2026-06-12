@@ -17,8 +17,7 @@ out vec2 uv;
 void main(void)
 {
     vec2 slice_pos =
-        vec2(a_quad_pos * a_size) +
-        vec2(a_pos.x, -a_pos.y);
+        vec2(a_quad_pos * a_size) + a_pos;
 
     gl_Position = vec4(-1.0, 1.0, 0.0, 1.0) +
             vec4(slice_pos * ndc_scale, 0.0, 0.0);

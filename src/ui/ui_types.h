@@ -23,24 +23,21 @@
 #ifndef FSL_UI_TYPES_H
 #define FSL_UI_TYPES_H
 
-#include "../common/types.h"
-#include "../assets/asset_types.h"
 #include "../math/vector.h"
-#include "../memory/memory_types.h"
 
 typedef struct fsl_ui_event     fsl_ui_event;
 typedef struct fsl_ui_callback  fsl_ui_callback;
-typedef struct fsl_ui_transform    fsl_ui_transform;
+typedef struct fsl_ui_transform fsl_ui_transform;
+typedef struct fsl_ui_element   fsl_ui_element;
 
 typedef enum fsl_ui_event_type
 {
     FSL_UI_EVENT_TYPE_NONE,
     FSL_UI_EVENT_TYPE_ENTER,
+    FSL_UI_EVENT_TYPE_HOVER,
     FSL_UI_EVENT_TYPE_LEAVE,
     FSL_UI_EVENT_TYPE_CLICK,
-    FSL_UI_EVENT_TYPE_CLICK_DOUBLE,
     FSL_UI_EVENT_TYPE_HOLD,
-    FSL_UI_EVENT_TYPE_HOLD_PERIOD,
     FSL_UI_EVENT_TYPE_RELEASE,
     FSL_UI_EVENT_TYPE_SCROLL,
     FSL_UI_EVENT_TYPE_DRAG,
@@ -50,14 +47,24 @@ typedef enum fsl_ui_event_type
 
 struct fsl_ui_event
 {
-    fsl_ui_event_type type;
-    v2i64 pos;
+    fsl_ui_element *caller;
+    v2f64 mouse_pos;
+    v2f64 mouse_click_pos;
+
+    /* difference between mouse position and element
+     * position on mouse click.
+     */
+    v2f64 mouse_click_pos_diff;
+
+    b8 hover;
+    b8 hover_last;
+    b8 mouse_click;
+    b8 mouse_click_last;
 }; /* fsl_ui_event */
 
 struct fsl_ui_callback
 {
-    void (*callback)(fsl_ui_event event, void *data);
-    fsl_ui_event event;
+    void (*func)(fsl_ui_event event, void *data);
     void *data;
 }; /* fsl_ui_callback */
 
@@ -80,10 +87,11 @@ struct fsl_ui_transform
      */
     v2i32 align;
 
-    v2f32 uv_pos_baked;     /* absolute, baked position in texture, in UV coordinates */
-    v2f32 uv_size_baked;    /* absolute, baked size in texture, in UV coordinates */
-    v2f32 pos_baked;        /* baked, absolute position on screen, in pixels */
-    v2f32 size_baked;       /* baked, absolute size on screen, in pixels */
+    v2f32 uv_pos_baked;     /* baked absolute position in texture, in normalized coordinates */
+    v2f32 uv_size_baked;    /* baked absolute size in texture, in normalized coordinates */
+    v2f32 pos_local;        /* baked local position, in pixels */
+    v2f32 pos_baked;        /* baked absolute position on screen, in pixels */
+    v2f32 size_baked;       /* baked absolute size on screen, in pixels */
 }; /* fsl_ui_transform */
 
 #endif /* FSL_UI_TYPES_H */

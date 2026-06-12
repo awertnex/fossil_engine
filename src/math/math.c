@@ -262,6 +262,13 @@ b8 fsl_is_in_area_f32(v2f32 v, v2f32 min, v2f32 max)
         (v.y - min.y >= 0.0f) & (max.y - v.y >= 0.0f);
 }
 
+b8 fsl_is_in_area_f64(v2f64 v, v2f64 min, v2f64 max)
+{
+    return
+        (v.x - min.x >= 0.0f) & (max.x - v.x >= 0.0f) &
+        (v.y - min.y >= 0.0f) & (max.y - v.y >= 0.0f);
+}
+
 b8 fsl_is_in_volume_i32(v3i32 v, v3i32 min, v3i32 max)
 {
     return

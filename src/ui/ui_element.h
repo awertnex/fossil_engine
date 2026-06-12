@@ -31,8 +31,6 @@
 
 /* ---- section: definitions ------------------------------------------------ */
 
-typedef struct fsl_ui_element   fsl_ui_element;
-
 enum fsl_ui_element_flag
 {
     FSL_FLAG_UI_ACTIVE,
@@ -59,11 +57,12 @@ struct fsl_ui_element
     fsl_ui_transform transform;
 
     u32 flag; /* enum @ref fsl_ui_element_flag */
-    i32 layer;
-    fsl_ui_callback action[FSL_UI_EVENT_TYPE_COUNT];
     fsl_ui_element *parent;
-    fsl_mem_handle children_buf;
+    fsl_array children_buf;
     fsl_ui_element **children;  /* cached pointer from `children_buf` */
+
+    fsl_ui_callback callback[FSL_UI_EVENT_TYPE_COUNT];
+    fsl_ui_event event;
 }; /* fsl_ui_element */
 
 /* ---- section: signatures ------------------------------------------------- */
@@ -129,6 +128,26 @@ FSLAPI void fsl_ui_element_set_scale(fsl_ui_element *element, f32 scale_x, f32 s
  *      >= 1: right-side/bottom is at position.
  */
 FSLAPI void fsl_ui_element_set_alignment(fsl_ui_element *element, i32 align_x, i32 align_y);
+
+/*!
+ *  @brief set an event action callback for `element` (e.g., button press, button hover).
+ *
+ *  @param element element to enable action callback for.
+ *  @param event_type type of event that will trigger `callback()`.
+ *  @param func function to call on `event_type` trigger.
+ *  @param data data to pass in to `callback()` on `event_type` trigger.
+ */
+FSLAPI void fsl_ui_element_set_callback(fsl_ui_element *element,
+        fsl_ui_event_type event_type,
+        void (*func)(fsl_ui_event event, void *data), void *data);
+
+/*!
+ *  @brief draw a UI element on screen.
+ *
+ *  @remark function @ref fsl_ui_element_bake() must be called to
+ *  prepare/refresh parameters for rendering.
+ */
+FSLAPI void fsl_ui_element_draw(fsl_ui_element *element);
 
 /*!
  *  @brief attach a UI element to another (e.g., button in a menu).

@@ -20,12 +20,12 @@
  *  @brief everything about drawing ui elements.
  */
 
-#include "../common/diagnostics.h"
-#include "../logger/logger.h"
-#include "../logger/logger_messages_internal.h"
+#include "../memory/memory.h"
 
-#include "ui_internal.h"
+#include "ui_element.h"
 #include "ui_types.h"
+
+#include <stddef.h>
 
 void fsl_ui_element_set_texture(fsl_ui_element *element, fsl_texture *texture)
 {
@@ -80,6 +80,14 @@ void fsl_ui_element_set_alignment(fsl_ui_element *element, i32 align_x, i32 alig
     element->transform.align.y = align_y;
 }
 
+FSLAPI void fsl_ui_element_set_callback(fsl_ui_element *element,
+        fsl_ui_event_type event_type,
+        void (*func)(fsl_ui_event event, void *data), void *data)
+{
+    element->callback[event_type].func = func;
+    element->callback[event_type].data = data;
+}
+
 void fsl_ui_element_attach(fsl_ui_element *parent, fsl_ui_element *child)
 {
     parent->flag |= FSL_FLAG_UI_DIRTY_CHILDREN;
@@ -96,39 +104,4 @@ void fsl_ui_element_detach(fsl_ui_element *child)
     child->flag |= FSL_FLAG_UI_DIRTY_PARENT;
     child->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
     child->parent = NULL;
-}
-
-void ui_element_bake_internal(fsl_ui_element *element, v2f32 ndc_scale)
-{
-    fsl_ui_transform *s = &element->transform;
-    v2f32 texture_scale = {0};
-    v2f32 size = {0};
-    v2f32 size_half = {0};
-    v2f32 alignment = {0};
-    v2f32 pos = {0};
-
-    element->flag &= ~FSL_FLAG_UI_DIRTY_TRANSFORM;
-
-    texture_scale.x = 1.0f / element->texture->size.x;
-    texture_scale.y = 1.0f / element->texture->size.y;
-    size.x = s->size.x + s->size_scaled.x * s->scale.x;
-    size.y = s->size.y + s->size_scaled.y * s->scale.y;
-    size_half.x = size.x / 2.0f;
-    size_half.y = size.y / 2.0f;
-    alignment.x = size_half.x + s->align.x * size_half.x;
-    alignment.y = size_half.y + s->align.y * size_half.y;
-    pos.x = s->pos.x + s->offset.x + s->offset_scaled.x * s->scale.x;
-    pos.y = s->pos.y + s->offset.y + s->offset_scaled.y * s->scale.y;
-
-    s->uv_pos_baked.x = s->uv_pos.x * texture_scale.x;
-    s->uv_pos_baked.y = s->uv_pos.y * texture_scale.y;
-    s->uv_size_baked.x = s->uv_size.x * texture_scale.x;
-    s->uv_size_baked.y = s->uv_size.y * texture_scale.y;
-    s->pos_baked.x = (pos.x - alignment.x) * ndc_scale.x;
-    s->pos_baked.y = (pos.y - alignment.y) * ndc_scale.y;
-    s->size_baked.x = size.x * ndc_scale.x;
-    s->size_baked.y = size.y * ndc_scale.y;
-
-    LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_UI_ELEMENT_BAKE(s->pos_baked.x, s->pos_baked.y, s->size_baked.x, s->size_baked.y));
 }

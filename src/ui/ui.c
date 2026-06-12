@@ -91,17 +91,17 @@ static struct ui_core
     b8 vao_loaded;
 
     /*!
-     *  @brief panel buffer, raw panel data.
+     *  @brief quad buffer, raw UI quad data.
      */
-    fsl_panel_nine_slice *panel_buf;
+    fsl_ui_drawable_quad *quad_buf;
 
-    u64 panel_count;
+    u64 quad_count;
 
     struct /* shader */
     {
         fsl_shader_program *text;
         fsl_shader_program *ui;
-        fsl_shader_program *ui_9_slice;
+        fsl_shader_program *ui_9_slice; /* -- DEPRECATED IN v0.10.1-dev -- */
     } shader;
 
     struct /* uniform */
@@ -119,7 +119,7 @@ static struct ui_core
             GLint tint;
         } ui;
 
-        struct /* nine_slice */
+        struct /* -- DEPRECATED IN v0.10.1-dev --; nine_slice*/
         {
             GLint tint;
         } nine_slice;
@@ -563,18 +563,12 @@ u32 fsl_ui_init(void)
 void fsl_ui_start(b8 nine_slice, b8 clear)
 {
     fsl_shader_program *shader_p = fsl_mem_handle_get(fsl_shader_buf);
-    fsl_fbo_bind();
 
-    if (nine_slice)
-    {
-        ui_core.shader.ui_9_slice = &shader_p[FSL_SHADER_INDEX_UI_9_SLICE];
-        glUseProgram(ui_core.shader.ui_9_slice->asset.id);
-    }
-    else
-    {
-        ui_core.shader.ui = &shader_p[FSL_SHADER_INDEX_UI];
-        glUseProgram(ui_core.shader.ui->asset.id);
-    }
+    (void)nine_slice;
+
+    fsl_fbo_bind();
+    ui_core.shader.ui = &shader_p[FSL_SHADER_INDEX_UI];
+    glUseProgram(ui_core.shader.ui->asset.id);
 
     glDisable(GL_DEPTH_TEST);
     if (clear)
@@ -584,13 +578,57 @@ void fsl_ui_start(b8 nine_slice, b8 clear)
 void fsl_ui_push_panel(i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, u32 tint)
 {
     fsl_texture *texture = fsl_mem_handle_get(fsl_texture_buf);
-    fsl_panel_nine_slice _panel = fsl_get_nine_slice(&texture[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
+    fsl_panel_nine_slice panel =
+        fsl_get_nine_slice_internal(&texture[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
             pos_x, pos_y, size_x, size_y, FSL_UI_SLICE_SIZE_DEFAULT);
 
     glBindBuffer(GL_ARRAY_BUFFER, ui_core.vertex_data_curr_quad);
-    glBufferData(GL_ARRAY_BUFFER, ui_core.panel_count * sizeof(fsl_panel_nine_slice),
-            ui_core.panel_buf, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, ui_core.quad_count * sizeof(fsl_panel_nine_slice),
+            &panel, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void ui_element_bake_internal(fsl_ui_element *element)
+{
+    fsl_ui_transform *t = &element->transform;
+    v2f32 texture_scale = {0};
+    v2f32 size = {0};
+    v2f32 size_half = {0};
+    v2f32 alignment = {0};
+    v2f32 pos = {0};
+
+    element->flag &= ~FSL_FLAG_UI_DIRTY_TRANSFORM;
+
+    texture_scale.x = 1.0f / element->texture->size.x;
+    texture_scale.y = 1.0f / element->texture->size.y;
+    size.x = t->size.x + t->size_scaled.x * t->scale.x;
+    size.y = t->size.y + t->size_scaled.y * t->scale.y;
+    size_half.x = size.x / 2.0f;
+    size_half.y = size.y / 2.0f;
+    alignment.x = size_half.x + t->align.x * size_half.x;
+    alignment.y = size_half.y + t->align.y * size_half.y;
+    pos.x = t->pos.x + t->offset.x + t->offset_scaled.x * t->scale.x;
+    pos.y = t->pos.y + t->offset.y + t->offset_scaled.y * t->scale.y;
+
+    t->uv_pos_baked.x = t->uv_pos.x * texture_scale.x;
+    t->uv_pos_baked.y = t->uv_pos.y * texture_scale.y;
+    t->uv_size_baked.x = t->uv_size.x * texture_scale.x;
+    t->uv_size_baked.y = t->uv_size.y * texture_scale.y;
+    t->pos_local.x = pos.x - alignment.x;
+    t->pos_local.y = pos.y - alignment.y;
+    t->pos_baked.x = t->pos_local.x;
+    t->pos_baked.y = t->pos_local.y;
+    t->size_baked.x = size.x;
+    t->size_baked.y = size.y;
+
+    if (element->parent)
+    {
+        t->pos_baked.x += element->parent->transform.pos_baked.x;
+        t->pos_baked.y += element->parent->transform.pos_baked.y;
+    }
+
+    LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
+            MSG_UI_ELEMENT_BAKE(t->pos_baked.x, t->pos_baked.y, t->size_baked.x, t->size_baked.y));
 }
 
 void fsl_ui_element_draw(fsl_ui_element *element)
@@ -598,22 +636,26 @@ void fsl_ui_element_draw(fsl_ui_element *element)
     fsl_ui_drawable_quad drawable = {0};
 
     if (element->flag & FSL_FLAG_UI_DIRTY_TRANSFORM)
-        ui_element_bake_internal(element, render->ndc_scale);
+        ui_element_bake_internal(element);
+
+    if (element->parent)
+    {
+        element->transform.pos_baked.x =
+            element->transform.pos_local.x + element->parent->transform.pos_baked.x;
+        element->transform.pos_baked.y =
+            element->transform.pos_local.y + element->parent->transform.pos_baked.y;
+    }
+
+    ui_element_listen_internal(element, render->mouse_pos, render->mouse_delta);
 
     drawable.uv_pos.x = element->transform.uv_pos_baked.x;
     drawable.uv_pos.y = element->transform.uv_pos_baked.y;
     drawable.uv_size.x = element->transform.uv_size_baked.x;
     drawable.uv_size.y = element->transform.uv_size_baked.y;
-    drawable.pos.x = element->transform.pos_baked.x;
-    drawable.pos.y = element->transform.pos_baked.y;
-    drawable.size.x = element->transform.size_baked.x;
-    drawable.size.y = element->transform.size_baked.y;
-
-    if (element->parent)
-    {
-        drawable.pos.x += element->parent->transform.pos_baked.x;
-        drawable.pos.y += element->parent->transform.pos_baked.y;
-    }
+    drawable.pos.x = element->transform.pos_baked.x * render->ndc_scale.x;
+    drawable.pos.y = element->transform.pos_baked.y * render->ndc_scale.y;
+    drawable.size.x = element->transform.size_baked.x * render->ndc_scale.x;
+    drawable.size.y = element->transform.size_baked.y * render->ndc_scale.y;
 
     drawable.pos.x = drawable.pos.x - 1.0f;
     drawable.pos.y = 1.0f - drawable.pos.y;
@@ -633,6 +675,7 @@ void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 siz
         f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint)
 {
     fsl_ui_drawable_quad drawable = {0};
+    v2f32 ndc_scale = render->ndc_scale;
 
     if (!size_x) size_x = texture->size.x;
     if (!size_y) size_y = texture->size.y;
@@ -645,10 +688,10 @@ void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 siz
     drawable.uv_pos.y = 0.0f;
     drawable.uv_size.x = 1.0f;
     drawable.uv_size.y = 1.0f;
-    drawable.pos.x = pos_x;
-    drawable.pos.y = pos_y;
-    drawable.size.x = size_x;
-    drawable.size.y = size_y;
+    drawable.pos.x = pos_x * ndc_scale.x;
+    drawable.pos.y = pos_y * ndc_scale.y;
+    drawable.size.x = size_x * ndc_scale.x;
+    drawable.size.y = size_y * ndc_scale.y;
 
     glBindBuffer(GL_ARRAY_BUFFER, ui_core.vertex_data_curr_quad);
     glBufferData(GL_ARRAY_BUFFER, sizeof(fsl_ui_drawable_quad), &drawable, GL_DYNAMIC_DRAW);
@@ -668,9 +711,10 @@ void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 siz
 void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
         i32 size_x, i32 size_y, i32 slice_size, u32 tint)
 {
-    fsl_panel_nine_slice panel = fsl_get_nine_slice(texture, pos_x, pos_y, size_x, size_y, slice_size);
+    fsl_panel_nine_slice panel = fsl_get_nine_slice_internal(texture,
+            pos_x, pos_y, size_x, size_y, slice_size);
 
-    glUniform4f(ui_core.uniform.nine_slice.tint,
+    glUniform4f(ui_core.uniform.ui.tint,
             (f32)((tint >> 0x18) & 0xff) / 0xff,
             (f32)((tint >> 0x10) & 0xff) / 0xff,
             (f32)((tint >> 0x08) & 0xff) / 0xff,
@@ -713,12 +757,13 @@ void fsl_ui_free(void)
     }
 }
 
-fsl_panel_nine_slice fsl_get_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
-        i32 size_x, i32 size_y, i32 slice_size)
+fsl_panel_nine_slice fsl_get_nine_slice_internal(fsl_texture *texture,
+        i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, i32 slice_size)
 {
     fsl_panel_nine_slice panel = {0};
     v2f32 texture_scale = {0};
     f32 slice_size_f32 = (f32)slice_size;
+    v2f32 ndc_scale = render->ndc_scale;
     v2f32 uv_pos[3] = {0};
     v2f32 uv_size[3] = {0};
     v2f32 pos = {0};
@@ -745,18 +790,18 @@ fsl_panel_nine_slice fsl_get_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos
     pos.y = (f32)pos_y;
     size.x = (f32)size_x;
     size.y = (f32)size_y;
-    pos_buf[0].x = pos.x;
-    pos_buf[0].y = pos.y;
-    pos_buf[1].x = pos.x + slice_size_f32;
-    pos_buf[1].y = pos.y + slice_size_f32;
-    pos_buf[2].x = pos.x + size.x - slice_size_f32;
-    pos_buf[2].y = pos.y + size.y - slice_size_f32;
-    size_buf[0].x = slice_size_f32;
-    size_buf[0].y = slice_size_f32;
-    size_buf[1].x = size.x - slice_size_f32 * 2;
-    size_buf[1].y = size.y - slice_size_f32 * 2;
-    size_buf[2].x = slice_size_f32;
-    size_buf[2].y = slice_size_f32;
+    pos_buf[0].x = pos.x * ndc_scale.x - 1.0f;
+    pos_buf[0].y = 1.0f - pos.y * ndc_scale.y;
+    pos_buf[1].x = ((pos.x + slice_size_f32) * ndc_scale.x) - 1.0f;
+    pos_buf[1].y = 1.0f - (pos.y + slice_size_f32) * ndc_scale.y;
+    pos_buf[2].x = ((pos.x + size.x - slice_size_f32) * ndc_scale.x) - 1.0f;
+    pos_buf[2].y = 1.0f - (pos.y + size.y - slice_size_f32) * ndc_scale.y;
+    size_buf[0].x = slice_size_f32 * ndc_scale.x;
+    size_buf[0].y = slice_size_f32 * ndc_scale.y;
+    size_buf[1].x = (size.x - slice_size_f32 * 2.0f) * ndc_scale.x;
+    size_buf[1].y = (size.y - slice_size_f32 * 2.0f) * ndc_scale.y;
+    size_buf[2].x = slice_size_f32 * ndc_scale.x;
+    size_buf[2].y = slice_size_f32 * ndc_scale.y;
 
     panel.slice[0].uv_pos.x = uv_pos[0].x;
     panel.slice[0].uv_pos.y = uv_pos[0].y;

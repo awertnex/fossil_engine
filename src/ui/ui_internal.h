@@ -24,7 +24,8 @@
 #define FSL_UI_INTERNAL_H
 
 #include "../common/types.h"
-#include "ui_element.h"
+
+#include "ui_types.h"
 
 /*!
  *  @brief init text rendering settings (and engine default fonts at @ref fsl_font_buf).
@@ -41,12 +42,24 @@ void ui_text_align_y_center_internal(u64 end, f32 height);
 void ui_text_align_y_bottom_internal(u64 end, f32 height);
 
 /*!
- *  @internal
- *
  *  @brief bake a UI element's parameters to prepare for rendering.
  *
- *  @remark called automaically from @ref ui_element_draw().
+ *  @remark called automatically from @ref ui_element_draw() if transform dirty.
  */
-void ui_element_bake_internal(fsl_ui_element *element, v2f32 ndc_scale);
+void ui_element_bake_internal(fsl_ui_element *element);
+
+/*!
+ *  @brief poll event data and parse element's callbacks (e.g., button pressed).
+ *
+ *  @remark called automatically from @ref ui_element_draw().
+ */
+void ui_element_listen_internal(fsl_ui_element *element, v2f64 mouse_pos, v2f64 mouse_delta);
+
+void ui_event_enter_process_internal(fsl_ui_element *element);
+void ui_event_hover_process_internal(fsl_ui_element *element);
+void ui_event_leave_process_internal(fsl_ui_element *element);
+void ui_event_click_process_internal(fsl_ui_element *element);
+void ui_event_hold_process_internal(fsl_ui_element *element);
+void ui_event_release_process_internal(fsl_ui_element *element);
 
 #endif /* FSL_UI_INTERNAL_H */

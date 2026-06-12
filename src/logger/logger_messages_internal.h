@@ -157,9 +157,7 @@
 
 /* ---- section: input ------------------------------------------------------ */
 
-#define MSG_INPUT_KEY_BIND_INIT(key, shift, ctrl, alt, super, context) fsl_logger_stringf("Key Bind [%s%s%s%s%s] for Input Context [%u] Initialized\n", key, shift, ctrl, alt, super, context)
-#define MSG_INPUT_KEY_BIND_ATTACH(key, shift, ctrl, alt, super, context) fsl_logger_stringf("Key Bind [%s%s%s%s%s] Attached to Input Context [%u]\n", key, shift, ctrl, alt, super, context)
-#define MSG_INPUT_CONTEXT_SET(context_old, context_new)     fsl_logger_stringf("Input Context Set [%u -> %u]\n", context_old, context_new)
+#define MSG_INPUT_KEY_BIND_INIT(key, shift, ctrl, alt, super) fsl_logger_stringf("Key Bind [%s%s%s%s%s] Initialized\n", key, shift, ctrl, alt, super)
 
 /* ---- section: ui --------------------------------------------------------- */
 

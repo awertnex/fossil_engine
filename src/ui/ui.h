@@ -136,7 +136,7 @@ FSLAPI u32 fsl_ui_init(void);
 /*!
  *  @brief start ui rendering batch.
  *
- *  @param nine_slice use a nine_slice shader
+ *  @param nine_slice DEPRECATED IN v0.10.1-dev --; use a nine_slice shader
  *  (ui elements with separate edge and corner slices of a texture).
  *
  *  @param clear clear the currently bound framebuffer before rendering.
@@ -149,8 +149,6 @@ FSLAPI void fsl_ui_start(b8 nine_slice, b8 clear);
  *  @brief push default engine panel onto internal panel buffer.
  */
 FSLAPI void fsl_ui_push_panel(i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, u32 tint);
-
-FSLAPI void fsl_ui_element_draw(fsl_ui_element *element);
 
 /*!
  *  @brief draw a texture as a UI element.
@@ -178,7 +176,7 @@ FSLAPI void fsl_ui_free(void);
 /*!
  *  @brief make a 9-slice panel.
  */
-FSLAPI fsl_panel_nine_slice fsl_get_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
-        i32 size_x, i32 size_y, i32 slice_size);
+FSLAPI fsl_panel_nine_slice fsl_get_nine_slice_internal(fsl_texture *texture,
+        i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, i32 slice_size);
 
 #endif /* FSL_UI_H */

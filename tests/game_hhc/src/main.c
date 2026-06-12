@@ -593,7 +593,7 @@ static void draw_everything(void)
 
      glUniformMatrix4fv(uniform.bounding_box.mat_perspective, 1, GL_FALSE,
              (GLfloat*)&player.camera.projection.perspective);
- 
+
     /* ---- draw player chunk bounding box ---------------------------------- */
 
     if (core.debug.chunk_bounds)
