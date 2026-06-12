@@ -37,14 +37,6 @@ struct fsl_mesh
     fsl_asset asset;
     GLuint vao;
 
-    GLuint vbo;                 /* -- DEPRECATED IN v0.9.0-beta -- */
-    GLuint vbo_len;             /* -- DEPRECATED IN v0.9.0-beta -- */
-    fsl_mem_handle vbo_data;    /* -- DEPRECATED IN v0.9.0-beta -- */
-
-    GLuint ebo;                 /* -- DEPRECATED IN v0.9.0-beta -- */
-    GLuint ebo_len;             /* -- DEPRECATED IN v0.9.0-beta -- */
-    fsl_mem_handle ebo_data;    /* -- DEPRECATED IN v0.9.0-beta -- */
-
     /*!
      *  @brief mesh vertex data.
      */
@@ -115,7 +107,7 @@ FSLAPI void fsl_mesh_draw(const fsl_mesh *mesh, const fsl_camera *camera,
 FSLAPI u32 fsl_mesh_generate(fsl_mesh *mesh,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path,
         void (*attrib)(void), GLenum usage,
-        GLuint vbo_len, GLuint ebo_len, GLfloat *vbo_data, GLuint *ebo_data);
+        GLuint vertex_buf_len, GLuint index_buf_len, GLfloat *vertex_data, GLuint *index_data);
 
 FSLAPI void fsl_mesh_free(fsl_mesh *mesh);
 

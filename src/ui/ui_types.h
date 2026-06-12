@@ -23,46 +23,21 @@
 #ifndef FSL_UI_TYPES_H
 #define FSL_UI_TYPES_H
 
-#include "../common/types.h"
-#include "../assets/asset_types.h"
 #include "../math/vector.h"
-#include "../memory/memory_types.h"
 
 typedef struct fsl_ui_event     fsl_ui_event;
 typedef struct fsl_ui_callback  fsl_ui_callback;
-typedef struct fsl_ui_sprite    fsl_ui_sprite;
+typedef struct fsl_ui_transform fsl_ui_transform;
 typedef struct fsl_ui_element   fsl_ui_element;
-
-/* ---- section: definitions ------------------------------------------------ */
-
-enum fsl_ui_element_flag
-{
-    FSL_FLAG_UI_ACTIVE,
-    FSL_FLAG_UI_VISIBLE,
-    FSL_FLAG_UI_DIRTY_TRANSFORM,
-    FSL_FLAG_UI_DIRTY_PARENT,
-    FSL_FLAG_UI_DIRTY_CHILDREN
-}; /* fsl_ui_element_flag */
-
-typedef enum fsl_ui_element_type
-{
-    FSL_UI_ELEMENT_TYPE_NONE,
-    FSL_UI_ELEMENT_TYPE_CONTAINER,
-    FSL_UI_ELEMENT_TYPE_PANEL,
-    FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE,
-    FSL_UI_ELEMENT_TYPE_BUTTON,
-    FSL_UI_ELEMENT_TYPE_COUNT
-} fsl_ui_element_type;
 
 typedef enum fsl_ui_event_type
 {
     FSL_UI_EVENT_TYPE_NONE,
     FSL_UI_EVENT_TYPE_ENTER,
+    FSL_UI_EVENT_TYPE_HOVER,
     FSL_UI_EVENT_TYPE_LEAVE,
     FSL_UI_EVENT_TYPE_CLICK,
-    FSL_UI_EVENT_TYPE_CLICK_DOUBLE,
     FSL_UI_EVENT_TYPE_HOLD,
-    FSL_UI_EVENT_TYPE_HOLD_PERIOD,
     FSL_UI_EVENT_TYPE_RELEASE,
     FSL_UI_EVENT_TYPE_SCROLL,
     FSL_UI_EVENT_TYPE_DRAG,
@@ -72,56 +47,54 @@ typedef enum fsl_ui_event_type
 
 struct fsl_ui_event
 {
-    fsl_ui_event_type type;
-    v2i64 pos;
+    fsl_ui_element *caller;
+    v2f64 mouse_pos;
+    v2f64 mouse_click_pos;
+
+    /* difference between mouse position and element
+     * position on mouse click.
+     */
+    v2f64 mouse_click_pos_diff;
+
+    b8 hover;
+    b8 hover_last;
+    b8 mouse_click;
+    b8 mouse_click_last;
 }; /* fsl_ui_event */
+
+typedef void (*fsl_ui_callback_func)(fsl_ui_event event, void *data);
 
 struct fsl_ui_callback
 {
-    void (*callback)(fsl_ui_event event, void *data);
-    fsl_ui_event event;
+    fsl_ui_callback_func func;
     void *data;
 }; /* fsl_ui_callback */
 
-struct fsl_ui_sprite
+struct fsl_ui_transform
 {
     v2i32 uv_pos;           /* position in texture, in pixels */
     v2i32 uv_size;          /* size in texture, in pixels */
+    i32 slice_size;         /* 9-slice slice diameter, in pixels (optional) */
     v2i32 pos;              /* position on screen, in pixels */
     v2i32 offset;           /* offset on screen from `pos`, in pixels */
     v2i32 offset_scaled;    /* offset on screen from `pos`, in pixels (scales with `scale`) */
     v2i32 size;             /* size on screen, in pixels */
     v2i32 size_scaled;      /* size on screen, in pixels (scales with `scale`) */
-    v2f32 scale;            /* gui scaling, for sprite's 'scaled' parameters */
+    v2f32 scale;            /* gui scaling, for 'scaled' parameters */
 
     /*!
      *  @brief alignment in respect to `pos`, `size` and `size_scaled`.
-     *  <= -1: left-side/top of sprite is at `pos`.
-     *  == 0: center of sprite is at `pos`.
-     *  >= 1: right-side/bottom of sprite is at `pos`.
+     *  <= -1: left-side/top is at `pos`.
+     *  == 0: center is at `pos`.
+     *  >= 1: right-side/bottom is at `pos`.
      */
     v2i32 align;
 
-    v2f32 uv_pos_baked;     /* absolute, baked position in texture, in UV coordinates */
-    v2f32 uv_size_baked;    /* absolute, baked size in texture, in UV coordinates */
-    v2f32 pos_baked;        /* baked, absolute position on screen, in pixels */
-    v2f32 size_baked;       /* baked, absolute size on screen, in pixels */
-}; /* fsl_ui_sprite */
-
-/* ---- section: definitions: elements -------------------------------------- */
-
-struct fsl_ui_element
-{
-    fsl_ui_element_type type;
-    fsl_texture *texture;
-    fsl_ui_sprite sprite;
-
-    u32 flag; /* enum @ref fsl_ui_element_flag */
-    i32 layer;
-    fsl_ui_callback action[FSL_UI_EVENT_TYPE_COUNT];
-    fsl_ui_element *parent;
-    fsl_mem_handle children_buf;
-    fsl_ui_element **children;  /* cached pointer from `children_buf` */
-}; /* fsl_ui_element */
+    v2f32 uv_pos_baked;     /* baked absolute position in texture, in normalized coordinates */
+    v2f32 uv_size_baked;    /* baked absolute size in texture, in normalized coordinates */
+    v2f32 pos_local;        /* baked local position, in pixels */
+    v2f32 pos_baked;        /* baked absolute position on screen, in pixels */
+    v2f32 size_baked;       /* baked absolute size on screen, in pixels */
+}; /* fsl_ui_transform */
 
 #endif /* FSL_UI_TYPES_H */

@@ -49,6 +49,7 @@ static str str_files[][CMD_SIZE] =
     DIR_SRC"string/string.c",
     DIR_SRC"ui/ui.c",
     DIR_SRC"ui/ui_element.c",
+    DIR_SRC"ui/ui_event.c",
     DIR_SRC"dir.c",
     DIR_SRC FSL_FILE_NAME_PLATFORM,
     DIR_SRC"time.c"
@@ -95,6 +96,7 @@ static str *copy_targets[][48] =
     {DIR_SRC"engine/engine.h",              DIR_DST DIR_DEPS DIR_DST"engine/"},
     {DIR_SRC"engine/engine_assets.h",       DIR_DST DIR_DEPS DIR_DST"engine/"},
     {DIR_SRC"input/input.h",                DIR_DST DIR_DEPS DIR_DST"input/"},
+    {DIR_SRC"input/input_key_codes.h",      DIR_DST DIR_DEPS DIR_DST"input/"},
     {DIR_SRC"logger/logger.h",              DIR_DST DIR_DEPS DIR_DST"logger/"},
     {DIR_SRC"math/math.h",                  DIR_DST DIR_DEPS DIR_DST"math/"},
     {DIR_SRC"math/matrix.h",                DIR_DST DIR_DEPS DIR_DST"math/"},
@@ -108,7 +110,7 @@ static str *copy_targets[][48] =
     {DIR_SRC"shaders/shaders.h",            DIR_DST DIR_DEPS DIR_DST"shaders/"},
     {DIR_SRC"string/string.h",              DIR_DST DIR_DEPS DIR_DST"string/"},
     {DIR_SRC"ui/ui.h",                      DIR_DST DIR_DEPS DIR_DST"ui/"},
-    {DIR_SRC"ui/ui_core.h",                 DIR_DST DIR_DEPS DIR_DST"ui/"},
+    {DIR_SRC"ui/ui_element.h",              DIR_DST DIR_DEPS DIR_DST"ui/"},
     {DIR_SRC"ui/ui_types.h",                DIR_DST DIR_DEPS DIR_DST"ui/"}
 };
 

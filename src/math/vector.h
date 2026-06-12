@@ -215,6 +215,7 @@ FSLAPI f32 fsl_distance_v3f32(v3f32 a, v3f32 b);
 FSLAPI f64 fsl_distance_v3f64(v3f64 a, v3f64 b);
 FSLAPI b8 fsl_is_in_area_i32(v2i32 v, v2i32 min, v2i32 max);
 FSLAPI b8 fsl_is_in_area_f32(v2f32 v, v2f32 min, v2f32 max);
+FSLAPI b8 fsl_is_in_area_f64(v2f64 v, v2f64 min, v2f64 max);
 FSLAPI b8 fsl_is_in_volume_i32(v3i32 v, v3i32 min, v3i32 max);
 FSLAPI b8 fsl_is_in_volume_f32(v3f32 v, v3f32 min, v3f32 max);
 FSLAPI b8 fsl_is_in_volume_i64(v3i64 v, v3i64 min, v3i64 max);

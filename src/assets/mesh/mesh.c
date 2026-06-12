@@ -332,31 +332,42 @@ void fsl_mesh_draw(const fsl_mesh *mesh, const fsl_camera *camera,
 u32 fsl_mesh_generate(fsl_mesh *mesh,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path,
         void (*attrib)(void), GLenum usage,
-        GLuint vbo_len, GLuint ebo_len, GLfloat *vbo_data, GLuint *ebo_data)
+        GLuint vertex_buf_len, GLuint index_buf_len, GLfloat *vertex_data, GLuint *index_data)
 {
-    GLfloat *vbo_data_p = NULL;
-    GLuint *ebo_data_p = NULL;
+    fsl_draw_type draw_type = 0;
     fsl_asset_metadata metadata = {0};
 
-    if (fsl_mem_arena_push(&mem_arena_sub_data_internal, &mesh->vbo_data, sizeof(GLfloat) * vbo_len,
-                "fsl_mesh_generate().mesh->vbo_data") != FSL_ERR_SUCCESS)
+    switch(usage)
+    {
+        case GL_STREAM_DRAW:
+            draw_type = FSL_DRAW_TYPE_STREAM;
+            break;
+        case GL_STATIC_DRAW:
+            draw_type = FSL_DRAW_TYPE_STATIC;
+            break;
+        case GL_DYNAMIC_DRAW:
+            draw_type = FSL_DRAW_TYPE_DYNAMIC;
+            break;
+        default:
+            draw_type = FSL_DRAW_TYPE_STATIC;
+    }
+
+    if (fsl_vbo_init(&mesh->vertex_buf, sizeof(GLfloat), vertex_buf_len, vertex_data,
+            GL_ARRAY_BUFFER, draw_type) != FSL_ERR_SUCCESS)
     {
         LOGERROR(FSL_ERR_MESH_GENERATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Generate Mesh", name_id, "`fsl_mem_arena_push()` Failed"));
+                MSG_ACTION_SUBJECT_REASON_ERROR("Generate Mesh", name_id, "`fsl_vbo_init()` Failed"));
         goto cleanup;
     }
 
-    if (ebo_data)
+    if (index_data && fsl_vbo_init(&mesh->index_buf, sizeof(GLuint), index_buf_len, index_data,
+            GL_ELEMENT_ARRAY_BUFFER, draw_type) != FSL_ERR_SUCCESS)
     {
-        if (fsl_mem_arena_push(&mem_arena_sub_data_internal, &mesh->ebo_data, sizeof(GLuint) * ebo_len,
-                    "fsl_mesh_generate().mesh->ebo_data") != FSL_ERR_SUCCESS)
-        {
-            LOGERROR(FSL_ERR_MESH_GENERATION_FAIL,
-                    FSL_FLAG_LOG_NO_VERBOSE,
-                    MSG_ACTION_SUBJECT_REASON_ERROR("Generate Mesh", name_id, "`fsl_mem_arena_push()` Failed"));
-            goto cleanup;
-        }
+        LOGERROR(FSL_ERR_MESH_GENERATION_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                MSG_ACTION_SUBJECT_REASON_ERROR("Generate Mesh", name_id, "`fsl_vbo_init()` Failed"));
+        goto cleanup;
     }
 
     if (fsl_asset_set_metadata(&mesh->asset, FSL_ASSET_MESH, name, name_id, file, path) != FSL_ERR_SUCCESS)
@@ -369,25 +380,13 @@ u32 fsl_mesh_generate(fsl_mesh *mesh,
 
     metadata = fsl_asset_get_metadata(mesh->asset);
 
-    vbo_data_p = fsl_mem_handle_get(mesh->vbo_data);
-    ebo_data_p = fsl_mem_handle_get(mesh->ebo_data);
-    mesh->vbo_len = vbo_len;
-    mesh->ebo_len = ebo_len;
-    memcpy(vbo_data_p, vbo_data, sizeof(GLfloat) * vbo_len);
-    memcpy(ebo_data_p, ebo_data, sizeof(GLuint) * ebo_len);
-
     /* ---- bind mesh ------------------------------------------------------- */
 
     glGenVertexArrays(1, &mesh->vao);
-    glGenBuffers(1, &mesh->vbo);
-    glGenBuffers(1, &mesh->ebo);
-
     glBindVertexArray(mesh->vao);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
 
-    glBufferData(GL_ARRAY_BUFFER, mesh->vbo_len * sizeof(GLfloat), vbo_data_p, usage);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo_len * sizeof(GLuint), ebo_data_p, usage);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->vertex_buf.id);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->index_buf.id);
 
     if (attrib) attrib();
 
@@ -509,8 +508,6 @@ void fsl_mesh_free(fsl_mesh *mesh)
     if (mesh->asset.initialized)
     {
         mesh->asset.initialized = FALSE;
-        glDeleteBuffers(1, &mesh->ebo); /* -- DEPRECATED IN v0.9.0-beta -- */
-        glDeleteBuffers(1, &mesh->vbo); /* -- DEPRECATED IN v0.9.0-beta -- */
         glDeleteVertexArrays(1, &mesh->vao);
     }
 

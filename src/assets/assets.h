@@ -184,14 +184,4 @@ FSLAPI void fsl_camera_lookat_update(fsl_camera *camera,
  */
 FSLAPI void fsl_projection_perspective_update(fsl_camera camera, fsl_projection *projection, b8 roll);
 
-/*!
- *
- *  -- DEPRECATED IN v0.8.0-dev --; use @ref fsl_camera_lookat_update().
- *
- *  @brief get camera look-at angles from camera position and target position.
- *
- *  assign vertical angle to `pitch` and horizontal angle to `yaw`.
- */
-FSLAPI void fsl_get_camera_lookat_angles(v3f64 camera_pos, v3f64 target, f64 *pitch, f64 *yaw);
-
 #endif /* FSL_ASSETS_H */

@@ -2,11 +2,11 @@
 
 uniform sampler2D texture_image;
 uniform vec4 tint;
-in vec2 vs_uv;
+in vec2 uv;
 out vec4 color;
 
 void main()
 {
-    color = texture(texture_image, vs_uv);
+    color = texture(texture_image, uv);
     color = color * color.a * tint;
 }

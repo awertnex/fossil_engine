@@ -324,4 +324,33 @@ static str *fsl_keyboard_key_name[FSL_KEYBOARD_KEYS_MAX] =
     "<menu>"
 }; /* fsl_keyboard_tab */
 
+/*!
+ *  @brief like @ref fsl_key_bind_init(), but quiet.
+ *
+ *  @param key a keyboard key or mouse button.
+ *  @param shift left or right shift.
+ *  @param ctrl left or right ctrl.
+ *  @param alt left or right alt.
+ *  @param super left or right super.
+ */
+fsl_key_bind key_bind_init_internal(fsl_keyboard_key key,
+        fsl_mod_key shift, fsl_mod_key ctrl, fsl_mod_key alt, fsl_mod_key super);
+
+/*!
+ *  @brief update mouse movement.
+ *
+ *  - update parameters at @ref fsl_render.mouse_pos and @ref fsl_render.mouse_delta
+ *    of the currently bound `fsl_render`.
+ *
+ *  @remark called automatically from @ref fsl_engine_running().
+ */
+void input_mouse_movement_update_internal(void);
+
+/*!
+ *  @brief update internal mouse and key states: press, double-press, hold and release.
+ *
+ *  @remark called automatically from @ref fsl_engine_running().
+ */
+void input_key_states_update_internal(void);
+
 #endif /* FSL_INPUT_INTERNAL_H */

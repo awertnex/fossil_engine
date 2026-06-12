@@ -119,6 +119,7 @@ u32 fsl_engine_assets_init(void)
                 FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
         goto cleanup;
 
+    /* -- DEPRECATED IN v0.10.1-dev -- */
     if (fsl_shader_program_init_ex(&shader_p[FSL_SHADER_INDEX_UI_9_SLICE],
                 "UI 9-Slice", "ui_9_slice", "ui_9_slice.vert", NULL, "ui_9_slice.frag",
                 FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
