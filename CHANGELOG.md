@@ -7,7 +7,7 @@
    version v0.3.3-beta (2026 01 24), which makes v0.3.4-beta the first version
    of the engine as standalone in this repo
 
-## v0.10.1-dev (current)
+## v0.11.0-beta (2026 06 12)
 
 #### changes
 - changed size parameter in UI element drawing from UV-relative to constant
@@ -25,6 +25,12 @@
       handling.
     - added function `fsl_ui_element_set_callback()` for attaching callbacks to
       elements (listening happens within function `fsl_ui_element_draw()`).
+- added UI 9-slice setter function `fsl_ui_element_set_9_slice()`.
+- added support for drawing 9-slice using the same functions and struct as a
+  regular element.
+- exposed function `fsl_ui_element_bake()` to manually bake/refresh element
+  parameters (also called automatically from function `fsl_ui_element_draw()` if
+  transform dirty).
 
 #### deletions
 - removed deprecations from v0.9.0-beta and earlier:

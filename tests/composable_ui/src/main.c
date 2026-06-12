@@ -1,5 +1,6 @@
 #include "../../../fossil/deps/fossil/fossil_engine.h"
 
+fsl_texture *texture_p = NULL;
 fsl_render *render = {0};
 fsl_key_bind bind_quit = {0};
 fsl_key_bind bind_bigger_x = {0};
@@ -11,9 +12,11 @@ fsl_key_bind bind_align_right = {0};
 fsl_key_bind bind_align_up = {0};
 fsl_key_bind bind_align_down = {0};
 fsl_key_bind bind_element_attach = {0};
+fsl_key_bind bind_switch_workspace = {0};
 fsl_texture texture = {0};
 fsl_ui_element element_parent = {0};
 fsl_ui_element element_child = {0};
+fsl_ui_element element_panel = {0};
 v2f32 scale = {0};
 v2i32 align = {0};
 
@@ -24,11 +27,19 @@ void ui_update(void)
     fsl_ui_element_set_alignment(&element_parent, align.x, align.y);
 }
 
-void ui_draw(void)
+void ui_draw_1(void)
 {
     fsl_ui_start(FALSE, TRUE);
     fsl_ui_element_draw(&element_parent);
     fsl_ui_element_draw(&element_child);
+    fsl_ui_stop();
+    fsl_fbo_blit(0);
+}
+
+void ui_draw_2(void)
+{
+    fsl_ui_start(FALSE, TRUE);
+    fsl_ui_element_draw(&element_panel);
     fsl_ui_stop();
     fsl_fbo_blit(0);
 }
@@ -67,14 +78,27 @@ void fuck(fsl_ui_event event, void *data)
     LOGSUCCESS(0, "CLICK\n");
 }
 
+void enter(fsl_ui_event event, void *data)
+{
+    fsl_ui_element_set_texture(event.caller, &texture_p[FSL_TEXTURE_INDEX_PANEL_ACTIVE]);
+}
+
+void leave(fsl_ui_event event, void *data)
+{
+    fsl_ui_element_set_texture(event.caller, &texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
+}
+
 int main(int argc, char **argv)
 {
+
     if (fsl_engine_init(argc, argv, NULL, 1280, 720, 0) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     if (fsl_texture_init(&texture, "Panel", "panel", "panel.png", "assets/",
                 GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
         goto cleanup;
+
+    texture_p = fsl_mem_handle_get(fsl_texture_buf);
 
     render = fsl_render_get();
 
@@ -88,6 +112,7 @@ int main(int argc, char **argv)
     bind_align_up = fsl_key_bind_init(FSL_KEY_UP, 0, 0, 0, 0, 0);
     bind_align_down = fsl_key_bind_init(FSL_KEY_DOWN, 0, 0, 0, 0, 0);
     bind_element_attach = fsl_key_bind_init(FSL_KEY_ENTER, 0, 0, 0, 0, 0);
+    bind_switch_workspace = fsl_key_bind_init(FSL_KEY_SPACE, 0, 0, 0, 0, 0);
 
     scale.x = 1.0f;
     scale.y = 1.0f;
@@ -111,6 +136,18 @@ int main(int argc, char **argv)
     fsl_ui_element_set_callback(&element_child, FSL_UI_EVENT_TYPE_HOVER, &move, NULL);
     fsl_ui_element_set_callback(&element_child, FSL_UI_EVENT_TYPE_LEAVE, &reset, NULL);
     fsl_ui_element_set_callback(&element_child, FSL_UI_EVENT_TYPE_CLICK, &fuck, &render->mouse_pos);
+
+    fsl_ui_element_set_uv(&element_panel, 0, 0, 16, 16);
+    fsl_ui_element_set_position(&element_panel, 10, 10, 0, 0, 0, 0);
+    fsl_ui_element_set_size(&element_panel, 0, render->size.y - 20, 400, 0);
+    fsl_ui_element_set_scale(&element_panel, 1.0f, 1.0f);
+    fsl_ui_element_set_alignment(&element_panel, -1, -1);
+    fsl_ui_element_set_9_slice(&element_panel, TRUE, 8);
+    fsl_ui_element_set_texture(&element_panel, &texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
+    fsl_ui_element_set_callback(&element_panel, FSL_UI_EVENT_TYPE_ENTER, &enter, NULL);
+    fsl_ui_element_set_callback(&element_panel, FSL_UI_EVENT_TYPE_LEAVE, &leave, NULL);
+
+workspace_1:
 
     while (fsl_engine_running(NULL))
     {
@@ -176,7 +213,39 @@ int main(int argc, char **argv)
             ui_update();
         }
 
-        ui_draw();
+        ui_draw_1();
+
+        if (fsl_is_key_press(bind_switch_workspace))
+            goto workspace_2;
+
+        if (fsl_is_key_press(bind_quit))
+            fsl_request_engine_close();
+
+        fsl_limit_framerate(60, render->time);
+    }
+
+workspace_2:
+
+    while (fsl_engine_running(NULL))
+    {
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        if (render->mouse_delta.x || render->mouse_delta.y)
+            ui_update();
+
+        if (fsl_is_key_press(bind_element_attach))
+        {
+            if (element_panel.parent)
+                fsl_ui_element_detach(&element_panel);
+            else
+                fsl_ui_element_attach(&element_parent, &element_panel);
+
+            ui_update();
+        }
+
+        ui_draw_2();
+
+        if (fsl_is_key_press(bind_switch_workspace))
+            goto workspace_1;
 
         if (fsl_is_key_press(bind_quit))
             fsl_request_engine_close();

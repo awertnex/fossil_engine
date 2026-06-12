@@ -27,7 +27,7 @@
 #include "ui_element.h"
 #include "ui_types.h"
 
-void (*ui_event_process_internal_func[FSL_UI_EVENT_TYPE_COUNT])(fsl_ui_element *element) =
+static void (*ui_event_process_func_internal[FSL_UI_EVENT_TYPE_COUNT])(fsl_ui_element *element) =
 {
     0,
     &ui_event_enter_process_internal,
@@ -77,7 +77,7 @@ void ui_element_listen_internal(fsl_ui_element *element, v2f64 mouse_pos, v2f64 
     for (; i < FSL_UI_EVENT_TYPE_COUNT; ++i)
     {
         if (element->callback[i].func)
-            ui_event_process_internal_func[i](element);
+            ui_event_process_func_internal[i](element);
     }
 }
 

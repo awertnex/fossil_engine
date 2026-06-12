@@ -42,13 +42,8 @@ void ui_text_align_y_center_internal(u64 end, f32 height);
 void ui_text_align_y_bottom_internal(u64 end, f32 height);
 
 /*!
- *  @brief bake a UI element's parameters to prepare for rendering.
+ *  @internal
  *
- *  @remark called automatically from @ref ui_element_draw() if transform dirty.
- */
-void ui_element_bake_internal(fsl_ui_element *element);
-
-/*!
  *  @brief poll event data and parse element's callbacks (e.g., button pressed).
  *
  *  @remark called automatically from @ref ui_element_draw().

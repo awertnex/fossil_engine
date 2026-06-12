@@ -153,16 +153,19 @@ FSLAPI void fsl_ui_push_panel(i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, u32 
 /*!
  *  @brief draw a texture as a UI element.
  *
- *  @param offset_x DEPRECATED IN v0.10.1-beta.
- *  @param offset_y DEPRECATED IN v0.10.1-beta.
- *  @param align_x DEPRECATED IN v0.10.1-beta.
- *  @param align_y DEPRECATED IN v0.10.1-beta.
+ *  @param offset_x -- DEPRECATED IN v0.10.1-beta --;
+ *  @param offset_y -- DEPRECATED IN v0.10.1-beta --;
+ *  @param align_x -- DEPRECATED IN v0.10.1-beta --;
+ *  @param align_y -- DEPRECATED IN v0.10.1-beta --;
  *
  *  @remark if `size_x` is 0, `texture->size.x` is used, and likewise for `size_y`.
  */
 FSLAPI void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
         f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint);
 
+/*!
+ *  -- DEPRECATED IN v0.10.1-beta --;
+ */
 FSLAPI void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
         i32 size_x, i32 size_y, i32 slice_size, u32 tint);
 

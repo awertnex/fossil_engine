@@ -62,9 +62,11 @@ struct fsl_ui_event
     b8 mouse_click_last;
 }; /* fsl_ui_event */
 
+typedef void (*fsl_ui_callback_func)(fsl_ui_event event, void *data);
+
 struct fsl_ui_callback
 {
-    void (*func)(fsl_ui_event event, void *data);
+    fsl_ui_callback_func func;
     void *data;
 }; /* fsl_ui_callback */
 
@@ -72,6 +74,7 @@ struct fsl_ui_transform
 {
     v2i32 uv_pos;           /* position in texture, in pixels */
     v2i32 uv_size;          /* size in texture, in pixels */
+    i32 slice_size;         /* 9-slice slice diameter, in pixels (optional) */
     v2i32 pos;              /* position on screen, in pixels */
     v2i32 offset;           /* offset on screen from `pos`, in pixels */
     v2i32 offset_scaled;    /* offset on screen from `pos`, in pixels (scales with `scale`) */

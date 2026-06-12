@@ -33,11 +33,12 @@
 
 enum fsl_ui_element_flag
 {
-    FSL_FLAG_UI_ACTIVE,
-    FSL_FLAG_UI_VISIBLE,
-    FSL_FLAG_UI_DIRTY_TRANSFORM,
-    FSL_FLAG_UI_DIRTY_PARENT,
-    FSL_FLAG_UI_DIRTY_CHILDREN
+    FSL_FLAG_UI_INACTIVE =          (1 << 0),
+    FSL_FLAG_UI_VISIBLE =           (1 << 1),
+    FSL_FLAG_UI_9_SLICE =           (1 << 2),
+    FSL_FLAG_UI_DIRTY_TRANSFORM =   (1 << 3),
+    FSL_FLAG_UI_DIRTY_PARENT =      (1 << 4),
+    FSL_FLAG_UI_DIRTY_CHILDREN =    (1 << 5),
 }; /* fsl_ui_element_flag */
 
 typedef enum fsl_ui_element_type
@@ -45,7 +46,6 @@ typedef enum fsl_ui_element_type
     FSL_UI_ELEMENT_TYPE_NONE,
     FSL_UI_ELEMENT_TYPE_CONTAINER,
     FSL_UI_ELEMENT_TYPE_PANEL,
-    FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE,
     FSL_UI_ELEMENT_TYPE_BUTTON,
     FSL_UI_ELEMENT_TYPE_COUNT
 } fsl_ui_element_type;
@@ -130,6 +130,14 @@ FSLAPI void fsl_ui_element_set_scale(fsl_ui_element *element, f32 scale_x, f32 s
 FSLAPI void fsl_ui_element_set_alignment(fsl_ui_element *element, i32 align_x, i32 align_y);
 
 /*!
+ *  @brief enable/disable 9-slice style rendering for `element`.
+ *
+ *  @param is_9_slice enable/disable 9-slice.
+ *  @param slice_size corner slice diameter, middle slices will consume the rest of the area.
+ */
+FSLAPI void fsl_ui_element_set_9_slice(fsl_ui_element *element, b8 is_9_slice, i32 slice_size);
+
+/*!
  *  @brief set an event action callback for `element` (e.g., button press, button hover).
  *
  *  @param element element to enable action callback for.
@@ -140,6 +148,13 @@ FSLAPI void fsl_ui_element_set_alignment(fsl_ui_element *element, i32 align_x, i
 FSLAPI void fsl_ui_element_set_callback(fsl_ui_element *element,
         fsl_ui_event_type event_type,
         void (*func)(fsl_ui_event event, void *data), void *data);
+
+/*!
+ *  @brief bake/refresh a UI element's parameters to prepare for rendering.
+ *
+ *  @remark called automatically from @ref ui_element_draw() if transform dirty.
+ */
+FSLAPI void fsl_ui_element_bake(fsl_ui_element *element);
 
 /*!
  *  @brief draw a UI element on screen.

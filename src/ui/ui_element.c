@@ -17,10 +17,9 @@
 /*!
  *  @file ui_element.c
  *
- *  @brief everything about drawing ui elements.
+ *  @brief initializing, setting up, drawing and attaching/detaching UI elements
+ *  to/from one another.
  */
-
-#include "../memory/memory.h"
 
 #include "ui_element.h"
 #include "ui_types.h"
@@ -80,7 +79,16 @@ void fsl_ui_element_set_alignment(fsl_ui_element *element, i32 align_x, i32 alig
     element->transform.align.y = align_y;
 }
 
-FSLAPI void fsl_ui_element_set_callback(fsl_ui_element *element,
+void fsl_ui_element_set_9_slice(fsl_ui_element *element, b8 is_9_slice, i32 slice_size)
+{
+    if (is_9_slice)
+        element->flag |= FSL_FLAG_UI_9_SLICE;
+    else
+        element->flag &= ~FSL_FLAG_UI_9_SLICE;
+    element->transform.slice_size = slice_size;
+}
+
+void fsl_ui_element_set_callback(fsl_ui_element *element,
         fsl_ui_event_type event_type,
         void (*func)(fsl_ui_event event, void *data), void *data)
 {
