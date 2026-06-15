@@ -3,17 +3,19 @@
 #include "deps/fossil/assets/assets.h"
 #include "deps/fossil/logger/logger.h"
 #include "deps/fossil/math/math.h"
+#include "deps/fossil/memory/memory.h"
 #include "deps/fossil/string/string.h"
 
 #include "deps/fossil/h/dir.h"
 #include "deps/fossil/h/time.h"
 
 #include "chunking/chunking.h"
+#include "gui/gui.h"
 
+#include "h/config_internal.h"
 #include "h/common.h"
 #include "h/diagnostics.h"
 #include "h/dir.h"
-#include "h/gui.h"
 #include "h/main.h"
 #include "h/world.h"
 
@@ -40,7 +42,7 @@ u32 world_init(str *name, u64 seed, hhc_player *p)
 
     world.gravity = FSL_GRAVITY * 3.0f;
 
-    set_player_spawn(p, 0, 0, -86);
+    player_set_spawn(p, -7, 34, -2);
     player_spawn(p, TRUE);
 
     core.flag.hud = TRUE;
@@ -61,7 +63,7 @@ u32 world_dir_init(const str *world_name)
     {
         LOGERROR(FSL_ERR_POINTER_NULL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                fsl_logger_stringf("%s\n", "World Name Cannot Be Empty"));
+                "World Name Cannot Be Empty\n");
         return *GAME_ERR;
     }
 
@@ -100,7 +102,7 @@ u32 world_dir_init(const str *world_name)
     fsl_make_dir(string);
     snprintf(world.path, FSL_PATH_CAP, "%s", string);
 
-    LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+    LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
             fsl_logger_stringf("Creating World Directories '%s'..\n", world.path));
 
     for (i = 0; i < DIR_WORLD_COUNT; ++i)
@@ -111,8 +113,9 @@ u32 world_dir_init(const str *world_name)
             return *GAME_ERR;
     }
 
-    LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+    LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
             fsl_logger_stringf("World Created '%s'\n", world_name));
+
     *GAME_ERR = FSL_ERR_SUCCESS;
     return *GAME_ERR;
 }
@@ -127,7 +130,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
     {
         LOGERROR(FSL_ERR_POINTER_NULL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                fsl_logger_stringf("%s\n", "Failed to Load World, World Name Empty"));
+                "Failed to Load World, World Name Empty");
         return *GAME_ERR;
     }
 
@@ -143,7 +146,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
     {
         LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                fsl_logger_stringf("Failed to Load World '%s', '"GAME_DIR_NAME_WORLDS"' Directory Not Found\n", world_name));
+                fsl_logger_stringf("Failed to Load World '%s', Directory '"GAME_DIR_NAME_WORLDS"' Not Found\n", world_name));
         return *GAME_ERR;
     }
 
@@ -166,7 +169,8 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
 
     /* ---- world seed ------------------------------------------------------ */
 
-    snprintf(string[0], FSL_PATH_CAP, GAME_DIR_NAME_WORLDS"%s/"GAME_FILE_NAME_WORLD_SEED, world_name);
+    snprintf(string[0], FSL_PATH_CAP, GAME_DIR_NAME_WORLDS"%s/"GAME_FILE_NAME_WORLD_METADATA,
+            world_name);
     if (fsl_is_file_exists(string[0], FALSE) == FSL_ERR_SUCCESS)
     {
         file_len = fsl_get_file_contents(string[0], (void*)&file_contents, TRUE);
@@ -190,15 +194,13 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
 
     /* ---- TODO: load the rest of world metadata --------------------------- */
 
-    world->tick_start = 7000;
+    world->tick_start = 19000;
     world->days = 0;
     world->drag.x = WORLD_DRAG_AIR;
     world->drag.y = WORLD_DRAG_AIR;
     world->drag.z = WORLD_DRAG_AIR;
 
     /* ---- other stuff ----------------------------------------------------- */
-
-    core.debug.chunk_gizmo = TRUE;
 
     LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
             fsl_logger_stringf("World Loaded '%s'\n", world_name));

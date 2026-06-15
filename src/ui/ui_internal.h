@@ -50,11 +50,11 @@ void ui_text_align_y_bottom_internal(u64 end, f32 height);
  */
 void ui_element_listen_internal(fsl_ui_element *element, v2f64 mouse_pos, v2f64 mouse_delta);
 
-void ui_event_enter_process_internal(fsl_ui_element *element);
-void ui_event_hover_process_internal(fsl_ui_element *element);
-void ui_event_leave_process_internal(fsl_ui_element *element);
-void ui_event_click_process_internal(fsl_ui_element *element);
-void ui_event_hold_process_internal(fsl_ui_element *element);
-void ui_event_release_process_internal(fsl_ui_element *element);
+void ui_event_enter_process_internal(fsl_ui_element *element, fsl_ui_callback *callback);
+void ui_event_hover_process_internal(fsl_ui_element *element, fsl_ui_callback *callback);
+void ui_event_leave_process_internal(fsl_ui_element *element, fsl_ui_callback *callback);
+void ui_event_click_process_internal(fsl_ui_element *element, fsl_ui_callback *callback);
+void ui_event_hold_process_internal(fsl_ui_element *element, fsl_ui_callback *callback);
+void ui_event_release_process_internal(fsl_ui_element *element, fsl_ui_callback *callback);
 
 #endif /* FSL_UI_INTERNAL_H */

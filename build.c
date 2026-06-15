@@ -1,7 +1,7 @@
 #include "src/common/engine_info.h"
 
 #include "src/external/buildtool/buildtool.h"
-#include "src/h/buildtool_config.h"
+#include "src/buildtool_config.h"
 
 #define DIR_SRC "src/"
 #define DIR_DEPS "deps/"

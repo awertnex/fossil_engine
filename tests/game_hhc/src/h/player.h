@@ -8,10 +8,9 @@
 #include "deps/fossil/physics/physics_types.h"
 
 #include "raycast.h"
+#include "container.h"
 
 #define PLAYER_REACH_DISTANCE_MAX   5.0f
-#define PLAYER_HOTBAR_SLOTS_MAX     10
-#define PLAYER_INVENTORY_SLOTS_MAX  (PLAYER_HOTBAR_SLOTS_MAX * 4)
 
 #define PLAYER_EYE_HEIGHT           1.55f
 #define PLAYER_JUMP_HEIGHT          1.5f
@@ -26,6 +25,24 @@
 #define PLAYER_FRICTION_FLYING      4.0f
 #define PLAYER_FRICTION_FLYING_V    13.0f
 #define PLAYER_COLLISION_DAMAGE_THRESHOLD 15.0f
+#define PLAYER_DEATH_STRING_CAP     128
+
+/* ---- strings: death ------------------------------------------------------ */
+
+#define DEATH_STRING_COLLISION_WALL_0           "died by headbutting a wall"
+#define DEATH_STRING_COLLISION_WALL_1           "rammed a wall at high speed"
+#define DEATH_STRING_COLLISION_WALL_2           "splat on a wall"
+#define DEATH_STRING_COLLISION_WALL_COUNT       3
+
+#define DEATH_STRING_COLLISION_FLOOR_0          "jumped off a cliff"
+#define DEATH_STRING_COLLISION_FLOOR_1          "fell to their death"
+#define DEATH_STRING_COLLISION_FLOOR_2          "splat on the ground"
+#define DEATH_STRING_COLLISION_FLOOR_COUNT      3
+
+#define DEATH_STRING_COLLISION_CEILING_0        "cracked their skull at a ceiling"
+#define DEATH_STRING_COLLISION_CEILING_1        "flew into a ceiling"
+#define DEATH_STRING_COLLISION_CEILING_2        "splat on a ceiling"
+#define DEATH_STRING_COLLISION_CEILING_COUNT    3
 
 enum player_flag
 {
@@ -54,7 +71,7 @@ enum player_flag
     FLAG_PLAYER_OVERFLOW_PZ =       0x00008000
 }; /* player_flag */
 
-enum player_camera_mode
+typedef enum hhc_player_camera_mode
 {
     PLAYER_CAMERA_MODE_1ST_PERSON,
     PLAYER_CAMERA_MODE_3RD_PERSON,
@@ -62,7 +79,16 @@ enum player_camera_mode
     PLAYER_CAMERA_MODE_STALKER,
     PLAYER_CAMERA_MODE_SPECTATOR,
     PLAYER_CAMERA_MODE_COUNT
-}; /* player_camera_mode */
+} hhc_player_camera_mode;
+
+typedef enum hhc_player_death_reason
+{
+    PLAYER_DEATH_REASON_NONE,
+    PLAYER_DEATH_REASON_COLLISION_WALL,
+    PLAYER_DEATH_REASON_COLLISION_FLOOR,
+    PLAYER_DEATH_REASON_COLLISION_CEILING,
+    PLAYER_DEATH_REASON_COUNT
+} hhc_player_death_reason;
 
 enum player_menu_state
 {
@@ -110,7 +136,7 @@ typedef struct hhc_player
     fsl_camera camera_ui;
 
     f32 camera_distance;            /* for camera collision detection */
-    u8 camera_mode;                 /* enum @ref player_camera_mode */
+    hhc_player_camera_mode camera_mode;
 
     /*!
      *  @brief player at world edge, enum @ref player_flag.
@@ -130,12 +156,23 @@ typedef struct hhc_player
      */
     i32 hotbar_slot_selected;
 
-    u32 hotbar_slots[PLAYER_HOTBAR_SLOTS_MAX];
-    u32 inventory_slots[PLAYER_INVENTORY_SLOTS_MAX];
+    hhc_container_slot hotbar_slots[CONTAINER_HOTBAR_SLOTS_MAX];
+    hhc_container_slot inventory_slots[CONTAINER_INVENTORY_SLOTS_MAX];
 
     fsl_bounding_box bbox;
-    u32 death; /* enum @ref player_death_reason */
+    hhc_player_death_reason death;
 } hhc_player;
+
+/*!
+ *  @brief look-up table for @ref str_death_<x> buffer sizes.
+ *
+ *  @remark read-only, initialized internally in @ref common.c.
+ */
+extern u32 DEATH_STRINGS_MAX[PLAYER_DEATH_REASON_COUNT];
+
+extern str str_death_collision_wall[DEATH_STRING_COLLISION_WALL_COUNT][PLAYER_DEATH_STRING_CAP];
+extern str str_death_collision_floor[DEATH_STRING_COLLISION_FLOOR_COUNT][PLAYER_DEATH_STRING_CAP];
+extern str str_death_collision_ceiling[DEATH_STRING_COLLISION_CEILING_COUNT][PLAYER_DEATH_STRING_CAP];
 
 u32 player_init(hhc_player *p, const str *name);
 
@@ -154,6 +191,7 @@ u32 player_init(hhc_player *p, const str *name);
  */
 void player_update(hhc_player *p, f64 dt);
 
+void player_hotbar_selected_set(hhc_player *p, u32 index);
 void player_collision_update(hhc_player *p, f64 dt);
 void player_bounding_box_update(hhc_player *p);
 
@@ -179,13 +217,13 @@ fsl_bounding_box make_collision_capsule(fsl_bounding_box b, v3i32 ch, v3f32 velo
 void player_camera_movement_update(hhc_player *p, v2f64 mouse_delta, b8 use_mouse);
 
 void player_target_update(hhc_player *p);
-void set_player_pos(hhc_player *p, f64 x, f64 y, f64 z);
-void set_player_block(hhc_player *p, i64 x, i64 y, i64 z);
+void player_set_pos(hhc_player *p, f64 x, f64 y, f64 z);
+void player_set_block(hhc_player *p, i64 x, i64 y, i64 z);
 
 /*!
  *  @brief set player spawn point.
  */
-void set_player_spawn(hhc_player *p, i64 x, i64 y, i64 z);
+void player_set_spawn(hhc_player *p, i64 x, i64 y, i64 z);
 
 /*!
  *  @brief re-spawn player.

@@ -5,10 +5,8 @@
 
 #define DIR_MAX 128
 
-enum directory_index
+enum dir_root_index
 {
-    /* ---- root directories ------------------------------------------------ */
-
     DIR_ASSETS,
     DIR_AUDIO,
     DIR_FONTS,
@@ -26,15 +24,16 @@ enum directory_index
     DIR_SCREENSHOTS,
     DIR_TEXT,
     DIR_WORLDS,
-    DIR_ROOT_COUNT,
+    DIR_ROOT_COUNT
+}; /* dir_root_index */
 
-    /* ---- world directories ----------------------------------------------- */
-
-    DIR_WORLD_CHUNKS = 0,
+enum dir_world_index
+{
+    DIR_WORLD_CHUNKS,
     DIR_WORLD_ENTITIES,
     DIR_WORLD_PLAYER,
     DIR_WORLD_COUNT
-}; /* directory_index */
+}; /* dir_world_index */
 
 extern str DIR_ROOT[DIR_ROOT_COUNT][FSL_ID_CAP];
 extern str DIR_WORLD[DIR_WORLD_COUNT][FSL_ID_CAP];

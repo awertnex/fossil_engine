@@ -32,14 +32,6 @@
 #define FSL_KEYBOARD_KEYS_MAX 120
 #define FSL_DOUBLE_PRESS_TIME_INTERVAL 0.5
 
-/*!
- *  @brief -- DEPRECATED IN v0.10.1-dev --; input layer, only key binds attached to a specific input context are active when the context is.
- *
- *  @remark default input context is 0.
- *  @remark key binds not attached to an input context will always work (will be attached to 0).
- */
-typedef i32 fsl_input_context;
-
 typedef struct fsl_key_bind fsl_key_bind;
 
 typedef enum fsl_mod_key
@@ -68,21 +60,12 @@ struct fsl_key_bind
  *  @param ctrl left or right ctrl.
  *  @param alt left or right alt.
  *  @param super left or right super.
- *  @param context -- DEPRECATED IN v0.10.1-dev --; input context to attach key bind to.
  *
  *
  *  @return `fsl_key_bind{0}` on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI fsl_key_bind fsl_key_bind_init(fsl_keyboard_key key,
-        fsl_mod_key shift, fsl_mod_key ctrl, fsl_mod_key alt, fsl_mod_key super,
-        fsl_input_context context);
-
-/*!
- *  @brief attach a key bind to an input context.
- *
- *  -- DEPRECATED IN v0.10.1-dev --;
- */
-FSLAPI void fsl_key_bind_attach(fsl_key_bind *bind, fsl_input_context context);
+        fsl_mod_key shift, fsl_mod_key ctrl, fsl_mod_key alt, fsl_mod_key super);
 
 FSLAPI b8 fsl_is_mouse_press(fsl_key_bind button);
 FSLAPI b8 fsl_is_mouse_hold(fsl_key_bind button);

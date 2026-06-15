@@ -136,38 +136,19 @@ FSLAPI u32 fsl_ui_init(void);
 /*!
  *  @brief start ui rendering batch.
  *
- *  @param nine_slice DEPRECATED IN v0.10.1-dev --; use a nine_slice shader
- *  (ui elements with separate edge and corner slices of a texture).
- *
  *  @param clear clear the currently bound framebuffer before rendering.
  *
  *  @remark disable @ref GL_DEPTH_TEST, @ref fsl_ui_stop() re-enables it.
  */
-FSLAPI void fsl_ui_start(b8 nine_slice, b8 clear);
-
-/*!
- *  @brief push default engine panel onto internal panel buffer.
- */
-FSLAPI void fsl_ui_push_panel(i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, u32 tint);
+FSLAPI void fsl_ui_start(b8 clear);
 
 /*!
  *  @brief draw a texture as a UI element.
  *
- *  @param offset_x -- DEPRECATED IN v0.10.1-beta --;
- *  @param offset_y -- DEPRECATED IN v0.10.1-beta --;
- *  @param align_x -- DEPRECATED IN v0.10.1-beta --;
- *  @param align_y -- DEPRECATED IN v0.10.1-beta --;
- *
  *  @remark if `size_x` is 0, `texture->size.x` is used, and likewise for `size_y`.
  */
-FSLAPI void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
-        f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint);
-
-/*!
- *  -- DEPRECATED IN v0.10.1-beta --;
- */
-FSLAPI void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
-        i32 size_x, i32 size_y, i32 slice_size, u32 tint);
+FSLAPI void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y,
+        i32 size_x, i32 size_y, u32 tint);
 
 /*!
  *  @remark enable @ref GL_DEPTH_TEST.
@@ -179,7 +160,6 @@ FSLAPI void fsl_ui_free(void);
 /*!
  *  @brief make a 9-slice panel.
  */
-FSLAPI fsl_panel_nine_slice fsl_get_nine_slice_internal(fsl_texture *texture,
-        i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, i32 slice_size);
+fsl_panel_nine_slice fsl_get_nine_slice_internal(fsl_ui_element *element);
 
 #endif /* FSL_UI_H */

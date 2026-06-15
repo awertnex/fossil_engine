@@ -26,8 +26,8 @@
 #ifndef FSL_BUILDTOOL_CONFIG_H
 #define FSL_BUILDTOOL_CONFIG_H
 
-#include "../common/api.h"
-#include "../external/buildtool/buildtool.h"
+#include "common/api.h"
+#include "external/buildtool/buildtool.h"
 
 #if defined(FSL_PLATFORM_WIN)
 

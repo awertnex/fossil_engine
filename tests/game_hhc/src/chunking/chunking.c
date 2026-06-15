@@ -6,7 +6,10 @@
 
 #include "deps/fossil/h/dir.h"
 
+#include "../settings/settings.h"
+
 #include "../h/assets.h"
+#include "../h/config_internal.h"
 #include "../h/common.h"
 #include "../h/diagnostics.h"
 #include "../h/main.h"
@@ -34,7 +37,6 @@ static hhc_chunk_buffer chunk_buf = {0};
 hhc_chunk_table chunk_tab = {0};
 hhc_chunk_order chunk_order = {0};
 hhc_chunk_scheduler chunk_sched[CHUNK_SCHEDULERS_MAX] = {0};
-hhc_chunk_draw chunk_draw[CHUNK_SCHEDULERS_MAX] = {0};
 
 /* ---- section: implementation --------------------------------------------- */
 
@@ -1013,8 +1015,10 @@ chunk_work_cost chunk_load_internal(hhc_chunk *ch, chunk_scheduler_budget budget
             "%s"GAME_DIR_WORLD_NAME_CHUNKS FORMAT_FILE_NAME_HHCC,
             world.path, ch->pos.x, ch->pos.y, ch->pos.z);
 
+#if MODE_INTERNAL_IMPORT_CHUNKS
     if (fsl_is_file_exists(path, FALSE) == FSL_ERR_SUCCESS)
         cost += chunk_import_internal(path, ch);
+#endif /* MODE_INTERNAL_IMPORT_CHUNKS */
     cost += chunk_generate_internal(ch, budget);
     return cost;
 }
@@ -1176,20 +1180,20 @@ chunk_work_cost chunk_mesh_update_internal(hhc_chunk *ch)
         ch->flag |= FLAG_CHUNK_VISIBLE;
         ch->color = CHUNK_GIZMO_COLOR_VISIBLE;
 
-        if (!ch->mesh.initialized)
+        if (!ch->mesh_deprecated.initialized)
         {
-            ch->mesh.initialized = TRUE;
+            ch->mesh_deprecated.initialized = TRUE;
 
             chunk_pos.x = (f32)ch->pos.x * CHUNK_DIAMETER;
             chunk_pos.y = (f32)ch->pos.y * CHUNK_DIAMETER;
             chunk_pos.z = (f32)ch->pos.z * CHUNK_DIAMETER;
 
-            glGenVertexArrays(1, &ch->mesh.vao);
-            glGenBuffers(1, &ch->mesh.vbo);
-            glGenBuffers(1, &ch->mesh.vbo_transform);
+            glGenVertexArrays(1, &ch->mesh_deprecated.vao);
+            glGenBuffers(1, &ch->mesh_deprecated.vbo);
+            glGenBuffers(1, &ch->mesh_deprecated.vbo_transform);
 
-            glBindVertexArray(ch->mesh.vao);
-            glBindBuffer(GL_ARRAY_BUFFER, ch->mesh.vbo);
+            glBindVertexArray(ch->mesh_deprecated.vao);
+            glBindBuffer(GL_ARRAY_BUFFER, ch->mesh_deprecated.vbo);
             glBufferData(GL_ARRAY_BUFFER, (cursor - buf) * sizeof(u64), buf, GL_DYNAMIC_DRAW);
 
             glEnableVertexAttribArray(0);
@@ -1198,7 +1202,7 @@ chunk_work_cost chunk_mesh_update_internal(hhc_chunk *ch)
             glEnableVertexAttribArray(1);
             glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, sizeof(u64), (void*)sizeof(u32));
 
-            glBindBuffer(GL_ARRAY_BUFFER, ch->mesh.vbo_transform);
+            glBindBuffer(GL_ARRAY_BUFFER, ch->mesh_deprecated.vbo_transform);
             glBufferData(GL_ARRAY_BUFFER, sizeof(v3f32), &chunk_pos, GL_STATIC_DRAW);
 
             glEnableVertexAttribArray(2);
@@ -1210,24 +1214,24 @@ chunk_work_cost chunk_mesh_update_internal(hhc_chunk *ch)
         }
         else
         {
-            glBindBuffer(GL_ARRAY_BUFFER, ch->mesh.vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, ch->mesh_deprecated.vbo);
             glBufferData(GL_ARRAY_BUFFER, (cursor - buf) * sizeof(u64), buf, GL_DYNAMIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
         }
 
-        ch->mesh.vbo_len = cursor - buf;
+        ch->mesh_deprecated.vbo_len = cursor - buf;
     }
     else
     {
         ch->flag &= ~FLAG_CHUNK_VISIBLE;
         ch->color = CHUNK_GIZMO_COLOR_LOADED;
 
-        if (ch->mesh.initialized)
+        if (ch->mesh_deprecated.initialized)
         {
-            ch->mesh.initialized = FALSE;
-            glDeleteBuffers(1, &ch->mesh.vbo_transform);
-            glDeleteBuffers(1, &ch->mesh.vbo);
-            glDeleteVertexArrays(1, &ch->mesh.vao);
+            ch->mesh_deprecated.initialized = FALSE;
+            glDeleteBuffers(1, &ch->mesh_deprecated.vbo_transform);
+            glDeleteBuffers(1, &ch->mesh_deprecated.vbo);
+            glDeleteVertexArrays(1, &ch->mesh_deprecated.vao);
         }
     }
 
@@ -1342,12 +1346,12 @@ void chunk_buf_push_internal(u32 index, v3i32 player_chunk_delta)
     {
         if (!(ch->flag & FLAG_CHUNK_LOADED))
         {
-            if (ch->mesh.initialized)
+            if (ch->mesh_deprecated.initialized)
             {
-                ch->mesh.initialized = FALSE;
-                glDeleteBuffers(1, &ch->mesh.vbo_transform);
-                glDeleteBuffers(1, &ch->mesh.vbo);
-                glDeleteVertexArrays(1, &ch->mesh.vao);
+                ch->mesh_deprecated.initialized = FALSE;
+                glDeleteBuffers(1, &ch->mesh_deprecated.vbo_transform);
+                glDeleteBuffers(1, &ch->mesh_deprecated.vbo);
+                glDeleteVertexArrays(1, &ch->mesh_deprecated.vao);
             }
             *ch = nochunk;
 
@@ -1394,19 +1398,19 @@ void chunk_buf_push_internal(u32 index, v3i32 player_chunk_delta)
 
     LOGERROR(FSL_ERR_BUFFER_FULL,
             FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-            fsl_logger_stringf("'%s'\n", "`chunk_buf` Full"));
+            "Failed to Push to `chunk_buf`, Buffer Full");
 }
 
 void chunk_buf_pop_internal(hhc_chunk *ch)
 {
     u32 index_popped = ch - chunk_buf.p;
 
-    if (ch->mesh.initialized)
+    if (ch->mesh_deprecated.initialized)
     {
-        ch->mesh.initialized = FALSE;
-        glDeleteBuffers(1, &ch->mesh.vbo_transform);
-        glDeleteBuffers(1, &ch->mesh.vbo);
-        glDeleteVertexArrays(1, &ch->mesh.vao);
+        ch->mesh_deprecated.initialized = FALSE;
+        glDeleteBuffers(1, &ch->mesh_deprecated.vbo_transform);
+        glDeleteBuffers(1, &ch->mesh_deprecated.vbo);
+        glDeleteVertexArrays(1, &ch->mesh_deprecated.vao);
     }
 
     ch->flag = 0;
@@ -1505,8 +1509,10 @@ pop:
 
             if (!(ch->flag & FLAG_CHUNK_DIRTY))
             {
+#if MODE_INTERNAL_EXPORT_CHUNKS
                 if (!(ch->flag & FLAG_CHUNK_IMPORTED))
                     chunk_export_internal(ch);
+#endif /* MODE_INTERNAL_EXPORT_CHUNKS */
 
                 ch->flag &= ~FLAG_CHUNK_IMPORTED;
                 ch->sched_id = 0;
@@ -1528,14 +1534,6 @@ pop:
     }
 
     sched->cursor_pop = pop;
-}
-
-void chunk_draw_update_internal(hhc_chunk_draw *draw)
-{
-    hhc_chunk **start = NULL;
-    u32 draw_len = draw->len;
-    u32 scan = draw->cursor_scan;
-    u32 i = 0;
 }
 
 u32 *get_block_resolved(hhc_chunk *ch, i32 x, i32 y, i32 z)

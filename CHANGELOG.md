@@ -5,8 +5,43 @@
    "https://github.com/awertnex/heaven-hell_continuum.git" since this engine
    originated from the making of that game and later was moved here at engine
    version v0.3.3-beta (2026 01 24), which makes v0.3.4-beta the first version
-   of the engine as standalone in this repo
+   of the engine as standalone in this repo.
 
+## v0.12.0-beta (2026 06 15)
+
+#### additions
+- added 'button_pressed' texture.
+
+#### changes
+- updated test `game_hhc` to a later version of 'Heaven-Hell Continuum' in
+  mid-development.
+- move header 'buildtool_config.h' to the root of engine source.
+
+#### fixes
+- fixed weird UI 9-slice dimensions.
+- fixed UI panel texture not showing up as transparent (the texture file
+  itself was fully opaque).
+- fixed UI element not regestering mouse RELEASE event.
+
+#### deletions
+- removed deprecated shader `ui_9_slice`.
+- removed function `fsl_ui_push_panel()` since it was never completed and never
+  used.
+- removed deprecated parameters `offset_x`, `offset_y`, `align_x` and `align_y`
+  in function `fsl_ui_draw()`.
+- removed deprecated parameter `nine_slice` in function `fsl_ui_start()`.
+- removed deprecated function `fsl_ui_draw_9_slice()`.
+- removed deprecated functions `fsl_input_context_set()` and
+  `fsl_key_bind_attach()`.
+- removed deprecated parameter `context` in function `fsl_key_bind_init()`.
+
+#### known bugs and flaws
+- the 'obj' loader possibly has a bug due to hash-table collisions:
+    - sometimes faces disappear when ordered in specific ways in the obj file.
+- the 'obj' loader does not handle concave faces smartly, just loads them as
+  they are.
+
+- - -
 ## v0.11.0-beta (2026 06 12)
 
 #### changes

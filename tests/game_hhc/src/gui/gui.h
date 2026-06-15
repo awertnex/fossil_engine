@@ -2,6 +2,8 @@
 #define HHC_GUI_H
 
 #include "deps/fossil/common/types.h"
+#include "deps/fossil/math/vector.h"
+#include "deps/fossil/ui/ui_element.h"
 
 #define show_cursor     glfwSetInputMode(render->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL)
 #define disable_cursor  glfwSetInputMode(render->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
@@ -12,9 +14,19 @@
 #define COL_TEXT_DEFAULT    0xbcbcbcff
 #define COL_TEXT_HOVER      0xa4ed74ff
 
+enum ui_element_index
+{
+    UI_ELEMENT_CROSSHAIR,
+    UI_ELEMENT_HOTBAR,
+    UI_ELEMENT_HOTBAR_SELECTED,
+    UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL,
+    UI_ELEMENT_COUNT
+}; /* ui_element_index */
+
 enum menu_index
 {
-    MENU_TITLE = 1,
+    MENU_NONE,
+    MENU_TITLE,
     MENU_SINGLEPLAYER,
     MENU_MULTIPLAYER,
     MENU_SETTINGS,
@@ -22,7 +34,6 @@ enum menu_index
     MENU_SETTINGS_VIDEO,
     MENU_GAME_PAUSE,
     MENU_DEATH
-
 }; /* menu_index */
 
 enum button_index
@@ -72,12 +83,7 @@ enum button_index
     BTN_ITEM_IN_9,
     BTN_ITEM_OUT_1,
     BTN_ITEM_OUT_2,
-    BTN_ITEM_OUT_3,
-
-    /* ---- super debugger (SDB) -------------------------------------------- */
-
-    BTN_SDB_ADD,
-    BTN_SDB_SUB
+    BTN_ITEM_OUT_3
 }; /* button_index */
 
 extern u16 menu_index_cur;
@@ -85,35 +91,28 @@ extern u16 menu_layer[5];
 extern u8 state_menu_depth;
 extern b8 is_menu_ready;
 extern u8 buttons[BTN_COUNT];
+extern fsl_ui_element ui_element[UI_ELEMENT_COUNT];
 
 /*!
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
-u32 gui_init(void);
+u32 gui_init(v2i32 render_size);
 
+void gui_update(v2i32 render_size);
 void gui_free(void);
 
 /*!
  *  @brief bind correct resources to start drawing UI items.
  */
-void gui_start_ui_items(void);
+void gui_start_ui_items(v2i32 render_size);
 
 /*!
  *  @brief draw UI item (e.g., hotbar items, container items).
  */
-void gui_draw_ui_item(f32 pos_x, f32 pos_y);
+void gui_draw_ui_item(u32 item_id, f32 pos_x, f32 pos_y, v2i32 render_size);
 
 #if 0 /* TODO: undef */
 void update_menus(v2f32 render_size);
-void draw_hud();
-
-float get_str_width(Font font, const str *str, f32 font_size, f32 spacing);
-void draw_texture(Texture2D texture, Rectangle source,
-        v2i16 pos, v2i16 scl, u8 align_x, u8 align_y, Color tint);
-void draw_texture_tiled(Texture2D texture, Rectangle source, Rectangle dest,
-        v2i16 pos, v2i16 scl, Color tint);
-void draw_texture_simple(Texture2D texture, Rectangle source,
-        v2i16 pos, v2i16 scl, Color tint);
 void draw_button(Texture2D texture, Rectangle button,
         v2i16 pos, u8 align_x, u8 align_y, u8 btn_state,
         void (*func)(), const str *str);

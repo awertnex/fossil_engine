@@ -27,15 +27,16 @@
 #include "ui_element.h"
 #include "ui_types.h"
 
-static void (*ui_event_process_func_internal[FSL_UI_EVENT_TYPE_COUNT])(fsl_ui_element *element) =
+static void (*ui_event_process_func_internal[FSL_UI_EVENT_TYPE_COUNT])(fsl_ui_element *element,
+        fsl_ui_callback *callback) =
 {
     0,
-    &ui_event_enter_process_internal,
-    &ui_event_hover_process_internal,
-    &ui_event_leave_process_internal,
-    &ui_event_click_process_internal,
-    &ui_event_hold_process_internal,
-    &ui_event_release_process_internal
+    ui_event_enter_process_internal,
+    ui_event_hover_process_internal,
+    ui_event_leave_process_internal,
+    ui_event_click_process_internal,
+    ui_event_hold_process_internal,
+    ui_event_release_process_internal
 };
 
 void ui_element_listen_internal(fsl_ui_element *element, v2f64 mouse_pos, v2f64 mouse_delta)
@@ -67,9 +68,9 @@ void ui_element_listen_internal(fsl_ui_element *element, v2f64 mouse_pos, v2f64 
         element->event.hover = FALSE;
 
     if (element->event.hover &&
-            (fsl_is_mouse_press(bind_click_left) ||
-             fsl_is_mouse_press(bind_click_right) ||
-             fsl_is_mouse_press(bind_click_middle)))
+            (fsl_is_mouse_press(bind_click_left) || fsl_is_mouse_hold(bind_click_left) ||
+             fsl_is_mouse_press(bind_click_right) || fsl_is_mouse_hold(bind_click_right) ||
+             fsl_is_mouse_press(bind_click_middle) || fsl_is_mouse_hold(bind_click_middle)))
         element->event.mouse_click = TRUE;
     else
         element->event.mouse_click = FALSE;
@@ -77,38 +78,35 @@ void ui_element_listen_internal(fsl_ui_element *element, v2f64 mouse_pos, v2f64 
     for (; i < FSL_UI_EVENT_TYPE_COUNT; ++i)
     {
         if (element->callback[i].func)
-            ui_event_process_func_internal[i](element);
+            ui_event_process_func_internal[i](element, &element->callback[i]);
     }
 }
 
-void ui_event_enter_process_internal(fsl_ui_element *element)
+void ui_event_enter_process_internal(fsl_ui_element *element, fsl_ui_callback *callback)
 {
     if (element->event.hover && !element->event.hover_last)
     {
-        element->callback[FSL_UI_EVENT_TYPE_ENTER].func(element->event,
-                element->callback[FSL_UI_EVENT_TYPE_ENTER].data);
+        callback->func(element->event, callback->data);
     }
 }
 
-void ui_event_hover_process_internal(fsl_ui_element *element)
+void ui_event_hover_process_internal(fsl_ui_element *element, fsl_ui_callback *callback)
 {
     if (element->event.hover && element->event.hover_last)
     {
-        element->callback[FSL_UI_EVENT_TYPE_HOVER].func(element->event,
-                element->callback[FSL_UI_EVENT_TYPE_HOVER].data);
+        callback->func(element->event, callback->data);
     }
 }
 
-void ui_event_leave_process_internal(fsl_ui_element *element)
+void ui_event_leave_process_internal(fsl_ui_element *element, fsl_ui_callback *callback)
 {
     if (!element->event.hover && element->event.hover_last)
     {
-        element->callback[FSL_UI_EVENT_TYPE_LEAVE].func(element->event,
-                element->callback[FSL_UI_EVENT_TYPE_LEAVE].data);
+        callback->func(element->event, callback->data);
     }
 }
 
-void ui_event_click_process_internal(fsl_ui_element *element)
+void ui_event_click_process_internal(fsl_ui_element *element, fsl_ui_callback *callback)
 {
     if (element->event.hover &&
             element->event.mouse_click && !element->event.mouse_click_last)
@@ -120,27 +118,24 @@ void ui_event_click_process_internal(fsl_ui_element *element)
         element->event.mouse_click_pos_diff.y =
             element->event.mouse_pos.y - element->transform.pos_baked.y;
 
-        element->callback[FSL_UI_EVENT_TYPE_CLICK].func(element->event,
-                element->callback[FSL_UI_EVENT_TYPE_CLICK].data);
+        callback->func(element->event, callback->data);
     }
 }
 
-void ui_event_hold_process_internal(fsl_ui_element *element)
+void ui_event_hold_process_internal(fsl_ui_element *element, fsl_ui_callback *callback)
 {
     if (element->event.hover &&
             element->event.mouse_click && element->event.mouse_click_last)
     {
-        element->callback[FSL_UI_EVENT_TYPE_HOLD].func(element->event,
-                element->callback[FSL_UI_EVENT_TYPE_HOLD].data);
+        callback->func(element->event, callback->data);
     }
 }
 
-void ui_event_release_process_internal(fsl_ui_element *element)
+void ui_event_release_process_internal(fsl_ui_element *element, fsl_ui_callback *callback)
 {
     if (element->event.hover &&
             !element->event.mouse_click && element->event.mouse_click_last)
     {
-        element->callback[FSL_UI_EVENT_TYPE_RELEASE].func(element->event,
-                element->callback[FSL_UI_EVENT_TYPE_RELEASE].data);
+        callback->func(element->event, callback->data);
     }
 }

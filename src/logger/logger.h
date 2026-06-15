@@ -24,6 +24,7 @@
 #define FSL_LOGGER_H
 
 #include "../common/api.h"
+#include "../common/diagnostics.h"
 #include "../common/limits.h"
 #include "../common/types.h"
 #include "../memory/memory_types.h"

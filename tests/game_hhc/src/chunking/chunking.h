@@ -149,7 +149,13 @@ typedef struct hhc_chunk
      */
     chunk_scheduler_id sched_id;
 
-    hhc_chunk_mesh mesh;
+    hhc_chunk_mesh mesh_deprecated;
+
+    /*!
+     *  @brief allocated by, or pushed onto, a @ref chunk_draw, if needed.
+     */
+    hhc_chunk_mesh *mesh;
+
     u32 block[CHUNK_DIAMETER][CHUNK_DIAMETER][CHUNK_DIAMETER];
 } hhc_chunk;
 
