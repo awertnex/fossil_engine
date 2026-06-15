@@ -28,7 +28,6 @@
 
 void fsl_ui_element_set_texture(fsl_ui_element *element, fsl_texture *texture)
 {
-    element->flag |= FSL_FLAG_UI_VISIBLE;
     element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
     element->texture = texture;
 }

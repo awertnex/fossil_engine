@@ -174,18 +174,6 @@ u32 assets_init(void)
     /* ---- textures -------------------------------------------------------- */
 
     if (
-            fsl_texture_init(&texture_p[TEXTURE_CROSSHAIR],
-                "Crosshair", "crosshair", "crosshair.png", GAME_DIR_NAME_GUI,
-                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS ||
-
-            fsl_texture_init(&texture_p[TEXTURE_ITEM_BAR],
-                "Item Bar", "item_bar", "item_bar.png", GAME_DIR_NAME_GUI,
-                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS ||
-
-            fsl_texture_init(&texture_p[TEXTURE_ITEM_BAR_SELECTED],
-                "Item Bar Selected", "item_bar_selected", "item_bar_selected.png", GAME_DIR_NAME_GUI,
-                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS ||
-
             fsl_texture_init(&texture_p[TEXTURE_SKYBOX_VAL],
                 "Skybox Val", "skybox_val", "skybox_val.png", GAME_DIR_NAME_ENV,
                 GL_RED, GL_NEAREST, FSL_COLOR_CHANNELS_GRAY, FALSE, FALSE) != FSL_ERR_SUCCESS ||
@@ -204,6 +192,22 @@ u32 assets_init(void)
 
             fsl_texture_init(&texture_p[TEXTURE_MOON],
                 "Moon", "moon", "moon.png", GAME_DIR_NAME_ENV,
+                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS ||
+
+            fsl_texture_init(&texture_p[TEXTURE_BUTTON],
+                "Button", "button", "button.png", GAME_DIR_NAME_GUI,
+                GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS ||
+
+            fsl_texture_init(&texture_p[TEXTURE_CROSSHAIR],
+                "Crosshair", "crosshair", "crosshair.png", GAME_DIR_NAME_GUI,
+                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS ||
+
+            fsl_texture_init(&texture_p[TEXTURE_HOTBAR],
+                "Hotbar", "hotbar", "hotbar.png", GAME_DIR_NAME_GUI,
+                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS ||
+
+            fsl_texture_init(&texture_p[TEXTURE_CONTAINER_INVENTORY_SURVIVAL],
+                "Container Inventory Survival", "container_inventory_survival", "container_inventory_survival.png", GAME_DIR_NAME_GUI,
                 GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
         goto cleanup;
 

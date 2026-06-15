@@ -101,7 +101,6 @@ static struct ui_core
     {
         fsl_shader_program *text;
         fsl_shader_program *ui;
-        fsl_shader_program *ui_9_slice; /* -- DEPRECATED IN v0.10.1-dev -- */
     } shader;
 
     struct /* uniform */
@@ -118,11 +117,6 @@ static struct ui_core
         {
             GLint tint;
         } ui;
-
-        struct /* -- DEPRECATED IN v0.10.1-dev --; nine_slice*/
-        {
-            GLint tint;
-        } nine_slice;
 
     } uniform;
 
@@ -497,7 +491,6 @@ u32 fsl_ui_init(void)
         return fsl_err;
 
     ui_core.shader.ui = &shader_p[FSL_SHADER_INDEX_UI];
-    ui_core.shader.ui_9_slice = &shader_p[FSL_SHADER_INDEX_UI_9_SLICE];
 
     if (!ui_core.vao_loaded)
     {
@@ -553,18 +546,13 @@ u32 fsl_ui_init(void)
     ui_core.uniform.ui.tint =
         glGetUniformLocation(ui_core.shader.ui->asset.id, "tint");
 
-    ui_core.uniform.nine_slice.tint =
-        glGetUniformLocation(ui_core.shader.ui_9_slice->asset.id, "tint");
-
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
 
-void fsl_ui_start(b8 nine_slice, b8 clear)
+void fsl_ui_start(b8 clear)
 {
     fsl_shader_program *shader_p = fsl_mem_handle_get(fsl_shader_buf);
-
-    (void)nine_slice;
 
     fsl_fbo_bind();
     ui_core.shader.ui = &shader_p[FSL_SHADER_INDEX_UI];
@@ -575,23 +563,10 @@ void fsl_ui_start(b8 nine_slice, b8 clear)
         glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void fsl_ui_push_panel(i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, u32 tint)
-{
-    fsl_texture *texture = fsl_mem_handle_get(fsl_texture_buf);
-    fsl_panel_nine_slice panel =
-        fsl_get_nine_slice_internal(&texture[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
-            pos_x, pos_y, size_x, size_y, FSL_UI_SLICE_SIZE_DEFAULT);
-
-    glBindBuffer(GL_ARRAY_BUFFER, ui_core.vertex_data_curr_quad);
-    glBufferData(GL_ARRAY_BUFFER, ui_core.quad_count * sizeof(fsl_panel_nine_slice),
-            &panel, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
 void fsl_ui_element_bake(fsl_ui_element *element)
 {
     fsl_ui_transform *t = &element->transform;
-    v2f32 texture_scale = {0};
+    v2f32 uv_scale = {0};
     v2f32 size = {0};
     v2f32 size_half = {0};
     v2f32 alignment = {0};
@@ -599,15 +574,15 @@ void fsl_ui_element_bake(fsl_ui_element *element)
 
     element->flag &= ~FSL_FLAG_UI_DIRTY_TRANSFORM;
 
-    if (element->flag & FSL_FLAG_UI_VISIBLE)
+    if (element->texture)
     {
-        texture_scale.x = 1.0f / element->texture->size.x;
-        texture_scale.y = 1.0f / element->texture->size.y;
+        uv_scale.x = 1.0f / element->texture->size.x;
+        uv_scale.y = 1.0f / element->texture->size.y;
 
-        t->uv_pos_baked.x = t->uv_pos.x * texture_scale.x;
-        t->uv_pos_baked.y = t->uv_pos.y * texture_scale.y;
-        t->uv_size_baked.x = t->uv_size.x * texture_scale.x;
-        t->uv_size_baked.y = t->uv_size.y * texture_scale.y;
+        t->uv_pos_baked.x = t->uv_pos.x * uv_scale.x;
+        t->uv_pos_baked.y = t->uv_pos.y * uv_scale.y;
+        t->uv_size_baked.x = t->uv_size.x * uv_scale.x;
+        t->uv_size_baked.y = t->uv_size.y * uv_scale.y;
     }
 
     size.x = t->size.x + t->size_scaled.x * t->scale.x;
@@ -643,9 +618,8 @@ void fsl_ui_element_draw(fsl_ui_element *element)
     void *buf = NULL;
     u32 buf_size = 0;
     u32 instance_count = 0;
-    u32 flag = element->flag;
 
-    if (flag & FSL_FLAG_UI_DIRTY_TRANSFORM)
+    if (element->flag & FSL_FLAG_UI_DIRTY_TRANSFORM)
         fsl_ui_element_bake(element);
 
     if (element->parent)
@@ -658,16 +632,11 @@ void fsl_ui_element_draw(fsl_ui_element *element)
 
     ui_element_listen_internal(element, render->mouse_pos, render->mouse_delta);
 
-    if (flag & FSL_FLAG_UI_VISIBLE)
+    if (element->texture)
     {
-        if (flag & FSL_FLAG_UI_9_SLICE)
+        if (element->flag & FSL_FLAG_UI_9_SLICE)
         {
-            panel = fsl_get_nine_slice_internal(element->texture,
-                    element->transform.pos_baked.x,
-                    element->transform.pos_baked.y,
-                    element->transform.size_baked.x,
-                    element->transform.size_baked.y,
-                    element->transform.slice_size);
+            panel = fsl_get_nine_slice_internal(element);
             buf = &panel;
             buf_size = sizeof(fsl_panel_nine_slice);
             instance_count = 9;
@@ -703,18 +672,14 @@ void fsl_ui_element_draw(fsl_ui_element *element)
     }
 }
 
-void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 size_y,
-        f32 offset_x, f32 offset_y, i32 align_x, i32 align_y, u32 tint)
+void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y,
+        i32 size_x, i32 size_y, u32 tint)
 {
     fsl_ui_drawable_quad drawable = {0};
     v2f32 ndc_scale = render->ndc_scale;
 
     if (!size_x) size_x = texture->size.x;
     if (!size_y) size_y = texture->size.y;
-    (void)offset_x;
-    (void)offset_y;
-    (void)align_x;
-    (void)align_y;
 
     drawable.uv_pos.x = 0.0f;
     drawable.uv_pos.y = 0.0f;
@@ -738,27 +703,6 @@ void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y, i32 size_x, i32 siz
     glBindVertexArray(ui_core.vao);
     glBindTexture(GL_TEXTURE_2D, texture->asset.id);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-}
-
-void fsl_ui_draw_nine_slice(fsl_texture *texture, i32 pos_x, i32 pos_y,
-        i32 size_x, i32 size_y, i32 slice_size, u32 tint)
-{
-    fsl_panel_nine_slice panel = fsl_get_nine_slice_internal(texture,
-            pos_x, pos_y, size_x, size_y, slice_size);
-
-    glUniform4f(ui_core.uniform.ui.tint,
-            (f32)((tint >> 0x18) & 0xff) / 0xff,
-            (f32)((tint >> 0x10) & 0xff) / 0xff,
-            (f32)((tint >> 0x08) & 0xff) / 0xff,
-            (f32)((tint >> 0x00) & 0xff) / 0xff);
-
-    glBindBuffer(GL_ARRAY_BUFFER, ui_core.vertex_data_curr_quad);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(fsl_panel_nine_slice), &panel, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindVertexArray(ui_core.vao);
-    glBindTexture(GL_TEXTURE_2D, texture->asset.id);
-    glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, 9);
 }
 
 void fsl_ui_stop(void)
@@ -789,13 +733,14 @@ void fsl_ui_free(void)
     }
 }
 
-fsl_panel_nine_slice fsl_get_nine_slice_internal(fsl_texture *texture,
-        i32 pos_x, i32 pos_y, i32 size_x, i32 size_y, i32 slice_size)
+fsl_panel_nine_slice fsl_get_nine_slice_internal(fsl_ui_element *element)
 {
     fsl_panel_nine_slice panel = {0};
-    v2f32 texture_scale = {0};
-    f32 slice_size_f32 = (f32)slice_size;
+    fsl_ui_transform *t = &element->transform;
+    f32 slice_size = t->slice_size;
+    v2f32 slice_size_scaled = {0};
     v2f32 ndc_scale = render->ndc_scale;
+    v2f32 uv_scale = {0};
     v2f32 uv_pos[3] = {0};
     v2f32 uv_size[3] = {0};
     v2f32 pos = {0};
@@ -803,37 +748,39 @@ fsl_panel_nine_slice fsl_get_nine_slice_internal(fsl_texture *texture,
     v2f32 pos_buf[3] = {0};
     v2f32 size_buf[3] = {0};
 
-    texture_scale.x = 1.0f / (f32)texture->size.x;
-    texture_scale.y = 1.0f / (f32)texture->size.y;
-    uv_pos[0].x = 0.0f;
-    uv_pos[0].y = 0.0f;
-    uv_pos[1].x = texture_scale.x * slice_size_f32;
-    uv_pos[1].y = texture_scale.y * slice_size_f32;
-    uv_pos[2].x = 1.0f - texture_scale.x * slice_size_f32;
-    uv_pos[2].y = 1.0f - texture_scale.y * slice_size_f32;
-    uv_size[0].x = texture_scale.x * slice_size_f32;
-    uv_size[0].y = texture_scale.y * slice_size_f32;
-    uv_size[1].x = 1.0f - texture_scale.x * slice_size_f32 * 2.0f;
-    uv_size[1].y = 1.0f - texture_scale.y * slice_size_f32 * 2.0f;
-    uv_size[2].x = texture_scale.x * slice_size_f32;
-    uv_size[2].y = texture_scale.y * slice_size_f32;
+    slice_size_scaled.x = slice_size * t->scale.x;
+    slice_size_scaled.y = slice_size * t->scale.y;
+    uv_scale.x = 1.0f / (f32)element->texture->size.x;
+    uv_scale.y = 1.0f / (f32)element->texture->size.y;
+    uv_pos[0].x = t->uv_pos_baked.x;
+    uv_pos[0].y = t->uv_pos_baked.y;
+    uv_pos[1].x = uv_pos[0].x + slice_size * uv_scale.x;
+    uv_pos[1].y = uv_pos[0].y + slice_size * uv_scale.y;
+    uv_pos[2].x = uv_pos[0].x + (t->uv_size.x - slice_size) * uv_scale.x;
+    uv_pos[2].y = uv_pos[0].y + (t->uv_size.y - slice_size) * uv_scale.y;
+    uv_size[0].x = slice_size * uv_scale.x;
+    uv_size[0].y = slice_size * uv_scale.y;
+    uv_size[1].x = (t->uv_size.x - slice_size * 2.0f) * uv_scale.x;
+    uv_size[1].y = (t->uv_size.y - slice_size * 2.0f) * uv_scale.y;
+    uv_size[2].x = slice_size * uv_scale.x;
+    uv_size[2].y = slice_size * uv_scale.y;
 
-    pos.x = (f32)pos_x;
-    pos.y = (f32)pos_y;
-    size.x = (f32)size_x;
-    size.y = (f32)size_y;
+    pos.x = t->pos_baked.x;
+    pos.y = t->pos_baked.y;
+    size.x = t->size_baked.x;
+    size.y = t->size_baked.y;
     pos_buf[0].x = pos.x * ndc_scale.x - 1.0f;
     pos_buf[0].y = 1.0f - pos.y * ndc_scale.y;
-    pos_buf[1].x = ((pos.x + slice_size_f32) * ndc_scale.x) - 1.0f;
-    pos_buf[1].y = 1.0f - (pos.y + slice_size_f32) * ndc_scale.y;
-    pos_buf[2].x = ((pos.x + size.x - slice_size_f32) * ndc_scale.x) - 1.0f;
-    pos_buf[2].y = 1.0f - (pos.y + size.y - slice_size_f32) * ndc_scale.y;
-    size_buf[0].x = slice_size_f32 * ndc_scale.x;
-    size_buf[0].y = slice_size_f32 * ndc_scale.y;
-    size_buf[1].x = (size.x - slice_size_f32 * 2.0f) * ndc_scale.x;
-    size_buf[1].y = (size.y - slice_size_f32 * 2.0f) * ndc_scale.y;
-    size_buf[2].x = slice_size_f32 * ndc_scale.x;
-    size_buf[2].y = slice_size_f32 * ndc_scale.y;
+    pos_buf[1].x = ((pos.x + slice_size_scaled.x) * ndc_scale.x) - 1.0f;
+    pos_buf[1].y = 1.0f - (pos.y + slice_size_scaled.y) * ndc_scale.y;
+    pos_buf[2].x = ((pos.x + size.x - slice_size_scaled.x) * ndc_scale.x) - 1.0f;
+    pos_buf[2].y = 1.0f - (pos.y + size.y - slice_size_scaled.y) * ndc_scale.y;
+    size_buf[0].x = slice_size_scaled.x * ndc_scale.x;
+    size_buf[0].y = slice_size_scaled.y * ndc_scale.y;
+    size_buf[1].x = (size.x - slice_size_scaled.x * 2.0f) * ndc_scale.x;
+    size_buf[1].y = (size.y - slice_size_scaled.y * 2.0f) * ndc_scale.y;
+    size_buf[2].x = slice_size_scaled.x * ndc_scale.x;
+    size_buf[2].y = slice_size_scaled.y * ndc_scale.y;
 
     panel.slice[0].uv_pos.x = uv_pos[0].x;
     panel.slice[0].uv_pos.y = uv_pos[0].y;

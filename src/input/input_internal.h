@@ -29,17 +29,17 @@
 
 #include "../external/glfw3.h"
 
-enum keyboard_key_state
+enum input_state
 {
-    STATE_KEY_IDLE,
-    STATE_KEY_PRESS,
-    STATE_KEY_HOLD,
-    STATE_KEY_RELEASE,
-    STATE_KEY_LISTEN_DOUBLE,
-    STATE_KEY_PRESS_DOUBLE,
-    STATE_KEY_HOLD_DOUBLE,
-    STATE_KEY_RELEASE_DOUBLE
-}; /* keyboard_key_state */
+    STATE_INPUT_IDLE,
+    STATE_INPUT_PRESS,
+    STATE_INPUT_HOLD,
+    STATE_INPUT_RELEASE,
+    STATE_INPUT_LISTEN_DOUBLE,
+    STATE_INPUT_PRESS_DOUBLE,
+    STATE_INPUT_HOLD_DOUBLE,
+    STATE_INPUT_RELEASE_DOUBLE
+}; /* input_state */
 
 enum mod_key_flag
 {

@@ -2,15 +2,7 @@
 #define HHC_COMMON_H
 
 #include "deps/fossil/common/types.h"
-#include "deps/fossil/memory/memory.h"
-
-#include "game_info.h"
-
-/* ---- settings ------------------------------------------------------------ */
-
-#define MODE_INTERNAL_VSYNC         0
-#define MODE_INTERNAL_LOAD_CHUNKS   1
-#define MODE_INTERNAL_COLLIDE       1
+#include "deps/fossil/memory/memory_types.h"
 
 /* ---- defaults ------------------------------------------------------------ */
 
@@ -26,19 +18,17 @@
 #define SET_MOUSE_SENSITIVITY_DEFAULT   100
 #define SET_MOUSE_SENSITIVITY_MIN       10
 #define SET_MOUSE_SENSITIVITY_MAX       200
-#define SET_GUI_SCALE_DEFAULT           2
-#define SET_GUI_SCALE_0                 0 /* TODO: auto gui scale */
-#define SET_GUI_SCALE_1                 1
-#define SET_GUI_SCALE_2                 2
-#define SET_GUI_SCALE_3                 3
-#define SET_GUI_SCALE_4                 4
+#define SET_GUI_SCALE_0                 0.0f /* TODO: auto gui scale */
+#define SET_GUI_SCALE_1                 1.0f
+#define SET_GUI_SCALE_2                 2.0f
+#define SET_GUI_SCALE_3                 3.0f
+#define SET_GUI_SCALE_4                 4.0f
+#define SET_GUI_SCALE_DEFAULT           SET_GUI_SCALE_2
 #define SET_LERP_SPEED_DEFAULT          25.0f
 #define SET_LERP_SPEED_FOV_MODE         16.0f
 #define SET_COLLISION_CAPSULE_PADDING   1.0f
 #define SET_TEXT_REFRESH_INTERVAL       4 /* unit: fps */
 #define SET_CONSOLE_SCROLL_SPEED        4
-
-#define DEATH_STRING_MAX        128
 
 #define COLOR_TEXT_DEFAULT      FSL_DIAGNOSTIC_COLOR_DEBUG
 #define COLOR_TEXT_BRIGHT       FSL_DIAGNOSTIC_COLOR_DEFAULT
@@ -79,9 +69,8 @@
 
 /* ---- file names ---------------------------------------------------------- */
 
-#define GAME_FILE_NAME_SETTINGS         "settings.txt"
-#define GAME_FILE_NAME_WORLD_METADATA   "metadata.txt"
-#define GAME_FILE_NAME_WORLD_SEED       "seed.txt"
+#define GAME_FILE_NAME_SETTINGS         "settings.conf"
+#define GAME_FILE_NAME_WORLD_METADATA   "metadata.conf"
 #define GAME_FILE_NAME_LOOKUP_CHUNK_ORDER "lookup_chunk_order.bin"
 #define GAME_FILE_NAME_LOOKUP_CHUNKS_MAX "lookup_chunks_max.bin"
 #define GAME_FILE_NAME_LOOKUP_RAND_TAB  "lookup_rand_tab.bin"
@@ -89,23 +78,6 @@
 /* ---- name formats -------------------------------------------------------- */
 
 #define FORMAT_FILE_NAME_HHCC "%d.%d.%d.hhcr"
-
-/* ---- strings: death ------------------------------------------------------ */
-
-#define DEATH_STRING_COLLISION_WALL_0           "died by headbutting a wall"
-#define DEATH_STRING_COLLISION_WALL_1           "rammed a wall at high speed"
-#define DEATH_STRING_COLLISION_WALL_2           "splat on a wall"
-#define DEATH_STRING_COLLISION_WALL_COUNT       3
-
-#define DEATH_STRING_COLLISION_FLOOR_0          "jumped off a cliff"
-#define DEATH_STRING_COLLISION_FLOOR_1          "fell to their death"
-#define DEATH_STRING_COLLISION_FLOOR_2          "splat on the ground"
-#define DEATH_STRING_COLLISION_FLOOR_COUNT      3
-
-#define DEATH_STRING_COLLISION_CEILING_0        "cracked their skull at a ceiling"
-#define DEATH_STRING_COLLISION_CEILING_1        "flew into a ceiling"
-#define DEATH_STRING_COLLISION_CEILING_2        "splat on a ceiling"
-#define DEATH_STRING_COLLISION_CEILING_COUNT    3
 
 enum mesh_index
 {
@@ -134,14 +106,6 @@ enum font_index
     FONT_COUNT
 }; /* font_index */
 
-enum player_death_reason_index
-{
-    PLAYER_DEATH_REASON_COLLISION_WALL = 1,
-    PLAYER_DEATH_REASON_COLLISION_FLOOR,
-    PLAYER_DEATH_REASON_COLLISION_CEILING,
-    PLAYER_DEATH_REASON_COUNT
-}; /* player_death_reason_index */
-
 /*!
  *  @internal
  *
@@ -150,16 +114,5 @@ enum player_death_reason_index
  *  initialized once in @ref game_init().
  */
 extern fsl_mem_arena memory_arena_internal;
-
-/*!
- *  @brief look-up table for @ref str_death_<x> buffer sizes.
- *
- *  @remark read-only, initialized internally in @ref common.c.
- */
-extern u32 DEATH_STRINGS_MAX[PLAYER_DEATH_REASON_COUNT];
-
-extern str str_death_collision_wall[DEATH_STRING_COLLISION_WALL_COUNT][DEATH_STRING_MAX];
-extern str str_death_collision_floor[DEATH_STRING_COLLISION_FLOOR_COUNT][DEATH_STRING_MAX];
-extern str str_death_collision_ceiling[DEATH_STRING_COLLISION_CEILING_COUNT][DEATH_STRING_MAX];
 
 #endif /* HHC_COMMON_H */

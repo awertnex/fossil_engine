@@ -1,6 +1,7 @@
 #ifndef HHC_WORLD_H
 #define HHC_WORLD_H
 
+#include "deps/fossil/common/types.h"
 #include "deps/fossil/math/vector.h"
 
 #include "../terrain/terrain.h"
@@ -36,7 +37,7 @@ typedef struct world_info
 extern world_info world;
 
 /*!
- *  @brief init, create and load world.
+ *  @brief initialize, create and load world.
  *
  *  @remark if `seed` is 0, a random seed will be generated.
  *
@@ -72,5 +73,12 @@ u32 world_dir_init(const str *world_name);
 u32 world_load(world_info *world, const str *world_name, u64 seed);
 
 void world_update(hhc_player *p);
+
+/*!
+ *  @brief write world state into disk on specific time intervals.
+ *
+ *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
+ */
+u32 world_save(hhc_player *p);
 
 #endif /* HHC_WORLD_H */

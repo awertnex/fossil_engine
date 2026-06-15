@@ -5,15 +5,20 @@
 #include "chunking/chunking.h"
 #include "chunking/chunking_internal.h"
 #include "chunking/chunking_debug_tools.h"
+#include "gui/gui.h"
+#include "gui/gui_menus.h"
+#include "settings/settings.h"
+#include "super_debugger/super_debugger.h"
 #include "terrain/perlin_noise.h"
 
 #include "h/game_info.h"
 #include "h/assets.h"
+#include "h/config_internal.h"
 #include "h/common.h"
 #include "h/diagnostics.h"
 #include "h/dir.h"
-#include "h/gui.h"
 #include "h/input.h"
+#include "h/main.h"
 #include "h/player.h"
 #include "h/world.h"
 
@@ -22,13 +27,10 @@
 #include <inttypes.h>
 #include <math.h>
 
-fsl_ui_element element_item_bar = {0};
-i32 scrool = 0;
 u32 *const GAME_ERR = (u32*)&fsl_err;
 fsl_mem_arena memory_arena_internal = {0};
 fsl_render *render = NULL;
 struct hhc_core core = {0};
-struct hhc_settings settings = {0};
 struct hhc_uniform uniform = {0};
 static hhc_player player = {0};
 
@@ -52,19 +54,10 @@ static void callback_key(GLFWwindow *window, int key, int scancode, int action, 
 static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset);
 
 static void bind_shader_uniforms(void);
-
-/*!
- *  @internal
- *
- *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
- */
-static u32 settings_init(void);
-
-void settings_update(void);
-static void draw_hotbar_items(void);
+static void ui_hud_draw(void);
 static void draw_world(void);
 static void draw_debug_gizmo_axis(void);
-static void draw_everything(void);
+static void world_draw(void);
 
 static void callback_framebuffer_size(i32 size_x, i32 size_y)
 {
@@ -79,6 +72,9 @@ static void callback_framebuffer_size(i32 size_x, i32 size_y)
     fsl_fbo_realloc(&fbo_p[FBO_HUD], render->size.x, render->size.y, FALSE, 4);
     fsl_fbo_realloc(&fbo_p[FBO_HUD_MSAA], render->size.x, render->size.y, TRUE, 4);
     fsl_fbo_realloc(&fbo_p[FBO_POST_PROCESSING], render->size.x, render->size.y, FALSE, 4);
+
+    gui_update(render->size);
+    super_debugger_update(render->size);
 }
 
 static void callback_key(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -97,104 +93,18 @@ static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset)
     (void)xoffset;
 
     if (core.flag.super_debug)
-        scrool = fsl_clamp_i32(scrool + (i32)yoffset * SET_CONSOLE_SCROLL_SPEED, 0, logger_core.cursor);
+        super_debugger_logger_scroll((i32)yoffset);
     else if (player.flag & FLAG_PLAYER_ZOOMER)
         player.camera.zoom =
             fsl_clamp_f64(player.camera.zoom + yoffset * FSL_CAMERA_ZOOM_SPEED, 0.0f, FSL_CAMERA_ZOOM_MAX);
     else
     {
-        player.hotbar_slot_selected -= (i64)yoffset;
-        if (player.hotbar_slot_selected >= PLAYER_HOTBAR_SLOTS_MAX)
+        player.hotbar_slot_selected += (i64)yoffset;
+        if (player.hotbar_slot_selected >= CONTAINER_HOTBAR_SLOTS_MAX)
             player.hotbar_slot_selected = 0;
         else if (player.hotbar_slot_selected < 0)
-            player.hotbar_slot_selected = PLAYER_HOTBAR_SLOTS_MAX - 1;
+            player.hotbar_slot_selected = CONTAINER_HOTBAR_SLOTS_MAX - 1;
     }
-}
-
-static u32 settings_init(void)
-{
-    str tokens[4][24] =
-    {
-        "mouse_sensitivity",
-        "field_of_view",
-        "render_distance",
-        "target_fps",
-    };
-    str *settings_file_contents = fsl_stringf(
-            "%s = %d\n"
-            "%s = %d\n"
-            "%s = %d\n"
-            "%s = %d\n",
-            tokens[0], SET_MOUSE_SENSITIVITY_DEFAULT,
-            tokens[1], SET_FOV_DEFAULT,
-            tokens[2], SET_RENDER_DISTANCE_DEFAULT,
-            tokens[3], FSL_TARGET_FPS_DEFAULT);
-
-    if (fsl_is_dir_exists(GAME_DIR_NAME_CONFIG, TRUE) != FSL_ERR_SUCCESS)
-        return *GAME_ERR;
-
-    if (fsl_is_file_exists(GAME_DIR_NAME_CONFIG GAME_FILE_NAME_SETTINGS, FALSE) != FSL_ERR_SUCCESS)
-    {
-        fsl_write_file(GAME_DIR_NAME_CONFIG GAME_FILE_NAME_SETTINGS,
-                strlen(settings_file_contents),
-                settings_file_contents, TRUE, TRUE);
-    }
-
-    settings_file_contents = NULL;
-    fsl_get_file_contents(GAME_DIR_NAME_CONFIG GAME_FILE_NAME_SETTINGS,
-            (void*)&settings_file_contents, TRUE);
-    if (*GAME_ERR != FSL_ERR_SUCCESS)
-        return *GAME_ERR;
-
-    settings.lerp_speed = SET_LERP_SPEED_DEFAULT;
-
-    settings.render_distance = SET_RENDER_DISTANCE_DEFAULT;
-    settings.chunk_buf_radius = settings.render_distance;
-    settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
-
-    settings.chunk_buf_layer =
-        settings.chunk_buf_diameter *
-        settings.chunk_buf_diameter;
-
-    settings.chunk_buf_volume =
-        settings.chunk_buf_diameter *
-        settings.chunk_buf_diameter *
-        settings.chunk_buf_diameter;
-
-    settings.chunk_tab_center =
-        settings.chunk_buf_radius +
-        settings.chunk_buf_radius * settings.chunk_buf_diameter +
-        settings.chunk_buf_radius * settings.chunk_buf_layer;
-
-    settings.reach_distance = PLAYER_REACH_DISTANCE_MAX;
-    settings.mouse_sensitivity = SET_MOUSE_SENSITIVITY_DEFAULT * 0.004f;
-    settings.gui_scale = SET_GUI_SCALE_DEFAULT;
-    settings.font_size = 20.0f;
-    settings.target_fps = 0;
-    settings.fov = SET_FOV_DEFAULT;
-    settings.anti_aliasing = TRUE;
-
-    fsl_mem_free((void*)&settings_file_contents, strlen(settings_file_contents),
-            "settings_init().settings_file_contents");
-
-    *GAME_ERR = FSL_ERR_SUCCESS;
-    return *GAME_ERR;
-}
-
-void settings_update(void)
-{
-    fsl_texture *texture_p = fsl_mem_handle_get(texture);
-
-    if (fsl_on_time_interval(&refresh_interval.fps_string,
-                FSL_SEC2NSEC / SET_TEXT_REFRESH_INTERVAL, render->time))
-        settings.fps = 1 / ((f64)render->time_delta * FSL_NSEC2SEC);
-
-    fsl_ui_element_set_texture(&element_item_bar, &texture_p[TEXTURE_ITEM_BAR]);
-    fsl_ui_element_set_uv(&element_item_bar, 0, 0, 169, 16);
-    fsl_ui_element_set_position(&element_item_bar, render->size.x / 2, render->size.y, 0, 0, 0, -2);
-    fsl_ui_element_set_size(&element_item_bar, 0, 0, 169, 16);
-    fsl_ui_element_set_scale(&element_item_bar, settings.gui_scale, settings.gui_scale);
-    fsl_ui_element_set_alignment(&element_item_bar, 0, 1);
 }
 
 static void bind_shader_uniforms(void)
@@ -285,19 +195,51 @@ static void bind_shader_uniforms(void)
         glGetUniformLocation(shader_p[SHADER_BOUNDING_BOX].asset.id, "box_color");
 }
 
-static void draw_hotbar_items(void)
+static void ui_hud_draw(void)
 {
     u32 i = 0;
+    f32 scale = settings.gui_scale;
+    f32 item_bar_item_stride = 0.0f;
 
-    gui_start_ui_items();
+    if (fsl_on_time_interval(&refresh_interval.fps_string,
+                FSL_SEC2NSEC / SET_TEXT_REFRESH_INTERVAL, render->time))
+        settings.fps = 1 / ((f64)render->time_delta * FSL_NSEC2SEC);
 
-    for (i = 0; i < PLAYER_HOTBAR_SLOTS_MAX; ++i)
+    if (!core.flag.hud)
+        return;
+
+    if (!core.flag.debug)
+        fsl_ui_element_draw(&ui_element[UI_ELEMENT_CROSSHAIR]);
+
+    fsl_ui_element_draw(&ui_element[UI_ELEMENT_HOTBAR]);
+    fsl_ui_element_draw(&ui_element[UI_ELEMENT_HOTBAR_SELECTED]);
+
+    gui_start_ui_items(render->size);
+
+    for (i = 0; i < CONTAINER_HOTBAR_SLOTS_MAX; ++i)
     {
-        if (player.hotbar_slots[i])
+        if (player.hotbar_slots[i].id)
         {
-            gui_draw_ui_item(i * 34.0f +
-                    (f32)render->size.x / 2.0f - 84.5f * 2.0f,
-                    4.0f);
+            item_bar_item_stride = i * 17.0f * scale + (f32)render->size.x / 2.0f - 84.5f * scale;
+
+            gui_draw_ui_item(player.hotbar_slots[i].id,
+                    item_bar_item_stride, 4.0f * scale, render->size);
+        }
+    }
+
+    /* ---- draw menus n whatnot -------------------------------------------- */
+
+    fsl_ui_start(FALSE);
+
+    if (state_menu_depth)
+    {
+        /* ---- draw container inventory survival --------------------------- */
+
+        switch (player.menu_state)
+        {
+            case STATE_PLAYER_MENU_INVENTORY_SURVIVAL:
+                fsl_ui_element_draw(&ui_element[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL]);
+                break;
         }
     }
 }
@@ -334,8 +276,8 @@ static void draw_world(void)
         ch = **cursor;
         if (ch && ch->flag & FLAG_CHUNK_VISIBLE)
         {
-            glBindVertexArray(ch->mesh.vao);
-            glDrawArraysInstanced(GL_POINTS, 0, ch->mesh.vbo_len, 1);
+            glBindVertexArray(ch->mesh_deprecated.vao);
+            glDrawArraysInstanced(GL_POINTS, 0, ch->mesh_deprecated.vbo_len, 1);
         }
     }
 }
@@ -363,7 +305,7 @@ static void draw_debug_gizmo_axis(void)
             GL_UNSIGNED_INT, NULL, 1);
 }
 
-static void draw_everything(void)
+static void world_draw(void)
 {
     static str engine_version[FSL_ID_CAP] = {0};
     fsl_fbo *fbo_p = fsl_mem_handle_get(fbo);
@@ -668,28 +610,9 @@ static void draw_everything(void)
 
     /* ---- draw ui --------------------------------------------------------- */
 
-    fsl_ui_start(FALSE, TRUE);
+    fsl_ui_start(TRUE);
 
-    if (core.flag.hud)
-    {
-        if (!core.flag.debug)
-            fsl_ui_draw(&texture_p[TEXTURE_CROSSHAIR], render->size.x / 2, render->size.y / 2,
-                    0, 0,
-                    0.0f, 0.0f, -1, -1, 0xffffffff);
-
-        fsl_ui_element_draw(&element_item_bar);
-
-        fsl_ui_draw(&texture_p[TEXTURE_ITEM_BAR_SELECTED],
-                render->size.x / 2 - 2 + player.hotbar_slot_selected * 34,
-                render->size.y - 2,
-                texture_p[TEXTURE_ITEM_BAR_SELECTED].size.x * 2,
-                texture_p[TEXTURE_ITEM_BAR_SELECTED].size.y * 2,
-                84.5f, 18.0f, 0, 0, 0xffffffff);
-
-        /* ---- draw item bar items ----------------------------------------- */
-
-        draw_hotbar_items();
-    }
+    ui_hud_draw();
 
     /* ---- draw debug info ------------------------------------------------- */
 
@@ -851,40 +774,10 @@ static void draw_everything(void)
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
     }
 
-    /* ---- draw logger strings --------------------------------------------- */
+    /* ---- draw super debugger --------------------------------------------- */
 
     if (core.flag.super_debug)
-    {
-        i32 i = 0;
-        u32 index = 0;
-        i32 logger_panel_height = 400;
-        fsl_log_entry *log_entry = NULL;
-
-        fsl_ui_start(TRUE, FALSE);
-        fsl_ui_draw_nine_slice(&fsl_texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE],
-                10, render->size.y - logger_panel_height - 30,
-                render->size.x - 20, logger_panel_height + 20, 8, 0xffffff5f);
-
-        fsl_text_start(font[FONT_MONO_BOLD], settings.font_size, 0, FALSE);
-
-        log_entry = fsl_mem_handle_get(logger_core.buf);
-        for (i = 20; i > 0; --i)
-        {
-            index = fsl_mod_i32(logger_core.cursor - i - scrool, FSL_LOGGER_HISTORY_MAX);
-            fsl_text_push(fsl_stringf("%s\n", log_entry[index].message),
-                    SET_MARGIN * 2, render->size.y - SET_MARGIN * 2,
-                    0, 0, render->size.x - SET_MARGIN * 4,
-                    log_entry[index].color);
-
-            if ((i32)fsl_get_text_height() + SET_MARGIN * 2 >= logger_panel_height)
-                break;
-        }
-
-        /* this "useless" function call aligns all the pushed strings correctly once at
-         * the end of the loop, do not touch it. */
-        fsl_text_push("", 0, 0, 0, FSL_TEXT_ALIGN_BOTTOM, 0, 0);
-        fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
-    }
+        super_debugger_draw(render->size);
 
     fsl_ui_stop();
 
@@ -966,12 +859,11 @@ int main(int argc, char **argv)
 
     if (assets_init() != FSL_ERR_SUCCESS)
         goto cleanup;
-    if (gui_init() != FSL_ERR_SUCCESS)
+
+    if (gui_init(render->size) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    /*temp off
-    init_super_debugger(render->size);
-    */
+    super_debugger_init(render->size);
 
     /* ---- end set graphics ------------------------------------------------ */
 
@@ -981,9 +873,33 @@ int main(int argc, char **argv)
 
 section_menu_title:
 
+    show_cursor;
+
+    while (fsl_engine_running(&callback_framebuffer_size))
+    {
+        /* ---- draw super debugger ----------------------------------------- */
+
+        input_update(&player);
+        fsl_ui_start(TRUE);
+
+        gui_menu_title_draw(render->size);
+
+        if (core.flag.super_debug)
+            super_debugger_draw(render->size);
+
+        fsl_ui_stop();
+        fsl_fbo_blit(0);
+
+        if (!core.flag.paused && core.request.world_load)
+        {
+            core.request.world_load = FALSE;
+            goto section_gameplay;
+        }
+    }
+
 section_menu_pause:
 
-section_world_loaded:
+section_gameplay:
 
     if (!core.flag.world_loaded &&
             world_init("Poop Consistency Tester", 0, &player) != FSL_ERR_SUCCESS)
@@ -992,9 +908,8 @@ section_world_loaded:
     while (fsl_engine_running(&callback_framebuffer_size))
     {
         input_update(&player);
-        settings_update();
         world_update(&player);
-        draw_everything();
+        world_draw();
 
         fsl_process_screenshot_request(GAME_DIR_NAME_SCREENSHOTS, world.name);
         fsl_limit_framerate(settings.target_fps, render->time);

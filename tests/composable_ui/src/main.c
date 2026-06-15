@@ -14,6 +14,7 @@ fsl_key_bind bind_align_down = {0};
 fsl_key_bind bind_element_attach = {0};
 fsl_key_bind bind_switch_workspace = {0};
 fsl_texture texture = {0};
+fsl_texture texture_9s = {0};
 fsl_ui_element element_parent = {0};
 fsl_ui_element element_child = {0};
 fsl_ui_element element_panel = {0};
@@ -29,7 +30,7 @@ void ui_update(void)
 
 void ui_draw_1(void)
 {
-    fsl_ui_start(FALSE, TRUE);
+    fsl_ui_start(TRUE);
     fsl_ui_element_draw(&element_parent);
     fsl_ui_element_draw(&element_child);
     fsl_ui_stop();
@@ -38,7 +39,7 @@ void ui_draw_1(void)
 
 void ui_draw_2(void)
 {
-    fsl_ui_start(FALSE, TRUE);
+    fsl_ui_start(TRUE);
     fsl_ui_element_draw(&element_panel);
     fsl_ui_stop();
     fsl_fbo_blit(0);
@@ -90,11 +91,14 @@ void leave(fsl_ui_event event, void *data)
 
 int main(int argc, char **argv)
 {
-
     if (fsl_engine_init(argc, argv, NULL, 1280, 720, 0) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     if (fsl_texture_init(&texture, "Panel", "panel", "panel.png", "assets/",
+                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    if (fsl_texture_init(&texture_9s, "Button", "button", "button.png", "assets/",
                 GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -137,13 +141,13 @@ int main(int argc, char **argv)
     fsl_ui_element_set_callback(&element_child, FSL_UI_EVENT_TYPE_LEAVE, &reset, NULL);
     fsl_ui_element_set_callback(&element_child, FSL_UI_EVENT_TYPE_CLICK, &fuck, &render->mouse_pos);
 
+    fsl_ui_element_set_texture(&element_panel, &texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
     fsl_ui_element_set_uv(&element_panel, 0, 0, 16, 16);
     fsl_ui_element_set_position(&element_panel, 10, 10, 0, 0, 0, 0);
     fsl_ui_element_set_size(&element_panel, 0, render->size.y - 20, 400, 0);
     fsl_ui_element_set_scale(&element_panel, 1.0f, 1.0f);
     fsl_ui_element_set_alignment(&element_panel, -1, -1);
     fsl_ui_element_set_9_slice(&element_panel, TRUE, 8);
-    fsl_ui_element_set_texture(&element_panel, &texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
     fsl_ui_element_set_callback(&element_panel, FSL_UI_EVENT_TYPE_ENTER, &enter, NULL);
     fsl_ui_element_set_callback(&element_panel, FSL_UI_EVENT_TYPE_LEAVE, &leave, NULL);
 

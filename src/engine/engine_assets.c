@@ -42,6 +42,7 @@ fsl_mesh fsl_mesh_unit_quad = {0};
 
 /* ---- section: implementation --------------------------------------------- */
 
+#include <assert.h>
 u32 fsl_engine_assets_init(void)
 {
     fsl_texture *texture_p = NULL;
@@ -71,26 +72,36 @@ u32 fsl_engine_assets_init(void)
 
     if (fsl_texture_init(&texture_p[FSL_TEXTURE_INDEX_PANEL_ACTIVE],
                 "Panel Active", "panel_active", "panel_active.png", FSL_DIR_NAME_TEXTURES,
-                GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS)
+                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
         goto cleanup;
+
     if (fsl_texture_init(&texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE],
                 "Panel Inactive", "panel_inactive", "panel_inactive.png", FSL_DIR_NAME_TEXTURES,
-                GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS)
+                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
         goto cleanup;
+
     if (fsl_texture_init(&texture_p[FSL_TEXTURE_INDEX_PANEL_DEBUG_NINE_SLICE],
                 "Panel Debug 9-Slice", "panel_debug_9_slice", "panel_debug_nine_slice.png", FSL_DIR_NAME_TEXTURES,
                 GL_RGB, GL_NEAREST, FSL_COLOR_CHANNELS_RGB, FALSE, FALSE) != FSL_ERR_SUCCESS)
         goto cleanup;
-    if (fsl_texture_init(&texture_p[FSL_TEXTURE_INDEX_BUTTON_SELECTED],
-                "Button Selected", "button_selected", "button_selected.png", FSL_DIR_NAME_TEXTURES,
-                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
-        goto cleanup;
+
     if (fsl_texture_init(&texture_p[FSL_TEXTURE_INDEX_BUTTON_ACTIVE],
                 "Button Active", "button_active", "button_active.png", FSL_DIR_NAME_TEXTURES,
                 GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
         goto cleanup;
+
     if (fsl_texture_init(&texture_p[FSL_TEXTURE_INDEX_BUTTON_INACTIVE],
                 "Button Inactive", "button_inactive", "button_inactive.png", FSL_DIR_NAME_TEXTURES,
+                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    if (fsl_texture_init(&texture_p[FSL_TEXTURE_INDEX_BUTTON_SELECTED],
+                "Button Selected", "button_selected", "button_selected.png", FSL_DIR_NAME_TEXTURES,
+                GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    if (fsl_texture_init(&texture_p[FSL_TEXTURE_INDEX_BUTTON_PRESSED],
+                "Button Pressed", "button_pressed", "button_pressed.png", FSL_DIR_NAME_TEXTURES,
                 GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -116,12 +127,6 @@ u32 fsl_engine_assets_init(void)
 
     if (fsl_shader_program_init_ex(&shader_p[FSL_SHADER_INDEX_UI],
                 "UI", "ui", "ui.vert", NULL, "ui.frag",
-                FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
-        goto cleanup;
-
-    /* -- DEPRECATED IN v0.10.1-dev -- */
-    if (fsl_shader_program_init_ex(&shader_p[FSL_SHADER_INDEX_UI_9_SLICE],
-                "UI 9-Slice", "ui_9_slice", "ui_9_slice.vert", NULL, "ui_9_slice.frag",
                 FSL_DIR_NAME_SHADERS) != FSL_ERR_SUCCESS)
         goto cleanup;
 

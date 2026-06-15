@@ -1,5 +1,5 @@
 #include "../src/external/buildtool/buildtool.h"
-#include "../src/h/buildtool_config.h"
+#include "../src/buildtool_config.h"
 
 #define DIR_ROOT "../"
 #define DIR_DEPS "../fossil/"
@@ -124,14 +124,19 @@ u32 build_game(int argc, char **argv)
     }
 
     cmd_push(&cmd, DIR_SRC_GAME"main.c");
+    cmd_push(&cmd, DIR_SRC_GAME"chunking/chunk_draw.c");
     cmd_push(&cmd, DIR_SRC_GAME"chunking/chunking.c");
     cmd_push(&cmd, DIR_SRC_GAME"chunking/chunking_debug_tools.c");
-    cmd_push(&cmd, DIR_SRC_GAME"terrain/perlin_noise.c");
+    cmd_push(&cmd, DIR_SRC_GAME"gui/gui.c");
+    cmd_push(&cmd, DIR_SRC_GAME"gui/gui_callbacks.c");
+    cmd_push(&cmd, DIR_SRC_GAME"gui/gui_menus.c");
+    cmd_push(&cmd, DIR_SRC_GAME"settings/settings.c");
+    cmd_push(&cmd, DIR_SRC_GAME"super_debugger/super_debugger.c");
     cmd_push(&cmd, DIR_SRC_GAME"terrain/terrain.c");
+    cmd_push(&cmd, DIR_SRC_GAME"terrain/perlin_noise.c");
     cmd_push(&cmd, DIR_SRC_GAME"assets.c");
     cmd_push(&cmd, DIR_SRC_GAME"common.c");
     cmd_push(&cmd, DIR_SRC_GAME"dir.c");
-    cmd_push(&cmd, DIR_SRC_GAME"gui.c");
     cmd_push(&cmd, DIR_SRC_GAME"input.c");
     cmd_push(&cmd, DIR_SRC_GAME"player.c");
     cmd_push(&cmd, DIR_SRC_GAME"world.c");

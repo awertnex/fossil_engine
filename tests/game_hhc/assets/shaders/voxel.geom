@@ -11,15 +11,14 @@ layout(std430, binding = 1) readonly buffer ssbo_texture_indices
     uint texture_indices[];
 };
 
-/* from 'src/h/main.h' */
-#define BLOCK_ID        0x000003ff
-#define BLOCK_LIGHT     0x0000003f
-#define POSITIVE_X      0x00010000
-#define NEGATIVE_X      0x00020000
-#define POSITIVE_Y      0x00040000
-#define NEGATIVE_Y      0x00080000
-#define POSITIVE_Z      0x00100000
-#define NEGATIVE_Z      0x00200000
+#define MASK_BLOCK_ID   0x000003ff
+#define MASK_BLOCK_LIGHT 0x0000003f
+#define FLAG_POSITIVE_X 0x00010000
+#define FLAG_NEGATIVE_X 0x00020000
+#define FLAG_POSITIVE_Y 0x00040000
+#define FLAG_NEGATIVE_Y 0x00080000
+#define FLAG_POSITIVE_Z 0x00100000
+#define FLAG_NEGATIVE_Z 0x00200000
 
 uniform mat4 mat_perspective;
 in uint vs_data[];
@@ -32,8 +31,8 @@ out float block_light;
 
 void main()
 {
-    uint block_id = vs_data[0] & BLOCK_ID;
-    block_light = ((vs_data[0] >> 0x18) & BLOCK_LIGHT) / float(BLOCK_LIGHT);
+    uint block_id = vs_data[0] & MASK_BLOCK_ID;
+    block_light = ((vs_data[0] >> 0x18) & MASK_BLOCK_LIGHT) / float(MASK_BLOCK_LIGHT);
 
     vec3 vbo[8] =
         vec3[](
@@ -68,7 +67,7 @@ void main()
     int ebo_tex_coords_top[FACE_VERTICES] =
         int[](3, 0, 1, 1, 2, 3);
 
-    if (bool(vs_data[0] & POSITIVE_X))
+    if (bool(vs_data[0] & FLAG_POSITIVE_X))
         for (int i = 0; i < FACE_VERTICES; ++i)
         {
             vertex_position = vs_position[0] +
@@ -82,7 +81,7 @@ void main()
             if ((i + 1) % 3 == 0) EndPrimitive();
         }
 
-    if (bool(vs_data[0] & NEGATIVE_X))
+    if (bool(vs_data[0] & FLAG_NEGATIVE_X))
         for (int i = 0; i < FACE_VERTICES; ++i)
         {
             vertex_position = vs_position[0] +
@@ -96,7 +95,7 @@ void main()
             if ((i + 1) % 3 == 0) EndPrimitive();
         }
 
-    if (bool(vs_data[0] & POSITIVE_Y))
+    if (bool(vs_data[0] & FLAG_POSITIVE_Y))
         for (int i = 0; i < FACE_VERTICES; ++i)
         {
             vertex_position = vs_position[0] +
@@ -110,7 +109,7 @@ void main()
             if ((i + 1) % 3 == 0) EndPrimitive();
         }
 
-    if (bool(vs_data[0] & NEGATIVE_Y))
+    if (bool(vs_data[0] & FLAG_NEGATIVE_Y))
         for (int i = 0; i < FACE_VERTICES; ++i)
         {
             vertex_position = vs_position[0] +
@@ -124,7 +123,7 @@ void main()
             if ((i + 1) % 3 == 0) EndPrimitive();
         }
 
-    if (bool(vs_data[0] & POSITIVE_Z))
+    if (bool(vs_data[0] & FLAG_POSITIVE_Z))
         for (int i = 0; i < FACE_VERTICES; ++i)
         {
             vertex_position = vs_position[0] +
@@ -138,7 +137,7 @@ void main()
             if ((i + 1) % 3 == 0) EndPrimitive();
         }
 
-    if (bool(vs_data[0] & NEGATIVE_Z))
+    if (bool(vs_data[0] & FLAG_NEGATIVE_Z))
         for (int i = 0; i < FACE_VERTICES; ++i)
         {
             vertex_position = vs_position[0] +

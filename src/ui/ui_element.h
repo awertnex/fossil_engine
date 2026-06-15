@@ -34,11 +34,10 @@
 enum fsl_ui_element_flag
 {
     FSL_FLAG_UI_INACTIVE =          (1 << 0),
-    FSL_FLAG_UI_VISIBLE =           (1 << 1),
-    FSL_FLAG_UI_9_SLICE =           (1 << 2),
-    FSL_FLAG_UI_DIRTY_TRANSFORM =   (1 << 3),
-    FSL_FLAG_UI_DIRTY_PARENT =      (1 << 4),
-    FSL_FLAG_UI_DIRTY_CHILDREN =    (1 << 5),
+    FSL_FLAG_UI_9_SLICE =           (1 << 1),
+    FSL_FLAG_UI_DIRTY_TRANSFORM =   (1 << 2),
+    FSL_FLAG_UI_DIRTY_PARENT =      (1 << 3),
+    FSL_FLAG_UI_DIRTY_CHILDREN =    (1 << 4)
 }; /* fsl_ui_element_flag */
 
 typedef enum fsl_ui_element_type

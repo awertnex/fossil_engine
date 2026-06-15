@@ -5,6 +5,10 @@
 #include "deps/fossil/assets/asset_types.h"
 #include "deps/fossil/memory/memory_types.h"
 
+#include "common.h"
+
+/* ---- section: definitions ------------------------------------------------ */
+
 #define FRICTION_BLOCK_SLIPPERY 0.02f
 #define FRICTION_BLOCK_WET      0.1f
 #define FRICTION_BLOCK_HARD     0.6f
@@ -22,14 +26,15 @@ enum shader_index
 
 enum texture_index
 {
-    TEXTURE_CROSSHAIR,
-    TEXTURE_ITEM_BAR,
-    TEXTURE_ITEM_BAR_SELECTED,
     TEXTURE_SKYBOX_VAL,
     TEXTURE_SKYBOX_HORIZON,
     TEXTURE_SKYBOX_STARS,
     TEXTURE_SUN,
     TEXTURE_MOON,
+    TEXTURE_BUTTON,
+    TEXTURE_CROSSHAIR,
+    TEXTURE_HOTBAR,
+    TEXTURE_CONTAINER_INVENTORY_SURVIVAL,
     TEXTURE_COUNT
 }; /* texture_index */
 
@@ -87,11 +92,16 @@ typedef struct block
     f32 friction;
 } block;
 
+/* ---- section: declarations ----------------------------------------------- */
+
 extern fsl_mem_handle texture;
 extern fsl_mem_handle fbo;
 extern fsl_mem_handle mesh;
 extern fsl_mem_handle shader;
 extern fsl_mem_handle blocks;
+extern fsl_font *font[FONT_COUNT];
+
+/* ---- section: signatures ------------------------------------------------- */
 
 /*!
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.

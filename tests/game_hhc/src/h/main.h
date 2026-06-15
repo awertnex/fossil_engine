@@ -4,10 +4,13 @@
 #include "deps/fossil/common/types.h"
 #include "deps/fossil/engine/engine.h"
 
-#include "common.h"
-
 struct hhc_core
 {
+    struct /* flag */
+    {
+        b8 world_load;
+    } request;
+
     struct /* flag */
     {
         b8 paused;
@@ -24,43 +27,12 @@ struct hhc_core
     struct /* debug */
     {
         b8 trans_blocks;
-        b8 chunk_bounds;
         b8 bounding_boxes;
+        b8 chunk_bounds;
         b8 chunk_gizmo;
         b8 chunk_scheduler_visualizer;
     } debug;
 }; /* hhc_core */
-
-struct hhc_settings
-{
-    /* ---- internal -------------------------------------------------------- */
-
-    u32 fps;
-    f32 lerp_speed;
-    u32 chunk_buf_radius;
-    u32 chunk_buf_diameter;
-    u32 chunk_buf_layer;
-    u32 chunk_buf_volume;
-    u32 chunk_tab_center;
-
-    f64 reach_distance; /* player reach (arm length) */
-
-    /* ---- controls -------------------------------------------------------- */
-
-    f32 mouse_sensitivity;
-
-    /* ---- video ----------------------------------------------------------- */
-
-    u32 gui_scale;
-    f32 font_size;
-    u64 target_fps; /* in nanoseconds */
-
-    /* ---- graphics -------------------------------------------------------- */
-
-    f32 fov;
-    u32 render_distance;
-    b8 anti_aliasing;
-}; /* hhc_settings */
 
 struct hhc_uniform
 {
@@ -141,8 +113,6 @@ struct hhc_uniform
 
 extern fsl_render *render;
 extern struct hhc_core core;
-extern struct hhc_settings settings;
 extern struct hhc_uniform uniform;
-extern fsl_font *font[FONT_COUNT];
 
 #endif /* HHC_MAIN_H */

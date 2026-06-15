@@ -1,4 +1,4 @@
-# Fossil Engine - v0.11.0-beta
+# Fossil Engine - v0.12.0-beta
 
 **a headless game engine written in C89, with minimal dependencies.**
 
@@ -7,7 +7,8 @@ Goals of this project:
 - to make 2D and/or 3D games, and general software (such as image editors, 3D
   editors, or even GUI-based text editors).
 - to provide simple implementations so to give the user finer control (at the
-  expense of being verbose), although some areas of the engine are a bit rigid.
+  expense of being verbose), although some areas of the engine are a bit rigid
+  still.
 
 ## Supported Platforms
 - Linux x86_64.

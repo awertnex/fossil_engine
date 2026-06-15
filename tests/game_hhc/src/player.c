@@ -3,14 +3,19 @@
 #include "deps/fossil/logger/logger.h"
 #include "deps/fossil/math/math.h"
 #include "deps/fossil/math/vector.h"
+#include "deps/fossil/memory/memory.h"
 #include "deps/fossil/physics/collision.h"
+#include "deps/fossil/ui/ui.h"
 
 #include "deps/fossil/h/time.h"
 
-#include "h/main.h"
-
 #include "chunking/chunking.h"
+#include "gui/gui.h"
+#include "settings/settings.h"
 
+#include "h/main.h"
+#include "h/config_internal.h"
+#include "h/container.h"
 #include "h/common.h"
 #include "h/diagnostics.h"
 #include "h/player.h"
@@ -49,14 +54,23 @@ u32 player_init(hhc_player *p, const str *name)
     p->camera_distance = SET_CAMERA_DISTANCE_MAX;
 
     p->menu_state = 0;
-    p->hotbar_slots[0] = BLOCK_GRASS;
-    p->hotbar_slots[1] = BLOCK_DIRT;
-    p->hotbar_slots[2] = BLOCK_STONE;
-    p->hotbar_slots[3] = BLOCK_SAND;
-    p->hotbar_slots[4] = BLOCK_GLASS;
-    p->hotbar_slots[5] = BLOCK_WOOD_OAK_LOG;
-    p->hotbar_slots[6] = BLOCK_WOOD_BIRCH_LOG;
-    p->hotbar_slots[7] = BLOCK_WOOD_CHERRY_LOG;
+    p->hotbar_slots[0].id = BLOCK_GRASS;
+    p->hotbar_slots[1].id = BLOCK_DIRT;
+    p->hotbar_slots[2].id = BLOCK_STONE;
+    p->hotbar_slots[3].id = BLOCK_SAND;
+    p->hotbar_slots[4].id = BLOCK_GLASS;
+    p->hotbar_slots[5].id = BLOCK_WOOD_OAK_LOG;
+    p->hotbar_slots[6].id = BLOCK_WOOD_BIRCH_LOG;
+    p->hotbar_slots[7].id = BLOCK_WOOD_CHERRY_LOG;
+
+    p->hotbar_slots[0].count = 1;
+    p->hotbar_slots[1].count = 1;
+    p->hotbar_slots[2].count = 1;
+    p->hotbar_slots[3].count = 1;
+    p->hotbar_slots[4].count = 1;
+    p->hotbar_slots[5].count = 1;
+    p->hotbar_slots[6].count = 1;
+    p->hotbar_slots[7].count = 1;
 
     p->camera.fovy = settings.fov;
     p->camera.fovy_smooth = 0.0f;
@@ -171,6 +185,14 @@ void player_update(hhc_player *p, f64 dt)
     p->ch.x = floorf((f32)p->transform.pos.x / CHUNK_DIAMETER);
     p->ch.y = floorf((f32)p->transform.pos.y / CHUNK_DIAMETER);
     p->ch.z = floorf((f32)p->transform.pos.z / CHUNK_DIAMETER);
+}
+
+void player_hotbar_selected_set(hhc_player *p, u32 index)
+{
+    p->hotbar_slot_selected = index;
+
+    fsl_ui_element_set_position(&ui_element[UI_ELEMENT_HOTBAR_SELECTED],
+            0, 0, 0, 0, p->hotbar_slot_selected * 17 - 1, -1);
 }
 
 void player_collision_update(hhc_player *p, f64 dt)
@@ -612,12 +634,12 @@ void player_target_update(hhc_player *p)
     end.y = start.y - p->yaw.sin * p->pitch.cos;
     end.z = start.z - p->pitch.sin;
 
-    p->hit = block_hit_get(p->transform.pos,
+    p->hit = block_hit_get(origin,
             start.x, start.y, start.z, end.x, end.y, end.z,
             settings.reach_distance);
 }
 
-void set_player_pos(hhc_player *p, f64 x, f64 y, f64 z)
+void player_set_pos(hhc_player *p, f64 x, f64 y, f64 z)
 {
     p->transform.pos.x = x;
     p->transform.pos.y = y;
@@ -628,7 +650,7 @@ void set_player_pos(hhc_player *p, f64 x, f64 y, f64 z)
     p->transform_last.pos = p->transform.pos;
 }
 
-void set_player_block(hhc_player *p, i64 x, i64 y, i64 z)
+void player_set_block(hhc_player *p, i64 x, i64 y, i64 z)
 {
     p->transform.pos.x = (f64)x + 0.5f;
     p->transform.pos.y = (f64)y + 0.5f;
@@ -636,7 +658,7 @@ void set_player_block(hhc_player *p, i64 x, i64 y, i64 z)
     p->transform_last.pos = p->transform.pos;
 }
 
-void set_player_spawn(hhc_player *p, i64 x, i64 y, i64 z)
+void player_set_spawn(hhc_player *p, i64 x, i64 y, i64 z)
 {
     p->spawn.x = x;
     p->spawn.y = y;
@@ -645,7 +667,7 @@ void set_player_spawn(hhc_player *p, i64 x, i64 y, i64 z)
 
 void player_spawn(hhc_player *p, b8 hard)
 {
-    set_player_pos(p,
+    player_set_pos(p,
             p->spawn.x + 0.5f,
             p->spawn.y + 0.5f,
             p->spawn.z + 0.5f);
@@ -671,10 +693,12 @@ void player_kill(hhc_player *p)
 
 str *get_death_str(hhc_player *p)
 {
-    u64 index = fsl_rand_u64(fsl_get_time_raw_usec()) % DEATH_STRINGS_MAX[p->death];
+    u64 index = fsl_rand_u32(fsl_get_time_raw_usec());
+    index %= DEATH_STRINGS_MAX[p->death];
 
     switch (p->death)
     {
+        case PLAYER_DEATH_REASON_NONE:
         case PLAYER_DEATH_REASON_COLLISION_WALL:
             return str_death_collision_wall[index];
             break;
