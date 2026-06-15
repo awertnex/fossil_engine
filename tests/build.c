@@ -1,5 +1,5 @@
-#include "../src/external/buildtool/buildtool.h"
-#include "../src/buildtool_config.h"
+#include "../fossil/deps/fossil/external/buildtool/buildtool.h"
+#include "../fossil/deps/fossil/buildtool_config.h"
 
 #define DIR_ROOT "../"
 #define DIR_DEPS "../fossil/"
