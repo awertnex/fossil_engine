@@ -7,6 +7,19 @@
    version v0.3.3-beta (2026 01 24), which makes v0.3.4-beta the first version
    of the engine as standalone in this repo.
 
+## v0.12.1-beta (2026 06 15)
+
+#### fixes
+- fixed build script not copying header 'buildtool_config.h' to deployment
+  directory.
+
+#### known bugs and flaws
+- the 'obj' loader possibly has a bug due to hash-table collisions:
+    - sometimes faces disappear when ordered in specific ways in the obj file.
+- the 'obj' loader does not handle concave faces smartly, just loads them as
+  they are.
+
+- - -
 ## v0.12.0-beta (2026 06 15)
 
 #### additions

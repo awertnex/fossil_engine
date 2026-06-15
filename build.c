@@ -89,6 +89,7 @@ static str *copy_targets[][48] =
     {DIR_SRC"external/glad/glad.h",         DIR_DST DIR_DEPS DIR_DST"external/glad/"},
     {DIR_SRC"external/glad/khrplatform.h",  DIR_DST DIR_DEPS DIR_DST"external/glad/"},
 
+    {DIR_SRC"buildtool_config.h",           DIR_DST DIR_DEPS DIR_DST},
     {DIR_SRC"fossil_engine.h",              DIR_DST DIR_DEPS DIR_DST},
     {DIR_SRC"assets/asset_types.h",         DIR_DST DIR_DEPS DIR_DST"assets/"},
     {DIR_SRC"assets/assets.h",              DIR_DST DIR_DEPS DIR_DST"assets/"},
