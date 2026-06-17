@@ -30,28 +30,24 @@ fsl_key_bind bind_sneak = {0};
 /* ---- gameplay ------------------------------------------------------------ */
 
 fsl_key_bind bind_attack_or_destroy = {0};
-fsl_key_bind bind_sample_block = {0};
 fsl_key_bind bind_build_or_use = {0};
-
-/* ---- inventory ----------------------------------------------------------- */
-
+fsl_key_bind bind_sample_block = {0};
 fsl_key_bind bind_drop_item = {0};
-fsl_key_bind bind_inventory = {0};
 fsl_key_bind bind_hotbar[2][CONTAINER_HOTBAR_SLOTS_MAX] = {0};
+fsl_key_bind bind_inventory = {0};
 
 /* ---- miscellaneous ------------------------------------------------------- */
 
+fsl_key_bind bind_pause = {0};
+fsl_key_bind bind_command_line = {0};
 fsl_key_bind bind_toggle_hud = {0};
 fsl_key_bind bind_take_screenshot = {0};
 fsl_key_bind bind_toggle_debug = {0};
-fsl_key_bind bind_toggle_cinematic_camera = {0};
-fsl_key_bind bind_toggle_perspective = {0};
 fsl_key_bind bind_toggle_cinematic_motion = {0};
+fsl_key_bind bind_toggle_perspective = {0};
 fsl_key_bind bind_toggle_fullscreen = {0};
 fsl_key_bind bind_zoom = {0};
 fsl_key_bind bind_toggle_flashlight = {0};
-fsl_key_bind bind_pause = {0};
-fsl_key_bind bind_chat_or_command = {0};
 fsl_key_bind bind_reload_shaders = {0};
 
 /* ---- debug & menu -------------------------------------------------------- */
@@ -115,14 +111,13 @@ void input_init(void)
     bind_toggle_hud = fsl_key_bind_init(FSL_KEY_F1, 0, 0, 0, 0);
     bind_take_screenshot = fsl_key_bind_init(FSL_KEY_F2, 0, 0, 0, 0);
     bind_toggle_debug = fsl_key_bind_init(FSL_KEY_F3, 0, 0, 0, 0);
-    bind_toggle_cinematic_camera = fsl_key_bind_init(FSL_KEY_F4, 0, 0, 0, 0);
+    bind_toggle_cinematic_motion = fsl_key_bind_init(FSL_KEY_F4, 0, 0, 0, 0);
     bind_toggle_perspective = fsl_key_bind_init(FSL_KEY_F5, 0, 0, 0, 0);
-    bind_toggle_cinematic_motion = fsl_key_bind_init(FSL_KEY_F6, 0, 0, 0, 0);
     bind_toggle_fullscreen = fsl_key_bind_init(FSL_KEY_F11, 0, 0, 0, 0);
     bind_zoom = fsl_key_bind_init(FSL_KEY_Z, 0, 0, 0, 0);
     bind_toggle_flashlight = fsl_key_bind_init(FSL_KEY_F, 0, 0, 0, 0);
     bind_pause = fsl_key_bind_init(FSL_KEY_ESCAPE, 0, 0, 0, 0);
-    bind_chat_or_command = fsl_key_bind_init(FSL_KEY_SLASH, 0, 0, 0, 0);
+    bind_command_line = fsl_key_bind_init(FSL_KEY_SLASH, 0, 0, 0, 0);
 
     /* ---- debug & menu ---------------------------------------------------- */
 
@@ -231,7 +226,7 @@ void input_update(hhc_player *p)
 
         /* ---- gameplay ---------------------------------------------------- */
 
-        if (p->hit.hit)
+        if (p->hit.hit && !p->menu_state && !core.flag.super_debug)
         {
             if (fsl_is_mouse_press(bind_attack_or_destroy))
             {
@@ -249,8 +244,6 @@ void input_update(hhc_player *p)
             }
         }
 
-        /* ---- inventory --------------------------------------------------- */
-
         for (i = 0; i < CONTAINER_HOTBAR_SLOTS_MAX; ++i)
         {
             if (fsl_is_key_press(bind_hotbar[0][i]) || fsl_is_key_press(bind_hotbar[1][i]))
@@ -259,57 +252,55 @@ void input_update(hhc_player *p)
 
         if (fsl_is_key_press(bind_inventory))
         {
-            if ((p->menu_state & STATE_PLAYER_MENU_INVENTORY_SURVIVAL) && state_menu_depth)
+            if (p->menu_state == STATE_PLAYER_MENU_INVENTORY_SURVIVAL && state_menu_depth == 1)
             {
                 state_menu_depth = 0;
-                p->menu_state &= ~STATE_PLAYER_MENU_INVENTORY_SURVIVAL;
+                p->menu_state = 0;
+                disable_cursor;
+                center_cursor;
             }
-            else if (!(p->menu_state & STATE_PLAYER_MENU_INVENTORY_SURVIVAL) && !state_menu_depth)
+            else if (p->menu_state != STATE_PLAYER_MENU_INVENTORY_SURVIVAL && !state_menu_depth)
             {
                 state_menu_depth = 1;
-                p->menu_state |= STATE_PLAYER_MENU_INVENTORY_SURVIVAL;
+                p->menu_state = STATE_PLAYER_MENU_INVENTORY_SURVIVAL;
+                enable_cursor;
             }
 
-            if (!(p->menu_state & STATE_PLAYER_MENU_INVENTORY_SURVIVAL) && state_menu_depth)
+            if (p->menu_state != STATE_PLAYER_MENU_INVENTORY_SURVIVAL && state_menu_depth)
                 --state_menu_depth;
         }
 
         /* ---- miscellaneous ----------------------------------------------- */
 
+        if (fsl_is_key_press(bind_pause))
+        {
+            core.request.menu_back = TRUE;
+
+            if (!state_menu_depth)
+            {
+                ++state_menu_depth;
+                menu_index_curr = MENU_GAME_PAUSE;
+                p->menu_state = 0;
+                enable_cursor;
+            }
+            else
+                --state_menu_depth;
+
+            if (!state_menu_depth)
+            {
+                disable_cursor;
+                center_cursor;
+            }
+        }
+
         if (fsl_is_key_press(bind_toggle_hud))
             core.flag.hud ^= 1;
+
         if (fsl_is_key_press(bind_take_screenshot))
             fsl_request_screenshot();
 
         if (fsl_is_key_press(bind_toggle_debug))
             core.flag.debug ^= 1;
-
-        if (fsl_is_key_press(bind_toggle_perspective))
-            p->camera_mode = (p->camera_mode + 1) % PLAYER_CAMERA_MODE_COUNT;
-
-        if (fsl_is_key_press(bind_zoom))
-            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                    "Zoom Toggled On\n");
-        if (fsl_is_key_hold(bind_zoom))
-            p->flag |= FLAG_PLAYER_ZOOMER;
-        if (fsl_is_key_release(bind_zoom))
-        {
-            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                    "Zoom Toggled Off\n");
-            p->flag &= ~FLAG_PLAYER_ZOOMER;
-        }
-
-        if (fsl_is_key_press(bind_toggle_flashlight))
-        {
-            p->flag ^= FLAG_PLAYER_FLASHLIGHT;
-
-            if (p->flag & FLAG_PLAYER_FLASHLIGHT)
-                LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "Flashlight Toggled On\n");
-            else
-                LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "Flashlight Toggled Off\n");
-        }
 
         if (fsl_is_key_press(bind_toggle_cinematic_motion))
         {
@@ -317,17 +308,59 @@ void input_update(hhc_player *p)
 
             if (p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
                 LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "Cinematic Motion On\n");
+                        "Cinematic Motion Toggled On\n");
             else
                 LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "Cinematic Motion Off\n");
+                        "Cinematic Motion Toggled Off\n");
+        }
+
+        if (fsl_is_key_press(bind_toggle_perspective))
+            p->camera_mode = (p->camera_mode + 1) % PLAYER_CAMERA_MODE_COUNT;
+
+        if (fsl_is_key_press(bind_zoom))
+        {
+            p->flag |= FLAG_PLAYER_ZOOMER;
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                    "Zoom Toggled On\n");
+        }
+        if (fsl_is_key_release(bind_zoom))
+        {
+            p->flag &= ~FLAG_PLAYER_ZOOMER;
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                    "Zoom Toggled Off\n");
+        }
+    }
+    else
+    {
+        if (p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
+        {
+            p->flag ^= FLAG_PLAYER_CINEMATIC_MOTION;
+
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                    "Cinematic Motion Toggled Off\n");
+        }
+
+        if (p->flag & FLAG_PLAYER_ZOOMER)
+        {
+            p->flag &= ~FLAG_PLAYER_ZOOMER;
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                    "Zoom Toggled Off\n");
         }
     }
 
-    /* ---- debug ----------------------------------------------------------- */
+    if (fsl_is_key_press(bind_toggle_flashlight))
+    {
+        p->flag ^= FLAG_PLAYER_FLASHLIGHT;
 
-    if (fsl_is_key_press(bind_toggle_super_debug))
-        core.flag.super_debug ^= 1;
+        if (p->flag & FLAG_PLAYER_FLASHLIGHT)
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                    "Flashlight Toggled On\n");
+        else
+            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                    "Flashlight Toggled Off\n");
+    }
+
+    /* ---- debug ----------------------------------------------------------- */
 
     if (fsl_is_key_press(bind_reload_shaders))
     {
@@ -343,5 +376,18 @@ void input_update(hhc_player *p)
         else
             LOGERROR(shader_err, FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     "Failed to Reload Shaders\n");
+    }
+
+    if (fsl_is_key_press(bind_toggle_super_debug))
+    {
+        core.flag.super_debug ^= 1;
+
+        if (core.flag.super_debug)
+            enable_cursor;
+        else
+        {
+            disable_cursor;
+            center_cursor;
+        }
     }
 }

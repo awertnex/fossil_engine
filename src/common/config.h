@@ -27,11 +27,13 @@
 #define FSL_DIR_NAME_TEXTURES   "fossil/assets/textures/"
 #define FSL_DIR_NAME_SHADERS    "fossil/assets/shaders/"
 #define FSL_DIR_NAME_MODELS     "fossil/assets/models/"
+#define FSL_DIR_NAME_LOOKUPS    "fossil/assets/lookups/"
 #define FSL_DIR_NAME_LOGS       "fossil/logs/"
 
-#define FSL_FILE_NAME_LOG_ERROR "log_error.log"
-#define FSL_FILE_NAME_LOG_INFO  "log_info.log"
-#define FSL_FILE_NAME_LOG_EXTRA "log_verbose.log"
+#define FSL_FILE_NAME_LOG_ERROR         "log_error.log"
+#define FSL_FILE_NAME_LOG_INFO          "log_info.log"
+#define FSL_FILE_NAME_LOG_EXTRA         "log_verbose.log"
+#define FSL_FILE_NAME_LOOKUP_RAND_TAB   "lookup_rand_tab.bin"
 
 #define FSL_FILE_FORMAT_NAME_FOSSIL_MESH "fmesh"
 

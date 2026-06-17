@@ -106,13 +106,4 @@ enum font_index
     FONT_COUNT
 }; /* font_index */
 
-/*!
- *  @internal
- *
- *  @brief global memory arena, used to manage all heap memory that belongs to the game.
- *
- *  initialized once in @ref game_init().
- */
-extern fsl_mem_arena memory_arena_internal;
-
 #endif /* HHC_COMMON_H */

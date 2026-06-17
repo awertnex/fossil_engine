@@ -90,15 +90,16 @@ typedef enum hhc_player_death_reason
     PLAYER_DEATH_REASON_COUNT
 } hhc_player_death_reason;
 
-enum player_menu_state
+typedef enum hhc_player_menu_state
 {
+    STATE_PLAYER_MENU_NONE,
     STATE_PLAYER_MENU_CHEST,
     STATE_PLAYER_MENU_CRAFTING_TABLE,
     STATE_PLAYER_MENU_FURNACE,
     STATE_PLAYER_MENU_INVENTORY_SURVIVAL,
     STATE_PLAYER_MENU_INVENTORY_SANDBOX,
     STATE_PLAYER_MENU_COUNT
-}; /* player_menu_state */
+} hhc_player_menu_state;
 
 typedef struct hhc_player
 {
@@ -148,7 +149,7 @@ typedef struct hhc_player
     block_hit hit;                  /* information about the currently targeted block */
 
     v3i64 spawn;                    /* spawn point */
-    u64 menu_state;                 /* enum @ref player_menu_state */
+    hhc_player_menu_state menu_state;
 
     /*!
      *  @remark signed instead of unsigned so it's possible to navigate `hotbar_slots`

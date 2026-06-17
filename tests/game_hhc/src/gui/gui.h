@@ -5,9 +5,17 @@
 #include "deps/fossil/math/vector.h"
 #include "deps/fossil/ui/ui_element.h"
 
-#define show_cursor     glfwSetInputMode(render->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL)
-#define disable_cursor  glfwSetInputMode(render->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
-#define center_cursor   glfwSetCursorPos(render->window, render->size.x / 2.0f, render->size.y / 2.0f)
+#define enable_cursor   glfwSetInputMode(render->window, \
+        GLFW_CURSOR, GLFW_CURSOR_NORMAL)
+
+#define disable_cursor  glfwSetInputMode(render->window, \
+        GLFW_CURSOR, GLFW_CURSOR_DISABLED)
+
+#define center_cursor \
+    do { \
+        glfwSetCursorPos(render->window, render->size.x / 2.0f, render->size.y / 2.0f); \
+        fsl_request_skip_mouse_delta(); \
+    } while (0)
 
 #define BTN_COUNT 110
 
@@ -86,11 +94,11 @@ enum button_index
     BTN_ITEM_OUT_3
 }; /* button_index */
 
-extern u16 menu_index_cur;
-extern u16 menu_layer[5];
-extern u8 state_menu_depth;
+extern u32 menu_index_curr;
+extern u32 menu_layer[5];
+extern u32 state_menu_depth;
 extern b8 is_menu_ready;
-extern u8 buttons[BTN_COUNT];
+extern u32 buttons[BTN_COUNT];
 extern fsl_ui_element ui_element[UI_ELEMENT_COUNT];
 
 /*!

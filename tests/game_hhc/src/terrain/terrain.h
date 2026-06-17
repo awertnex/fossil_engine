@@ -26,10 +26,17 @@ typedef struct terrain
     enum block_id block_id;
 
     /*!
+     *  @brief value/density of block at generation position.
+     */
+    f32 value;
+
+    /*!
      *  @brief cost of terrain generation done on this block.
      */
     chunk_work_cost cost;
 } terrain;
+
+typedef terrain (*hhc_terrain_func)(v3i32 coordinates);
 
 /*!
  *  @brief default terrain of mountains valleys, caves and biomes.

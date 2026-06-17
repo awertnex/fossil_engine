@@ -94,6 +94,15 @@ typedef struct block
 
 /* ---- section: declarations ----------------------------------------------- */
 
+/*!
+ *  @internal
+ *
+ *  @brief global memory arena, manages all asset data for the game.
+ *
+ *  initialized once in @ref assets_init().
+ */
+extern fsl_mem_arena memory_arena_assets_internal;
+
 extern fsl_mem_handle texture;
 extern fsl_mem_handle fbo;
 extern fsl_mem_handle mesh;

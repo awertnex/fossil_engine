@@ -33,6 +33,7 @@
 #include "../logger/logger_messages_internal.h"
 #include "../memory/memory.h"
 #include "../math/math.h"
+#include "../math/math_internal.h"
 #include "../math/vector.h"
 #include "../shaders/shader_types.h"
 #include "../ui/ui.h"
@@ -58,12 +59,17 @@
 
 struct /* fsl_core */
 {
+    struct /* request */
+    {
+        b8 skip_mouse_delta;
+        b8 take_screenshot;
+        b8 close_engine;
+    } request;
+
     struct /* flag */
     {
         b8 active;
         b8 glfw_initialized;
-        b8 request_screenshot;
-        b8 request_engine_close;
     } flag;
 
     struct /* ubo */
@@ -228,6 +234,9 @@ u32 fsl_engine_init(int argc, char **argv, const str *title,
     glBindBufferBase(GL_UNIFORM_BUFFER, FSL_SHADER_BUFFER_BINDING_UBO_NDC_SCALE,
             fsl_core.ubo.ndc_scale);
 
+    if (noise_init_internal() != FSL_ERR_SUCCESS)
+        goto cleanup;
+
     if (fsl_ui_init() != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -244,7 +253,7 @@ b8 fsl_engine_running(void (*callback_framebuffer_size)(i32 size_x, i32 size_y))
 {
     static u64 time_last = 0;
     if (fsl_core.flag.active == FALSE ||
-            fsl_core.flag.request_engine_close == TRUE ||
+            fsl_core.request.close_engine == TRUE ||
             glfwWindowShouldClose(render_internal.window))
         return FALSE;
 
@@ -262,7 +271,15 @@ b8 fsl_engine_running(void (*callback_framebuffer_size)(i32 size_x, i32 size_y))
 
     glfwSwapBuffers(render_internal.window);
     glfwPollEvents();
+
     input_mouse_movement_update_internal();
+    if (fsl_core.request.skip_mouse_delta)
+    {
+        fsl_core.request.skip_mouse_delta = FALSE;
+        render_internal.mouse_delta.x = 0.0;
+        render_internal.mouse_delta.y = 0.0;
+    }
+
     input_key_states_update_internal();
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -305,7 +322,7 @@ u32 fsl_update_render_settings(void (*callback_framebuffer_size)(i32 size_x, i32
 
 void fsl_request_engine_close(void)
 {
-    fsl_core.flag.request_engine_close = TRUE;
+    fsl_core.request.close_engine = TRUE;
 
     if (render_internal.window)
         glfwSetWindowShouldClose(render_internal.window, GL_TRUE);
@@ -320,6 +337,7 @@ void fsl_engine_close(void)
 
     fsl_core.flag.active = FALSE;
 
+    noise_free_internal();
     fsl_ui_free();
     fsl_assets_free();
 
@@ -525,16 +543,21 @@ u32 fsl_change_render(fsl_render *r)
     return fsl_err;
 }
 
+void fsl_request_skip_mouse_delta(void)
+{
+    fsl_core.request.skip_mouse_delta = TRUE;
+}
+
 void fsl_request_screenshot(void)
 {
-    fsl_core.flag.request_screenshot = TRUE;
+    fsl_core.request.take_screenshot = TRUE;
 }
 
 u32 fsl_process_screenshot_request(const str *dir_screenshots, const str *special_text)
 {
-    if (fsl_core.flag.request_screenshot)
+    if (fsl_core.request.take_screenshot)
     {
-        fsl_core.flag.request_screenshot = FALSE;
+        fsl_core.request.take_screenshot = FALSE;
         return take_screenshot_internal(dir_screenshots, special_text);
     }
     return FSL_ERR_SUCCESS;
