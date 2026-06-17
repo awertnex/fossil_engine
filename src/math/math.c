@@ -20,12 +20,74 @@
  *  @brief math stuff.
  */
 
+#include "../common/config.h"
+#include "../common/diagnostics.h"
+#include "../common/limits.h"
+#include "../memory/memory.h"
+
+#include "../h/dir.h"
+
 #include "math.h"
+#include "math_internal.h"
 #include "matrix.h"
+#include "noise.h"
 #include "trigonometry.h"
 #include "vector.h"
 
+#include <stdio.h>
 #include <math.h>
+
+f32 *fsl_rand_tab = NULL;
+
+u32 noise_init_internal(void)
+{
+    str path[FSL_PATH_CAP] = {0};
+    f32 *file_contents = NULL;
+    u64 file_len = 0;
+    u32 i = 0;
+
+    if (fsl_mem_map((void*)&fsl_rand_tab, FSL_RAND_TAB_VOLUME * sizeof(f32),
+                "noise_init_internal().fsl_rand_tab") != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    snprintf(path, FSL_PATH_CAP, "%s%s", FSL_DIR_NAME_LOOKUPS, FSL_FILE_NAME_LOOKUP_RAND_TAB);
+
+    if (fsl_is_file_exists(path, FALSE) == FSL_ERR_SUCCESS)
+    {
+        file_len = fsl_get_file_contents(path, (void*)&file_contents, FALSE);
+        if (fsl_err != FSL_ERR_SUCCESS || file_contents == NULL)
+            goto cleanup;
+
+        for (i = 0; i < FSL_RAND_TAB_VOLUME; ++i)
+            fsl_rand_tab[i] = file_contents[i];
+
+        fsl_mem_free((void*)&file_contents, file_len,
+                "noise_init_internal().file_contents");
+    }
+    else
+    {
+        for (i = 0; i < FSL_RAND_TAB_VOLUME; ++i)
+            fsl_rand_tab[i] = sin((f64)fsl_rand_u64(i));
+
+        if (fsl_write_file(path, FSL_RAND_TAB_VOLUME * sizeof(f32),
+                    fsl_rand_tab, TRUE, FALSE) != FSL_ERR_SUCCESS)
+            goto cleanup;
+    }
+
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+
+cleanup:
+
+    noise_free_internal();
+    return fsl_err;
+}
+
+void noise_free_internal(void)
+{
+    fsl_mem_unmap((void*)&fsl_rand_tab, FSL_RAND_TAB_VOLUME * sizeof(f32),
+            "noise_free_internal().fsl_rand_tab");
+}
 
 v3f32 fsl_add_v3f32(v3f32 a, v3f32 b)
 {

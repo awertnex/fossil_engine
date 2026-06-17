@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 
+fsl_mem_arena memory_arena_assets_internal = {0};
 fsl_mem_handle fbo = {0};
 fsl_mem_handle texture = {0};
 fsl_mem_handle mesh = {0};
@@ -67,28 +68,31 @@ u32 assets_init(void)
     font[FONT_MONO] =       &font_p[FSL_FONT_INDEX_DEJAVU_SANS_MONO];
     font[FONT_MONO_BOLD] =  &font_p[FSL_FONT_INDEX_DEJAVU_SANS_MONO_BOLD];
 
-    if (
-            fsl_mem_arena_push(&memory_arena_internal, &fbo,
+
+    if (fsl_mem_arena_init(&memory_arena_assets_internal,
+                "assets_init().memory_arena_assets_internal") != FSL_ERR_SUCCESS ||
+
+            fsl_mem_arena_push(&memory_arena_assets_internal, &fbo,
                 FBO_COUNT * sizeof(fsl_fbo),
                 "assets_init().fbo") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_arena_push(&memory_arena_internal, &texture,
+            fsl_mem_arena_push(&memory_arena_assets_internal, &texture,
                 TEXTURE_COUNT * sizeof(fsl_texture),
                 "assets_init().texture") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_arena_push(&memory_arena_internal, &mesh,
+            fsl_mem_arena_push(&memory_arena_assets_internal, &mesh,
                 MESH_COUNT * sizeof(fsl_mesh),
                 "assets_init().mesh") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_arena_push(&memory_arena_internal, &shader,
+            fsl_mem_arena_push(&memory_arena_assets_internal, &shader,
                 SHADER_COUNT * sizeof(fsl_shader_program),
                 "assets_init().shader") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_arena_push(&memory_arena_internal, &blocks,
+            fsl_mem_arena_push(&memory_arena_assets_internal, &blocks,
                 BLOCK_COUNT * sizeof(block),
                 "assets_init().blocks") != FSL_ERR_SUCCESS ||
 
-            fsl_mem_arena_push(&memory_arena_internal, &block_textures,
+            fsl_mem_arena_push(&memory_arena_assets_internal, &block_textures,
                 TEXTURE_BLOCK_COUNT * sizeof(fsl_texture),
                 "assets_init().block_textures") != FSL_ERR_SUCCESS)
         goto cleanup;
@@ -318,6 +322,8 @@ void assets_free(void)
 
     if (ssbo_texture_handles_id)
         glDeleteBuffers(1, &ssbo_texture_handles_id);
+
+    fsl_mem_arena_free(&memory_arena_assets_internal, "assets_free().memory_arena_assets_internal");
 }
 
 u32 block_texture_init(u32 index, const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file)

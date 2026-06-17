@@ -23,7 +23,7 @@ typedef struct world_info
     u64 tick;
     u64 tick_start;
     u64 days;
-    terrain (*terrain_func)(v3i32 coordinates);
+    hhc_terrain_func terrain_func;
 
     f32 gravity;
     v3f32 drag;

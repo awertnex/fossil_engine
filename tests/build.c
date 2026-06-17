@@ -132,8 +132,8 @@ u32 build_game(int argc, char **argv)
     cmd_push(&cmd, DIR_SRC_GAME"gui/gui_menus.c");
     cmd_push(&cmd, DIR_SRC_GAME"settings/settings.c");
     cmd_push(&cmd, DIR_SRC_GAME"super_debugger/super_debugger.c");
+    cmd_push(&cmd, DIR_SRC_GAME"super_debugger/super_debugger_callbacks.c");
     cmd_push(&cmd, DIR_SRC_GAME"terrain/terrain.c");
-    cmd_push(&cmd, DIR_SRC_GAME"terrain/perlin_noise.c");
     cmd_push(&cmd, DIR_SRC_GAME"assets.c");
     cmd_push(&cmd, DIR_SRC_GAME"common.c");
     cmd_push(&cmd, DIR_SRC_GAME"dir.c");

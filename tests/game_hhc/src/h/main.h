@@ -8,7 +8,11 @@ struct hhc_core
 {
     struct /* flag */
     {
+        b8 menu_back;
         b8 world_load;
+        b8 menu_title_enter;
+        b8 menu_settings_enter;
+        b8 menu_worlds_enter;
     } request;
 
     struct /* flag */

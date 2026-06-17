@@ -33,11 +33,11 @@ struct /* ui_item_data_internal */
     f64 camera_distance;
 } ui_item_data_internal = {0};
 
-u16 menu_index_cur;
-u16 menu_layer[5] = {0};
-u8 state_menu_depth = 0;
+u32 menu_index_curr = 0;
+u32 menu_layer[5] = {0};
+u32 state_menu_depth = 0;
 b8 is_menu_ready;
-u8 buttons[BTN_COUNT];
+u32 buttons[BTN_COUNT];
 fsl_ui_element ui_element[UI_ELEMENT_COUNT] = {0};
 
 u32 gui_init(v2i32 render_size)
@@ -77,7 +77,7 @@ u32 gui_init(v2i32 render_size)
 
     /*
     game_menu_pos = setting.render_size.y / 3; // TODO: figure this out
-    menu_index_cur = MENU_TITLE;
+    menu_index_curr = MENU_TITLE;
      */
 
     while (button_count--)

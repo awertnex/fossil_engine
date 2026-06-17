@@ -321,7 +321,8 @@ void input_mouse_movement_update_internal(void)
 {
     static v2f64 mouse_last = {0};
 
-    glfwGetCursorPos(render_internal.window, &render_internal.mouse_pos.x, &render_internal.mouse_pos.y);
+    glfwGetCursorPos(render_internal.window,
+            &render_internal.mouse_pos.x, &render_internal.mouse_pos.y);
     render_internal.mouse_delta.x = render_internal.mouse_pos.x - mouse_last.x;
     render_internal.mouse_delta.y = render_internal.mouse_pos.y - mouse_last.y;
     mouse_last = render_internal.mouse_pos;

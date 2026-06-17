@@ -206,7 +206,14 @@ FSLAPI fsl_render *fsl_render_get(void);
 FSLAPI u32 fsl_change_render(fsl_render *r);
 
 /*!
- *  @remark send screenshot request to then be processed by @ref fsl_process_screenshot_request().
+ *  @brief send skip-mouse-delta request so to not consume mouse delta for a single frame.
+ *
+ *  centering cursor on screen can produce mouse-delta spikes, this is useful for skipping them.
+ */
+FSLAPI void fsl_request_skip_mouse_delta(void);
+
+/*!
+ *  @brief send screenshot request to then be processed by @ref fsl_process_screenshot_request().
  *
  *  can be called from anywhere, then @ref fsl_process_screenshot_request() can be called
  *  to take the screenshot at the end of the render loop.
@@ -214,7 +221,8 @@ FSLAPI u32 fsl_change_render(fsl_render *r);
 FSLAPI void fsl_request_screenshot(void);
 
 /*!
- *  @remark take screenshot requested by @ref fsl_request_screenshot() and save into dir at `dir_screenshots`.
+ *  @brief take screenshot requested by @ref fsl_request_screenshot() and save
+ *  into dir at `dir_screenshots`.
  *
  *  @param dir_screenshots directory to save screenshot to.
  *  @param special_text string appended to file name, before file extension.

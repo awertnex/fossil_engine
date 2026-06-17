@@ -56,10 +56,6 @@ u32 game_init(void)
     LOGTRACE(FSL_FLAG_LOG_CMD,
             fsl_logger_stringf("Main Directory Created '%s'\n", FSL_SESSION.bin_root));
 
-    if (fsl_mem_arena_init(&memory_arena_internal,
-                "game_init().memory_arena_internal") != FSL_ERR_SUCCESS)
-        return *GAME_ERR;
-
     render = fsl_render_get();
 
     *GAME_ERR = FSL_ERR_SUCCESS;

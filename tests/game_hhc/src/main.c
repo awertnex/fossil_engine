@@ -9,7 +9,6 @@
 #include "gui/gui_menus.h"
 #include "settings/settings.h"
 #include "super_debugger/super_debugger.h"
-#include "terrain/perlin_noise.h"
 
 #include "h/game_info.h"
 #include "h/assets.h"
@@ -28,7 +27,6 @@
 #include <math.h>
 
 u32 *const GAME_ERR = (u32*)&fsl_err;
-fsl_mem_arena memory_arena_internal = {0};
 fsl_render *render = NULL;
 struct hhc_core core = {0};
 struct hhc_uniform uniform = {0};
@@ -830,8 +828,7 @@ int main(int argc, char **argv)
                 "'MODE_INTERNAL_COLLIDE' Disabled\n");
     }
 
-    if (rand_init() != FSL_ERR_SUCCESS ||
-            settings_init() != FSL_ERR_SUCCESS)
+    if (settings_init() != FSL_ERR_SUCCESS)
         goto cleanup;
 
     /* ---- set mouse input ------------------------------------------------- */
@@ -871,18 +868,20 @@ int main(int argc, char **argv)
     input_init();
     bind_shader_uniforms();
 
+#if MODE_INTERNAL_SKIP_TITLE_MENU
+    goto section_gameplay;
+#endif /* MODE_INTERNAL_SKIP_TITLE_MENU */
+
 section_menu_title:
 
-    show_cursor;
+    enable_cursor;
 
     while (fsl_engine_running(&callback_framebuffer_size))
     {
-        /* ---- draw super debugger ----------------------------------------- */
-
         input_update(&player);
         fsl_ui_start(TRUE);
 
-        gui_menu_title_draw(render->size);
+        gui_menu_title_draw();
 
         if (core.flag.super_debug)
             super_debugger_draw(render->size);
@@ -890,14 +889,40 @@ section_menu_title:
         fsl_ui_stop();
         fsl_fbo_blit(0);
 
-        if (!core.flag.paused && core.request.world_load)
+        if (core.request.world_load)
         {
             core.request.world_load = FALSE;
+            disable_cursor;
+            center_cursor;
             goto section_gameplay;
         }
     }
 
 section_menu_pause:
+
+    while (fsl_engine_running(&callback_framebuffer_size))
+    {
+        input_update(&player);
+        fsl_ui_start(TRUE);
+
+        gui_menu_pause_draw();
+
+        if (core.flag.super_debug)
+            super_debugger_draw(render->size);
+
+        fsl_ui_stop();
+        fsl_fbo_blit(0);
+
+        if (core.request.menu_back)
+        {
+            core.request.menu_back = FALSE;
+            core.flag.paused = FALSE;
+            center_cursor;
+            enable_cursor;
+            goto section_gameplay;
+        }
+        printf("mouse_pos: %f %f\n", render->mouse_pos.x, render->mouse_pos.y);
+    }
 
 section_gameplay:
 
@@ -910,6 +935,7 @@ section_gameplay:
         input_update(&player);
         world_update(&player);
         world_draw();
+        printf("mouse_pos: %f %f\n", render->mouse_pos.x, render->mouse_pos.y);
 
         fsl_process_screenshot_request(GAME_DIR_NAME_SCREENSHOTS, world.name);
         fsl_limit_framerate(settings.target_fps, render->time);
@@ -917,8 +943,12 @@ section_gameplay:
         if (!core.flag.world_loaded)
             goto section_menu_title;
 
-        if (core.flag.paused)
+        if (core.request.menu_back)
+        {
+            core.request.menu_back = FALSE;
+            core.flag.paused = TRUE;
             goto section_menu_pause;
+        }
     }
 
 cleanup:
@@ -926,8 +956,6 @@ cleanup:
     gui_free();
     assets_free();
     chunking_free();
-    rand_free();
-    fsl_mem_arena_free(&memory_arena_internal, "main().memory_arena_internal");
     fsl_engine_close();
     return *GAME_ERR;
 }

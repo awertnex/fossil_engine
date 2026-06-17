@@ -33,12 +33,6 @@
 #define FSL_GRAVITY     9.7803267715
 #define FSL_EPSILON     1e-5
 
-/*!
- *  @brief can be used to shrink down big values when passed into trigonometrical
- *  functions, especially when generating random floats, it decreases workload.
- */
-#define FSL_RAND_SCALE  (FSL_PI / ~(~0u >> 1))
-
 FSLAPI i32 fsl_clamp_i32(i32 n, i32 min, i32 max);
 FSLAPI u32 fsl_clamp_u32(u32 n, u32 min, u32 max);
 FSLAPI f32 fsl_clamp_f32(f32 n, f32 min, f32 max);
