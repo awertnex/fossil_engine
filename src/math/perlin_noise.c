@@ -1,3 +1,25 @@
+/*!
+ *  Copyright 2026 Lily Awertnex
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+/*!
+ *  @file perlin_noise.c
+ *
+ *  @brief perlin noise functions and gradient samplers.
+ */
+
 #include "math.h"
 #include "noise.h"
 
@@ -47,7 +69,7 @@ f32 fsl_gradient_3d(f32 vx, f32 vy, f32 vz, i32 x, i32 y, i32 z, u64 seed)
 
 f32 fsl_perlin_noise_1d(i32 x, f32 amplitude, f32 frequency, u64 seed)
 {
-    f32 v = (f32)x / frequency;
+    f32 v = (f32)x * frequency;
     i32 a = (i32)floorf(v);
     i32 b = a + 1;
     f32 d = v - (f32)a;
@@ -71,8 +93,8 @@ f32 fsl_perlin_noise_1d_ex(i32 x, f32 amplitude, f32 frequency,
 
 f32 fsl_perlin_noise_2d(i32 x, i32 y, f32 amplitude, f32 frequency, u64 seed)
 {
-    f32 vx = (f32)x / frequency;
-    f32 vy = (f32)y / frequency;
+    f32 vx = (f32)x * frequency;
+    f32 vy = (f32)y * frequency;
     i32 ax = (i32)floorf(vx);
     i32 ay = (i32)floorf(vy);
     i32 bx = ax + 1;
@@ -110,9 +132,9 @@ f32 fsl_perlin_noise_2d_ex(i32 x, i32 y, f32 amplitude, f32 frequency,
 
 f32 fsl_perlin_noise_3d(i32 x, i32 y, i32 z, f32 amplitude, f32 frequency, u64 seed)
 {
-    f32 vx = (f32)x / frequency;
-    f32 vy = (f32)y / frequency;
-    f32 vz = (f32)z / frequency;
+    f32 vx = (f32)x * frequency;
+    f32 vy = (f32)y * frequency;
+    f32 vz = (f32)z * frequency;
     i32 ax = (i32)floorf(vx);
     i32 ay = (i32)floorf(vy);
     i32 az = (i32)floorf(vz);
