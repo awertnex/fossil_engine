@@ -18,6 +18,7 @@
 
 terrain terrain_land(v3i32 coordinates)
 {
+    terrain result = {0};
     i32 x = coordinates.x + 7324;
     i32 y = coordinates.y - 7272;
     i32 z = coordinates.z - 30;
@@ -38,7 +39,6 @@ terrain terrain_land(v3i32 coordinates)
     f32 biome_blend = 0.0f;
     f32 land_final = 0.0f;
     f32 cave_final = 0.0f;
-    terrain result = {0};
 
     crush = fabsf(((f32)(z + TERRAIN_CAVE_LEVEL) / WORLD_DIAMETER_VERTICAL) + 0.4f) * 0.8f;
 
@@ -107,9 +107,10 @@ terrain terrain_land(v3i32 coordinates)
 
 terrain terrain_decaying_lands(v3i32 coordinates)
 {
-    i32 x = coordinates.x + 7324;
-    i32 y = coordinates.y - 7272;
-    i32 z = coordinates.z + 30;
+    terrain result = {0};
+    f32 x = (f32)coordinates.x + 7324.0f;
+    f32 y = (f32)coordinates.y - 7272.0f;
+    f32 z = (f32)coordinates.z + 30.0f;
     f32 crush = 0.0f;
     f32 mountains = 0.0f;
     f32 ridges = 0.0f;
@@ -121,20 +122,19 @@ terrain terrain_decaying_lands(v3i32 coordinates)
     f32 cave_level = 0.0f;
     f32 land_final = 0.0f;
     f32 cave_final = 0.0f;
-    terrain result = {0};
 
     crush = fabsf((((f32)z - (WORLD_RADIUS_VERTICAL / 2)) / WORLD_RADIUS_VERTICAL) + 0.4f) * 0.8f;
 
-    gathering = fsl_perlin_noise_2d(x, y, 0.2f, 22.5f, world.seed + 75489);
+    gathering = fsl_perlin_noise_2d(x, y, 0.2f, 1.0f / 22.5f, world.seed + 75489);
 
-    mountains = fsl_perlin_noise_2d_ex(x, y, 170.0f, 255.0f, 3, 0.8f, 0.8f, world.seed + 9584);
+    mountains = fsl_perlin_noise_2d_ex(x, y, 170.0f, 1.0f / 255.0f, 3, 0.8f, 0.8f, world.seed + 9584);
 
-    ridges = fsl_perlin_noise_2d(x, y, 3.0f, 19.0f + gathering, world.seed - 5873956);
+    ridges = fsl_perlin_noise_2d(x, y, 3.0f, 1.0f / (19.0f + gathering), world.seed - 5873956);
 
-    cave_frequency = fsl_perlin_noise_3d_ex(x, y, z, 1.0f, 208.0f, 2, 0.8f, 0.8f, world.seed + 57394);
-    cave_spaghetti = fsl_perlin_noise_3d(x, y, z, 1.0f, 22.0f, world.seed + 377779623);
-    cave_features_big = fsl_perlin_noise_3d_ex(x, y, z, 0.1f, 190.0f, 3, 0.7f, 0.5f, world.seed + 7923847) + 0.04f;
-    cave_features_small = fsl_perlin_noise_3d_ex(x, y, z, 1.0f, 20.0f, 3, 0.7f, 0.75f, world.seed + 87722234);
+    cave_frequency = fsl_perlin_noise_3d_ex(x, y, z, 1.0f, 1.0f / 208.0f, 2, 0.8f, 0.8f, world.seed + 57394);
+    cave_spaghetti = fsl_perlin_noise_3d(x, y, z, 1.0f, 1.0f / 22.0f, world.seed + 377779623);
+    cave_features_big = fsl_perlin_noise_3d_ex(x, y, z, 0.1f, 1.0f / 190.0f, 3, 0.7f, 0.5f, world.seed + 7923847) + 0.04f;
+    cave_features_small = fsl_perlin_noise_3d_ex(x, y, z, 1.0f, 1.0f / 20.0f, 3, 0.7f, 0.75f, world.seed + 87722234);
 
     land_final = mountains + ridges;
     cave_final = cave_spaghetti + cave_frequency + cave_features_big + cave_features_small;

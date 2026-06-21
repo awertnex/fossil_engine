@@ -86,7 +86,7 @@ FSLAPI f32 fsl_gradient_3d(f32 vx, f32 vy, f32 vz, i32 x, i32 y, i32 z, u64 seed
  *
  *  @return a value between [amplitude / 2, -amplitude / 2].
  */
-FSLAPI f32 fsl_perlin_noise_1d(i32 x, f32 amplitude, f32 frequency, u64 seed);
+FSLAPI f32 fsl_perlin_noise_1d(f32 x, f32 amplitude, f32 frequency, u64 seed);
 
 /*!
  *  @brief calls @ref perlin_noise_1d() for as many `octaves`.
@@ -97,7 +97,7 @@ FSLAPI f32 fsl_perlin_noise_1d(i32 x, f32 amplitude, f32 frequency, u64 seed);
  *
  *  @return a value between [amplitude / 2, -amplitude / 2].
  */
-FSLAPI f32 fsl_perlin_noise_1d_ex(i32 x, f32 amplitude, f32 frequency,
+FSLAPI f32 fsl_perlin_noise_1d_ex(f32 x, f32 amplitude, f32 frequency,
         u32 octaves, f32 amplitude_persistence, f32 frequency_persistence, u64 seed);
 
 /*!
@@ -108,7 +108,7 @@ FSLAPI f32 fsl_perlin_noise_1d_ex(i32 x, f32 amplitude, f32 frequency,
  *
  *  @return a value between [amplitude / 2, -amplitude / 2].
  */
-FSLAPI f32 fsl_perlin_noise_2d(i32 x, i32 y, f32 amplitude, f32 frequency, u64 seed);
+FSLAPI f32 fsl_perlin_noise_2d(f32 x, f32 y, f32 amplitude, f32 frequency, u64 seed);
 
 /*!
  *  @brief calls @ref perlin_noise_2d() for as many `octaves`.
@@ -123,7 +123,7 @@ FSLAPI f32 fsl_perlin_noise_2d(i32 x, i32 y, f32 amplitude, f32 frequency, u64 s
  *
  *  @return a value between [amplitude / 2, -amplitude / 2].
  */
-FSLAPI f32 fsl_perlin_noise_2d_ex(i32 x, i32 y, f32 amplitude, f32 frequency,
+FSLAPI f32 fsl_perlin_noise_2d_ex(f32 x, f32 y, f32 amplitude, f32 frequency,
         u32 octaves, f32 amplitude_persistence, f32 frequency_persistence, u64 seed);
 
 /*!
@@ -135,7 +135,7 @@ FSLAPI f32 fsl_perlin_noise_2d_ex(i32 x, i32 y, f32 amplitude, f32 frequency,
  *
  *  @return a value between [amplitude / 2, -amplitude / 2].
  */
-FSLAPI f32 fsl_perlin_noise_3d(i32 x, i32 y, i32 z, f32 amplitude, f32 frequency, u64 seed);
+FSLAPI f32 fsl_perlin_noise_3d(f32 x, f32 y, f32 z, f32 amplitude, f32 frequency, u64 seed);
 
 /*!
  *  @brief calls @ref perlin_noise_3d() for as many `octaves`.
@@ -151,7 +151,7 @@ FSLAPI f32 fsl_perlin_noise_3d(i32 x, i32 y, i32 z, f32 amplitude, f32 frequency
  *
  *  @return a value between [amplitude / 2, -amplitude / 2].
  */
-FSLAPI f32 fsl_perlin_noise_3d_ex(i32 x, i32 y, i32 z, f32 amplitude, f32 frequency,
+FSLAPI f32 fsl_perlin_noise_3d_ex(f32 x, f32 y, f32 z, f32 amplitude, f32 frequency,
         u32 octaves, f32 amplitude_persistence, f32 frequency_persistence, u64 seed);
 
 #endif /* FSL_MATH_NOISE_H */

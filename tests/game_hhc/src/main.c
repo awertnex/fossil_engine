@@ -921,7 +921,6 @@ section_menu_pause:
             enable_cursor;
             goto section_gameplay;
         }
-        printf("mouse_pos: %f %f\n", render->mouse_pos.x, render->mouse_pos.y);
     }
 
 section_gameplay:
@@ -935,7 +934,6 @@ section_gameplay:
         input_update(&player);
         world_update(&player);
         world_draw();
-        printf("mouse_pos: %f %f\n", render->mouse_pos.x, render->mouse_pos.y);
 
         fsl_process_screenshot_request(GAME_DIR_NAME_SCREENSHOTS, world.name);
         fsl_limit_framerate(settings.target_fps, render->time);

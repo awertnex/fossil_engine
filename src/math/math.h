@@ -50,7 +50,6 @@ FSLAPI b8 fsl_is_in_range_i64(i64 n, i64 min, i64 max);
 FSLAPI b8 fsl_is_in_range_f64(f64 n, f64 min, f64 max);
 FSLAPI f32 fsl_lerp_f32(f32 a, f32 b, f64 t);
 FSLAPI f32 fsl_lerp_exp_f32(f32 a, f32 b, f64 k, f32 t);
-FSLAPI f32 fsl_lerp_cubic_f32(f32 a, f32 b, f32 t);
 FSLAPI f32 fsl_easein_f32(f32 a, f32 b, f32 t);
 FSLAPI f32 fsl_easeout_f32(f32 a, f32 b, f32 t);
 FSLAPI f32 fsl_smoothstep_f32(f32 a, f32 b, f32 t);

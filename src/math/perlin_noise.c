@@ -67,18 +67,18 @@ f32 fsl_gradient_3d(f32 vx, f32 vy, f32 vz, i32 x, i32 y, i32 z, u64 seed)
     return (vx - x) * gx + (vy - y) * gy + (vz - z) * gz;
 }
 
-f32 fsl_perlin_noise_1d(i32 x, f32 amplitude, f32 frequency, u64 seed)
+f32 fsl_perlin_noise_1d(f32 x, f32 amplitude, f32 frequency, u64 seed)
 {
-    f32 v = (f32)x * frequency;
+    f32 v = x * frequency;
     i32 a = (i32)floorf(v);
     i32 b = a + 1;
     f32 d = v - (f32)a;
     f32 g0 = fsl_gradient_1d(v, a, seed);
     f32 g1 = fsl_gradient_1d(v, b, seed);
-    return fsl_lerp_cubic_f32(g0, g1, d) * amplitude;
+    return fsl_smoothstep_f32(g0, g1, d) * amplitude;
 }
 
-f32 fsl_perlin_noise_1d_ex(i32 x, f32 amplitude, f32 frequency,
+f32 fsl_perlin_noise_1d_ex(f32 x, f32 amplitude, f32 frequency,
         u32 octaves, f32 amplitude_persistence, f32 frequency_persistence, u64 seed)
 {
     f32 result = 0.0f;
@@ -91,10 +91,10 @@ f32 fsl_perlin_noise_1d_ex(i32 x, f32 amplitude, f32 frequency,
     return result;
 }
 
-f32 fsl_perlin_noise_2d(i32 x, i32 y, f32 amplitude, f32 frequency, u64 seed)
+f32 fsl_perlin_noise_2d(f32 x, f32 y, f32 amplitude, f32 frequency, u64 seed)
 {
-    f32 vx = (f32)x * frequency;
-    f32 vy = (f32)y * frequency;
+    f32 vx = x * frequency;
+    f32 vy = y * frequency;
     i32 ax = (i32)floorf(vx);
     i32 ay = (i32)floorf(vy);
     i32 bx = ax + 1;
@@ -108,16 +108,16 @@ f32 fsl_perlin_noise_2d(i32 x, i32 y, f32 amplitude, f32 frequency, u64 seed)
 
     g0 = fsl_gradient_2d(vx, vy, ax, ay, seed);
     g1 = fsl_gradient_2d(vx, vy, bx, ay, seed);
-    l0 = fsl_lerp_cubic_f32(g0, g1, dx);
+    l0 = fsl_smoothstep_f32(g0, g1, dx);
 
     g0 = fsl_gradient_2d(vx, vy, ax, by, seed);
     g1 = fsl_gradient_2d(vx, vy, bx, by, seed);
-    l1 = fsl_lerp_cubic_f32(g0, g1, dx);
+    l1 = fsl_smoothstep_f32(g0, g1, dx);
 
-    return fsl_lerp_cubic_f32(l0, l1, dy) * amplitude;
+    return fsl_smoothstep_f32(l0, l1, dy) * amplitude;
 }
 
-f32 fsl_perlin_noise_2d_ex(i32 x, i32 y, f32 amplitude, f32 frequency,
+f32 fsl_perlin_noise_2d_ex(f32 x, f32 y, f32 amplitude, f32 frequency,
         u32 octaves, f32 amplitude_persistence, f32 frequency_persistence, u64 seed)
 {
     f32 result = 0.0f;
@@ -130,11 +130,11 @@ f32 fsl_perlin_noise_2d_ex(i32 x, i32 y, f32 amplitude, f32 frequency,
     return result;
 }
 
-f32 fsl_perlin_noise_3d(i32 x, i32 y, i32 z, f32 amplitude, f32 frequency, u64 seed)
+f32 fsl_perlin_noise_3d(f32 x, f32 y, f32 z, f32 amplitude, f32 frequency, u64 seed)
 {
-    f32 vx = (f32)x * frequency;
-    f32 vy = (f32)y * frequency;
-    f32 vz = (f32)z * frequency;
+    f32 vx = x * frequency;
+    f32 vy = y * frequency;
+    f32 vz = z * frequency;
     i32 ax = (i32)floorf(vx);
     i32 ay = (i32)floorf(vy);
     i32 az = (i32)floorf(vz);
@@ -153,28 +153,28 @@ f32 fsl_perlin_noise_3d(i32 x, i32 y, i32 z, f32 amplitude, f32 frequency, u64 s
 
     g0 = fsl_gradient_3d(vx, vy, vz, ax, ay, az, seed);
     g1 = fsl_gradient_3d(vx, vy, vz, bx, ay, az, seed);
-    l0 = fsl_lerp_cubic_f32(g0, g1, dx);
+    l0 = fsl_smoothstep_f32(g0, g1, dx);
 
     g0 = fsl_gradient_3d(vx, vy, vz, ax, by, az, seed);
     g1 = fsl_gradient_3d(vx, vy, vz, bx, by, az, seed);
-    l1 = fsl_lerp_cubic_f32(g0, g1, dx);
+    l1 = fsl_smoothstep_f32(g0, g1, dx);
 
-    ll0 = fsl_lerp_cubic_f32(l0, l1, dy);
+    ll0 = fsl_smoothstep_f32(l0, l1, dy);
 
     g0 = fsl_gradient_3d(vx, vy, vz, ax, ay, bz, seed);
     g1 = fsl_gradient_3d(vx, vy, vz, bx, ay, bz, seed);
-    l0 = fsl_lerp_cubic_f32(g0, g1, dx);
+    l0 = fsl_smoothstep_f32(g0, g1, dx);
 
     g0 = fsl_gradient_3d(vx, vy, vz, ax, by, bz, seed);
     g1 = fsl_gradient_3d(vx, vy, vz, bx, by, bz, seed);
-    l1 = fsl_lerp_cubic_f32(g0, g1, dx);
+    l1 = fsl_smoothstep_f32(g0, g1, dx);
 
-    ll1 = fsl_lerp_cubic_f32(l0, l1, dy);
+    ll1 = fsl_smoothstep_f32(l0, l1, dy);
 
-    return fsl_lerp_cubic_f32(ll0, ll1, dz) * amplitude;
+    return fsl_smoothstep_f32(ll0, ll1, dz) * amplitude;
 }
 
-f32 fsl_perlin_noise_3d_ex(i32 x, i32 y, i32 z, f32 amplitude, f32 frequency,
+f32 fsl_perlin_noise_3d_ex(f32 x, f32 y, f32 z, f32 amplitude, f32 frequency,
         u32 octaves, f32 amplitude_persistence, f32 frequency_persistence, u64 seed)
 {
     f32 result = 0.0f;

@@ -10,7 +10,13 @@
 ## v0.13.0-dev (current)
 
 #### changes
-- change disivion by `frequency` in perlin noise functions to multiplication.
+- change disivion by `frequency` in perlin-noise functions to multiplication.
+- change parameters in perlin-noise functions from integer coordinates to
+  floating point coordinates.
+
+#### deletions
+- removed function `fsl_lerp_cubic_f32()` because it was smoothstep, not cubic
+  interpolation, use `fsl_smoothstep_f32()` instead.
 
 #### known bugs and flaws
 - the 'obj' loader possibly has a bug due to hash-table collisions:

@@ -67,7 +67,7 @@ u32 noise_init_internal(void)
     else
     {
         for (i = 0; i < FSL_RAND_TAB_VOLUME; ++i)
-            fsl_rand_tab[i] = sin((f64)fsl_rand_u64(i));
+            fsl_rand_tab[i] = sin((f64)(fsl_rand_u64(i) % 360));
 
         if (fsl_write_file(path, FSL_RAND_TAB_VOLUME * sizeof(f32),
                     fsl_rand_tab, TRUE, FALSE) != FSL_ERR_SUCCESS)
@@ -459,11 +459,6 @@ f32 fsl_lerp_exp_f32(f32 a, f32 b, f64 k, f32 t)
     return a + (b - a) * (1.0f - expf(-k * t));
 }
 
-f32 fsl_lerp_cubic_f32(f32 a, f32 b, f32 t)
-{
-    return a + (b - a) * (3.0f - t * 2.0f) * t * t;
-}
-
 v3f64 fsl_lerp_v3f64(v3f64 a, v3f64 b, f32 t)
 {
     v3f64 v = {0};
@@ -480,8 +475,7 @@ f32 fsl_easein_f32(f32 a, f32 b, f32 t)
 
 f32 fsl_smoothstep_f32(f32 a, f32 b, f32 t)
 {
-   t = fsl_clamp_f32((t - a) / (b - a), -1.0f, 1.0f);
-   return t * t * (3.0f - 2.0f * t);
+   return a + (b - a) * t * t * (3.0f - t * 2.0f);
 }
 
 #pragma GCC diagnostic push
