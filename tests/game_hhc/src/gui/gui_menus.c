@@ -40,7 +40,6 @@ static void ui_button_click_func_menu_pause_quit_to_title(fsl_ui_event event, vo
 void gui_menus_init(v2i32 render_size)
 {
     fsl_texture *texture_p = fsl_mem_handle_get(texture);
-    u32 i = 0;
 
     fsl_ui_element_set_texture(&ui_element_menu[UI_ELEMENT_MENU_TITLE_BUTTON_SINGLEPLAYER],
             &texture_p[TEXTURE_BUTTON]);

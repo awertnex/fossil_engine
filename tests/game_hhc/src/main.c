@@ -21,8 +21,7 @@
 #include "h/player.h"
 #include "h/world.h"
 
-#include <stdio.h>
-#include <string.h>
+#include <stddef.h>
 #include <inttypes.h>
 #include <math.h>
 
@@ -308,12 +307,11 @@ static void world_draw(void)
     static str engine_version[FSL_ID_CAP] = {0};
     fsl_fbo *fbo_p = fsl_mem_handle_get(fbo);
     fsl_texture *texture_p = fsl_mem_handle_get(texture);
-    fsl_texture *fsl_texture_p = fsl_mem_handle_get(fsl_texture_buf);
     fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
     fsl_mesh *fsl_mesh_p = fsl_mem_handle_get(fsl_mesh_buf);
     fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
     fsl_shader_program *fsl_shader_p = fsl_mem_handle_get(fsl_shader_buf);
-    block *blocks_p = fsl_mem_handle_get(blocks);
+    hhc_block *blocks_p = fsl_mem_handle_get(blocks);
     fsl_asset_metadata metadata = {0};
     u32 block_id = 0;
 
@@ -339,19 +337,19 @@ static void world_draw(void)
     skybox_data.sun_rotation.z = sin(skybox_data.time * FSL_PI);
 
     mid_day =       (sin(sun_time) + 1.0) / 2.0;
-    mid_day =       pow(sin((FSL_PI / 2.0) * mid_day), 2.0);
-    mid_day =       pow(sin((FSL_PI / 2.0) * mid_day), 2.0);
+    mid_day =       pow(sin(FSL_HALF_PI * mid_day), 2.0);
+    mid_day =       pow(sin(FSL_HALF_PI * mid_day), 2.0);
 
-    burn_cold =     pow((sin((FSL_PI / 2.0) * sin(sun_time + (FSL_PI / 2.0))) + 1.0) / 2.0, 24.0);
-    burn_cold +=    pow((sin((FSL_PI / 2.0) * sin(sun_time - (FSL_PI / 2.0))) + 1.0) / 2.0, 24.0);
+    burn_cold =     pow((sin(FSL_HALF_PI * sin(sun_time + FSL_HALF_PI)) + 1.0) / 2.0, 24.0);
+    burn_cold +=    pow((sin(FSL_HALF_PI * sin(sun_time - FSL_HALF_PI)) + 1.0) / 2.0, 24.0);
 
-    burn =          pow((sin(sun_time + (FSL_PI / 2.0)) + 1.0) / 2.0, 64.0);
-    burn +=         pow((sin(sun_time - (FSL_PI / 2.0)) + 1.0) / 2.0, 64.0);
+    burn =          pow((sin(sun_time + FSL_HALF_PI) + 1.0) / 2.0, 64.0);
+    burn +=         pow((sin(sun_time - FSL_HALF_PI) + 1.0) / 2.0, 64.0);
 
-    burn_boost =    pow(sin(sun_time + (FSL_PI / 2.0)), 128.0);
-    burn_boost +=   pow(sin(sun_time - (FSL_PI / 2.0)), 128.0);
+    burn_boost =    pow(sin(sun_time + FSL_HALF_PI), 128.0);
+    burn_boost +=   pow(sin(sun_time - FSL_HALF_PI), 128.0);
 
-    mid_night =     pow((sin((FSL_PI / 2.0) * sin(sun_time + FSL_PI)) + 1.0) / 2.0, 4.0);
+    mid_night =     pow((sin(FSL_HALF_PI * sin(sun_time + FSL_PI)) + 1.0) / 2.0, 4.0);
 
     skybox_data.sky_color.x = (mid_day * 171.0f + mid_night * 1.0f + burn_cold * 8.0f) / 0xff;
     skybox_data.sky_color.y = (mid_day * 229.0f + mid_night * 4.0f + burn_cold * 4.0f) / 0xff;
@@ -429,8 +427,8 @@ static void world_draw(void)
     };
 
     rotation = (m4f32){
-        cosf(FSL_PI / 2.0f), -sinf(FSL_PI / 2.0f), 0.0f, 0.0f,
-        sinf(FSL_PI / 2.0f), cosf(FSL_PI / 2.0f), 0.0f, 0.0f,
+        cosf(FSL_HALF_PI), -sinf(FSL_HALF_PI), 0.0f, 0.0f,
+        sinf(FSL_HALF_PI), cosf(FSL_HALF_PI), 0.0f, 0.0f,
         0.0f, 1.0f, 0.0f, 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f,
     };
@@ -463,10 +461,10 @@ static void world_draw(void)
         1.0f,
     };
 
-    sun_angle = skybox_data.time * FSL_PI - 90.0f * FSL_DEG2RAD;
+    sun_angle = skybox_data.time * FSL_PI - FSL_HALF_PI;
     rotation = (m4f32){
-        cosf(FSL_PI / 2.0f), -sinf(FSL_PI / 2.0f), 0.0f, 0.0f,
-        sinf(FSL_PI / 2.0f), cosf(FSL_PI / 2.0f), 0.0f, 0.0f,
+        cosf(FSL_HALF_PI), -sinf(FSL_HALF_PI), 0.0f, 0.0f,
+        sinf(FSL_HALF_PI), cosf(FSL_HALF_PI), 0.0f, 0.0f,
         0.0f, 1.0f, 0.0f, 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f,
     };
@@ -892,8 +890,6 @@ section_menu_title:
         if (core.request.world_load)
         {
             core.request.world_load = FALSE;
-            disable_cursor;
-            center_cursor;
             goto section_gameplay;
         }
     }
@@ -912,6 +908,13 @@ section_menu_pause:
 
         fsl_ui_stop();
         fsl_fbo_blit(0);
+
+        if (core.request.menu_title_enter)
+        {
+            core.request.menu_title_enter = FALSE;
+            core.flag.world_loaded = FALSE;
+            goto section_menu_title;
+        }
 
         if (core.request.menu_back)
         {
@@ -937,9 +940,6 @@ section_gameplay:
 
         fsl_process_screenshot_request(GAME_DIR_NAME_SCREENSHOTS, world.name);
         fsl_limit_framerate(settings.target_fps, render->time);
-
-        if (!core.flag.world_loaded)
-            goto section_menu_title;
 
         if (core.request.menu_back)
         {

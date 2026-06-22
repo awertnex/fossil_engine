@@ -17,12 +17,17 @@
 #define CHUNK_REGION_DIAMETER   32
 #define CHUNK_REGION_VOLUME     (CHUNK_REGION_DIAMETER * CHUNK_REGION_DIAMETER * CHUNK_REGION_DIAMETER)
 
-#define WORLD_RADIUS            (2048 * CHUNK_DIAMETER)
-#define WORLD_RADIUS_VERTICAL   (64 * CHUNK_DIAMETER)
+#define WORLD_RADIUS            2048
+#define WORLD_RADIUS_VERTICAL   64
 
-#define WORLD_DIAMETER          (WORLD_RADIUS * 2 + CHUNK_DIAMETER)
-#define WORLD_DIAMETER_VERTICAL (WORLD_RADIUS_VERTICAL * 2 + CHUNK_DIAMETER)
-#define WORLD_CHUNKS_MAX        ((WORLD_DIAMETER * WORLD_DIAMETER * WORLD_DIAMETER_VERTICAL) / CHUNK_DIAMETER)
+#define WORLD_DIAMETER          (WORLD_RADIUS * 2)
+#define WORLD_DIAMETER_VERTICAL (WORLD_RADIUS_VERTICAL * 2)
+#define WORLD_CHUNKS_MAX        (WORLD_DIAMETER * WORLD_DIAMETER * WORLD_DIAMETER_VERTICAL)
+
+/*!
+ *  @brief a margin of chunks before any world edge.
+ */
+#define WORLD_MARGIN            SET_RENDER_DISTANCE_MAX
 
 #define CHUNK_BUF_RADIUS_MAX    SET_RENDER_DISTANCE_MAX
 #define CHUNK_BUF_DIAMETER_MAX  (CHUNK_BUF_RADIUS_MAX * 2 + 1)
@@ -106,7 +111,8 @@ typedef struct hhc_chunk_mesh
 typedef struct hhc_chunk
 {
     u8 flag; /* enum: chunk_flag */
-    v3i16 pos; /* world position / @ref CHUNK_DIAMETER */
+    v3i16 pos_world;    /* world position, in chunk-space (for rendering) */
+    v3i16 pos;          /* canonical position, in chunk-space (for serialization) */
 
     /*!
      *  @brief chunk's unique id derived from its position.

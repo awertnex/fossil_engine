@@ -475,7 +475,7 @@ f32 fsl_easein_f32(f32 a, f32 b, f32 t)
 
 f32 fsl_smoothstep_f32(f32 a, f32 b, f32 t)
 {
-   return a + (b - a) * t * t * (3.0f - t * 2.0f);
+    return a + (b - a) * t * t * (3.0f - 2.0f * t);
 }
 
 #pragma GCC diagnostic push

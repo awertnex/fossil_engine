@@ -9,10 +9,16 @@
 
 ## v0.13.0-dev (current)
 
+#### fixes
+- fixed mouse delta spike when resizing window.
+
 #### changes
+- enabled compiler optimizations (-Ofast).
 - change disivion by `frequency` in perlin-noise functions to multiplication.
 - change parameters in perlin-noise functions from integer coordinates to
   floating point coordinates.
+- optimized perlin-noise functions by expanding interpolation math to
+  weighted-sum math.
 
 #### deletions
 - removed function `fsl_lerp_cubic_f32()` because it was smoothstep, not cubic

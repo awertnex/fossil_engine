@@ -263,9 +263,9 @@ static void chunk_debug_scheduler_visualizer_draw_internal(hhc_chunk_scheduler s
     while (count--)
     {
         glUniform3f(uniform.bounding_box.position,
-                (f32)(sched.p[pop]->pos.x * CHUNK_DIAMETER),
-                (f32)(sched.p[pop]->pos.y * CHUNK_DIAMETER),
-                (f32)(sched.p[pop]->pos.z * CHUNK_DIAMETER));
+                (f32)(sched.p[pop]->pos_world.x * CHUNK_DIAMETER),
+                (f32)(sched.p[pop]->pos_world.y * CHUNK_DIAMETER),
+                (f32)(sched.p[pop]->pos_world.z * CHUNK_DIAMETER));
 
         glUniform4f(uniform.bounding_box.color, color_r, color_g, color_b, color_a);
         glBindVertexArray(mesh_bounding_box->vao);
