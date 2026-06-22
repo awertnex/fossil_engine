@@ -7,7 +7,7 @@
    version v0.3.3-beta (2026 01 24), which makes v0.3.4-beta the first version
    of the engine as standalone in this repo.
 
-## v0.13.0-dev (current)
+## v0.14.0-beta (2026 06 22)
 
 #### fixes
 - fixed mouse delta spike when resizing window.
