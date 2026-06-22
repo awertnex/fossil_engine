@@ -1,6 +1,7 @@
 #include "deps/fossil/engine/engine_assets.h"
 #include "deps/fossil/logger/logger.h"
 #include "deps/fossil/memory/memory.h"
+#include "deps/fossil/ui/ui_element.h"
 #include "deps/fossil/ui/ui_types.h"
 
 #include "../h/main.h"

@@ -84,13 +84,13 @@ enum block_state
     BLOCK_STATE_SOLID = 1
 }; /* block_state */
 
-typedef struct block
+typedef struct hhc_block
 {
     fsl_asset asset;
     u32 texture_index[6]; /* px, nx, py, ny, pz, nz */
     enum block_state state;
     f32 friction;
-} block;
+} hhc_block;
 
 /* ---- section: declarations ----------------------------------------------- */
 

@@ -7,6 +7,31 @@
    version v0.3.3-beta (2026 01 24), which makes v0.3.4-beta the first version
    of the engine as standalone in this repo.
 
+## v0.14.0-beta (2026 06 22)
+
+#### fixes
+- fixed mouse delta spike when resizing window.
+
+#### changes
+- enabled compiler optimizations (-Ofast).
+- change disivion by `frequency` in perlin-noise functions to multiplication.
+- change parameters in perlin-noise functions from integer coordinates to
+  floating point coordinates.
+- optimized perlin-noise functions by expanding interpolation math to
+  weighted-sum math.
+
+#### deletions
+- removed function `fsl_lerp_cubic_f32()` because it was smoothstep, not cubic
+  interpolation, use `fsl_smoothstep_f32()` instead.
+
+#### known bugs and flaws
+- the 'obj' loader possibly has a bug due to hash-table collisions:
+    - sometimes faces disappear when ordered in specific ways in the obj file.
+- the 'obj' loader does not handle concave faces smartly, just loads them as
+  they are.
+- function `fsl_mem_arena_pop()` does not use arena's freelist yet.
+
+- - -
 ## v0.13.0-beta (2026 06 17)
 
 #### additions

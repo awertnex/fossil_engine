@@ -17,7 +17,8 @@ static str str_cflags[][CMD_SIZE] =
     "-std="FSL_ENGINE_C_STD,
     "-D_GNU_SOURCE",
     "-DGLAD_GLAPI_EXPORT",
-    "-DGLAD_GLAPI_EXPORT_BUILD"
+    "-DGLAD_GLAPI_EXPORT_BUILD",
+    "-Ofast"
 };
 
 static str str_cflags_debug[][CMD_SIZE] =

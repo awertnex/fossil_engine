@@ -18,11 +18,12 @@ typedef struct world_info
     u64 id;
     str name[FSL_ID_CAP];
     str path[FSL_PATH_CAP];
-    u32 type;           /* gamemode set at world creation */
+    u32 type; /* gamemode set at world creation */
     u64 seed;
     u64 tick;
     u64 tick_start;
     u64 days;
+    hhc_terrain_noise_func terrain_noise_func;
     hhc_terrain_func terrain_func;
 
     f32 gravity;

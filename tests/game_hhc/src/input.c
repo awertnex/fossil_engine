@@ -200,11 +200,11 @@ void input_update(hhc_player *p)
         {
             p->input.x =
                 (px - nx) * cyaw * cpch +
-                (py - ny) * -cos(p->transform.rot.z * FSL_DEG2RAD + FSL_PI / 2.0) +
+                (py - ny) * -cos(p->transform.rot.z * FSL_DEG2RAD + FSL_HALF_PI) +
                 (pz - nz) * cyaw * spch;
             p->input.y =
                 (px - nx) * -syaw * cpch +
-                (py - ny) * sin(p->transform.rot.z * FSL_DEG2RAD + FSL_PI / 2.0) +
+                (py - ny) * sin(p->transform.rot.z * FSL_DEG2RAD + FSL_HALF_PI) +
                 (pz - nz) * -syaw * spch;
             p->input.z =
                 (px - nx) * -spch +
@@ -214,10 +214,10 @@ void input_update(hhc_player *p)
         {
             p->input.x =
                 (px - nx) * cyaw +
-                (py - ny) * -cos(p->transform.rot.z * FSL_DEG2RAD + FSL_PI / 2.0);
+                (py - ny) * -cos(p->transform.rot.z * FSL_DEG2RAD + FSL_HALF_PI);
             p->input.y =
                 (px - nx) * -syaw +
-                (py - ny) * sin(p->transform.rot.z * FSL_DEG2RAD + FSL_PI / 2.0);
+                (py - ny) * sin(p->transform.rot.z * FSL_DEG2RAD + FSL_HALF_PI);
             p->input.z =
                 pz - nz;
         }
@@ -296,9 +296,6 @@ void input_update(hhc_player *p)
         if (fsl_is_key_press(bind_toggle_hud))
             core.flag.hud ^= 1;
 
-        if (fsl_is_key_press(bind_take_screenshot))
-            fsl_request_screenshot();
-
         if (fsl_is_key_press(bind_toggle_debug))
             core.flag.debug ^= 1;
 
@@ -329,13 +326,24 @@ void input_update(hhc_player *p)
             LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     "Zoom Toggled Off\n");
         }
+
+        if (fsl_is_key_press(bind_toggle_flashlight))
+        {
+            p->flag ^= FLAG_PLAYER_FLASHLIGHT;
+
+            if (p->flag & FLAG_PLAYER_FLASHLIGHT)
+                LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                        "Flashlight Toggled On\n");
+            else
+                LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                        "Flashlight Toggled Off\n");
+        }
     }
     else
     {
         if (p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
         {
-            p->flag ^= FLAG_PLAYER_CINEMATIC_MOTION;
-
+            p->flag &= ~FLAG_PLAYER_CINEMATIC_MOTION;
             LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     "Cinematic Motion Toggled Off\n");
         }
@@ -346,19 +354,17 @@ void input_update(hhc_player *p)
             LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     "Zoom Toggled Off\n");
         }
-    }
-
-    if (fsl_is_key_press(bind_toggle_flashlight))
-    {
-        p->flag ^= FLAG_PLAYER_FLASHLIGHT;
 
         if (p->flag & FLAG_PLAYER_FLASHLIGHT)
-            LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                    "Flashlight Toggled On\n");
-        else
+        {
+            p->flag &= ~FLAG_PLAYER_FLASHLIGHT;
             LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
                     "Flashlight Toggled Off\n");
+        }
     }
+
+    if (fsl_is_key_press(bind_take_screenshot))
+        fsl_request_screenshot();
 
     /* ---- debug ----------------------------------------------------------- */
 

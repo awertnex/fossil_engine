@@ -140,6 +140,7 @@ void gui_update(v2i32 render_size)
             settings.gui_scale, settings.gui_scale);
 
     gui_menu_title_update(render_size);
+    gui_menu_pause_update(render_size);
 }
 
 void gui_free(void)

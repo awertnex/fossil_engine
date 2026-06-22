@@ -33,7 +33,7 @@ u32 assets_init(void)
     fsl_texture *texture_p = NULL;
     fsl_mesh *mesh_p = NULL;
     fsl_shader_program *shader_p = NULL;
-    block *blocks_p = NULL;
+    hhc_block *blocks_p = NULL;
     fsl_texture *block_textures_p = NULL;
     fsl_font *font_p = NULL;
 
@@ -89,7 +89,7 @@ u32 assets_init(void)
                 "assets_init().shader") != FSL_ERR_SUCCESS ||
 
             fsl_mem_arena_push(&memory_arena_assets_internal, &blocks,
-                BLOCK_COUNT * sizeof(block),
+                BLOCK_COUNT * sizeof(hhc_block),
                 "assets_init().blocks") != FSL_ERR_SUCCESS ||
 
             fsl_mem_arena_push(&memory_arena_assets_internal, &block_textures,
@@ -353,7 +353,7 @@ cleanup:
 
 void blocks_init(void)
 {
-    block *blocks_p = fsl_mem_handle_get(blocks);
+    hhc_block *blocks_p = fsl_mem_handle_get(blocks);
 
     fsl_asset_set_metadata(&blocks_p[BLOCK_NONE].asset, FSL_ASSET_CUSTOM,
             "None", "none", NULL, NULL);

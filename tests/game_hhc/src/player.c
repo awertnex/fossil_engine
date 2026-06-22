@@ -5,7 +5,6 @@
 #include "deps/fossil/math/vector.h"
 #include "deps/fossil/memory/memory.h"
 #include "deps/fossil/physics/collision.h"
-#include "deps/fossil/ui/ui.h"
 
 #include "deps/fossil/h/time.h"
 
@@ -15,7 +14,6 @@
 
 #include "h/main.h"
 #include "h/config_internal.h"
-#include "h/container.h"
 #include "h/common.h"
 #include "h/diagnostics.h"
 #include "h/player.h"
@@ -198,8 +196,8 @@ void player_hotbar_selected_set(hhc_player *p, u32 index)
 void player_collision_update(hhc_player *p, f64 dt)
 {
     hhc_chunk *ch = NULL;
-    block *block_p = fsl_mem_handle_get(blocks);
-    u32 *_block = NULL;
+    hhc_block *block_p = fsl_mem_handle_get(blocks);
+    u32 *block = NULL;
     f32 speed;
     v3f32 displacement = {0};
     f32 time = 0.0f;
@@ -264,27 +262,35 @@ void player_collision_update(hhc_player *p, f64 dt)
                     if (!ch || !(ch->flag & FLAG_CHUNK_GENERATED))
                         continue;
 
-                    _block = get_block_resolved(ch, x, y, z);
-                    if (!_block || !*_block)
+                    block = get_block_resolved(ch, x, y, z);
+                    if (!block || !*block)
                         continue;
 
-                    block_box.pos.x = (f64)((i64)ch->pos.x * CHUNK_DIAMETER + fsl_mod_i32(x, CHUNK_DIAMETER));
-                    block_box.pos.y = (f64)((i64)ch->pos.y * CHUNK_DIAMETER + fsl_mod_i32(y, CHUNK_DIAMETER));
-                    block_box.pos.z = (f64)((i64)ch->pos.z * CHUNK_DIAMETER + fsl_mod_i32(z, CHUNK_DIAMETER));
+                    block_box.pos.x = (f64)(ch->pos_world.x * CHUNK_DIAMETER +
+                            fsl_mod_i32(x, CHUNK_DIAMETER));
+                    block_box.pos.y = (f64)(ch->pos_world.y * CHUNK_DIAMETER +
+                            fsl_mod_i32(y, CHUNK_DIAMETER));
+                    block_box.pos.z = (f64)(ch->pos_world.z * CHUNK_DIAMETER +
+                            fsl_mod_i32(z, CHUNK_DIAMETER));
                     block_box.size.x = 1.0;
                     block_box.size.y = 1.0;
                     block_box.size.z = 1.0;
 
                     time = fsl_get_swept_aabb(p->bbox, block_box, displacement, &normal);
 
-                    if (fsl_is_in_range_f32(time, 0.0f, 1.0f) ||
+                    if (/* fsl_is_in_range_f32(time, 0.0f, 1.0f) || */
                             fsl_is_intersect_aabb(p->bbox, block_box))
                     {
                         /* ---- resolution ---------------------------------- */
 
-                        p->transform.pos.x += displacement.x * time + normal.x * FSL_COLLISION_EPSILON;
-                        p->transform.pos.y += displacement.y * time + normal.y * FSL_COLLISION_EPSILON;
-                        p->transform.pos.z += displacement.z * time + normal.z * FSL_COLLISION_EPSILON;
+                        p->transform.pos.x += displacement.x * time +
+                            normal.x * FSL_COLLISION_EPSILON;
+
+                        p->transform.pos.y += displacement.y * time +
+                            normal.y * FSL_COLLISION_EPSILON;
+
+                        p->transform.pos.z += displacement.z * time +
+                            normal.z * FSL_COLLISION_EPSILON;
 
                         dot = fsl_dot_v3f32(displacement, normal);
                         if (dot < 0.0f)
@@ -308,7 +314,7 @@ void player_collision_update(hhc_player *p, f64 dt)
                                 p->flag &= ~FLAG_PLAYER_FLYING;
                             p->flag |= FLAG_PLAYER_CAN_JUMP;
 
-                            friction = block_p[GET_BLOCK_ID(*_block)].friction;
+                            friction = block_p[GET_BLOCK_ID(*block)].friction;
                             p->friction.x = friction;
                             p->friction.y = friction;
                         }
@@ -428,51 +434,51 @@ fsl_bounding_box make_collision_capsule(fsl_bounding_box b, v3i32 ch, v3f32 velo
 
 static void player_wrap_coordinates(hhc_player *p)
 {
-    const i64 DIAMETER = WORLD_DIAMETER;
-    const i64 DIAMETER_V = WORLD_DIAMETER_VERTICAL;
-    const i64 WORLD_MARGIN = WORLD_RADIUS - SET_RENDER_DISTANCE_MAX * CHUNK_DIAMETER;
-    const i64 WORLD_MARGIN_V = WORLD_RADIUS_VERTICAL - SET_RENDER_DISTANCE_MAX * CHUNK_DIAMETER;
-    const i64 OVERFLOW_EDGE = WORLD_RADIUS + CHUNK_DIAMETER;
-    const i64 OVERFLOW_EDGE_V = WORLD_RADIUS_VERTICAL + CHUNK_DIAMETER;
-    const v3f64 WORLD_VOLUME_MIN =
+    i64 diameter = WORLD_DIAMETER * CHUNK_DIAMETER;
+    i64 diameter_v = WORLD_DIAMETER_VERTICAL * CHUNK_DIAMETER;
+    i64 world_margin = WORLD_RADIUS * CHUNK_DIAMETER - WORLD_MARGIN * CHUNK_DIAMETER;
+    i64 world_margin_v = WORLD_RADIUS_VERTICAL * CHUNK_DIAMETER - WORLD_MARGIN * CHUNK_DIAMETER;
+    i64 overflow_edge = WORLD_RADIUS * CHUNK_DIAMETER + CHUNK_DIAMETER;
+    i64 overflow_edge_v = WORLD_RADIUS_VERTICAL * CHUNK_DIAMETER + CHUNK_DIAMETER;
+    v3f64 world_volume_min =
     {
-        -(f64)(WORLD_DIAMETER + WORLD_RADIUS),
-        -(f64)(WORLD_DIAMETER + WORLD_RADIUS),
-        -(f64)(WORLD_DIAMETER_VERTICAL + WORLD_RADIUS_VERTICAL)
+        -(f64)(WORLD_DIAMETER * CHUNK_DIAMETER),
+        -(f64)(WORLD_DIAMETER * CHUNK_DIAMETER),
+        -(f64)(WORLD_DIAMETER_VERTICAL * CHUNK_DIAMETER)
     };
-    const v3f64 WORLD_VOLUME_MAX =
+    v3f64 world_volume_max =
     {
-        (f64)(WORLD_DIAMETER + WORLD_RADIUS),
-        (f64)(WORLD_DIAMETER + WORLD_RADIUS),
-        (f64)(WORLD_DIAMETER_VERTICAL + WORLD_RADIUS_VERTICAL)
+        (f64)(WORLD_DIAMETER * CHUNK_DIAMETER),
+        (f64)(WORLD_DIAMETER * CHUNK_DIAMETER),
+        (f64)(WORLD_DIAMETER_VERTICAL * CHUNK_DIAMETER)
     };
 
-    if (!fsl_is_in_volume_f64(p->transform.pos, WORLD_VOLUME_MIN, WORLD_VOLUME_MAX))
+    if (!fsl_is_in_volume_f64(p->transform.pos, world_volume_min, world_volume_max))
         player_spawn(p, FALSE);
 
     /* ---- world margin ---------------------------------------------------- */
 
-    if (p->transform.pos.x > WORLD_MARGIN)
+    if (p->transform.pos.x > world_margin)
         p->flag |= FLAG_PLAYER_OVERFLOW_X | FLAG_PLAYER_OVERFLOW_PX;
-    else if (p->transform.pos.x < -WORLD_MARGIN)
+    else if (p->transform.pos.x < -world_margin)
     {
         p->flag |= FLAG_PLAYER_OVERFLOW_X;
         p->flag &= ~FLAG_PLAYER_OVERFLOW_PX;
     }
     else p->flag &= ~(FLAG_PLAYER_OVERFLOW_X | FLAG_PLAYER_OVERFLOW_PX);
 
-    if (p->transform.pos.y > WORLD_MARGIN)
+    if (p->transform.pos.y > world_margin)
         p->flag |= FLAG_PLAYER_OVERFLOW_Y | FLAG_PLAYER_OVERFLOW_PY;
-    else if (p->transform.pos.y < -WORLD_MARGIN)
+    else if (p->transform.pos.y < -world_margin)
     {
         p->flag |= FLAG_PLAYER_OVERFLOW_Y;
         p->flag &= ~FLAG_PLAYER_OVERFLOW_PY;
     }
     else p->flag &= ~(FLAG_PLAYER_OVERFLOW_Y | FLAG_PLAYER_OVERFLOW_PY);
 
-    if (p->transform.pos.z > WORLD_MARGIN_V)
+    if (p->transform.pos.z > world_margin_v)
         p->flag |= FLAG_PLAYER_OVERFLOW_Z | FLAG_PLAYER_OVERFLOW_PZ;
-    else if (p->transform.pos.z < -WORLD_MARGIN_V)
+    else if (p->transform.pos.z < -world_margin_v)
     {
         p->flag |= FLAG_PLAYER_OVERFLOW_Z;
         p->flag &= ~FLAG_PLAYER_OVERFLOW_PZ;
@@ -481,35 +487,35 @@ static void player_wrap_coordinates(hhc_player *p)
 
     /* ---- overflow edge --------------------------------------------------- */
 
-    if (p->transform.pos.x > OVERFLOW_EDGE)
+    if (p->transform.pos.x > overflow_edge)
     {
-        p->transform.pos.x -= DIAMETER;
-        p->transform_last.pos.x -= DIAMETER;
+        p->transform.pos.x -= diameter;
+        p->transform_last.pos.x -= diameter;
     }
-    if (p->transform.pos.x < -OVERFLOW_EDGE)
+    if (p->transform.pos.x < -overflow_edge)
     {
-        p->transform.pos.x += DIAMETER;
-        p->transform_last.pos.x += DIAMETER;
+        p->transform.pos.x += diameter;
+        p->transform_last.pos.x += diameter;
     }
-    if (p->transform.pos.y > OVERFLOW_EDGE)
+    if (p->transform.pos.y > overflow_edge)
     {
-        p->transform.pos.y -= DIAMETER;
-        p->transform_last.pos.y -= DIAMETER;
+        p->transform.pos.y -= diameter;
+        p->transform_last.pos.y -= diameter;
     }
-    if (p->transform.pos.y < -OVERFLOW_EDGE)
+    if (p->transform.pos.y < -overflow_edge)
     {
-        p->transform.pos.y += DIAMETER;
-        p->transform_last.pos.y += DIAMETER;
+        p->transform.pos.y += diameter;
+        p->transform_last.pos.y += diameter;
     }
-    if (p->transform.pos.z > OVERFLOW_EDGE_V)
+    if (p->transform.pos.z > overflow_edge_v)
     {
-        p->transform.pos.z -= DIAMETER_V;
-        p->transform_last.pos.z -= DIAMETER_V;
+        p->transform.pos.z -= diameter_v;
+        p->transform_last.pos.z -= diameter_v;
     }
-    if (p->transform.pos.z < -OVERFLOW_EDGE_V)
+    if (p->transform.pos.z < -overflow_edge_v)
     {
-        p->transform.pos.z += DIAMETER_V;
-        p->transform_last.pos.z += DIAMETER_V;
+        p->transform.pos.z += diameter_v;
+        p->transform_last.pos.z += diameter_v;
     }
 }
 
@@ -605,6 +611,9 @@ void player_camera_movement_update(hhc_player *p, v2f64 mouse_delta, b8 use_mous
 
             /* TODO: make the spectator camera mode */
         case PLAYER_CAMERA_MODE_SPECTATOR:
+            break;
+
+        default:
             break;
     }
 

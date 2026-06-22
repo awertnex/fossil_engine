@@ -294,6 +294,8 @@ u32 fsl_update_render_settings(void (*callback_framebuffer_size)(i32 size_x, i32
 
     if (size.x != render_internal.size.x || size.y != render_internal.size.y)
     {
+        fsl_request_skip_mouse_delta();
+
         render_internal.size.x = size.x;
         render_internal.size.y = size.y;
         glViewport(0, 0, size.x, size.y);

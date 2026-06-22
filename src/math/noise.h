@@ -80,65 +80,84 @@ FSLAPI f32 fsl_gradient_2d(f32 vx, f32 vy, i32 x, i32 y, u64 seed);
 FSLAPI f32 fsl_gradient_3d(f32 vx, f32 vy, f32 vz, i32 x, i32 y, i32 z, u64 seed);
 
 /*!
- *  @param x point in 1D space to sample at.
- *  @param amplitude height, or contrast of the noise.
- *  @param frequency frequency of the noise.
- *
- *  @return a value between [amplitude / 2, -amplitude / 2].
- */
-FSLAPI f32 fsl_perlin_noise_1d(i32 x, f32 amplitude, f32 frequency, u64 seed);
-
-/*!
- *  @brief calls @ref perlin_noise_1d() for as many `octaves`.
+ *  @brief get a perlin-noise sample at specified point.
  *
  *  @param x point in 1D space to sample at.
  *  @param amplitude height, or contrast of the noise.
  *  @param frequency frequency of the noise.
  *
- *  @return a value between [amplitude / 2, -amplitude / 2].
- */
-FSLAPI f32 fsl_perlin_noise_1d_ex(i32 x, f32 amplitude, f32 frequency,
-        u32 octaves, f32 amplitude_persistence, f32 frequency_persistence, u64 seed);
-
-/*!
- *  @param x x coordinate of point in 2D space to sample at.
- *  @param y y coordinate of point in 2D space to sample at.
- *  @param amplitude height, or contrast of the noise.
- *  @param frequency frequency of the noise.
+ *  @remark use quintic interpolation.
  *
  *  @return a value between [amplitude / 2, -amplitude / 2].
  */
-FSLAPI f32 fsl_perlin_noise_2d(i32 x, i32 y, f32 amplitude, f32 frequency, u64 seed);
+FSLAPI f32 fsl_perlin_noise_1d(f32 x, f32 amplitude, f32 frequency, u64 seed);
 
 /*!
- *  @brief calls @ref perlin_noise_2d() for as many `octaves`.
+ *  @brief get a perlin-noise sample at specified point.
  *
  *  @param x x coordinate of point in 2D space to sample at.
  *  @param y y coordinate of point in 2D space to sample at.
  *  @param amplitude height, or contrast of the noise.
  *  @param frequency frequency of the noise.
- *  @param octaves number of noise iterations.
- *  @param amplitude_persistence scaling factor per iteration for `amplitude`.
- *  @param frequency_persistance scaling factor per iteration for `frequency`.
+ *
+ *  @remark use quintic interpolation.
  *
  *  @return a value between [amplitude / 2, -amplitude / 2].
  */
-FSLAPI f32 fsl_perlin_noise_2d_ex(i32 x, i32 y, f32 amplitude, f32 frequency,
-        u32 octaves, f32 amplitude_persistence, f32 frequency_persistence, u64 seed);
+FSLAPI f32 fsl_perlin_noise_2d(f32 x, f32 y, f32 amplitude, f32 frequency, u64 seed);
 
 /*!
+ *  @brief get a perlin-noise sample at specified point.
+ *
  *  @param x x coordinate of point in 3D space to sample at.
  *  @param y y coordinate of point in 3D space to sample at.
  *  @param z z coordinate of point in 3D space to sample at.
  *  @param amplitude height, or contrast of the noise.
  *  @param frequency frequency of the noise.
  *
+ *  @remark use quintic interpolation.
+ *
  *  @return a value between [amplitude / 2, -amplitude / 2].
  */
-FSLAPI f32 fsl_perlin_noise_3d(i32 x, i32 y, i32 z, f32 amplitude, f32 frequency, u64 seed);
+FSLAPI f32 fsl_perlin_noise_3d(f32 x, f32 y, f32 z, f32 amplitude, f32 frequency, u64 seed);
 
 /*!
- *  @brief calls @ref perlin_noise_3d() for as many `octaves`.
+ *  @brief get a perlin-noise sample at specified point.
+ *
+ *  @param x point in 1D space to sample at.
+ *  @param amplitude height, or contrast of the noise.
+ *  @param frequency frequency of the noise.
+ *  @param octaves number of noise iterations.
+ *  @param amplitude_persistence scaling factor each iteration for `amplitude`.
+ *  @param frequency_persistance scaling factor each iteration for `frequency`.
+ *
+ *  @remark call @ref perlin_noise_1d() for as many `octaves`.
+ *
+ *  @return a value between [amplitude / 2, -amplitude / 2].
+ */
+FSLAPI f32 fsl_perlin_noise_1d_ex(f32 x, f32 amplitude, f32 frequency,
+        u32 octaves, f32 amplitude_persistence, f32 frequency_persistence, u64 seed);
+
+/*!
+ *  @brief get a perlin-noise sample at specified point.
+ *
+ *  @param x x coordinate of point in 2D space to sample at.
+ *  @param y y coordinate of point in 2D space to sample at.
+ *  @param amplitude height, or contrast of the noise.
+ *  @param frequency frequency of the noise.
+ *  @param octaves number of noise iterations.
+ *  @param amplitude_persistence scaling factor each iteration for `amplitude`.
+ *  @param frequency_persistance scaling factor each iteration for `frequency`.
+ *
+ *  @remark call @ref perlin_noise_2d() for as many `octaves`.
+ *
+ *  @return a value between [amplitude / 2, -amplitude / 2].
+ */
+FSLAPI f32 fsl_perlin_noise_2d_ex(f32 x, f32 y, f32 amplitude, f32 frequency,
+        u32 octaves, f32 amplitude_persistence, f32 frequency_persistence, u64 seed);
+
+/*!
+ *  @brief get a perlin-noise sample at specified point.
  *
  *  @param x x coordinate of point in 3D space to sample at.
  *  @param y y coordinate of point in 3D space to sample at.
@@ -146,12 +165,14 @@ FSLAPI f32 fsl_perlin_noise_3d(i32 x, i32 y, i32 z, f32 amplitude, f32 frequency
  *  @param amplitude height, or contrast of the noise.
  *  @param frequency frequency of the noise.
  *  @param octaves number of noise iterations.
- *  @param amplitude_persistence scaling factor per iteration for `amplitude`.
- *  @param frequency_persistance scaling factor per iteration for `frequency`.
+ *  @param amplitude_persistence scaling factor each iteration for `amplitude`.
+ *  @param frequency_persistance scaling factor each iteration for `frequency`.
+ *
+ *  @remark call @ref perlin_noise_3d() for as many `octaves`.
  *
  *  @return a value between [amplitude / 2, -amplitude / 2].
  */
-FSLAPI f32 fsl_perlin_noise_3d_ex(i32 x, i32 y, i32 z, f32 amplitude, f32 frequency,
+FSLAPI f32 fsl_perlin_noise_3d_ex(f32 x, f32 y, f32 z, f32 amplitude, f32 frequency,
         u32 octaves, f32 amplitude_persistence, f32 frequency_persistence, u64 seed);
 
 #endif /* FSL_MATH_NOISE_H */
