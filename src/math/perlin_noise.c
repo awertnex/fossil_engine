@@ -20,7 +20,6 @@
  *  @brief perlin noise functions and gradient samplers.
  */
 
-#include "math.h"
 #include "noise.h"
 
 #include <math.h>

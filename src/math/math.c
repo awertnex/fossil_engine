@@ -449,12 +449,53 @@ v4f32 fsl_matrix_multiply_vector(m4f32 a, v4f32 b)
     return v;
 }
 
-f32 fsl_lerp_f32(f32 a, f32 b, f64 t)
+f32 fsl_lerp_f32(f32 a, f32 b, f32 t)
 {
     return a + (b - a) * t;
 }
 
-f32 fsl_lerp_exp_f32(f32 a, f32 b, f64 k, f32 t)
+f32 fsl_bilerp_f32(f32 a, f32 b, f32 c, f32 d, f32 tx, f32 ty)
+{
+    f32 wx = 1.0f - tx;
+    f32 wy = 1.0f - ty;
+    f32 w[4] = {0};
+    w[0] = wx * wy;
+    w[1] = tx * wy;
+    w[2] = wx * ty;
+    w[3] = tx * ty;
+    return
+        a * w[0] +
+        b * w[1] +
+        c * w[2] +
+        d * w[3];
+}
+
+f32 fsl_trilerp_f32(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f, f32 g, f32 h, f32 tx, f32 ty, f32 tz)
+{
+    f32 wx = 1.0f - tx;
+    f32 wy = 1.0f - ty;
+    f32 wz = 1.0f - tz;
+    f32 w[8] = {0};
+    w[0] = wx * wy * wz;
+    w[1] = tx * wy * wz;
+    w[2] = wx * ty * wz;
+    w[3] = tx * ty * wz;
+    w[4] = wx * wy * tz;
+    w[5] = tx * wy * tz;
+    w[6] = wx * ty * tz;
+    w[7] = tx * ty * tz;
+    return
+        a * w[0] +
+        b * w[1] +
+        c * w[2] +
+        d * w[3] +
+        e * w[4] +
+        f * w[5] +
+        g * w[6] +
+        h * w[7];
+}
+
+f32 fsl_lerp_exp_f32(f32 a, f32 b, f32 k, f32 t)
 {
     return a + (b - a) * (1.0f - expf(-k * t));
 }
