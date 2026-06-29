@@ -4,9 +4,7 @@
 #include "deps/fossil/common/types.h"
 #include "deps/fossil/math/vector.h"
 
-#include "../h/common.h"
-
-#include "chunk_scheduler.h"
+#include "chunk_work.h"
 #include "chunking.h"
 
 /* ---- section: definitions ------------------------------------------------ */
@@ -15,11 +13,6 @@
  *  @brief count of temporary static buffers in function @ref chunk_mesh_update_internal().
  */
 #define BLOCK_BUFFERS_MAX 2
-
-/*!
- *  @remark an entry for each render distance, one u32 for offset and one for size.
- */
-#define CHUNK_ORDER_LOOKUP_OFFSET_TABLE_SIZE ((SET_RENDER_DISTANCE_MAX + 1) * sizeof(u32) * 2)
 
 /* ---- section: block flag ------------------------------------------------- */
 
@@ -74,31 +67,50 @@ typedef struct hhc_chunk_buffer
     /*!
      *  @brief position of first empty slot in `p`.
      */
-    u64 cursor;
+    u32 cursor;
 
     fsl_mem_handle handle;
     hhc_chunk *p;           /* cached pointer from `handle` */
 } hhc_chunk_buffer;
 
 /*!
+ *  @brief a chunk and all six neighbors surrounding it.
+ */
+typedef struct hhc_chunk_neighbors
+{
+    hhc_chunk *ch, *px, *nx, *py, *ny, *pz, *nz;
+} hhc_chunk_neighbors;
+
+/*!
+ *  @brief chunk-scheduler bucket for a unique distance away from @ref chunk_tab center index.
+ */
+typedef struct hhc_chunk_bucket
+{
+    u32 count;  /* number of chunks scheduled */
+    u32 pos;    /* start position of bucket into @ref chunk_order.p */
+    u32 len;    /* total number of slots in bucket */
+} hhc_chunk_bucket;
+
+/*!
  *  @brief schedule of chunks to be processed.
  */
-struct hhc_chunk_scheduler
+typedef struct hhc_chunk_scheduler
 {
-    chunk_scheduler_id id;  /* scheduler ID */
     fsl_len count;          /* number of chunks scheduled */
-    u32 offset;             /* offset of scheduler into @ref chunk_order.p */
-    fsl_len len;            /* number of members in `p` */
+
     u32 cursor_push;        /* push position */
     u32 cursor_pop;         /* pop position */
-    chunk_scheduler_budget budget;
-    fsl_mem_handle schedule;
-    hhc_chunk **p;        /* cached pointer from `schedule` */
-}; /* hhc_chunk_scheduler */
+    fsl_mem_handle handle_p;
+    fsl_mem_handle handle_bucket;
+    hhc_chunk **p;          /* cached pointer from `schedule` */
+    hhc_chunk_bucket *bucket; /* cached pointer from `schedule` */
+    u32 buckets_max;        /* total number of members in `bucket` */
+    u32 priority;           /* current parsing priority */
+} hhc_chunk_scheduler;
 
 /* ---- section: declarations ----------------------------------------------- */
 
-extern hhc_chunk_scheduler chunk_sched[CHUNK_SCHEDULERS_MAX];
+extern hhc_chunk_scheduler chunk_sched;
 
 /* ---- section: signatures ------------------------------------------------- */
 
@@ -109,6 +121,13 @@ u32 chunks_max_init_internal(void);
  *
  *  write lookup to disk, and load if exists.
  *
+ *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
+ */
+u32 chunk_order_init_internal(void);
+
+/*!
+ *  @brief build @ref chunk_order look-up and write to disk.
+ *
  *  format:
  *      offset-table:   offset of each lookup into file, after compression, in bytes,
  *      |               size of table is "(SET_RENDER_DISTANCE_MAX + 1) * 4 bytes * 2".
@@ -118,7 +137,25 @@ u32 chunks_max_init_internal(void);
  *
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
-u32 chunk_order_init_internal(void);
+u32 chunk_order_build_internal(void);
+
+/*!
+ *  @brief load @ref chunk_order look-up from disk.
+ *
+ *  can be called again when changing render distance.
+ *
+ *  @param render_distance current render distance to use in index-adjustment.
+ *
+ *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
+ */
+u32 chunk_order_load_internal(u32 render_distance);
+
+/*!
+ *  @brief load @ref chunk_sched.bucket look-up from disk.
+ *
+ *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
+ */
+u32 chunk_bucket_load_internal(void);
 
 /*!
  *  @brief initialize resources required by chunk debug tools.
@@ -132,33 +169,33 @@ void chunk_debug_free_internal(void);
  *
  *  @return block with modified faces.
  */
-u32 block_get_faces_internal(const hhc_chunk *ch,
-        const hhc_chunk *px, const hhc_chunk *nx,
-        const hhc_chunk *py, const hhc_chunk *ny,
-        const hhc_chunk *pz, const hhc_chunk *nz,
-        i32 x, i32 y, i32 z);
+u32 block_faces_get_internal(hhc_chunk_neighbors *chunk_neighbors, i32 x, i32 y, i32 z);
 
-void block_add_internal(hhc_chunk *ch,
-        hhc_chunk *px, hhc_chunk *nx,
-        hhc_chunk *py, hhc_chunk *ny,
-        hhc_chunk *pz, hhc_chunk *nz,
-        i32 x, i32 y, i32 z, enum block_id block_id);
+void block_add_internal(hhc_chunk_neighbors *chunk_neighbors, i32 x, i32 y, i32 z,
+        enum block_id block_id);
 
-void block_remove_internal(hhc_chunk *ch,
-        hhc_chunk *px, hhc_chunk *nx,
-        hhc_chunk *py, hhc_chunk *ny,
-        hhc_chunk *pz, hhc_chunk *nz,
-        i32 x, i32 y, i32 z);
+void block_remove_internal(hhc_chunk_neighbors *chunk_neighbors, i32 x, i32 y, i32 z);
 
 /*!
  *  @brief execute block logic on the block based on its ID (e.g., make grass
  *  turn to dirt when under another block).
  */
-void block_evaluate_internal(hhc_chunk *ch,
-        hhc_chunk *px, hhc_chunk *nx,
-        hhc_chunk *py, hhc_chunk *ny,
-        hhc_chunk *pz, hhc_chunk *nz,
+void block_evaluate_internal(hhc_chunk_neighbors *chunk_neighbors,
         i32 x, i32 y, i32 z, enum block_id block_id);
+
+/*!
+ *  @brief get radius of sphere squared as per internal conventions.
+ */
+u32 chunk_sphere_radius_get_internal(u32 radius);
+
+/*!
+ *  @brief set new chunk position.
+ *
+ *  set chunk position and wrapped position.
+ *  set chunk ID, cti and cpi.
+ */
+void chunk_pos_set_internal(hhc_chunk *chunk,
+        v3i32 player_chunk_delta, v3u32 chunk_tab_coordinates);
 
 /*!
  *  @brief generate chunk blocks.
@@ -168,7 +205,9 @@ void block_evaluate_internal(hhc_chunk *ch,
  *
  *  @return cost of operation (used in @ref chunk_scheduler_update_internal()).
  */
-chunk_work_cost chunk_load_internal(hhc_chunk *ch, chunk_scheduler_budget budget);
+chunk_work_cost chunk_load_internal(hhc_chunk *chunk, chunk_work_budget budget);
+
+hhc_chunk_neighbors chunk_neighbors_get_internal(hhc_chunk *chunk);
 
 /*!
  *  @brief generate chunk blocks.
@@ -180,43 +219,35 @@ chunk_work_cost chunk_load_internal(hhc_chunk *ch, chunk_scheduler_budget budget
  *
  *  @return cost of operation (used in @ref chunk_scheduler_update_internal()).
  */
-chunk_work_cost chunk_generate_internal(hhc_chunk *ch, chunk_scheduler_budget budget);
+chunk_work_cost chunk_generate_internal(hhc_chunk *chunk, chunk_work_budget budget);
 
 /*!
  *  @return cost of operation (used in @ref chunk_scheduler_update_internal()).
  */
-chunk_work_cost chunk_mesh_update_internal(hhc_chunk *ch);
+chunk_work_cost chunk_mesh_update_internal(hhc_chunk *chunk);
 
 /*!
  *  @brief write chunk into disk.
  *
  *  @return cost of operation (used in @ref chunk_scheduler_update_internal()).
  */
-chunk_work_cost chunk_export_internal(hhc_chunk *ch);
+chunk_work_cost chunk_export_internal(hhc_chunk *chunk);
 
 /*!
  *  @brief read chunk from disk.
  *
  *  @return cost of operation (used in @ref chunk_scheduler_update_internal()).
  */
-chunk_work_cost chunk_import_internal(const fsl_fs_path *path, hhc_chunk *ch);
+chunk_work_cost chunk_import_internal(const fsl_fs_path *path, hhc_chunk *chunk);
 
+void chunk_buf_update_internal(v3i32 *player_chunk_delta);
 void chunk_buf_push_internal(u32 index, v3i32 player_chunk_delta);
-void chunk_buf_pop_internal(hhc_chunk *ch);
+void chunk_buf_pop_internal(hhc_chunk *chunk);
+void chunk_scheduler_update_internal_deprecated(void);
+void chunk_scheduler_update_internal(void);
+chunk_work_cost chunk_scheduler_push_internal(hhc_chunk *chunk);
+chunk_work_cost chunk_scheduler_pop_internal(u32 index);
 
-/*!
- *  @brief initialize chunk scheduler resources.
- *
- *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
- */
-u32 chunk_scheduler_init_internal(hhc_chunk_scheduler *sched, chunk_scheduler_id id,
-        u64 offset, chunk_scheduler_radius radius, chunk_scheduler_budget budget);
-/*!
- *  @param len number of chunks from @ref chunk_order.p this scheduler is allowed to parse.
- */
-void chunk_scheduler_update_internal(hhc_chunk_scheduler *sched, fsl_len len,
-        b8 should_push, b8 should_pop);
-
-void chunk_debug_chunk_gizmo_write_internal(hhc_chunk *ch);
+void chunk_debug_chunk_gizmo_write_internal(hhc_chunk *chunk);
 
 #endif /* HHC_CHUNKING_INTERNAL_H */

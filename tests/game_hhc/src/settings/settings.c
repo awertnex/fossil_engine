@@ -63,24 +63,7 @@ u32 settings_init(void)
 
     settings.lerp_speed = SET_LERP_SPEED_DEFAULT;
 
-    settings.render_distance = 8;
-    settings.chunk_buf_radius = settings.render_distance;
-    settings.chunk_buf_diameter = settings.chunk_buf_radius * 2 + 1;
-
-    settings.chunk_buf_layer =
-        settings.chunk_buf_diameter *
-        settings.chunk_buf_diameter;
-
-    settings.chunk_buf_volume =
-        settings.chunk_buf_diameter *
-        settings.chunk_buf_diameter *
-        settings.chunk_buf_diameter;
-
-    settings.chunk_tab_center =
-        settings.chunk_buf_radius +
-        settings.chunk_buf_radius * settings.chunk_buf_diameter +
-        settings.chunk_buf_radius * settings.chunk_buf_layer;
-
+    settings_render_distance_set(8);
     settings.reach_distance = PLAYER_REACH_DISTANCE_MAX;
     settings.mouse_sensitivity = SET_MOUSE_SENSITIVITY_DEFAULT * 0.004f;
     settings.font_size = 20.0f;
@@ -111,6 +94,7 @@ cleanup:
 
 void settings_gui_scale_set(f32 scale)
 {
+    settings.flag.gui_scale_dirty = TRUE;
     settings.gui_scale = scale;
 
     fsl_ui_element_set_scale(&ui_element[UI_ELEMENT_CROSSHAIR], scale, scale);
@@ -119,4 +103,20 @@ void settings_gui_scale_set(f32 scale)
     fsl_ui_element_set_scale(&ui_element[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL], scale, scale);
 
     super_debugger_gui_scale_set(scale);
+}
+
+void settings_render_distance_set(u32 distance)
+{
+    u32 radius = distance;
+    u32 diameter = radius * 2 + 1;
+    u32 layer = diameter * diameter;
+    u32 volume = layer * diameter;
+
+    settings.flag.render_distance_dirty = TRUE;
+    settings.render_distance = radius;
+    settings.chunk_buf_radius = radius;
+    settings.chunk_buf_diameter = diameter;
+    settings.chunk_buf_layer = layer;
+    settings.chunk_buf_volume = volume;
+    settings.chunk_tab_center = radius + radius * diameter + radius * layer;
 }

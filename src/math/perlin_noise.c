@@ -21,6 +21,7 @@
  */
 
 #include "noise.h"
+#include "vector.h"
 
 #include <math.h>
 
@@ -47,23 +48,36 @@
 
 f32 fsl_gradient_1d(f32 v, i32 x, u64 seed)
 {
-    f32 g = fsl_rand_tab[(seed + RAND_CONST_0 + x) % FSL_RAND_TAB_VOLUME];
-    return (v - x) * g;
+    u64 h = x * RAND_CONST_0;
+    h ^= h >> 16;
+    h *= RAND_CONST_1;
+    return (v - x) * fsl_rand_tab[(seed + h) % FSL_RAND_TAB_VOLUME];
 }
 
 f32 fsl_gradient_2d(f32 vx, f32 vy, i32 x, i32 y, u64 seed)
 {
-    f32 gx = fsl_rand_tab[(seed + (RAND_CONST_1 + x) * (RAND_CONST_2 + y)) % FSL_RAND_TAB_VOLUME];
-    f32 gy = fsl_rand_tab[(seed + (RAND_CONST_3 + y) * (RAND_CONST_4 + x)) % FSL_RAND_TAB_VOLUME];
-    return (vx - x) * gx + (vy - y) * gy;
+    u64 h = {0};
+    h = x * RAND_CONST_1;
+    h ^= y * RAND_CONST_2;
+    h ^= h >> 16;
+    h *= RAND_CONST_0;
+    return
+        (vx - x) * fsl_rand_tab[(seed + ((h >> 0x00) & 0xffffffff))  % FSL_RAND_TAB_VOLUME] +
+        (vy - y) * fsl_rand_tab[(seed + ((h >> 0x20) & 0xffffffff))  % FSL_RAND_TAB_VOLUME];
 }
 
 f32 fsl_gradient_3d(f32 vx, f32 vy, f32 vz, i32 x, i32 y, i32 z, u64 seed)
 {
-    f32 gx = fsl_rand_tab[(seed + (RAND_CONST_5 + x) * (RAND_CONST_6 + y) * (RAND_CONST_7 + z)) % FSL_RAND_TAB_VOLUME];
-    f32 gy = fsl_rand_tab[(seed + (RAND_CONST_8 + y) * (RAND_CONST_9 + z) * (RAND_CONST_10 + x)) % FSL_RAND_TAB_VOLUME];
-    f32 gz = fsl_rand_tab[(seed + (RAND_CONST_11 + z) * (RAND_CONST_12 + x) * (RAND_CONST_13 + y)) % FSL_RAND_TAB_VOLUME];
-    return (vx - x) * gx + (vy - y) * gy + (vz - z) * gz;
+    u64 h = {0};
+    h = x * RAND_CONST_5;
+    h ^= y * RAND_CONST_6;
+    h ^= z * RAND_CONST_7;
+    h ^= h >> 16;
+    h *= RAND_CONST_0;
+    return
+        (vx - x) * fsl_rand_tab[(seed + ((h >> 0) & 0xfffff)) % FSL_RAND_TAB_VOLUME] +
+        (vy - y) * fsl_rand_tab[(seed + ((h >> 20) & 0xfffff)) % FSL_RAND_TAB_VOLUME] +
+        (vz - z) * fsl_rand_tab[(seed + ((h >> 40) & 0xfffff)) % FSL_RAND_TAB_VOLUME];
 }
 
 f32 fsl_perlin_noise_1d(f32 x, f32 amplitude, f32 frequency, u64 seed)
@@ -90,27 +104,22 @@ f32 fsl_perlin_noise_2d(f32 x, f32 y, f32 amplitude, f32 frequency, u64 seed)
     f32 dy = vy - (f32)ay;
     f32 wx = 0.0f;
     f32 wy = 0.0f;
-    f32 w[4];
     f32 g[4];
 
     dx = dx * dx * dx * (dx * (6.0f * dx - 15.0f) + 10.0f);
     dy = dy * dy * dy * (dy * (6.0f * dy - 15.0f) + 10.0f);
     wx = 1.0f - dx;
     wy = 1.0f - dy;
-    w[0] = wx * wy;
-    w[1] = dx * wy;
-    w[2] = wx * dy;
-    w[3] = dx * dy;
 
     g[0] = fsl_gradient_2d(vx, vy, ax, ay, seed);
     g[1] = fsl_gradient_2d(vx, vy, bx, ay, seed);
     g[2] = fsl_gradient_2d(vx, vy, ax, by, seed);
     g[3] = fsl_gradient_2d(vx, vy, bx, by, seed);
 
-    return (g[0] * w[0] +
-            g[1] * w[1] +
-            g[2] * w[2] +
-            g[3] * w[3]) * amplitude;
+    return (g[0] * wx * wy +
+            g[1] * dx * wy +
+            g[2] * wx * dy +
+            g[3] * dx * dy) * amplitude;
 }
 
 f32 fsl_perlin_noise_3d(f32 x, f32 y, f32 z, f32 amplitude, f32 frequency, u64 seed)
@@ -132,9 +141,9 @@ f32 fsl_perlin_noise_3d(f32 x, f32 y, f32 z, f32 amplitude, f32 frequency, u64 s
     f32 wz = 0.0f;
     f32 g[8] = {0};
 
-    dx = dx * dx * dx * (dx * (6.0f * dx - 15.0f) + 10.0f);
-    dy = dy * dy * dy * (dy * (6.0f * dy - 15.0f) + 10.0f);
-    dz = dz * dz * dz * (dz * (6.0f * dz - 15.0f) + 10.0f);
+    dx = dx * dx * dx * (dx * (dx * 6.0f - 15.0f) + 10.0f);
+    dy = dy * dy * dy * (dy * (dy * 6.0f - 15.0f) + 10.0f);
+    dz = dz * dz * dz * (dz * (dz * 6.0f - 15.0f) + 10.0f);
     wx = 1.0f - dx;
     wy = 1.0f - dy;
     wz = 1.0f - dz;

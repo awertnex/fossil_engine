@@ -1,9 +1,6 @@
 #ifndef HHC_COMMON_H
 #define HHC_COMMON_H
 
-#include "deps/fossil/common/types.h"
-#include "deps/fossil/memory/memory_types.h"
-
 /* ---- defaults ------------------------------------------------------------ */
 
 #define SET_MARGIN                      10
@@ -71,8 +68,9 @@
 
 #define GAME_FILE_NAME_SETTINGS         "settings.conf"
 #define GAME_FILE_NAME_WORLD_METADATA   "metadata.conf"
-#define GAME_FILE_NAME_LOOKUP_CHUNK_ORDER "lookup_chunk_order.bin"
-#define GAME_FILE_NAME_LOOKUP_CHUNKS_MAX "lookup_chunks_max.bin"
+#define GAME_FILE_NAME_LOOKUP_CHUNKS_MAX "chunks_max.lut"
+#define GAME_FILE_NAME_LOOKUP_CHUNK_ORDER "chunk_order.lut"
+#define GAME_FILE_NAME_LOOKUP_CHUNK_BUCKET "chunk_bucket.lut"
 
 /* ---- name formats -------------------------------------------------------- */
 

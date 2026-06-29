@@ -11,30 +11,35 @@
 void super_debugger_panel_enter_func(fsl_ui_event event, void *data)
 {
     fsl_texture *fsl_texture_p = fsl_mem_handle_get(fsl_texture_buf);
+    (void)data;
     fsl_ui_element_set_texture(event.caller, &fsl_texture_p[FSL_TEXTURE_INDEX_PANEL_ACTIVE]);
 }
 
 void super_debugger_panel_leave_func(fsl_ui_event event, void *data)
 {
     fsl_texture *fsl_texture_p = fsl_mem_handle_get(fsl_texture_buf);
+    (void)data;
     fsl_ui_element_set_texture(event.caller, &fsl_texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
 }
 
 void super_debugger_button_enter_func(fsl_ui_event event, void *data)
 {
     fsl_texture *fsl_texture_p = fsl_mem_handle_get(fsl_texture_buf);
+    (void)data;
     fsl_ui_element_set_texture(event.caller, &fsl_texture_p[FSL_TEXTURE_INDEX_BUTTON_SELECTED]);
 }
 
 void super_debugger_button_leave_func(fsl_ui_event event, void *data)
 {
     fsl_texture *fsl_texture_p = fsl_mem_handle_get(fsl_texture_buf);
+    (void)data;
     fsl_ui_element_set_texture(event.caller, &fsl_texture_p[FSL_TEXTURE_INDEX_BUTTON_ACTIVE]);
 }
 
 void super_debugger_button_click_func(fsl_ui_event event, void *data)
 {
     fsl_texture *fsl_texture_p = fsl_mem_handle_get(fsl_texture_buf);
+    (void)data;
     fsl_ui_element_set_texture(event.caller, &fsl_texture_p[FSL_TEXTURE_INDEX_BUTTON_PRESSED]);
 }
 

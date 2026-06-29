@@ -23,8 +23,6 @@ typedef struct world_info
     u64 tick;
     u64 tick_start;
     u64 days;
-    hhc_terrain_noise_func terrain_noise_func;
-    hhc_terrain_func terrain_func;
 
     f32 gravity;
     v3f32 drag;

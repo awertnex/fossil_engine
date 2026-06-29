@@ -237,6 +237,9 @@ static void ui_hud_draw(void)
             case STATE_PLAYER_MENU_INVENTORY_SURVIVAL:
                 fsl_ui_element_draw(&ui_element[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL]);
                 break;
+
+            default:
+                break;
         }
     }
 }
@@ -244,8 +247,8 @@ static void ui_hud_draw(void)
 static void draw_world(void)
 {
     fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
-    static hhc_chunk ***cursor = NULL;
-    static hhc_chunk *ch = NULL;
+    hhc_chunk *chunk = NULL;
+    i32 i = 0;
 
     glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -267,14 +270,13 @@ static void draw_world(void)
     else
         glUniform1f(uniform.voxel.opacity, 1.0f);
 
-    cursor = &chunk_order.p[chunk_order.len[settings.render_distance] - 1];
-    for (; cursor >= chunk_order.p; --cursor)
+    for (i = chunk_order.chunks_max - 1; i >= 0; --i)
     {
-        ch = **cursor;
-        if (ch && ch->flag & FLAG_CHUNK_VISIBLE)
+        chunk = chunk_tab.p[chunk_order.p[i]];
+        if (chunk && chunk->flag & FLAG_CHUNK_VISIBLE)
         {
-            glBindVertexArray(ch->mesh_deprecated.vao);
-            glDrawArraysInstanced(GL_POINTS, 0, ch->mesh_deprecated.vbo_len, 1);
+            glBindVertexArray(chunk->mesh_deprecated.vao);
+            glDrawArraysInstanced(GL_POINTS, 0, chunk->mesh_deprecated.vbo_len, 1);
         }
     }
 }
@@ -727,19 +729,12 @@ static void world_draw(void)
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
 
         fsl_text_push(fsl_stringf(
-                    "CHUNK SCHEDULER 1 [%7d/%-7"PRIu64"][pop/push: %7"PRIu64"/%-7"PRIu64"]\n"
-                    "CHUNK SCHEDULER 2 [%7d/%-7"PRIu64"][pop/push: %7"PRIu64"/%-7"PRIu64"]\n"
-                    "CHUNK SCHEDULER 3 [%7d/%-7"PRIu64"][pop/push: %7"PRIu64"/%-7"PRIu64"]\n"
-                    "TOTAL CHUNKS  [%15"PRIu64"]                           \n",
-                    chunk_sched[0].count, chunk_sched[0].len,
-                    chunk_sched[0].cursor_pop, chunk_sched[0].cursor_push,
-
-                    chunk_sched[1].count, chunk_sched[1].len,
-                    chunk_sched[1].cursor_pop, chunk_sched[1].cursor_push,
-
-                    chunk_sched[2].count, chunk_sched[2].len,
-                    chunk_sched[2].cursor_pop, chunk_sched[2].cursor_push,
-                    chunk_order.len[settings.render_distance]),
+                    "CHUNK SCHEDULER [%7d/%-7"PRIu64"][pop/push: %7"PRIu64"/%-7"PRIu64"]\n"
+                    "RENDER DISTANCE [%2d]\n",
+                    chunk_sched.count,
+                    chunk_order.chunks_max,
+                    chunk_sched.cursor_pop, chunk_sched.cursor_push,
+                settings.render_distance),
                 render->size.x - SET_MARGIN, SET_MARGIN,
                 FSL_TEXT_ALIGN_RIGHT, 0, 0,
                 COLOR_TEXT_DEFAULT);
@@ -818,13 +813,6 @@ int main(int argc, char **argv)
 
     glfwSetWindowPos(render->window, 1920 - render->size.x, 24);
 #endif /* HHC_RELEASE_BUILD */
-
-    if (!MODE_INTERNAL_COLLIDE)
-    {
-        LOGWARNING(HHC_ERR_COLLISIONS_DISABLED,
-                FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                "'MODE_INTERNAL_COLLIDE' Disabled\n");
-    }
 
     if (settings_init() != FSL_ERR_SUCCESS)
         goto cleanup;

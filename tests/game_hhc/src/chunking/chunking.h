@@ -8,14 +8,13 @@
 #include "../h/common.h"
 #include "../h/raycast.h"
 
-#include "chunk_scheduler.h"
-
 #define CHUNK_DIAMETER  16
 #define CHUNK_LAYER     (CHUNK_DIAMETER * CHUNK_DIAMETER)
-#define CHUNK_VOLUME    (CHUNK_DIAMETER * CHUNK_DIAMETER * CHUNK_DIAMETER)
+#define CHUNK_VOLUME    (CHUNK_LAYER * CHUNK_DIAMETER)
 
 #define CHUNK_REGION_DIAMETER   32
-#define CHUNK_REGION_VOLUME     (CHUNK_REGION_DIAMETER * CHUNK_REGION_DIAMETER * CHUNK_REGION_DIAMETER)
+#define CHUNK_REGION_LAYER      (CHUNK_REGION_DIAMETER * CHUNK_REGION_DIAMETER)
+#define CHUNK_REGION_VOLUME     (CHUNK_REGION_LAYER * CHUNK_REGION_DIAMETER)
 
 #define WORLD_RADIUS            2048
 #define WORLD_RADIUS_VERTICAL   64
@@ -32,7 +31,7 @@
 #define CHUNK_BUF_RADIUS_MAX    SET_RENDER_DISTANCE_MAX
 #define CHUNK_BUF_DIAMETER_MAX  (CHUNK_BUF_RADIUS_MAX * 2 + 1)
 #define CHUNK_BUF_LAYER_MAX     (CHUNK_BUF_DIAMETER_MAX * CHUNK_BUF_DIAMETER_MAX)
-#define CHUNK_BUF_VOLUME_MAX    (CHUNK_BUF_DIAMETER_MAX * CHUNK_BUF_DIAMETER_MAX * CHUNK_BUF_DIAMETER_MAX)
+#define CHUNK_BUF_VOLUME_MAX    (CHUNK_BUF_LAYER_MAX * CHUNK_BUF_DIAMETER_MAX)
 
 /* ---- section: block mask ------------------------------------------------- */
 
@@ -92,11 +91,12 @@ enum chunk_flag
     FLAG_CHUNK_GENERATED =  (1 << 2),
     FLAG_CHUNK_VISIBLE =    (1 << 3),
     FLAG_CHUNK_IMPORTED =   (1 << 4),
+    FLAG_CHUNK_QUEUED =     (1 << 5),
 
     /*!
      *  @brief chunk marking for @ref chunk_tab shifting logic.
      */
-    FLAG_CHUNK_EDGE =       (1 << 5)
+    FLAG_CHUNK_EDGE =       (1 << 6)
 }; /* chunk_flag */
 
 typedef struct hhc_chunk_mesh
@@ -112,15 +112,15 @@ typedef struct hhc_chunk
 {
     u8 flag; /* enum: chunk_flag */
     v3i16 pos_world;    /* world position, in chunk-space (for rendering) */
-    v3i16 pos;          /* canonical position, in chunk-space (for serialization) */
+    v3i16 pos_wrap;     /* canonical position, in chunk-space (for serialization) */
 
     /*!
      *  @brief chunk's unique id derived from its position.
      *
      * format:
-     * (pos.x & 0xffff) << 0x00 |
-     * (pos.y & 0xffff) << 0x10 |
-     * (pos.z & 0xffff) << 0x20.
+     * (pos_world.x & 0xffff) << 0x00 |
+     * (pos_world.y & 0xffff) << 0x10 |
+     * (pos_world.z & 0xffff) << 0x20.
      */
     u64 id;
 
@@ -146,14 +146,15 @@ typedef struct hhc_chunk
     u32 cursor;
 
     /*!
-     *  @brief chunk's own index in @ref chunk_table.p.
+     *  @brief chunk's own index in @ref chunk_table.p (Chunk-Tab Index).
      */
-    u32 index;
+    u32 cti;
 
     /*!
-     *  @brief ID of @ref hhc_chunk_scheduler that scheduled this chunk.
+     *  @brief chunk's priority index (Chunk Priority Index), it's chunk's distance
+     *  away from center index of @ref chunk_table.p.
      */
-    chunk_scheduler_id sched_id;
+    u32 cpi;
 
     hhc_chunk_mesh mesh_deprecated;
 
@@ -172,13 +173,14 @@ typedef struct hhc_chunk
  */
 typedef struct hhc_chunk_table
 {
+    fsl_mem_handle handle;
+    hhc_chunk **p; /* cached pointer from `handle` */
+
     /*!
      *  @brief player-relative `p` access.
      */
     u32 index;
 
-    fsl_mem_handle handle;
-    hhc_chunk **p;          /* cached pointer from `handle` */
 } hhc_chunk_table;
 
 /*!
@@ -189,7 +191,7 @@ typedef struct hhc_chunk_table
 typedef struct hhc_chunk_order
 {
     fsl_mem_handle handle;
-    hhc_chunk ***p;
+    u32 *p; /* cached pointer from `handle` */
 
     /*!
      *  @brief look-up table to reduce redundant checking of untouched indices of @ref chunk_tab
@@ -201,14 +203,24 @@ typedef struct hhc_chunk_order
      *  get processed, and since @ref chunk_order is a look-up that orders @ref chunk_tab
      *  addresses by their distance from that table's center, it becomes easy to iterate
      *  from @ref chunk_order.p[0] to @ref chunk_order.p[chunk_order.len[render_distance]]
-     *  and get exactly that sphere.
+     *  (or @ref chunk_order.chunks_max) and get exactly that sphere.
      *
      *  @remark index 0 of this array is always 0 since render distance of 0 is not
-     *  possible (it's possible, but goofy).
+     *  possible (it is possible, but goofy).
      *
      *  @remark read-only, initialized internally in @ref chunking_init().
      */
     u32 len[SET_RENDER_DISTANCE_MAX + 1];
+
+    /*!
+     *  @brief max number of chunks for current render distance setting,
+     *  cached from `len`.
+     *
+     *  @remark read-only, initialized internally in @ref chunking_init() and
+     *  updated in @ref setting_render_distance_set().
+     */
+    u32 chunks_max;
+
 } hhc_chunk_order;
 
 /*!
@@ -247,11 +259,9 @@ extern hhc_chunk_order chunk_order;
  *    @ref chunk_order and @ref chunk_sched[<x>] onto it.
  *  - load necessary look-ups from disk if found and build them if not.
  *
- *  @remark building the look-ups is very taxing currently.
- *
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
-u32 chunking_init(void);
+u32 chunking_init(v3i32 *player_chunk_delta);
 
 /*!
  *  @update everything about chunks during gameplay.
@@ -262,13 +272,12 @@ u32 chunking_init(void);
  *  2. if @ref core.flag.chunk_buf_dirty, shift @ref chunk_tab to compensate for
  *     player crossing a chunk boundary.
  *
- *  3. check if player has crossed on more than one axis and go back to shift
- *     along that axis if true.
+ *  3. check if player has crossed multiple axes and shift for each one.
  *
  *  4. find empty chunk slots within @ref settings.render_distance distance, push chunks onto
  *     @ref chunk_buf and return the address to the respective index to @ref chunk_tab.
  *
- *  5. remove @ref core.flag.chunk_buf_dirty when no further processing is required.
+ *  5. un-dirty @ref core.flag.chunk_buf_dirty when done.
  */
 void chunking_update(v3i32 player_chunk, v3i32 *player_chunk_delta, block_hit hit);
 
@@ -296,7 +305,7 @@ void block_break(block_hit hit);
  *  @return block address in chunk if `x`, `y` and `z` are within chunk bounds and
  *  return the correct block in the neighboring chunk otherwise.
  */
-u32 *get_block_resolved(hhc_chunk *ch, i32 x, i32 y, i32 z);
+u32 *get_block_resolved(hhc_chunk *chunk, i32 x, i32 y, i32 z);
 
 /*!
  *  @brief get chunk relative to position.

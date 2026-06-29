@@ -51,8 +51,7 @@ hhc_chunk_gizmo chunk_gizmo_visible = {0};
 
 /* ---- section: signatures ------------------------------------------------- */
 
-static void chunk_debug_scheduler_visualizer_draw_internal(hhc_chunk_scheduler sched,
-        const fsl_mesh *mesh_bounding_box, const fsl_camera *camera,
+static void chunk_debug_scheduler_visualizer_draw_internal(const fsl_camera *camera,
         f32 color_r, f32 color_g, f32 color_b, f32 color_a);
 
 /* ---- section: implementation --------------------------------------------- */
@@ -175,86 +174,76 @@ void chunk_debug_chunk_gizmo_draw(const fsl_camera *camera)
     glEnable(GL_BLEND);
 }
 
-void chunk_debug_chunk_gizmo_write_internal(hhc_chunk *ch)
+void chunk_debug_chunk_gizmo_write_internal(hhc_chunk *chunk)
 {
     v3u32 chunk_pos = {0};
     v4u32 chunk_color = {0};
 
-    chunk_pos.x = ch->index % settings.chunk_buf_diameter;
-    chunk_pos.y = (ch->index / settings.chunk_buf_diameter) % settings.chunk_buf_diameter;
-    chunk_pos.z = ch->index / settings.chunk_buf_layer;
+    chunk_pos.x = chunk->cti % settings.chunk_buf_diameter;
+    chunk_pos.y = (chunk->cti / settings.chunk_buf_diameter) % settings.chunk_buf_diameter;
+    chunk_pos.z = chunk->cti / settings.chunk_buf_layer;
 
-    chunk_color.x = (ch->color >> 0x18) & 0xff;
-    chunk_color.y = (ch->color >> 0x10) & 0xff;
-    chunk_color.z = (ch->color >> 0x08) & 0xff;
-    chunk_color.w = (ch->color >> 0x00) & 0xff;
+    chunk_color.x = (chunk->color >> 0x18) & 0xff;
+    chunk_color.y = (chunk->color >> 0x10) & 0xff;
+    chunk_color.z = (chunk->color >> 0x08) & 0xff;
+    chunk_color.w = (chunk->color >> 0x00) & 0xff;
 
-    chunk_color.x = (chunk_color.x + ((ch->color_variant >> 0x18) & 0xff)) / 2;
-    chunk_color.y = (chunk_color.y + ((ch->color_variant >> 0x10) & 0xff)) / 2;
-    chunk_color.z = (chunk_color.z + ((ch->color_variant >> 0x08) & 0xff)) / 2;
+    chunk_color.x = (chunk_color.x + ((chunk->color_variant >> 0x18) & 0xff)) / 2;
+    chunk_color.y = (chunk_color.y + ((chunk->color_variant >> 0x10) & 0xff)) / 2;
+    chunk_color.z = (chunk_color.z + ((chunk->color_variant >> 0x08) & 0xff)) / 2;
 
-    if (ch->flag & FLAG_CHUNK_VISIBLE)
+    if (chunk->flag & FLAG_CHUNK_VISIBLE)
     {
-        chunk_gizmo_visible.p[ch->index].x =
+        chunk_gizmo_visible.p[chunk->cti].x =
             (chunk_pos.x << 0x18) | (chunk_pos.y << 0x10) | (chunk_pos.z << 0x08);
-        chunk_gizmo_visible.p[ch->index].y =
+        chunk_gizmo_visible.p[chunk->cti].y =
             (chunk_color.x << 0x18) |
             (chunk_color.y << 0x10) |
             (chunk_color.z << 0x08) |
             (chunk_color.w << 0x00);
-        chunk_gizmo_loaded.p[ch->index].y = 0;
+        chunk_gizmo_loaded.p[chunk->cti].y = 0;
     }
-    else if (ch->flag & FLAG_CHUNK_LOADED)
+    else if (chunk->flag & FLAG_CHUNK_LOADED)
     {
-        chunk_gizmo_loaded.p[ch->index].x =
+        chunk_gizmo_loaded.p[chunk->cti].x =
             (chunk_pos.x << 0x18) | (chunk_pos.y << 0x10) | (chunk_pos.z << 0x08);
-        chunk_gizmo_loaded.p[ch->index].y =
+        chunk_gizmo_loaded.p[chunk->cti].y =
             (chunk_color.x << 0x18) |
             (chunk_color.y << 0x10) |
             (chunk_color.z << 0x08) |
             (chunk_color.w << 0x00);
-        chunk_gizmo_visible.p[ch->index].y = 0;
+        chunk_gizmo_visible.p[chunk->cti].y = 0;
     }
     else
     {
-        chunk_gizmo_loaded.p[ch->index].y = 0;
-        chunk_gizmo_visible.p[ch->index].y = 0;
+        chunk_gizmo_loaded.p[chunk->cti].y = 0;
+        chunk_gizmo_visible.p[chunk->cti].y = 0;
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, chunk_gizmo_loaded.vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, ch->index * sizeof(v2u32), sizeof(v2u32),
-            &chunk_gizmo_loaded.p[ch->index]);
+    glBufferSubData(GL_ARRAY_BUFFER, chunk->cti * sizeof(v2u32), sizeof(v2u32),
+            &chunk_gizmo_loaded.p[chunk->cti]);
     glBindBuffer(GL_ARRAY_BUFFER, chunk_gizmo_visible.vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, ch->index * sizeof(v2u32), sizeof(v2u32),
-            &chunk_gizmo_visible.p[ch->index]);
+    glBufferSubData(GL_ARRAY_BUFFER, chunk->cti * sizeof(v2u32), sizeof(v2u32),
+            &chunk_gizmo_visible.p[chunk->cti]);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void chunk_debug_scheduler_visualizer_draw(const fsl_camera *camera, f32 opacity)
 {
-    fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
-
-    glClear(GL_DEPTH_BUFFER_BIT);
-    chunk_debug_scheduler_visualizer_draw_internal(chunk_sched[2],
-            &mesh_p[MESH_CUBE_OF_HAPPINESS], camera,
-            0.9f, 0.3f, 0.3f, opacity);
-    glClear(GL_DEPTH_BUFFER_BIT);
-    chunk_debug_scheduler_visualizer_draw_internal(chunk_sched[1],
-            &mesh_p[MESH_CUBE_OF_HAPPINESS], camera,
-            0.9f, 0.6f, 0.3f, opacity);
-    glClear(GL_DEPTH_BUFFER_BIT);
-    chunk_debug_scheduler_visualizer_draw_internal(chunk_sched[0],
-            &mesh_p[MESH_CUBE_OF_HAPPINESS], camera,
-            0.9f, 0.6f, 0.3f, opacity);
+    chunk_debug_scheduler_visualizer_draw_internal(camera, 0.9f, 0.6f, 0.3f, opacity);
 }
 
-static void chunk_debug_scheduler_visualizer_draw_internal(hhc_chunk_scheduler sched,
-        const fsl_mesh *mesh_bounding_box, const fsl_camera *camera,
+static void chunk_debug_scheduler_visualizer_draw_internal(const fsl_camera *camera,
         f32 color_r, f32 color_g, f32 color_b, f32 color_a)
 {
-    u32 pop = sched.cursor_pop;
-    u32 count = sched.count;
+    fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
+    hhc_chunk *chunk = NULL;
+    u32 pop = chunk_sched.cursor_pop;
+    u32 count = chunk_sched.count;
+    u32 len = chunk_order.chunks_max;
 
+    glClear(GL_DEPTH_BUFFER_BIT);
     glUniformMatrix4fv(uniform.bounding_box.mat_perspective, 1, GL_FALSE,
             (GLfloat*)&camera->projection.perspective);
     glUniform3f(uniform.bounding_box.size,
@@ -262,17 +251,21 @@ static void chunk_debug_scheduler_visualizer_draw_internal(hhc_chunk_scheduler s
 
     while (count--)
     {
+        chunk = chunk_sched.p[pop];
+        if (!chunk)
+            continue;
+
         glUniform3f(uniform.bounding_box.position,
-                (f32)(sched.p[pop]->pos_world.x * CHUNK_DIAMETER),
-                (f32)(sched.p[pop]->pos_world.y * CHUNK_DIAMETER),
-                (f32)(sched.p[pop]->pos_world.z * CHUNK_DIAMETER));
+                (f32)(chunk->pos_world.x * CHUNK_DIAMETER),
+                (f32)(chunk->pos_world.y * CHUNK_DIAMETER),
+                (f32)(chunk->pos_world.z * CHUNK_DIAMETER));
 
         glUniform4f(uniform.bounding_box.color, color_r, color_g, color_b, color_a);
-        glBindVertexArray(mesh_bounding_box->vao);
+        glBindVertexArray(mesh_p[MESH_CUBE_OF_HAPPINESS].vao);
         glDrawElements(GL_LINE_STRIP, 24, GL_UNSIGNED_INT, 0);
 
         ++pop;
-        if (pop == sched.len)
+        if (pop >= len)
             pop = 0;
     }
 }

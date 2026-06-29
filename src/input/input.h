@@ -30,7 +30,7 @@
 
 #define FSL_MOUSE_BUTTONS_MAX 8
 #define FSL_KEYBOARD_KEYS_MAX 120
-#define FSL_DOUBLE_PRESS_TIME_INTERVAL 0.5
+#define FSL_DOUBLE_PRESS_TIME_INTERVAL 0.25
 
 typedef struct fsl_key_bind fsl_key_bind;
 

@@ -139,11 +139,6 @@ typedef struct hhc_player
     f32 camera_distance;            /* for camera collision detection */
     hhc_player_camera_mode camera_mode;
 
-    /*!
-     *  @brief player at world edge, enum @ref player_flag.
-     */
-    u8 overflow;
-
     v3i32 ch;                       /* current chunk (named `ch` to avoid symbol clash with @ref chunk) */
     v3i32 ch_delta;                 /* previous chunk (named `ch` to avoid symbol clash with @ref chunk) */
     block_hit hit;                  /* information about the currently targeted block */

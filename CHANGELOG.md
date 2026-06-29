@@ -9,6 +9,12 @@
 
 ## v0.14.0-dev (current)
 
+#### changes
+- improved perlin-noise performance by changing interpolation per axis to
+  corner weight multiplication.
+- improved perlin-noise gradient axis hashing randomness.
+- shortened double-press time interval to half as long.
+
 #### additions
 - added functions `fsl_bilerp_f32()` and `fsl_trilerp_f32()` for
   bi-linear interpolation and tri-linear interpolation.
