@@ -40,10 +40,10 @@ u32 build_composable_ui(int argc, char **argv);
 fsl_test_info test_list[] =
 {
     /* name             abbreviation    build function */
-    {"game_hhc",        "hhc",          &build_game},
-    {"text_rendering",  "txt",          &build_text_rendering},
-    {"nine_slice",      "9s",           &build_nine_slice},
-    {"composable_ui",   "ui",           &build_composable_ui}
+    {"game_hhc",        "hhc",          build_game},
+    {"text_rendering",  "txt",          build_text_rendering},
+    {"nine_slice",      "9s",           build_nine_slice},
+    {"composable_ui",   "ui",           build_composable_ui}
 };
 
 int main(int argc, char **argv)
