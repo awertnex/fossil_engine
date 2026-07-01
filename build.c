@@ -57,6 +57,12 @@ static str str_files[][CMD_SIZE] =
     DIR_SRC"time.c"
 };
 
+static str str_files_plugins[][CMD_SIZE] =
+{
+    DIR_SRC"plugins/fsl_native/noise_sampler/noise_sampler.c",
+    DIR_SRC"plugins/fsl_native/noise_sampler/noise_sampler_sample.c"
+};
+
 static str str_make_dir[][CMD_SIZE] =
 {
     DIR_DST,
@@ -81,8 +87,15 @@ static str str_make_dir[][CMD_SIZE] =
     DIR_DST DIR_DST DIR_DST,
     DIR_DST DIR_DST DIR_DST"logs/",
 
-    DIR_DST "lib/",
-    DIR_DST "lib/"PLATFORM
+    DIR_DST"lib/",
+    DIR_DST"lib/"PLATFORM
+};
+
+static str str_make_dir_plugins[][CMD_SIZE] =
+{
+    DIR_DST DIR_DEPS DIR_DST"plugins/",
+    DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/",
+    DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/noise_sampler/"
 };
 
 static str *copy_targets[][48] =
@@ -118,6 +131,12 @@ static str *copy_targets[][48] =
     {DIR_SRC"ui/ui_types.h",                DIR_DST DIR_DEPS DIR_DST"ui/"}
 };
 
+static str *copy_targets_plugins[][48] =
+{
+    {DIR_SRC"plugins/fsl_native/noise_sampler/noise_sampler.h", DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/noise_sampler/"},
+    {DIR_SRC"plugins/fsl_native/noise_sampler/noise_sampler_sample.h", DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/noise_sampler/"}
+};
+
 int main(int argc, char **argv)
 {
     u32 i = 0;
@@ -133,6 +152,13 @@ int main(int argc, char **argv)
     for (i = 0; i < arr_len(str_make_dir); ++i)
     {
         make_dir(str_make_dir[i]);
+        if (build_err != ERR_SUCCESS && build_err != ERR_DIR_EXISTS)
+            cmd_fail(&cmd);
+    }
+
+    for (i = 0; i < arr_len(str_make_dir_plugins); ++i)
+    {
+        make_dir(str_make_dir_plugins[i]);
         if (build_err != ERR_SUCCESS && build_err != ERR_DIR_EXISTS)
             cmd_fail(&cmd);
     }
@@ -164,6 +190,9 @@ int main(int argc, char **argv)
     for (i = 0; i < arr_len(str_files); ++i)
         cmd_push(&cmd, str_files[i]);
 
+    for (i = 0; i < arr_len(str_files_plugins); ++i)
+        cmd_push(&cmd, str_files_plugins[i]);
+
     cmd_push(&cmd, "-o");
     cmd_push(&cmd, "lib/"PLATFORM"/"FSL_FILE_NAME_LIB);
     cmd_ready(&cmd);
@@ -188,6 +217,10 @@ int main(int argc, char **argv)
 
     for (i = 0; i < arr_len(copy_targets); ++i)
         if (copy_file(copy_targets[i][0], copy_targets[i][1]) != ERR_SUCCESS)
+            cmd_fail(&cmd);
+
+    for (i = 0; i < arr_len(copy_targets_plugins); ++i)
+        if (copy_file(copy_targets_plugins[i][0], copy_targets_plugins[i][1]) != ERR_SUCCESS)
             cmd_fail(&cmd);
 
     return ERR_SUCCESS;

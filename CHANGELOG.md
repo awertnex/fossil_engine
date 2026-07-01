@@ -16,6 +16,7 @@
 - shortened double-press time interval to half as long.
 
 #### additions
+- new seamless-tiling noise sampler plug-in.
 - added functions `fsl_bilerp_f32()` and `fsl_trilerp_f32()` for
   bi-linear interpolation and tri-linear interpolation.
 

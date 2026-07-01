@@ -1,4 +1,22 @@
-#include "deps/fossil/fossil_engine.h"
+#include "deps/fossil/common/common_values.h"
+#include "deps/fossil/common/config.h"
+#include "deps/fossil/common/diagnostics.h"
+#include "deps/fossil/common/engine_info.h"
+#include "deps/fossil/common/limits.h"
+#include "deps/fossil/common/types.h"
+#include "deps/fossil/assets/assets.h"
+#include "deps/fossil/engine/engine.h"
+#include "deps/fossil/engine/engine_assets.h"
+#include "deps/fossil/logger/logger.h"
+#include "deps/fossil/math/math.h"
+#include "deps/fossil/math/matrix.h"
+#include "deps/fossil/math/vector.h"
+#include "deps/fossil/memory/memory.h"
+#include "deps/fossil/shaders/shader_types.h"
+#include "deps/fossil/string/string.h"
+#include "deps/fossil/ui/ui.h"
+
+#include "deps/fossil/h/time.h"
 
 #include "h/main.h"
 
@@ -51,6 +69,7 @@ static void callback_key(GLFWwindow *window, int key, int scancode, int action, 
 static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset);
 
 static void bind_shader_uniforms(void);
+static void skybox_draw(void);
 static void ui_hud_draw(void);
 static void draw_world(void);
 static void draw_debug_gizmo_axis(void);
@@ -192,6 +211,173 @@ static void bind_shader_uniforms(void)
         glGetUniformLocation(shader_p[SHADER_BOUNDING_BOX].asset.id, "box_color");
 }
 
+static void skybox_draw(void)
+{
+    f32 delay_in_hours = 6.0f;
+    f32 sun_time = skybox_data.time * FSL_PI;
+    f32 sun_angle = sun_time + 90.0f * FSL_DEG2RAD;
+    f64 mid_day = 0.0f;
+    f64 burn_cold = 0.0f;
+    f64 burn = 0.0f;
+    f64 burn_boost = 0.0f;
+    f64 mid_night = 0.0f;
+    m4f32 translation = {0};
+    m4f32 rotation_yaw = {0};
+    m4f32 rotation_pitch = {0};
+    fsl_fbo *fbo_p = fsl_mem_handle_get(fbo);
+    fsl_texture *texture_p = fsl_mem_handle_get(texture);
+    fsl_mesh *fsl_mesh_p = fsl_mem_handle_get(fsl_mesh_buf);
+    fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
+
+    glEnable(GL_DEPTH_TEST);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_p[FBO_SKYBOX].fbo);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    skybox_data.time = fmodf((f32)world.tick / SET_DAY_TICKS_MAX, 1.0f);
+    skybox_data.time = fmodf(skybox_data.time * 2.0f - delay_in_hours / 12.0f, 2.0f);
+    skybox_data.sun_rotation.x = cos(skybox_data.time * FSL_PI);
+    skybox_data.sun_rotation.y = cos(skybox_data.time * FSL_PI) * 0.3f;
+    skybox_data.sun_rotation.z = sin(skybox_data.time * FSL_PI);
+
+    mid_day =       (sin(sun_time) + 1.0) / 2.0;
+    mid_day =       pow(sin(FSL_HALF_PI * mid_day), 2.0);
+    mid_day =       pow(sin(FSL_HALF_PI * mid_day), 2.0);
+
+    burn_cold =     pow((sin(FSL_HALF_PI * sin(sun_time + FSL_HALF_PI)) + 1.0) / 2.0, 24.0) +
+        pow((sin(FSL_HALF_PI * sin(sun_time - FSL_HALF_PI)) + 1.0) / 2.0, 24.0);
+
+    burn =          pow((sin(sun_time + FSL_HALF_PI) + 1.0) / 2.0, 64.0) +
+        pow((sin(sun_time - FSL_HALF_PI) + 1.0) / 2.0, 64.0);
+
+    burn_boost =    pow(sin(sun_time + FSL_HALF_PI), 128.0) +
+        pow(sin(sun_time - FSL_HALF_PI), 128.0);
+    mid_night =     pow((sin(FSL_HALF_PI * sin(sun_time + FSL_PI)) + 1.0) / 2.0, 4.0);
+
+    skybox_data.sky_color.x = (mid_day * 171.0f + mid_night * 1.0f + burn_cold * 8.0f) / 0xff;
+    skybox_data.sky_color.y = (mid_day * 229.0f + mid_night * 4.0f + burn_cold * 4.0f) / 0xff;
+    skybox_data.sky_color.z = (mid_day * 255.0f + mid_night * 14.0f + burn_cold * 18.0f) / 0xff;
+    skybox_data.horizon_color.x = (mid_day * 224.0f + mid_night * 1.0f + burn_cold * 8.0f + burn * 92.0f + burn_boost * 116.0f) / 0xff;
+    skybox_data.horizon_color.y = (mid_day * 244.0f + mid_night * 4.0f + burn_cold * 4.0f + burn * 5.0f + burn_boost * 77.0f) / 0xff;
+    skybox_data.horizon_color.z = (mid_day * 255.0f + mid_night * 14.0f + burn_cold * 18.0f) / 0xff;
+    skybox_data.sky_light.x = skybox_data.sky_color.x + skybox_data.horizon_color.x;
+    skybox_data.sky_light.y = skybox_data.sky_color.y + skybox_data.horizon_color.y;
+    skybox_data.sky_light.z = skybox_data.sky_color.z + skybox_data.horizon_color.z;
+    skybox_data.moon_light.x = mid_night;
+    skybox_data.moon_light.y = mid_night;
+    skybox_data.moon_light.z = mid_night;
+
+    translation = fsl_matrix_unit();
+    rotation_yaw = fsl_matrix_unit();
+    rotation_pitch = fsl_matrix_unit();
+
+    glUseProgram(shader_p[SHADER_SKYBOX].asset.id);
+
+    glUniformMatrix4fv(uniform.skybox.mat_translation, 1, GL_FALSE, (GLfloat*)&translation);
+    glUniformMatrix4fv(uniform.skybox.mat_rotation, 1, GL_FALSE,
+            (GLfloat*)&player.camera.projection.rotation);
+    glUniformMatrix4fv(uniform.skybox.mat_sun_rotation, 1, GL_FALSE, (GLfloat*)&rotation_yaw);
+    glUniformMatrix4fv(uniform.skybox.mat_orientation, 1, GL_FALSE,
+            (GLfloat*)&player.camera.projection.orientation);
+    glUniformMatrix4fv(uniform.skybox.mat_projection, 1, GL_FALSE,
+            (GLfloat*)&player.camera.projection.projection);
+    glUniform3fv(uniform.skybox.sun_rotation, 1, (GLfloat*)&skybox_data.sun_rotation);
+    glUniform3fv(uniform.skybox.sky_color, 1, (GLfloat*)&skybox_data.sky_color);
+    glUniform3fv(uniform.skybox.horizon_color, 1, (GLfloat*)&skybox_data.horizon_color);
+    glUniform1i(uniform.skybox.render_layer, 0);
+
+    glUniform1i(uniform.skybox.texture_sky, 0);
+    glUniform1i(uniform.skybox.texture_horizon, 1);
+    glUniform1i(uniform.skybox.texture_stars, 2);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture_p[TEXTURE_SKYBOX_VAL].asset.id);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture_p[TEXTURE_SKYBOX_HORIZON].asset.id);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, texture_p[TEXTURE_SKYBOX_STARS].asset.id);
+    glBindVertexArray(fsl_mesh_p[FSL_MESH_INDEX_SKYBOX].vao);
+    glDrawElements(GL_TRIANGLES, fsl_mesh_p[FSL_MESH_INDEX_SKYBOX].index_buf.len,
+            GL_UNSIGNED_INT, 0);
+
+    /* ---- draw sun -------------------------------------------------------- */
+
+    if (settings.anti_aliasing)
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo_p[FBO_WORLD_MSAA].fbo);
+    else
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo_p[FBO_WORLD].fbo);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    translation = fsl_matrix_unit();
+    translation.a41 = skybox_data.sun_rotation.x * 2.0f;
+    translation.a42 = skybox_data.sun_rotation.y * 2.0f;
+    translation.a43 = skybox_data.sun_rotation.z * 2.0f;
+
+    rotation_yaw = fsl_matrix_unit();
+    rotation_yaw.a11 = cosf(FSL_HALF_PI);
+    rotation_yaw.a12 = -sinf(FSL_HALF_PI);
+    rotation_yaw.a21 = sinf(FSL_HALF_PI);
+    rotation_yaw.a22 = cosf(FSL_HALF_PI);
+
+    rotation_pitch = fsl_matrix_unit();
+    rotation_pitch.a11 = cosf(sun_angle);
+    rotation_pitch.a13 = sinf(sun_angle);
+    rotation_pitch.a31 = -sinf(sun_angle);
+    rotation_pitch.a33 = cosf(sun_angle);
+
+    rotation_yaw = fsl_matrix_multiply(rotation_yaw, rotation_pitch);
+
+    glUniformMatrix4fv(uniform.skybox.mat_translation, 1, GL_FALSE, (GLfloat*)&translation);
+    glUniformMatrix4fv(uniform.skybox.mat_sun_rotation, 1, GL_FALSE, (GLfloat*)&rotation_yaw);
+    glUniform1i(uniform.skybox.render_layer, 1);
+
+    glUniform1i(uniform.skybox.texture_sun, 3);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, texture_p[TEXTURE_SUN].asset.id);
+    glBindVertexArray(fsl_mesh_unit_quad.vao);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+    /* ---- draw moon ------------------------------------------------------- */
+
+    translation.a41 = -skybox_data.sun_rotation.x * 2.0f;
+    translation.a42 = -skybox_data.sun_rotation.y * 2.0f;
+    translation.a43 = -skybox_data.sun_rotation.z * 2.0f;
+
+    sun_angle = skybox_data.time * FSL_PI - FSL_HALF_PI;
+
+    rotation_yaw = fsl_matrix_unit();
+    rotation_yaw.a11 = cosf(FSL_HALF_PI);
+    rotation_yaw.a22 = -sinf(FSL_HALF_PI);
+    rotation_yaw.a11 = sinf(FSL_HALF_PI);
+    rotation_yaw.a22 = cosf(FSL_HALF_PI);
+
+    rotation_pitch = fsl_matrix_unit();
+    rotation_pitch.a11 = cosf(sun_angle);
+    rotation_pitch.a13 = sinf(sun_angle);
+    rotation_pitch.a31 = -sinf(sun_angle);
+    rotation_pitch.a33 = cosf(sun_angle);
+
+    rotation_yaw = fsl_matrix_multiply(rotation_yaw, rotation_pitch);
+
+    glUniformMatrix4fv(uniform.skybox.mat_translation, 1, GL_FALSE,
+            (GLfloat*)&translation);
+    glUniformMatrix4fv(uniform.skybox.mat_sun_rotation, 1, GL_FALSE,
+            (GLfloat*)&rotation_yaw);
+    glUniform1i(uniform.skybox.render_layer, 2);
+
+    glBindTexture(GL_TEXTURE_2D, texture_p[TEXTURE_MOON].asset.id);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0);
+}
+
 static void ui_hud_draw(void)
 {
     u32 i = 0;
@@ -308,108 +494,14 @@ static void world_draw(void)
 {
     static str engine_version[FSL_ID_CAP] = {0};
     fsl_fbo *fbo_p = fsl_mem_handle_get(fbo);
-    fsl_texture *texture_p = fsl_mem_handle_get(texture);
     fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
-    fsl_mesh *fsl_mesh_p = fsl_mem_handle_get(fsl_mesh_buf);
     fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
     fsl_shader_program *fsl_shader_p = fsl_mem_handle_get(fsl_shader_buf);
     hhc_block *blocks_p = fsl_mem_handle_get(blocks);
     fsl_asset_metadata metadata = {0};
     u32 block_id = 0;
 
-    f32 delay_in_hours = 6.0f;
-    f32 sun_time = skybox_data.time * FSL_PI;
-    f32 sun_angle = sun_time + 90.0f * FSL_DEG2RAD;
-    f64 mid_day = 0.0f;
-    f64 burn_cold = 0.0f;
-    f64 burn = 0.0f;
-    f64 burn_boost = 0.0f;
-    f64 mid_night = 0.0f;
-
-    /* ---- draw skybox ----------------------------------------------------- */
-
-    glEnable(GL_DEPTH_TEST);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo_p[FBO_SKYBOX].fbo);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    skybox_data.time = fmodf((f32)world.tick / SET_DAY_TICKS_MAX, 1.0f);
-    skybox_data.time = fmodf(skybox_data.time * 2.0f - delay_in_hours / 12.0f, 2.0f);
-    skybox_data.sun_rotation.x = cos(skybox_data.time * FSL_PI);
-    skybox_data.sun_rotation.y = cos(skybox_data.time * FSL_PI) * 0.3f;
-    skybox_data.sun_rotation.z = sin(skybox_data.time * FSL_PI);
-
-    mid_day =       (sin(sun_time) + 1.0) / 2.0;
-    mid_day =       pow(sin(FSL_HALF_PI * mid_day), 2.0);
-    mid_day =       pow(sin(FSL_HALF_PI * mid_day), 2.0);
-
-    burn_cold =     pow((sin(FSL_HALF_PI * sin(sun_time + FSL_HALF_PI)) + 1.0) / 2.0, 24.0);
-    burn_cold +=    pow((sin(FSL_HALF_PI * sin(sun_time - FSL_HALF_PI)) + 1.0) / 2.0, 24.0);
-
-    burn =          pow((sin(sun_time + FSL_HALF_PI) + 1.0) / 2.0, 64.0);
-    burn +=         pow((sin(sun_time - FSL_HALF_PI) + 1.0) / 2.0, 64.0);
-
-    burn_boost =    pow(sin(sun_time + FSL_HALF_PI), 128.0);
-    burn_boost +=   pow(sin(sun_time - FSL_HALF_PI), 128.0);
-
-    mid_night =     pow((sin(FSL_HALF_PI * sin(sun_time + FSL_PI)) + 1.0) / 2.0, 4.0);
-
-    skybox_data.sky_color.x = (mid_day * 171.0f + mid_night * 1.0f + burn_cold * 8.0f) / 0xff;
-    skybox_data.sky_color.y = (mid_day * 229.0f + mid_night * 4.0f + burn_cold * 4.0f) / 0xff;
-    skybox_data.sky_color.z = (mid_day * 255.0f + mid_night * 14.0f + burn_cold * 18.0f) / 0xff;
-    skybox_data.horizon_color.x = (mid_day * 224.0f + mid_night * 1.0f + burn_cold * 8.0f + burn * 92.0f + burn_boost * 116.0f) / 0xff;
-    skybox_data.horizon_color.y = (mid_day * 244.0f + mid_night * 4.0f + burn_cold * 4.0f + burn * 5.0f + burn_boost * 77.0f) / 0xff;
-    skybox_data.horizon_color.z = (mid_day * 255.0f + mid_night * 14.0f + burn_cold * 18.0f) / 0xff;
-    skybox_data.sky_light.x = skybox_data.sky_color.x + skybox_data.horizon_color.x;
-    skybox_data.sky_light.y = skybox_data.sky_color.y + skybox_data.horizon_color.y;
-    skybox_data.sky_light.z = skybox_data.sky_color.z + skybox_data.horizon_color.z;
-    skybox_data.moon_light.x = mid_night;
-    skybox_data.moon_light.y = mid_night;
-    skybox_data.moon_light.z = mid_night;
-
-    m4f32 translation =
-    {
-        1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f
-    };
-
-    m4f32 rotation =
-    {
-        1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f
-    };
-
-    glUseProgram(shader_p[SHADER_SKYBOX].asset.id);
-
-    glUniformMatrix4fv(uniform.skybox.mat_translation, 1, GL_FALSE, (GLfloat*)&translation);
-    glUniformMatrix4fv(uniform.skybox.mat_rotation, 1, GL_FALSE,
-            (GLfloat*)&player.camera.projection.rotation);
-    glUniformMatrix4fv(uniform.skybox.mat_sun_rotation, 1, GL_FALSE, (GLfloat*)&rotation);
-    glUniformMatrix4fv(uniform.skybox.mat_orientation, 1, GL_FALSE,
-            (GLfloat*)&player.camera.projection.orientation);
-    glUniformMatrix4fv(uniform.skybox.mat_projection, 1, GL_FALSE,
-            (GLfloat*)&player.camera.projection.projection);
-    glUniform3fv(uniform.skybox.sun_rotation, 1, (GLfloat*)&skybox_data.sun_rotation);
-    glUniform3fv(uniform.skybox.sky_color, 1, (GLfloat*)&skybox_data.sky_color);
-    glUniform3fv(uniform.skybox.horizon_color, 1, (GLfloat*)&skybox_data.horizon_color);
-    glUniform1i(uniform.skybox.render_layer, 0);
-
-    glUniform1i(uniform.skybox.texture_sky, 0);
-    glUniform1i(uniform.skybox.texture_horizon, 1);
-    glUniform1i(uniform.skybox.texture_stars, 2);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture_p[TEXTURE_SKYBOX_VAL].asset.id);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture_p[TEXTURE_SKYBOX_HORIZON].asset.id);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, texture_p[TEXTURE_SKYBOX_STARS].asset.id);
-    glBindVertexArray(fsl_mesh_p[FSL_MESH_INDEX_SKYBOX].vao);
-    glDrawElements(GL_TRIANGLES, fsl_mesh_p[FSL_MESH_INDEX_SKYBOX].index_buf.len, GL_UNSIGNED_INT, 0);
-
-    /* ---- draw sun -------------------------------------------------------- */
+    skybox_draw();
 
     if (settings.anti_aliasing)
         glBindFramebuffer(GL_FRAMEBUFFER, fbo_p[FBO_WORLD_MSAA].fbo);
@@ -417,88 +509,6 @@ static void world_draw(void)
         glBindFramebuffer(GL_FRAMEBUFFER, fbo_p[FBO_WORLD].fbo);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    translation = (m4f32){
-        1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        skybox_data.sun_rotation.x * 2.0f,
-        skybox_data.sun_rotation.y * 2.0f,
-        skybox_data.sun_rotation.z * 2.0f,
-        1.0f,
-    };
-
-    rotation = (m4f32){
-        cosf(FSL_HALF_PI), -sinf(FSL_HALF_PI), 0.0f, 0.0f,
-        sinf(FSL_HALF_PI), cosf(FSL_HALF_PI), 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f,
-    };
-
-    rotation = fsl_matrix_multiply(rotation,
-            (m4f32){
-            cosf(sun_angle), 0.0f, sinf(sun_angle), 0.0f,
-            0.0f, 1.0f, 0.0f, 0.0f,
-            -sinf(sun_angle), 0.0f, cosf(sun_angle), 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f,
-            });
-
-    glUniformMatrix4fv(uniform.skybox.mat_translation, 1, GL_FALSE, (GLfloat*)&translation);
-    glUniformMatrix4fv(uniform.skybox.mat_sun_rotation, 1, GL_FALSE, (GLfloat*)&rotation);
-    glUniform1i(uniform.skybox.render_layer, 1);
-
-    glUniform1i(uniform.skybox.texture_sun, 3);
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, texture_p[TEXTURE_SUN].asset.id);
-    glBindVertexArray(fsl_mesh_unit_quad.vao);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-    translation = (m4f32){
-        1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        -skybox_data.sun_rotation.x * 2.0f,
-        -skybox_data.sun_rotation.y * 2.0f,
-        -skybox_data.sun_rotation.z * 2.0f,
-        1.0f,
-    };
-
-    sun_angle = skybox_data.time * FSL_PI - FSL_HALF_PI;
-    rotation = (m4f32){
-        cosf(FSL_HALF_PI), -sinf(FSL_HALF_PI), 0.0f, 0.0f,
-        sinf(FSL_HALF_PI), cosf(FSL_HALF_PI), 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f,
-    };
-
-    rotation = fsl_matrix_multiply(rotation,
-            (m4f32){
-            cosf(sun_angle), 0.0f, sinf(sun_angle), 0.0f,
-            0.0f, 1.0f, 0.0f, 0.0f,
-            -sinf(sun_angle), 0.0f, cosf(sun_angle), 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f,
-            });
-
-    glUniformMatrix4fv(uniform.skybox.mat_translation, 1, GL_FALSE,
-            (GLfloat*)&translation);
-    glUniformMatrix4fv(uniform.skybox.mat_sun_rotation, 1, GL_FALSE,
-            (GLfloat*)&rotation);
-    glUniform1i(uniform.skybox.render_layer, 2);
-
-    glBindTexture(GL_TEXTURE_2D, texture_p[TEXTURE_MOON].asset.id);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE0);
-
-    /* ---- draw world ------------------------------------------------------ */
 
     draw_world();
 
@@ -536,7 +546,7 @@ static void world_draw(void)
 
     /* ---- draw player chunk bounding box ---------------------------------- */
 
-    if (core.debug.chunk_bounds)
+    if (core.debug.chunk_bounds && core.flag.hud)
     {
         glUniform3f(uniform.bounding_box.position,
                 (f32)player.ch.x * CHUNK_DIAMETER,
@@ -552,7 +562,7 @@ static void world_draw(void)
 
     /* ---- draw player bounding box ---------------------------------------- */
 
-    if (core.debug.bounding_boxes)
+    if (core.debug.bounding_boxes && core.flag.hud)
     {
         glUniform3f(uniform.bounding_box.position,
                 player.bbox.pos.x, player.bbox.pos.y, player.bbox.pos.z);
@@ -566,7 +576,7 @@ static void world_draw(void)
 
     /* ---- draw chunk scheduler visualizer --------------------------------- */
 
-    if (core.debug.chunk_scheduler_visualizer)
+    if (core.debug.chunk_scheduler_visualizer && core.flag.hud)
         chunk_debug_scheduler_visualizer_draw(&player.camera, 0.5f);
 
     if (settings.anti_aliasing)

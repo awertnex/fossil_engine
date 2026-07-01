@@ -1,12 +1,11 @@
 #include "deps/fossil/common/limits.h"
 #include "deps/fossil/math/math.h"
-#include "deps/fossil/math/noise.h"
+#include "deps/fossil/plugins/fsl_native/noise_sampler/noise_sampler.h"
+#include "deps/fossil/plugins/fsl_native/noise_sampler/noise_sampler_sample.h"
 
 #include "../h/world.h"
 
 #include "terrain.h"
-#include "noise.h"
-#include "noise_sampler.h"
 
 #include <stdio.h>
 
@@ -19,7 +18,6 @@
 #define FREQ_DETAIL         (1.0 / 16.0)
 
 /* terrain modifiers (and/or biome selection) */
-#define BIOME_NOISE_OFFSET  TERRAIN_NOISE_TEMPERATURE
 #define FREQ_TEMPERATURE    (1.0 / 326.0)
 #define FREQ_HUMIDITY       (1.0 / 726.0)
 #define FREQ_EXTREMITY      (1.0 / 953.34)
@@ -100,59 +98,65 @@ static void terrain_spec_biome_set(hhc_biome_index biome_index, str *name,
         terrain_spec.biome[biome_index].spec[i] /= sum;
 }
 
-chunk_work_cost sampler_noise_axis_update_2d(hhc_noise_sampler_context *ctx, u8 axis)
+chunk_work_cost sampler_noise_axis_update_2d(fsl_noise_sampler_context *ctx, u8 axis)
 {
-    chunk_work_cost cost = 0;
     u32 i = 0;
     u32 j = 0;
-    u32 end = ctx->sample_count;
-    hhc_noise_sample *sample = NULL;
+    u64 noise_count = ctx->sampler->noise_buf.noise_len;
+    u32 sample_count = ctx->sample_count;
+    fsl_noise_sample *sample_src_buf = NULL;
 
-    for (i = 0; i < TERRAIN_NOISE_COUNT; ++i)
+    for (i = 0; i < noise_count; ++i)
     {
-        sample = ctx->sample_buf[i];
-        for (j = 0; j < end; ++j)
+        sample_src_buf = &ctx->sampler->noise_buf.sample_src_buf[i * sample_count];
+        for (j = 0; j < sample_count; ++j)
         {
-            cost += noise_sample_axis_init(&sample[j], axis,
+            fsl_noise_sample_axis_init(&sample_src_buf[j], axis,
                     *ctx->pos[j][axis], terrain_spec.freq[i]);
         }
     }
 
-    return cost;
+    return CHUNK_WORK_COST_GENERATE_NOISE_INIT * i * j;
 }
 
-chunk_work_cost sampler_noise_bake(hhc_noise_sampler_context *ctx)
+chunk_work_cost sampler_noise_bake(fsl_noise_sampler_context *ctx)
 {
-    chunk_work_cost cost = 0;
-    u32 i = 0;
-    u32 j = 0;
-    u32 end = ctx->sample_count;
-    hhc_noise_sample *sample = NULL;
-    f64 *dst = NULL;
-    f64 *final = ctx->n;
+    u64 i = 0;
+    u64 j = 0;
+    fsl_noise_buffer *noise_buf = &ctx->sampler->noise_buf;
+    u64 noise_count = noise_buf->noise_len;
+    u64 sample_count = ctx->sample_count;
+    fsl_noise_sample *sample_src_buf = NULL;
+    f64 *sample_dst_buf = NULL;
+    f64 *noise_dst_buf = noise_buf->noise_dst_buf;
     f64 *t = ctx->t;
 
-    for (i = 0; i < TERRAIN_NOISE_COUNT; ++i)
+    for (i = 0; i < noise_count; ++i)
     {
-        sample = ctx->sample_buf[i];
-        dst = ctx->sample_value[i];
-        for (j = 0; j < end; ++j)
+        sample_src_buf = &noise_buf->sample_src_buf[i * sample_count];
+        sample_dst_buf = &noise_buf->sample_dst_buf[i * sample_count];
+        for (j = 0; j < sample_count; ++j)
         {
-            cost += noise_sample_make_2d(&sample[j], &dst[j], terrain_spec.amp[i],
+            sample_dst_buf[j] = fsl_noise_sample_make_3d(&sample_src_buf[j], terrain_spec.amp[i],
                     world.seed + TERRAIN_SEED_DEFAULT + i * 10);
         }
 
-        final[i] = ctx->noise_sample_lerp_func(dst, t);
+        noise_dst_buf[i] = ctx->noise_sample_lerp_func(sample_dst_buf, t);
     }
 
-    for (i = BIOME_NOISE_OFFSET; i < TERRAIN_NOISE_COUNT; ++i)
-        final[i] = fsl_clamp_f64(final[i] + terrain_spec.post_offset[i], 0.0, 1.0);
-    return cost;
+    for (i = BIOME_NOISE_OFFSET; i < noise_count; ++i)
+    {
+        noise_dst_buf[i] = fsl_clamp_f64(noise_dst_buf[i] +
+                terrain_spec.post_offset[i], 0.0, 1.0);
+    }
+
+    return CHUNK_WORK_COST_GENERATE_NOISE_INTERPOLATE_2D * ctx->sample_count;
 }
 
-chunk_work_cost terrain_shape(hhc_terrain *terrain, hhc_noise_sampler_context *ctx)
+chunk_work_cost terrain_shape(hhc_terrain *terrain, fsl_noise_sampler_context *ctx)
 {
     chunk_work_cost cost = 0;
+    f64 *noise_dst_buf = ctx->sampler->noise_buf.noise_dst_buf;
     hhc_terrain noterrain = {0};
     hhc_biome biome = {0};
     f64 biome_score = 0.0;
@@ -163,7 +167,7 @@ chunk_work_cost terrain_shape(hhc_terrain *terrain, hhc_noise_sampler_context *c
     *terrain = noterrain;
 
     for (i = BIOME_NOISE_OFFSET; i < TERRAIN_NOISE_COUNT; ++i)
-    biome.spec[i] = ctx->n[i];
+    biome.spec[i] = noise_dst_buf[i];
 
     i = BIOME_COUNT;
     while (i--)
@@ -178,11 +182,11 @@ chunk_work_cost terrain_shape(hhc_terrain *terrain, hhc_noise_sampler_context *c
 
     terrain->biome = biome_best_index;
     terrain->value =
-        ((ctx->n[0] + ctx->n[1]) * (1.0 - ctx->n[4]) +
-        ctx->n[2]) * ctx->n[6] +
-        ctx->n[3] * ctx->n[7];
+        ((noise_dst_buf[0] + noise_dst_buf[1]) * (1.0 - noise_dst_buf[4]) +
+        noise_dst_buf[2]) * noise_dst_buf[6] +
+        noise_dst_buf[3] * noise_dst_buf[7];
 
-    if (terrain->value > ctx->pos_tab[0][2])
+    if (noise_dst_buf[3] > 0.0)
     {
         terrain->block_id = BLOCK_GRASS;
     }

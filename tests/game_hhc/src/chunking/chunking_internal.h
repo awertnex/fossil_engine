@@ -3,6 +3,7 @@
 
 #include "deps/fossil/common/types.h"
 #include "deps/fossil/math/vector.h"
+#include "deps/fossil/plugins/fsl_native/noise_sampler/noise_sampler.h"
 
 #include "chunk_work.h"
 #include "chunking.h"
@@ -107,6 +108,12 @@ typedef struct hhc_chunk_scheduler
     u32 buckets_max;        /* total number of members in `bucket` */
     u32 priority;           /* current parsing priority */
 } hhc_chunk_scheduler;
+
+typedef struct hhc_chunk_sampler
+{
+    fsl_noise_sampler sampler;
+    fsl_noise_sampler_context context;
+} hhc_chunk_sampler;
 
 /* ---- section: declarations ----------------------------------------------- */
 

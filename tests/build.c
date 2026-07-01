@@ -133,8 +133,6 @@ u32 build_game(int argc, char **argv)
     cmd_push(&cmd, DIR_SRC_GAME"settings/settings.c");
     cmd_push(&cmd, DIR_SRC_GAME"super_debugger/super_debugger.c");
     cmd_push(&cmd, DIR_SRC_GAME"super_debugger/super_debugger_callbacks.c");
-    cmd_push(&cmd, DIR_SRC_GAME"terrain/noise.c");
-    cmd_push(&cmd, DIR_SRC_GAME"terrain/noise_sampler.c");
     cmd_push(&cmd, DIR_SRC_GAME"terrain/terrain.c");
     cmd_push(&cmd, DIR_SRC_GAME"assets.c");
     cmd_push(&cmd, DIR_SRC_GAME"common.c");

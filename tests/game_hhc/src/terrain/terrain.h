@@ -3,13 +3,37 @@
 
 #include "deps/fossil/common/types.h"
 #include "deps/fossil/common/limits.h"
+#include "deps/fossil/plugins/fsl_native/noise_sampler/noise_sampler.h"
 
 #include "../chunking/chunk_work.h"
 
 #include "../h/assets.h"
 
-#include "noise_sampler.h"
-#include "terrain_common.h"
+#define BIOME_NOISE_OFFSET  TERRAIN_NOISE_TEMPERATURE
+
+typedef enum hhc_terrain_noise_index
+{
+    TERRAIN_NOISE_CONTINENTAL,
+    TERRAIN_NOISE_REGIONAL,
+    TERRAIN_NOISE_LOCAL,
+    TERRAIN_NOISE_DETAIL,
+    TERRAIN_NOISE_TEMPERATURE,
+    TERRAIN_NOISE_HUMIDITY,
+    TERRAIN_NOISE_EXTREMITY, /* big detail height */
+    TERRAIN_NOISE_ROUGHNESS, /* small detail height */
+    TERRAIN_NOISE_LIFE,
+    TERRAIN_NOISE_COUNT
+} hhc_terrain_noise_index;
+
+typedef enum hhc_biome_index
+{
+    BIOME_STONE,
+    BIOME_HILLS,
+    BIOME_SANDSTORM,
+    BIOME_DECAYING_LANDS,
+    BIOME_JUNGLE,
+    BIOME_COUNT
+} hhc_biome_index;
 
 typedef struct hhc_biome
 {
@@ -48,7 +72,7 @@ void terrain_spec_set(hhc_terrain_noise_index noise_index, f64 amp, f64 freq, f6
  *
  *  @param pos position along specified axis.
  */
-chunk_work_cost sampler_noise_axis_update_2d(hhc_noise_sampler_context *ctx, u8 axis);
+chunk_work_cost sampler_noise_axis_update_2d(fsl_noise_sampler_context *ctx, u8 axis);
 
 /*!
  *  @brief finalize and bake all pre-defined 2D and 3D noise maps to ready for
@@ -56,14 +80,14 @@ chunk_work_cost sampler_noise_axis_update_2d(hhc_noise_sampler_context *ctx, u8 
  *
  *  @remark use quintic interpolation internally.
  */
-chunk_work_cost sampler_noise_bake(hhc_noise_sampler_context *ctx);
+chunk_work_cost sampler_noise_bake(fsl_noise_sampler_context *ctx);
 
 /*!
  *  @brief default terrain shape.
  *
  *  @remark terrain info (e.g., biome) is stored inside `ctx`.
  */
-chunk_work_cost terrain_shape(hhc_terrain *terrain, hhc_noise_sampler_context *ctx);
+chunk_work_cost terrain_shape(hhc_terrain *terrain, fsl_noise_sampler_context *ctx);
 
 /*!
  *  @brief compare likelihood of biomes `a` and `b` matching.

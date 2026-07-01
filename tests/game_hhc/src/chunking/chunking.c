@@ -1,15 +1,14 @@
 #include "deps/fossil/common/limits.h"
 #include "deps/fossil/logger/logger.h"
 #include "deps/fossil/math/math.h"
-#include "deps/fossil/math/noise.h"
 #include "deps/fossil/memory/memory.h"
+#include "deps/fossil/plugins/fsl_native/noise_sampler/noise_sampler.h"
 #include "deps/fossil/string/string.h"
 
 #include "deps/fossil/h/dir.h"
 
 #include "../settings/settings.h"
 #include "../terrain/terrain.h"
-#include "../terrain/noise_sampler.h"
 
 #include "../h/assets.h"
 #include "../h/config_internal.h"
@@ -39,7 +38,7 @@ static hhc_chunk_buffer chunk_buf = {0};
 hhc_chunk_table chunk_tab = {0};
 hhc_chunk_order chunk_order = {0};
 hhc_chunk_scheduler chunk_sched = {0};
-static hhc_noise_sampler chunk_sampler = {0};
+static hhc_chunk_sampler chunk_sampler = {0};
 
 /* ---- section: implementation --------------------------------------------- */
 
@@ -50,17 +49,6 @@ u32 chunking_init(v3i32 *player_chunk_delta)
 
     if (chunks_max_init_internal() != FSL_ERR_SUCCESS)
         return *GAME_ERR;
-
-    chunk_sampler = noise_sampler_init(
-            (f64)(WORLD_RADIUS * CHUNK_DIAMETER),
-            (f64)(WORLD_RADIUS * CHUNK_DIAMETER),
-            (f64)(WORLD_RADIUS_VERTICAL * CHUNK_DIAMETER),
-            (f64)(WORLD_DIAMETER * CHUNK_DIAMETER),
-            (f64)(WORLD_DIAMETER * CHUNK_DIAMETER),
-            (f64)(WORLD_DIAMETER_VERTICAL * CHUNK_DIAMETER),
-            (f64)(WORLD_MARGIN * CHUNK_DIAMETER),
-            (f64)(WORLD_MARGIN * CHUNK_DIAMETER),
-            (f64)(WORLD_MARGIN * CHUNK_DIAMETER));
 
     chunk_sched.buckets_max = chunk_sphere_radius_get_internal(SET_RENDER_DISTANCE_MAX);
 
@@ -107,6 +95,20 @@ u32 chunking_init(v3i32 *player_chunk_delta)
     chunk_sched.bucket = fsl_mem_handle_get(chunk_sched.handle_bucket);
 
     if (chunk_bucket_load_internal() != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    if (fsl_noise_sampler_init(
+            &chunk_sampler.sampler,
+            TERRAIN_NOISE_COUNT, 8,
+            (f64)(WORLD_RADIUS * CHUNK_DIAMETER),
+            (f64)(WORLD_RADIUS * CHUNK_DIAMETER),
+            (f64)(WORLD_RADIUS_VERTICAL * CHUNK_DIAMETER),
+            (f64)(WORLD_DIAMETER * CHUNK_DIAMETER),
+            (f64)(WORLD_DIAMETER * CHUNK_DIAMETER),
+            (f64)(WORLD_DIAMETER_VERTICAL * CHUNK_DIAMETER),
+            (f64)(WORLD_MARGIN * CHUNK_DIAMETER),
+            (f64)(WORLD_MARGIN * CHUNK_DIAMETER),
+            (f64)(WORLD_MARGIN * CHUNK_DIAMETER)) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     core.flag.chunks_initialized = TRUE;
@@ -410,6 +412,12 @@ void chunking_update(v3i32 player_chunk, v3i32 *player_chunk_delta, block_hit hi
     v3f32 DISTANCE = {0};
     u32 RENDER_DISTANCE = 0;
     v3u32 chunk_tab_coordinates = {0};
+    v3i32 overflow_diameter =
+    {
+        WORLD_DIAMETER + CHUNK_DIAMETER,
+        WORLD_DIAMETER + CHUNK_DIAMETER,
+        WORLD_DIAMETER_VERTICAL + CHUNK_DIAMETER,
+    };
 
     if (settings.flag.render_distance_dirty)
     {
@@ -422,9 +430,13 @@ void chunking_update(v3i32 player_chunk, v3i32 *player_chunk_delta, block_hit hi
 
     chunk_scheduler_update_internal_deprecated();
 
-    DELTA.x = player_chunk.x - player_chunk_delta->x;
-    DELTA.y = player_chunk.y - player_chunk_delta->y;
-    DELTA.z = player_chunk.z - player_chunk_delta->z;
+    DELTA.x = player_chunk_delta->x - player_chunk.x;
+    DELTA.y = player_chunk_delta->y - player_chunk.y;
+    DELTA.z = player_chunk_delta->z - player_chunk.z;
+
+    DELTA.x -= (i32)(roundf((f32)DELTA.x / overflow_diameter.x) * overflow_diameter.x);
+    DELTA.y -= (i32)(roundf((f32)DELTA.y / overflow_diameter.y) * overflow_diameter.y);
+    DELTA.z -= (i32)(roundf((f32)DELTA.z / overflow_diameter.z) * overflow_diameter.z);
 
     if (!(DELTA.x || DELTA.y || DELTA.z))
         return;
@@ -432,12 +444,12 @@ void chunking_update(v3i32 player_chunk, v3i32 *player_chunk_delta, block_hit hi
 chunk_tab_shift:
 
     AXIS =
-        DELTA.x > 0 ? STATE_CHUNK_SHIFT_PX :
-        DELTA.x < 0 ? STATE_CHUNK_SHIFT_NX :
-        DELTA.y > 0 ? STATE_CHUNK_SHIFT_PY :
-        DELTA.y < 0 ? STATE_CHUNK_SHIFT_NY :
-        DELTA.z > 0 ? STATE_CHUNK_SHIFT_PZ :
-        DELTA.z < 0 ? STATE_CHUNK_SHIFT_NZ : 0;
+        DELTA.x < 0 ? STATE_CHUNK_SHIFT_PX :
+        DELTA.x > 0 ? STATE_CHUNK_SHIFT_NX :
+        DELTA.y < 0 ? STATE_CHUNK_SHIFT_PY :
+        DELTA.y > 0 ? STATE_CHUNK_SHIFT_NY :
+        DELTA.z < 0 ? STATE_CHUNK_SHIFT_PZ :
+        DELTA.z > 0 ? STATE_CHUNK_SHIFT_NZ : 0;
 
     INCREMENT = (AXIS % 2 == 1) - (AXIS %2 == 0);
     DISTANCE.x = DELTA.x;
@@ -644,6 +656,8 @@ chunk_buf_push:
 void chunking_free(void)
 {
     u32 i = 0;
+
+    fsl_noise_sampler_free(&chunk_sampler.sampler);
 
     if (chunk_tab.p)
     {
@@ -1073,11 +1087,8 @@ chunk_work_cost chunk_generate_internal(hhc_chunk *chunk, chunk_work_budget budg
 {
     chunk_work_cost cost = 0;
     hhc_chunk_neighbors chunk_neighbors = {0};
-    hhc_noise_sampler_context s = {0};
     hhc_terrain terrain = {0};
     v3i32 pos = {0};
-    u32 i = 0;
-    f32 n = 0.0f;
 
     if (chunk->cursor == CHUNK_VOLUME)
     {
@@ -1087,7 +1098,7 @@ chunk_work_cost chunk_generate_internal(hhc_chunk *chunk, chunk_work_budget budg
     }
 
     chunk_neighbors = chunk_neighbors_get_internal(chunk);
-    noise_sampler_context_init(&chunk_sampler, &s,
+    fsl_noise_sampler_context_init(&chunk_sampler.sampler, &chunk_sampler.context,
             (f64)(chunk->pos_world.x * CHUNK_DIAMETER),
             (f64)(chunk->pos_world.y * CHUNK_DIAMETER),
             (f64)(chunk->pos_world.z * CHUNK_DIAMETER));
@@ -1098,26 +1109,26 @@ chunk_work_cost chunk_generate_internal(hhc_chunk *chunk, chunk_work_budget budg
 
     /* `pos.x`, `pos.y` and `pos.z` reset at the end of their loops because they
      * should first pick up from where `chunk->cursor` left off last time. */
-    sampler_axis_init(&s, 2, pos.z);
-    for (; pos.z < CHUNK_DIAMETER; ++pos.z, sampler_axis_post_update(&s, 2))
+    fsl_noise_sampler_axis_init(&chunk_sampler.context, 2, pos.z);
+    for (; pos.z < CHUNK_DIAMETER; ++pos.z, fsl_noise_sampler_axis_post_update(&chunk_sampler.context, 2))
     {
-        sampler_axis_pre_update(&s, 2);
-        cost += sampler_noise_axis_update_2d(&s, 2);
+        fsl_noise_sampler_axis_pre_update(&chunk_sampler.context, 2);
+        cost += sampler_noise_axis_update_2d(&chunk_sampler.context, 2);
 
-        sampler_axis_init(&s, 1, pos.y);
-        for (; pos.y < CHUNK_DIAMETER; ++pos.y, sampler_axis_post_update(&s, 1))
+        fsl_noise_sampler_axis_init(&chunk_sampler.context, 1, pos.y);
+        for (; pos.y < CHUNK_DIAMETER; ++pos.y, fsl_noise_sampler_axis_post_update(&chunk_sampler.context, 1))
         {
-            sampler_axis_pre_update(&s, 1);
-            cost += sampler_noise_axis_update_2d(&s, 1);
+            fsl_noise_sampler_axis_pre_update(&chunk_sampler.context, 1);
+            cost += sampler_noise_axis_update_2d(&chunk_sampler.context, 1);
 
-            sampler_axis_init(&s, 0, pos.x);
-            for (; pos.x < CHUNK_DIAMETER; ++pos.x, sampler_axis_post_update(&s, 0))
+            fsl_noise_sampler_axis_init(&chunk_sampler.context, 0, pos.x);
+            for (; pos.x < CHUNK_DIAMETER; ++pos.x, fsl_noise_sampler_axis_post_update(&chunk_sampler.context, 0))
             {
-                sampler_axis_pre_update(&s, 0);
-                cost += sampler_noise_axis_update_2d(&s, 0);
+                fsl_noise_sampler_axis_pre_update(&chunk_sampler.context, 0);
+                cost += sampler_noise_axis_update_2d(&chunk_sampler.context, 0);
 
-                cost += sampler_noise_bake(&s);
-                cost += terrain_shape(&terrain, &s);
+                cost += sampler_noise_bake(&chunk_sampler.context);
+                cost += terrain_shape(&terrain, &chunk_sampler.context);
 
                 if (terrain.block_id)
                 {
