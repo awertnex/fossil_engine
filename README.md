@@ -1,11 +1,11 @@
-# Fossil Engine - v0.14.0-dev
+# Fossil Engine - v0.15.0-beta
 
 **a headless game engine written in C89, with minimal dependencies.**
 
 Goals of this project:
-- to need nothing but a C compiler to build.
+- to build using only a C compiler.
 - to make 2D and/or 3D games, and general software (such as image editors, 3D
-  editors, or even GUI-based text editors).
+  editors, or GUI-based text editors and such).
 - to provide simple implementations so to give the user finer control (at the
   expense of being verbose), although some areas of the engine are a bit rigid
   still.

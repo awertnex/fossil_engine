@@ -124,7 +124,7 @@ static struct ui_core
 
 /* ---- section: declarations ----------------------------------------------- */
 
-static f32 vbo_data_unit_quad_internal[] =
+static f32 vertex_buf_ui_unit_quad_internal[] =
 {
     0.0f, -1.0f, 0.0f, 1.0f,
     0.0f, 0.0f, 0.0f, 0.0f,
@@ -155,8 +155,8 @@ u32 ui_text_init_internal(void)
 
         glGenBuffers(1, &text_core.vertex_data_unit_quad);
         glBindBuffer(GL_ARRAY_BUFFER, text_core.vertex_data_unit_quad);
-        glBufferData(GL_ARRAY_BUFFER, fsl_arr_len(vbo_data_unit_quad_internal) * sizeof(f32),
-                &vbo_data_unit_quad_internal, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, fsl_arr_len(vertex_buf_ui_unit_quad_internal) * sizeof(f32),
+                &vertex_buf_ui_unit_quad_internal, GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
@@ -501,8 +501,8 @@ u32 fsl_ui_init(void)
 
         glGenBuffers(1, &ui_core.vertex_data_unit_quad);
         glBindBuffer(GL_ARRAY_BUFFER, ui_core.vertex_data_unit_quad);
-        glBufferData(GL_ARRAY_BUFFER, fsl_arr_len(vbo_data_unit_quad_internal) * sizeof(f32),
-                &vbo_data_unit_quad_internal, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, fsl_arr_len(vertex_buf_ui_unit_quad_internal) * sizeof(f32),
+                &vertex_buf_ui_unit_quad_internal, GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
