@@ -1,7 +1,6 @@
 #ifndef HHC_CHUNKING_DEBUG_TOOLS_H
 #define HHC_CHUNKING_DEBUG_TOOLS_H
 
-#include "deps/fossil/common/common.h"
 #include "deps/fossil/common/types.h"
 #include "deps/fossil/assets/asset_types.h"
 

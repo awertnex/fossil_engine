@@ -32,6 +32,13 @@ typedef struct hhc_settings
     f32 fov;
     u32 render_distance;
     b8 anti_aliasing;
+
+    struct /* flag */
+    {
+        b8 render_distance_dirty;
+        b8 gui_scale_dirty;
+    } flag;
+
 } hhc_settings;
 
 extern hhc_settings settings;
@@ -42,5 +49,6 @@ extern hhc_settings settings;
 u32 settings_init(void);
 
 void settings_gui_scale_set(f32 scale);
+void settings_render_distance_set(u32 distance);
 
 #endif /* HHC_SETTINGS_H */

@@ -1,0 +1,38 @@
+TODO: complete gui.txt
+
+--image_paths
+{
+    assets/gui/;
+    assets/gui/title/;
+}
+
+--screen[title]
+{
+    name = Title Screen;
+    layer = 1;
+    button_long = 3;
+    button_half = 2;
+    button_icon = 2;
+}
+
+--screen[singleplayer]
+{
+    name = Select World;
+    layer = 2;
+}
+
+--screen[multiplayer]
+{
+    layer = 2;
+}
+
+--screen[options_title]
+{
+    layer = 2;
+}
+
+--screen[options_game]
+{
+    layer = 2;
+}
+

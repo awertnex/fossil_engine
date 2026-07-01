@@ -35,15 +35,12 @@ u32 world_init(str *name, u64 seed, hhc_player *p)
     if (*GAME_ERR != FSL_ERR_SUCCESS && *GAME_ERR != HHC_ERR_WORLD_EXISTS)
         return *GAME_ERR;
 
-    if (chunking_init() != FSL_ERR_SUCCESS)
+    if (chunking_init(&p->ch_delta) != FSL_ERR_SUCCESS)
         return *GAME_ERR;
-
-    world.terrain_noise_func = terrain_noise_make;
-    world.terrain_func = terrain_shape;
 
     world.gravity = FSL_GRAVITY * 3.0f;
 
-    player_set_spawn(p, 32250, 32250, 70);
+    player_set_spawn(p, 8, 8, 8);
     player_spawn(p, TRUE);
 
     core.flag.hud = TRUE;

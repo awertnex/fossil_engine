@@ -25,11 +25,14 @@
 /*!
  *  @internal
  *
- *  @brief handle player being near or past world edges.
+ *  @brief handle player being near or past a world edge.
  *
- *  teleport player to the other side of the world if they cross a world edge.
+ *  - teleport player to the other side of the world if they cross a world edge.
+ *  - adjust player chunk delta so it looks natural to the chunking system,
+ *    since if player chunk delta is too big, the chunk system will dump all
+ *    chunks and parse them again.
  */
-static void player_wrap_coordinates(hhc_player *p);
+static void player_world_overflow_update(hhc_player *p);
 
 u32 player_init(hhc_player *p, const str *name)
 {
@@ -91,7 +94,6 @@ void player_update(hhc_player *p, f64 dt)
     v3f32 gravity = {0};
     v3f32 drag = {0};
     v3f32 damping = {0};
-    v3f32 air_control = {0};
     v3f32 nov3f32 = {0};
 
     p->flag &= ~FLAG_PLAYER_CAN_JUMP;
@@ -132,9 +134,6 @@ void player_update(hhc_player *p, f64 dt)
         drag.x = PLAYER_FRICTION_DEFAULT;
         drag.y = PLAYER_FRICTION_DEFAULT;
         drag.z = PLAYER_FRICTION_DEFAULT;
-
-        air_control.x = p->input.x * p->acceleration_rate * drag.x * (1.0f - p->friction.x);
-        air_control.y = p->input.y * p->acceleration_rate * drag.y * (1.0f - p->friction.y);
 
         if (p->flag & FLAG_PLAYER_SNEAKING)
             p->acceleration_rate = PLAYER_ACCELERATION_SNEAK;
@@ -179,10 +178,7 @@ void player_update(hhc_player *p, f64 dt)
     player_bounding_box_update(p);
     if (MODE_INTERNAL_COLLIDE)
         player_collision_update(p, dt);
-    player_wrap_coordinates(p);
-    p->ch.x = floorf((f32)p->transform.pos.x / CHUNK_DIAMETER);
-    p->ch.y = floorf((f32)p->transform.pos.y / CHUNK_DIAMETER);
-    p->ch.z = floorf((f32)p->transform.pos.z / CHUNK_DIAMETER);
+    player_world_overflow_update(p);
 }
 
 void player_hotbar_selected_set(hhc_player *p, u32 index)
@@ -323,6 +319,7 @@ void player_collision_update(hhc_player *p, f64 dt)
 
                         speed = p->speed;
                         p->speed = sqrtf(fsl_len_v3f32(p->velocity));
+#if MODE_INTERNAL_DIE
                         if (speed - p->speed > PLAYER_COLLISION_DAMAGE_THRESHOLD)
                         {
                             p->health -= (speed - p->speed);
@@ -343,6 +340,7 @@ void player_collision_update(hhc_player *p, f64 dt)
                                 player_kill(p);
                             }
                         }
+#endif /* MODE_INTERNAL_DIE */
 
                         resolved = TRUE;
                     }
@@ -432,14 +430,14 @@ fsl_bounding_box make_collision_capsule(fsl_bounding_box b, v3i32 ch, v3f32 velo
     return result;
 }
 
-static void player_wrap_coordinates(hhc_player *p)
+static void player_world_overflow_update(hhc_player *p)
 {
     i64 diameter = WORLD_DIAMETER * CHUNK_DIAMETER;
-    i64 diameter_v = WORLD_DIAMETER_VERTICAL * CHUNK_DIAMETER;
-    i64 world_margin = WORLD_RADIUS * CHUNK_DIAMETER - WORLD_MARGIN * CHUNK_DIAMETER;
-    i64 world_margin_v = WORLD_RADIUS_VERTICAL * CHUNK_DIAMETER - WORLD_MARGIN * CHUNK_DIAMETER;
-    i64 overflow_edge = WORLD_RADIUS * CHUNK_DIAMETER + CHUNK_DIAMETER;
-    i64 overflow_edge_v = WORLD_RADIUS_VERTICAL * CHUNK_DIAMETER + CHUNK_DIAMETER;
+    i64 diamerer_v = WORLD_DIAMETER_VERTICAL * CHUNK_DIAMETER;
+    i64 margin = WORLD_RADIUS * CHUNK_DIAMETER - WORLD_MARGIN * CHUNK_DIAMETER;
+    i64 margin_v = WORLD_RADIUS_VERTICAL * CHUNK_DIAMETER - WORLD_MARGIN * CHUNK_DIAMETER;
+    i64 edge = WORLD_RADIUS * CHUNK_DIAMETER + CHUNK_DIAMETER;
+    i64 edge_v = WORLD_RADIUS_VERTICAL * CHUNK_DIAMETER + CHUNK_DIAMETER;
     v3f64 world_volume_min =
     {
         -(f64)(WORLD_DIAMETER * CHUNK_DIAMETER),
@@ -456,67 +454,77 @@ static void player_wrap_coordinates(hhc_player *p)
     if (!fsl_is_in_volume_f64(p->transform.pos, world_volume_min, world_volume_max))
         player_spawn(p, FALSE);
 
-    /* ---- world margin ---------------------------------------------------- */
+    /* ---- world margin tagging -------------------------------------------- */
 
-    if (p->transform.pos.x > world_margin)
+    if (p->transform.pos.x > margin)
         p->flag |= FLAG_PLAYER_OVERFLOW_X | FLAG_PLAYER_OVERFLOW_PX;
-    else if (p->transform.pos.x < -world_margin)
+    else if (p->transform.pos.x < -margin)
     {
         p->flag |= FLAG_PLAYER_OVERFLOW_X;
         p->flag &= ~FLAG_PLAYER_OVERFLOW_PX;
     }
     else p->flag &= ~(FLAG_PLAYER_OVERFLOW_X | FLAG_PLAYER_OVERFLOW_PX);
 
-    if (p->transform.pos.y > world_margin)
+    if (p->transform.pos.y > margin)
         p->flag |= FLAG_PLAYER_OVERFLOW_Y | FLAG_PLAYER_OVERFLOW_PY;
-    else if (p->transform.pos.y < -world_margin)
+    else if (p->transform.pos.y < -margin)
     {
         p->flag |= FLAG_PLAYER_OVERFLOW_Y;
         p->flag &= ~FLAG_PLAYER_OVERFLOW_PY;
     }
     else p->flag &= ~(FLAG_PLAYER_OVERFLOW_Y | FLAG_PLAYER_OVERFLOW_PY);
 
-    if (p->transform.pos.z > world_margin_v)
+    if (p->transform.pos.z > margin_v)
         p->flag |= FLAG_PLAYER_OVERFLOW_Z | FLAG_PLAYER_OVERFLOW_PZ;
-    else if (p->transform.pos.z < -world_margin_v)
+    else if (p->transform.pos.z < -margin_v)
     {
         p->flag |= FLAG_PLAYER_OVERFLOW_Z;
         p->flag &= ~FLAG_PLAYER_OVERFLOW_PZ;
     }
     else p->flag &= ~(FLAG_PLAYER_OVERFLOW_Z | FLAG_PLAYER_OVERFLOW_PZ);
 
-    /* ---- overflow edge --------------------------------------------------- */
+    /* ---- overflow edge teleportation ------------------------------------- */
 
-    if (p->transform.pos.x > overflow_edge)
+    if (p->transform.pos.x > edge)
     {
         p->transform.pos.x -= diameter;
         p->transform_last.pos.x -= diameter;
+        p->ch_delta.x -= WORLD_DIAMETER;
     }
-    if (p->transform.pos.x < -overflow_edge)
+    if (p->transform.pos.x < -edge)
     {
         p->transform.pos.x += diameter;
         p->transform_last.pos.x += diameter;
+        p->ch_delta.x += WORLD_DIAMETER;
     }
-    if (p->transform.pos.y > overflow_edge)
+    if (p->transform.pos.y > edge)
     {
         p->transform.pos.y -= diameter;
         p->transform_last.pos.y -= diameter;
+        p->ch_delta.y -= WORLD_DIAMETER;
     }
-    if (p->transform.pos.y < -overflow_edge)
+    if (p->transform.pos.y < -edge)
     {
         p->transform.pos.y += diameter;
         p->transform_last.pos.y += diameter;
+        p->ch_delta.y += WORLD_DIAMETER;
     }
-    if (p->transform.pos.z > overflow_edge_v)
+    if (p->transform.pos.z > edge_v)
     {
-        p->transform.pos.z -= diameter_v;
-        p->transform_last.pos.z -= diameter_v;
+        p->transform.pos.z -= diamerer_v;
+        p->transform_last.pos.z -= diamerer_v;
+        p->ch_delta.z -= WORLD_DIAMETER_VERTICAL;
     }
-    if (p->transform.pos.z < -overflow_edge_v)
+    if (p->transform.pos.z < -edge_v)
     {
-        p->transform.pos.z += diameter_v;
-        p->transform_last.pos.z += diameter_v;
+        p->transform.pos.z += diamerer_v;
+        p->transform_last.pos.z += diamerer_v;
+        p->ch_delta.z += WORLD_DIAMETER_VERTICAL;
     }
+
+    p->ch.x = floorf((f32)p->transform.pos.x / CHUNK_DIAMETER);
+    p->ch.y = floorf((f32)p->transform.pos.y / CHUNK_DIAMETER);
+    p->ch.z = floorf((f32)p->transform.pos.z / CHUNK_DIAMETER);
 }
 
 void player_camera_movement_update(hhc_player *p, v2f64 mouse_delta, b8 use_mouse)
@@ -625,14 +633,10 @@ void player_camera_movement_update(hhc_player *p, v2f64 mouse_delta, b8 use_mous
 
 void player_target_update(hhc_player *p)
 {
-    v3f64 delta = {0}; /* important to compensate for `chunk_tab` shifting */
     v3f64 origin = {0};
     v3f64 start = {0};
     v3f64 end = {0};
 
-    delta.x = (p->ch_delta.x - p->ch.x) * CHUNK_DIAMETER;
-    delta.y = (p->ch_delta.y - p->ch.y) * CHUNK_DIAMETER;
-    delta.z = (p->ch_delta.z - p->ch.z) * CHUNK_DIAMETER;
     origin.x = p->transform.pos.x;
     origin.y = p->transform.pos.y;
     origin.z = p->transform.pos.z;
@@ -680,21 +684,23 @@ void player_spawn(hhc_player *p, b8 hard)
             p->spawn.x + 0.5f,
             p->spawn.y + 0.5f,
             p->spawn.z + 0.5f);
-    p->health = 100.0f;
-    if (!hard) return;
-    p->flag &= ~(FLAG_PLAYER_FLYING | FLAG_PLAYER_HUNGRY | FLAG_PLAYER_DEAD);
+
+    if (hard)
+    {
+        p->health = 100.0f;
+        p->flag &= ~(FLAG_PLAYER_FLYING | FLAG_PLAYER_HUNGRY | FLAG_PLAYER_DEAD);
+    }
 }
 
 void player_kill(hhc_player *p)
 {
-    p->velocity.x = 0.0;
-    p->velocity.y = 0.0;
-    p->velocity.z = 0.0;
     p->health = 0.0f;
     p->flag |= FLAG_PLAYER_DEAD;
     p->flag &= ~FLAG_PLAYER_CAN_JUMP;
     p->flag &= ~FLAG_PLAYER_FLYING;
     p->flag &= ~FLAG_PLAYER_CINEMATIC_MOTION;
+
+    player_spawn(p, TRUE);
 
     LOGINFO(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
             fsl_logger_stringf("%s %s\n", p->name, get_death_str(p)));
@@ -707,7 +713,6 @@ str *get_death_str(hhc_player *p)
 
     switch (p->death)
     {
-        case PLAYER_DEATH_REASON_NONE:
         case PLAYER_DEATH_REASON_COLLISION_WALL:
             return str_death_collision_wall[index];
             break;
@@ -718,6 +723,9 @@ str *get_death_str(hhc_player *p)
 
         case PLAYER_DEATH_REASON_COLLISION_CEILING:
             return str_death_collision_ceiling[index];
+            break;
+
+        default:
             break;
     }
 

@@ -30,9 +30,7 @@
 
 #define FSL_RAND_TAB_DIAMETER   48
 #define FSL_RAND_TAB_LAYER      (FSL_RAND_TAB_DIAMETER * FSL_RAND_TAB_DIAMETER)
-
-#define FSL_RAND_TAB_VOLUME \
-    (FSL_RAND_TAB_DIAMETER * FSL_RAND_TAB_DIAMETER * FSL_RAND_TAB_DIAMETER)
+#define FSL_RAND_TAB_VOLUME     (FSL_RAND_TAB_LAYER * FSL_RAND_TAB_DIAMETER)
 
 /*!
  *  @brief can be used to shrink down big values when passed into trigonometrical
