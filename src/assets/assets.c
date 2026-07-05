@@ -390,7 +390,7 @@ u32 fsl_fbo_realloc(fsl_fbo *fbo, i32 size_x, i32 size_y, b8 multisample, u32 sa
     {
         LOGFATAL(FSL_ERR_FBO_REALLOC_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_FBO_INIT_FAIL(fbo->fbo, status));
+                MSG_FBO_REALLOC_FAIL(fbo->fbo, status));
 
         fsl_fbo_free(fbo);
         return fsl_err;

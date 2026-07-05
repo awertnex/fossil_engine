@@ -1099,9 +1099,9 @@ chunk_work_cost chunk_generate_internal(hhc_chunk *chunk, chunk_work_budget budg
 
     chunk_neighbors = chunk_neighbors_get_internal(chunk);
     fsl_noise_sampler_context_init(&chunk_sampler.sampler, &chunk_sampler.context,
-            (f64)(chunk->pos_world.x * CHUNK_DIAMETER),
-            (f64)(chunk->pos_world.y * CHUNK_DIAMETER),
-            (f64)(chunk->pos_world.z * CHUNK_DIAMETER));
+            (f64)(chunk->pos_wrap.x * CHUNK_DIAMETER),
+            (f64)(chunk->pos_wrap.y * CHUNK_DIAMETER),
+            (f64)(chunk->pos_wrap.z * CHUNK_DIAMETER));
 
     pos.x = chunk->cursor % CHUNK_DIAMETER;
     pos.y = (chunk->cursor / CHUNK_DIAMETER) % CHUNK_DIAMETER;
