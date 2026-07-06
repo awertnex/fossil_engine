@@ -203,6 +203,7 @@ u32 fsl_engine_init(int argc, char **argv, const str *title,
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_MULTISAMPLE);
+    glEnable(GL_DEPTH_CLAMP); /* remove near-plane clipping */
 
     /* ---- engine framebuffers --------------------------------------------- */
 
