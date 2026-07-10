@@ -179,7 +179,7 @@ void super_debugger_update(v2i32 render_size)
             1, -13);
 }
 
-void super_debugger_draw(v2i32 render_size)
+void super_debugger_draw(v2i32 render_size, GLuint fbo)
 {
     i32 i = 0;
     u32 index = 0;
@@ -216,6 +216,7 @@ void super_debugger_draw(v2i32 render_size)
      * at the end of the loop, do not touch it. */
     fsl_text_push("", 0, 0, 0, FSL_TEXT_ALIGN_BOTTOM, 0, 0);
     fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
+    fsl_fbo_blit(fbo);
     fsl_ui_stop();
 }
 

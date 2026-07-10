@@ -134,29 +134,29 @@ void input_update(hhc_player *p)
     fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
     u32 shader_err = FSL_ERR_SUCCESS;
     u32 i = 0;
-    f32 px = 0.0f;
-    f32 nx = 0.0f;
-    f32 py = 0.0f;
-    f32 ny = 0.0f;
-    f32 pz = 0.0f;
-    f32 nz = 0.0f;
-    f32 spch = sin(p->transform.rot.y * FSL_DEG2RAD);
-    f32 cpch = cos(p->transform.rot.y * FSL_DEG2RAD);
-    f32 syaw = sin(p->transform.rot.z * FSL_DEG2RAD);
-    f32 cyaw = cos(p->transform.rot.z * FSL_DEG2RAD);
+    f64 px = 0.0;
+    f64 nx = 0.0;
+    f64 py = 0.0;
+    f64 ny = 0.0;
+    f64 pz = 0.0;
+    f64 nz = 0.0;
+    f64 spch = sin(p->transform.rot.y * FSL_DEG2RAD);
+    f64 cpch = cos(p->transform.rot.y * FSL_DEG2RAD);
+    f64 syaw = sin(p->transform.rot.z * FSL_DEG2RAD);
+    f64 cyaw = cos(p->transform.rot.z * FSL_DEG2RAD);
 
-    p->input.x = 0.0f;
-    p->input.y = 0.0f;
-    p->input.z = 0.0f;
+    p->force.x = 0.0;
+    p->force.y = 0.0;
+    p->force.z = 0.0;
 
     if (!(p->flag & FLAG_PLAYER_DEAD))
     {
         /* ---- movement ---------------------------------------------------- */
 
-        px += (f32)fsl_is_key_hold(bind_walk_forward);
-        nx += (f32)fsl_is_key_hold(bind_walk_backward);
-        py += (f32)fsl_is_key_hold(bind_strafe_left);
-        ny += (f32)fsl_is_key_hold(bind_strafe_right);
+        px += (f64)fsl_is_key_hold(bind_walk_forward);
+        nx += (f64)fsl_is_key_hold(bind_walk_backward);
+        py += (f64)fsl_is_key_hold(bind_strafe_left);
+        ny += (f64)fsl_is_key_hold(bind_strafe_right);
 
         if (fsl_is_key_press_double(bind_walk_forward))
             p->flag |= FLAG_PLAYER_SPRINTING;
@@ -166,16 +166,16 @@ void input_update(hhc_player *p)
         if (fsl_is_key_hold(bind_jump))
         {
             if (p->flag & FLAG_PLAYER_FLYING)
-                pz += 1.0f;
+                pz += 1.0;
             else if (p->flag & FLAG_PLAYER_CAN_JUMP)
             {
-                p->velocity.z += sqrtf(2.0f * world.gravity * PLAYER_JUMP_HEIGHT);
+                p->kn.velocity.z += sqrt(2.0 * -world.gravity.z * PLAYER_JUMP_HEIGHT);
                 p->flag &= ~FLAG_PLAYER_CAN_JUMP;
             }
         }
 
         if (fsl_is_key_press_double(bind_jump))
-            p->flag ^= FLAG_PLAYER_FLYING;
+            player_toggle_flying(p);
 
         /* ---- sprinting --------------------------------------------------- */
 
@@ -189,7 +189,7 @@ void input_update(hhc_player *p)
         if (fsl_is_key_hold(bind_sneak))
         {
             if (p->flag & FLAG_PLAYER_FLYING)
-                nz += 1.0f;
+                nz += 1.0;
             else p->flag |= FLAG_PLAYER_SNEAKING;
         }
         else p->flag &= ~FLAG_PLAYER_SNEAKING;
@@ -198,31 +198,31 @@ void input_update(hhc_player *p)
 
         if (p->flag & FLAG_PLAYER_FLYING && p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
         {
-            p->input.x =
+            p->force.x =
                 (px - nx) * cyaw * cpch +
                 (py - ny) * -cos(p->transform.rot.z * FSL_DEG2RAD + FSL_HALF_PI) +
                 (pz - nz) * cyaw * spch;
-            p->input.y =
+            p->force.y =
                 (px - nx) * -syaw * cpch +
                 (py - ny) * sin(p->transform.rot.z * FSL_DEG2RAD + FSL_HALF_PI) +
                 (pz - nz) * -syaw * spch;
-            p->input.z =
+            p->force.z =
                 (px - nx) * -spch +
                 (pz - nz) * cpch;
         }
         else
         {
-            p->input.x =
+            p->force.x =
                 (px - nx) * cyaw +
                 (py - ny) * -cos(p->transform.rot.z * FSL_DEG2RAD + FSL_HALF_PI);
-            p->input.y =
+            p->force.y =
                 (px - nx) * -syaw +
                 (py - ny) * sin(p->transform.rot.z * FSL_DEG2RAD + FSL_HALF_PI);
-            p->input.z =
+            p->force.z =
                 pz - nz;
         }
 
-        p->input = fsl_normalize_v3f32(p->input);
+        p->force = fsl_normalize_v3f64(p->force);
 
         /* ---- gameplay ---------------------------------------------------- */
 
@@ -300,16 +300,7 @@ void input_update(hhc_player *p)
             core.flag.debug ^= 1;
 
         if (fsl_is_key_press(bind_toggle_cinematic_motion))
-        {
-            p->flag ^= FLAG_PLAYER_CINEMATIC_MOTION;
-
-            if (p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
-                LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "Cinematic Motion Toggled On\n");
-            else
-                LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
-                        "Cinematic Motion Toggled Off\n");
-        }
+            player_toggle_cinematic_motion(p);
 
         if (fsl_is_key_press(bind_toggle_perspective))
             p->camera_mode = (p->camera_mode + 1) % PLAYER_CAMERA_MODE_COUNT;

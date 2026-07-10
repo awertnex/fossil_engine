@@ -3,7 +3,10 @@
 #include "deps/fossil/assets/assets.h"
 #include "deps/fossil/engine/engine_assets.h"
 #include "deps/fossil/logger/logger.h"
+#include "deps/fossil/math/math.h"
+#include "deps/fossil/math/vector.h"
 #include "deps/fossil/memory/memory.h"
+#include "deps/fossil/physics/transform.h"
 #include "deps/fossil/shaders/shaders.h"
 
 #include "h/assets.h"
@@ -14,6 +17,8 @@
 
 fsl_mem_arena memory_arena_assets_internal = {0};
 fsl_mem_handle fbo = {0};
+hhc_g_buffer g_buf = {0};
+hhc_ssao ssao_buf = {0};
 fsl_mem_handle texture = {0};
 fsl_mem_handle mesh = {0};
 fsl_mem_handle shader = {0};
@@ -125,6 +130,11 @@ u32 assets_init(void)
             fsl_fbo_init(&fbo_p[FBO_POST_PROCESSING],
                 render->size.x, render->size.y, NULL, FALSE, 0) != FSL_ERR_SUCCESS)
         goto cleanup;
+
+    if (g_buffer_init(&g_buf, render->size.x, render->size.y) != FSL_ERR_SUCCESS)
+        goto cleanup;
+
+    ssao_init(&ssao_buf);
 
     /* ---- shaders --------------------------------------------------------- */
 
@@ -317,6 +327,8 @@ void assets_free(void)
             fsl_fbo_free(&fbo_p[i]);
     }
 
+    g_buffer_free(&g_buf);
+
     if (ssbo_texture_indices_id)
         glDeleteBuffers(1, &ssbo_texture_indices_id);
 
@@ -324,6 +336,148 @@ void assets_free(void)
         glDeleteBuffers(1, &ssbo_texture_handles_id);
 
     fsl_mem_arena_free(&memory_arena_assets_internal, "assets_free().memory_arena_assets_internal");
+}
+
+u32 g_buffer_init(hhc_g_buffer *buf, i32 size_x, i32 size_y)
+{
+    GLuint status = 0;
+    GLuint attachments[3] =
+    {
+        GL_COLOR_ATTACHMENT0,
+        GL_COLOR_ATTACHMENT1,
+        GL_COLOR_ATTACHMENT2
+    };
+
+    if (!buf->asset.initialized)
+    {
+        buf->asset.type = FSL_ASSET_FBO;
+
+        glGenFramebuffers(1, &buf->fbo);
+        glGenTextures(1, &buf->color_buf_pos);
+        glGenTextures(1, &buf->color_buf_normal);
+        glGenTextures(1, &buf->color_buf_albedo_specular);
+        glGenRenderbuffers(1, &buf->rbo);
+        buf->asset.initialized = TRUE;
+
+        glBindFramebuffer(GL_FRAMEBUFFER, buf->fbo);
+
+        /* ---- color buffers ----------------------------------------------- */
+
+        glBindTexture(GL_TEXTURE_2D, buf->color_buf_pos);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                buf->color_buf_pos, 0);
+
+        glBindTexture(GL_TEXTURE_2D, buf->color_buf_normal);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,
+                buf->color_buf_normal, 0);
+
+        glBindTexture(GL_TEXTURE_2D, buf->color_buf_albedo_specular);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D,
+                buf->color_buf_albedo_specular, 0);
+
+        glDrawBuffers(3, attachments);
+
+        /* ---- render buffer ----------------------------------------------- */
+
+        glBindRenderbuffer(GL_RENDERBUFFER, buf->rbo);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, buf->rbo);
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, buf->fbo);
+
+    /* ---- color buffers --------------------------------------------------- */
+
+    glBindTexture(GL_TEXTURE_2D, buf->color_buf_pos);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, size_x, size_y, 0, GL_RGBA, GL_FLOAT, NULL);
+
+    glBindTexture(GL_TEXTURE_2D, buf->color_buf_normal);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, size_x, size_y, 0, GL_RGB, GL_FLOAT, NULL);
+
+    glBindTexture(GL_TEXTURE_2D, buf->color_buf_albedo_specular);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size_x, size_y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+    /* ---- render buffer --------------------------------------------------- */
+
+    glBindRenderbuffer(GL_RENDERBUFFER, buf->rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size_x, size_y);
+
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE)
+    {
+        LOGFATAL(FSL_ERR_FBO_REALLOC_FAIL,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                fsl_logger_stringf("Failed to Initialize G-Buffer[%u], Status[%u]\n", buf->fbo, status));
+        goto cleanup;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    *GAME_ERR = FSL_ERR_SUCCESS;
+    return *GAME_ERR;
+
+cleanup:
+
+    g_buffer_free(buf);
+    return *GAME_ERR;
+}
+
+void g_buffer_free(hhc_g_buffer *buf)
+{
+    hhc_g_buffer nogbuf = {0};
+
+    if (!buf)
+        return;
+
+    if (buf->asset.initialized)
+    {
+        buf->asset.initialized = FALSE;
+        glDeleteTextures(1, &buf->color_buf_pos);
+        glDeleteTextures(1, &buf->color_buf_normal);
+        glDeleteTextures(1, &buf->color_buf_albedo_specular);
+    }
+
+    *buf = nogbuf;
+}
+
+void ssao_init(hhc_ssao *ssao)
+{
+    u32 kernel_size = 64;
+    f32 scale = 0.0f;
+    f32 rand_scale = 1.0f / FSL_U32_MAX;
+    static u32 seed = 0;
+    u32 i = 0;
+
+    for (; i < kernel_size; ++i)
+    {
+        scale = (f32)i / kernel_size;
+        scale = fsl_lerp_f32(0.1f, 1.0f, scale * scale);
+
+        ssao->sample[i].x = (f32)fsl_rand_u32((u32)render->time + seed++) * rand_scale * 2.0f - 1.0f;
+        ssao->sample[i].y = (f32)fsl_rand_u32((u32)render->time + seed++) * rand_scale * 2.0f - 1.0f;
+        ssao->sample[i].z = (f32)fsl_rand_u32((u32)render->time + seed++) * rand_scale;
+        ssao->sample[i] = fsl_normalize_v3f32(ssao->sample[i]);
+
+        ssao->sample[i].x *= (f32)fsl_rand_u32((u32)render->time + seed++) * rand_scale;
+        ssao->sample[i].y *= (f32)fsl_rand_u32((u32)render->time + seed++) * rand_scale;
+        ssao->sample[i].z *= (f32)fsl_rand_u32((u32)render->time + seed++) * rand_scale;
+        ssao->sample[i].x *= scale;
+        ssao->sample[i].y *= scale;
+        ssao->sample[i].z *= scale;
+    }
 }
 
 u32 block_texture_init(u32 index, const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file)
@@ -367,7 +521,9 @@ void blocks_init(void)
     blocks_p[BLOCK_GRASS].texture_index[3] = TEXTURE_BLOCK_GRASS_SIDE;
     blocks_p[BLOCK_GRASS].texture_index[4] = TEXTURE_BLOCK_GRASS_TOP;
     blocks_p[BLOCK_GRASS].texture_index[5] = TEXTURE_BLOCK_DIRT;
-    blocks_p[BLOCK_GRASS].friction = FRICTION_BLOCK_HARD;
+    blocks_p[BLOCK_GRASS].physics_material =
+        fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
+                0.0, 0.0, 0.0, 0.0);
 
     fsl_asset_set_metadata(&blocks_p[BLOCK_DIRT].asset, FSL_ASSET_CUSTOM,
             "Dirt Block", "block_dirt", "block_dirt", NULL);
@@ -378,7 +534,9 @@ void blocks_init(void)
     blocks_p[BLOCK_DIRT].texture_index[3] = TEXTURE_BLOCK_DIRT;
     blocks_p[BLOCK_DIRT].texture_index[4] = TEXTURE_BLOCK_DIRT;
     blocks_p[BLOCK_DIRT].texture_index[5] = TEXTURE_BLOCK_DIRT;
-    blocks_p[BLOCK_DIRT].friction = FRICTION_BLOCK_HARD;
+    blocks_p[BLOCK_DIRT].physics_material =
+        fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
+                0.0, 0.0, 0.0, 0.0);
 
     fsl_asset_set_metadata(&blocks_p[BLOCK_DIRTUP].asset, FSL_ASSET_CUSTOM,
             "Dirtup", "block_dirtup", "block_dirtup", NULL);
@@ -389,7 +547,9 @@ void blocks_init(void)
     blocks_p[BLOCK_DIRTUP].texture_index[3] = TEXTURE_BLOCK_DIRTUP;
     blocks_p[BLOCK_DIRTUP].texture_index[4] = TEXTURE_BLOCK_DIRTUP;
     blocks_p[BLOCK_DIRTUP].texture_index[5] = TEXTURE_BLOCK_DIRTUP;
-    blocks_p[BLOCK_DIRTUP].friction = FRICTION_BLOCK_HARD;
+    blocks_p[BLOCK_DIRTUP].physics_material =
+        fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
+                0.0, 0.0, 0.0, 0.0);
 
     fsl_asset_set_metadata(&blocks_p[BLOCK_STONE].asset, FSL_ASSET_CUSTOM,
             "Stone", "block_stone", "block_stone", NULL);
@@ -400,7 +560,9 @@ void blocks_init(void)
     blocks_p[BLOCK_STONE].texture_index[3] = TEXTURE_BLOCK_STONE;
     blocks_p[BLOCK_STONE].texture_index[4] = TEXTURE_BLOCK_STONE;
     blocks_p[BLOCK_STONE].texture_index[5] = TEXTURE_BLOCK_STONE;
-    blocks_p[BLOCK_STONE].friction = FRICTION_BLOCK_HARD;
+    blocks_p[BLOCK_STONE].physics_material =
+        fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
+                0.0, 0.0, 0.0, 0.0);
 
     fsl_asset_set_metadata(&blocks_p[BLOCK_SAND].asset, FSL_ASSET_CUSTOM,
             "Sand", "block_sand", "block_sand", NULL);
@@ -411,7 +573,9 @@ void blocks_init(void)
     blocks_p[BLOCK_SAND].texture_index[3] = TEXTURE_BLOCK_SAND;
     blocks_p[BLOCK_SAND].texture_index[4] = TEXTURE_BLOCK_SAND;
     blocks_p[BLOCK_SAND].texture_index[5] = TEXTURE_BLOCK_SAND;
-    blocks_p[BLOCK_SAND].friction = FRICTION_BLOCK_HARD;
+    blocks_p[BLOCK_SAND].physics_material =
+        fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
+                0.0, 0.0, 0.0, 0.0);
 
     fsl_asset_set_metadata(&blocks_p[BLOCK_GLASS].asset, FSL_ASSET_CUSTOM,
             "Glass", "block_glass", "block_glass", NULL);
@@ -422,7 +586,9 @@ void blocks_init(void)
     blocks_p[BLOCK_GLASS].texture_index[3] = TEXTURE_BLOCK_GLASS;
     blocks_p[BLOCK_GLASS].texture_index[4] = TEXTURE_BLOCK_GLASS;
     blocks_p[BLOCK_GLASS].texture_index[5] = TEXTURE_BLOCK_GLASS;
-    blocks_p[BLOCK_GLASS].friction = FRICTION_BLOCK_HARD;
+    blocks_p[BLOCK_GLASS].physics_material =
+        fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
+                0.0, 0.0, 0.0, 0.0);
 
     fsl_asset_set_metadata(&blocks_p[BLOCK_WOOD_BIRCH_LOG].asset, FSL_ASSET_CUSTOM,
             "Birch Wood Log", "wood_birch_log", "wood_birch_log", NULL);
@@ -433,7 +599,9 @@ void blocks_init(void)
     blocks_p[BLOCK_WOOD_BIRCH_LOG].texture_index[3] = TEXTURE_BLOCK_WOOD_BIRCH_LOG_SIDE;
     blocks_p[BLOCK_WOOD_BIRCH_LOG].texture_index[4] = TEXTURE_BLOCK_WOOD_BIRCH_LOG_TOP;
     blocks_p[BLOCK_WOOD_BIRCH_LOG].texture_index[5] = TEXTURE_BLOCK_WOOD_BIRCH_LOG_TOP;
-    blocks_p[BLOCK_WOOD_BIRCH_LOG].friction = FRICTION_BLOCK_HARD;
+    blocks_p[BLOCK_WOOD_BIRCH_LOG].physics_material =
+        fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
+                0.0, 0.0, 0.0, 0.0);
 
     fsl_asset_set_metadata(&blocks_p[BLOCK_WOOD_BIRCH_PLANKS].asset, FSL_ASSET_CUSTOM,
             "Birch Wood Planks", "wood_birch_planks", "wood_birch_planks", NULL);
@@ -444,7 +612,9 @@ void blocks_init(void)
     blocks_p[BLOCK_WOOD_BIRCH_PLANKS].texture_index[3] = TEXTURE_BLOCK_WOOD_BIRCH_PLANKS;
     blocks_p[BLOCK_WOOD_BIRCH_PLANKS].texture_index[4] = TEXTURE_BLOCK_WOOD_BIRCH_PLANKS;
     blocks_p[BLOCK_WOOD_BIRCH_PLANKS].texture_index[5] = TEXTURE_BLOCK_WOOD_BIRCH_PLANKS;
-    blocks_p[BLOCK_WOOD_BIRCH_PLANKS].friction = FRICTION_BLOCK_HARD;
+    blocks_p[BLOCK_WOOD_BIRCH_PLANKS].physics_material =
+        fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
+                0.0, 0.0, 0.0, 0.0);
 
     fsl_asset_set_metadata(&blocks_p[BLOCK_WOOD_CHERRY_LOG].asset, FSL_ASSET_CUSTOM,
             "Cherry Wood Log", "wood_cherry_log", "wood_cherry_log", NULL);
@@ -455,7 +625,9 @@ void blocks_init(void)
     blocks_p[BLOCK_WOOD_CHERRY_LOG].texture_index[3] = TEXTURE_BLOCK_WOOD_CHERRY_LOG_SIDE;
     blocks_p[BLOCK_WOOD_CHERRY_LOG].texture_index[4] = TEXTURE_BLOCK_WOOD_CHERRY_LOG_TOP;
     blocks_p[BLOCK_WOOD_CHERRY_LOG].texture_index[5] = TEXTURE_BLOCK_WOOD_CHERRY_LOG_TOP;
-    blocks_p[BLOCK_WOOD_CHERRY_LOG].friction = FRICTION_BLOCK_HARD;
+    blocks_p[BLOCK_WOOD_CHERRY_LOG].physics_material =
+        fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
+                0.0, 0.0, 0.0, 0.0);
 
     fsl_asset_set_metadata(&blocks_p[BLOCK_WOOD_CHERRY_PLANKS].asset, FSL_ASSET_CUSTOM,
             "Cherry Wood Planks", "wood_cherry_planks", "wood_cherry_planks", NULL);
@@ -466,7 +638,9 @@ void blocks_init(void)
     blocks_p[BLOCK_WOOD_CHERRY_PLANKS].texture_index[3] = TEXTURE_BLOCK_WOOD_CHERRY_PLANKS;
     blocks_p[BLOCK_WOOD_CHERRY_PLANKS].texture_index[4] = TEXTURE_BLOCK_WOOD_CHERRY_PLANKS;
     blocks_p[BLOCK_WOOD_CHERRY_PLANKS].texture_index[5] = TEXTURE_BLOCK_WOOD_CHERRY_PLANKS;
-    blocks_p[BLOCK_WOOD_CHERRY_PLANKS].friction = FRICTION_BLOCK_HARD;
+    blocks_p[BLOCK_WOOD_CHERRY_PLANKS].physics_material =
+        fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
+                0.0, 0.0, 0.0, 0.0);
 
     fsl_asset_set_metadata(&blocks_p[BLOCK_WOOD_OAK_LOG].asset, FSL_ASSET_CUSTOM,
             "Oak Wood Log", "wood_oak_log", "wood_oak_log", NULL);
@@ -477,7 +651,9 @@ void blocks_init(void)
     blocks_p[BLOCK_WOOD_OAK_LOG].texture_index[3] = TEXTURE_BLOCK_WOOD_OAK_LOG_SIDE;
     blocks_p[BLOCK_WOOD_OAK_LOG].texture_index[4] = TEXTURE_BLOCK_WOOD_OAK_LOG_TOP;
     blocks_p[BLOCK_WOOD_OAK_LOG].texture_index[5] = TEXTURE_BLOCK_WOOD_OAK_LOG_TOP;
-    blocks_p[BLOCK_WOOD_OAK_LOG].friction = FRICTION_BLOCK_HARD;
+    blocks_p[BLOCK_WOOD_OAK_LOG].physics_material =
+        fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
+                0.0, 0.0, 0.0, 0.0);
 
     fsl_asset_set_metadata(&blocks_p[BLOCK_WOOD_OAK_PLANKS].asset, FSL_ASSET_CUSTOM,
             "Oak Wood Planks", "wood_oak_planks", "wood_oak_planks", NULL);
@@ -488,7 +664,9 @@ void blocks_init(void)
     blocks_p[BLOCK_WOOD_OAK_PLANKS].texture_index[3] = TEXTURE_BLOCK_WOOD_OAK_PLANKS;
     blocks_p[BLOCK_WOOD_OAK_PLANKS].texture_index[4] = TEXTURE_BLOCK_WOOD_OAK_PLANKS;
     blocks_p[BLOCK_WOOD_OAK_PLANKS].texture_index[5] = TEXTURE_BLOCK_WOOD_OAK_PLANKS;
-    blocks_p[BLOCK_WOOD_OAK_PLANKS].friction = FRICTION_BLOCK_HARD;
+    blocks_p[BLOCK_WOOD_OAK_PLANKS].physics_material =
+        fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
+                0.0, 0.0, 0.0, 0.0);
 
     fsl_asset_set_metadata(&blocks_p[BLOCK_BLOOD].asset, FSL_ASSET_CUSTOM,
             "Blood Block", "block_blood", "block_blood", NULL);
@@ -499,7 +677,9 @@ void blocks_init(void)
     blocks_p[BLOCK_BLOOD].texture_index[3] = TEXTURE_BLOCK_BLOOD;
     blocks_p[BLOCK_BLOOD].texture_index[4] = TEXTURE_BLOCK_BLOOD;
     blocks_p[BLOCK_BLOOD].texture_index[5] = TEXTURE_BLOCK_BLOOD;
-    blocks_p[BLOCK_BLOOD].friction = FRICTION_BLOCK_WET;
+    blocks_p[BLOCK_BLOOD].physics_material =
+        fsl_physics_material_init(FRICTION_BLOCK_WET, FRICTION_BLOCK_WET, FRICTION_BLOCK_WET,
+                0.0, 0.0, 0.0, 0.0);
 }
 
 /* ---- special_blocks ------------------------------------------------------ */

@@ -20,6 +20,7 @@
  *  @brief collision detection.
  */
 
+#include "../math/math.h"
 #include "../math/vector.h"
 
 #include "collision.h"
@@ -33,22 +34,18 @@ b8 fsl_is_intersect_aabb(fsl_bounding_box a, fsl_bounding_box b)
             a.pos.z >= b.pos.z + b.size.z || b.pos.z >= a.pos.z + a.size.z);
 }
 
-f32 fsl_get_swept_aabb(fsl_bounding_box a, fsl_bounding_box b, v3f32 displacement, v3f32 *normal)
+fsl_collision_info fsl_get_swept_aabb(fsl_bounding_box a, fsl_bounding_box b,
+        v3f64 displacement)
 {
-    v3f32 entry = {0};
-    v3f32 exit = {0};
-    v3f32 entry_distance = {0};
-    v3f32 exit_distance = {0};
-    f32 entry_time = 0;
-    f32 exit_time = 0;
-
-    normal->x = 0.0f;
-    normal->y = 0.0f;
-    normal->z = 0.0f;
+    fsl_collision_info c = {0};
+    v3f64 entry;
+    v3f64 exit;
+    v3f64 entry_distance;
+    v3f64 exit_distance;
 
     /* ---- entry and exit distance ----------------------------------------- */
 
-    if (displacement.x > 0.0f)
+    if (displacement.x > 0.0)
     {
         entry_distance.x = b.pos.x - (a.pos.x + a.size.x);
         exit_distance.x = (b.pos.x + b.size.x) - a.pos.x;
@@ -59,7 +56,7 @@ f32 fsl_get_swept_aabb(fsl_bounding_box a, fsl_bounding_box b, v3f32 displacemen
         exit_distance.x = b.pos.x - (a.pos.x + a.size.x);
     }
 
-    if (displacement.y > 0.0f)
+    if (displacement.y > 0.0)
     {
         entry_distance.y = b.pos.y - (a.pos.y + a.size.y);
         exit_distance.y = (b.pos.y + b.size.y) - a.pos.y;
@@ -70,7 +67,7 @@ f32 fsl_get_swept_aabb(fsl_bounding_box a, fsl_bounding_box b, v3f32 displacemen
         exit_distance.y = b.pos.y - (a.pos.y + a.size.y);
     }
 
-    if (displacement.z > 0.0f)
+    if (displacement.z > 0.0)
     {
         entry_distance.z = b.pos.z - (a.pos.z + a.size.z);
         exit_distance.z = (b.pos.z + b.size.z) - a.pos.z;
@@ -83,7 +80,7 @@ f32 fsl_get_swept_aabb(fsl_bounding_box a, fsl_bounding_box b, v3f32 displacemen
 
     /* ---- entry and exit -------------------------------------------------- */
 
-    if (displacement.x == 0.0f)
+    if (displacement.x == 0.0)
     {
         entry.x = -INFINITY;
         exit.x = INFINITY;
@@ -94,7 +91,7 @@ f32 fsl_get_swept_aabb(fsl_bounding_box a, fsl_bounding_box b, v3f32 displacemen
         exit.x = exit_distance.x / displacement.x;
     }
 
-    if (displacement.y == 0.0f)
+    if (displacement.y == 0.0)
     {
         entry.y = -INFINITY;
         exit.y = INFINITY;
@@ -105,7 +102,7 @@ f32 fsl_get_swept_aabb(fsl_bounding_box a, fsl_bounding_box b, v3f32 displacemen
         exit.y = exit_distance.y / displacement.y;
     }
 
-    if (displacement.z == 0.0f)
+    if (displacement.z == 0.0)
     {
         entry.z = -INFINITY;
         exit.z = INFINITY;
@@ -116,28 +113,39 @@ f32 fsl_get_swept_aabb(fsl_bounding_box a, fsl_bounding_box b, v3f32 displacemen
         exit.z = exit_distance.z / displacement.z;
     }
 
-    entry_time = fsl_max_v3f32(entry);
-    exit_time = fsl_min_v3f32(exit);
+    c.entry_time = fsl_max_v3f64(entry);
+    c.exit_time = fsl_min_v3f64(exit);
 
-    if (entry_time > exit_time || exit_time < 0.0f || entry_time > 1.0f)
-        return 1.0f;
+    if (c.entry_time > c.exit_time || c.exit_time < 0.0 || c.entry_time > 1.0)
+    {
+        c.entry_time = 1.0;
+        return c;
+    }
 
     /* ---- normals --------------------------------------------------------- */
 
-    switch (fsl_max_axis_v3f32(entry))
+    switch (fsl_max_axis_v3f64(entry))
     {
         case 1:
-            normal->x = displacement.x > 0.0f ? -1.0f : 1.0f;
+            c.normal.x = displacement.x > 0.0 ? -1.0 : 1.0;
             break;
 
         case 2:
-            normal->y = displacement.y > 0.0f ? -1.0f : 1.0f;
+            c.normal.y = displacement.y > 0.0 ? -1.0 : 1.0;
             break;
 
         case 3:
-            normal->z = displacement.z > 0.0f ? -1.0f : 1.0f;
+            c.normal.z = displacement.z > 0.0 ? -1.0 : 1.0;
             break;
     }
 
-    return entry_time;
+    if (fsl_is_in_bounds_f64(c.entry_time, -1.0, 0.0))
+    {
+        c.hit = TRUE;
+
+        c.dot = fsl_dot_v3f64(displacement, c.normal);
+        if (c.dot < 0.0)
+            c.mask = fsl_slide_mask_v3f64(c.normal, c.normal);
+    }
+    return c;
 }

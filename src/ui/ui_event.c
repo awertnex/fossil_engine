@@ -62,7 +62,7 @@ void ui_element_listen_internal(fsl_ui_element *element, v2f64 mouse_pos, v2f64 
     element->event.hover_last = element->event.hover;
     element->event.mouse_click_last = element->event.mouse_click;
 
-    if (fsl_is_in_area_f64(mouse_pos, area_start, area_end))
+    if (fsl_is_in_bounds_v2f64(mouse_pos, area_start, area_end))
         element->event.hover = TRUE;
     else
         element->event.hover = FALSE;

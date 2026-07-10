@@ -34,6 +34,7 @@ static str str_files[][CMD_SIZE] =
 {
     DIR_SRC"external/glad/glad.c",
     DIR_SRC"assets/assets.c",
+    DIR_SRC"assets/model.c",
     DIR_SRC"assets/mesh/mesh.c",
     DIR_SRC"assets/mesh/mesh_loader_fmesh.c",
     DIR_SRC"assets/mesh/mesh_loader_gltf.c",
@@ -46,6 +47,7 @@ static str str_files[][CMD_SIZE] =
     DIR_SRC"math/perlin_noise.c",
     DIR_SRC"memory/memory.c",
     DIR_SRC"physics/collision.c",
+    DIR_SRC"physics/physics.c",
     DIR_SRC"shaders/shaders.c",
     DIR_SRC"shaders/shader_pre_processor.c",
     DIR_SRC"string/string.c",
@@ -122,6 +124,7 @@ static str *copy_targets[][48] =
     {DIR_SRC"memory/memory.h",              DIR_DST DIR_DEPS DIR_DST"memory/"},
     {DIR_SRC"memory/memory_types.h",        DIR_DST DIR_DEPS DIR_DST"memory/"},
     {DIR_SRC"physics/collision.h",          DIR_DST DIR_DEPS DIR_DST"physics/"},
+    {DIR_SRC"physics/transform.h",          DIR_DST DIR_DEPS DIR_DST"physics/"},
     {DIR_SRC"physics/physics_types.h",      DIR_DST DIR_DEPS DIR_DST"physics/"},
     {DIR_SRC"shaders/shader_types.h",       DIR_DST DIR_DEPS DIR_DST"shaders/"},
     {DIR_SRC"shaders/shaders.h",            DIR_DST DIR_DEPS DIR_DST"shaders/"},

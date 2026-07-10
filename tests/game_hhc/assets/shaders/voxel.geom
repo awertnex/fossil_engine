@@ -1,14 +1,15 @@
 #version 430 core
 
-#define FACE_VERTICES   6
-#define VERTICES_MAX    36
+#define FACE_VERTICES 6
+#define VERTICES_MAX 36
+#define FACES_MAX 6
 
 layout(points) in;
 layout(triangle_strip, max_vertices = VERTICES_MAX) out;
 
 layout(std430, binding = 1) readonly buffer ssbo_texture_indices
 {
-    uint texture_indices[];
+    uint texture_buf[];
 };
 
 #define MASK_BLOCK_ID   0x000003ff
@@ -20,21 +21,27 @@ layout(std430, binding = 1) readonly buffer ssbo_texture_indices
 #define FLAG_POSITIVE_Z 0x00100000
 #define FLAG_NEGATIVE_Z 0x00200000
 
+uniform mat4 mat_view;
 uniform mat4 mat_perspective;
 in uint vs_data[];
-in vec3 vs_position[];
-out vec3 vertex_position;
-out vec2 tex_coords;
+in vec3 vs_pos[];
+out vec4 pos;
+out vec4 pos_view;
+out vec2 uv;
 out vec3 normal;
+out vec3 normal_view;
 out flat uint face_index;
 out float block_light;
 
-void main()
+void voxel_make()
 {
+    int i = 0;
+    int j = 0;
     uint block_id = vs_data[0] & MASK_BLOCK_ID;
+    uint block_faces = vs_data[0] >> 16;
     block_light = ((vs_data[0] >> 0x18) & MASK_BLOCK_LIGHT) / float(MASK_BLOCK_LIGHT);
 
-    vec3 vbo[8] =
+    vec3 vertex_buf[8] =
         vec3[](
                 vec3(0.0, 0.0, 0.0),
                 vec3(1.0, 0.0, 0.0),
@@ -45,7 +52,16 @@ void main()
                 vec3(0.0, 1.0, 1.0),
                 vec3(1.0, 1.0, 1.0));
 
-    int ebo[VERTICES_MAX] =
+    vec3 normal_buf[6] =
+        vec3[](
+                vec3(1.0, 0.0, 0.0),
+                vec3(-1.0, 0.0, 0.0),
+                vec3(0.0, 1.0, 0.0),
+                vec3(0.0, -1.0, 0.0),
+                vec3(0.0, 0.0, 1.0),
+                vec3(0.0, 0.0, -1.0));
+
+    int index_buf[VERTICES_MAX] =
         int[](
                 1, 5, 7, 7, 3, 1,
                 2, 6, 4, 4, 0, 2,
@@ -54,100 +70,41 @@ void main()
                 4, 6, 7, 7, 5, 4,
                 0, 1, 3, 3, 2, 0);
 
-    vec2 gs_tex_coords[4] =
+    vec2 gs_uv[4] =
         vec2[](
                 vec2(0.0, 1.0),
                 vec2(0.0, 0.0),
                 vec2(1.0, 0.0),
                 vec2(1.0, 1.0));
 
-    int ebo_tex_coords[FACE_VERTICES] =
+    int index_buf_uv[FACE_VERTICES] =
         int[](0, 1, 2, 2, 3, 0);
 
-    int ebo_tex_coords_top[FACE_VERTICES] =
+    int ebo_uv_top[FACE_VERTICES] =
         int[](3, 0, 1, 1, 2, 3);
 
-    if (bool(vs_data[0] & FLAG_POSITIVE_X))
-        for (int i = 0; i < FACE_VERTICES; ++i)
-        {
-            vertex_position = vs_position[0] +
-                vbo[ebo[i]];
-            tex_coords = gs_tex_coords[ebo_tex_coords[i]];
-            face_index = texture_indices[block_id * 6 + 0];
-            normal = vec3(1.0, 0.0, 0.0);
+    mat3 mat_view_transpose = transpose(inverse(mat3(mat_view)));
 
-            gl_Position = mat_perspective * vec4(vertex_position, 1.0);
-            EmitVertex();
-            if ((i + 1) % 3 == 0) EndPrimitive();
-        }
+    for (i = 0; i < FACES_MAX; ++i)
+    {
+        if (bool(block_faces & (1 << i)))
+            for (j = 0; j < FACE_VERTICES; ++j)
+            {
+                pos = vec4(vs_pos[0] + vertex_buf[index_buf[j + FACE_VERTICES * i]], 1.0);
+                pos_view = mat_view * pos;
+                uv = gs_uv[index_buf_uv[j]];
+                face_index = texture_buf[block_id * 6 + i];
+                normal = normal_buf[i];
+                normal_view = mat_view_transpose * normal;
 
-    if (bool(vs_data[0] & FLAG_NEGATIVE_X))
-        for (int i = 0; i < FACE_VERTICES; ++i)
-        {
-            vertex_position = vs_position[0] +
-                vbo[ebo[i + FACE_VERTICES]];
-            tex_coords = gs_tex_coords[ebo_tex_coords[i]];
-            face_index = texture_indices[block_id * 6 + 1];
-            normal = vec3(-1.0, 0.0, 0.0);
+                gl_Position = mat_perspective * pos;
+                EmitVertex();
+                if ((j + 1) % 3 == 0) EndPrimitive();
+            }
+    }
+}
 
-            gl_Position = mat_perspective * vec4(vertex_position, 1.0);
-            EmitVertex();
-            if ((i + 1) % 3 == 0) EndPrimitive();
-        }
-
-    if (bool(vs_data[0] & FLAG_POSITIVE_Y))
-        for (int i = 0; i < FACE_VERTICES; ++i)
-        {
-            vertex_position = vs_position[0] +
-                vbo[ebo[i + (FACE_VERTICES * 2)]];
-            tex_coords = gs_tex_coords[ebo_tex_coords[i]];
-            face_index = texture_indices[block_id * 6 + 2];
-            normal = vec3(0.0, 1.0, 0.0);
-
-            gl_Position = mat_perspective * vec4(vertex_position, 1.0);
-            EmitVertex();
-            if ((i + 1) % 3 == 0) EndPrimitive();
-        }
-
-    if (bool(vs_data[0] & FLAG_NEGATIVE_Y))
-        for (int i = 0; i < FACE_VERTICES; ++i)
-        {
-            vertex_position = vs_position[0] +
-                vbo[ebo[i + (FACE_VERTICES * 3)]];
-            tex_coords = gs_tex_coords[ebo_tex_coords[i]];
-            face_index = texture_indices[block_id * 6 + 3];
-            normal = vec3(0.0, -1.0, 0.0);
-
-            gl_Position = mat_perspective * vec4(vertex_position, 1.0);
-            EmitVertex();
-            if ((i + 1) % 3 == 0) EndPrimitive();
-        }
-
-    if (bool(vs_data[0] & FLAG_POSITIVE_Z))
-        for (int i = 0; i < FACE_VERTICES; ++i)
-        {
-            vertex_position = vs_position[0] +
-                vbo[ebo[i + (FACE_VERTICES * 4)]];
-            tex_coords = gs_tex_coords[ebo_tex_coords_top[i]];
-            face_index = texture_indices[block_id * 6 + 4];
-            normal = vec3(0.0, 0.0, 1.0);
-
-            gl_Position = mat_perspective * vec4(vertex_position, 1.0);
-            EmitVertex();
-            if ((i + 1) % 3 == 0) EndPrimitive();
-        }
-
-    if (bool(vs_data[0] & FLAG_NEGATIVE_Z))
-        for (int i = 0; i < FACE_VERTICES; ++i)
-        {
-            vertex_position = vs_position[0] +
-                vbo[ebo[i + (FACE_VERTICES * 5)]];
-            tex_coords = gs_tex_coords[ebo_tex_coords[i]];
-            face_index = texture_indices[block_id * 6 + 5];
-            normal = vec3(0.0, 0.0, -1.0);
-
-            gl_Position = mat_perspective * vec4(vertex_position, 1.0);
-            EmitVertex();
-            if ((i + 1) % 3 == 0) EndPrimitive();
-        }
+void main()
+{
+    voxel_make();
 }

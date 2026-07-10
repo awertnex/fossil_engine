@@ -261,6 +261,7 @@ cleanup:
 }
 
 void fsl_mesh_draw(const fsl_mesh *mesh, const fsl_camera *camera,
+        GLuint texture_id,
         f32 pos_x, f32 pos_y, f32 pos_z,
         f32 roll, f32 pitch, f32 yaw,
         f32 scale_x, f32 scale_y, f32 scale_z)
@@ -315,18 +316,23 @@ void fsl_mesh_draw(const fsl_mesh *mesh, const fsl_camera *camera,
     scale.a33 = scale_z;
     scale.a44 = 1.0f;
 
-    transform = fsl_matrix_multiply(scale, location);
-    transform = fsl_matrix_multiply(rotation_pitch, transform);
-    transform = fsl_matrix_multiply(rotation_yaw, transform);
-    transform = fsl_matrix_multiply(transform, camera->projection.perspective);
+    transform = fsl_multiply_m4f32(scale, location);
+    transform = fsl_multiply_m4f32(rotation_pitch, transform);
+    transform = fsl_multiply_m4f32(rotation_yaw, transform);
+    transform = fsl_multiply_m4f32(transform, camera->projection.perspective);
 
     glBindBuffer(GL_ARRAY_BUFFER, mesh->transform_buf.id);
     glBufferData(GL_ARRAY_BUFFER, sizeof(m4f32), &transform, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glUseProgram(shader[FSL_SHADER_INDEX_OBJECT].asset.id);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
     glBindVertexArray(mesh->vao);
     glDrawElementsInstanced(GL_TRIANGLES, mesh->index_buf.len, GL_UNSIGNED_INT, NULL, 1);
+
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 u32 fsl_mesh_generate(fsl_mesh *mesh,

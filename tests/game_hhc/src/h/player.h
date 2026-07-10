@@ -10,21 +10,22 @@
 #include "raycast.h"
 #include "container.h"
 
-#define PLAYER_REACH_DISTANCE_MAX   5.0f
+#define PLAYER_REACH_DISTANCE_MAX   5.0
 
-#define PLAYER_EYE_HEIGHT           1.55f
-#define PLAYER_JUMP_HEIGHT          1.5f
-#define PLAYER_ACCELERATION_SNEAK   2.5f
-#define PLAYER_ACCELERATION_WALK    4.0f
-#define PLAYER_ACCELERATION_SPRINT  6.0f
-#define PLAYER_ACCELERATION_FLY     9.0f
-#define PLAYER_ACCELERATION_FLY_FAST 20.0f
-#define PLAYER_ACCELERATION_MAX     100.0f
-#define PLAYER_FRICTION_DEFAULT     1.0f
-#define PLAYER_FRICTION_FLY_NATURAL 1.0f
-#define PLAYER_FRICTION_FLYING      4.0f
-#define PLAYER_FRICTION_FLYING_V    13.0f
-#define PLAYER_COLLISION_DAMAGE_THRESHOLD 15.0f
+#define PLAYER_EYE_HEIGHT           1.55
+#define PLAYER_JUMP_HEIGHT          1.5
+#define PLAYER_ACCELERATION_SNEAK   15.0
+#define PLAYER_ACCELERATION_WALK    30.0
+#define PLAYER_ACCELERATION_SPRINT  50.0
+#define PLAYER_ACCELERATION_FLY     70.0
+#define PLAYER_ACCELERATION_FLY_FAST 140.0
+#define PLAYER_ACCELERATION_MAX     200.0
+#define PLAYER_DRAG_DEFAULT         4.0
+#define PLAYER_DRAG_FLY_NATURAL     1.0
+#define PLAYER_DRAG_FLYING          3.0
+#define PLAYER_DRAG_FLYING_V        7.0
+#define PLAYER_FRICTION_DEFAULT     0.3
+#define PLAYER_COLLISION_DAMAGE_THRESHOLD 15.0
 #define PLAYER_DEATH_STRING_CAP     128
 
 /* ---- strings: death ------------------------------------------------------ */
@@ -46,29 +47,29 @@
 
 enum player_flag
 {
-    FLAG_PLAYER_CAN_JUMP =          0x00000001,
-    FLAG_PLAYER_SNEAKING =          0x00000002,
-    FLAG_PLAYER_SPRINTING =         0x00000004,
-    FLAG_PLAYER_FLYING =            0x00000008,
-    FLAG_PLAYER_SWIMMING =          0x00000010,
-    FLAG_PLAYER_HUNGRY =            0x00000020,
-    FLAG_PLAYER_DEAD =              0x00000040,
-    FLAG_PLAYER_ZOOMER =            0x00000080,
-    FLAG_PLAYER_CINEMATIC_MOTION =  0x00000100,
-    FLAG_PLAYER_FLASHLIGHT =        0x00000200,
+    FLAG_PLAYER_CAN_JUMP =          1 << 0,
+    FLAG_PLAYER_SNEAKING =          1 << 1,
+    FLAG_PLAYER_SPRINTING =         1 << 2,
+    FLAG_PLAYER_FLYING =            1 << 3,
+    FLAG_PLAYER_SWIMMING =          1 << 4,
+    FLAG_PLAYER_HUNGRY =            1 << 5,
+    FLAG_PLAYER_DEAD =              1 << 6,
+    FLAG_PLAYER_ZOOMER =            1 << 7,
+    FLAG_PLAYER_CINEMATIC_MOTION =  1 << 8,
+    FLAG_PLAYER_FLASHLIGHT =        1 << 9,
 
-    FLAG_PLAYER_OVERFLOW_X =        0x00000400,
-    FLAG_PLAYER_OVERFLOW_Y =        0x00000800,
-    FLAG_PLAYER_OVERFLOW_Z =        0x00001000,
+    FLAG_PLAYER_OVERFLOW_X =        1 << 10,
+    FLAG_PLAYER_OVERFLOW_Y =        1 << 11,
+    FLAG_PLAYER_OVERFLOW_Z =        1 << 12,
 
     /*!
      *  @brief positive overflow direction flags.
      *
      *  @remark default is 0 for negative overflow (underflow).
      */
-    FLAG_PLAYER_OVERFLOW_PX =       0x00002000,
-    FLAG_PLAYER_OVERFLOW_PY =       0x00004000,
-    FLAG_PLAYER_OVERFLOW_PZ =       0x00008000
+    FLAG_PLAYER_OVERFLOW_PX =       1 << 13,
+    FLAG_PLAYER_OVERFLOW_PY =       1 << 14,
+    FLAG_PLAYER_OVERFLOW_PZ =       1 << 15
 }; /* player_flag */
 
 typedef enum hhc_player_camera_mode
@@ -105,8 +106,8 @@ typedef struct hhc_player
 {
     str name[64];                   /* in-game name */
     u64 flag;                       /* enum @ref player_flag */
-    transform_v3f64 transform;
-    transform_v3f64 transform_last;
+    fsl_transform_v3f64 transform;
+    fsl_transform_v3f64 transform_last;
     v3f32 size;                     /* size (for collision detection) */
     v3f64 target;                   /* arm */
 
@@ -114,13 +115,12 @@ typedef struct hhc_player
     f32 eye_height;                 /* eye-level (camera height) */
     fsl_mesh mesh;
 
-    v3f32 input;                    /* raw user input */
-    v3f32 acceleration;
-    v3f32 velocity;
-    v3f32 friction;
-    f32 acceleration_rate;          /* scalar for `acceleration` */
-    f32 speed;                      /* derived from `velocity` */
-    f32 health;
+    fsl_physics_material physics_material;
+    fsl_physics_force force;        /* raw input signal */
+    fsl_kinematics kn_forces;       /* outside forces kinematics */
+    fsl_kinematics kn;              /* self forces kinematics */
+    fsl_collision_info collision_info;
+    f64 health;
 
     fsl_camera camera;
 
@@ -146,12 +146,7 @@ typedef struct hhc_player
     v3i64 spawn;                    /* spawn point */
     hhc_player_menu_state menu_state;
 
-    /*!
-     *  @remark signed instead of unsigned so it's possible to navigate `hotbar_slots`
-     *  when using mousewheel, used for wrapping around when out of range.
-     */
-    i32 hotbar_slot_selected;
-
+    u32 hotbar_slot_selected;
     hhc_container_slot hotbar_slots[CONTAINER_HOTBAR_SLOTS_MAX];
     hhc_container_slot inventory_slots[CONTAINER_INVENTORY_SLOTS_MAX];
 
@@ -188,6 +183,7 @@ u32 player_init(hhc_player *p, const str *name);
 void player_update(hhc_player *p, f64 dt);
 
 void player_hotbar_selected_set(hhc_player *p, u32 index);
+void player_hotbar_selected_advance(hhc_player *p, i32 offset);
 void player_collision_update(hhc_player *p, f64 dt);
 void player_bounding_box_update(hhc_player *p);
 
@@ -202,7 +198,7 @@ void player_bounding_box_update(hhc_player *p);
  *  @remark collision capsule position is in chunk-relative coordinates, not world
  *  coordinates.
  */
-fsl_bounding_box make_collision_capsule(fsl_bounding_box b, v3i32 ch, v3f32 velocity);
+fsl_bounding_box make_collision_capsule(fsl_bounding_box b, v3i32 ch, v3f64 velocity);
 
 /*!
  *  @brief calculate camera rotations and mechanics based on `p->camera_mode`.
@@ -227,6 +223,16 @@ void player_set_spawn(hhc_player *p, i64 x, i64 y, i64 z);
  *  @param hard `TRUE` will reset all player stats, `FALSE` will only teleport to spawn.
  */
 void player_spawn(hhc_player *p, b8 hard);
+
+/*!
+ *  @brief enable/disable flying for a player.
+ */
+void player_toggle_flying(hhc_player *p);
+
+/*!
+ *  @brief enable/disable cinematic motion for a player (only seem while flying).
+ */
+void player_toggle_cinematic_motion(hhc_player *p);
 
 void player_kill(hhc_player *p);
 

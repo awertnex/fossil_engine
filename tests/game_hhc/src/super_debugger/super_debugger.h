@@ -20,7 +20,7 @@ extern fsl_ui_element ui_element_sdb[UI_ELEMENT_SDB_COUNT];
 
 void super_debugger_init(v2i32 render_size);
 void super_debugger_update(v2i32 render_size);
-void super_debugger_draw(v2i32 render_size);
+void super_debugger_draw(v2i32 render_size, GLuint fbo);
 void super_debugger_logger_scroll(i32 delta);
 void super_debugger_gui_scale_set(f32 scale);
 

@@ -59,6 +59,7 @@ struct fsl_render
     v2f64 mouse_delta;
     u64 time;
     u64 time_delta;
+    f64 time_delta_f; /* delta time in floating point representation */
 
     /*!
      *  @brief for reading screen pixels back to RAM (e.g., screenshots).

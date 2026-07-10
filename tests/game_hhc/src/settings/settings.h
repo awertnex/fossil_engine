@@ -3,6 +3,8 @@
 
 #include "deps/fossil/common/types.h"
 
+#include "../chunking/chunk_work.h"
+
 typedef struct hhc_settings
 {
     /* ---- internal -------------------------------------------------------- */
@@ -14,6 +16,7 @@ typedef struct hhc_settings
     u32 chunk_buf_layer;
     u32 chunk_buf_volume;
     u32 chunk_tab_center;
+    chunk_work_budget frame_budget;
 
     f64 reach_distance; /* player reach (arm length) */
 

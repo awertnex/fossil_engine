@@ -3,15 +3,14 @@
 
 #include "deps/fossil/common/types.h"
 #include "deps/fossil/math/vector.h"
-
-#include "../terrain/terrain.h"
+#include "deps/fossil/physics/physics_types.h"
 
 #include "player.h"
 
 #define WORLD_TICK_SPEED        20.0
 
-#define WORLD_DRAG_AIR          0.2f
-#define WORLD_DRAG_WATER        2.0f
+#define WORLD_DRAG_AIR          0.2
+#define WORLD_DRAG_WATER        2.0
 
 typedef struct world_info
 {
@@ -24,8 +23,8 @@ typedef struct world_info
     u64 tick_start;
     u64 days;
 
-    f32 gravity;
-    v3f32 drag;
+    fsl_physics_material physics_material;
+    fsl_physics_force gravity;
 } world_info;
 
 /*!

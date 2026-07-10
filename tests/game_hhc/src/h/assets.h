@@ -4,14 +4,15 @@
 #include "deps/fossil/common/types.h"
 #include "deps/fossil/assets/asset_types.h"
 #include "deps/fossil/memory/memory_types.h"
+#include "deps/fossil/physics/physics_types.h"
 
 #include "common.h"
 
 /* ---- section: definitions ------------------------------------------------ */
 
-#define FRICTION_BLOCK_SLIPPERY 0.02f
-#define FRICTION_BLOCK_WET      0.1f
-#define FRICTION_BLOCK_HARD     0.6f
+#define FRICTION_BLOCK_SLIPPERY 0.02
+#define FRICTION_BLOCK_WET      0.1
+#define FRICTION_BLOCK_HARD     0.6
 
 enum shader_index
 {
@@ -60,6 +61,21 @@ enum texture_block_index
     TEXTURE_BLOCK_COUNT
 }; /* texture_block_index */
 
+typedef struct hhc_g_buffer
+{
+    fsl_asset asset;
+    GLuint fbo;
+    GLuint color_buf_pos;
+    GLuint color_buf_normal;
+    GLuint color_buf_albedo_specular;
+    GLuint rbo;
+} hhc_g_buffer;
+
+typedef struct hhc_ssao
+{
+    v3f32 sample[64];
+} hhc_ssao;
+
 enum block_id
 {
     BLOCK_NONE,
@@ -89,7 +105,7 @@ typedef struct hhc_block
     fsl_asset asset;
     u32 texture_index[6]; /* px, nx, py, ny, pz, nz */
     enum block_state state;
-    f32 friction;
+    fsl_physics_material physics_material;
 } hhc_block;
 
 /* ---- section: declarations ----------------------------------------------- */
@@ -105,6 +121,8 @@ extern fsl_mem_arena memory_arena_assets_internal;
 
 extern fsl_mem_handle texture;
 extern fsl_mem_handle fbo;
+extern hhc_g_buffer g_buf;
+extern hhc_ssao ssao_buf;
 extern fsl_mem_handle mesh;
 extern fsl_mem_handle shader;
 extern fsl_mem_handle blocks;
@@ -118,6 +136,16 @@ extern fsl_font *font[FONT_COUNT];
 u32 assets_init(void);
 
 void assets_free(void);
+
+/*!
+ *  @brief initialize a rendering G-buffer.
+ *
+ *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
+ */
+u32 g_buffer_init(hhc_g_buffer *buf, i32 size_x, i32 size_y);
+
+void g_buffer_free(hhc_g_buffer *buf);
+void ssao_init(hhc_ssao *ssao);
 
 /*!
  *  @param index index into @ref block_textures.

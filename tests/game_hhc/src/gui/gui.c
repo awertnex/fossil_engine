@@ -202,12 +202,12 @@ void gui_draw_ui_item(u32 item_id, f32 pos_x, f32 pos_y, v2i32 render_size)
     offset.a44 = 1.0f;
 
     /* 3D space */
-    transform = fsl_matrix_multiply(rotation_yaw, rotation_pitch);
-    transform = fsl_matrix_multiply(transform, ui_item_data_internal.camera.projection.perspective);
+    transform = fsl_multiply_m4f32(rotation_yaw, rotation_pitch);
+    transform = fsl_multiply_m4f32(transform, ui_item_data_internal.camera.projection.perspective);
 
     /* UI space */
-    transform = fsl_matrix_multiply(scale, transform);
-    transform = fsl_matrix_multiply(transform, offset);
+    transform = fsl_multiply_m4f32(scale, transform);
+    transform = fsl_multiply_m4f32(transform, offset);
 
     glBindBuffer(GL_ARRAY_BUFFER, ui_item_data_internal.mesh_unit_cube.transform_buf.id);
     glBufferData(GL_ARRAY_BUFFER, sizeof(m4f32), &transform, GL_DYNAMIC_DRAW);

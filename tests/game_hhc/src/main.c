@@ -10,6 +10,7 @@
 #include "deps/fossil/logger/logger.h"
 #include "deps/fossil/math/math.h"
 #include "deps/fossil/math/matrix.h"
+#include "deps/fossil/math/noise.h"
 #include "deps/fossil/math/vector.h"
 #include "deps/fossil/memory/memory.h"
 #include "deps/fossil/shaders/shader_types.h"
@@ -25,6 +26,7 @@
 #include "chunking/chunking_debug_tools.h"
 #include "gui/gui.h"
 #include "gui/gui_menus.h"
+#include "plugins/big_num_separator/big_num_separator.h"
 #include "settings/settings.h"
 #include "super_debugger/super_debugger.h"
 
@@ -82,12 +84,13 @@ static void callback_framebuffer_size(i32 size_x, i32 size_y)
     player.camera.ratio = (f32)size_x / (f32)size_y;
     player.camera_hud.ratio = (f32)size_x / (f32)size_y;
 
-    fsl_fbo_realloc(&fbo_p[FBO_SKYBOX], render->size.x, render->size.y, FALSE, 4);
-    fsl_fbo_realloc(&fbo_p[FBO_WORLD], render->size.x, render->size.y, FALSE, 4);
+    fsl_fbo_realloc(&fbo_p[FBO_SKYBOX], render->size.x, render->size.y, FALSE, 0);
+    fsl_fbo_realloc(&fbo_p[FBO_WORLD], render->size.x, render->size.y, FALSE, 0);
     fsl_fbo_realloc(&fbo_p[FBO_WORLD_MSAA], render->size.x, render->size.y, TRUE, 4);
-    fsl_fbo_realloc(&fbo_p[FBO_HUD], render->size.x, render->size.y, FALSE, 4);
+    fsl_fbo_realloc(&fbo_p[FBO_HUD], render->size.x, render->size.y, FALSE, 0);
     fsl_fbo_realloc(&fbo_p[FBO_HUD_MSAA], render->size.x, render->size.y, TRUE, 4);
-    fsl_fbo_realloc(&fbo_p[FBO_POST_PROCESSING], render->size.x, render->size.y, FALSE, 4);
+    fsl_fbo_realloc(&fbo_p[FBO_POST_PROCESSING], render->size.x, render->size.y, FALSE, 0);
+    g_buffer_init(&g_buf, render->size.x, render->size.y);
 
     gui_update(render->size);
     super_debugger_update(render->size);
@@ -114,13 +117,7 @@ static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset)
         player.camera.zoom =
             fsl_clamp_f64(player.camera.zoom + yoffset * FSL_CAMERA_ZOOM_SPEED, 0.0f, FSL_CAMERA_ZOOM_MAX);
     else
-    {
-        player.hotbar_slot_selected += (i64)yoffset;
-        if (player.hotbar_slot_selected >= CONTAINER_HOTBAR_SLOTS_MAX)
-            player.hotbar_slot_selected = 0;
-        else if (player.hotbar_slot_selected < 0)
-            player.hotbar_slot_selected = CONTAINER_HOTBAR_SLOTS_MAX - 1;
-    }
+        player_hotbar_selected_advance(&player, (i64)-yoffset);
 }
 
 static void bind_shader_uniforms(void)
@@ -175,13 +172,37 @@ static void bind_shader_uniforms(void)
     uniform.gizmo_chunk.time =
         glGetUniformLocation(shader_p[SHADER_GIZMO_CHUNK].asset.id, "time");
 
+    uniform.post_processing.texture_skybox =
+        glGetUniformLocation(shader_p[SHADER_POST_PROCESSING].asset.id, "texture_skybox");
+    uniform.post_processing.texture_world_pos =
+        glGetUniformLocation(shader_p[SHADER_POST_PROCESSING].asset.id, "texture_world_pos");
+    uniform.post_processing.texture_world_normal =
+        glGetUniformLocation(shader_p[SHADER_POST_PROCESSING].asset.id, "texture_world_normal");
+    uniform.post_processing.texture_world_albedo_specular =
+        glGetUniformLocation(shader_p[SHADER_POST_PROCESSING].asset.id, "texture_world_albedo_specular");
+    uniform.post_processing.texture_hud =
+        glGetUniformLocation(shader_p[SHADER_POST_PROCESSING].asset.id, "texture_hud");
     uniform.post_processing.time =
         glGetUniformLocation(shader_p[SHADER_POST_PROCESSING].asset.id, "time");
+    uniform.post_processing.mat_projection =
+        glGetUniformLocation(shader_p[SHADER_POST_PROCESSING].asset.id, "mat_projection");
+    uniform.post_processing.camera_far =
+        glGetUniformLocation(shader_p[SHADER_POST_PROCESSING].asset.id, "camera_far");
+    uniform.post_processing.camera_near =
+        glGetUniformLocation(shader_p[SHADER_POST_PROCESSING].asset.id, "camera_near");
+    uniform.post_processing.ssao_sample =
+        glGetUniformLocation(shader_p[SHADER_POST_PROCESSING].asset.id, "ssao_sample");
 
+    uniform.voxel.mat_view =
+        glGetUniformLocation(shader_p[SHADER_VOXEL].asset.id, "mat_view");
     uniform.voxel.mat_perspective =
         glGetUniformLocation(shader_p[SHADER_VOXEL].asset.id, "mat_perspective");
     uniform.voxel.camera_position =
         glGetUniformLocation(shader_p[SHADER_VOXEL].asset.id, "camera_position");
+    uniform.voxel.camera_far =
+        glGetUniformLocation(shader_p[SHADER_VOXEL].asset.id, "camera_far");
+    uniform.voxel.camera_near =
+        glGetUniformLocation(shader_p[SHADER_VOXEL].asset.id, "camera_near");
     uniform.voxel.sun_rotation =
         glGetUniformLocation(shader_p[SHADER_VOXEL].asset.id, "sun_rotation");
     uniform.voxel.sky_light =
@@ -194,12 +215,18 @@ static void bind_shader_uniforms(void)
         glGetUniformLocation(shader_p[SHADER_VOXEL].asset.id, "voxel_color");
     uniform.voxel.opacity =
         glGetUniformLocation(shader_p[SHADER_VOXEL].asset.id, "opacity");
-    uniform.voxel.flashlight_position =
-        glGetUniformLocation(shader_p[SHADER_VOXEL].asset.id, "flashlight_position");
-    uniform.voxel.toggle_flashlight =
-        glGetUniformLocation(shader_p[SHADER_VOXEL].asset.id, "toggle_flashlight");
     uniform.voxel.render_distance =
         glGetUniformLocation(shader_p[SHADER_VOXEL].asset.id, "render_distance");
+    uniform.voxel.spotlight.pos =
+        glGetUniformLocation(shader_p[SHADER_VOXEL].asset.id, "flashlight.pos");
+    uniform.voxel.spotlight.direction =
+        glGetUniformLocation(shader_p[SHADER_VOXEL].asset.id, "flashlight.direction");
+    uniform.voxel.spotlight.cutoff =
+        glGetUniformLocation(shader_p[SHADER_VOXEL].asset.id, "flashlight.cutoff");
+    uniform.voxel.spotlight.feather_factor =
+        glGetUniformLocation(shader_p[SHADER_VOXEL].asset.id, "flashlight.feather_factor");
+    uniform.voxel.spotlight.intensity =
+        glGetUniformLocation(shader_p[SHADER_VOXEL].asset.id, "flashlight.intensity");
 
     uniform.bounding_box.mat_perspective =
         glGetUniformLocation(shader_p[SHADER_BOUNDING_BOX].asset.id, "mat_perspective");
@@ -266,9 +293,9 @@ static void skybox_draw(void)
     skybox_data.moon_light.y = mid_night;
     skybox_data.moon_light.z = mid_night;
 
-    translation = fsl_matrix_unit();
-    rotation_yaw = fsl_matrix_unit();
-    rotation_pitch = fsl_matrix_unit();
+    translation = fsl_identity_m4f32();
+    rotation_yaw = fsl_identity_m4f32();
+    rotation_pitch = fsl_identity_m4f32();
 
     glUseProgram(shader_p[SHADER_SKYBOX].asset.id);
 
@@ -307,24 +334,24 @@ static void skybox_draw(void)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    translation = fsl_matrix_unit();
+    translation = fsl_identity_m4f32();
     translation.a41 = skybox_data.sun_rotation.x * 2.0f;
     translation.a42 = skybox_data.sun_rotation.y * 2.0f;
     translation.a43 = skybox_data.sun_rotation.z * 2.0f;
 
-    rotation_yaw = fsl_matrix_unit();
+    rotation_yaw = fsl_identity_m4f32();
     rotation_yaw.a11 = cosf(FSL_HALF_PI);
     rotation_yaw.a12 = -sinf(FSL_HALF_PI);
     rotation_yaw.a21 = sinf(FSL_HALF_PI);
     rotation_yaw.a22 = cosf(FSL_HALF_PI);
 
-    rotation_pitch = fsl_matrix_unit();
+    rotation_pitch = fsl_identity_m4f32();
     rotation_pitch.a11 = cosf(sun_angle);
     rotation_pitch.a13 = sinf(sun_angle);
     rotation_pitch.a31 = -sinf(sun_angle);
     rotation_pitch.a33 = cosf(sun_angle);
 
-    rotation_yaw = fsl_matrix_multiply(rotation_yaw, rotation_pitch);
+    rotation_yaw = fsl_multiply_m4f32(rotation_yaw, rotation_pitch);
 
     glUniformMatrix4fv(uniform.skybox.mat_translation, 1, GL_FALSE, (GLfloat*)&translation);
     glUniformMatrix4fv(uniform.skybox.mat_sun_rotation, 1, GL_FALSE, (GLfloat*)&rotation_yaw);
@@ -344,19 +371,19 @@ static void skybox_draw(void)
 
     sun_angle = skybox_data.time * FSL_PI - FSL_HALF_PI;
 
-    rotation_yaw = fsl_matrix_unit();
+    rotation_yaw = fsl_identity_m4f32();
     rotation_yaw.a11 = cosf(FSL_HALF_PI);
     rotation_yaw.a22 = -sinf(FSL_HALF_PI);
     rotation_yaw.a11 = sinf(FSL_HALF_PI);
     rotation_yaw.a22 = cosf(FSL_HALF_PI);
 
-    rotation_pitch = fsl_matrix_unit();
+    rotation_pitch = fsl_identity_m4f32();
     rotation_pitch.a11 = cosf(sun_angle);
     rotation_pitch.a13 = sinf(sun_angle);
     rotation_pitch.a31 = -sinf(sun_angle);
     rotation_pitch.a33 = cosf(sun_angle);
 
-    rotation_yaw = fsl_matrix_multiply(rotation_yaw, rotation_pitch);
+    rotation_yaw = fsl_multiply_m4f32(rotation_yaw, rotation_pitch);
 
     glUniformMatrix4fv(uniform.skybox.mat_translation, 1, GL_FALSE,
             (GLfloat*)&translation);
@@ -367,15 +394,14 @@ static void skybox_draw(void)
     glBindTexture(GL_TEXTURE_2D, texture_p[TEXTURE_MOON].asset.id);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE1);
+    glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, 0);
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE3);
+    glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, 0);
     glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 static void ui_hud_draw(void)
@@ -386,7 +412,7 @@ static void ui_hud_draw(void)
 
     if (fsl_on_time_interval(&refresh_interval.fps_string,
                 FSL_SEC2NSEC / SET_TEXT_REFRESH_INTERVAL, render->time))
-        settings.fps = 1 / ((f64)render->time_delta * FSL_NSEC2SEC);
+        settings.fps = 1 / render->time_delta_f;
 
     if (!core.flag.hud)
         return;
@@ -432,27 +458,97 @@ static void ui_hud_draw(void)
 
 static void draw_world(void)
 {
+    fsl_fbo *fbo_p = fsl_mem_handle_get(fbo);
     fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
     hhc_chunk *chunk = NULL;
+    static hhc_spotlight flashlight = {0};
+    static hhc_spotlight flashlight_last = {0};
+    f32 flashlight_flicker = 0.0f;
+    f32 flashlight_flicker_intensity = 2.0f;
+    f32 flashlight_flicker_gathering = 0.8f;
     i32 i = 0;
+    f32 lerp_speed = 0.2f;
+    f32 lerp_speed_toggle = 0.5f;
+    f32 k = 1.0f - render->time_delta_f;
 
-    glClear(GL_DEPTH_BUFFER_BIT);
+    flashlight.pos.x = player.transform.pos.x - player.yaw.sin * 0.3f;
+    flashlight.pos.y = player.transform.pos.y - player.yaw.cos * 0.3f;
+    flashlight.pos.z = player.transform.pos.z + player.eye_height - 0.3f;
+    flashlight.direction.x = player.yaw.cos * player.pitch.cos;
+    flashlight.direction.y = -player.yaw.sin * player.pitch.cos;
+    flashlight.direction.z = -player.pitch.sin;
+    flashlight.cutoff = cosf(35.0f * FSL_DEG2RAD);
+    flashlight.feather_factor = 0.2f;
+
+    if (player.flag & FLAG_PLAYER_FLASHLIGHT)
+    {
+        flashlight_flicker =
+            fsl_perlin_noise_1d((f32)render->time * FSL_NSEC2SEC, 2.0f, 4.0f, 0) +
+            fsl_perlin_noise_1d((f32)render->time * FSL_NSEC2SEC, 2.0f, 15.0f, 0);
+
+        if (flashlight_flicker >= flashlight_flicker_gathering)
+            flashlight_flicker = flashlight_flicker_intensity;
+        else if (flashlight_flicker <= -flashlight_flicker_gathering)
+            flashlight_flicker = -flashlight_flicker_intensity;
+        else
+            flashlight_flicker = 0.0f;
+
+        flashlight.intensity = 20.0f + flashlight_flicker;
+    }
+    else
+        flashlight.intensity = 0.0f;
+
+    flashlight_last.pos.x = fsl_lerp_exp_f32(flashlight_last.pos.x, flashlight.pos.x,
+            k, lerp_speed);
+    flashlight_last.pos.y = fsl_lerp_exp_f32(flashlight_last.pos.y, flashlight.pos.y,
+            k, lerp_speed);
+    flashlight_last.pos.z = fsl_lerp_exp_f32(flashlight_last.pos.z, flashlight.pos.z,
+            k, lerp_speed);
+
+    flashlight_last.direction.x = fsl_lerp_exp_f32(flashlight_last.direction.x,
+            flashlight.direction.x, k, lerp_speed);
+    flashlight_last.direction.y = fsl_lerp_exp_f32(flashlight_last.direction.y,
+            flashlight.direction.y, k, lerp_speed);
+    flashlight_last.direction.z = fsl_lerp_exp_f32(flashlight_last.direction.z,
+            flashlight.direction.z, k, lerp_speed);
+
+    flashlight_last.direction = fsl_normalize_v3f32(flashlight_last.direction);
+    flashlight_last.cutoff = flashlight.cutoff;
+    flashlight_last.feather_factor = flashlight.feather_factor;
+    flashlight_last.intensity = fsl_lerp_exp_f32(flashlight_last.intensity,
+            flashlight.intensity, k, lerp_speed_toggle);
+
+    if (settings.anti_aliasing)
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo_p[FBO_WORLD_MSAA].fbo);
+    else
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo_p[FBO_WORLD].fbo);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, g_buf.fbo);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(shader_p[SHADER_VOXEL].asset.id);
+
+    glUniformMatrix4fv(uniform.voxel.mat_view, 1, GL_FALSE,
+            (GLfloat*)&player.camera.projection.view);
     glUniformMatrix4fv(uniform.voxel.mat_perspective, 1, GL_FALSE,
             (GLfloat*)&player.camera.projection.perspective);
-    glUniform3f(uniform.voxel.camera_position,
-            player.camera.pos.x, player.camera.pos.y, player.camera.pos.z);
-    glUniform3f(uniform.voxel.flashlight_position,
-            player.transform.pos.x, player.transform.pos.y, player.transform.pos.z + player.eye_height);
     glUniform3fv(uniform.voxel.sun_rotation, 1, (GLfloat*)&skybox_data.sun_rotation);
     glUniform3fv(uniform.voxel.sky_light, 1, (GLfloat*)&skybox_data.sky_light);
     glUniform3fv(uniform.voxel.moon_light, 1, (GLfloat*)&skybox_data.moon_light);
-    glUniform1f(uniform.voxel.toggle_flashlight, player.flag & FLAG_PLAYER_FLASHLIGHT ? 1.0f : 0.0f);
+    glUniform3f(uniform.voxel.camera_position,
+            player.camera.pos.x, player.camera.pos.y, player.camera.pos.z);
+    glUniform1f(uniform.voxel.camera_far, player.camera.far);
+    glUniform1f(uniform.voxel.camera_near, player.camera.near);
     glUniform1i(uniform.voxel.render_distance, settings.render_distance * CHUNK_DIAMETER);
 
+    glUniform3fv(uniform.voxel.spotlight.pos, 1, (GLfloat*)&flashlight_last.pos);
+    glUniform3fv(uniform.voxel.spotlight.direction, 1, (GLfloat*)&flashlight_last.direction);
+    glUniform1f(uniform.voxel.spotlight.cutoff, flashlight_last.cutoff);
+    glUniform1f(uniform.voxel.spotlight.feather_factor, flashlight_last.feather_factor);
+    glUniform1f(uniform.voxel.spotlight.intensity, flashlight_last.intensity);
+
     if (core.debug.trans_blocks)
-        glUniform1f(uniform.voxel.opacity, 0.7f);
+        glUniform1f(uniform.voxel.opacity, 0.6f);
     else
         glUniform1f(uniform.voxel.opacity, 1.0f);
 
@@ -474,9 +570,9 @@ static void draw_debug_gizmo_axis(void)
     m4f32 transform = {0};
 
     transform = player.camera_hud.projection.projection;
-    transform = fsl_matrix_multiply(player.camera_hud.projection.orientation, transform);
-    transform = fsl_matrix_multiply(player.camera_hud.projection.rotation, transform);
-    transform = fsl_matrix_multiply(player.camera_hud.projection.target, transform);
+    transform = fsl_multiply_m4f32(player.camera_hud.projection.orientation, transform);
+    transform = fsl_multiply_m4f32(player.camera_hud.projection.rotation, transform);
+    transform = fsl_multiply_m4f32(player.camera_hud.projection.target, transform);
 
     glUseProgram(shader_p[SHADER_GIZMO_AXIS].asset.id);
 
@@ -496,12 +592,13 @@ static void world_draw(void)
     fsl_fbo *fbo_p = fsl_mem_handle_get(fbo);
     fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
     fsl_shader_program *shader_p = fsl_mem_handle_get(shader);
-    fsl_shader_program *fsl_shader_p = fsl_mem_handle_get(fsl_shader_buf);
+    fsl_texture *texture_p = fsl_mem_handle_get(texture);
     hhc_block *blocks_p = fsl_mem_handle_get(blocks);
     fsl_asset_metadata metadata = {0};
     u32 block_id = 0;
 
     skybox_draw();
+    draw_world();
 
     if (settings.anti_aliasing)
         glBindFramebuffer(GL_FRAMEBUFFER, fbo_p[FBO_WORLD_MSAA].fbo);
@@ -510,13 +607,12 @@ static void world_draw(void)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    draw_world();
-
     /* ---- draw player ----------------------------------------------------- */
 
     if (player.camera_mode != PLAYER_CAMERA_MODE_1ST_PERSON)
     {
         fsl_mesh_draw(&player.mesh, &player.camera,
+                texture_p[TEXTURE_SUN].asset.id,
                 player.transform.pos.x, player.transform.pos.y, player.transform.pos.z,
                 0.0f, 0.0f, player.transform.rot.z,
                 player.transform.scale.x, player.transform.scale.y, player.transform.scale.z);
@@ -577,7 +673,7 @@ static void world_draw(void)
     /* ---- draw chunk scheduler visualizer --------------------------------- */
 
     if (core.debug.chunk_scheduler_visualizer && core.flag.hud)
-        chunk_debug_scheduler_visualizer_draw(&player.camera, 0.5f);
+        chunk_debug_scheduler_visualizer_draw(&player.camera);
 
     if (settings.anti_aliasing)
     {
@@ -653,7 +749,7 @@ static void world_draw(void)
                     "PITCH/YAW   [%5.2f][%5.2f]\n"
                     "ACCELERATION[%5.2f %5.2f %5.2f]\n"
                     "VELOCITY    [%5.2f %5.2f %5.2f]\n"
-                    "SPEED       [%5.2f]\n",
+                    "SPEED       [%5.2f]\n\n",
                     player.transform.pos.x, player.transform.pos.y, player.transform.pos.z,
                     floor(player.transform.pos.x),
                     floor(player.transform.pos.y),
@@ -663,9 +759,13 @@ static void world_draw(void)
                     floorf((f32)player.ch.y / CHUNK_REGION_DIAMETER),
                     floorf((f32)player.ch.z / CHUNK_REGION_DIAMETER),
                     player.transform.rot.y, player.transform.rot.z,
-                    player.acceleration.x, player.acceleration.y, player.acceleration.z,
-                    player.velocity.x, player.velocity.y, player.velocity.z,
-                    player.speed),
+                    player.kn.acceleration.x + player.kn_forces.acceleration.x,
+                    player.kn.acceleration.y + player.kn_forces.acceleration.y,
+                    player.kn.acceleration.z + player.kn_forces.acceleration.z,
+                    player.kn.velocity.x + player.kn_forces.velocity.x,
+                    player.kn.velocity.y + player.kn_forces.velocity.y,
+                    player.kn.velocity.z + player.kn_forces.velocity.z,
+                    player.kn.speed + player.kn_forces.speed),
                 SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 COLOR_TEXT_DEFAULT);
 
@@ -706,7 +806,7 @@ static void world_draw(void)
                 FSL_DIAGNOSTIC_COLOR_ERROR);
 
         fsl_text_push(fsl_stringf(
-                    "RATIO       [%.2f]\n"
+                    "FRAME RATIO [%.2f]\n"
                     "SKYBOX TIME [%.2f]\n"
                     "SKYBOX RGB  [%.2f %.2f %.2f]\n"
                     "SUN ANGLE   [%.2f %.2f %.2f]\n",
@@ -720,6 +820,10 @@ static void world_draw(void)
                     skybox_data.sun_rotation.z),
                 SET_MARGIN, SET_MARGIN, 0, 0, 0,
                 COLOR_DIAGNOSTIC_INFO);
+
+        fsl_text_push(fsl_stringf("%s", chunk_tab.receipt_center.printed),
+                SET_MARGIN, SET_MARGIN, 0, 0, 0,
+                COLOR_TEXT_ECONOMIC);
 
         if (player.hit.hit)
         {
@@ -775,38 +879,56 @@ static void world_draw(void)
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
     }
 
+    fsl_fbo_blit(fbo_p[FBO_HUD].fbo);
+    fsl_ui_stop();
+
     /* ---- draw super debugger --------------------------------------------- */
 
     if (core.flag.super_debug)
-        super_debugger_draw(render->size);
-
-    fsl_ui_stop();
+        super_debugger_draw(render->size, fbo_p[FBO_HUD].fbo);
 
     /* ---- post processing ------------------------------------------------- */
 
     glDisable(GL_DEPTH_TEST);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo_p[FBO_POST_PROCESSING].fbo);
-    glUseProgram(fsl_shader_p[FSL_SHADER_INDEX_UNIT_QUAD].asset.id);
-    glBindVertexArray(fsl_mesh_unit_quad.vao);
-    glBindTexture(GL_TEXTURE_2D, fbo_p[FBO_SKYBOX].color_buf);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-    glBindTexture(GL_TEXTURE_2D, fbo_p[FBO_WORLD].color_buf);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-    glBindTexture(GL_TEXTURE_2D, fbo_p[FBO_HUD].color_buf);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-    fsl_fbo_blit(fbo_p[FBO_POST_PROCESSING].fbo);
-
-    /* ---- final ----------------------------------------------------------- */
-
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(shader_p[SHADER_POST_PROCESSING].asset.id);
     glClear(GL_COLOR_BUFFER_BIT);
-    glBindVertexArray(fsl_mesh_unit_quad.vao);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fbo_p[FBO_SKYBOX].color_buf);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, g_buf.color_buf_pos);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, g_buf.color_buf_normal);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, g_buf.color_buf_albedo_specular);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, fbo_p[FBO_HUD].color_buf);
+
+    glUniform1i(uniform.post_processing.texture_skybox, 0);
+    glUniform1i(uniform.post_processing.texture_world_pos, 1);
+    glUniform1i(uniform.post_processing.texture_world_normal, 2);
+    glUniform1i(uniform.post_processing.texture_world_albedo_specular, 3);
+    glUniform1i(uniform.post_processing.texture_hud, 4);
     glUniform1ui(uniform.post_processing.time, ((u32)(render->time) & 0x1ff) + 1);
-    glBindTexture(GL_TEXTURE_2D, fbo_p[FBO_POST_PROCESSING].color_buf);
+    glUniformMatrix4fv(uniform.post_processing.mat_projection, 1, GL_FALSE,
+            (GLfloat*)&player.camera.projection.projection);
+    glUniform1f(uniform.post_processing.camera_far, player.camera.far);
+    glUniform1f(uniform.post_processing.camera_near, player.camera.near);
+    glUniform3fv(uniform.post_processing.ssao_sample, 64, (GLfloat*)ssao_buf.sample);
+
+    glBindVertexArray(fsl_mesh_unit_quad.vao);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
     glBindVertexArray(0);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -880,10 +1002,9 @@ section_menu_title:
         gui_menu_title_draw();
 
         if (core.flag.super_debug)
-            super_debugger_draw(render->size);
+            super_debugger_draw(render->size, 0);
 
         fsl_ui_stop();
-        fsl_fbo_blit(0);
 
         if (core.request.world_load)
         {
@@ -902,10 +1023,9 @@ section_menu_pause:
         gui_menu_pause_draw();
 
         if (core.flag.super_debug)
-            super_debugger_draw(render->size);
+            super_debugger_draw(render->size, 0);
 
         fsl_ui_stop();
-        fsl_fbo_blit(0);
 
         if (core.request.menu_title_enter)
         {

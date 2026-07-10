@@ -268,6 +268,7 @@ b8 fsl_engine_running(void (*callback_framebuffer_size)(i32 size_x, i32 size_y))
     if (!time_last)
         time_last = render_internal.time;
     render_internal.time_delta = render_internal.time - time_last;
+    render_internal.time_delta_f = (f64)render_internal.time_delta * FSL_NSEC2SEC;
     time_last = render_internal.time;
 
     glfwSwapBuffers(render_internal.window);

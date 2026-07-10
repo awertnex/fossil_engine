@@ -1,6 +1,7 @@
 #include "deps/fossil/common/types.h"
 #include "deps/fossil/assets/asset_types.h"
 #include "deps/fossil/assets/mesh/mesh.h"
+#include "deps/fossil/math/math.h"
 #include "deps/fossil/memory/memory.h"
 #include "deps/fossil/shaders/shader_types.h"
 
@@ -48,11 +49,6 @@ hhc_chunk_gizmo chunk_gizmo_loaded = {0};
  *  @brief buffer data for transparent chunk colors.
  */
 hhc_chunk_gizmo chunk_gizmo_visible = {0};
-
-/* ---- section: signatures ------------------------------------------------- */
-
-static void chunk_debug_scheduler_visualizer_draw_internal(const fsl_camera *camera,
-        f32 color_r, f32 color_g, f32 color_b, f32 color_a);
 
 /* ---- section: implementation --------------------------------------------- */
 
@@ -135,9 +131,9 @@ void chunk_debug_chunk_gizmo_draw(const fsl_camera *camera)
     v3f32 camera_position = {0};
 
     transform = camera->projection.projection;
-    transform = fsl_matrix_multiply(camera->projection.orientation, transform);
-    transform = fsl_matrix_multiply(camera->projection.rotation, transform);
-    transform = fsl_matrix_multiply(camera->projection.target, transform);
+    transform = fsl_multiply_m4f32(camera->projection.orientation, transform);
+    transform = fsl_multiply_m4f32(camera->projection.rotation, transform);
+    transform = fsl_multiply_m4f32(camera->projection.target, transform);
 
     glUseProgram(shader_p[SHADER_GIZMO_CHUNK].asset.id);
 
@@ -229,43 +225,54 @@ void chunk_debug_chunk_gizmo_write_internal(hhc_chunk *chunk)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void chunk_debug_scheduler_visualizer_draw(const fsl_camera *camera, f32 opacity)
-{
-    chunk_debug_scheduler_visualizer_draw_internal(camera, 0.9f, 0.6f, 0.3f, opacity);
-}
-
-static void chunk_debug_scheduler_visualizer_draw_internal(const fsl_camera *camera,
-        f32 color_r, f32 color_g, f32 color_b, f32 color_a)
+void chunk_debug_scheduler_visualizer_draw(const fsl_camera *camera)
 {
     fsl_mesh *mesh_p = fsl_mem_handle_get(mesh);
+    u32 i = 0;
     hhc_chunk *chunk = NULL;
-    u32 pop = chunk_sched.cursor_pop;
-    u32 count = chunk_sched.count;
-    u32 len = chunk_order.chunks_max;
+    hhc_chunk_bucket bucket = {0};
+    u32 bucket_end = 0;
+    u32 distance = 0;
+    f32 distance_normalized = 0.0f;
+    v4f32 color = {0};
+
+    distance = chunk_sphere_radius_get_internal(settings.render_distance);
 
     glClear(GL_DEPTH_BUFFER_BIT);
+    glBindVertexArray(mesh_p[MESH_CUBE_OF_HAPPINESS].vao);
     glUniformMatrix4fv(uniform.bounding_box.mat_perspective, 1, GL_FALSE,
             (GLfloat*)&camera->projection.perspective);
     glUniform3f(uniform.bounding_box.size,
             CHUNK_DIAMETER, CHUNK_DIAMETER, CHUNK_DIAMETER);
 
-    while (count--)
+    for (; i < chunk_sched.buckets_max; ++i)
     {
-        chunk = chunk_sched.p[pop];
-        if (!chunk)
-            continue;
+        bucket = chunk_sched.bucket[i];
 
-        glUniform3f(uniform.bounding_box.position,
-                (f32)(chunk->pos_world.x * CHUNK_DIAMETER),
-                (f32)(chunk->pos_world.y * CHUNK_DIAMETER),
-                (f32)(chunk->pos_world.z * CHUNK_DIAMETER));
+        if (bucket.count)
+        {
+            bucket_end = bucket.pos + bucket.len;
+            do
+            {
+                chunk = chunk_sched.p[bucket.pop];
 
-        glUniform4f(uniform.bounding_box.color, color_r, color_g, color_b, color_a);
-        glBindVertexArray(mesh_p[MESH_CUBE_OF_HAPPINESS].vao);
-        glDrawElements(GL_LINE_STRIP, 24, GL_UNSIGNED_INT, 0);
+                distance_normalized = (f32)chunk->cpi / distance;
+                color.x = fsl_map_range_f32(distance_normalized, 0.0f, 1.0f, 0.3f, 0.9f);
+                color.y = fsl_map_range_f32(distance_normalized, 0.0f, 1.0f, 0.9f, 0.3f);
+                color.z = fsl_map_range_f32(distance_normalized, 0.0f, 1.0f, 0.3f, 0.3f);
+                color.w = fsl_map_range_f32(distance_normalized, 0.0f, 1.0f, 1.0f, 0.3f);
 
-        ++pop;
-        if (pop >= len)
-            pop = 0;
+                glUniform3f(uniform.bounding_box.position,
+                        (f32)(chunk->pos_world.x * CHUNK_DIAMETER),
+                        (f32)(chunk->pos_world.y * CHUNK_DIAMETER),
+                        (f32)(chunk->pos_world.z * CHUNK_DIAMETER));
+                glUniform4fv(uniform.bounding_box.color, 1, (GLfloat*)&color);
+                glDrawElements(GL_LINE_STRIP, 24, GL_UNSIGNED_INT, 0);
+
+                ++bucket.pop;
+                if (bucket.pop >= bucket_end)
+                    bucket.pop = bucket.pos;
+            } while (bucket.pop != bucket.push);
+        }
     }
 }

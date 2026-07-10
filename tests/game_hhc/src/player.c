@@ -5,6 +5,7 @@
 #include "deps/fossil/math/vector.h"
 #include "deps/fossil/memory/memory.h"
 #include "deps/fossil/physics/collision.h"
+#include "deps/fossil/physics/transform.h"
 
 #include "deps/fossil/h/time.h"
 
@@ -47,12 +48,20 @@ u32 player_init(hhc_player *p, const str *name)
     p->size.x = 0.6f;
     p->size.y = 0.6f;
     p->size.z = 1.8f;
-    p->transform.scale.x = 1.0f;
-    p->transform.scale.y = 1.0f;
-    p->transform.scale.z = 1.0f;
+    p->transform.scale.x = 1.0;
+    p->transform.scale.y = 1.0;
+    p->transform.scale.z = 1.0;
     p->eye_height = PLAYER_EYE_HEIGHT;
-    p->camera_mode = PLAYER_CAMERA_MODE_1ST_PERSON;
+
+    p->physics_material =
+        fsl_physics_material_init(PLAYER_FRICTION_DEFAULT, PLAYER_FRICTION_DEFAULT, 0.0,
+                0.0 ,0.0, 0.0, 0.0);
+    p->kn_forces.acceleration_rate = 1.0;
+
+    fsl_kinematics_mass_set(&p->kn_forces, 1.0);
+    fsl_kinematics_mass_set(&p->kn, 1.0);
     p->camera_distance = SET_CAMERA_DISTANCE_MAX;
+    p->camera_mode = PLAYER_CAMERA_MODE_1ST_PERSON;
 
     p->menu_state = 0;
     p->hotbar_slots[0].id = BLOCK_GRASS;
@@ -91,55 +100,54 @@ u32 player_init(hhc_player *p, const str *name)
 
 void player_update(hhc_player *p, f64 dt)
 {
-    v3f32 gravity = {0};
-    v3f32 drag = {0};
-    v3f32 damping = {0};
-    v3f32 nov3f32 = {0};
+    fsl_collision_info nocollision_info = {0};
 
     p->flag &= ~FLAG_PLAYER_CAN_JUMP;
-    p->acceleration = nov3f32;
-    p->acceleration_rate = PLAYER_ACCELERATION_WALK;
+    p->kn.acceleration_rate = PLAYER_ACCELERATION_WALK;
+    p->collision_info = nocollision_info;
     p->camera.fovy = settings.fov;
 
     /* ---- player flags ---------------------------------------------------- */
 
     if (p->flag & FLAG_PLAYER_FLYING)
     {
-        p->acceleration_rate = PLAYER_ACCELERATION_FLY;
+        p->kn_forces.acceleration.z = 0.0;
+        p->kn_forces.velocity.z = 0.0;
+        p->kn.acceleration_rate = PLAYER_ACCELERATION_FLY;
 
         if (p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
         {
-            drag.x = PLAYER_FRICTION_FLY_NATURAL;
-            drag.y = PLAYER_FRICTION_FLY_NATURAL;
-            drag.z = PLAYER_FRICTION_FLY_NATURAL;
+            p->physics_material.drag.x = PLAYER_DRAG_FLY_NATURAL;
+            p->physics_material.drag.y = PLAYER_DRAG_FLY_NATURAL;
+            p->physics_material.drag.z = PLAYER_DRAG_FLY_NATURAL;
         }
         else
         {
-            drag.x = PLAYER_FRICTION_FLYING;
-            drag.y = PLAYER_FRICTION_FLYING;
-            drag.z = PLAYER_FRICTION_FLYING_V;
+            p->physics_material.drag.x = PLAYER_DRAG_FLYING;
+            p->physics_material.drag.y = PLAYER_DRAG_FLYING;
+            p->physics_material.drag.z = PLAYER_DRAG_FLYING_V;
         }
 
         p->camera.fovy += 10.0f;
 
         if (p->flag & FLAG_PLAYER_SPRINTING)
         {
-            p->acceleration_rate = PLAYER_ACCELERATION_FLY_FAST;
+            p->kn.acceleration_rate = PLAYER_ACCELERATION_FLY_FAST;
             p->camera.fovy += 10.0f;
         }
     }
     else
     {
-        gravity.z -= world.gravity;
-        drag.x = PLAYER_FRICTION_DEFAULT;
-        drag.y = PLAYER_FRICTION_DEFAULT;
-        drag.z = PLAYER_FRICTION_DEFAULT;
+        p->kn_forces.acceleration.z = world.gravity.z;
+        p->physics_material.drag.x = PLAYER_DRAG_DEFAULT;
+        p->physics_material.drag.y = PLAYER_DRAG_DEFAULT;
+        p->physics_material.drag.z = 0.0;
 
         if (p->flag & FLAG_PLAYER_SNEAKING)
-            p->acceleration_rate = PLAYER_ACCELERATION_SNEAK;
+            p->kn.acceleration_rate = PLAYER_ACCELERATION_SNEAK;
         else if (p->flag & FLAG_PLAYER_SPRINTING)
         {
-            p->acceleration_rate = PLAYER_ACCELERATION_SPRINT;
+            p->kn.acceleration_rate = PLAYER_ACCELERATION_SPRINT;
             p->camera.fovy += 5.0f;
         }
     }
@@ -147,30 +155,11 @@ void player_update(hhc_player *p, f64 dt)
     if (p->flag & FLAG_PLAYER_ZOOMER && p->camera.zoom)
         p->camera.fovy = settings.fov - p->camera.zoom;
 
-    /* ---- apply parameters ------------------------------------------------ */
+    fsl_kinematics_update_v3f64(&p->transform.pos, p->kn_forces.acceleration, &p->kn_forces, &world.physics_material, dt);
+    fsl_kinematics_update_v3f64(&p->transform.pos, p->force, &p->kn, &p->physics_material, dt);
 
-    damping.x = -(world.drag.x) * p->velocity.x;
-    damping.y = -(world.drag.y) * p->velocity.y;
-    damping.z = -(world.drag.z) * p->velocity.z;
-
-    p->acceleration.x = p->input.x * p->acceleration_rate * drag.x;
-    p->acceleration.y = p->input.y * p->acceleration_rate * drag.y;
-    p->acceleration.z = p->input.z * p->acceleration_rate * drag.z;
-
-    p->velocity.x += (p->acceleration.x + damping.x + gravity.x) * dt;
-    p->velocity.y += (p->acceleration.y + damping.y + gravity.y) * dt;
-    p->velocity.z += (p->acceleration.z + damping.z + gravity.z) * dt;
-
-    p->transform.pos.x += p->velocity.x * dt;
-    p->transform.pos.y += p->velocity.y * dt;
-    p->transform.pos.z += p->velocity.z * dt;
-
-    p->friction.x = 0.0f;
-    p->friction.y = 0.0f;
-
-    p->speed = sqrtf(fsl_len_v3f32(p->velocity));
-    if (p->speed > FSL_EPSILON)
-        p->camera.fovy += p->speed * 0.03f;
+    if (p->kn.speed + p->kn_forces.speed > FSL_EPSILON)
+        p->camera.fovy += (p->kn.speed + p->kn_forces.speed) * 0.03f;
     p->camera.fovy = fsl_clamp_f32(p->camera.fovy, 1.0f, SET_FOV_MAX);
     p->camera.fovy_smooth = fsl_lerp_exp_f32(p->camera.fovy_smooth, p->camera.fovy,
                 SET_LERP_SPEED_FOV_MODE, dt);
@@ -189,17 +178,28 @@ void player_hotbar_selected_set(hhc_player *p, u32 index)
             0, 0, 0, 0, p->hotbar_slot_selected * 17 - 1, -1);
 }
 
+void player_hotbar_selected_advance(hhc_player *p, i32 delta)
+{
+    i32 index = p->hotbar_slot_selected + delta;
+
+    if (index >= CONTAINER_HOTBAR_SLOTS_MAX)
+        index = 0;
+    else if (index < 0)
+        index = CONTAINER_HOTBAR_SLOTS_MAX - 1;
+
+    player_hotbar_selected_set(p, index);
+}
+
+
 void player_collision_update(hhc_player *p, f64 dt)
 {
     hhc_chunk *ch = NULL;
     hhc_block *block_p = fsl_mem_handle_get(blocks);
     u32 *block = NULL;
-    f32 speed;
-    v3f32 displacement = {0};
-    f32 time = 0.0f;
-    v3f32 normal = {0};
-    f32 dot = 0.0f;
-    f32 friction = 0.0f;
+    f64 speed;
+    v3f64 velocity = {0};
+    v3f64 displacement = {0};
+    fsl_physics_material *block_physics_material = NULL;
     fsl_bounding_box block_box = {0};
     fsl_bounding_box collision_capsule = {0};
     i32 i = 0;
@@ -213,9 +213,12 @@ void player_collision_update(hhc_player *p, f64 dt)
     b8 resolved = TRUE;
     u32 max_axis = 0;
 
-    displacement.x = p->velocity.x * dt;
-    displacement.y = p->velocity.y * dt;
-    displacement.z = p->velocity.z * dt;
+    velocity.x = p->kn_forces.velocity.x + p->kn.velocity.x;
+    velocity.y = p->kn_forces.velocity.y + p->kn.velocity.y;
+    velocity.z = p->kn_forces.velocity.z + p->kn.velocity.z;
+    displacement.x = velocity.x * dt;
+    displacement.y = velocity.y * dt;
+    displacement.z = velocity.z * dt;
     collision_capsule = make_collision_capsule(p->bbox, p->ch, displacement);
     MIN.x = (i32)collision_capsule.pos.x;
     MIN.y = (i32)collision_capsule.pos.y;
@@ -224,21 +227,21 @@ void player_collision_update(hhc_player *p, f64 dt)
     MAX.y = (i32)(collision_capsule.pos.y + collision_capsule.size.y);
     MAX.z = (i32)(collision_capsule.pos.z + collision_capsule.size.z);
 
-    if (p->velocity.x < 0.0f)
+    if (velocity.x < 0.0)
     {
         START.x = MAX.x - 1;
         INCREMENT.x = -1;
     }
     else START.x = MIN.x;
 
-    if (p->velocity.y < 0.0f)
+    if (velocity.y < 0.0)
     {
         START.y = MAX.y - 1;
         INCREMENT.y = -1;
     }
     else START.y = MIN.y;
 
-    if (p->velocity.z < 0.0f)
+    if (velocity.z < 0.0)
     {
         START.z = MAX.z - 1;
         INCREMENT.z = -1;
@@ -272,66 +275,67 @@ void player_collision_update(hhc_player *p, f64 dt)
                     block_box.size.y = 1.0;
                     block_box.size.z = 1.0;
 
-                    time = fsl_get_swept_aabb(p->bbox, block_box, displacement, &normal);
+                    p->collision_info = fsl_get_swept_aabb(p->bbox, block_box, displacement);
 
-                    if (/* fsl_is_in_range_f32(time, 0.0f, 1.0f) || */
-                            fsl_is_intersect_aabb(p->bbox, block_box))
+                    if (p->collision_info.hit)
                     {
                         /* ---- resolution ---------------------------------- */
 
-                        p->transform.pos.x += displacement.x * time +
-                            normal.x * FSL_COLLISION_EPSILON;
+                        p->transform.pos.x += displacement.x * p->collision_info.entry_time +
+                            p->collision_info.normal.x * FSL_COLLISION_EPSILON;
 
-                        p->transform.pos.y += displacement.y * time +
-                            normal.y * FSL_COLLISION_EPSILON;
+                        p->transform.pos.y += displacement.y * p->collision_info.entry_time +
+                            p->collision_info.normal.y * FSL_COLLISION_EPSILON;
 
-                        p->transform.pos.z += displacement.z * time +
-                            normal.z * FSL_COLLISION_EPSILON;
+                        p->transform.pos.z += displacement.z * p->collision_info.entry_time +
+                            p->collision_info.normal.z * FSL_COLLISION_EPSILON;
 
-                        dot = fsl_dot_v3f32(displacement, normal);
-                        if (dot < 0.0f)
+                        if (p->collision_info.dot < 0.0)
                         {
-                            displacement.x -= dot * normal.x;
-                            displacement.y -= dot * normal.y;
-                            displacement.z -= dot * normal.z;
+                            displacement.x *= p->collision_info.mask.x;
+                            displacement.y *= p->collision_info.mask.y;
+                            displacement.z *= p->collision_info.mask.z;
+
+                            p->kn_forces.velocity.x *= p->collision_info.mask.x;
+                            p->kn_forces.velocity.y *= p->collision_info.mask.y;
+                            p->kn_forces.velocity.z *= p->collision_info.mask.z;
+                            p->kn.velocity.x *= p->collision_info.mask.x;
+                            p->kn.velocity.y *= p->collision_info.mask.y;
+                            p->kn.velocity.z *= p->collision_info.mask.z;
                         }
 
-                        p->transform.pos.x -= displacement.x * time;
-                        p->transform.pos.y -= displacement.y * time;
-                        p->transform.pos.z -= displacement.z * time;
+                        p->transform.pos.x -= displacement.x * p->collision_info.entry_time;
+                        p->transform.pos.y -= displacement.y * p->collision_info.entry_time;
+                        p->transform.pos.z -= displacement.z * p->collision_info.entry_time;
 
-                        p->velocity.x = displacement.x / dt;
-                        p->velocity.y = displacement.y / dt;
-                        p->velocity.z = displacement.z / dt;
-
-                        if (normal.z > 0.0f)
+                        if (p->collision_info.normal.z > 0.0)
                         {
                             if (!(p->flag & FLAG_PLAYER_CINEMATIC_MOTION))
                                 p->flag &= ~FLAG_PLAYER_FLYING;
                             p->flag |= FLAG_PLAYER_CAN_JUMP;
 
-                            friction = block_p[GET_BLOCK_ID(*block)].friction;
-                            p->friction.x = friction;
-                            p->friction.y = friction;
+                            block_physics_material = &block_p[GET_BLOCK_ID(*block)].physics_material;
                         }
 
                         player_bounding_box_update(p);
 
-                        speed = p->speed;
-                        p->speed = sqrtf(fsl_len_v3f32(p->velocity));
+                        speed = p->kn_forces.speed + p->kn.speed;
+                        p->kn_forces.speed = sqrt(fsl_len_v3f64(p->kn_forces.velocity));
+                        p->kn.speed = sqrt(fsl_len_v3f64(p->kn.velocity));
 #if MODE_INTERNAL_DIE
-                        if (speed - p->speed > PLAYER_COLLISION_DAMAGE_THRESHOLD)
+                        speed -= p->kn_forces.speed + p->kn.speed;
+                        if (speed > PLAYER_COLLISION_DAMAGE_THRESHOLD)
                         {
-                            p->health -= (speed - p->speed);
+                            p->health -= speed;
 
-                            if (p->health <= 0.0f && !(p->flag & FLAG_PLAYER_DEAD))
+                            if (p->health <= 0.0 && !(p->flag & FLAG_PLAYER_DEAD))
                             {
-                                max_axis = fsl_max_axis_v3f32(normal);
+                                max_axis = fsl_max_axis_v3f64(p->collision_info.normal);
                                 if (max_axis == 1 || max_axis == 2)
                                     p->death = PLAYER_DEATH_REASON_COLLISION_WALL;
                                 else if (max_axis == 3)
                                 {
-                                    if (normal.z > 0.0f)
+                                    if (p->collision_info.normal.z > 0.0)
                                         p->death = PLAYER_DEATH_REASON_COLLISION_FLOOR;
                                     else
                                         p->death = PLAYER_DEATH_REASON_COLLISION_CEILING;
@@ -352,72 +356,58 @@ void player_collision_update(hhc_player *p, f64 dt)
 
 void player_bounding_box_update(hhc_player *p)
 {
-    if (p->flag & FLAG_PLAYER_FLYING && p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
-    {
-        p->bbox.pos.x = p->transform.pos.x - p->size.x * 0.5f;
-        p->bbox.pos.y = p->transform.pos.y - p->size.x * 0.5f; /* `size.x` here to link 'x' and 'y' to one size */
-        p->bbox.pos.z = p->transform.pos.z + p->eye_height - p->size.x * 0.5f;
-
-        /* size for all axes is `size.x` intentionally because we want cube bbox */
-        p->bbox.size.x = p->size.x;
-        p->bbox.size.y = p->size.x;
-        p->bbox.size.z = p->size.x;
-    }
-    else
-    {
-        p->bbox.pos.x = p->transform.pos.x - p->size.x * 0.5f;
-        p->bbox.pos.y = p->transform.pos.y - p->size.y * 0.5f;
-        p->bbox.pos.z = p->transform.pos.z;
-        p->bbox.size.x = p->size.x;
-        p->bbox.size.y = p->size.y;
-        p->bbox.size.z = p->size.z;
-    }
+    p->bbox.pos.x = p->transform.pos.x - p->size.x * 0.5f;
+    p->bbox.pos.y = p->transform.pos.y - p->size.y * 0.5f;
+    p->bbox.pos.z = p->transform.pos.z;
+    p->bbox.size.x = p->size.x;
+    p->bbox.size.y = p->size.y;
+    p->bbox.size.z = p->size.z;
 }
 
-fsl_bounding_box make_collision_capsule(fsl_bounding_box b, v3i32 ch, v3f32 velocity)
+fsl_bounding_box make_collision_capsule(fsl_bounding_box b, v3i32 ch, v3f64 velocity)
 {
-    const f32 PADDING = 1.0f;
+    const f64 PADDING = 1.0f;
     v3f64 pos = {0};
     v3f64 size = {0};
-    v3f32 delta = {0};
+    v3f64 delta = {0};
     fsl_bounding_box result = {0};
 
     if (velocity.x > 0.0f)
     {
         pos.x = b.pos.x - b.size.x * 0.5f - PADDING;
-        delta.x = (f32)(pos.x - ceil(pos.x));
+        delta.x = (pos.x - ceil(pos.x));
         size.x = b.size.x + velocity.x + delta.x + PADDING * 2.0f + 1.0f;
     }
     else
     {
         pos.x = b.pos.x + velocity.x - b.size.x * 0.5f - PADDING;
-        delta.x = (f32)(pos.x - ceil(pos.x));
+        delta.x = (pos.x - ceil(pos.x));
         size.x = b.size.x - velocity.x + delta.x + PADDING * 2.0f + 1.0f;
     }
 
     if (velocity.y > 0.0f)
     {
         pos.y = b.pos.y - b.size.y * 0.5f - PADDING;
-        delta.y = (f32)(pos.y - ceil(pos.y));
+        delta.y = (pos.y - ceil(pos.y));
         size.y = b.size.y + velocity.y + delta.y + PADDING * 2.0f + 1.0f;
     }
     else
     {
         pos.y = b.pos.y + velocity.y - b.size.y * 0.5f - PADDING;
-        delta.y = (f32)(pos.y - ceil(pos.y));
+        delta.y = (pos.y - ceil(pos.y));
         size.y = b.size.y - velocity.y + delta.y + PADDING * 2.0f + 1.0f;
     }
 
     if (velocity.z > 0.0f)
     {
         pos.z = b.pos.z - PADDING;
-        delta.z = (f32)(pos.z - ceil(pos.z));
+        delta.z = (pos.z - ceil(pos.z));
         size.z = b.size.z + velocity.z + delta.z + PADDING * 2.0f + 1.0f;
     }
     else
     {
         pos.z = b.pos.z + velocity.z - PADDING;
-        delta.z = (f32)(pos.z - ceil(pos.z));
+        delta.z = (pos.z - ceil(pos.z));
         size.z = b.size.z - velocity.z + delta.z + PADDING * 2.0f + 1.0f;
     }
 
@@ -451,7 +441,7 @@ static void player_world_overflow_update(hhc_player *p)
         (f64)(WORLD_DIAMETER_VERTICAL * CHUNK_DIAMETER)
     };
 
-    if (!fsl_is_in_volume_f64(p->transform.pos, world_volume_min, world_volume_max))
+    if (!fsl_is_in_bounds_v3f64(p->transform.pos, world_volume_min, world_volume_max))
         player_spawn(p, FALSE);
 
     /* ---- world margin tagging -------------------------------------------- */
@@ -657,17 +647,20 @@ void player_set_pos(hhc_player *p, f64 x, f64 y, f64 z)
     p->transform.pos.x = x;
     p->transform.pos.y = y;
     p->transform.pos.z = z;
-    p->velocity.x = 0.0;
-    p->velocity.y = 0.0;
-    p->velocity.z = 0.0;
+    p->kn.velocity.x = 0.0;
+    p->kn.velocity.y = 0.0;
+    p->kn.velocity.z = 0.0;
+    p->kn_forces.velocity.x = 0.0;
+    p->kn_forces.velocity.y = 0.0;
+    p->kn_forces.velocity.z = 0.0;
     p->transform_last.pos = p->transform.pos;
 }
 
 void player_set_block(hhc_player *p, i64 x, i64 y, i64 z)
 {
-    p->transform.pos.x = (f64)x + 0.5f;
-    p->transform.pos.y = (f64)y + 0.5f;
-    p->transform.pos.z = (f64)z + 0.5f;
+    p->transform.pos.x = (f64)x + 0.5;
+    p->transform.pos.y = (f64)y + 0.5;
+    p->transform.pos.z = (f64)z + 0.5;
     p->transform_last.pos = p->transform.pos;
 }
 
@@ -681,24 +674,79 @@ void player_set_spawn(hhc_player *p, i64 x, i64 y, i64 z)
 void player_spawn(hhc_player *p, b8 hard)
 {
     player_set_pos(p,
-            p->spawn.x + 0.5f,
-            p->spawn.y + 0.5f,
-            p->spawn.z + 0.5f);
+            p->spawn.x + 0.5,
+            p->spawn.y + 0.5,
+            p->spawn.z + 0.5);
 
     if (hard)
     {
-        p->health = 100.0f;
+        p->health = 100.0;
         p->flag &= ~(FLAG_PLAYER_FLYING | FLAG_PLAYER_HUNGRY | FLAG_PLAYER_DEAD);
+    }
+}
+
+void player_toggle_flying(hhc_player *p)
+{
+    p->flag ^= FLAG_PLAYER_FLYING;
+
+    if (p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
+    {
+        if (p->flag & FLAG_PLAYER_FLYING)
+        {
+            p->transform.pos.z += PLAYER_EYE_HEIGHT - p->size.x / 2.0;
+            p->size.z = p->size.x;
+            p->eye_height = p->size.x / 2.0f;
+        }
+        else
+        {
+            p->transform.pos.z -= PLAYER_EYE_HEIGHT - p->size.x / 2.0;
+            p->size.z = 1.8f;
+            p->eye_height = PLAYER_EYE_HEIGHT;
+        }
+        p->transform.scale.z = p->size.z / 1.8;
+    }
+}
+
+void player_toggle_cinematic_motion(hhc_player *p)
+{
+    p->flag ^= FLAG_PLAYER_CINEMATIC_MOTION;
+
+    if (p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
+        LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                "Cinematic Motion Toggled On\n");
+    else
+        LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
+                "Cinematic Motion Toggled Off\n");
+
+    if (p->flag & FLAG_PLAYER_FLYING)
+    {
+        if (p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
+        {
+            p->transform.pos.z += PLAYER_EYE_HEIGHT - p->size.x / 2.0;
+            p->size.z = p->size.x;
+            p->eye_height = p->size.x / 2.0f;
+        }
+        else
+        {
+            p->transform.pos.z -= PLAYER_EYE_HEIGHT - p->size.x / 2.0;
+            p->size.z = 1.8f;
+            p->eye_height = PLAYER_EYE_HEIGHT;
+        }
+        p->transform.scale.z = p->size.z / 1.8;
     }
 }
 
 void player_kill(hhc_player *p)
 {
-    p->health = 0.0f;
+    p->health = 0.0;
     p->flag |= FLAG_PLAYER_DEAD;
     p->flag &= ~FLAG_PLAYER_CAN_JUMP;
-    p->flag &= ~FLAG_PLAYER_FLYING;
-    p->flag &= ~FLAG_PLAYER_CINEMATIC_MOTION;
+
+    if (p->flag & FLAG_PLAYER_FLYING)
+        player_toggle_cinematic_motion(p);
+
+    if (p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
+        player_toggle_cinematic_motion(p);
 
     player_spawn(p, TRUE);
 

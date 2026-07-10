@@ -9,6 +9,17 @@
 
 ## v0.15.0-dev (current)
 
+#### changes
+- re-wrote math library to include implementations of all math functions for all math types.
+- changed all matrix functions names from 'fsl_matrix_*' to 'fsl_*_<type>'.
+- changed function `fsl_get_swept_aabb()` from floats to doubles.
+
+#### additions
+- added model asset-type.
+- added model transform baking and model drawing with textures.
+- added engine prefix to transform types.
+- added kinematics types and functions, and physics materials.
+
 #### known bugs and flaws
 - the 'obj' loader possibly has a bug due to hash-table collisions:
     - sometimes faces disappear when ordered in specific ways in the obj file.
