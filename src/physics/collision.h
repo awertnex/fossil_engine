@@ -40,11 +40,11 @@ struct fsl_bounding_box
 struct fsl_collision_info
 {
     v3f64 normal;           /* collision surface normal */
-    v3f64 mask;             /* velocity/displacement mask vector after collision */
     f64 entry_time;
     f64 exit_time;
     f64 dot;
     b8 hit;
+    b8 slide;
 }; /* fsl_collision_info */
 
 FSLAPI b8 fsl_is_intersect_aabb(fsl_bounding_box a, fsl_bounding_box b);

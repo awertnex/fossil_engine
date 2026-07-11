@@ -145,6 +145,7 @@ void input_update(hhc_player *p)
     f64 syaw = sin(p->transform.rot.z * FSL_DEG2RAD);
     f64 cyaw = cos(p->transform.rot.z * FSL_DEG2RAD);
 
+    p->kn_forces[ENTITY_KINEMATICS_CONTROL].acceleration.z = 0.0;
     p->force.x = 0.0;
     p->force.y = 0.0;
     p->force.z = 0.0;
@@ -169,7 +170,8 @@ void input_update(hhc_player *p)
                 pz += 1.0;
             else if (p->flag & FLAG_PLAYER_CAN_JUMP)
             {
-                p->kn.velocity.z += sqrt(2.0 * -world.gravity.z * PLAYER_JUMP_HEIGHT);
+                p->kn_forces[ENTITY_KINEMATICS_CONTROL].velocity.z +=
+                    sqrt(2.0 * -world.gravity.z * p->kn.mass * PLAYER_JUMP_HEIGHT);
                 p->flag &= ~FLAG_PLAYER_CAN_JUMP;
             }
         }

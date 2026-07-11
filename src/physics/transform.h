@@ -50,17 +50,26 @@ FSLAPI fsl_physics_material fsl_physics_material_init(f64 friction_x, f64 fricti
     f64 drag_x, f64 drag_y, f64 drag_z, f64 bounciness);
 
 /*!
- *  @brief modify `kn` as per physics material `mat`.
+ *  @brief apply a force to `kn` as per physics material `mat`.
  *
- *  @param pos position to modify.
  *  @param force raw input force, for acceleration.
+ *  @param mass_inv inverse of mass to scale final velocity by.
  */
-FSLAPI void fsl_kinematics_update_v3f64(v3f64 *pos, fsl_physics_force force, fsl_kinematics *kn,
-        const fsl_physics_material *mat, f64 delta_time);
+FSLAPI void fsl_kinematics_update_v3f64(fsl_kinematics *kn, fsl_physics_force force,
+        const fsl_physics_material *mat, f64 mass_inv, f64 delta_time);
 
 /*!
- *  @brief set mass for `kn` and its inverse for internal use.
+ *  @brief set mass for `kn` and store its inverse for internal use.
  */
 FSLAPI void fsl_kinematics_mass_set(fsl_kinematics *kn, f64 mass);
+
+/*!
+ *  @brief get total velocity from all velocities in array `kn`.
+ *
+ *  @param len length of array `kn`.
+ *
+ *  @return total velocity.
+ */
+FSLAPI v3f64 fsl_kinematics_velocity_get(const fsl_kinematics *kn, u64 len);
 
 #endif /* FSL_PHYSICS_TRANSFORM_H */

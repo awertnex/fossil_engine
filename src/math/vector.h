@@ -475,11 +475,4 @@ FSLAPI f64 fsl_dot_v2f64(v2f64 a, v2f64 b);
 FSLAPI f64 fsl_dot_v3f64(v3f64 a, v3f64 b);
 FSLAPI f64 fsl_dot_v4f64(v4f64 a, v4f64 b);
 
-FSLAPI v2f32 fsl_slide_mask_v2f32(v2f32 a, v2f32 b);
-FSLAPI v3f32 fsl_slide_mask_v3f32(v3f32 a, v3f32 b);
-FSLAPI v4f32 fsl_slide_mask_v4f32(v4f32 a, v4f32 b);
-FSLAPI v2f64 fsl_slide_mask_v2f64(v2f64 a, v2f64 b);
-FSLAPI v3f64 fsl_slide_mask_v3f64(v3f64 a, v3f64 b);
-FSLAPI v4f64 fsl_slide_mask_v4f64(v4f64 a, v4f64 b);
-
 #endif /* FSL_MATH_VECTOR_H */

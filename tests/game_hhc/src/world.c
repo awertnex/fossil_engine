@@ -199,7 +199,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
 
     world->physics_material = fsl_physics_material_init(0.0, 0.0, 0.0,
                 WORLD_DRAG_AIR, WORLD_DRAG_AIR, WORLD_DRAG_AIR, 0.0);
-    world->gravity.z = -FSL_GRAVITY * 3.0;
+    world->gravity.z = -FSL_GRAVITY;
 
     /* ---- other stuff ----------------------------------------------------- */
 

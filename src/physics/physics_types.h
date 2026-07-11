@@ -82,7 +82,6 @@ typedef struct fsl_kinematics
 {
     v3f64 acceleration;
     v3f64 velocity;
-    f64 acceleration_rate;
     f64 speed;
     f64 mass;
     f64 mass_inv; /* inverse mass */

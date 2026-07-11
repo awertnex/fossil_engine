@@ -14,17 +14,17 @@
 
 #define PLAYER_EYE_HEIGHT           1.55
 #define PLAYER_JUMP_HEIGHT          1.5
-#define PLAYER_ACCELERATION_SNEAK   15.0
-#define PLAYER_ACCELERATION_WALK    30.0
-#define PLAYER_ACCELERATION_SPRINT  50.0
-#define PLAYER_ACCELERATION_FLY     70.0
-#define PLAYER_ACCELERATION_FLY_FAST 140.0
-#define PLAYER_ACCELERATION_MAX     200.0
-#define PLAYER_DRAG_DEFAULT         4.0
-#define PLAYER_DRAG_FLY_NATURAL     1.0
-#define PLAYER_DRAG_FLYING          3.0
-#define PLAYER_DRAG_FLYING_V        7.0
-#define PLAYER_FRICTION_DEFAULT     0.3
+#define PLAYER_ACCELERATION_SNEAK   0.6
+#define PLAYER_ACCELERATION_WALK    1.4
+#define PLAYER_ACCELERATION_SPRINT  2.2
+#define PLAYER_ACCELERATION_FLY     5.0
+#define PLAYER_ACCELERATION_FLY_FAST 16.0
+#define PLAYER_ACCELERATION_MAX     20.0
+#define PLAYER_DRAG_DEFAULT         40.0
+#define PLAYER_DRAG_FLY_NATURAL     5.0
+#define PLAYER_DRAG_FLYING          20.0
+#define PLAYER_DRAG_FLYING_V        30.0
+#define PLAYER_FRICTION_DEFAULT     0.0
 #define PLAYER_COLLISION_DAMAGE_THRESHOLD 15.0
 #define PLAYER_DEATH_STRING_CAP     128
 
@@ -102,6 +102,13 @@ typedef enum hhc_player_menu_state
     STATE_PLAYER_MENU_COUNT
 } hhc_player_menu_state;
 
+enum entity_kinematics_index
+{
+    ENTITY_KINEMATICS_CONTROL,
+    ENTITY_KINEMATICS_ENV,
+    ENTITY_KINEMATICS_COUNT
+}; /* entity_kinematica_index */
+
 typedef struct hhc_player
 {
     str name[64];                   /* in-game name */
@@ -117,8 +124,9 @@ typedef struct hhc_player
 
     fsl_physics_material physics_material;
     fsl_physics_force force;        /* raw input signal */
-    fsl_kinematics kn_forces;       /* outside forces kinematics */
-    fsl_kinematics kn;              /* self forces kinematics */
+    f64 acceleration_rate;
+    fsl_kinematics kn_forces[ENTITY_KINEMATICS_COUNT]; /* forces kinematics */
+    fsl_kinematics kn;              /* final calculated kinematics */
     fsl_collision_info collision_info;
     f64 health;
 

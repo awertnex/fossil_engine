@@ -253,26 +253,35 @@
 
 #define DISTANCE_V2_FUNC_IMPL \
 { \
-    return \
-        (a.x - b.x) * (a.x - b.x) + \
-        (a.y - b.y) * (a.y - b.y); \
+    b.x -= a.x; \
+    b.y -= a.y; \
+    b.x *= b.x; \
+    b.y *= b.y; \
+    return b.x + b.y; \
 }
 
 #define DISTANCE_V3_FUNC_IMPL \
 { \
-    return \
-        (a.x - b.x) * (a.x - b.x) + \
-        (a.y - b.y) * (a.y - b.y) + \
-        (a.z - b.z) * (a.z - b.z); \
+    b.x -= a.x; \
+    b.y -= a.y; \
+    b.z -= a.z; \
+    b.x *= b.x; \
+    b.y *= b.y; \
+    b.z *= b.z; \
+    return b.x + b.y + b.z; \
 }
 
 #define DISTANCE_V4_FUNC_IMPL \
 { \
-    return \
-        (a.x - b.x) * (a.x - b.x) + \
-        (a.y - b.y) * (a.y - b.y) + \
-        (a.z - b.z) * (a.z - b.z) + \
-        (a.w - b.w) * (a.w - b.w); \
+    b.x -= a.x; \
+    b.y -= a.y; \
+    b.z -= a.z; \
+    b.w -= a.w; \
+    b.x *= b.x; \
+    b.y *= b.y; \
+    b.z *= b.z; \
+    b.w *= b.w; \
+    return b.x + b.y + b.z + b.w; \
 }
 
 #define NORMALIZE_V2_FUNC_IMPL(type, sqrt_func, len_func, suffix) \
@@ -336,33 +345,6 @@
 #define DOT_V4_FUNC_IMPL \
 { \
     return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w; \
-}
-
-#define SLIDE_MASK_V2_FUNC_IMPL(suffix) \
-{ \
-    b.x += b.y; \
-    a.x = 1.0##suffix - a.x * b.x; \
-    a.y = 1.0##suffix - a.y * b.x; \
-    return a; \
-}
-
-#define SLIDE_MASK_V3_FUNC_IMPL(suffix) \
-{ \
-    b.x += b.y + b.z; \
-    a.x = 1.0##suffix - a.x * b.x; \
-    a.y = 1.0##suffix - a.y * b.x; \
-    a.z = 1.0##suffix - a.z * b.x; \
-    return a; \
-}
-
-#define SLIDE_MASK_V4_FUNC_IMPL(suffix) \
-{ \
-    b.x += b.y + b.z + b.w; \
-    a.x = 1.0##suffix - a.x * b.x; \
-    a.y = 1.0##suffix - a.y * b.x; \
-    a.z = 1.0##suffix - a.z * b.x; \
-    a.w = 1.0##suffix - a.w * b.x; \
-    return a; \
 }
 
 /* ---- section: matrix ----------------------------------------------------- */

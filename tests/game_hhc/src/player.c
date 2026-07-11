@@ -52,14 +52,7 @@ u32 player_init(hhc_player *p, const str *name)
     p->transform.scale.y = 1.0;
     p->transform.scale.z = 1.0;
     p->eye_height = PLAYER_EYE_HEIGHT;
-
-    p->physics_material =
-        fsl_physics_material_init(PLAYER_FRICTION_DEFAULT, PLAYER_FRICTION_DEFAULT, 0.0,
-                0.0 ,0.0, 0.0, 0.0);
-    p->kn_forces.acceleration_rate = 1.0;
-
-    fsl_kinematics_mass_set(&p->kn_forces, 1.0);
-    fsl_kinematics_mass_set(&p->kn, 1.0);
+    fsl_kinematics_mass_set(&p->kn, 4.0);
     p->camera_distance = SET_CAMERA_DISTANCE_MAX;
     p->camera_mode = PLAYER_CAMERA_MODE_1ST_PERSON;
 
@@ -100,20 +93,17 @@ u32 player_init(hhc_player *p, const str *name)
 
 void player_update(hhc_player *p, f64 dt)
 {
-    fsl_collision_info nocollision_info = {0};
-
     p->flag &= ~FLAG_PLAYER_CAN_JUMP;
-    p->kn.acceleration_rate = PLAYER_ACCELERATION_WALK;
-    p->collision_info = nocollision_info;
+    p->acceleration_rate = PLAYER_ACCELERATION_WALK;
     p->camera.fovy = settings.fov;
 
     /* ---- player flags ---------------------------------------------------- */
 
     if (p->flag & FLAG_PLAYER_FLYING)
     {
-        p->kn_forces.acceleration.z = 0.0;
-        p->kn_forces.velocity.z = 0.0;
-        p->kn.acceleration_rate = PLAYER_ACCELERATION_FLY;
+        p->kn_forces[ENTITY_KINEMATICS_ENV].acceleration.z = 0.0;
+        p->kn_forces[ENTITY_KINEMATICS_ENV].velocity.z = 0.0;
+        p->acceleration_rate = PLAYER_ACCELERATION_FLY;
 
         if (p->flag & FLAG_PLAYER_CINEMATIC_MOTION)
         {
@@ -132,22 +122,22 @@ void player_update(hhc_player *p, f64 dt)
 
         if (p->flag & FLAG_PLAYER_SPRINTING)
         {
-            p->kn.acceleration_rate = PLAYER_ACCELERATION_FLY_FAST;
+            p->acceleration_rate = PLAYER_ACCELERATION_FLY_FAST;
             p->camera.fovy += 10.0f;
         }
     }
     else
     {
-        p->kn_forces.acceleration.z = world.gravity.z;
+        p->kn_forces[ENTITY_KINEMATICS_ENV].acceleration.z = world.gravity.z * p->kn.mass;
         p->physics_material.drag.x = PLAYER_DRAG_DEFAULT;
         p->physics_material.drag.y = PLAYER_DRAG_DEFAULT;
         p->physics_material.drag.z = 0.0;
 
         if (p->flag & FLAG_PLAYER_SNEAKING)
-            p->kn.acceleration_rate = PLAYER_ACCELERATION_SNEAK;
+            p->acceleration_rate = PLAYER_ACCELERATION_SNEAK;
         else if (p->flag & FLAG_PLAYER_SPRINTING)
         {
-            p->kn.acceleration_rate = PLAYER_ACCELERATION_SPRINT;
+            p->acceleration_rate = PLAYER_ACCELERATION_SPRINT;
             p->camera.fovy += 5.0f;
         }
     }
@@ -155,11 +145,25 @@ void player_update(hhc_player *p, f64 dt)
     if (p->flag & FLAG_PLAYER_ZOOMER && p->camera.zoom)
         p->camera.fovy = settings.fov - p->camera.zoom;
 
-    fsl_kinematics_update_v3f64(&p->transform.pos, p->kn_forces.acceleration, &p->kn_forces, &world.physics_material, dt);
-    fsl_kinematics_update_v3f64(&p->transform.pos, p->force, &p->kn, &p->physics_material, dt);
+    p->force.x *= p->acceleration_rate * p->physics_material.drag.x;
+    p->force.y *= p->acceleration_rate * p->physics_material.drag.y;
+    p->force.z *= p->acceleration_rate * p->physics_material.drag.z;
 
-    if (p->kn.speed + p->kn_forces.speed > FSL_EPSILON)
-        p->camera.fovy += (p->kn.speed + p->kn_forces.speed) * 0.03f;
+    fsl_kinematics_update_v3f64(&p->kn_forces[ENTITY_KINEMATICS_CONTROL], p->force,
+            &p->physics_material, p->kn.mass_inv, dt);
+
+    fsl_kinematics_update_v3f64(&p->kn_forces[ENTITY_KINEMATICS_ENV],
+            p->kn_forces[ENTITY_KINEMATICS_ENV].acceleration, &world.physics_material,
+            p->kn.mass_inv, dt);
+
+    p->kn.velocity = fsl_kinematics_velocity_get(p->kn_forces, ENTITY_KINEMATICS_COUNT);
+    p->transform.pos.x += p->kn.velocity.x * dt;
+    p->transform.pos.y += p->kn.velocity.y * dt;
+    p->transform.pos.z += p->kn.velocity.z * dt;
+
+    p->kn.speed = sqrt(fsl_len_v3f64(p->kn.velocity));
+    if (p->kn.speed > FSL_EPSILON)
+        p->camera.fovy += p->kn.speed * 0.03f;
     p->camera.fovy = fsl_clamp_f32(p->camera.fovy, 1.0f, SET_FOV_MAX);
     p->camera.fovy_smooth = fsl_lerp_exp_f32(p->camera.fovy_smooth, p->camera.fovy,
                 SET_LERP_SPEED_FOV_MODE, dt);
@@ -213,9 +217,9 @@ void player_collision_update(hhc_player *p, f64 dt)
     b8 resolved = TRUE;
     u32 max_axis = 0;
 
-    velocity.x = p->kn_forces.velocity.x + p->kn.velocity.x;
-    velocity.y = p->kn_forces.velocity.y + p->kn.velocity.y;
-    velocity.z = p->kn_forces.velocity.z + p->kn.velocity.z;
+    velocity.x = p->kn.velocity.x;
+    velocity.y = p->kn.velocity.y;
+    velocity.z = p->kn.velocity.z;
     displacement.x = velocity.x * dt;
     displacement.y = velocity.y * dt;
     displacement.z = velocity.z * dt;
@@ -290,23 +294,28 @@ void player_collision_update(hhc_player *p, f64 dt)
                         p->transform.pos.z += displacement.z * p->collision_info.entry_time +
                             p->collision_info.normal.z * FSL_COLLISION_EPSILON;
 
-                        if (p->collision_info.dot < 0.0)
+                        if (p->collision_info.slide)
                         {
-                            displacement.x *= p->collision_info.mask.x;
-                            displacement.y *= p->collision_info.mask.y;
-                            displacement.z *= p->collision_info.mask.z;
+                            displacement.x -= p->collision_info.dot * p->collision_info.normal.x;
+                            displacement.y -= p->collision_info.dot * p->collision_info.normal.y;
+                            displacement.z -= p->collision_info.dot * p->collision_info.normal.z;
 
-                            p->kn_forces.velocity.x *= p->collision_info.mask.x;
-                            p->kn_forces.velocity.y *= p->collision_info.mask.y;
-                            p->kn_forces.velocity.z *= p->collision_info.mask.z;
-                            p->kn.velocity.x *= p->collision_info.mask.x;
-                            p->kn.velocity.y *= p->collision_info.mask.y;
-                            p->kn.velocity.z *= p->collision_info.mask.z;
+                            p->collision_info.dot = fsl_dot_v3f64(p->kn_forces[0].velocity, p->collision_info.normal);
+                            p->kn_forces[0].velocity.x -= p->collision_info.dot * p->collision_info.normal.x;
+                            p->kn_forces[0].velocity.y -= p->collision_info.dot * p->collision_info.normal.y;
+                            p->kn_forces[0].velocity.z -= p->collision_info.dot * p->collision_info.normal.z;
+
+                            p->collision_info.dot = fsl_dot_v3f64(p->kn_forces[1].velocity, p->collision_info.normal);
+                            p->kn_forces[1].velocity.x -= p->collision_info.dot * p->collision_info.normal.x;
+                            p->kn_forces[1].velocity.y -= p->collision_info.dot * p->collision_info.normal.y;
+                            p->kn_forces[1].velocity.z -= p->collision_info.dot * p->collision_info.normal.z;
                         }
 
                         p->transform.pos.x -= displacement.x * p->collision_info.entry_time;
                         p->transform.pos.y -= displacement.y * p->collision_info.entry_time;
                         p->transform.pos.z -= displacement.z * p->collision_info.entry_time;
+
+                        p->kn.velocity = fsl_kinematics_velocity_get(p->kn_forces, ENTITY_KINEMATICS_COUNT);
 
                         if (p->collision_info.normal.z > 0.0)
                         {
@@ -319,11 +328,11 @@ void player_collision_update(hhc_player *p, f64 dt)
 
                         player_bounding_box_update(p);
 
-                        speed = p->kn_forces.speed + p->kn.speed;
-                        p->kn_forces.speed = sqrt(fsl_len_v3f64(p->kn_forces.velocity));
+                        speed = p->kn.speed;
                         p->kn.speed = sqrt(fsl_len_v3f64(p->kn.velocity));
 #if MODE_INTERNAL_DIE
-                        speed -= p->kn_forces.speed + p->kn.speed;
+                        speed -= p->kn.speed;
+                        printf("DAMAGE: %f, HEALTH %f\n", speed, p->health);
                         if (speed > PLAYER_COLLISION_DAMAGE_THRESHOLD)
                         {
                             p->health -= speed;
@@ -650,9 +659,12 @@ void player_set_pos(hhc_player *p, f64 x, f64 y, f64 z)
     p->kn.velocity.x = 0.0;
     p->kn.velocity.y = 0.0;
     p->kn.velocity.z = 0.0;
-    p->kn_forces.velocity.x = 0.0;
-    p->kn_forces.velocity.y = 0.0;
-    p->kn_forces.velocity.z = 0.0;
+    p->kn_forces[0].velocity.x = 0.0;
+    p->kn_forces[0].velocity.y = 0.0;
+    p->kn_forces[0].velocity.z = 0.0;
+    p->kn_forces[1].velocity.x = 0.0;
+    p->kn_forces[1].velocity.y = 0.0;
+    p->kn_forces[1].velocity.z = 0.0;
     p->transform_last.pos = p->transform.pos;
 }
 

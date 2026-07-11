@@ -223,32 +223,37 @@ fsl_physics_material fsl_physics_material_init(f64 friction_x, f64 friction_y, f
     return mat;
 }
 
-void fsl_kinematics_update_v3f64(v3f64 *pos, fsl_physics_force force, fsl_kinematics *kn,
-        const fsl_physics_material *mat, f64 delta_time)
+void fsl_kinematics_update_v3f64(fsl_kinematics *kn, fsl_physics_force force,
+        const fsl_physics_material *mat, f64 mass_inv, f64 delta_time)
 {
-    kn->acceleration.x = force.x * kn->acceleration_rate * (1.0 - mat->friction.x);
-    kn->acceleration.y = force.y * kn->acceleration_rate * (1.0 - mat->friction.y);
-    kn->acceleration.z = force.z * kn->acceleration_rate * (1.0 - mat->friction.z);
+    kn->acceleration.x = force.x * (1.0 - mat->friction.x);
+    kn->acceleration.y = force.y * (1.0 - mat->friction.y);
+    kn->acceleration.z = force.z * (1.0 - mat->friction.z);
 
     kn->velocity.x += kn->acceleration.x * delta_time;
     kn->velocity.y += kn->acceleration.y * delta_time;
     kn->velocity.z += kn->acceleration.z * delta_time;
 
-    kn->velocity.x -= mat->drag.x * kn->velocity.x * kn->mass_inv * delta_time;
-    kn->velocity.y -= mat->drag.y * kn->velocity.y * kn->mass_inv * delta_time;
-    kn->velocity.z -= mat->drag.z * kn->velocity.z * kn->mass_inv * delta_time;
-    kn->velocity.x -= mat->friction.x * kn->velocity.x * kn->mass_inv * delta_time;
-    kn->velocity.y -= mat->friction.y * kn->velocity.y * kn->mass_inv * delta_time;
-    kn->velocity.z -= mat->friction.z * kn->velocity.z * kn->mass_inv * delta_time;
-    kn->speed = sqrt(fsl_len_v3f64(kn->velocity));
-
-    pos->x += kn->velocity.x * delta_time;
-    pos->y += kn->velocity.y * delta_time;
-    pos->z += kn->velocity.z * delta_time;
+    kn->velocity.x -= mat->drag.x * kn->velocity.x * mass_inv * delta_time;
+    kn->velocity.y -= mat->drag.y * kn->velocity.y * mass_inv * delta_time;
+    kn->velocity.z -= mat->drag.z * kn->velocity.z * mass_inv * delta_time;
 }
 
 void fsl_kinematics_mass_set(fsl_kinematics *kn, f64 mass)
 {
     kn->mass = mass;
     kn->mass_inv = 1.0 / (mass > FSL_EPSILON ? mass : FSL_EPSILON);
+}
+
+v3f64 fsl_kinematics_velocity_get(const fsl_kinematics *kn, u64 len)
+{
+    u64 i = 0;
+    v3f64 velocity = {0};
+    for (; i < len; ++i)
+    {
+        velocity.x += kn[i].velocity.x;
+        velocity.y += kn[i].velocity.y;
+        velocity.z += kn[i].velocity.z;
+    }
+    return velocity;
 }

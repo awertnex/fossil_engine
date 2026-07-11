@@ -145,7 +145,8 @@ fsl_collision_info fsl_get_swept_aabb(fsl_bounding_box a, fsl_bounding_box b,
 
         c.dot = fsl_dot_v3f64(displacement, c.normal);
         if (c.dot < 0.0)
-            c.mask = fsl_slide_mask_v3f64(c.normal, c.normal);
+            c.slide = TRUE;
     }
+
     return c;
 }
