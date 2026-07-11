@@ -203,6 +203,7 @@ u32 fsl_engine_init(int argc, char **argv, const str *title,
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_MULTISAMPLE);
+    glEnable(GL_DEPTH_CLAMP); /* remove near-plane clipping */
 
     /* ---- engine framebuffers --------------------------------------------- */
 
@@ -267,6 +268,7 @@ b8 fsl_engine_running(void (*callback_framebuffer_size)(i32 size_x, i32 size_y))
     if (!time_last)
         time_last = render_internal.time;
     render_internal.time_delta = render_internal.time - time_last;
+    render_internal.time_delta_f = (f64)render_internal.time_delta * FSL_NSEC2SEC;
     time_last = render_internal.time;
 
     glfwSwapBuffers(render_internal.window);

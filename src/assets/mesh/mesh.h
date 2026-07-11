@@ -26,6 +26,7 @@
 #include "../../common/api.h"
 #include "../../common/types.h"
 #include "../../memory/memory_types.h"
+
 #include "../asset_types.h"
 
 #include "../../external/glad/glad.h"
@@ -83,6 +84,7 @@ FSLAPI u32 fsl_mesh_load(fsl_mesh *mesh,
  *  @brief draw mesh through the lens of `camera` at specified transforms.
  */
 FSLAPI void fsl_mesh_draw(const fsl_mesh *mesh, const fsl_camera *camera,
+        GLuint texture_id,
         f32 pos_x, f32 pos_y, f32 pos_z,
         f32 roll, f32 pitch, f32 yaw,
         f32 scale_x, f32 scale_y, f32 scale_z);

@@ -1,6 +1,3 @@
-#ifndef FSL_PHYSICS_TYPES_H
-#define FSL_PHYSICS_TYPES_H
-
 /*!
  *  Copyright 2026 Lily Awertnex
  *
@@ -23,9 +20,12 @@
  *  @brief physics types.
  */
 
+#ifndef FSL_PHYSICS_TYPES_H
+#define FSL_PHYSICS_TYPES_H
+
 #include "../math/vector.h"
 
-typedef struct transform_v2f32
+typedef struct fsl_transform_v2f32
 {
     v2f32 pos;
     v2f32 rot;
@@ -34,9 +34,9 @@ typedef struct transform_v2f32
     v2f32 pos_delta;
     v2f32 rot_delta;
     v2f32 scale_delta;
-} transform_v2f32;
+} fsl_transform_v2f32;
 
-typedef struct transform_v2f64
+typedef struct fsl_transform_v2f64
 {
     v2f64 pos;
     v2f64 rot;
@@ -45,9 +45,9 @@ typedef struct transform_v2f64
     v2f64 pos_delta;
     v2f64 rot_delta;
     v2f64 scale_delta;
-} transform_v2f64;
+} fsl_transform_v2f64;
 
-typedef struct transform_v3f32
+typedef struct fsl_transform_v3f32
 {
     v3f32 pos;
     v3f32 rot;
@@ -56,9 +56,9 @@ typedef struct transform_v3f32
     v3f32 pos_delta;
     v3f32 rot_delta;
     v3f32 scale_delta;
-} transform_v3f32;
+} fsl_transform_v3f32;
 
-typedef struct transform_v3f64
+typedef struct fsl_transform_v3f64
 {
     v3f64 pos;
     v3f64 rot;
@@ -67,6 +67,24 @@ typedef struct transform_v3f64
     v3f64 pos_delta;
     v3f64 rot_delta;
     v3f64 scale_delta;
-} transform_v3f64;
+} fsl_transform_v3f64;
+
+typedef struct fsl_physics_material
+{
+    v3f64 friction;
+    v3f64 drag;
+    f64 bounciness;
+} fsl_physics_material;
+
+typedef v3f64 fsl_physics_force;
+
+typedef struct fsl_kinematics
+{
+    v3f64 acceleration;
+    v3f64 velocity;
+    f64 speed;
+    f64 mass;
+    f64 mass_inv; /* inverse mass */
+} fsl_kinematics;
 
 #endif /* FSL_PHYSICS_TYPES_H */

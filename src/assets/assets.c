@@ -20,7 +20,6 @@
  *  @brief asset parsing, loading and unloading.
  */
 
-#include "../common/api.h"
 #include "../common/config.h"
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
@@ -140,7 +139,7 @@ cleanup:
 
 /* ---- section: vbo -------------------------------------------------------- */
 
-FSLAPI u32 fsl_vbo_init(fsl_vbo *vbo, fsl_size size, fsl_len len, void *data,
+u32 fsl_vbo_init(fsl_vbo *vbo, fsl_size size, fsl_len len, void *data,
         GLenum target, fsl_draw_type draw_type)
 {
     GLenum draw_type_temp = 0;
@@ -390,7 +389,7 @@ u32 fsl_fbo_realloc(fsl_fbo *fbo, i32 size_x, i32 size_y, b8 multisample, u32 sa
     {
         LOGFATAL(FSL_ERR_FBO_REALLOC_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_FBO_INIT_FAIL(fbo->fbo, status));
+                MSG_FBO_REALLOC_FAIL(fbo->fbo, status));
 
         fsl_fbo_free(fbo);
         return fsl_err;
@@ -806,7 +805,7 @@ void fsl_projection_perspective_update(fsl_camera camera, fsl_projection *projec
     rotation_pitch.a33 = CPCH;
     rotation_pitch.a44 = 1.0f;
 
-    projection->rotation = fsl_matrix_multiply(rotation_yaw, rotation_pitch);
+    projection->rotation = fsl_multiply_m4f32(rotation_yaw, rotation_pitch);
 
     /* ---- rotation: roll -------------------------------------------------- */
 
@@ -820,7 +819,7 @@ void fsl_projection_perspective_update(fsl_camera camera, fsl_projection *projec
         rotation_roll.a33 = CROL;
         rotation_roll.a44 = 1.0f;
 
-        projection->rotation = fsl_matrix_multiply(projection->rotation, rotation_roll);
+        projection->rotation = fsl_multiply_m4f32(projection->rotation, rotation_roll);
     }
 
     /* ---- orientation: z-up ----------------------------------------------- */
@@ -832,8 +831,8 @@ void fsl_projection_perspective_update(fsl_camera camera, fsl_projection *projec
 
     /* ---- view ------------------------------------------------------------ */
 
-    projection->view = fsl_matrix_multiply(projection->translation,
-                fsl_matrix_multiply(projection->rotation, projection->orientation));
+    projection->view = fsl_multiply_m4f32(projection->translation,
+                fsl_multiply_m4f32(projection->rotation, projection->orientation));
 
     /* ---- projection ------------------------------------------------------ */
 
@@ -843,5 +842,5 @@ void fsl_projection_perspective_update(fsl_camera camera, fsl_projection *projec
     projection->projection.a34 = -1.0f;
     projection->projection.a43 = offset;
 
-    projection->perspective = fsl_matrix_multiply(projection->view, projection->projection);
+    projection->perspective = fsl_multiply_m4f32(projection->view, projection->projection);
 }

@@ -8,6 +8,8 @@
 #include "../h/common.h"
 #include "../h/raycast.h"
 
+#include "chunk_work.h"
+
 #define CHUNK_DIAMETER  16
 #define CHUNK_LAYER     (CHUNK_DIAMETER * CHUNK_DIAMETER)
 #define CHUNK_VOLUME    (CHUNK_LAYER * CHUNK_DIAMETER)
@@ -87,16 +89,17 @@ enum block_shift
 enum chunk_flag
 {
     FLAG_CHUNK_LOADED =     (1 << 0),
-    FLAG_CHUNK_DIRTY =      (1 << 1),
-    FLAG_CHUNK_GENERATED =  (1 << 2),
-    FLAG_CHUNK_VISIBLE =    (1 << 3),
-    FLAG_CHUNK_IMPORTED =   (1 << 4),
-    FLAG_CHUNK_QUEUED =     (1 << 5),
+    FLAG_CHUNK_IMPORTED =   (1 << 1),
+    FLAG_CHUNK_DIRTY =      (1 << 2),
+    FLAG_CHUNK_QUEUED =     (1 << 3),
+    FLAG_CHUNK_NON_AIR =    (1 << 4),
+    FLAG_CHUNK_GENERATED =  (1 << 5),
+    FLAG_CHUNK_VISIBLE =    (1 << 6),
 
     /*!
      *  @brief chunk marking for @ref chunk_tab shifting logic.
      */
-    FLAG_CHUNK_EDGE =       (1 << 6)
+    FLAG_CHUNK_EDGE =       (1 << 7)
 }; /* chunk_flag */
 
 typedef struct hhc_chunk_mesh
@@ -164,6 +167,15 @@ typedef struct hhc_chunk
     hhc_chunk_mesh *mesh;
 
     u32 block[CHUNK_DIAMETER][CHUNK_DIAMETER][CHUNK_DIAMETER];
+
+    /*!
+     *  @brief cost of work done on generating, meshing, importing and/or exporting
+     *  this chunk.
+     *
+     *  @remark only assigned by chunk scheduler @ref chunk_sched.
+     */
+    hhc_chunk_receipt receipt;
+
 } hhc_chunk;
 
 /*!
@@ -181,6 +193,7 @@ typedef struct hhc_chunk_table
      */
     u32 index;
 
+    hhc_chunk_receipt_printed receipt_center; /* receipt info of center-most chunk */
 } hhc_chunk_table;
 
 /*!
@@ -228,19 +241,19 @@ typedef struct hhc_chunk_order
  *
  *  there are as many chunk-draw buffers as there are chunk schedulers.
  *
- *  @ref chunk_order is traversed backwards, visible chunks are pushed to this buffer,
- *  that way, further chunks are drawn first.
+ *  @ref chunk_order is traversed backwards, visible chunks are pushed to this buffer
+ *  so further chunks can be drawn first.
  *
  *  @remark updated on a fixed time-step.
  */
 typedef struct hhc_chunk_draw
 {
-    fsl_len count;          /* number of chunks scheduled */
-    u32 offset;             /* offset of scheduler into @ref chunk_order.p */
-    fsl_len len;            /* number of members in `p` */
+    fsl_len count;          /* number of chunks listed */
+    u32 offset;             /* offset of draw into @ref chunk_order.p */
     u32 cursor_scan;        /* dirty chunk scanner */
     fsl_mem_handle handle;
     hhc_chunk_mesh *p;      /* cached pointer from `handle` */
+    fsl_len len;            /* number of members in `p` */
 } hhc_chunk_draw;
 
 #define GET_BLOCK_ID(block)     (block & MASK_BLOCK_ID)
@@ -256,7 +269,7 @@ extern hhc_chunk_order chunk_order;
  *  @brief initialize chunking resources.
  *
  *  - allocate @ref chunk_arena and push @ref chunk_buf, @ref chunk_tab,
- *    @ref chunk_order and @ref chunk_sched[<x>] onto it.
+ *    @ref chunk_order and @ref chunk_sched onto it.
  *  - load necessary look-ups from disk if found and build them if not.
  *
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
@@ -266,16 +279,17 @@ u32 chunking_init(v3i32 *player_chunk_delta);
 /*!
  *  @update everything about chunks during gameplay.
  *
- *  1. load dirty chunks into their priority schedulers based on their distance from
- *     the player.
+ *  1. load dirty chunks into @ref chunk_sched based on their distance from
+       the player.
  *
  *  2. if @ref core.flag.chunk_buf_dirty, shift @ref chunk_tab to compensate for
  *     player crossing a chunk boundary.
  *
  *  3. check if player has crossed multiple axes and shift for each one.
  *
- *  4. find empty chunk slots within @ref settings.render_distance distance, push chunks onto
- *     @ref chunk_buf and return the address to the respective index to @ref chunk_tab.
+ *  4. find empty chunk slots in @ref chunk_tab within @ref settings.render_distance distance,
+ *     push chunks onto @ref chunk_buf and return the address to the respective
+ *     index to @ref chunk_tab.
  *
  *  5. un-dirty @ref core.flag.chunk_buf_dirty when done.
  */

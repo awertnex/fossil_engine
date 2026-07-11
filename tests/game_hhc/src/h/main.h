@@ -87,22 +87,42 @@ struct hhc_uniform
 
     struct /* post_processing */
     {
+        GLint texture_skybox;
+        GLint texture_world_pos;
+        GLint texture_world_normal;
+        GLint texture_world_albedo_specular;
+        GLint texture_hud;
         GLint time;
+        GLint mat_projection;
+        GLint camera_far;
+        GLint camera_near;
+        GLint ssao_sample;
     } post_processing;
 
     struct /* voxel */
     {
+        GLint mat_view;
         GLint mat_perspective;
-        GLint camera_position;
         GLint sun_rotation;
         GLint sky_light;
         GLint moon_light;
         GLint chunk_position;
         GLint color;
         GLint opacity;
-        GLint flashlight_position;
-        GLint toggle_flashlight;
+        GLint camera_position;
+        GLint camera_far;
+        GLint camera_near;
         GLint render_distance;
+
+        struct /* spotlight */
+        {
+            GLint pos;
+            GLint direction;
+            GLint cutoff;
+            GLint feather_factor;
+            GLint intensity;
+        } spotlight;
+
     } voxel;
 
     struct /* bounding_box */
@@ -114,6 +134,15 @@ struct hhc_uniform
     } bounding_box;
 
 }; /* hhc_uniform */
+
+typedef struct hhc_spotlight
+{
+    v3f32 pos;
+    v3f32 direction;
+    f32 cutoff;
+    f32 feather_factor;
+    f32 intensity;
+} hhc_spotlight;
 
 extern fsl_render *render;
 extern struct hhc_core core;

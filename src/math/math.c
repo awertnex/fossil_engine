@@ -28,6 +28,7 @@
 #include "../h/dir.h"
 
 #include "math.h"
+#include "math_implementation.h"
 #include "math_internal.h"
 #include "matrix.h"
 #include "noise.h"
@@ -89,162 +90,421 @@ void noise_free_internal(void)
             "noise_free_internal().fsl_rand_tab");
 }
 
-v3f32 fsl_add_v3f32(v3f32 a, v3f32 b)
-{
-    v3f32 v = {0};
-    v.x = a.x + b.x;
-    v.y = a.y + b.y;
-    v.z = a.z + b.z;
-    return v;
-}
+/* ---- section: scalar ----------------------------------------------------- */
 
-v3f32 fsl_sub_v3f32(v3f32 a, v3f32 b)
-{
-    v3f32 v = {0};
-    v.x = a.x - b.x;
-    v.y = a.y - b.y;
-    v.z = a.z - b.z;
-    return v;
-}
+u8 fsl_clamp_u8(u8 n, u8 min, u8 max) CLAMP_FUNC_IMPL
+i8 fsl_clamp_i8(i8 n, i8 min, i8 max) CLAMP_FUNC_IMPL
+u16 fsl_clamp_u16(u16 n, u16 min, u16 max) CLAMP_FUNC_IMPL
+i16 fsl_clamp_i16(i16 n, i16 min, i16 max) CLAMP_FUNC_IMPL
+u32 fsl_clamp_u32(u32 n, u32 min, u32 max) CLAMP_FUNC_IMPL
+i32 fsl_clamp_i32(i32 n, i32 min, i32 max) CLAMP_FUNC_IMPL
+f32 fsl_clamp_f32(f32 n, f32 min, f32 max) CLAMP_FUNC_IMPL
+u64 fsl_clamp_u64(u64 n, u64 min, u64 max) CLAMP_FUNC_IMPL
+i64 fsl_clamp_i64(i64 n, i64 min, i64 max) CLAMP_FUNC_IMPL
+f64 fsl_clamp_f64(f64 n, f64 min, f64 max) CLAMP_FUNC_IMPL
 
-i32 fsl_clamp_i32(i32 n, i32 min, i32 max)
-{
-    return n < min ? min : n > max ? max : n;
-}
+u8 fsl_mod_u8(u8 n, u8 max) MOD_FUNC_IMPL
+i8 fsl_mod_i8(i8 n, i8 max) MOD_FUNC_IMPL
+u16 fsl_mod_u16(u16 n, u16 max) MOD_FUNC_IMPL
+i16 fsl_mod_i16(i16 n, i16 max) MOD_FUNC_IMPL
+u32 fsl_mod_u32(u32 n, u32 max) MOD_FUNC_IMPL
+i32 fsl_mod_i32(i32 n, i32 max) MOD_FUNC_IMPL
+u64 fsl_mod_u64(u64 n, u64 max) MOD_FUNC_IMPL
+i64 fsl_mod_i64(i64 n, i64 max) MOD_FUNC_IMPL
 
-u32 fsl_clamp_u32(u32 n, u32 min, u32 max)
-{
-    return n < min ? min : n > max ? max : n;
-}
+u8 fsl_round_up_u8(u8 n, u8 max) ROUND_UP_FUNC_IMPL
+i8 fsl_round_up_i8(i8 n, i8 max) ROUND_UP_FUNC_IMPL
+u16 fsl_round_up_u16(u16 n, u16 max) ROUND_UP_FUNC_IMPL
+i16 fsl_round_up_i16(i16 n, i16 max) ROUND_UP_FUNC_IMPL
+u32 fsl_round_up_u32(u32 n, u32 max) ROUND_UP_FUNC_IMPL
+i32 fsl_round_up_i32(i32 n, i32 max) ROUND_UP_FUNC_IMPL
+u64 fsl_round_up_u64(u64 n, u64 max) ROUND_UP_FUNC_IMPL
+i64 fsl_round_up_i64(i64 n, i64 max) ROUND_UP_FUNC_IMPL
 
-f32 fsl_clamp_f32(f32 n, f32 min, f32 max)
-{
-    return n < min ? min : n > max ? max : n;
-}
+u8 fsl_map_range_u8(u8 n, u8 n_min, u8 n_max, u8 r_min, u8 r_max) MAP_RANGE_FUNC_IMPL
+i8 fsl_map_range_i8(i8 n, i8 n_min, i8 n_max, i8 r_min, i8 r_max) MAP_RANGE_FUNC_IMPL
+u16 fsl_map_range_u16(u16 n, u16 n_min, u16 n_max, u16 r_min, u16 r_max) MAP_RANGE_FUNC_IMPL
+i16 fsl_map_range_i16(i16 n, i16 n_min, i16 n_max, i16 r_min, i16 r_max) MAP_RANGE_FUNC_IMPL
+u32 fsl_map_range_u32(u32 n, u32 n_min, u32 n_max, u32 r_min, u32 r_max) MAP_RANGE_FUNC_IMPL
+i32 fsl_map_range_i32(i32 n, i32 n_min, i32 n_max, i32 r_min, i32 r_max) MAP_RANGE_FUNC_IMPL
+f32 fsl_map_range_f32(f32 n, f32 n_min, f32 n_max, f32 r_min, f32 r_max) MAP_RANGE_FUNC_IMPL
+u64 fsl_map_range_u64(u64 n, u64 n_min, u64 n_max, u64 r_min, u64 r_max) MAP_RANGE_FUNC_IMPL
+i64 fsl_map_range_i64(i64 n, i64 n_min, i64 n_max, i64 r_min, i64 r_max) MAP_RANGE_FUNC_IMPL
+f64 fsl_map_range_f64(f64 n, f64 n_min, f64 n_max, f64 r_min, f64 r_max) MAP_RANGE_FUNC_IMPL
 
-i64 fsl_clamp_i64(i64 n, i64 min, i64 max)
-{
-    return n < min ? min : n > max ? max : n;
-}
+b8 fsl_is_in_bounds_u8(u8 n, u8 min, u8 max) IS_IN_BOUNDS_FUNC_IMPL
+b8 fsl_is_in_bounds_i8(i8 n, i8 min, i8 max) IS_IN_BOUNDS_FUNC_IMPL
+b8 fsl_is_in_bounds_u16(u16 n, u16 min, u16 max) IS_IN_BOUNDS_FUNC_IMPL
+b8 fsl_is_in_bounds_i16(i16 n, i16 min, i16 max) IS_IN_BOUNDS_FUNC_IMPL
+b8 fsl_is_in_bounds_u32(u32 n, u32 min, u32 max) IS_IN_BOUNDS_FUNC_IMPL
+b8 fsl_is_in_bounds_i32(i32 n, i32 min, i32 max) IS_IN_BOUNDS_FUNC_IMPL
+b8 fsl_is_in_bounds_f32(f32 n, f32 min, f32 max) IS_IN_BOUNDS_FUNC_IMPL
+b8 fsl_is_in_bounds_u64(u64 n, u64 min, u64 max) IS_IN_BOUNDS_FUNC_IMPL
+b8 fsl_is_in_bounds_i64(i64 n, i64 min, i64 max) IS_IN_BOUNDS_FUNC_IMPL
+b8 fsl_is_in_bounds_f64(f64 n, f64 min, f64 max) IS_IN_BOUNDS_FUNC_IMPL
 
-u64 fsl_clamp_u64(u64 n, u64 min, u64 max)
-{
-    return n < min ? min : n > max ? max : n;
-}
+f32 fsl_lerp_f32(f32 a, f32 b, f32 t) LERP_FUNC_IMPL
+f64 fsl_lerp_f64(f64 a, f64 b, f64 t) LERP_FUNC_IMPL
+f32 fsl_bilerp_f32(f32 a, f32 b, f32 c, f32 d, f32 tx, f32 ty) BILERP_FUNC_IMPL(f32, f)
+f64 fsl_bilerp_f64(f64 a, f64 b, f64 c, f64 d, f64 tx, f64 ty) BILERP_FUNC_IMPL(f64, 0)
+f32 fsl_trilerp_f32(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f, f32 g, f32 h, f32 tx, f32 ty, f32 tz) TRILERP_FUNC_IMPL(f32, f)
+f64 fsl_trilerp_f64(f64 a, f64 b, f64 c, f64 d, f64 e, f64 f, f64 g, f64 h, f64 tx, f64 ty, f64 tz) TRILERP_FUNC_IMPL(f64, 0)
+f32 fsl_lerp_exp_f32(f32 a, f32 b, f32 k, f32 t) LERP_EXP_FUNC_IMPL(f, expf)
+f64 fsl_lerp_exp_f64(f64 a, f64 b, f64 k, f64 t) LERP_EXP_FUNC_IMPL(0, exp)
+f32 fsl_fade_ease_in_f32(f32 t) FADE_EASE_IN_FUNC_IMPL
+f64 fsl_fade_ease_in_f64(f64 t) FADE_EASE_IN_FUNC_IMPL
+f32 fsl_fade_smoothstep_f32(f32 t) FADE_SMOOTHSTEP_FUNC_IMPL(f)
+f64 fsl_fade_smoothstep_f64(f64 t) FADE_SMOOTHSTEP_FUNC_IMPL(0)
+f32 fsl_fade_quintic_f32(f32 t) FADE_QUINTIC_FUNC_IMPL(f)
+f64 fsl_fade_quintic_f64(f64 t) FADE_QUINTIC_FUNC_IMPL(0)
 
-f64 fsl_clamp_f64(f64 n, f64 min, f64 max)
-{
-    return n < min ? min : n > max ? max : n;
-}
+/* ---- section: vector ----------------------------------------------------- */
 
-u64 fsl_round_up_u64(u64 n, u64 max)
-{
-    return n + (max - (n % max)) % max;
-}
+v2u8 fsl_add_v2u8(v2u8 a, v2u8 b) ADD_V2_FUNC_IMPL
+v3u8 fsl_add_v3u8(v3u8 a, v3u8 b) ADD_V3_FUNC_IMPL
+v4u8 fsl_add_v4u8(v4u8 a, v4u8 b) ADD_V4_FUNC_IMPL
+v2i8 fsl_add_v2i8(v2i8 a, v2i8 b) ADD_V2_FUNC_IMPL
+v3i8 fsl_add_v3i8(v3i8 a, v3i8 b) ADD_V3_FUNC_IMPL
+v4i8 fsl_add_v4i8(v4i8 a, v4i8 b) ADD_V4_FUNC_IMPL
+v2u16 fsl_add_v2u16(v2u16 a, v2u16 b) ADD_V2_FUNC_IMPL
+v3u16 fsl_add_v3u16(v3u16 a, v3u16 b) ADD_V3_FUNC_IMPL
+v4u16 fsl_add_v4u16(v4u16 a, v4u16 b) ADD_V4_FUNC_IMPL
+v2i16 fsl_add_v2i16(v2i16 a, v2i16 b) ADD_V2_FUNC_IMPL
+v3i16 fsl_add_v3i16(v3i16 a, v3i16 b) ADD_V3_FUNC_IMPL
+v4i16 fsl_add_v4i16(v4i16 a, v4i16 b) ADD_V4_FUNC_IMPL
+v2u32 fsl_add_v2u32(v2u32 a, v2u32 b) ADD_V2_FUNC_IMPL
+v3u32 fsl_add_v3u32(v3u32 a, v3u32 b) ADD_V3_FUNC_IMPL
+v4u32 fsl_add_v4u32(v4u32 a, v4u32 b) ADD_V4_FUNC_IMPL
+v2i32 fsl_add_v2i32(v2i32 a, v2i32 b) ADD_V2_FUNC_IMPL
+v3i32 fsl_add_v3i32(v3i32 a, v3i32 b) ADD_V3_FUNC_IMPL
+v4i32 fsl_add_v4i32(v4i32 a, v4i32 b) ADD_V4_FUNC_IMPL
+v2f32 fsl_add_v2f32(v2f32 a, v2f32 b) ADD_V2_FUNC_IMPL
+v3f32 fsl_add_v3f32(v3f32 a, v3f32 b) ADD_V3_FUNC_IMPL
+v4f32 fsl_add_v4f32(v4f32 a, v4f32 b) ADD_V4_FUNC_IMPL
+v2u64 fsl_add_v2u64(v2u64 a, v2u64 b) ADD_V2_FUNC_IMPL
+v3u64 fsl_add_v3u64(v3u64 a, v3u64 b) ADD_V3_FUNC_IMPL
+v4u64 fsl_add_v4u64(v4u64 a, v4u64 b) ADD_V4_FUNC_IMPL
+v2i64 fsl_add_v2i64(v2i64 a, v2i64 b) ADD_V2_FUNC_IMPL
+v3i64 fsl_add_v3i64(v3i64 a, v3i64 b) ADD_V3_FUNC_IMPL
+v4i64 fsl_add_v4i64(v4i64 a, v4i64 b) ADD_V4_FUNC_IMPL
+v2f64 fsl_add_v2f64(v2f64 a, v2f64 b) ADD_V2_FUNC_IMPL
+v3f64 fsl_add_v3f64(v3f64 a, v3f64 b) ADD_V3_FUNC_IMPL
+v4f64 fsl_add_v4f64(v4f64 a, v4f64 b) ADD_V4_FUNC_IMPL
 
-i32 fsl_mod_i32(i32 n, i32 max)
-{
-    return (n % max + max) % max;
-}
+v2u8 fsl_sub_v2u8(v2u8 a, v2u8 b) SUBTRACT_V2_FUNC_IMPL
+v3u8 fsl_sub_v3u8(v3u8 a, v3u8 b) SUBTRACT_V3_FUNC_IMPL
+v4u8 fsl_sub_v4u8(v4u8 a, v4u8 b) SUBTRACT_V4_FUNC_IMPL
+v2i8 fsl_sub_v2i8(v2i8 a, v2i8 b) SUBTRACT_V2_FUNC_IMPL
+v3i8 fsl_sub_v3i8(v3i8 a, v3i8 b) SUBTRACT_V3_FUNC_IMPL
+v4i8 fsl_sub_v4i8(v4i8 a, v4i8 b) SUBTRACT_V4_FUNC_IMPL
+v2u16 fsl_sub_v2u16(v2u16 a, v2u16 b) SUBTRACT_V2_FUNC_IMPL
+v3u16 fsl_sub_v3u16(v3u16 a, v3u16 b) SUBTRACT_V3_FUNC_IMPL
+v4u16 fsl_sub_v4u16(v4u16 a, v4u16 b) SUBTRACT_V4_FUNC_IMPL
+v2i16 fsl_sub_v2i16(v2i16 a, v2i16 b) SUBTRACT_V2_FUNC_IMPL
+v3i16 fsl_sub_v3i16(v3i16 a, v3i16 b) SUBTRACT_V3_FUNC_IMPL
+v4i16 fsl_sub_v4i16(v4i16 a, v4i16 b) SUBTRACT_V4_FUNC_IMPL
+v2u32 fsl_sub_v2u32(v2u32 a, v2u32 b) SUBTRACT_V2_FUNC_IMPL
+v3u32 fsl_sub_v3u32(v3u32 a, v3u32 b) SUBTRACT_V3_FUNC_IMPL
+v4u32 fsl_sub_v4u32(v4u32 a, v4u32 b) SUBTRACT_V4_FUNC_IMPL
+v2i32 fsl_sub_v2i32(v2i32 a, v2i32 b) SUBTRACT_V2_FUNC_IMPL
+v3i32 fsl_sub_v3i32(v3i32 a, v3i32 b) SUBTRACT_V3_FUNC_IMPL
+v4i32 fsl_sub_v4i32(v4i32 a, v4i32 b) SUBTRACT_V4_FUNC_IMPL
+v2f32 fsl_sub_v2f32(v2f32 a, v2f32 b) SUBTRACT_V2_FUNC_IMPL
+v3f32 fsl_sub_v3f32(v3f32 a, v3f32 b) SUBTRACT_V3_FUNC_IMPL
+v4f32 fsl_sub_v4f32(v4f32 a, v4f32 b) SUBTRACT_V4_FUNC_IMPL
+v2u64 fsl_sub_v2u64(v2u64 a, v2u64 b) SUBTRACT_V2_FUNC_IMPL
+v3u64 fsl_sub_v3u64(v3u64 a, v3u64 b) SUBTRACT_V3_FUNC_IMPL
+v4u64 fsl_sub_v4u64(v4u64 a, v4u64 b) SUBTRACT_V4_FUNC_IMPL
+v2i64 fsl_sub_v2i64(v2i64 a, v2i64 b) SUBTRACT_V2_FUNC_IMPL
+v3i64 fsl_sub_v3i64(v3i64 a, v3i64 b) SUBTRACT_V3_FUNC_IMPL
+v4i64 fsl_sub_v4i64(v4i64 a, v4i64 b) SUBTRACT_V4_FUNC_IMPL
+v2f64 fsl_sub_v2f64(v2f64 a, v2f64 b) SUBTRACT_V2_FUNC_IMPL
+v3f64 fsl_sub_v3f64(v3f64 a, v3f64 b) SUBTRACT_V3_FUNC_IMPL
+v4f64 fsl_sub_v4f64(v4f64 a, v4f64 b) SUBTRACT_V4_FUNC_IMPL
 
-i64 fsl_mod_i64(i64 n, i64 max)
-{
-    return (n % max + max) % max;
-}
+u8 fsl_min_v2u8(v2u8 v) MIN_V2_FUNC_IMPL
+u8 fsl_min_v3u8(v3u8 v) MIN_V3_FUNC_IMPL
+u8 fsl_min_v4u8(v4u8 v) MIN_V4_FUNC_IMPL
+i8 fsl_min_v2i8(v2i8 v) MIN_V2_FUNC_IMPL
+i8 fsl_min_v3i8(v3i8 v) MIN_V3_FUNC_IMPL
+i8 fsl_min_v4i8(v4i8 v) MIN_V4_FUNC_IMPL
+u16 fsl_min_v2u16(v2u16 v) MIN_V2_FUNC_IMPL
+u16 fsl_min_v3u16(v3u16 v) MIN_V3_FUNC_IMPL
+u16 fsl_min_v4u16(v4u16 v) MIN_V4_FUNC_IMPL
+i16 fsl_min_v2i16(v2i16 v) MIN_V2_FUNC_IMPL
+i16 fsl_min_v3i16(v3i16 v) MIN_V3_FUNC_IMPL
+i16 fsl_min_v4i16(v4i16 v) MIN_V4_FUNC_IMPL
+u32 fsl_min_v2u32(v2u32 v) MIN_V2_FUNC_IMPL
+u32 fsl_min_v3u32(v3u32 v) MIN_V3_FUNC_IMPL
+u32 fsl_min_v4u32(v4u32 v) MIN_V4_FUNC_IMPL
+i32 fsl_min_v2i32(v2i32 v) MIN_V2_FUNC_IMPL
+i32 fsl_min_v3i32(v3i32 v) MIN_V3_FUNC_IMPL
+i32 fsl_min_v4i32(v4i32 v) MIN_V4_FUNC_IMPL
+f32 fsl_min_v2f32(v2f32 v) MIN_V2_FUNC_IMPL
+f32 fsl_min_v3f32(v3f32 v) MIN_V3_FUNC_IMPL
+f32 fsl_min_v4f32(v4f32 v) MIN_V4_FUNC_IMPL
+u64 fsl_min_v2u64(v2u64 v) MIN_V2_FUNC_IMPL
+u64 fsl_min_v3u64(v3u64 v) MIN_V3_FUNC_IMPL
+u64 fsl_min_v4u64(v4u64 v) MIN_V4_FUNC_IMPL
+i64 fsl_min_v2i64(v2i64 v) MIN_V2_FUNC_IMPL
+i64 fsl_min_v3i64(v3i64 v) MIN_V3_FUNC_IMPL
+i64 fsl_min_v4i64(v4i64 v) MIN_V4_FUNC_IMPL
+f64 fsl_min_v2f64(v2f64 v) MIN_V2_FUNC_IMPL
+f64 fsl_min_v3f64(v3f64 v) MIN_V3_FUNC_IMPL
+f64 fsl_min_v4f64(v4f64 v) MIN_V4_FUNC_IMPL
 
-f32 fsl_min_v3f32(v3f32 v)
-{
-    return v.x < v.y ? v.x < v.z ? v.x : v.z : v.y < v.z ? v.y : v.z;
-}
+u8 fsl_max_v2u8(v2u8 v) MAX_V2_FUNC_IMPL
+u8 fsl_max_v3u8(v3u8 v) MAX_V3_FUNC_IMPL
+u8 fsl_max_v4u8(v4u8 v) MAX_V4_FUNC_IMPL
+i8 fsl_max_v2i8(v2i8 v) MAX_V2_FUNC_IMPL
+i8 fsl_max_v3i8(v3i8 v) MAX_V3_FUNC_IMPL
+i8 fsl_max_v4i8(v4i8 v) MAX_V4_FUNC_IMPL
+u16 fsl_max_v2u16(v2u16 v) MAX_V2_FUNC_IMPL
+u16 fsl_max_v3u16(v3u16 v) MAX_V3_FUNC_IMPL
+u16 fsl_max_v4u16(v4u16 v) MAX_V4_FUNC_IMPL
+i16 fsl_max_v2i16(v2i16 v) MAX_V2_FUNC_IMPL
+i16 fsl_max_v3i16(v3i16 v) MAX_V3_FUNC_IMPL
+i16 fsl_max_v4i16(v4i16 v) MAX_V4_FUNC_IMPL
+u32 fsl_max_v2u32(v2u32 v) MAX_V2_FUNC_IMPL
+u32 fsl_max_v3u32(v3u32 v) MAX_V3_FUNC_IMPL
+u32 fsl_max_v4u32(v4u32 v) MAX_V4_FUNC_IMPL
+i32 fsl_max_v2i32(v2i32 v) MAX_V2_FUNC_IMPL
+i32 fsl_max_v3i32(v3i32 v) MAX_V3_FUNC_IMPL
+i32 fsl_max_v4i32(v4i32 v) MAX_V4_FUNC_IMPL
+f32 fsl_max_v2f32(v2f32 v) MAX_V2_FUNC_IMPL
+f32 fsl_max_v3f32(v3f32 v) MAX_V3_FUNC_IMPL
+f32 fsl_max_v4f32(v4f32 v) MAX_V4_FUNC_IMPL
+u64 fsl_max_v2u64(v2u64 v) MAX_V2_FUNC_IMPL
+u64 fsl_max_v3u64(v3u64 v) MAX_V3_FUNC_IMPL
+u64 fsl_max_v4u64(v4u64 v) MAX_V4_FUNC_IMPL
+i64 fsl_max_v2i64(v2i64 v) MAX_V2_FUNC_IMPL
+i64 fsl_max_v3i64(v3i64 v) MAX_V3_FUNC_IMPL
+i64 fsl_max_v4i64(v4i64 v) MAX_V4_FUNC_IMPL
+f64 fsl_max_v2f64(v2f64 v) MAX_V2_FUNC_IMPL
+f64 fsl_max_v3f64(v3f64 v) MAX_V3_FUNC_IMPL
+f64 fsl_max_v4f64(v4f64 v) MAX_V4_FUNC_IMPL
 
-f64 fsl_min_v3f64(v3f64 v)
-{
-    return v.x < v.y ? v.x < v.z ? v.x : v.z : v.y < v.z ? v.y : v.z;
-}
+u8 fsl_min_axis_v2u8(v2u8 v) MIN_AXIS_V2_FUNC_IMPL
+u8 fsl_min_axis_v3u8(v3u8 v) MIN_AXIS_V3_FUNC_IMPL
+u8 fsl_min_axis_v4u8(v4u8 v) MIN_AXIS_V4_FUNC_IMPL
+u8 fsl_min_axis_v2i8(v2i8 v) MIN_AXIS_V2_FUNC_IMPL
+u8 fsl_min_axis_v3i8(v3i8 v) MIN_AXIS_V3_FUNC_IMPL
+u8 fsl_min_axis_v4i8(v4i8 v) MIN_AXIS_V4_FUNC_IMPL
+u16 fsl_min_axis_v2u16(v2u16 v) MIN_AXIS_V2_FUNC_IMPL
+u16 fsl_min_axis_v3u16(v3u16 v) MIN_AXIS_V3_FUNC_IMPL
+u16 fsl_min_axis_v4u16(v4u16 v) MIN_AXIS_V4_FUNC_IMPL
+u16 fsl_min_axis_v2i16(v2i16 v) MIN_AXIS_V2_FUNC_IMPL
+u16 fsl_min_axis_v3i16(v3i16 v) MIN_AXIS_V3_FUNC_IMPL
+u16 fsl_min_axis_v4i16(v4i16 v) MIN_AXIS_V4_FUNC_IMPL
+u32 fsl_min_axis_v2u32(v2u32 v) MIN_AXIS_V2_FUNC_IMPL
+u32 fsl_min_axis_v3u32(v3u32 v) MIN_AXIS_V3_FUNC_IMPL
+u32 fsl_min_axis_v4u32(v4u32 v) MIN_AXIS_V4_FUNC_IMPL
+u32 fsl_min_axis_v2i32(v2i32 v) MIN_AXIS_V2_FUNC_IMPL
+u32 fsl_min_axis_v3i32(v3i32 v) MIN_AXIS_V3_FUNC_IMPL
+u32 fsl_min_axis_v4i32(v4i32 v) MIN_AXIS_V4_FUNC_IMPL
+u32 fsl_min_axis_v2f32(v2f32 v) MIN_AXIS_V2_FUNC_IMPL
+u32 fsl_min_axis_v3f32(v3f32 v) MIN_AXIS_V3_FUNC_IMPL
+u32 fsl_min_axis_v4f32(v4f32 v) MIN_AXIS_V4_FUNC_IMPL
+u64 fsl_min_axis_v2u64(v2u64 v) MIN_AXIS_V2_FUNC_IMPL
+u64 fsl_min_axis_v3u64(v3u64 v) MIN_AXIS_V3_FUNC_IMPL
+u64 fsl_min_axis_v4u64(v4u64 v) MIN_AXIS_V4_FUNC_IMPL
+u64 fsl_min_axis_v2i64(v2i64 v) MIN_AXIS_V2_FUNC_IMPL
+u64 fsl_min_axis_v3i64(v3i64 v) MIN_AXIS_V3_FUNC_IMPL
+u64 fsl_min_axis_v4i64(v4i64 v) MIN_AXIS_V4_FUNC_IMPL
+u64 fsl_min_axis_v2f64(v2f64 v) MIN_AXIS_V2_FUNC_IMPL
+u64 fsl_min_axis_v3f64(v3f64 v) MIN_AXIS_V3_FUNC_IMPL
+u64 fsl_min_axis_v4f64(v4f64 v) MIN_AXIS_V4_FUNC_IMPL
 
-f32 fsl_max_v3f32(v3f32 v)
-{
-    return v.x > v.y ? v.x > v.z ? v.x : v.z : v.y > v.z ? v.y : v.z;
-}
+u8 fsl_max_axis_v2u8(v2u8 v) MAX_AXIS_V2_FUNC_IMPL
+u8 fsl_max_axis_v3u8(v3u8 v) MAX_AXIS_V3_FUNC_IMPL
+u8 fsl_max_axis_v4u8(v4u8 v) MAX_AXIS_V4_FUNC_IMPL
+u8 fsl_max_axis_v2i8(v2i8 v) MAX_AXIS_V2_FUNC_IMPL
+u8 fsl_max_axis_v3i8(v3i8 v) MAX_AXIS_V3_FUNC_IMPL
+u8 fsl_max_axis_v4i8(v4i8 v) MAX_AXIS_V4_FUNC_IMPL
+u16 fsl_max_axis_v2u16(v2u16 v) MAX_AXIS_V2_FUNC_IMPL
+u16 fsl_max_axis_v3u16(v3u16 v) MAX_AXIS_V3_FUNC_IMPL
+u16 fsl_max_axis_v4u16(v4u16 v) MAX_AXIS_V4_FUNC_IMPL
+u16 fsl_max_axis_v2i16(v2i16 v) MAX_AXIS_V2_FUNC_IMPL
+u16 fsl_max_axis_v3i16(v3i16 v) MAX_AXIS_V3_FUNC_IMPL
+u16 fsl_max_axis_v4i16(v4i16 v) MAX_AXIS_V4_FUNC_IMPL
+u32 fsl_max_axis_v2u32(v2u32 v) MAX_AXIS_V2_FUNC_IMPL
+u32 fsl_max_axis_v3u32(v3u32 v) MAX_AXIS_V3_FUNC_IMPL
+u32 fsl_max_axis_v4u32(v4u32 v) MAX_AXIS_V4_FUNC_IMPL
+u32 fsl_max_axis_v2i32(v2i32 v) MAX_AXIS_V2_FUNC_IMPL
+u32 fsl_max_axis_v3i32(v3i32 v) MAX_AXIS_V3_FUNC_IMPL
+u32 fsl_max_axis_v4i32(v4i32 v) MAX_AXIS_V4_FUNC_IMPL
+u32 fsl_max_axis_v2f32(v2f32 v) MAX_AXIS_V2_FUNC_IMPL
+u32 fsl_max_axis_v3f32(v3f32 v) MAX_AXIS_V3_FUNC_IMPL
+u32 fsl_max_axis_v4f32(v4f32 v) MAX_AXIS_V4_FUNC_IMPL
+u64 fsl_max_axis_v2u64(v2u64 v) MAX_AXIS_V2_FUNC_IMPL
+u64 fsl_max_axis_v3u64(v3u64 v) MAX_AXIS_V3_FUNC_IMPL
+u64 fsl_max_axis_v4u64(v4u64 v) MAX_AXIS_V4_FUNC_IMPL
+u64 fsl_max_axis_v2i64(v2i64 v) MAX_AXIS_V2_FUNC_IMPL
+u64 fsl_max_axis_v3i64(v3i64 v) MAX_AXIS_V3_FUNC_IMPL
+u64 fsl_max_axis_v4i64(v4i64 v) MAX_AXIS_V4_FUNC_IMPL
+u64 fsl_max_axis_v2f64(v2f64 v) MAX_AXIS_V2_FUNC_IMPL
+u64 fsl_max_axis_v3f64(v3f64 v) MAX_AXIS_V3_FUNC_IMPL
+u64 fsl_max_axis_v4f64(v4f64 v) MAX_AXIS_V4_FUNC_IMPL
 
-f64 fsl_max_v3f64(v3f64 v)
-{
-    return v.x > v.y ? v.x > v.z ? v.x : v.z : v.y > v.z ? v.y : v.z;
-}
+b8 fsl_is_in_bounds_v2u8(v2u8 v, v2u8 min, v2u8 max) IS_IN_BOUNDS_V2_FUNC_IMPL
+b8 fsl_is_in_bounds_v3u8(v3u8 v, v3u8 min, v3u8 max) IS_IN_BOUNDS_V3_FUNC_IMPL
+b8 fsl_is_in_bounds_v4u8(v4u8 v, v4u8 min, v4u8 max) IS_IN_BOUNDS_V4_FUNC_IMPL
+b8 fsl_is_in_bounds_v2i8(v2i8 v, v2i8 min, v2i8 max) IS_IN_BOUNDS_V2_FUNC_IMPL
+b8 fsl_is_in_bounds_v3i8(v3i8 v, v3i8 min, v3i8 max) IS_IN_BOUNDS_V3_FUNC_IMPL
+b8 fsl_is_in_bounds_v4i8(v4i8 v, v4i8 min, v4i8 max) IS_IN_BOUNDS_V4_FUNC_IMPL
+b8 fsl_is_in_bounds_v2u16(v2u16 v, v2u16 min, v2u16 max) IS_IN_BOUNDS_V2_FUNC_IMPL
+b8 fsl_is_in_bounds_v3u16(v3u16 v, v3u16 min, v3u16 max) IS_IN_BOUNDS_V3_FUNC_IMPL
+b8 fsl_is_in_bounds_v4u16(v4u16 v, v4u16 min, v4u16 max) IS_IN_BOUNDS_V4_FUNC_IMPL
+b8 fsl_is_in_bounds_v2i16(v2i16 v, v2i16 min, v2i16 max) IS_IN_BOUNDS_V2_FUNC_IMPL
+b8 fsl_is_in_bounds_v3i16(v3i16 v, v3i16 min, v3i16 max) IS_IN_BOUNDS_V3_FUNC_IMPL
+b8 fsl_is_in_bounds_v4i16(v4i16 v, v4i16 min, v4i16 max) IS_IN_BOUNDS_V4_FUNC_IMPL
+b8 fsl_is_in_bounds_v2u32(v2u32 v, v2u32 min, v2u32 max) IS_IN_BOUNDS_V2_FUNC_IMPL
+b8 fsl_is_in_bounds_v3u32(v3u32 v, v3u32 min, v3u32 max) IS_IN_BOUNDS_V3_FUNC_IMPL
+b8 fsl_is_in_bounds_v4u32(v4u32 v, v4u32 min, v4u32 max) IS_IN_BOUNDS_V4_FUNC_IMPL
+b8 fsl_is_in_bounds_v2i32(v2i32 v, v2i32 min, v2i32 max) IS_IN_BOUNDS_V2_FUNC_IMPL
+b8 fsl_is_in_bounds_v3i32(v3i32 v, v3i32 min, v3i32 max) IS_IN_BOUNDS_V3_FUNC_IMPL
+b8 fsl_is_in_bounds_v4i32(v4i32 v, v4i32 min, v4i32 max) IS_IN_BOUNDS_V4_FUNC_IMPL
+b8 fsl_is_in_bounds_v2f32(v2f32 v, v2f32 min, v2f32 max) IS_IN_BOUNDS_V2_FUNC_IMPL
+b8 fsl_is_in_bounds_v3f32(v3f32 v, v3f32 min, v3f32 max) IS_IN_BOUNDS_V3_FUNC_IMPL
+b8 fsl_is_in_bounds_v4f32(v4f32 v, v4f32 min, v4f32 max) IS_IN_BOUNDS_V4_FUNC_IMPL
+b8 fsl_is_in_bounds_v2u64(v2u64 v, v2u64 min, v2u64 max) IS_IN_BOUNDS_V2_FUNC_IMPL
+b8 fsl_is_in_bounds_v3u64(v3u64 v, v3u64 min, v3u64 max) IS_IN_BOUNDS_V3_FUNC_IMPL
+b8 fsl_is_in_bounds_v4u64(v4u64 v, v4u64 min, v4u64 max) IS_IN_BOUNDS_V4_FUNC_IMPL
+b8 fsl_is_in_bounds_v2i64(v2i64 v, v2i64 min, v2i64 max) IS_IN_BOUNDS_V2_FUNC_IMPL
+b8 fsl_is_in_bounds_v3i64(v3i64 v, v3i64 min, v3i64 max) IS_IN_BOUNDS_V3_FUNC_IMPL
+b8 fsl_is_in_bounds_v4i64(v4i64 v, v4i64 min, v4i64 max) IS_IN_BOUNDS_V4_FUNC_IMPL
+b8 fsl_is_in_bounds_v2f64(v2f64 v, v2f64 min, v2f64 max) IS_IN_BOUNDS_V2_FUNC_IMPL
+b8 fsl_is_in_bounds_v3f64(v3f64 v, v3f64 min, v3f64 max) IS_IN_BOUNDS_V3_FUNC_IMPL
+b8 fsl_is_in_bounds_v4f64(v4f64 v, v4f64 min, v4f64 max) IS_IN_BOUNDS_V4_FUNC_IMPL
 
-u32 fsl_min_axis_v3f32(v3f32 v)
-{
-    return v.x < v.y ? v.x < v.z ? 1 : 3 : v.y < v.z ? 2 : 3;
-}
+u8 fsl_len_v2u8(v2u8 v) LENGTH_V2_FUNC_IMPL
+u8 fsl_len_v3u8(v3u8 v) LENGTH_V3_FUNC_IMPL
+u8 fsl_len_v4u8(v4u8 v) LENGTH_V4_FUNC_IMPL
+i8 fsl_len_v2i8(v2i8 v) LENGTH_V2_FUNC_IMPL
+i8 fsl_len_v3i8(v3i8 v) LENGTH_V3_FUNC_IMPL
+i8 fsl_len_v4i8(v4i8 v) LENGTH_V4_FUNC_IMPL
+u16 fsl_len_v2u16(v2u16 v) LENGTH_V2_FUNC_IMPL
+u16 fsl_len_v3u16(v3u16 v) LENGTH_V3_FUNC_IMPL
+u16 fsl_len_v4u16(v4u16 v) LENGTH_V4_FUNC_IMPL
+i16 fsl_len_v2i16(v2i16 v) LENGTH_V2_FUNC_IMPL
+i16 fsl_len_v3i16(v3i16 v) LENGTH_V3_FUNC_IMPL
+i16 fsl_len_v4i16(v4i16 v) LENGTH_V4_FUNC_IMPL
+u32 fsl_len_v2u32(v2u32 v) LENGTH_V2_FUNC_IMPL
+u32 fsl_len_v3u32(v3u32 v) LENGTH_V3_FUNC_IMPL
+u32 fsl_len_v4u32(v4u32 v) LENGTH_V4_FUNC_IMPL
+i32 fsl_len_v2i32(v2i32 v) LENGTH_V2_FUNC_IMPL
+i32 fsl_len_v3i32(v3i32 v) LENGTH_V3_FUNC_IMPL
+i32 fsl_len_v4i32(v4i32 v) LENGTH_V4_FUNC_IMPL
+f32 fsl_len_v2f32(v2f32 v) LENGTH_V2_FUNC_IMPL
+f32 fsl_len_v3f32(v3f32 v) LENGTH_V3_FUNC_IMPL
+f32 fsl_len_v4f32(v4f32 v) LENGTH_V4_FUNC_IMPL
+u64 fsl_len_v2u64(v2u64 v) LENGTH_V2_FUNC_IMPL
+u64 fsl_len_v3u64(v3u64 v) LENGTH_V3_FUNC_IMPL
+u64 fsl_len_v4u64(v4u64 v) LENGTH_V4_FUNC_IMPL
+i64 fsl_len_v2i64(v2i64 v) LENGTH_V2_FUNC_IMPL
+i64 fsl_len_v3i64(v3i64 v) LENGTH_V3_FUNC_IMPL
+i64 fsl_len_v4i64(v4i64 v) LENGTH_V4_FUNC_IMPL
+f64 fsl_len_v2f64(v2f64 v) LENGTH_V2_FUNC_IMPL
+f64 fsl_len_v3f64(v3f64 v) LENGTH_V3_FUNC_IMPL
+f64 fsl_len_v4f64(v4f64 v) LENGTH_V4_FUNC_IMPL
 
-u64 fsl_min_axis_v3f64(v3f64 v)
-{
-    return v.x < v.y ? v.x < v.z ? 1 : 3 : v.y < v.z ? 2 : 3;
-}
+u8 fsl_distance_v2u8(v2u8 a, v2u8 b) DISTANCE_V2_FUNC_IMPL
+u8 fsl_distance_v3u8(v3u8 a, v3u8 b) DISTANCE_V3_FUNC_IMPL
+u8 fsl_distance_v4u8(v4u8 a, v4u8 b) DISTANCE_V4_FUNC_IMPL
+i8 fsl_distance_v2i8(v2i8 a, v2i8 b) DISTANCE_V2_FUNC_IMPL
+i8 fsl_distance_v3i8(v3i8 a, v3i8 b) DISTANCE_V3_FUNC_IMPL
+i8 fsl_distance_v4i8(v4i8 a, v4i8 b) DISTANCE_V4_FUNC_IMPL
+u16 fsl_distance_v2u16(v2u16 a, v2u16 b) DISTANCE_V2_FUNC_IMPL
+u16 fsl_distance_v3u16(v3u16 a, v3u16 b) DISTANCE_V3_FUNC_IMPL
+u16 fsl_distance_v4u16(v4u16 a, v4u16 b) DISTANCE_V4_FUNC_IMPL
+i16 fsl_distance_v2i16(v2i16 a, v2i16 b) DISTANCE_V2_FUNC_IMPL
+i16 fsl_distance_v3i16(v3i16 a, v3i16 b) DISTANCE_V3_FUNC_IMPL
+i16 fsl_distance_v4i16(v4i16 a, v4i16 b) DISTANCE_V4_FUNC_IMPL
+u32 fsl_distance_v2u32(v2u32 a, v2u32 b) DISTANCE_V2_FUNC_IMPL
+u32 fsl_distance_v3u32(v3u32 a, v3u32 b) DISTANCE_V3_FUNC_IMPL
+u32 fsl_distance_v4u32(v4u32 a, v4u32 b) DISTANCE_V4_FUNC_IMPL
+i32 fsl_distance_v2i32(v2i32 a, v2i32 b) DISTANCE_V2_FUNC_IMPL
+i32 fsl_distance_v3i32(v3i32 a, v3i32 b) DISTANCE_V3_FUNC_IMPL
+i32 fsl_distance_v4i32(v4i32 a, v4i32 b) DISTANCE_V4_FUNC_IMPL
+f32 fsl_distance_v2f32(v2f32 a, v2f32 b) DISTANCE_V2_FUNC_IMPL
+f32 fsl_distance_v3f32(v3f32 a, v3f32 b) DISTANCE_V3_FUNC_IMPL
+f32 fsl_distance_v4f32(v4f32 a, v4f32 b) DISTANCE_V4_FUNC_IMPL
+u64 fsl_distance_v2u64(v2u64 a, v2u64 b) DISTANCE_V2_FUNC_IMPL
+u64 fsl_distance_v3u64(v3u64 a, v3u64 b) DISTANCE_V3_FUNC_IMPL
+u64 fsl_distance_v4u64(v4u64 a, v4u64 b) DISTANCE_V4_FUNC_IMPL
+i64 fsl_distance_v2i64(v2i64 a, v2i64 b) DISTANCE_V2_FUNC_IMPL
+i64 fsl_distance_v3i64(v3i64 a, v3i64 b) DISTANCE_V3_FUNC_IMPL
+i64 fsl_distance_v4i64(v4i64 a, v4i64 b) DISTANCE_V4_FUNC_IMPL
+f64 fsl_distance_v2f64(v2f64 a, v2f64 b) DISTANCE_V2_FUNC_IMPL
+f64 fsl_distance_v3f64(v3f64 a, v3f64 b) DISTANCE_V3_FUNC_IMPL
+f64 fsl_distance_v4f64(v4f64 a, v4f64 b) DISTANCE_V4_FUNC_IMPL
 
-u32 fsl_max_axis_v3f32(v3f32 v)
-{
-    return v.x > v.y ? v.x > v.z ? 1 : 3 : v.y > v.z ? 2 : 3;
-}
+v2f32 fsl_normalize_v2f32(v2f32 v) NORMALIZE_V2_FUNC_IMPL(f32, sqrtf, fsl_len_v2f32, f)
+v3f32 fsl_normalize_v3f32(v3f32 v) NORMALIZE_V3_FUNC_IMPL(f32, sqrtf, fsl_len_v3f32, f)
+v4f32 fsl_normalize_v4f32(v4f32 v) NORMALIZE_V4_FUNC_IMPL(f32, sqrtf, fsl_len_v4f32, f)
+v2f64 fsl_normalize_v2f64(v2f64 v) NORMALIZE_V2_FUNC_IMPL(f64, sqrt, fsl_len_v2f64, 0)
+v3f64 fsl_normalize_v3f64(v3f64 v) NORMALIZE_V3_FUNC_IMPL(f64, sqrt, fsl_len_v3f64, 0)
+v4f64 fsl_normalize_v4f64(v4f64 v) NORMALIZE_V4_FUNC_IMPL(f64, sqrt, fsl_len_v4f64, 0)
 
-u64 fsl_max_axis_v3f64(v3f64 v)
-{
-    return v.x > v.y ? v.x > v.z ? 1 : 3 : v.y > v.z ? 2 : 3;
-}
+f32 fsl_dot_v2f32(v2f32 a, v2f32 b) DOT_V2_FUNC_IMPL
+f32 fsl_dot_v3f32(v3f32 a, v3f32 b) DOT_V3_FUNC_IMPL
+f32 fsl_dot_v4f32(v4f32 a, v4f32 b) DOT_V4_FUNC_IMPL
+f64 fsl_dot_v2f64(v2f64 a, v2f64 b) DOT_V2_FUNC_IMPL
+f64 fsl_dot_v3f64(v3f64 a, v3f64 b) DOT_V3_FUNC_IMPL
+f64 fsl_dot_v4f64(v4f64 a, v4f64 b) DOT_V4_FUNC_IMPL
 
-f32 fsl_map_range_f32(f32 n, f32 n_min, f32 n_max, f32 r_min, f32 r_max)
-{
-    return r_min + ((n - n_min) * (r_max - r_min)) / (n_max - n_min);
-}
+/* ---- section: matrix ----------------------------------------------------- */
 
-f64 fsl_map_range_f64(f64 n, f64 n_min, f64 n_max, f64 r_min, f64 r_max)
-{
-    return r_min + ((n - n_min) * (r_max - r_min)) / (n_max - n_min);
-}
+m2f32 fsl_identity_m2f32(void) IDENTITY_M2_FUNC_IMPL(m2f32, f)
+m3f32 fsl_identity_m3f32(void) IDENTITY_M3_FUNC_IMPL(m3f32, f)
+m4f32 fsl_identity_m4f32(void) IDENTITY_M4_FUNC_IMPL(m4f32, f)
+m2f64 fsl_identity_m2f64(void) IDENTITY_M2_FUNC_IMPL(m2f64, 0)
+m3f64 fsl_identity_m3f64(void) IDENTITY_M3_FUNC_IMPL(m3f64, 0)
+m4f64 fsl_identity_m4f64(void) IDENTITY_M4_FUNC_IMPL(m4f64, 0)
+m2f32 fsl_add_m2f32(m2f32 a, m2f32 b) ADD_M2_FUNC_IMPL
+m3f32 fsl_add_m3f32(m3f32 a, m3f32 b) ADD_M3_FUNC_IMPL
+m4f32 fsl_add_m4f32(m4f32 a, m4f32 b) ADD_M4_FUNC_IMPL
+m2f64 fsl_add_m2f64(m2f64 a, m2f64 b) ADD_M2_FUNC_IMPL
+m3f64 fsl_add_m3f64(m3f64 a, m3f64 b) ADD_M3_FUNC_IMPL
+m4f64 fsl_add_m4f64(m4f64 a, m4f64 b) ADD_M4_FUNC_IMPL
+m2f32 fsl_sub_m2f32(m2f32 a, m2f32 b) SUBTRACT_M2_FUNC_IMPL
+m3f32 fsl_sub_m3f32(m3f32 a, m3f32 b) SUBTRACT_M3_FUNC_IMPL
+m4f32 fsl_sub_m4f32(m4f32 a, m4f32 b) SUBTRACT_M4_FUNC_IMPL
+m2f64 fsl_sub_m2f64(m2f64 a, m2f64 b) SUBTRACT_M2_FUNC_IMPL
+m3f64 fsl_sub_m3f64(m3f64 a, m3f64 b) SUBTRACT_M3_FUNC_IMPL
+m4f64 fsl_sub_m4f64(m4f64 a, m4f64 b) SUBTRACT_M4_FUNC_IMPL
+m2f32 fsl_sub_identity_m2f32(m2f32 m) SUBTRACT_IDENTITY_M2_FUNC_IMPL(f)
+m3f32 fsl_sub_identity_m3f32(m3f32 m) SUBTRACT_IDENTITY_M3_FUNC_IMPL(f)
+m4f32 fsl_sub_identity_m4f32(m4f32 m) SUBTRACT_IDENTITY_M4_FUNC_IMPL(f)
+m2f64 fsl_sub_identity_m2f64(m2f64 m) SUBTRACT_IDENTITY_M2_FUNC_IMPL(0)
+m3f64 fsl_sub_identity_m3f64(m3f64 m) SUBTRACT_IDENTITY_M3_FUNC_IMPL(0)
+m4f64 fsl_sub_identity_m4f64(m4f64 m) SUBTRACT_IDENTITY_M4_FUNC_IMPL(0)
+m2f32 fsl_multiply_m2f32(m2f32 a, m2f32 b) MULTIPLY_M2_FUNC_IMPL(m2f32)
+m3f32 fsl_multiply_m3f32(m3f32 a, m3f32 b) MULTIPLY_M3_FUNC_IMPL(m3f32)
+m4f32 fsl_multiply_m4f32(m4f32 a, m4f32 b) MULTIPLY_M4_FUNC_IMPL(m4f32)
+m2f64 fsl_multiply_m2f64(m2f64 a, m2f64 b) MULTIPLY_M2_FUNC_IMPL(m2f64)
+m3f64 fsl_multiply_m3f64(m3f64 a, m3f64 b) MULTIPLY_M3_FUNC_IMPL(m3f64)
+m4f64 fsl_multiply_m4f64(m4f64 a, m4f64 b) MULTIPLY_M4_FUNC_IMPL(m4f64)
+v2f32 fsl_multiply_vector_m2f32(m2f32 m, v2f32 v) MULTIPLY_VECTOR_M2_FUNC_IMPL(v2f32)
+v3f32 fsl_multiply_vector_m3f32(m3f32 m, v3f32 v) MULTIPLY_VECTOR_M3_FUNC_IMPL(v3f32)
+v4f32 fsl_multiply_vector_m4f32(m4f32 m, v4f32 v) MULTIPLY_VECTOR_M4_FUNC_IMPL(v4f32)
+v2f64 fsl_multiply_vector_m2f64(m2f64 m, v2f64 v) MULTIPLY_VECTOR_M2_FUNC_IMPL(v2f64)
+v3f64 fsl_multiply_vector_m3f64(m3f64 m, v3f64 v) MULTIPLY_VECTOR_M3_FUNC_IMPL(v3f64)
+v4f64 fsl_multiply_vector_m4f64(m4f64 m, v4f64 v) MULTIPLY_VECTOR_M4_FUNC_IMPL(v4f64)
+m2f32 fsl_transpose_m2f32(m2f32 m) TRANSPOSE_M2_FUNC_IMPL(m2f32)
+m3f32 fsl_transpose_m3f32(m3f32 m) TRANSPOSE_M3_FUNC_IMPL(m3f32)
+m4f32 fsl_transpose_m4f32(m4f32 m) TRANSPOSE_M4_FUNC_IMPL(m4f32)
+m2f64 fsl_transpose_m2f64(m2f64 m) TRANSPOSE_M2_FUNC_IMPL(m2f64)
+m3f64 fsl_transpose_m3f64(m3f64 m) TRANSPOSE_M3_FUNC_IMPL(m3f64)
+m4f64 fsl_transpose_m4f64(m4f64 m) TRANSPOSE_M4_FUNC_IMPL(m4f64)
+m2f32 fsl_outer_m2f32(v2f32 a, v2f32 b) OUTER_PRODUCT_M2_FUNC_IMPL(m2f32)
+m3f32 fsl_outer_m3f32(v3f32 a, v3f32 b) OUTER_PRODUCT_M3_FUNC_IMPL(m3f32)
+m4f32 fsl_outer_m4f32(v4f32 a, v4f32 b) OUTER_PRODUCT_M4_FUNC_IMPL(m4f32)
+m2f64 fsl_outer_m2f64(v2f64 a, v2f64 b) OUTER_PRODUCT_M2_FUNC_IMPL(m2f64)
+m3f64 fsl_outer_m3f64(v3f64 a, v3f64 b) OUTER_PRODUCT_M3_FUNC_IMPL(m3f64)
+m4f64 fsl_outer_m4f64(v4f64 a, v4f64 b) OUTER_PRODUCT_M4_FUNC_IMPL(m4f64)
 
-f32 fsl_len_v3f32(v3f32 v)
-{
-    return v.x * v.x + v.y * v.y + v.z * v.z;
-}
-
-f64 fsl_len_v3f64(v3f64 v)
-{
-    return v.x * v.x + v.y * v.y + v.z * v.z;
-}
-
-v3f32 fsl_normalize_v3f32(v3f32 v)
-{
-    v3f32 nov3f32 = {0};
-    f32 len = sqrtf(fsl_len_v3f32(v));
-    if (len < FSL_EPSILON)
-        return nov3f32;
-    v.x /= len;
-    v.y /= len;
-    v.z /= len;
-    return v;
-}
-
-v3f64 fsl_normalize_v3f64(v3f64 v)
-{
-    v3f64 nov3f64 = {0};
-    f64 len = sqrt(fsl_len_v3f64(v));
-    if (len < FSL_EPSILON)
-        return nov3f64;
-    v.x /= len;
-    v.y /= len;
-    v.z /= len;
-    return v;
-}
-
-f32 fsl_dot_v3f32(v3f32 a, v3f32 b)
-{
-    return a.x * b.x + a.y * b.y + a.z * b.z;
-}
-
-f64 fsl_dot_v3f64(v3f64 a, v3f64 b)
-{
-    return a.x * b.x + a.y * b.y + a.z * b.z;
-}
+/* ---- section: trigonometry ----------------------------------------------- */
 
 angle_f32 fsl_angle_f32(f32 n)
 {
@@ -266,244 +526,7 @@ angle_f64 fsl_angle_f64(f64 n)
     return angle;
 }
 
-u32 fsl_distance_v3i32(v3i32 a, v3i32 b)
-{
-    return
-        (a.x - b.x) * (a.x - b.x) +
-        (a.y - b.y) * (a.y - b.y) +
-        (a.z - b.z) * (a.z - b.z);
-}
-
-f32 fsl_distance_v3f32(v3f32 a, v3f32 b)
-{
-    return
-        (a.x - b.x) * (a.x - b.x) +
-        (a.y - b.y) * (a.y - b.y) +
-        (a.z - b.z) * (a.z - b.z);
-}
-
-f64 fsl_distance_v3f64(v3f64 a, v3f64 b)
-{
-    return
-        (a.x - b.x) * (a.x - b.x) +
-        (a.y - b.y) * (a.y - b.y) +
-        (a.z - b.z) * (a.z - b.z);
-}
-
-b8 fsl_is_in_range_i32(i32 n, i32 min, i32 max)
-{
-    return (n - min >= 0) & (max - n >= 0);
-}
-
-b8 fsl_is_in_range_f32(f32 n, f32 min, f32 max)
-{
-    return (n - min >= 0.0f) & (max - n >= 0.0f);
-}
-
-b8 fsl_is_in_range_i64(i64 n, i64 min, i64 max)
-{
-    return (n - min >= 0) & (max - n >= 0);
-}
-
-b8 fsl_is_in_range_f64(f64 n, f64 min, f64 max)
-{
-    return (n - min >= 0.0f) & (max - n >= 0.0f);
-}
-
-b8 fsl_is_in_area_i32(v2i32 v, v2i32 min, v2i32 max)
-{
-    return
-        (v.x - min.x >= 0) & (max.x - v.x >= 0) &
-        (v.y - min.y >= 0) & (max.y - v.y >= 0);
-}
-
-b8 fsl_is_in_area_f32(v2f32 v, v2f32 min, v2f32 max)
-{
-    return
-        (v.x - min.x >= 0.0f) & (max.x - v.x >= 0.0f) &
-        (v.y - min.y >= 0.0f) & (max.y - v.y >= 0.0f);
-}
-
-b8 fsl_is_in_area_f64(v2f64 v, v2f64 min, v2f64 max)
-{
-    return
-        (v.x - min.x >= 0.0f) & (max.x - v.x >= 0.0f) &
-        (v.y - min.y >= 0.0f) & (max.y - v.y >= 0.0f);
-}
-
-b8 fsl_is_in_volume_i32(v3i32 v, v3i32 min, v3i32 max)
-{
-    return
-        (v.x - min.x >= 0) & (max.x - v.x >= 0) &
-        (v.y - min.y >= 0) & (max.y - v.y >= 0) &
-        (v.z - min.z >= 0) & (max.z - v.z >= 0);
-}
-
-b8 fsl_is_in_volume_f32(v3f32 v, v3f32 min, v3f32 max)
-{
-    return
-        (v.x - min.x >= 0.0f) & (max.x - v.x >= 0.0f) &
-        (v.y - min.y >= 0.0f) & (max.y - v.y >= 0.0f) &
-        (v.z - min.z >= 0.0f) & (max.z - v.z >= 0.0f);
-}
-
-b8 fsl_is_in_volume_i64(v3i64 v, v3i64 min, v3i64 max)
-{
-    return
-        (v.x - min.x >= 0) & (max.x - v.x >= 0) &
-        (v.y - min.y >= 0) & (max.y - v.y >= 0) &
-        (v.z - min.z >= 0) & (max.z - v.z >= 0);
-}
-
-b8 fsl_is_in_volume_f64(v3f64 v, v3f64 min, v3f64 max)
-{
-    return
-        (v.x - min.x >= 0.0f) & (max.x - v.x >= 0.0f) &
-        (v.y - min.y >= 0.0f) & (max.y - v.y >= 0.0f) &
-        (v.z - min.z >= 0.0f) & (max.z - v.z >= 0.0f);
-}
-
-m4f32 fsl_matrix_unit(void)
-{
-    m4f32 matrix = {0};
-    matrix.a11 = 1.0f;
-    matrix.a22 = 1.0f;
-    matrix.a33 = 1.0f;
-    matrix.a44 = 1.0f;
-    return matrix;
-}
-
-m4f32 fsl_matrix_add(m4f32 a, m4f32 b)
-{
-    m4f32 m = {0};
-    m.a11 = a.a11 + b.a11;
-    m.a12 = a.a12 + b.a12;
-    m.a13 = a.a13 + b.a13;
-    m.a14 = a.a14 + b.a14;
-    m.a21 = a.a21 + b.a21;
-    m.a22 = a.a22 + b.a22;
-    m.a23 = a.a23 + b.a23;
-    m.a24 = a.a24 + b.a24;
-    m.a31 = a.a31 + b.a31;
-    m.a32 = a.a32 + b.a32;
-    m.a33 = a.a33 + b.a33;
-    m.a34 = a.a34 + b.a34;
-    m.a41 = a.a41 + b.a41;
-    m.a42 = a.a42 + b.a42;
-    m.a43 = a.a43 + b.a43;
-    m.a44 = a.a44 + b.a44;
-    return m;
-}
-
-m4f32 fsl_matrix_subtract(m4f32 a, m4f32 b)
-{
-    m4f32 m = {0};
-    m.a11 = a.a11 - b.a11;
-    m.a12 = a.a12 - b.a12;
-    m.a13 = a.a13 - b.a13;
-    m.a14 = a.a14 - b.a14;
-    m.a21 = a.a21 - b.a21;
-    m.a22 = a.a22 - b.a22;
-    m.a23 = a.a23 - b.a23;
-    m.a24 = a.a24 - b.a24;
-    m.a31 = a.a31 - b.a31;
-    m.a32 = a.a32 - b.a32;
-    m.a33 = a.a33 - b.a33;
-    m.a34 = a.a34 - b.a34;
-    m.a41 = a.a41 - b.a41;
-    m.a42 = a.a42 - b.a42;
-    m.a43 = a.a43 - b.a43;
-    m.a44 = a.a44 - b.a44;
-    return m;
-}
-
-m4f32 fsl_matrix_multiply(m4f32 a, m4f32 b)
-{
-    m4f32 m = {0};
-    m.a11 = a.a11 * b.a11 + a.a12 * b.a21 + a.a13 * b.a31 + a.a14 * b.a41;
-    m.a12 = a.a11 * b.a12 + a.a12 * b.a22 + a.a13 * b.a32 + a.a14 * b.a42;
-    m.a13 = a.a11 * b.a13 + a.a12 * b.a23 + a.a13 * b.a33 + a.a14 * b.a43;
-    m.a14 = a.a11 * b.a14 + a.a12 * b.a24 + a.a13 * b.a34 + a.a14 * b.a44;
-    m.a21 = a.a21 * b.a11 + a.a22 * b.a21 + a.a23 * b.a31 + a.a24 * b.a41;
-    m.a22 = a.a21 * b.a12 + a.a22 * b.a22 + a.a23 * b.a32 + a.a24 * b.a42;
-    m.a23 = a.a21 * b.a13 + a.a22 * b.a23 + a.a23 * b.a33 + a.a24 * b.a43;
-    m.a24 = a.a21 * b.a14 + a.a22 * b.a24 + a.a23 * b.a34 + a.a24 * b.a44;
-    m.a31 = a.a31 * b.a11 + a.a32 * b.a21 + a.a33 * b.a31 + a.a34 * b.a41;
-    m.a32 = a.a31 * b.a12 + a.a32 * b.a22 + a.a33 * b.a32 + a.a34 * b.a42;
-    m.a33 = a.a31 * b.a13 + a.a32 * b.a23 + a.a33 * b.a33 + a.a34 * b.a43;
-    m.a34 = a.a31 * b.a14 + a.a32 * b.a24 + a.a33 * b.a34 + a.a34 * b.a44;
-    m.a41 = a.a41 * b.a11 + a.a42 * b.a21 + a.a43 * b.a31 + a.a44 * b.a41;
-    m.a42 = a.a41 * b.a12 + a.a42 * b.a22 + a.a43 * b.a32 + a.a44 * b.a42;
-    m.a43 = a.a41 * b.a13 + a.a42 * b.a23 + a.a43 * b.a33 + a.a44 * b.a43;
-    m.a44 = a.a41 * b.a14 + a.a42 * b.a24 + a.a43 * b.a34 + a.a44 * b.a44;
-    return m;
-}
-
-v4f32 fsl_matrix_multiply_vector(m4f32 a, v4f32 b)
-{
-    v4f32 v = {0};
-    v.x = a.a11 * b.x + a.a12 * b.x + a.a13 * b.x + a.a14 * b.x;
-    v.y = a.a21 * b.y + a.a22 * b.y + a.a23 * b.y + a.a24 * b.y;
-    v.z = a.a31 * b.z + a.a32 * b.z + a.a33 * b.z + a.a34 * b.z;
-    v.w = a.a41 * b.w + a.a42 * b.w + a.a43 * b.w + a.a44 * b.w;
-    return v;
-}
-
-f32 fsl_lerp_f32(f32 a, f32 b, f32 t)
-{
-    return a + (b - a) * t;
-}
-
-f32 fsl_bilerp_f32(f32 a, f32 b, f32 c, f32 d, f32 tx, f32 ty)
-{
-    f32 wx = 1.0f - tx;
-    f32 wy = 1.0f - ty;
-    return
-        a * wx * wy +
-        b * tx * wy +
-        c * wx * ty +
-        d * tx * ty;
-}
-
-f32 fsl_trilerp_f32(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f, f32 g, f32 h, f32 tx, f32 ty, f32 tz)
-{
-    f32 wx = 1.0f - tx;
-    f32 wy = 1.0f - ty;
-    f32 wz = 1.0f - tz;
-    return
-        a * wx * wy * wz +
-        b * tx * wy * wz +
-        c * wx * ty * wz +
-        d * tx * ty * wz +
-        e * wx * wy * tz +
-        f * tx * wy * tz +
-        g * wx * ty * tz +
-        h * tx * ty * tz;
-}
-
-f32 fsl_lerp_exp_f32(f32 a, f32 b, f32 k, f32 t)
-{
-    return a + (b - a) * (1.0f - expf(-k * t));
-}
-
-v3f64 fsl_lerp_v3f64(v3f64 a, v3f64 b, f32 t)
-{
-    v3f64 v = {0};
-    v.x = a.x + (b.x - a.x) * t;
-    v.y = a.y + (b.y - a.y) * t;
-    v.z = a.z + (b.z - a.z) * t;
-    return v;
-}
-
-f32 fsl_easein_f32(f32 a, f32 b, f32 t)
-{
-    return a + (b - a) * t * t;
-}
-
-f32 fsl_smoothstep_f32(f32 a, f32 b, f32 t)
-{
-    return a + (b - a) * t * t * (3.0f - 2.0f * t);
-}
+/* ---- section: random ----------------------------------------------------- */
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshift-count-overflow"

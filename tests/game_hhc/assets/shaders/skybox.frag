@@ -11,9 +11,6 @@ in vec2 uv;
 out vec4 color;
 vec4 sun;
 
-#define USE_TONE_MAPPING
-#include "h/defaults.glsl"
-
 void main()
 {
     float sky_brightness = (sky_color.r + sky_color.g + sky_color.b +

@@ -26,6 +26,7 @@
 #include "../common/api.h"
 #include "../common/types.h"
 #include "../math/vector.h"
+#include "../physics/physics_types.h"
 
 #include "asset_types.h"
 #include "mesh/mesh.h"
@@ -46,6 +47,13 @@ enum fsl_text_alignment
     FSL_TEXT_ALIGN_TOP = 0,
     FSL_TEXT_ALIGN_BOTTOM = 2
 }; /* fsl_text_alignment */
+
+struct fsl_model
+{
+    fsl_mesh mesh;
+    fsl_transform_v3f64 transform;
+    m4f32 mat_model;
+}; /* fsl_model */
 
 /*!
  *  @brief get an asset's metadata (e.g., name, name_id, etc..).
@@ -183,5 +191,11 @@ FSLAPI void fsl_camera_lookat_update(fsl_camera *camera,
  *  @param roll enable/disable roll rotation.
  */
 FSLAPI void fsl_projection_perspective_update(fsl_camera camera, fsl_projection *projection, b8 roll);
+
+/*!
+ *  @brief draw model using baked transform and texture ID.
+ */
+FSLAPI void fsl_model_draw(const fsl_model *model, const fsl_camera *camera,
+        GLuint texture_id);
 
 #endif /* FSL_ASSETS_H */

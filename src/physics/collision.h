@@ -1,6 +1,3 @@
-#ifndef FSL_COLLISION_H
-#define FSL_COLLISION_H
-
 /*!
  *  Copyright 2026 Lily Awertnex
  *
@@ -23,12 +20,16 @@
  *  @brief collision detection and collision data types.
  */
 
+#ifndef FSL_COLLISION_H
+#define FSL_COLLISION_H
+
 #include "../common/api.h"
 #include "../common/types.h"
 
 #define FSL_COLLISION_EPSILON 1e-5
 
 typedef struct fsl_bounding_box fsl_bounding_box;
+typedef struct fsl_collision_info fsl_collision_info;
 
 struct fsl_bounding_box
 {
@@ -36,15 +37,24 @@ struct fsl_bounding_box
     v3f64 size;
 }; /* fsl_bounding_box */
 
+struct fsl_collision_info
+{
+    v3f64 normal;           /* collision surface normal */
+    f64 entry_time;
+    f64 exit_time;
+    f64 dot;
+    b8 hit;
+    b8 slide;
+}; /* fsl_collision_info */
+
 FSLAPI b8 fsl_is_intersect_aabb(fsl_bounding_box a, fsl_bounding_box b);
 
 /*!
- *  @brief get collision status and stats between `a` and `b` using the 'Swept AABB' algorithm.
+ *  @brief get collision info between `a` and `b` using the 'Swept AABB' algorithm.
  *
  *  @param displacement displacement of `a`, since this function assumes `b` is static.
- *
- *  @return entry time.
  */
-FSLAPI f32 fsl_get_swept_aabb(fsl_bounding_box a, fsl_bounding_box b, v3f32 displacement, v3f32 *normal);
+FSLAPI fsl_collision_info fsl_get_swept_aabb(fsl_bounding_box a, fsl_bounding_box b,
+        v3f64 displacement);
 
 #endif /* FSL_COLLISION_H */

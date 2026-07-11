@@ -66,6 +66,11 @@ typedef struct fsl_font             fsl_font;
 typedef struct fsl_projection       fsl_projection;
 typedef struct fsl_camera           fsl_camera;
 
+/*!
+ *  @remark defined in @ref assets.h
+ */
+typedef struct fsl_model            fsl_model;
+
 typedef enum fsl_asset_type
 {
     FSL_ASSET_CUSTOM = 0, /* user defined asset types */

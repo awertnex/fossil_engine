@@ -4,6 +4,7 @@
 #include "deps/fossil/logger/logger.h"
 #include "deps/fossil/math/math.h"
 #include "deps/fossil/memory/memory.h"
+#include "deps/fossil/physics/transform.h"
 #include "deps/fossil/string/string.h"
 
 #include "deps/fossil/h/dir.h"
@@ -11,6 +12,7 @@
 
 #include "chunking/chunking.h"
 #include "gui/gui.h"
+#include "terrain/terrain.h"
 
 #include "h/config_internal.h"
 #include "h/common.h"
@@ -37,8 +39,6 @@ u32 world_init(str *name, u64 seed, hhc_player *p)
 
     if (chunking_init(&p->ch_delta) != FSL_ERR_SUCCESS)
         return *GAME_ERR;
-
-    world.gravity = FSL_GRAVITY * 3.0f;
 
     player_set_spawn(p, 8, 8, 8);
     player_spawn(p, TRUE);
@@ -194,11 +194,12 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
 
     /* ---- TODO: load the rest of world metadata --------------------------- */
 
-    world->tick_start = 9500;
+    world->tick_start = 12000;
     world->days = 0;
-    world->drag.x = WORLD_DRAG_AIR;
-    world->drag.y = WORLD_DRAG_AIR;
-    world->drag.z = WORLD_DRAG_AIR;
+
+    world->physics_material = fsl_physics_material_init(0.0, 0.0, 0.0,
+                WORLD_DRAG_AIR, WORLD_DRAG_AIR, WORLD_DRAG_AIR, 0.0);
+    world->gravity.z = -FSL_GRAVITY;
 
     /* ---- other stuff ----------------------------------------------------- */
 

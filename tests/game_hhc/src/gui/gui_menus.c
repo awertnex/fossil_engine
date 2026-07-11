@@ -229,8 +229,8 @@ void gui_menu_title_draw(void)
     fsl_ui_element_draw(&ui_element_menu[UI_ELEMENT_MENU_TITLE_BUTTON_MULTIPLAYER]);
     fsl_ui_element_draw(&ui_element_menu[UI_ELEMENT_MENU_TITLE_BUTTON_SETTINGS]);
     fsl_ui_element_draw(&ui_element_menu[UI_ELEMENT_MENU_TITLE_BUTTON_QUIT]);
-    fsl_ui_stop();
     fsl_fbo_blit(0);
+    fsl_ui_stop();
 }
 
 void gui_menu_pause_draw(void)
@@ -239,8 +239,8 @@ void gui_menu_pause_draw(void)
     fsl_ui_element_draw(&ui_element_menu[UI_ELEMENT_MENU_PAUSE_BUTTON_RESUME]);
     fsl_ui_element_draw(&ui_element_menu[UI_ELEMENT_MENU_PAUSE_BUTTON_SETTINGS]);
     fsl_ui_element_draw(&ui_element_menu[UI_ELEMENT_MENU_PAUSE_BUTTON_QUIT_TO_TITLE]);
-    fsl_ui_stop();
     fsl_fbo_blit(0);
+    fsl_ui_stop();
 }
 
 static void ui_button_click_func_menu_title_singleplayer(fsl_ui_event event, void *data)

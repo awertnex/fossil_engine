@@ -1,7 +1,6 @@
 #ifndef HHC_CHUNKING_DEBUG_TOOLS_H
 #define HHC_CHUNKING_DEBUG_TOOLS_H
 
-#include "deps/fossil/common/types.h"
 #include "deps/fossil/assets/asset_types.h"
 
 /*!
@@ -21,7 +20,7 @@
 #define CHUNK_DEBUG_SCHEDULER_VISUALIZER_OPACITY_DEFAULT 1.0f
 
 void chunk_debug_chunk_gizmo_draw(const fsl_camera *camera);
-void chunk_debug_scheduler_visualizer_draw(const fsl_camera *camera, f32 opacity);
+void chunk_debug_scheduler_visualizer_draw(const fsl_camera *camera);
 
 #endif /* HHC_CHUNKING_DEBUG_TOOLS_H */
 

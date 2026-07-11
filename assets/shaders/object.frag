@@ -1,5 +1,6 @@
 #version 430 core
 
+uniform sampler2D texture_0;
 in vec4 pos;
 in vec3 normal;
 in vec2 uv;
@@ -12,5 +13,6 @@ void main()
     /* reinhard tone mapping */
     base_color /= base_color + vec3(1.0);
 
-    color = vec4(base_color, 1.0);
+    color = texture(texture_0, uv);
+    color = vec4(color.rgb, color.a) * color.a;
 }
