@@ -1,4 +1,4 @@
-# Fossil Engine - v0.15.0-dev
+# Fossil Engine - v0.16.0-beta
 
 **a headless game engine written in C89, with minimal dependencies.**
 
