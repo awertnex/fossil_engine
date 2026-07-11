@@ -14,7 +14,7 @@ STATUS  DONE DATE       TASK
 - [x]   (2026 05 17):   change deployment package directory structure to make
                         engine headers' relative includes not break in other
                         repos
-- [ ]   (          ):   make physics module
+- [x]   (2026 07 09):   make physics module
 - [x]   (2026 05 27):   make camera module
 - [x]   (2026 05 24):   do mesh loading and unloading from disk
 - [ ]   (          ):   do json parsing
@@ -23,5 +23,5 @@ quirks:
 - [x]   (2025 09 19):   fix weird framebuffer scaling on window scaling
                         (possibly reallocate framebuffers)
 - [ ]   (          ):   fix segfault when allocating smaller than 256 bytes for
-                        `size` parameter of function `mem_alloc_buf()`
+                        `size` parameter of function `fsl_mem_alloc_buf()`
 - [ ]   (          ):   fix double press for windows

@@ -377,67 +377,67 @@ b8 fsl_is_in_bounds_v2f64(v2f64 v, v2f64 min, v2f64 max) IS_IN_BOUNDS_V2_FUNC_IM
 b8 fsl_is_in_bounds_v3f64(v3f64 v, v3f64 min, v3f64 max) IS_IN_BOUNDS_V3_FUNC_IMPL
 b8 fsl_is_in_bounds_v4f64(v4f64 v, v4f64 min, v4f64 max) IS_IN_BOUNDS_V4_FUNC_IMPL
 
-u8 fsl_len_v2u8(v2u8 v) LENGTH_V2_FUNC_IMPL
-u8 fsl_len_v3u8(v3u8 v) LENGTH_V3_FUNC_IMPL
-u8 fsl_len_v4u8(v4u8 v) LENGTH_V4_FUNC_IMPL
-i8 fsl_len_v2i8(v2i8 v) LENGTH_V2_FUNC_IMPL
-i8 fsl_len_v3i8(v3i8 v) LENGTH_V3_FUNC_IMPL
-i8 fsl_len_v4i8(v4i8 v) LENGTH_V4_FUNC_IMPL
-u16 fsl_len_v2u16(v2u16 v) LENGTH_V2_FUNC_IMPL
-u16 fsl_len_v3u16(v3u16 v) LENGTH_V3_FUNC_IMPL
-u16 fsl_len_v4u16(v4u16 v) LENGTH_V4_FUNC_IMPL
-i16 fsl_len_v2i16(v2i16 v) LENGTH_V2_FUNC_IMPL
-i16 fsl_len_v3i16(v3i16 v) LENGTH_V3_FUNC_IMPL
-i16 fsl_len_v4i16(v4i16 v) LENGTH_V4_FUNC_IMPL
-u32 fsl_len_v2u32(v2u32 v) LENGTH_V2_FUNC_IMPL
-u32 fsl_len_v3u32(v3u32 v) LENGTH_V3_FUNC_IMPL
-u32 fsl_len_v4u32(v4u32 v) LENGTH_V4_FUNC_IMPL
-i32 fsl_len_v2i32(v2i32 v) LENGTH_V2_FUNC_IMPL
-i32 fsl_len_v3i32(v3i32 v) LENGTH_V3_FUNC_IMPL
-i32 fsl_len_v4i32(v4i32 v) LENGTH_V4_FUNC_IMPL
-f32 fsl_len_v2f32(v2f32 v) LENGTH_V2_FUNC_IMPL
-f32 fsl_len_v3f32(v3f32 v) LENGTH_V3_FUNC_IMPL
-f32 fsl_len_v4f32(v4f32 v) LENGTH_V4_FUNC_IMPL
-u64 fsl_len_v2u64(v2u64 v) LENGTH_V2_FUNC_IMPL
-u64 fsl_len_v3u64(v3u64 v) LENGTH_V3_FUNC_IMPL
-u64 fsl_len_v4u64(v4u64 v) LENGTH_V4_FUNC_IMPL
-i64 fsl_len_v2i64(v2i64 v) LENGTH_V2_FUNC_IMPL
-i64 fsl_len_v3i64(v3i64 v) LENGTH_V3_FUNC_IMPL
-i64 fsl_len_v4i64(v4i64 v) LENGTH_V4_FUNC_IMPL
-f64 fsl_len_v2f64(v2f64 v) LENGTH_V2_FUNC_IMPL
-f64 fsl_len_v3f64(v3f64 v) LENGTH_V3_FUNC_IMPL
-f64 fsl_len_v4f64(v4f64 v) LENGTH_V4_FUNC_IMPL
+u8 fsl_len_squared_v2u8(v2u8 v) LENGTH_SQUARED_V2_FUNC_IMPL
+u8 fsl_len_squared_v3u8(v3u8 v) LENGTH_SQUARED_V3_FUNC_IMPL
+u8 fsl_len_squared_v4u8(v4u8 v) LENGTH_SQUARED_V4_FUNC_IMPL
+i8 fsl_len_squared_v2i8(v2i8 v) LENGTH_SQUARED_V2_FUNC_IMPL
+i8 fsl_len_squared_v3i8(v3i8 v) LENGTH_SQUARED_V3_FUNC_IMPL
+i8 fsl_len_squared_v4i8(v4i8 v) LENGTH_SQUARED_V4_FUNC_IMPL
+u16 fsl_len_squared_v2u16(v2u16 v) LENGTH_SQUARED_V2_FUNC_IMPL
+u16 fsl_len_squared_v3u16(v3u16 v) LENGTH_SQUARED_V3_FUNC_IMPL
+u16 fsl_len_squared_v4u16(v4u16 v) LENGTH_SQUARED_V4_FUNC_IMPL
+i16 fsl_len_squared_v2i16(v2i16 v) LENGTH_SQUARED_V2_FUNC_IMPL
+i16 fsl_len_squared_v3i16(v3i16 v) LENGTH_SQUARED_V3_FUNC_IMPL
+i16 fsl_len_squared_v4i16(v4i16 v) LENGTH_SQUARED_V4_FUNC_IMPL
+u32 fsl_len_squared_v2u32(v2u32 v) LENGTH_SQUARED_V2_FUNC_IMPL
+u32 fsl_len_squared_v3u32(v3u32 v) LENGTH_SQUARED_V3_FUNC_IMPL
+u32 fsl_len_squared_v4u32(v4u32 v) LENGTH_SQUARED_V4_FUNC_IMPL
+i32 fsl_len_squared_v2i32(v2i32 v) LENGTH_SQUARED_V2_FUNC_IMPL
+i32 fsl_len_squared_v3i32(v3i32 v) LENGTH_SQUARED_V3_FUNC_IMPL
+i32 fsl_len_squared_v4i32(v4i32 v) LENGTH_SQUARED_V4_FUNC_IMPL
+f32 fsl_len_squared_v2f32(v2f32 v) LENGTH_SQUARED_V2_FUNC_IMPL
+f32 fsl_len_squared_v3f32(v3f32 v) LENGTH_SQUARED_V3_FUNC_IMPL
+f32 fsl_len_squared_v4f32(v4f32 v) LENGTH_SQUARED_V4_FUNC_IMPL
+u64 fsl_len_squared_v2u64(v2u64 v) LENGTH_SQUARED_V2_FUNC_IMPL
+u64 fsl_len_squared_v3u64(v3u64 v) LENGTH_SQUARED_V3_FUNC_IMPL
+u64 fsl_len_squared_v4u64(v4u64 v) LENGTH_SQUARED_V4_FUNC_IMPL
+i64 fsl_len_squared_v2i64(v2i64 v) LENGTH_SQUARED_V2_FUNC_IMPL
+i64 fsl_len_squared_v3i64(v3i64 v) LENGTH_SQUARED_V3_FUNC_IMPL
+i64 fsl_len_squared_v4i64(v4i64 v) LENGTH_SQUARED_V4_FUNC_IMPL
+f64 fsl_len_squared_v2f64(v2f64 v) LENGTH_SQUARED_V2_FUNC_IMPL
+f64 fsl_len_squared_v3f64(v3f64 v) LENGTH_SQUARED_V3_FUNC_IMPL
+f64 fsl_len_squared_v4f64(v4f64 v) LENGTH_SQUARED_V4_FUNC_IMPL
 
-u8 fsl_distance_v2u8(v2u8 a, v2u8 b) DISTANCE_V2_FUNC_IMPL
-u8 fsl_distance_v3u8(v3u8 a, v3u8 b) DISTANCE_V3_FUNC_IMPL
-u8 fsl_distance_v4u8(v4u8 a, v4u8 b) DISTANCE_V4_FUNC_IMPL
-i8 fsl_distance_v2i8(v2i8 a, v2i8 b) DISTANCE_V2_FUNC_IMPL
-i8 fsl_distance_v3i8(v3i8 a, v3i8 b) DISTANCE_V3_FUNC_IMPL
-i8 fsl_distance_v4i8(v4i8 a, v4i8 b) DISTANCE_V4_FUNC_IMPL
-u16 fsl_distance_v2u16(v2u16 a, v2u16 b) DISTANCE_V2_FUNC_IMPL
-u16 fsl_distance_v3u16(v3u16 a, v3u16 b) DISTANCE_V3_FUNC_IMPL
-u16 fsl_distance_v4u16(v4u16 a, v4u16 b) DISTANCE_V4_FUNC_IMPL
-i16 fsl_distance_v2i16(v2i16 a, v2i16 b) DISTANCE_V2_FUNC_IMPL
-i16 fsl_distance_v3i16(v3i16 a, v3i16 b) DISTANCE_V3_FUNC_IMPL
-i16 fsl_distance_v4i16(v4i16 a, v4i16 b) DISTANCE_V4_FUNC_IMPL
-u32 fsl_distance_v2u32(v2u32 a, v2u32 b) DISTANCE_V2_FUNC_IMPL
-u32 fsl_distance_v3u32(v3u32 a, v3u32 b) DISTANCE_V3_FUNC_IMPL
-u32 fsl_distance_v4u32(v4u32 a, v4u32 b) DISTANCE_V4_FUNC_IMPL
-i32 fsl_distance_v2i32(v2i32 a, v2i32 b) DISTANCE_V2_FUNC_IMPL
-i32 fsl_distance_v3i32(v3i32 a, v3i32 b) DISTANCE_V3_FUNC_IMPL
-i32 fsl_distance_v4i32(v4i32 a, v4i32 b) DISTANCE_V4_FUNC_IMPL
-f32 fsl_distance_v2f32(v2f32 a, v2f32 b) DISTANCE_V2_FUNC_IMPL
-f32 fsl_distance_v3f32(v3f32 a, v3f32 b) DISTANCE_V3_FUNC_IMPL
-f32 fsl_distance_v4f32(v4f32 a, v4f32 b) DISTANCE_V4_FUNC_IMPL
-u64 fsl_distance_v2u64(v2u64 a, v2u64 b) DISTANCE_V2_FUNC_IMPL
-u64 fsl_distance_v3u64(v3u64 a, v3u64 b) DISTANCE_V3_FUNC_IMPL
-u64 fsl_distance_v4u64(v4u64 a, v4u64 b) DISTANCE_V4_FUNC_IMPL
-i64 fsl_distance_v2i64(v2i64 a, v2i64 b) DISTANCE_V2_FUNC_IMPL
-i64 fsl_distance_v3i64(v3i64 a, v3i64 b) DISTANCE_V3_FUNC_IMPL
-i64 fsl_distance_v4i64(v4i64 a, v4i64 b) DISTANCE_V4_FUNC_IMPL
-f64 fsl_distance_v2f64(v2f64 a, v2f64 b) DISTANCE_V2_FUNC_IMPL
-f64 fsl_distance_v3f64(v3f64 a, v3f64 b) DISTANCE_V3_FUNC_IMPL
-f64 fsl_distance_v4f64(v4f64 a, v4f64 b) DISTANCE_V4_FUNC_IMPL
+u8 fsl_distance_squared_v2u8(v2u8 a, v2u8 b) DISTANCE_SQUARED_V2_FUNC_IMPL
+u8 fsl_distance_squared_v3u8(v3u8 a, v3u8 b) DISTANCE_SQUARED_V3_FUNC_IMPL
+u8 fsl_distance_squared_v4u8(v4u8 a, v4u8 b) DISTANCE_SQUARED_V4_FUNC_IMPL
+i8 fsl_distance_squared_v2i8(v2i8 a, v2i8 b) DISTANCE_SQUARED_V2_FUNC_IMPL
+i8 fsl_distance_squared_v3i8(v3i8 a, v3i8 b) DISTANCE_SQUARED_V3_FUNC_IMPL
+i8 fsl_distance_squared_v4i8(v4i8 a, v4i8 b) DISTANCE_SQUARED_V4_FUNC_IMPL
+u16 fsl_distance_squared_v2u16(v2u16 a, v2u16 b) DISTANCE_SQUARED_V2_FUNC_IMPL
+u16 fsl_distance_squared_v3u16(v3u16 a, v3u16 b) DISTANCE_SQUARED_V3_FUNC_IMPL
+u16 fsl_distance_squared_v4u16(v4u16 a, v4u16 b) DISTANCE_SQUARED_V4_FUNC_IMPL
+i16 fsl_distance_squared_v2i16(v2i16 a, v2i16 b) DISTANCE_SQUARED_V2_FUNC_IMPL
+i16 fsl_distance_squared_v3i16(v3i16 a, v3i16 b) DISTANCE_SQUARED_V3_FUNC_IMPL
+i16 fsl_distance_squared_v4i16(v4i16 a, v4i16 b) DISTANCE_SQUARED_V4_FUNC_IMPL
+u32 fsl_distance_squared_v2u32(v2u32 a, v2u32 b) DISTANCE_SQUARED_V2_FUNC_IMPL
+u32 fsl_distance_squared_v3u32(v3u32 a, v3u32 b) DISTANCE_SQUARED_V3_FUNC_IMPL
+u32 fsl_distance_squared_v4u32(v4u32 a, v4u32 b) DISTANCE_SQUARED_V4_FUNC_IMPL
+i32 fsl_distance_squared_v2i32(v2i32 a, v2i32 b) DISTANCE_SQUARED_V2_FUNC_IMPL
+i32 fsl_distance_squared_v3i32(v3i32 a, v3i32 b) DISTANCE_SQUARED_V3_FUNC_IMPL
+i32 fsl_distance_squared_v4i32(v4i32 a, v4i32 b) DISTANCE_SQUARED_V4_FUNC_IMPL
+f32 fsl_distance_squared_v2f32(v2f32 a, v2f32 b) DISTANCE_SQUARED_V2_FUNC_IMPL
+f32 fsl_distance_squared_v3f32(v3f32 a, v3f32 b) DISTANCE_SQUARED_V3_FUNC_IMPL
+f32 fsl_distance_squared_v4f32(v4f32 a, v4f32 b) DISTANCE_SQUARED_V4_FUNC_IMPL
+u64 fsl_distance_squared_v2u64(v2u64 a, v2u64 b) DISTANCE_SQUARED_V2_FUNC_IMPL
+u64 fsl_distance_squared_v3u64(v3u64 a, v3u64 b) DISTANCE_SQUARED_V3_FUNC_IMPL
+u64 fsl_distance_squared_v4u64(v4u64 a, v4u64 b) DISTANCE_SQUARED_V4_FUNC_IMPL
+i64 fsl_distance_squared_v2i64(v2i64 a, v2i64 b) DISTANCE_SQUARED_V2_FUNC_IMPL
+i64 fsl_distance_squared_v3i64(v3i64 a, v3i64 b) DISTANCE_SQUARED_V3_FUNC_IMPL
+i64 fsl_distance_squared_v4i64(v4i64 a, v4i64 b) DISTANCE_SQUARED_V4_FUNC_IMPL
+f64 fsl_distance_squared_v2f64(v2f64 a, v2f64 b) DISTANCE_SQUARED_V2_FUNC_IMPL
+f64 fsl_distance_squared_v3f64(v3f64 a, v3f64 b) DISTANCE_SQUARED_V3_FUNC_IMPL
+f64 fsl_distance_squared_v4f64(v4f64 a, v4f64 b) DISTANCE_SQUARED_V4_FUNC_IMPL
 
 v2f32 fsl_normalize_v2f32(v2f32 v) NORMALIZE_V2_FUNC_IMPL(f32, sqrtf, fsl_len_v2f32, f)
 v3f32 fsl_normalize_v3f32(v3f32 v) NORMALIZE_V3_FUNC_IMPL(f32, sqrtf, fsl_len_v3f32, f)
