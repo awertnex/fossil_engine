@@ -439,12 +439,12 @@ f64 fsl_distance_squared_v2f64(v2f64 a, v2f64 b) DISTANCE_SQUARED_V2_FUNC_IMPL
 f64 fsl_distance_squared_v3f64(v3f64 a, v3f64 b) DISTANCE_SQUARED_V3_FUNC_IMPL
 f64 fsl_distance_squared_v4f64(v4f64 a, v4f64 b) DISTANCE_SQUARED_V4_FUNC_IMPL
 
-v2f32 fsl_normalize_v2f32(v2f32 v) NORMALIZE_V2_FUNC_IMPL(f32, sqrtf, fsl_len_v2f32, f)
-v3f32 fsl_normalize_v3f32(v3f32 v) NORMALIZE_V3_FUNC_IMPL(f32, sqrtf, fsl_len_v3f32, f)
-v4f32 fsl_normalize_v4f32(v4f32 v) NORMALIZE_V4_FUNC_IMPL(f32, sqrtf, fsl_len_v4f32, f)
-v2f64 fsl_normalize_v2f64(v2f64 v) NORMALIZE_V2_FUNC_IMPL(f64, sqrt, fsl_len_v2f64, 0)
-v3f64 fsl_normalize_v3f64(v3f64 v) NORMALIZE_V3_FUNC_IMPL(f64, sqrt, fsl_len_v3f64, 0)
-v4f64 fsl_normalize_v4f64(v4f64 v) NORMALIZE_V4_FUNC_IMPL(f64, sqrt, fsl_len_v4f64, 0)
+v2f32 fsl_normalize_v2f32(v2f32 v) NORMALIZE_V2_FUNC_IMPL(f32, sqrtf, fsl_len_squared_v2f32, f)
+v3f32 fsl_normalize_v3f32(v3f32 v) NORMALIZE_V3_FUNC_IMPL(f32, sqrtf, fsl_len_squared_v3f32, f)
+v4f32 fsl_normalize_v4f32(v4f32 v) NORMALIZE_V4_FUNC_IMPL(f32, sqrtf, fsl_len_squared_v4f32, f)
+v2f64 fsl_normalize_v2f64(v2f64 v) NORMALIZE_V2_FUNC_IMPL(f64, sqrt, fsl_len_squared_v2f64, 0)
+v3f64 fsl_normalize_v3f64(v3f64 v) NORMALIZE_V3_FUNC_IMPL(f64, sqrt, fsl_len_squared_v3f64, 0)
+v4f64 fsl_normalize_v4f64(v4f64 v) NORMALIZE_V4_FUNC_IMPL(f64, sqrt, fsl_len_squared_v4f64, 0)
 
 f32 fsl_dot_v2f32(v2f32 a, v2f32 b) DOT_V2_FUNC_IMPL
 f32 fsl_dot_v3f32(v3f32 a, v3f32 b) DOT_V3_FUNC_IMPL
