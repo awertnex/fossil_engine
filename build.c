@@ -61,8 +61,8 @@ static str str_files[][CMD_SIZE] =
 
 static str str_files_plugins[][CMD_SIZE] =
 {
-    DIR_SRC"plugins/fsl_native/noise_sampler/noise_sampler.c",
-    DIR_SRC"plugins/fsl_native/noise_sampler/noise_sampler_sample.c"
+    DIR_SRC"plugins/fsl_native/torus_noise/torus_noise.c",
+    DIR_SRC"plugins/fsl_native/torus_noise/torus_sample.c"
 };
 
 static str str_make_dir[][CMD_SIZE] =
@@ -97,7 +97,7 @@ static str str_make_dir_plugins[][CMD_SIZE] =
 {
     DIR_DST DIR_DEPS DIR_DST"plugins/",
     DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/",
-    DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/noise_sampler/"
+    DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/torus_noise/"
 };
 
 static str *copy_targets[][48] =
@@ -136,8 +136,8 @@ static str *copy_targets[][48] =
 
 static str *copy_targets_plugins[][48] =
 {
-    {DIR_SRC"plugins/fsl_native/noise_sampler/noise_sampler.h", DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/noise_sampler/"},
-    {DIR_SRC"plugins/fsl_native/noise_sampler/noise_sampler_sample.h", DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/noise_sampler/"}
+    {DIR_SRC"plugins/fsl_native/torus_noise/torus_noise.h", DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/torus_noise/"},
+    {DIR_SRC"plugins/fsl_native/torus_noise/torus_sample.h", DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/torus_noise/"}
 };
 
 int main(int argc, char **argv)
