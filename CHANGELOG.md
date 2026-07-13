@@ -9,6 +9,13 @@
 
 ## v0.16.0-dev (current)
 
+#### changes
+- changed math 'length' and 'distance' functions names to 'squared' variants
+  (non-squared variants will be added in a future version so to not introduce
+  silent bugs).
+- changed entire plug-in function names and plug-in name from 'noise_sampler' to
+  'torus_noise' (Torus Noise).
+
 #### known bugs and flaws
 - the 'obj' loader possibly has a bug due to hash-table collisions:
     - sometimes faces disappear when ordered in specific ways in the obj file.

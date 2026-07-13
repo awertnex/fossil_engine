@@ -3,7 +3,7 @@
 
 #include "deps/fossil/common/types.h"
 #include "deps/fossil/math/vector.h"
-#include "deps/fossil/plugins/fsl_native/noise_sampler/noise_sampler.h"
+#include "deps/fossil/plugins/fsl_native/torus_noise/torus_noise.h"
 
 #include "chunk_work.h"
 #include "chunking.h"
@@ -122,8 +122,8 @@ typedef struct hhc_chunk_scheduler
 
 typedef struct hhc_chunk_sampler
 {
-    fsl_noise_sampler sampler;
-    fsl_noise_sampler_context context;
+    fsl_torus_sampler sampler;
+    fsl_torus_sampler_context context;
 } hhc_chunk_sampler;
 
 /* ---- section: declarations ----------------------------------------------- */

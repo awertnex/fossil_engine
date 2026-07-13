@@ -2,7 +2,7 @@
 #define HHC_TERRAIN_H
 
 #include "deps/fossil/common/types.h"
-#include "deps/fossil/plugins/fsl_native/noise_sampler/noise_sampler.h"
+#include "deps/fossil/plugins/fsl_native/torus_noise/torus_noise.h"
 
 #include "../chunking/chunk_work.h"
 
@@ -50,7 +50,7 @@ void terrain_spec_set(hhc_terrain_noise_index noise_index, f64 amp, f64 freq, f6
  *
  *  @param pos position along specified axis.
  */
-chunk_work_cost sampler_noise_axis_update_2d(fsl_noise_sampler_context *ctx, u8 axis);
+chunk_work_cost sampler_noise_axis_update_2d(fsl_torus_sampler_context *ctx, u8 axis);
 
 /*!
  *  @brief finalize and bake all pre-defined 2D and 3D noise maps to ready for
@@ -58,11 +58,11 @@ chunk_work_cost sampler_noise_axis_update_2d(fsl_noise_sampler_context *ctx, u8 
  *
  *  @remark use quintic interpolation internally.
  */
-chunk_work_cost sampler_noise_bake(fsl_noise_sampler_context *ctx);
+chunk_work_cost sampler_noise_bake(fsl_torus_sampler_context *ctx);
 
 /*!
  *  @brief default terrain shaping function.
  */
-chunk_work_cost terrain_shape(hhc_terrain_sample *terrain, fsl_noise_sampler_context *ctx);
+chunk_work_cost terrain_shape(hhc_terrain_sample *terrain, fsl_torus_sampler_context *ctx);
 
 #endif /* HHC_TERRAIN_H */

@@ -161,7 +161,7 @@ void player_update(hhc_player *p, f64 dt)
     p->transform.pos.y += p->kn.velocity.y * dt;
     p->transform.pos.z += p->kn.velocity.z * dt;
 
-    p->kn.speed = sqrt(fsl_len_v3f64(p->kn.velocity));
+    p->kn.speed = sqrt(fsl_len_squared_v3f64(p->kn.velocity));
     if (p->kn.speed > FSL_EPSILON)
         p->camera.fovy += p->kn.speed * 0.03f;
     p->camera.fovy = fsl_clamp_f32(p->camera.fovy, 1.0f, SET_FOV_MAX);
@@ -329,7 +329,7 @@ void player_collision_update(hhc_player *p, f64 dt)
                         player_bounding_box_update(p);
 
                         speed = p->kn.speed;
-                        p->kn.speed = sqrt(fsl_len_v3f64(p->kn.velocity));
+                        p->kn.speed = sqrt(fsl_len_squared_v3f64(p->kn.velocity));
 #if MODE_INTERNAL_DIE
                         speed -= p->kn.speed;
                         printf("DAMAGE: %f, HEALTH %f\n", speed, p->health);
