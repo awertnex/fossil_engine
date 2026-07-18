@@ -1,6 +1,7 @@
 #ifndef HHC_PLAYER_H
 #define HHC_PLAYER_H
 
+#include "deps/fossil/common/limits.h"
 #include "deps/fossil/assets/mesh/mesh.h"
 #include "deps/fossil/math/trigonometry.h"
 #include "deps/fossil/math/vector.h"
@@ -111,7 +112,7 @@ enum entity_kinematics_index
 
 typedef struct hhc_player
 {
-    str name[64];                   /* in-game name */
+    str name[FSL_ID_CAP];           /* in-game name */
     u64 flag;                       /* enum @ref player_flag */
     fsl_transform_v3f64 transform;
     fsl_transform_v3f64 transform_last;

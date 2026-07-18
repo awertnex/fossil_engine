@@ -186,15 +186,15 @@ int main(int argc, char **argv)
     for (i = 0; i < arr_len(str_cflags); ++i)
         cmd_push(&cmd, str_cflags[i]);
 
-    fsl_engine_set_runtime_path(&cmd);
-    for (i = 0; i < arr_len(fsl_str_libs_internal); ++i)
-        cmd_push(&cmd, fsl_str_libs_internal[i]);
-
     for (i = 0; i < arr_len(str_files); ++i)
         cmd_push(&cmd, str_files[i]);
 
     for (i = 0; i < arr_len(str_files_plugins); ++i)
         cmd_push(&cmd, str_files_plugins[i]);
+
+    fsl_engine_set_runtime_path(&cmd);
+    for (i = 0; i < arr_len(fsl_str_libs_internal); ++i)
+        cmd_push(&cmd, fsl_str_libs_internal[i]);
 
     cmd_push(&cmd, "-o");
     cmd_push(&cmd, "lib/"PLATFORM"/"FSL_FILE_NAME_LIB);

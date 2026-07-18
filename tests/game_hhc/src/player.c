@@ -332,7 +332,6 @@ void player_collision_update(hhc_player *p, f64 dt)
                         p->kn.speed = sqrt(fsl_len_squared_v3f64(p->kn.velocity));
 #if MODE_INTERNAL_DIE
                         speed -= p->kn.speed;
-                        printf("DAMAGE: %f, HEALTH %f\n", speed, p->health);
                         if (speed > PLAYER_COLLISION_DAMAGE_THRESHOLD)
                         {
                             p->health -= speed;
