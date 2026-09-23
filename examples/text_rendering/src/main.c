@@ -23,8 +23,8 @@ int main(int argc, char **argv)
 
     render = fsl_render_get();
 
-    bind_enter = fsl_key_bind_init(FSL_KEY_ENTER, 0, 0, 0, 0, 0);
-    bind_quit = fsl_key_bind_init(FSL_KEY_Q, 0, 0, 0, 0, 0);
+    bind_enter = fsl_key_bind_init(FSL_KEY_ENTER, 0, 0, 0, 0);
+    bind_quit = fsl_key_bind_init(FSL_KEY_Q, 0, 0, 0, 0);
 
     font = fsl_mem_handle_get(fsl_font_buf);
     font = &font[FSL_FONT_INDEX_DEJAVU_SANS_MONO];

@@ -106,17 +106,17 @@ int main(int argc, char **argv)
 
     render = fsl_render_get();
 
-    bind_quit = fsl_key_bind_init(FSL_KEY_Q, 0, 0, 0, 0, 0);
-    bind_bigger_x = fsl_key_bind_init(FSL_KEY_A, 0, 0, 0, 0, 0);
-    bind_smaller_x = fsl_key_bind_init(FSL_KEY_D, 0, 0, 0, 0, 0);
-    bind_bigger_y = fsl_key_bind_init(FSL_KEY_W, 0, 0, 0, 0, 0);
-    bind_smaller_y = fsl_key_bind_init(FSL_KEY_S, 0, 0, 0, 0, 0);
-    bind_align_left = fsl_key_bind_init(FSL_KEY_LEFT, 0, 0, 0, 0, 0);
-    bind_align_right = fsl_key_bind_init(FSL_KEY_RIGHT, 0, 0, 0, 0, 0);
-    bind_align_up = fsl_key_bind_init(FSL_KEY_UP, 0, 0, 0, 0, 0);
-    bind_align_down = fsl_key_bind_init(FSL_KEY_DOWN, 0, 0, 0, 0, 0);
-    bind_element_attach = fsl_key_bind_init(FSL_KEY_ENTER, 0, 0, 0, 0, 0);
-    bind_switch_workspace = fsl_key_bind_init(FSL_KEY_SPACE, 0, 0, 0, 0, 0);
+    bind_quit = fsl_key_bind_init(FSL_KEY_Q, 0, 0, 0, 0);
+    bind_bigger_x = fsl_key_bind_init(FSL_KEY_A, 0, 0, 0, 0);
+    bind_smaller_x = fsl_key_bind_init(FSL_KEY_D, 0, 0, 0, 0);
+    bind_bigger_y = fsl_key_bind_init(FSL_KEY_W, 0, 0, 0, 0);
+    bind_smaller_y = fsl_key_bind_init(FSL_KEY_S, 0, 0, 0, 0);
+    bind_align_left = fsl_key_bind_init(FSL_KEY_LEFT, 0, 0, 0, 0);
+    bind_align_right = fsl_key_bind_init(FSL_KEY_RIGHT, 0, 0, 0, 0);
+    bind_align_up = fsl_key_bind_init(FSL_KEY_UP, 0, 0, 0, 0);
+    bind_align_down = fsl_key_bind_init(FSL_KEY_DOWN, 0, 0, 0, 0);
+    bind_element_attach = fsl_key_bind_init(FSL_KEY_ENTER, 0, 0, 0, 0);
+    bind_switch_workspace = fsl_key_bind_init(FSL_KEY_SPACE, 0, 0, 0, 0);
 
     scale.x = 1.0f;
     scale.y = 1.0f;

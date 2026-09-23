@@ -194,7 +194,7 @@ int main(int argc, char **argv)
 
     render = fsl_render_get();
 
-    bind_quit = fsl_key_bind_init(FSL_KEY_Q, 0, 0, 0, 0, 0);
+    bind_quit = fsl_key_bind_init(FSL_KEY_Q, 0, 0, 0, 0);
 
     if (
             fsl_asset_set_metadata(&nine_slice.asset, FSL_ASSET_SHADER_PROGRAM,
