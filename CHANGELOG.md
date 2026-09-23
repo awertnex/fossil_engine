@@ -10,6 +10,8 @@
 ## v0.16.0-dev (current)
 
 #### changes
+- added basic 'README.md' documentation and overview.
+- changed directory name 'tests/' to 'examples/'.
 - changed math 'length' and 'distance' functions names to 'squared' variants
   (non-squared variants will be added in a future version so to not introduce
   silent bugs).

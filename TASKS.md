@@ -18,6 +18,11 @@ STATUS  DONE DATE       TASK
 - [x]   (2026 05 27):   make camera module
 - [x]   (2026 05 24):   do mesh loading and unloading from disk
 - [ ]   (          ):   do json parsing
+- [ ]   (          ):   add smart mesh subdivision (vertex order sometimes
+                        stretches across concave faces)
+- [ ]   (          ):   upgrade the engine's renderer
+- [ ]   (          ):   make the UI library a plug-in
+- [ ]   (          ):   make the engine's renderer a plug-in
 
 quirks:
 - [x]   (2025 09 19):   fix weird framebuffer scaling on window scaling
