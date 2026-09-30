@@ -2,7 +2,7 @@
 
 **a headless game engine written in C89, with minimal dependencies.**
 
-Goals of this project:
+## Goals of this project:
 - to make 2D and/or 3D games, and general software (such as image editors, 3D
   editors, or GUI-based text editors and such)
 - to provide simple, general-purpose (mostly) implementations so to give the
@@ -10,12 +10,34 @@ Goals of this project:
   the engine are less versatile still
 - to compile using only a C compiler
 
+>**NOTE ABOUT VERSIONING:** all tags before `v0.3.4-beta` belong to the repo
+ [heaven-hell_continuum](https://github.com/awertnex/heaven-hell_continuum)
+ since this engine used to be one directory in that repo.
+
 - - -
 
 ## Engine Start
 - engine uses OpenGL as its primary graphics API
 - all source code for the engine is in the directory `src/`
 - quick examples using the engine are in the directory `examples/`
+
+## Engine Modules
+- `src/external/`: engine's external dependencies.
+- `src/common/`: most important module, has common definitions, base data types, error codes and API control.
+- `src/string/`: string handling, token-searching and basic hashing algorithms.
+- `src/math/`: math functions, perlin noise functions and some RNG stuff.
+- `src/logger/`: engine's logging system, prints to the command line and an internal history buffer.
+- `src/assets/`: asset handling and pipeline, handles fonts, textures, meshes, camera and projection and graphics API buffers.
+- `src/engine/`: engine's entry point, main functions and engine's own assets.
+- `src/h/`: old global directory for headers, all headers used to be here (still used, but should be removed in the future).
+- `src/input/`: keyboard and mouse input handling.
+- `src/memory/`: memory handling, memory arenas, with some security checks.
+- `src/physics/`: physics-handling, collisions and forces.
+- `src/plugins/`: any external plug-ins that use the engine (right now plug-ins are compiled directly into the engine binary).
+- `src/shaders/`: pre-processing, hot-reloading and fall-back for the graphics API's shaders.
+- `src/ui/`: UI library, panels, buttons and interactivity.
+- `src/buildtool_config.h`: definitions and functions that the linking software can use to build with the engine.
+- `src/fossil_engine.h`: header that includes the entire engine.
 
 ## Quick Examples
 - a simple window:
@@ -46,24 +68,6 @@ cleanup:
 }
 ```
 
-## Engine Modules
-- `src/external/`: engine's dependencies.
-- `src/common/`: most important module, has common definitions, base data types, error codes and API control.
-- `src/string/`: string handling, token-searching and basic hashing algorithms.
-- `src/math/`: math functions, perlin noise functions and some RNG stuff.
-- `src/logger/`: engine's logging system, prints to the command line and an internal history buffer.
-- `src/assets/`: asset handling and pipeline, handles fonts, textures, meshes, camera and projection and graphics API buffers.
-- `src/engine/`: engine's entry point, main functions and engine's own assets.
-- `src/h/`: old global directory for headers, all headers used to be here.
-- `src/input/`: keyboard and mouse input handling.
-- `src/memory/`: memory handling, memory arenas, with some security checks.
-- `src/physics/`: physics-handling, collisions and forces.
-- `src/plugins/`: any external plug-ins that use the engine (right now plug-ins are compiled directly into the engine binary).
-- `src/shaders/`: pre-processing, hot-reloading and fall-back for the graphics API's shaders.
-- `src/ui/`: UI library, panels, buttons and interactivity.
-- `src/buildtool_config.h`: definitions and functions that the linking software can use to build with the engine.
-- `src/fossil_engine.h`: header that includes the entire engine.
-
 ## Supported Platforms
 - Linux x86_64
 - Windows (broken right now)
@@ -92,8 +96,6 @@ cleanup:
 windows-specific:
 - [w64devkit v2.4.0](https://github.com/skeeto/w64devkit): not necessary for runtime, just for building from source
 
->**NOTE ABOUT VERSIONING:** before version v0.3.4-beta, the repo used to be a directory in [heaven-hell_continuum](https://github.com/awertnex/heaven-hell_continuum), so all tags before that are not engine tags and are not aligned with engine version changes.
-
 ## Build From Source
 
 >**NOTES:**
@@ -120,15 +122,14 @@ bootstrap buildtool (optional):
 cc build.c -o build
 ```
 
-additional build commands:
+additional build arguments:
 
-- `./build help`: show help and exit
-- `./build show`: show build command in list format
-- `./build raw`: show build command in raw format
-- `./build self`: re-build buildtool
-- `./build release`: build as release
-- `./build btdebug`: show debug info for buildtool
-
+- `help`: show help and exit
+- `show`: show build command in list format
+- `raw`: show build command in raw format
+- `self`: re-build buildtool
+- `release`: build as release
+- `btdebug`: show debug info for buildtool
 
 **windows (using any C compiler):**
 
@@ -148,14 +149,14 @@ bootstrap buildtool (optional):
 cc.exe build.c -o build
 ```
 
-additional build commands:
+additional build arguments:
 
-- `./build.exe help`: show help and exit
-- `./build.exe show`: show build command in list format
-- `./build.exe raw`: show build command in raw format
-- `./build.exe self`: re-build buildtool
-- `./build.exe release`: build as release
-- `./build.exe btdebug`: show debug info for buildtool
+- `help`: show help and exit
+- `show`: show build command in list format
+- `raw`: show build command in raw format
+- `self`: re-build buildtool
+- `release`: build as release
+- `btdebug`: show debug info for buildtool
 
 ## Contributing:
-currently not accepting contributions since the project is in an early stage, but I will be opening contributions soon (saying this as of today: 24 Oct 2025)
+will be available soon (saying this as of 2025-10-24)

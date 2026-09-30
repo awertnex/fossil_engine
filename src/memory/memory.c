@@ -662,6 +662,7 @@ u32 fsl_mem_arena_pop_internal(fsl_mem_handle *handle,
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
+
 void *fsl_mem_handle_get_internal(fsl_mem_handle handle)
 {
     return handle.arena ? (void*)((u8*)handle.arena->buf + handle.offset) : NULL;

@@ -1,16 +1,15 @@
 # changelog
 
->**NOTE:**
->- history is mixed with the repo
-   "https://github.com/awertnex/heaven-hell_continuum.git" since this engine
-   originated from the making of that game and later was moved here at engine
-   version v0.3.3-beta (2026 01 24), which makes v0.3.4-beta the first version
-   of the engine as standalone in this repo.
+>**NOTE ABOUT VERSIONING:** history is mixed with the repo
+ [heaven-hell_continuum](https://github.com/awertnex/heaven-hell_continuum)
+ since this engine originated from the making of that game and later was moved
+ here at engine version `v0.3.3-beta` (2026 01 24), which makes `v0.3.4-beta`
+ the first version of the engine as standalone in this repo.
 
 ## v0.16.0-dev (current)
 
 #### changes
-- updated 'glad' version: 0.1.36 -> 2.0.8
+- updated 'glad' version: `v0.1.36` -> `v2.0.8`.
 - added basic 'README.md' documentation and overview.
 - changed directory name 'tests/' to 'examples/'.
 - changed math 'length' and 'distance' functions names to 'squared' variants
