@@ -23,10 +23,9 @@
 #ifndef FSL_SHADER_PRE_PROCESSOR_INTERNAL_H
 #define FSL_SHADER_PRE_PROCESSOR_INTERNAL_H
 
-#include "../common/limits.h"
 #include "../common/types.h"
 
-#include "../external/glad/glad.h"
+#include "../external/glad/gl.h"
 
 #define FSL_SHADER_PRE_PROCESSOR_INCLUDE_RECURSION_MAX 512
 

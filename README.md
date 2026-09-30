@@ -70,19 +70,19 @@ cleanup:
 
 ## Dependencies (already bundled)
 
-- [buildtool v1.8.7](https://github.com/awertnex/buildtool): build tool used to build the engine
-- [glfw v3.4](https://github.com/glfw/glfw): platform-independent windowing (headers modified)
+- [buildtool](https://github.com/awertnex/buildtool) (v1.8.7): build tool used to build the engine
+- [glfw](https://github.com/glfw/glfw) (v3.4): platform-independent windowing (headers modified)
     - modifications: remove `__cplusplus` guard, since the engine is C-only
-- [glad v0.1.36](https://github.com/dav1dde/glad-web): OpenGL function loader (modified)
+- [glad](https://github.com/Dav1dde/glad) jwd(v2.0.8): graphics API loader (header modified)
     - extensions: GL_ARB_bindless_texture
     - modifications: remove `__cplusplus` guard, since the engine is C-only
-- [stb_truetype.h v1.26](https://github.com/nothings/stb/blob/master/stb_truetype.h): loading font data (modified)
+- [stb_truetype.h](https://github.com/nothings/stb/blob/master/stb_truetype.h) (v1.26): font loader (modified)
     - modifications: change all // comments to /* */ block comments to support C89 standard
-- [stb_image.h v2.30](https://github.com/nothings/stb/blob/master/stb_image.h): loading image data (modified)
+- [stb_image.h](https://github.com/nothings/stb/blob/master/stb_image.h) (v2.30): image loader (modified)
     - modifications: change all // comments to /* */ block comments to support C89 standard
-- [stb_image_write.h v1.26](https://github.com/nothings/stb/blob/master/stb_image_write.h): writing images (modified, unused)
+- [stb_image_write.h](https://github.com/nothings/stb/blob/master/stb_image_write.h) (v1.26): image writer (modified)
     - modifications: change all // comments to /* */ block comments to support C89 standard
-- [dejavu-fonts v2.37](https://github.com/dejavu-fonts/dejavu-fonts): fonts of choice (modified)
+- [dejavu-fonts](https://github.com/dejavu-fonts/dejavu-fonts) (v2.37): fonts of choice (modified)
     - modifications:
         - (subset: U+0000-00ff): dejavu_sans_ansi.ttf
         - (subset: U+0000-00ff): dejavu_sans_bold_ansi.ttf

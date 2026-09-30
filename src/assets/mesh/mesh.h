@@ -29,7 +29,7 @@
 
 #include "../asset_types.h"
 
-#include "../../external/glad/glad.h"
+#include "../../external/glad/gl.h"
 
 typedef struct fsl_mesh fsl_mesh;
 

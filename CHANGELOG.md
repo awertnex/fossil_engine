@@ -10,6 +10,7 @@
 ## v0.16.0-dev (current)
 
 #### changes
+- updated 'glad' version: 0.1.36 -> 2.0.8
 - added basic 'README.md' documentation and overview.
 - changed directory name 'tests/' to 'examples/'.
 - changed math 'length' and 'distance' functions names to 'squared' variants

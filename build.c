@@ -32,7 +32,7 @@ static str str_cflags_debug[][CMD_SIZE] =
 
 static str str_files[][CMD_SIZE] =
 {
-    DIR_SRC"external/glad/glad.c",
+    DIR_SRC"external/glad/gl.c",
     DIR_SRC"assets/assets.c",
     DIR_SRC"assets/model.c",
     DIR_SRC"assets/mesh/mesh.c",
@@ -103,7 +103,7 @@ static str str_make_dir_plugins[][CMD_SIZE] =
 static str *copy_targets[][48] =
 {
     {DIR_SRC"external/glfw3.h",             DIR_DST DIR_DEPS DIR_DST"external/"},
-    {DIR_SRC"external/glad/glad.h",         DIR_DST DIR_DEPS DIR_DST"external/glad/"},
+    {DIR_SRC"external/glad/gl.h",           DIR_DST DIR_DEPS DIR_DST"external/glad/"},
     {DIR_SRC"external/glad/khrplatform.h",  DIR_DST DIR_DEPS DIR_DST"external/glad/"},
 
     {DIR_SRC"buildtool_config.h",           DIR_DST DIR_DEPS DIR_DST},
@@ -182,6 +182,8 @@ int main(int argc, char **argv)
             cmd_push(&cmd, str_cflags_debug[i]);
     }
 
+    cmd_push(&cmd, "-DGLAD_API_CALL_EXPORT");
+    cmd_push(&cmd, "-DGLAD_API_CALL_EXPORT_BUILD");
     cmd_push(&cmd, stringf("-ffile-prefix-map=%s=", DIR_BUILDTOOL_BIN_ROOT));
     for (i = 0; i < arr_len(str_cflags); ++i)
         cmd_push(&cmd, str_cflags[i]);

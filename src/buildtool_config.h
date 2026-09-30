@@ -68,7 +68,7 @@
         "-Llib/"PLATFORM,
         "-lm",
         "-lmvec",
-        "-lglfw",
+        "-lglfw"
     };
 
     /*!
@@ -79,7 +79,7 @@
         "-Lfossil/lib/"PLATFORM,
         "-lm",
         "-lglfw",
-        "-lfossil",
+        "-lfossil"
     };
 
 #endif /* FSL_PLATFORM */
