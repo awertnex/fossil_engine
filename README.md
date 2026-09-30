@@ -73,7 +73,7 @@ cleanup:
 - [buildtool](https://github.com/awertnex/buildtool) (v1.8.7): build tool used to build the engine
 - [glfw](https://github.com/glfw/glfw) (v3.4): platform-independent windowing (headers modified)
     - modifications: remove `__cplusplus` guard, since the engine is C-only
-- [glad](https://github.com/Dav1dde/glad) jwd(v2.0.8): graphics API loader (header modified)
+- [glad](https://github.com/Dav1dde/glad) (v2.0.8): graphics API loader (header modified)
     - extensions: GL_ARB_bindless_texture
     - modifications: remove `__cplusplus` guard, since the engine is C-only
 - [stb_truetype.h](https://github.com/nothings/stb/blob/master/stb_truetype.h) (v1.26): font loader (modified)
