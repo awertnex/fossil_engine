@@ -236,21 +236,6 @@
         (v.w >= min.w) && (v.w <= max.w); \
 }
 
-#define LENGTH_SQUARED_V2_FUNC_IMPL \
-{ \
-    return v.x * v.x + v.y * v.y; \
-}
-
-#define LENGTH_SQUARED_V3_FUNC_IMPL \
-{ \
-    return v.x * v.x + v.y * v.y + v.z * v.z; \
-}
-
-#define LENGTH_SQUARED_V4_FUNC_IMPL \
-{ \
-    return v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w; \
-}
-
 #define LENGTH_V2_FUNC_IMPL(type, type_f, sqrt_func) \
 { \
     return (type)sqrt_func((type_f)(v.x * v.x + v.y * v.y)); \
@@ -279,6 +264,21 @@
 #define LENGTH_FLOAT_V4_FUNC_IMPL(sqrt_func) \
 { \
     return sqrt_func(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w); \
+}
+
+#define LENGTH_SQUARED_V2_FUNC_IMPL \
+{ \
+    return v.x * v.x + v.y * v.y; \
+}
+
+#define LENGTH_SQUARED_V3_FUNC_IMPL \
+{ \
+    return v.x * v.x + v.y * v.y + v.z * v.z; \
+}
+
+#define LENGTH_SQUARED_V4_FUNC_IMPL \
+{ \
+    return v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w; \
 }
 
 #define DISTANCE_V2_FUNC_IMPL(type, type_f, sqrt_func) \
