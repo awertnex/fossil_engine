@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    here at engine version `v0.3.3-beta` (2026-01-24), which makes `v0.3.4-beta`
    the first version of the engine as standalone in this repo.
 
-## [0.16.0-dev] - current
+## [0.17.0-beta] - 2026-10-18
 
 #### added
 - add basic 'README.md' documentation and overview.

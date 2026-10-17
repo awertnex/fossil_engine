@@ -1,8 +1,8 @@
-# Fossil Engine - v0.16.0-dev
+# Fossil Engine - v0.17.0-beta
 
 **a headless game engine written in C89, with minimal dependencies.**
 
-## Goals of this project:
+## Goals of This Project:
 - to make 2D and/or 3D games, and general software (such as image editors, 3D
   editors, or GUI-based text editors and such)
 - to provide simple, general-purpose (mostly) implementations so to give the
@@ -13,8 +13,6 @@
 >**NOTE ABOUT VERSIONING:** all tags before `v0.3.4-beta` belong to the repo
  [heaven-hell_continuum](https://github.com/awertnex/heaven-hell_continuum)
  since this engine used to be one directory in that repo.
-
-- - -
 
 ## Engine Start
 - engine uses OpenGL as its primary graphics API
