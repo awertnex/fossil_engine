@@ -57,7 +57,7 @@ int main(int argc, char **argv)
                 "Usage: ./build [options]...\n"
                 "Options:\n"
                 "    help       print this help\n"
-                "    list       list available tests\n"
+                "    list       list available examples\n"
                 "    show       show build command in list format\n"
                 "    raw        show build command in raw format\n"
                 "    self       build build source\n");
@@ -69,7 +69,7 @@ int main(int argc, char **argv)
 
     if (find_token("list", argc, argv))
     {
-        printf("%s", "available tests:\n");
+        printf("%s", "available examples:\n");
         cursor = printf("%s", "    id      name");
         for (; cursor < TEST_NAME_WIDTH; ++cursor)
             putchar(' ');
@@ -147,8 +147,8 @@ u32 build_game(int argc, char **argv)
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
     cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
-    fsl_engine_link_libs(&cmd);
     fsl_engine_set_runtime_path(&cmd);
+    fsl_engine_link_libs(&cmd);
     cmd_push(&cmd, "-o");
     cmd_push(&cmd, DIR_OUT_GAME"hhc");
     cmd_ready(&cmd);

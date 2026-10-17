@@ -5,7 +5,7 @@
 #include "deps/fossil/memory/memory.h"
 #include "deps/fossil/shaders/shader_types.h"
 
-#include "deps/fossil/external/glad/glad.h"
+#include "deps/fossil/external/glad/gl.h"
 
 #include "../settings/settings.h"
 

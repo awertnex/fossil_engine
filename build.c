@@ -32,7 +32,7 @@ static str str_cflags_debug[][CMD_SIZE] =
 
 static str str_files[][CMD_SIZE] =
 {
-    DIR_SRC"external/glad/glad.c",
+    DIR_SRC"external/glad/gl.c",
     DIR_SRC"assets/assets.c",
     DIR_SRC"assets/model.c",
     DIR_SRC"assets/mesh/mesh.c",
@@ -61,8 +61,8 @@ static str str_files[][CMD_SIZE] =
 
 static str str_files_plugins[][CMD_SIZE] =
 {
-    DIR_SRC"plugins/fsl_native/noise_sampler/noise_sampler.c",
-    DIR_SRC"plugins/fsl_native/noise_sampler/noise_sampler_sample.c"
+    DIR_SRC"plugins/fsl_native/torus_noise/torus_noise.c",
+    DIR_SRC"plugins/fsl_native/torus_noise/torus_sample.c"
 };
 
 static str str_make_dir[][CMD_SIZE] =
@@ -97,13 +97,13 @@ static str str_make_dir_plugins[][CMD_SIZE] =
 {
     DIR_DST DIR_DEPS DIR_DST"plugins/",
     DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/",
-    DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/noise_sampler/"
+    DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/torus_noise/"
 };
 
 static str *copy_targets[][48] =
 {
     {DIR_SRC"external/glfw3.h",             DIR_DST DIR_DEPS DIR_DST"external/"},
-    {DIR_SRC"external/glad/glad.h",         DIR_DST DIR_DEPS DIR_DST"external/glad/"},
+    {DIR_SRC"external/glad/gl.h",           DIR_DST DIR_DEPS DIR_DST"external/glad/"},
     {DIR_SRC"external/glad/khrplatform.h",  DIR_DST DIR_DEPS DIR_DST"external/glad/"},
 
     {DIR_SRC"buildtool_config.h",           DIR_DST DIR_DEPS DIR_DST},
@@ -136,8 +136,8 @@ static str *copy_targets[][48] =
 
 static str *copy_targets_plugins[][48] =
 {
-    {DIR_SRC"plugins/fsl_native/noise_sampler/noise_sampler.h", DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/noise_sampler/"},
-    {DIR_SRC"plugins/fsl_native/noise_sampler/noise_sampler_sample.h", DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/noise_sampler/"}
+    {DIR_SRC"plugins/fsl_native/torus_noise/torus_noise.h", DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/torus_noise/"},
+    {DIR_SRC"plugins/fsl_native/torus_noise/torus_sample.h", DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/torus_noise/"}
 };
 
 int main(int argc, char **argv)
@@ -182,19 +182,21 @@ int main(int argc, char **argv)
             cmd_push(&cmd, str_cflags_debug[i]);
     }
 
+    cmd_push(&cmd, "-DGLAD_API_CALL_EXPORT");
+    cmd_push(&cmd, "-DGLAD_API_CALL_EXPORT_BUILD");
     cmd_push(&cmd, stringf("-ffile-prefix-map=%s=", DIR_BUILDTOOL_BIN_ROOT));
     for (i = 0; i < arr_len(str_cflags); ++i)
         cmd_push(&cmd, str_cflags[i]);
-
-    fsl_engine_set_runtime_path(&cmd);
-    for (i = 0; i < arr_len(fsl_str_libs_internal); ++i)
-        cmd_push(&cmd, fsl_str_libs_internal[i]);
 
     for (i = 0; i < arr_len(str_files); ++i)
         cmd_push(&cmd, str_files[i]);
 
     for (i = 0; i < arr_len(str_files_plugins); ++i)
         cmd_push(&cmd, str_files_plugins[i]);
+
+    fsl_engine_set_runtime_path(&cmd);
+    for (i = 0; i < arr_len(fsl_str_libs_internal); ++i)
+        cmd_push(&cmd, fsl_str_libs_internal[i]);
 
     cmd_push(&cmd, "-o");
     cmd_push(&cmd, "lib/"PLATFORM"/"FSL_FILE_NAME_LIB);

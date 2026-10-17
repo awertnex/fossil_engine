@@ -1,13 +1,43 @@
 # changelog
 
->**NOTE:**
->- history is mixed with the repo
-   "https://github.com/awertnex/heaven-hell_continuum.git" since this engine
-   originated from the making of that game and later was moved here at engine
-   version v0.3.3-beta (2026 01 24), which makes v0.3.4-beta the first version
-   of the engine as standalone in this repo.
+All notable changes to this project will be documented in this file.
 
-## v0.16.0-beta (2026 07 11)
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+>**NOTES:**
+>- the changelog format is based on
+   [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) since engine version
+   `v0.16.0-beta`, with some modification: changelogs start as lower-case,
+   change headers are one level smaller.
+>- history is mixed with the repo
+   [heaven-hell_continuum](https://github.com/awertnex/heaven-hell_continuum)
+   since this engine originated from the making of that game and later was moved
+   here at engine version `v0.3.3-beta` (2026-01-24), which makes `v0.3.4-beta`
+   the first version of the engine as standalone in this repo.
+
+## [0.17.0-beta] - 2026-10-18
+
+#### added
+- add basic 'README.md' documentation and overview.
+
+#### changed
+- update 'glad' version: `v0.1.36` -> `v2.0.8`.
+- change directory name 'tests/' to 'examples/'.
+- change math 'length' and 'distance' functions names to 'squared' variants
+  (non-squared variants will be added in a future version so to not introduce
+  silent bugs).
+- change entire plug-in function names and plug-in name from 'noise_sampler' to
+  'torus_noise' (Torus Noise).
+
+#### security
+- the 'obj' loader possibly has a bug due to hash-table collisions:
+    - sometimes faces disappear when ordered in specific ways in the obj file.
+- the 'obj' loader does not handle concave faces smartly, just loads them as
+  they are.
+- function `fsl_mem_arena_pop()` does not use arena's freelist yet.
+
+## [0.16.0-beta] - 2026-07-11
 
 #### changes
 - re-wrote math library to include implementations of all math functions for all math types.
@@ -27,8 +57,7 @@
   they are.
 - function `fsl_mem_arena_pop()` does not use arena's freelist yet.
 
-- - -
-## v0.15.0-beta (2026 07 01)
+## [0.15.0-beta] - 2026-07-01
 
 #### changes
 - improved perlin-noise performance by changing interpolation per axis to
@@ -48,8 +77,7 @@
   they are.
 - function `fsl_mem_arena_pop()` does not use arena's freelist yet.
 
-- - -
-## v0.14.0-beta (2026 06 22)
+## [0.14.0-beta] - 2026-06-22
 
 #### fixes
 - fixed mouse delta spike when resizing window.
@@ -73,8 +101,7 @@
   they are.
 - function `fsl_mem_arena_pop()` does not use arena's freelist yet.
 
-- - -
-## v0.13.0-beta (2026 06 17)
+## [0.13.0-beta] - 2026-06-17
 
 #### additions
 - added function `fsl_request_skip_mouse_delta()` to skip garbage delta when
@@ -87,8 +114,7 @@
 - the 'obj' loader does not handle concave faces smartly, just loads them as
   they are.
 
-- - -
-## v0.12.1-beta (2026 06 15)
+## [0.12.1-beta] - 2026-06-15
 
 #### fixes
 - fixed build script not copying header 'buildtool_config.h' to deployment
@@ -100,8 +126,7 @@
 - the 'obj' loader does not handle concave faces smartly, just loads them as
   they are.
 
-- - -
-## v0.12.0-beta (2026 06 15)
+## [0.12.0-beta] - 2026-06-15
 
 #### additions
 - added 'button_pressed' texture.
@@ -135,8 +160,7 @@
 - the 'obj' loader does not handle concave faces smartly, just loads them as
   they are.
 
-- - -
-## v0.11.0-beta (2026 06 12)
+## [0.11.0-beta] - 2026-06-12
 
 #### changes
 - changed size parameter in UI element drawing from UV-relative to constant
@@ -182,18 +206,17 @@
 - game UI is clunky right now because new UI API and didn't bother to change it,
   yet.
 
-- - -
-## v0.10.1-beta (2026 06 10)
+## [0.10.1-beta] - 2026-06-10
 
 #### additions
-- (2026 06 09): added new UI module with panel-baking and easier drawing.
+- (2026-06-09): added new UI module with panel-baking and easier drawing.
 
 #### fixes
-- (2026 06 10): fixed nonexistent alpha in UI shader.
-- (2026 06 09): fixed wrong alpha calculation in macro `fsl_color_v4_to_hex()`.
+- (2026-06-10): fixed nonexistent alpha in UI shader.
+- (2026-06-09): fixed wrong alpha calculation in macro `fsl_color_v4_to_hex()`.
 
 #### deprecations
-- (2026 06 09): deprecated parameters `offset_x`, `offset_y`, `align_x` and
+- (2026-06-09): deprecated parameters `offset_x`, `offset_y`, `align_x` and
                 `align_y` in function `fsl_ui_draw()`, use new UI module
                 'src/ui/ui.h' instead:
                     - function `ui_element_set_texture()` to set a texture for
@@ -221,37 +244,35 @@
 - game UI is clunky right now because new UI API and didn't bother to change it,
   yet.
 
-- - -
-## v0.10.0-beta (2026 06 07)
+## [0.10.0-beta] - 2026-06-07
 
 #### changes
-- (2026 06 07): made copying of a directory and a sub directory of the same name
+- (2026-06-07): made copying of a directory and a sub directory of the same name
                 not place them inside each other.
-- (2026 06 07): added copying of empty directories to function `fsl_copy_dir()`.
-- (2026 06 06): deprecated function `fsl_get_camera_lookat_angles()`.
-- (2026 06 06): added function `fsl_camera_lookat_update()`.
-- (2026 06 06): function `fsl_camera_movement_update()` now actually updates
+- (2026-06-07): added copying of empty directories to function `fsl_copy_dir()`.
+- (2026-06-06): deprecated function `fsl_get_camera_lookat_angles()`.
+- (2026-06-06): added function `fsl_camera_lookat_update()`.
+- (2026-06-06): function `fsl_camera_movement_update()` now actually updates
                 camera perspective (calls `fsl_projection_perspective_update()`
                 automatically).
-- (2026 06 06): camera struct now has a projection `fsl_projection` in it.
-- (2026 06 03): added new standard mesh 'skybox'.
-- (2026 06 02): added function `fsl_rle()` for run-length data compression.
+- (2026-06-06): camera struct now has a projection `fsl_projection` in it.
+- (2026-06-03): added new standard mesh 'skybox'.
+- (2026-06-02): added function `fsl_rle()` for run-length data compression.
 
-- - -
-## v0.9.0-beta (2026 05 31)
+## [0.9.0-beta] - 2026-05-31
 
 #### changes
-- (2026 05 29): added math types `angle_f32` and `angle_f64` to store an angle
+- (2026-05-29): added math types `angle_f32` and `angle_f64` to store an angle
                 along with its cached sine, cosine and tangent values, and
                 functions `fsl_angle_f32()` and `fsl_angle_f64()` to calculate
                 all three.
-- (2026 05 29): added engine's mesh format 'Fossil Mesh' (.fmesh), now, loaded
+- (2026-05-29): added engine's mesh format 'Fossil Mesh' (.fmesh), now, loaded
                 meshes get automatically cooked into '.fmesh' for next time
                 and will be loaded instead when found.
-- (2026 05 27): deprecate `vbo_data` and `ebo_data` arrays in struct `fsl_mesh`.
-- (2026 05 27): added `fsl_vbo` data type and its initialization and freeing
+- (2026-05-27): deprecate `vbo_data` and `ebo_data` arrays in struct `fsl_mesh`.
+- (2026-05-27): added `fsl_vbo` data type and its initialization and freeing
                 functions.
-- (2026 05 27): added string functions:
+- (2026-05-27): added string functions:
                 - `fsl_is_digit()`.
                 - `fsl_skip_spaces()`.
                 - `fsl_strip_non_printable()`.
@@ -263,22 +284,22 @@
                 - `fsl_hash_djb2_u64()`.
                 - `fsl_hash_fnv1a_u64()`.
                 - `fsl_find_hash_u64()`.
-- (2026 05 27): added mesh-drawing function `fsl_mesh_draw()`.
-- (2026 05 27): moved camera structs and functions from 'engine/' module to
+- (2026-05-27): added mesh-drawing function `fsl_mesh_draw()`.
+- (2026-05-27): moved camera structs and functions from 'engine/' module to
                 'assets/' module.
-- (2026 05 25): added 'Wavefront OBJ' mesh format loader:
+- (2026-05-25): added 'Wavefront OBJ' mesh format loader:
                 - parses vertices (x, y, z[, w]), normals (x, y, z), UVs
                   (u[, v]) and, of course, faces.
                 - skips all non-printable characters.
                 - handles optional parameters.
                 - hashes vertex entries to de-duplicate.
                 - triangulates faces in fan-pattern.
-- (2026 05 14): removed 'TRACE' logs from release builds completely.
-- (2026 05 14): added feature 'input contexts' (input layers), and made context
+- (2026-05-14): removed 'TRACE' logs from release builds completely.
+- (2026-05-14): added feature 'input contexts' (input layers), and made context
                 0 the default input context (always active).
-- (2026 05 13): including dependency 'stb_truetype.h' is no longer required in
+- (2026-05-13): including dependency 'stb_truetype.h' is no longer required in
                 order to use assets module externally.
-- (2026 05 12): added parameters `size_x` and `size_y` to functions
+- (2026-05-12): added parameters `size_x` and `size_y` to functions
                 `fsl_fbo_init()` and `fsl_fbo_realloc()`.
 
 #### bugs and flaws
@@ -286,55 +307,54 @@
 - test 'game_hhc' saves chunks as separate files on disk, in one directory,
   which is very taxing for file I/O.
 
-- - -
-## v0.8.0-beta (2026 05 11)
+## [0.8.0-beta] - 2026-05-11
 
 #### changes
-- (2026 05 11): replaced all `PATH_MAX` and `NAME_MAX` with `FSL_PATH_CAP` and
+- (2026-05-11): replaced all `PATH_MAX` and `NAME_MAX` with `FSL_PATH_CAP` and
                 `FSL_ID_CAP` respectively.
-- (2026 05 11): removed standard header 'limits.h' from engine header 'limits.h'.
-- (2026 05 11): added function `fsl_mem_arena_pop()`.
-- (2026 05 10): changed memory arena internals from pointers to offsets.
-- (2026 05 06): removed functions `fsl_mem_request_page_size()` and
+- (2026-05-11): removed standard header 'limits.h' from engine header 'limits.h'.
+- (2026-05-11): added function `fsl_mem_arena_pop()`.
+- (2026-05-10): changed memory arena internals from pointers to offsets.
+- (2026-05-06): removed functions `fsl_mem_request_page_size()` and
                 `_fsl_mem_request_page_size()`, no longer needed.
-- (2026 05 06): added guards around log macros to check for log level, the old
+- (2026-05-06): added guards around log macros to check for log level, the old
                 system used to be that 'DEBUG' and 'TRACE' logs were removed by
                 the pre-processor in release builds, it's changed so that log
                 calls are always there, but there's a cheap if-guard around
                 them.
-- (2026 05 05): removed parameter `_render` from function `fsl_engine_init()`.
-- (2026 05 05): added parameter `bindless` to function `fsl_texture_init()`
+- (2026-05-05): removed parameter `_render` from function `fsl_engine_init()`.
+- (2026-05-05): added parameter `bindless` to function `fsl_texture_init()`
                 and combined `fsl_texture_generate()` with `fsl_texture_init()`.
-- (2026 05 05): removed member `format_internal` and `buf` from struct
+- (2026-05-05): removed member `format_internal` and `buf` from struct
                 `fsl_texture`.
-- (2026 05 05): removed parameter `format_internal` from functions
+- (2026-05-05): removed parameter `format_internal` from functions
                 `fsl_texture_init()` and `fsl_texture_generate()`.
-- (2026 05 04): added parameters `name`, `file` and `path` to functions:
+- (2026-05-04): added parameters `name`, `file` and `path` to functions:
                 - `fsl_texture_init()`.
                 - `fsl_mesh_generate()`.
                 - `fsl_font_init()`.
-- (2026 05 04): added asset module.
-- (2026 04 29): updated 'buildtool' version to 'v1.8.4-beta'.
-- (2026 04 29): moved 'logger.c' and 'logger.h' into their own directory
+- (2026-05-04): added asset module.
+- (2026-04-29): updated 'buildtool' version to 'v1.8.4-beta'.
+- (2026-04-29): moved 'logger.c' and 'logger.h' into their own directory
                 'logger/'.
-- (2026 04 29): hide function `fsl_logger_init()` and change name to
+- (2026-04-29): hide function `fsl_logger_init()` and change name to
                 `_fsl_logger_init()` (automatically called from
                 `fsl_engine_init()`).
-- (2026 04 29): remove param `log_dir_not_found` from function
+- (2026-04-29): remove param `log_dir_not_found` from function
                 `fsl_logger_init()`.
-- (2026 04 29): remove param `_log_dir` from function `fsl_engine_init()` and
+- (2026-04-29): remove param `_log_dir` from function `fsl_engine_init()` and
                 function `fsl_logger_init()`.
-- (2026 04 28): add math functions:
+- (2026-04-28): add math functions:
                 - `fsl_min_v3f64(v3f64 v)`.
                 - `fsl_max_v3f64(v3f64 v)`.
                 - `fsl_min_axis_v3f64(v3f64 v)`.
                 - `fsl_max_axis_v3f64(v3f64 v)`.
-- (2026 04 28): add shader hot reloading support (just call the function
+- (2026-04-28): add shader hot reloading support (just call the function
                 `fsl_shader_program_init()` again on the same
                 `fsl_shader_program` struct) with fallback support (hot
                 reloading and fallback won't work for the function
                 `fsl_shader_init()`).
-- (2026 04 28): add struct `fsl_key_bind` to define key combinations more
+- (2026-04-28): add struct `fsl_key_bind` to define key combinations more
                 easily.
 
 ## bugs and flaws
@@ -344,85 +364,81 @@
 - UI module is still very weak, but it can draw text, textures and 9-slice
   textures.
 
-- - -
-## v0.7.0-beta (2026 04 27)
+## [0.7.0-beta] - 2026-04-27
 
 #### changes
-- (2026 04 23): add engine version to the stdout info on engine start
-- (2026 04 15): many small bug fixes
-- (2026 04 13): officially compile the engine in C89
-- (2026 04 13): change function `fsl_log_output()` to take a string instead of
+- (2026-04-23): add engine version to the stdout info on engine start
+- (2026-04-15): many small bug fixes
+- (2026-04-13): officially compile the engine in C89
+- (2026-04-13): change function `fsl_log_output()` to take a string instead of
                 variadic arguments
-- (2026 02 07): remove parameter `size` from function `fsl_texture_init()`
+- (2026-02-07): remove parameter `size` from function `fsl_texture_init()`
                 because not needed
-- (2026 02 07): add cflag `-Wpedantic` to engine build and fix all pedantic
+- (2026-02-07): add cflag `-Wpedantic` to engine build and fix all pedantic
                 warnings
-- (2026 02 06): remove function `fsl_text_stop()`, use `fsl_ui_stop()` instead
+- (2026-02-06): remove function `fsl_text_stop()`, use `fsl_ui_stop()` instead
 
 #### bugs and flaws
 - floating point exception when flying too fast horizontally at a dense area of
   objects (yes, I broke it again, but this time it's weirdly stable at fast
   vertical collisions)
 
-- - -
-## v0.6.0-beta (2026 02 06)
+## [0.6.0-beta] - 2026-02-06
 
 #### changes
-- (2026 02 04): change `fsl_ui_fbo_blit()` and `fsl_text_fbo_blit()` to
+- (2026-02-04): change `fsl_ui_fbo_blit()` and `fsl_text_fbo_blit()` to
                 `fsl_fbo_blit()` and move from `text.h` and `ui.h` to `core.h`
-- (2026 02 04): hide function `fsl_text_init()` and move inside function
+- (2026-02-04): hide function `fsl_text_init()` and move inside function
                 `fsl_ui_init()`
-- (2026 02 04): remove parameter `*fbo` from function `fsl_ui_start()`
-- (2026 02 04): change flag `FSL_FLAG_LOAD_DEFAULT_SHADERS` to
+- (2026-02-04): remove parameter `*fbo` from function `fsl_ui_start()`
+- (2026-02-04): change flag `FSL_FLAG_LOAD_DEFAULT_SHADERS` to
                 `FSL_FLAG_NO_DEFAULT_SHADERS` to make loading default shaders
                 the default choice
-- (2026 02 04): merge `src/h/text.h` into `src/h/ui.h` and use single fbo for
+- (2026-02-04): merge `src/h/text.h` into `src/h/ui.h` and use single fbo for
                 both
-- (2026 02 03): make multisampled text rendering
-- (2026 02 03): remove `fbo` parameter from function `fsl_text_start()`
-- (2026 02 03): optimize text rendering: change texture atlas to texture array
-- (2026 02 02): group logger globals into one struct `fsl_logger_core`
+- (2026-02-03): make multisampled text rendering
+- (2026-02-03): remove `fbo` parameter from function `fsl_text_start()`
+- (2026-02-03): optimize text rendering: change texture atlas to texture array
+- (2026-02-02): group logger globals into one struct `fsl_logger_core`
 
-- - -
-## v0.5.0-beta (2026 02 01)
+## [0.5.0-beta] - 2026-02-01
 
 #### changes
-- (2026 01 31): Add text window restriction
-- (2026 01 31): Fix missing `fsl_render.ndc_scale` at init time
-- (2026 01 31): Add 9-slice UI
-- (2026 01 31): Add test `nine_slice`
-- (2026 01 31): Split `fsl_str_libs[][]` into internal and external arrays
-- (2026 01 31): Add internal framebuffer size callback and an optional pointer
+- (2026-01-31): Add text window restriction
+- (2026-01-31): Fix missing `fsl_render.ndc_scale` at init time
+- (2026-01-31): Add 9-slice UI
+- (2026-01-31): Add test `nine_slice`
+- (2026-01-31): Split `fsl_str_libs[][]` into internal and external arrays
+- (2026-01-31): Add internal framebuffer size callback and an optional pointer
                 to an additional framebuffer size callback
-- (2026 01 30): Package engine-specific boilerplate into engine init functions
-- (2026 01 30): Optimize text rendering by removing geometry shader and going
+- (2026-01-30): Package engine-specific boilerplate into engine init functions
+- (2026-01-30): Optimize text rendering by removing geometry shader and going
                 with instanced rendering
-- (2026 01 30): Add "catch-up" behavior to function `fsl_on_time_interval()`
-- (2026 01 30): Update buildtool version `v1.7.0-beta` -> `v1.8.1-beta`
-- (2026 01 30): Add `fsl_mkdir()`, `fsl_chdir()`, `fsl_stat()` and
+- (2026-01-30): Add "catch-up" behavior to function `fsl_on_time_interval()`
+- (2026-01-30): Update buildtool version `v1.7.0-beta` -> `v1.8.1-beta`
+- (2026-01-30): Add `fsl_mkdir()`, `fsl_chdir()`, `fsl_stat()` and
                 `fsl_chmod()` for platform abstraction
-- (2026 01 30): Move functions `fsl_make_dir()` and `fsl_change_dir()`
+- (2026-01-30): Move functions `fsl_make_dir()` and `fsl_change_dir()`
                 implementations to file `dir.c`
-- (2026 01 30): Treat symlinks as files in function `fsl_is_file_exists()`
-- (2026 01 30): Use proper error-handling for function `readlink()` in
+- (2026-01-30): Treat symlinks as files in function `fsl_is_file_exists()`
+- (2026-01-30): Use proper error-handling for function `readlink()` in
                 function `fsl_get_path_bin_root()`
-- (2026 01 30): Terminate string buffer in function `fsl_get_path_bin_root()`
-- (2026 01 30): Preserve symlinks when using `copy_file()` and `copy_dir()`
-- (2026 01 30): Fix function `fsl_get_file_type()` doing funky bitwise
-- (2026 01 30): Add enum `fsl_file_type_index()` for file type checking
+- (2026-01-30): Terminate string buffer in function `fsl_get_path_bin_root()`
+- (2026-01-30): Preserve symlinks when using `copy_file()` and `copy_dir()`
+- (2026-01-30): Fix function `fsl_get_file_type()` doing funky bitwise
+- (2026-01-30): Add enum `fsl_file_type_index()` for file type checking
                 gymnastics
-- (2026 01 30): Add error code `FSL_ERR_READ_LINK_FAIL`
-- (2026 01 29): Change `str_libs` `"-Llib/"PLATFORM`:
+- (2026-01-30): Add error code `FSL_ERR_READ_LINK_FAIL`
+- (2026-01-29): Change `str_libs` `"-Llib/"PLATFORM`:
     - For engine: `"-Llib/"PLATFORM`
     - For software that uses the engine: `"-Lfossil/lib/"PLATFORM`
-- (2026 01 29): Change `CHANGELOG.md` order of history from oldest top to
+- (2026-01-29): Change `CHANGELOG.md` order of history from oldest top to
                 newest top
-- (2026 01 29): Change `CHANGELOG.md` format to include date in changes
-- (2026 01 29): Change date format in text files `(YYYY MMM DD)` ->
-                `(YYYY MM DD)`
+- (2026-01-29): Change `CHANGELOG.md` format to include date in changes
+- (2026-01-29): Change date format in text files `(YYYY-MMM-DD)` ->
+                `(YYYY-MM-DD)`
 
-- - -
-## v0.4.0-beta (2026 Jan 29)
+## [0.4.0-beta] - 2026-Jan-29
 
 #### changes
 - `copy_file()` bug fix and new features:
@@ -443,8 +459,7 @@
 - Change build source of building tests
 - Update buildtool version `v1.6.2` -> `v1.7.0-beta`
 
-- - -
-## v0.3.4-beta (2026 Jan 28)
+## [0.3.4-beta] - 2026-Jan-28
 
 #### changes
 - Move engine from game repo "heaven-hell_continuum" into its own repo
@@ -466,8 +481,7 @@
 - Add function `fsl_engine_set_runtime_path()` to link engine's dependencies
   with the including software for run time
 
-- - -
-## v0.3.3-beta (2026 Jan 24)
+## [0.3.3-beta] - 2026-Jan-24
 
 #### changes
 - Make logger easier to use via flags
@@ -475,8 +489,7 @@
   write to its log destinations on disk without modifying global error variable
 - Add guards around definitions `TRUE` and `FALSE`
 
-- - -
-## v0.3.2-beta (2026 Jan 24)
+## [0.3.2-beta] - 2026-Jan-24
 
 #### changes
 - Add page size alignment for `sys/mman.h` functions:
@@ -506,8 +519,7 @@
   custom options
 - Add function `fsl_shader_free()` to unload individual shaders
 
-- - -
-## v0.3.1-beta (2026 Jan 19)
+## [0.3.1-beta] - 2026-Jan-19
 
 #### changes
 - Optimize text rendering loop
@@ -523,8 +535,7 @@
     `_mem_unmap_arena()`
 - Fix header documentation in `engine/h/memory.h`
 
-- - -
-## v0.2.0-beta (2026 Jan 19)
+## [0.2.0-beta] - 2026-Jan-19
 
 #### changes
 - Add engine API exposure definitions in 'h/common.h' for FSLAPI
@@ -535,7 +546,6 @@
     all: Build build tool and engine
     noproject: don't execute the build function passed to `engine_build()`
 
-- - -
 # previous history, from repo: [heaven-hell_continuum](https:/github.com/awertnex/heaven-hell_continuum)
 
 ## Heaven-Hell Continuum - v0.4.0-dev
@@ -576,7 +586,7 @@
 #### bugs and flaws
 - segfault when allocating smaller than 256 bytes for 'size' in function 'mem_alloc_buf()'
 
-## Heaven-Hell Continuum - v0.4.0-beta (18 Jan 2026)
+## Heaven-Hell Continuum - v0.4.0-beta (2026-Jan-18)
 
 #### changes
 - added player air control while not flying
@@ -617,8 +627,7 @@
 - if logger can't find log directory, it saves logs to engine log directory, if not found, it saves to current working directory (it should not save at all if so)
 - 'draw_ui_9_slice()' function doesn't work yet
 
-- - -
-## Heaven-Hell Continuum - v0.3.0-beta (10 Dec 2025)
+## Heaven-Hell Continuum - v0.3.0-beta (2025-Dec-10)
 
 #### changes
 - nudging the major version up by 1 is an understatement, this is almost
@@ -634,7 +643,7 @@
 - added cool textures
 - revived old code completely and removed all scrap code
 - fixed chunk queue offset miscalculation
-- fixed windows support (10 Dec 2025: actually broke it later)
+- fixed windows support (2025-Dec-10: actually broke it later)
 - fixed z-fighting between overlapped quads and lines
 - added basic AABB collision
 - added proper skybox and stars
@@ -673,8 +682,7 @@
 - made build tool build engine separately into a dynamic shared library
 - simplified build tool by removing some unnecessary commands
 
-- - -
-## Heaven-Hell Continuum - v0.2.3-beta (16 Oct 2025)
+## Heaven-Hell Continuum - v0.2.3-beta (2025-Oct-16)
 
 #### changes
 - added image loading with stb_image.h
@@ -686,8 +694,7 @@
   nothing allocated, and just froze there)
 - baked chunk order indices to a table on disk to avoid runtime re-calculation
 
-- - -
-## Heaven-Hell Continuum - v0.2.2-beta (12 Oct 2025)
+## Heaven-Hell Continuum - v0.2.2-beta (2025-Oct-12)
 
 #### changes
 - optimized chunk rendering:
@@ -711,8 +718,7 @@
         - added 'rate_chunk' to limit number of chunks processed per frame
         - added 'rate_block' to limit number of blocks processed per chunk
 
-- - -
-## Heaven-Hell Continuum - v0.2.0-beta (05 Oct 2025)
+## Heaven-Hell Continuum - v0.2.0-beta (2025-Oct-05)
 
 #### changes
 - added skybox colors for day/night cycle
@@ -784,8 +790,7 @@
 - geometry shaders' precision errors show up sometimes in DEBUG_MORE mode (semi-transparent blocks)
 - setting render distance to 0 segfaults (ofc, but I'm not gonna patch that)
 
-- - -
-## Heaven-Hell Continuum - v0.1.4-alpha (08 Apr 2025)
+## Heaven-Hell Continuum - v0.1.4-alpha (2025-Apr-08)
 
 #### changes
 - added windows support for build tool
@@ -796,8 +801,7 @@
 - added day/night cycle
 - added compiled release_build for windows
 
-- - -
-## Heaven-Hell Continuum - v0.1.3 (03 Apr 2025)
+## Heaven-Hell Continuum - v0.1.3 (2025-Apr-03)
 
 #### changes
 - fixed segfault while placing or breaking blocks in non-allocated chunk area
@@ -805,8 +809,7 @@
 - changed original resources to avoid copyright
 - made build system more difficult to read but easier to use (not tested on windows)
 
-- - -
-## Heaven-Hell Continuum - v0.1.2 (01 Apr 2025)
+## Heaven-Hell Continuum - v0.1.2 (2025-Apr-01)
 
 #### changes
 - can break and place blocks
@@ -825,8 +828,7 @@
 - changed build system from Bash to C
 - made 'defines.h' a local file
 
-- - -
-## Heaven-Hell Continuum - v0.1.1 (27 Mar 2025)
+## Heaven-Hell Continuum - v0.1.1 (2025-Mar-27)
 
 #### changes
 - added many button names for menus and containers enum
@@ -841,8 +843,7 @@
 - made the codebase a lot more readable
 - added delta time
 
-- - -
-## Heaven-Hell Continuum - v0.1.0 (2025 Mar 24)
+## Heaven-Hell Continuum - v0.1.0 (2025-Mar-24)
 
 **first version, as I have started this project long before I version-controlled it with git**
 

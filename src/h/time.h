@@ -95,7 +95,7 @@ FSLAPI b8 fsl_is_in_time_window(u64 *t, u64 interval, u64 curr);
  *  as oppose to @ref fsl_limit_framerate()).
  *
  *  @remark no syscalls used, time is queried from `curr`, usually passed from
- *  @ref fsl_render.time of the currently bound `fsl_render`.
+ *  @ref fsl_render.time of the currently bound @ref fsl_render.
  */
 FSLAPI b8 fsl_on_time_interval(u64 *t, u64 interval, u64 curr);
 

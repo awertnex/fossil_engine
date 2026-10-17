@@ -620,12 +620,12 @@ u32 fsl_mem_arena_pop_internal(fsl_mem_handle *handle,
     freelist_cap = arena->freelist_cap / sizeof(fsl_mem_arena_handle);
 
     while (entry[entry_pos].offset != handle->offset && entry_pos < entry_cap)
-    {++entry_pos;}
+        ++entry_pos;
 
     if (entry_pos < entry_cap)
     {
         while (freelist[freelist_pos].offset != FSL_OFFSET_INVALID && freelist_pos < freelist_cap)
-        {++freelist_pos;}
+            ++freelist_pos;
 
         if (freelist_pos >= freelist_cap)
         {
@@ -662,6 +662,7 @@ u32 fsl_mem_arena_pop_internal(fsl_mem_handle *handle,
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
+
 void *fsl_mem_handle_get_internal(fsl_mem_handle handle)
 {
     return handle.arena ? (void*)((u8*)handle.arena->buf + handle.offset) : NULL;

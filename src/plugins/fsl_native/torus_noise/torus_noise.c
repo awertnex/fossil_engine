@@ -15,10 +15,11 @@
  */
 
 /*!
- *  @file noise_sampler.c
+ *  @file torus_noise.c
  *
- *  @brief seamless-tiling noise sampler, grid-based, 1D, 2D and 3D support,
- *  arbitrary blend margin thickness per axis and arbitrary final noise map size per axis.
+ *  @brief Torus Noise plug-in implementation, for 'Fossil Engine'; seamless-tiling
+ *  noise sampler, grid-based, 1D, 2D and 3D support, arbitrary blend margin
+ *  thickness per axis and arbitrary final noise map size per axis.
  */
 
 #include "../../../logger/logger.h"
@@ -27,7 +28,7 @@
 
 #include "../../../common/diagnostics.h"
 
-#include "noise_sampler.h"
+#include "torus_noise.h"
 
 #include <stddef.h>
 #include <inttypes.h>
@@ -40,13 +41,13 @@ enum fsl_sampler_blend_type
     SAMPLER_BLEND_TYPE_CORNER
 }; /* fsl_sampler_blend_type */
 
-u32 fsl_noise_sampler_init(fsl_noise_sampler *sampler,
+u32 fsl_torus_sampler_init(fsl_torus_sampler *sampler,
         u64 noise_count, u64 sample_count,
         f64 map_radius_x, f64 map_radius_y, f64 map_radius_z,
         f64 map_diameter_x, f64 map_diameter_y, f64 map_diameter_z,
         f64 map_margin_x, f64 map_margin_y, f64 map_margin_z)
 {
-    fsl_noise_buffer *noise_buf = NULL;
+    fsl_torus_buffer *torus_buf = NULL;
 
     if (!sampler)
     {
@@ -56,23 +57,23 @@ u32 fsl_noise_sampler_init(fsl_noise_sampler *sampler,
     }
 
     if (sampler->initialized)
-        fsl_noise_sampler_free(sampler);
+        fsl_torus_sampler_free(sampler);
 
-    noise_buf = &sampler->noise_buf;
+    torus_buf = &sampler->torus_buf;
 
-    if (fsl_mem_map((void*)&noise_buf->sample_src_buf,
-            noise_count * sample_count * sizeof(fsl_noise_sample),
-            "noise_sampler_init().noise_buf->sample_src_buf") != FSL_ERR_SUCCESS)
+    if (fsl_mem_map((void*)&torus_buf->sample_src_buf,
+            noise_count * sample_count * sizeof(fsl_torus_sample),
+            "torus_sampler_init().torus_buf->sample_src_buf") != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    if (fsl_mem_map((void*)&noise_buf->sample_dst_buf,
+    if (fsl_mem_map((void*)&torus_buf->sample_dst_buf,
             noise_count * sample_count * sizeof(f64),
-            "noise_sampler_init().noise_buf->sample_dst_buf") != FSL_ERR_SUCCESS)
+            "torus_sampler_init().torus_buf->sample_dst_buf") != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    if (fsl_mem_map((void*)&noise_buf->noise_dst_buf,
+    if (fsl_mem_map((void*)&torus_buf->noise_dst_buf,
                 noise_count * sizeof(f64),
-            "noise_sampler_init().noise_buf->noise_dst_buf") != FSL_ERR_SUCCESS)
+            "torus_sampler_init().torus_buf->noise_dst_buf") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     sampler->radius[0] = map_radius_x;
@@ -88,8 +89,8 @@ u32 fsl_noise_sampler_init(fsl_noise_sampler *sampler,
     sampler->t_scale[1] = 1.0 / (map_margin_y * 2.0);
     sampler->t_scale[2] = 1.0 / (map_margin_z * 2.0);
 
-    sampler->noise_buf.noise_len = noise_count;
-    sampler->noise_buf.sample_len = sample_count;
+    sampler->torus_buf.noise_len = noise_count;
+    sampler->torus_buf.sample_len = sample_count;
 
     sampler->initialized = TRUE;
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
@@ -100,39 +101,39 @@ u32 fsl_noise_sampler_init(fsl_noise_sampler *sampler,
 
 cleanup:
 
-    fsl_noise_sampler_free(sampler);
+    fsl_torus_sampler_free(sampler);
     return fsl_err;
 }
 
-void fsl_noise_sampler_free(fsl_noise_sampler *sampler)
+void fsl_torus_sampler_free(fsl_torus_sampler *sampler)
 {
-    fsl_noise_sampler nosampler = {0};
-    fsl_noise_buffer *noise_buf = NULL;
+    fsl_torus_sampler nosampler = {0};
+    fsl_torus_buffer *torus_buf = NULL;
 
     if (!sampler || !sampler->initialized)
         return;
 
     sampler->initialized = FALSE;
-    noise_buf = &sampler->noise_buf;
+    torus_buf = &sampler->torus_buf;
 
-    fsl_mem_unmap((void*)&noise_buf->sample_src_buf,
-            noise_buf->noise_len * noise_buf->sample_len * sizeof(fsl_noise_sample),
-            "noise_sampler_free().noise_buf->sample_src_buf");
-    fsl_mem_unmap((void*)&noise_buf->sample_dst_buf,
-            noise_buf->noise_len * noise_buf->sample_len * sizeof(f64),
-            "noise_sampler_free().noise_buf->sample_dst_buf");
-    fsl_mem_unmap((void*)&noise_buf->noise_dst_buf,
-            noise_buf->noise_len * sizeof(f64),
-            "noise_sampler_free().noise_buf->noise_dst_buf");
+    fsl_mem_unmap((void*)&torus_buf->sample_src_buf,
+            torus_buf->noise_len * torus_buf->sample_len * sizeof(fsl_torus_sample),
+            "torus_sampler_free().torus_buf->sample_src_buf");
+    fsl_mem_unmap((void*)&torus_buf->sample_dst_buf,
+            torus_buf->noise_len * torus_buf->sample_len * sizeof(f64),
+            "torus_sampler_free().torus_buf->sample_dst_buf");
+    fsl_mem_unmap((void*)&torus_buf->noise_dst_buf,
+            torus_buf->noise_len * sizeof(f64),
+            "torus_sampler_free().torus_buf->noise_dst_buf");
 
     *sampler = nosampler;
 }
 
-void fsl_noise_sampler_context_init(fsl_noise_sampler *sampler,
-        fsl_noise_sampler_context *context,
+void fsl_torus_sampler_context_init(fsl_torus_sampler *sampler,
+        fsl_torus_sampler_context *context,
         f64 base_x, f64 base_y, f64 base_z)
 {
-    fsl_noise_sampler_context nocontext = {0};
+    fsl_torus_sampler_context nocontext = {0};
     enum fsl_sampler_blend_type blend_type = 0;
     u8 blend_mask = 0;
     u32 i = 0;
@@ -187,22 +188,22 @@ void fsl_noise_sampler_context_init(fsl_noise_sampler *sampler,
     {
         case SAMPLER_BLEND_TYPE_FACE:
             context->sample_count = 2;
-            context->noise_sample_lerp_func = fsl_noise_sample_lerp;
+            context->torus_sample_lerp_func = fsl_torus_sample_lerp;
             break;
 
         case SAMPLER_BLEND_TYPE_EDGE:
             context->sample_count = 4;
-            context->noise_sample_lerp_func = fsl_noise_sample_bilerp;
+            context->torus_sample_lerp_func = fsl_torus_sample_bilerp;
             break;
 
         case SAMPLER_BLEND_TYPE_CORNER:
             context->sample_count = 8;
-            context->noise_sample_lerp_func = fsl_noise_sample_trilerp;
+            context->torus_sample_lerp_func = fsl_torus_sample_trilerp;
             break;
 
         default:
             context->sample_count = 1;
-            context->noise_sample_lerp_func = fsl_noise_sample_nolerp;
+            context->torus_sample_lerp_func = fsl_torus_sample_nolerp;
             break;
     }
 
@@ -279,13 +280,13 @@ void fsl_noise_sampler_context_init(fsl_noise_sampler *sampler,
     }
 }
 
-void fsl_noise_sampler_axis_init(fsl_noise_sampler_context *context, u8 axis, f64 pos)
+void fsl_torus_sampler_axis_init(fsl_torus_sampler_context *context, u8 axis, f64 pos)
 {
     context->pos_tab[0][axis] = pos + context->sample_offset[axis];
     context->pos_tab[1][axis] = context->pos_tab[0][axis] + context->diameter[axis];
 }
 
-void fsl_noise_sampler_axis_pre_update(fsl_noise_sampler_context *context, u8 axis)
+void fsl_torus_sampler_axis_pre_update(fsl_torus_sampler_context *context, u8 axis)
 {
     f64 t = 0.0;
 
@@ -297,7 +298,7 @@ void fsl_noise_sampler_axis_pre_update(fsl_noise_sampler_context *context, u8 ax
     }
 }
 
-void fsl_noise_sampler_axis_post_update(fsl_noise_sampler_context *context, u8 axis)
+void fsl_torus_sampler_axis_post_update(fsl_torus_sampler_context *context, u8 axis)
 {
     ++context->pos_tab[0][axis];
     ++context->pos_tab[1][axis];

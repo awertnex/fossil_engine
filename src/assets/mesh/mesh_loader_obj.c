@@ -32,7 +32,7 @@
 
 #include "mesh_loader_internal.h"
 
-#include "../../external/glad/glad.h"
+#include "../../external/glad/gl.h"
 
 #include <stdio.h>
 #include <string.h>

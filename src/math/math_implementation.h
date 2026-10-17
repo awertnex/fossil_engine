@@ -236,22 +236,118 @@
         (v.w >= min.w) && (v.w <= max.w); \
 }
 
-#define LENGTH_V2_FUNC_IMPL \
+#define LENGTH_SQUARED_V2_FUNC_IMPL \
 { \
     return v.x * v.x + v.y * v.y; \
 }
 
-#define LENGTH_V3_FUNC_IMPL \
+#define LENGTH_SQUARED_V3_FUNC_IMPL \
 { \
     return v.x * v.x + v.y * v.y + v.z * v.z; \
 }
 
-#define LENGTH_V4_FUNC_IMPL \
+#define LENGTH_SQUARED_V4_FUNC_IMPL \
 { \
     return v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w; \
 }
 
-#define DISTANCE_V2_FUNC_IMPL \
+#define LENGTH_V2_FUNC_IMPL(type, type_f, sqrt_func) \
+{ \
+    return (type)sqrt_func((type_f)(v.x * v.x + v.y * v.y)); \
+}
+
+#define LENGTH_V3_FUNC_IMPL(type, type_f, sqrt_func) \
+{ \
+    return (type)sqrt_func((type_f)(v.x * v.x + v.y * v.y + v.z * v.z)); \
+}
+
+#define LENGTH_V4_FUNC_IMPL(type, type_f, sqrt_func) \
+{ \
+    return (type)sqrt_func((type_f)(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w)); \
+}
+
+#define LENGTH_FLOAT_V2_FUNC_IMPL(sqrt_func) \
+{ \
+    return sqrt_func(v.x * v.x + v.y * v.y); \
+}
+
+#define LENGTH_FLOAT_V3_FUNC_IMPL(sqrt_func) \
+{ \
+    return sqrt_func(v.x * v.x + v.y * v.y + v.z * v.z); \
+}
+
+#define LENGTH_FLOAT_V4_FUNC_IMPL(sqrt_func) \
+{ \
+    return sqrt_func(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w); \
+}
+
+#define DISTANCE_V2_FUNC_IMPL(type, type_f, sqrt_func) \
+{ \
+    b.x -= a.x; \
+    b.y -= a.y; \
+    b.x *= b.x; \
+    b.y *= b.y; \
+    return (type)sqrt_func((type_f)(b.x + b.y)); \
+}
+
+#define DISTANCE_V3_FUNC_IMPL(type, type_f, sqrt_func) \
+{ \
+    b.x -= a.x; \
+    b.y -= a.y; \
+    b.z -= a.z; \
+    b.x *= b.x; \
+    b.y *= b.y; \
+    b.z *= b.z; \
+    return (type)sqrt_func((type_f)(b.x + b.y + b.z)); \
+}
+
+#define DISTANCE_V4_FUNC_IMPL(type, type_f, sqrt_func) \
+{ \
+    b.x -= a.x; \
+    b.y -= a.y; \
+    b.z -= a.z; \
+    b.w -= a.w; \
+    b.x *= b.x; \
+    b.y *= b.y; \
+    b.z *= b.z; \
+    b.w *= b.w; \
+    return (type)sqrt_func((type_f)(b.x + b.y + b.z + b.w)); \
+}
+
+#define DISTANCE_FLOAT_V2_FUNC_IMPL(sqrt_func) \
+{ \
+    b.x -= a.x; \
+    b.y -= a.y; \
+    b.x *= b.x; \
+    b.y *= b.y; \
+    return sqrt_func(b.x + b.y); \
+}
+
+#define DISTANCE_FLOAT_V3_FUNC_IMPL(sqrt_func) \
+{ \
+    b.x -= a.x; \
+    b.y -= a.y; \
+    b.z -= a.z; \
+    b.x *= b.x; \
+    b.y *= b.y; \
+    b.z *= b.z; \
+    return sqrt_func(b.x + b.y + b.z); \
+}
+
+#define DISTANCE_FLOAT_V4_FUNC_IMPL(sqrt_func) \
+{ \
+    b.x -= a.x; \
+    b.y -= a.y; \
+    b.z -= a.z; \
+    b.w -= a.w; \
+    b.x *= b.x; \
+    b.y *= b.y; \
+    b.z *= b.z; \
+    b.w *= b.w; \
+    return sqrt_func(b.x + b.y + b.z + b.w); \
+}
+
+#define DISTANCE_SQUARED_V2_FUNC_IMPL \
 { \
     b.x -= a.x; \
     b.y -= a.y; \
@@ -260,7 +356,7 @@
     return b.x + b.y; \
 }
 
-#define DISTANCE_V3_FUNC_IMPL \
+#define DISTANCE_SQUARED_V3_FUNC_IMPL \
 { \
     b.x -= a.x; \
     b.y -= a.y; \
@@ -271,7 +367,7 @@
     return b.x + b.y + b.z; \
 }
 
-#define DISTANCE_V4_FUNC_IMPL \
+#define DISTANCE_SQUARED_V4_FUNC_IMPL \
 { \
     b.x -= a.x; \
     b.y -= a.y; \

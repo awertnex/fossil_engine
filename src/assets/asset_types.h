@@ -30,7 +30,7 @@
 #include "../math/vector.h"
 #include "../memory/memory_types.h"
 
-#include "../external/glad/glad.h"
+#include "../external/glad/gl.h"
 
 /*!
  *  @brief an asset's display name (optional).

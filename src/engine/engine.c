@@ -481,10 +481,13 @@ u32 fsl_window_init(const str *title, i32 size_x, i32 size_y)
 u32 fsl_glad_init(void)
 {
     str str_engine_version[FSL_ID_CAP] = {0};
+    int gl_version = gladLoadGL(glfwGetProcAddress);
+    int gl_version_major = 0;
+    int gl_version_minor = 0;
 
     fsl_engine_get_string(str_engine_version, FSL_ENGINE_STR_INDEX_VERSION);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    if (!gl_version)
     {
         LOGFATAL(FSL_ERR_GLAD_INIT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
@@ -492,11 +495,14 @@ u32 fsl_glad_init(void)
         return fsl_err;
     }
 
-    if (GLVersion.major < 4 || (GLVersion.major == 4 && GLVersion.minor < 3))
+    gl_version_major = GLAD_VERSION_MAJOR(gl_version);
+    gl_version_minor = GLAD_VERSION_MINOR(gl_version);
+
+    if (!GLAD_GL_VERSION_4_3)
     {
         LOGFATAL(FSL_ERR_GL_VERSION_NOT_SUPPORT,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_GL_VERSION_NOT_SUPPORT(GLVersion.major, GLVersion.minor));
+                MSG_GL_VERSION_NOT_SUPPORT(gl_version_major, gl_version_minor));
         return fsl_err;
     }
 

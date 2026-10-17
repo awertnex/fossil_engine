@@ -1,7 +1,7 @@
 #include "deps/fossil/common/limits.h"
 #include "deps/fossil/math/math.h"
-#include "deps/fossil/plugins/fsl_native/noise_sampler/noise_sampler.h"
-#include "deps/fossil/plugins/fsl_native/noise_sampler/noise_sampler_sample.h"
+#include "deps/fossil/plugins/fsl_native/torus_noise/torus_noise.h"
+#include "deps/fossil/plugins/fsl_native/torus_noise/torus_sample.h"
 
 #include "../h/world.h"
 
@@ -73,20 +73,20 @@ void terrain_spec_set(hhc_terrain_noise_index noise_index, f64 amp, f64 freq, f6
     terrain_spec.post_offset[noise_index] = post_offset;
 }
 
-chunk_work_cost sampler_noise_axis_update_2d(fsl_noise_sampler_context *ctx, u8 axis)
+chunk_work_cost sampler_noise_axis_update_2d(fsl_torus_sampler_context *ctx, u8 axis)
 {
     u32 i = 0;
     u32 j = 0;
-    u64 noise_count = ctx->sampler->noise_buf.noise_len;
+    u64 noise_count = ctx->sampler->torus_buf.noise_len;
     u32 sample_count = ctx->sample_count;
-    fsl_noise_sample *sample_src_buf = NULL;
+    fsl_torus_sample *sample_src_buf = NULL;
 
     for (i = 0; i < noise_count; ++i)
     {
-        sample_src_buf = &ctx->sampler->noise_buf.sample_src_buf[i * sample_count];
+        sample_src_buf = &ctx->sampler->torus_buf.sample_src_buf[i * sample_count];
         for (j = 0; j < sample_count; ++j)
         {
-            fsl_noise_sample_axis_init(&sample_src_buf[j], axis,
+            fsl_torus_sample_axis_init(&sample_src_buf[j], axis,
                     *ctx->pos[j][axis], terrain_spec.freq[i]);
         }
     }
@@ -94,30 +94,30 @@ chunk_work_cost sampler_noise_axis_update_2d(fsl_noise_sampler_context *ctx, u8 
     return CHUNK_WORK_COST_GENERATE_NOISE_INIT * noise_count * sample_count;
 }
 
-chunk_work_cost sampler_noise_bake(fsl_noise_sampler_context *ctx)
+chunk_work_cost sampler_noise_bake(fsl_torus_sampler_context *ctx)
 {
     u64 i = 0;
     u64 j = 0;
-    fsl_noise_buffer *noise_buf = &ctx->sampler->noise_buf;
-    u64 noise_count = noise_buf->noise_len;
+    fsl_torus_buffer *torus_buf = &ctx->sampler->torus_buf;
+    u64 noise_count = torus_buf->noise_len;
     u64 sample_count = ctx->sample_count;
-    fsl_noise_sample *sample_src_buf = NULL;
+    fsl_torus_sample *sample_src_buf = NULL;
     f64 *sample_dst_buf = NULL;
-    f64 *noise_dst_buf = noise_buf->noise_dst_buf;
+    f64 *noise_dst_buf = torus_buf->noise_dst_buf;
     f64 *t = ctx->t;
 
     for (i = 0; i < noise_count; ++i)
     {
-        sample_src_buf = &noise_buf->sample_src_buf[i * sample_count];
-        sample_dst_buf = &noise_buf->sample_dst_buf[i * sample_count];
+        sample_src_buf = &torus_buf->sample_src_buf[i * sample_count];
+        sample_dst_buf = &torus_buf->sample_dst_buf[i * sample_count];
         for (j = 0; j < sample_count; ++j)
         {
-            sample_dst_buf[j] = fsl_noise_sample_make_2d(&sample_src_buf[j], terrain_spec.amp[i],
+            sample_dst_buf[j] = fsl_torus_sample_make_2d(&sample_src_buf[j], terrain_spec.amp[i],
                     world.seed + TERRAIN_SEED_DEFAULT + i * 10);
         }
 
         noise_dst_buf[i] =
-            ctx->noise_sample_lerp_func(sample_dst_buf, t) +
+            ctx->torus_sample_lerp_func(sample_dst_buf, t) +
             terrain_spec.post_offset[i];
     }
 
@@ -129,10 +129,10 @@ chunk_work_cost sampler_noise_bake(fsl_noise_sampler_context *ctx)
     return CHUNK_WORK_COST_GENERATE_NOISE_SAMPLE_2D * noise_count * sample_count;
 }
 
-chunk_work_cost terrain_shape(hhc_terrain_sample *terrain, fsl_noise_sampler_context *ctx)
+chunk_work_cost terrain_shape(hhc_terrain_sample *terrain, fsl_torus_sampler_context *ctx)
 {
     chunk_work_cost cost = 0;
-    f64 *noise_dst_buf = ctx->sampler->noise_buf.noise_dst_buf;
+    f64 *noise_dst_buf = ctx->sampler->torus_buf.noise_dst_buf;
     hhc_terrain_sample noterrain = {0};
     hhc_biome biome = {0};
     f64 biome_score = 0.0;
