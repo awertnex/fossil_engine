@@ -22,12 +22,12 @@
 
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
+
+#include "../file_io/file_io.h"
 #include "../assets/assets.h"
 #include "../logger/logger.h"
 #include "../logger/logger_messages_internal.h"
 #include "../memory/memory.h"
-
-#include "../h/dir.h"
 
 #include "shader_pre_processor_internal.h"
 #include "shaders.h"

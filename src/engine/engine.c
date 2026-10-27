@@ -27,7 +27,9 @@
 #include "../common/limits.h"
 #include "../common/session.h"
 #include "../common/types.h"
+
 #include "../assets/assets.h"
+#include "../file_io/file_io.h"
 #include "../input/input_internal.h"
 #include "../logger/logger.h"
 #include "../logger/logger_messages_internal.h"
@@ -38,7 +40,6 @@
 #include "../shaders/shader_types.h"
 #include "../ui/ui.h"
 
-#include "../h/dir.h"
 #include "../h/process.h"
 #include "../h/time.h"
 

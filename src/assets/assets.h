@@ -25,6 +25,7 @@
 
 #include "../common/api.h"
 #include "../common/types.h"
+
 #include "../math/vector.h"
 #include "../physics/physics_types.h"
 

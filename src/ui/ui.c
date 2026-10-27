@@ -24,6 +24,7 @@
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
 #include "../common/types.h"
+
 #include "../assets/assets.h"
 #include "../assets/asset_types.h"
 #include "../engine/engine.h"

@@ -41,6 +41,7 @@ static str str_files[][CMD_SIZE] =
     DIR_SRC"assets/mesh/mesh_loader_obj.c",
     DIR_SRC"engine/engine.c",
     DIR_SRC"engine/engine_assets.c",
+    DIR_SRC"file_io/file_io.c",
     DIR_SRC"input/input.c",
     DIR_SRC"logger/logger.c",
     DIR_SRC"math/math.c",
@@ -54,7 +55,6 @@ static str str_files[][CMD_SIZE] =
     DIR_SRC"ui/ui.c",
     DIR_SRC"ui/ui_element.c",
     DIR_SRC"ui/ui_event.c",
-    DIR_SRC"dir.c",
     DIR_SRC FSL_FILE_NAME_PLATFORM,
     DIR_SRC"time.c"
 };
@@ -74,6 +74,7 @@ static str str_make_dir[][CMD_SIZE] =
     DIR_DST DIR_DEPS DIR_DST"assets/mesh/",
     DIR_DST DIR_DEPS DIR_DST"common/",
     DIR_DST DIR_DEPS DIR_DST"engine/",
+    DIR_DST DIR_DEPS DIR_DST"file_io/",
     DIR_DST DIR_DEPS DIR_DST"input/",
     DIR_DST DIR_DEPS DIR_DST"external/",
     DIR_DST DIR_DEPS DIR_DST"external/glad/",
@@ -113,6 +114,7 @@ static str *copy_targets[][48] =
     {DIR_SRC"assets/mesh/mesh.h",           DIR_DST DIR_DEPS DIR_DST"assets/mesh/"},
     {DIR_SRC"engine/engine.h",              DIR_DST DIR_DEPS DIR_DST"engine/"},
     {DIR_SRC"engine/engine_assets.h",       DIR_DST DIR_DEPS DIR_DST"engine/"},
+    {DIR_SRC"file_io/file_io.h",            DIR_DST DIR_DEPS DIR_DST"file_io/"},
     {DIR_SRC"input/input.h",                DIR_DST DIR_DEPS DIR_DST"input/"},
     {DIR_SRC"input/input_key_codes.h",      DIR_DST DIR_DEPS DIR_DST"input/"},
     {DIR_SRC"logger/logger.h",              DIR_DST DIR_DEPS DIR_DST"logger/"},

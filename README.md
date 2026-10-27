@@ -22,6 +22,7 @@
 ## Engine Modules
 - `src/external/`: engine's external dependencies.
 - `src/common/`: most important module, has common definitions, base data types, error codes and API control.
+- `src/file_io/`: file i/o, creating, copying, moving files/directories and path-handling.
 - `src/string/`: string handling, token-searching and basic hashing algorithms.
 - `src/math/`: math functions, perlin noise functions and some RNG stuff.
 - `src/logger/`: engine's logging system, prints to the command line and an internal history buffer.

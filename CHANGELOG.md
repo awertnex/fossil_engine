@@ -21,6 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### added
 - add 'len' and 'distance' functions to `math/` module.
 
+#### changed
+- change file 'src/dir.c' to 'src/file_io/file_io.c' and update all references.
+- change file 'src/h/dir.h' to 'src/file_io/file_io.h' and update all
+  references.
+
 ## [0.17.0-beta] - 2026-10-18
 
 #### added

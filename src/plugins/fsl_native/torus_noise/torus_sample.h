@@ -25,6 +25,7 @@
 
 #include "../../../common/api.h"
 #include "../../../common/types.h"
+
 #include "../../../math/vector.h"
 
 typedef struct fsl_torus_sample

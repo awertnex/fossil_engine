@@ -23,9 +23,9 @@
 #include "../common/config.h"
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
-#include "../memory/memory.h"
 
-#include "../h/dir.h"
+#include "../file_io/file_io.h"
+#include "../memory/memory.h"
 
 #include "math.h"
 #include "math_implementation.h"

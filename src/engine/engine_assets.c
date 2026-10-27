@@ -23,6 +23,7 @@
 #include "../common/config.h"
 #include "../common/diagnostics.h"
 #include "../common/types.h"
+
 #include "../assets/assets.h"
 #include "../memory/memory.h"
 #include "../shaders/shader_types.h"

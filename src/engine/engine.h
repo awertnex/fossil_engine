@@ -26,6 +26,7 @@
 #include "../common/api.h"
 #include "../common/limits.h"
 #include "../common/types.h"
+
 #include "../assets/asset_types.h"
 #include "../math/vector.h"
 

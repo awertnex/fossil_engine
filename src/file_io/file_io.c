@@ -15,19 +15,21 @@
  */
 
 /*!
- *  @file dir.c
+ *  @file file_io.c
  *
  *  @brief directory and file parsing, writing, copying and path resolution.
  */
 
-#include "common/diagnostics.h"
-#include "common/limits.h"
-#include "logger/logger.h"
-#include "logger/logger_messages_internal.h"
-#include "memory/memory.h"
+#include "../common/diagnostics.h"
+#include "../common/limits.h"
 
-#include "h/dir.h"
-#include "h/process.h"
+#include "../logger/logger.h"
+#include "../logger/logger_messages_internal.h"
+#include "../memory/memory.h"
+
+#include "../h/process.h"
+
+#include "file_io.h"
 
 #include <stdio.h>
 #include <string.h>

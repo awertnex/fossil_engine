@@ -15,13 +15,13 @@
  */
 
 /*!
- *  @file dir.h
+ *  @file file_io.h
  *
  *  @brief directory and file parsing, writing, copying and path resolution.
  */
 
-#ifndef FSL_DIR_H
-#define FSL_DIR_H
+#ifndef FSL_FILE_IO_H
+#define FSL_FILE_IO_H
 
 #include "../common/api.h"
 #include "../common/types.h"
@@ -226,4 +226,4 @@ FSLAPI u32 fsl_retract_path(fsl_fs_path *path);
  */
 FSLAPI u32 fsl_get_base_name(const fsl_fs_path *path, str *dst, u64 size);
 
-#endif /* FSL_DIR_H */
+#endif /* FSL_FILE_IO_H */

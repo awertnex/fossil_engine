@@ -23,8 +23,9 @@
 #include "../../common/config.h"
 #include "../../common/diagnostics.h"
 #include "../../common/types.h"
-#include "../assets.h"
+
 #include "../../engine/engine_assets.h"
+#include "../../file_io/file_io.h"
 #include "../../logger/logger.h"
 #include "../../logger/logger_messages_internal.h"
 #include "../../math/math.h"
@@ -33,7 +34,7 @@
 #include "../../shaders/shader_types.h"
 #include "../../string/string_internal.h"
 
-#include "../../h/dir.h"
+#include "../assets.h"
 
 #include "mesh.h"
 #include "mesh_loader_internal.h"

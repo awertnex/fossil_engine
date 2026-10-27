@@ -22,11 +22,11 @@
  *  thickness per axis and arbitrary final noise map size per axis.
  */
 
+#include "../../../common/diagnostics.h"
+
 #include "../../../logger/logger.h"
 #include "../../../logger/logger_messages_internal.h"
 #include "../../../memory/memory.h"
-
-#include "../../../common/diagnostics.h"
 
 #include "torus_noise.h"
 

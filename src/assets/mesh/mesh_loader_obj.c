@@ -23,6 +23,7 @@
 #include "../../common/diagnostics.h"
 #include "../../common/limits.h"
 #include "../../common/types.h"
+
 #include "../../logger/logger.h"
 #include "../../logger/logger_messages_internal.h"
 #include "../../math/math.h"

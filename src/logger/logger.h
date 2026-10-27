@@ -27,6 +27,7 @@
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
 #include "../common/types.h"
+
 #include "../memory/memory_types.h"
 
 #define LOGFATAL(err, flags, message) \

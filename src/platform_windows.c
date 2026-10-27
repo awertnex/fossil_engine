@@ -23,12 +23,13 @@
 #include "common/diagnostics.h"
 #include "common/limits.h"
 #include "common/types.h"
+
+#include "file_io/file_io.h"
 #include "logger/logger.h"
 #include "logger/logger_messages_internal.h"
 #include "memory/memory.h"
 #include "string/string_internal.h"
 
-#include "h/dir.h"
 #include "h/process.h"
 
 #include <stdlib.h>

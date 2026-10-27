@@ -25,6 +25,7 @@
 
 #include "../common/limits.h"
 #include "../common/types.h"
+
 #include "../math/matrix.h"
 #include "../math/trigonometry.h"
 #include "../math/vector.h"

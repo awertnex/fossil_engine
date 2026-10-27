@@ -25,6 +25,7 @@
 
 #include "../common/api.h"
 #include "../common/types.h"
+
 #include "../assets/asset_types.h"
 
 #include "ui_types.h"

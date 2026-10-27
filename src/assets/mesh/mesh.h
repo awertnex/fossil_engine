@@ -25,6 +25,7 @@
 
 #include "../../common/api.h"
 #include "../../common/types.h"
+
 #include "../../memory/memory_types.h"
 
 #include "../asset_types.h"

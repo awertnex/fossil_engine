@@ -25,6 +25,7 @@
 
 #include "../common/api.h"
 #include "../common/types.h"
+
 #include "vector.h"
 
 /* ---- matrix4f ------------------------------------------------------------ */
