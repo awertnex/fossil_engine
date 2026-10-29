@@ -158,4 +158,7 @@ additional build arguments:
 - `btdebug`: show debug info for buildtool
 
 ## Contributing:
-will be available soon (saying this as of 2025-10-24)
+contributions will open by project version `1.0.0`, if you'd like to contribute,
+be mindful of the contributing rules and guidelines at
+[CONTRIBUTING.md](https://github.com/awertnex/fossil_engine/blob/main/CONTRIBUTING.md),
+have fun programming.
