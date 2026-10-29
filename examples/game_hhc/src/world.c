@@ -7,7 +7,7 @@
 #include "deps/fossil/physics/transform.h"
 #include "deps/fossil/string/string.h"
 
-#include "deps/fossil/h/dir.h"
+#include "deps/fossil/file_io/file_io.h"
 #include "deps/fossil/h/time.h"
 
 #include "chunking/chunking.h"

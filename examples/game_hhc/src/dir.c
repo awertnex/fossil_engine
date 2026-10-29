@@ -4,7 +4,7 @@
 #include "deps/fossil/logger/logger.h"
 #include "deps/fossil/memory/memory.h"
 
-#include "deps/fossil/h/dir.h"
+#include "deps/fossil/file_io/file_io.h"
 
 #include "h/main.h"
 #include "h/common.h"

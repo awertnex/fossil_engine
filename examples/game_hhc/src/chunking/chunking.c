@@ -5,7 +5,7 @@
 #include "deps/fossil/plugins/fsl_native/torus_noise/torus_noise.h"
 #include "deps/fossil/string/string.h"
 
-#include "deps/fossil/h/dir.h"
+#include "deps/fossil/file_io/file_io.h"
 
 #include "../settings/settings.h"
 #include "../terrain/terrain.h"

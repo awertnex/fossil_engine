@@ -2,7 +2,7 @@
 #include "deps/fossil/common/config.h"
 #include "deps/fossil/memory/memory.h"
 
-#include "deps/fossil/h/dir.h"
+#include "deps/fossil/file_io/file_io.h"
 
 #include "../gui/gui.h"
 #include "../super_debugger/super_debugger.h"
