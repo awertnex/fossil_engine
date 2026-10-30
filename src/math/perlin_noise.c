@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file perlin_noise.c
  *
  *  @brief perlin noise functions and gradient samplers.
@@ -25,7 +25,7 @@
 
 #include <math.h>
 
-/*!
+/**
  *  @remark these constants are the result of the mathematical expression "3^174"
  *  split into groups of 6 digits, I chose this power because it was the first
  *  power of 3 that included exactly the number of digits to fit into 14 6-digit

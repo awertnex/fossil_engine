@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file mesh.h
  *
  *  @brief mesh loading, generating, unloading and mesh file formats.
@@ -39,23 +39,23 @@ struct fsl_mesh
     fsl_asset asset;
     GLuint vao;
 
-    /*!
+    /**
      *  @brief mesh vertex data.
      */
     fsl_vbo vertex_buf;
 
-    /*!
+    /**
      *  @brief mesh indices of vertex data.
      */
     fsl_ebo index_buf;
 
-    /*!
+    /**
      *  @brief model transform data (location, rotation and scale).
      */
     fsl_vbo transform_buf;
 }; /* fsl_mesh */
 
-/*!
+/**
  *  @brief load mesh from file into VRAM.
  *
  *  additionally, convert file into a cooked asset for easier loading next time,
@@ -81,7 +81,7 @@ struct fsl_mesh
 FSLAPI u32 fsl_mesh_load(fsl_mesh *mesh,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path);
 
-/*!
+/**
  *  @brief draw mesh through the lens of `camera` at specified transforms.
  */
 FSLAPI void fsl_mesh_draw(const fsl_mesh *mesh, const fsl_camera *camera,
@@ -90,7 +90,7 @@ FSLAPI void fsl_mesh_draw(const fsl_mesh *mesh, const fsl_camera *camera,
         f32 roll, f32 pitch, f32 yaw,
         f32 scale_x, f32 scale_y, f32 scale_z);
 
-/*!
+/**
  *  @param attrib pointer to a function to set attribute arrays for `mesh->vao`
  *  (e.g., &attrib_vec3, set a single vec3 attribute array).
  *

@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file session.h
  *
  *  @brief engine's session info.
@@ -30,12 +30,12 @@ typedef struct fsl_engine_session fsl_engine_session;
 
 struct fsl_engine_session
 {
-    /*!
+    /**
      *  @brief POSIX timestamp of session's start, in millisecond format.
      */
     u64 init_time;
 
-    /*!
+    /**
      *  @brief running binary/executable's root directory.
      *
      *  @remark used to change current working dirctory to the running binary's.
@@ -43,7 +43,7 @@ struct fsl_engine_session
     str *bin_root;
 }; /* fsl_engine_session */
 
-/*!
+/**
  *  @remark declared and initialized in @ref fsl_engine_init().
  */
 FSLAPI extern fsl_engine_session FSL_SESSION;

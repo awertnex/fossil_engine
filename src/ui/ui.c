@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file ui.c
  *
  *  @brief initializing UI module and drawing things on screen.
@@ -67,14 +67,14 @@ static struct text_core
     f32 advance;
     v2f32 text_scale;
 
-    /*!
+    /**
      *  @brief iterator for `buf`, resets at @ref fsl_text_start() and @ref fsl_text_render().
      */
     GLuint cursor;
 
-    /*!
+    /**
      *  @brief text buffer, raw text data.
-    */
+     */
     struct fsl_text_data *buf;
 
     u64 buf_len;
@@ -91,7 +91,7 @@ static struct ui_core
     GLuint vertex_data_curr_quad;
     b8 vao_loaded;
 
-    /*!
+    /**
      *  @brief quad buffer, raw UI quad data.
      */
     fsl_ui_drawable_quad *quad_buf;

@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file buildtool_config.h
  *
  *  @brief build info to link the engine with external software.
@@ -32,7 +32,7 @@
 
 #if defined(FSL_PLATFORM_WIN)
 
-    /*!
+    /**
      *  @brief for the engine itself.
      */
     static const str fsl_str_libs_internal[][CMD_SIZE] =
@@ -46,7 +46,7 @@
         "-mwindows"
     };
 
-    /*!
+    /**
      *  @brief for the including software.
      */
     static const str fsl_str_libs[][CMD_SIZE] =
@@ -61,7 +61,7 @@
 
 #else
 
-    /*!
+    /**
      *  @brief for the engine itself.
      */
     static const str fsl_str_libs_internal[][CMD_SIZE] =
@@ -72,7 +72,7 @@
         "-lglfw"
     };
 
-    /*!
+    /**
      *  @brief for the including software.
      */
     static const str fsl_str_libs[][CMD_SIZE] =
@@ -87,14 +87,14 @@
 
 /* ---- section: signatures ------------------------------------------------- */
 
-/*!
+/**
  *  @brief link engine's dependencies with the including software for compile time.
  *
  *  @param cmd cmd to push engine's required libs to, if `NULL`, internal cmd is used.
  */
 static void fsl_engine_link_libs(bt_buf *cmd);
 
-/*!
+/**
  *  @brief link engine's dependencies with the including software for run time.
  *
  *  @param cmd cmd to push application's runtime path to, if `NULL`, internal cmd is used.

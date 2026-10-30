@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file ui.h
  *
  *  @brief main UI module header; creating menus and drawing UI elements.
@@ -37,7 +37,7 @@
 #define FSL_UI_PANEL_PADDING_DEFAULT 10
 #define FSL_UI_SLICE_SIZE_DEFAULT 8
 
-/*!
+/**
  *  @brief one 9-slice panel.
  */
 typedef struct fsl_ui_panel_9_slice
@@ -53,7 +53,7 @@ typedef struct fsl_ui_drawable_quad
     v2f32 size;
 } fsl_ui_drawable_quad;
 
-/*!
+/**
  *  @brief one 9-slice panel.
  *
  *  -- DEPRECATED IN v0.10.0-beta --;
@@ -65,7 +65,7 @@ typedef struct fsl_panel_nine_slice
 
 /* ---- section: signatures ------------------------------------------------- */
 
-/*!
+/**
  *  @brief start text rendering batch.
  *
  *  @param size font height, in pixels.
@@ -78,7 +78,7 @@ typedef struct fsl_panel_nine_slice
  */
 FSLAPI void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear);
 
-/*!
+/**
  *  @brief push string's glyph metrics, position, alignment and color to internal text queue.
  *
  *  @param align_x enum @ref fsl_text_alignment:
@@ -105,7 +105,7 @@ FSLAPI void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear);
 FSLAPI void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y,
         i32 window_x, u32 color);
 
-/*!
+/**
  *  @brief render text to framebuffer.
  *
  *  @param shadow_color shadow color (if `shadow` is `TRUE`) (optional),
@@ -118,14 +118,14 @@ FSLAPI void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 
  */
 FSLAPI void fsl_text_render(b8 shadow, u32 shadow_color);
 
-/*!
+/**
  *  @brief get total string height of current rendering batch.
  *
  *  @remark call before @ref fsl_text_render().
  */
 FSLAPI f32 fsl_get_text_height(void);
 
-/*!
+/**
  *  @brief initialize ui.
  *
  *  @remark must be called after @ref fsl_engine_init().
@@ -134,7 +134,7 @@ FSLAPI f32 fsl_get_text_height(void);
  */
 FSLAPI u32 fsl_ui_init(void);
 
-/*!
+/**
  *  @brief start ui rendering batch.
  *
  *  @param clear clear the currently bound framebuffer before rendering.
@@ -143,7 +143,7 @@ FSLAPI u32 fsl_ui_init(void);
  */
 FSLAPI void fsl_ui_start(b8 clear);
 
-/*!
+/**
  *  @brief draw a texture as a UI element.
  *
  *  @remark if `size_x` is 0, `texture->size.x` is used, and likewise for `size_y`.
@@ -151,14 +151,14 @@ FSLAPI void fsl_ui_start(b8 clear);
 FSLAPI void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y,
         i32 size_x, i32 size_y, u32 tint);
 
-/*!
+/**
  *  @remark enable @ref GL_DEPTH_TEST.
  */
 FSLAPI void fsl_ui_stop(void);
 
 FSLAPI void fsl_ui_free(void);
 
-/*!
+/**
  *  @brief make a 9-slice panel.
  */
 fsl_panel_nine_slice fsl_get_nine_slice_internal(fsl_ui_element *element);

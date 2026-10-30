@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file input_internal.h
  *
  *  @brief input module internal definitions.
@@ -53,7 +53,7 @@ enum mod_key_flag
     FLAG_MOD_KEY_RIGHT_SUPER = 0x80
 }; /* mod_key_flag */
 
-/*!
+/**
  *  @brief translation table to communicate engine conventions to GLFW.
  */
 static u32 fsl_keyboard_tab[FSL_KEYBOARD_KEYS_MAX] =
@@ -181,7 +181,7 @@ static u32 fsl_keyboard_tab[FSL_KEYBOARD_KEYS_MAX] =
     GLFW_KEY_MENU
 }; /* fsl_keyboard_tab */
 
-/*!
+/**
  *  @brief keyboard key names.
  */
 static str *fsl_mouse_button_name[FSL_MOUSE_BUTTONS_MAX] =
@@ -196,7 +196,7 @@ static str *fsl_mouse_button_name[FSL_MOUSE_BUTTONS_MAX] =
     "<mb 8>"
 };
 
-/*!
+/**
  *  @brief keyboard key names.
  */
 static str *fsl_keyboard_key_name[FSL_KEYBOARD_KEYS_MAX] =
@@ -324,7 +324,7 @@ static str *fsl_keyboard_key_name[FSL_KEYBOARD_KEYS_MAX] =
     "<menu>"
 }; /* fsl_keyboard_tab */
 
-/*!
+/**
  *  @brief like @ref fsl_key_bind_init(), but quiet.
  *
  *  @param key a keyboard key or mouse button.
@@ -336,7 +336,7 @@ static str *fsl_keyboard_key_name[FSL_KEYBOARD_KEYS_MAX] =
 fsl_key_bind key_bind_init_internal(fsl_keyboard_key key,
         fsl_mod_key shift, fsl_mod_key ctrl, fsl_mod_key alt, fsl_mod_key super);
 
-/*!
+/**
  *  @brief update mouse movement.
  *
  *  - update parameters at @ref fsl_render.mouse_pos and @ref fsl_render.mouse_delta
@@ -346,7 +346,7 @@ fsl_key_bind key_bind_init_internal(fsl_keyboard_key key,
  */
 void input_mouse_movement_update_internal(void);
 
-/*!
+/**
  *  @brief update internal mouse and key states: press, double-press, hold and release.
  *
  *  @remark called automatically from @ref fsl_engine_running().

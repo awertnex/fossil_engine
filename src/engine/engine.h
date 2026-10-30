@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file engine.h
  *
  *  @brief main engine module header; engine init, running, close, windowing, opengl loading.
@@ -48,7 +48,7 @@ struct fsl_render
     char title[FSL_ID_CAP];
     v2i32 size;
 
-    /*!
+    /**
      *  @brief conversion from world-space to screen-space.
      *
      *  @remark read-only, updated internally in @ref fsl_engine_running().
@@ -62,7 +62,7 @@ struct fsl_render
     u64 time_delta;
     f64 time_delta_f; /* delta time in floating point representation */
 
-    /*!
+    /**
      *  @brief for reading screen pixels back to RAM (e.g., screenshots).
      */
     u8 *screen_buf;
@@ -70,7 +70,7 @@ struct fsl_render
 
 /* ---- section: declarations ----------------------------------------------- */
 
-/*!
+/**
  *  @internal
  *
  *  @brief engine's default render.
@@ -81,7 +81,7 @@ extern fsl_render render_internal;
 
 /* ---- section: signatures ------------------------------------------------- */
 
-/*!
+/**
  *  @brief initialize engine stuff.
  *
  *  - set 'GLFW' error callback.
@@ -118,7 +118,7 @@ extern fsl_render render_internal;
 FSLAPI u32 fsl_engine_init(int argc, char **argv, const str *title,
         i32 size_x, i32 size_y, u64 flags);
 
-/*!
+/**
  *  @brief engine main loop check.
  *
  *  - update @ref fsl_render.time and @ref fsl_render.time_delta of the currently bound @ref fsl_render.
@@ -128,7 +128,7 @@ FSLAPI u32 fsl_engine_init(int argc, char **argv, const str *title,
  */
 FSLAPI b8 fsl_engine_running(void (*callback_framebuffer_size)(i32 size_x, i32 size_y));
 
-/*!
+/**
  *  @brief update render settings (e.g., render size).
  *
  *  - update @ref fsl_render.size of the currently bound @ref fsl_render to window size.
@@ -140,12 +140,12 @@ FSLAPI b8 fsl_engine_running(void (*callback_framebuffer_size)(i32 size_x, i32 s
  */
 FSLAPI u32 fsl_update_render_settings(void (*callback_framebuffer_size)(i32 size_x, i32 size_y));
 
-/*!
+/**
  *  @brief send engine close request to then be processed by @ref fsl_engine_running().
  */
 FSLAPI void fsl_request_engine_close(void);
 
-/*!
+/**
  *  @brief free all engine's internal resources.
  *
  *  free logger, assets, internal memory arenas, destroy window (if not `NULL`)
@@ -153,7 +153,7 @@ FSLAPI void fsl_request_engine_close(void);
  */
 FSLAPI void fsl_engine_close(void);
 
-/*!
+/**
  *  @brief get engine-specific string no longer than @ref FSL_ID_CAP bytes.
  *
  *  @param dst pointer to buffer to store string.
@@ -162,7 +162,7 @@ FSLAPI void fsl_engine_close(void);
  */
 FSLAPI u32 fsl_engine_get_string(str *dst, enum fsl_engine_string_index type);
 
-/*!
+/**
  *  @brief initialize 'GLFW'.
  *
  *  @param multisample turn on multisampling.
@@ -173,7 +173,7 @@ FSLAPI u32 fsl_engine_get_string(str *dst, enum fsl_engine_string_index type);
  */
 FSLAPI u32 fsl_glfw_init(b8 multisample);
 
-/*!
+/**
  *  @brief initialize a new 'GLFW' window for the currently bound @ref fsl_render.
  *
  *  @param title window/application title (if `NULL`, default title is used).
@@ -186,7 +186,7 @@ FSLAPI u32 fsl_glfw_init(b8 multisample);
  */
 FSLAPI u32 fsl_window_init(const str *title, i32 size_x, i32 size_y);
 
-/*!
+/**
  *  @brief initialize 'OpenGL' function loader 'GLAD'.
  *
  *  @remark called automatically from @ref fsl_engine_init().
@@ -195,26 +195,26 @@ FSLAPI u32 fsl_window_init(const str *title, i32 size_x, i32 size_y);
  */
 FSLAPI u32 fsl_glad_init(void);
 
-/*!
+/**
  *  @brief get address of currently bound @ref fsl_render.
  *
  *  get metadata like render size, current process time, delta time and screen buffer.
  */
 FSLAPI fsl_render *fsl_render_get(void);
 
-/*!
+/**
  *  @brief switch engine's currently bound @ref fsl_render to `r`.
  */
 FSLAPI u32 fsl_change_render(fsl_render *r);
 
-/*!
+/**
  *  @brief send skip-mouse-delta request so to not consume mouse delta for a single frame.
  *
  *  centering cursor on screen can produce mouse-delta spikes, this is useful for skipping them.
  */
 FSLAPI void fsl_request_skip_mouse_delta(void);
 
-/*!
+/**
  *  @brief send screenshot request to then be processed by @ref fsl_process_screenshot_request().
  *
  *  can be called from anywhere, then @ref fsl_process_screenshot_request() can be called
@@ -222,7 +222,7 @@ FSLAPI void fsl_request_skip_mouse_delta(void);
  */
 FSLAPI void fsl_request_screenshot(void);
 
-/*!
+/**
  *  @brief take screenshot requested by @ref fsl_request_screenshot() and save
  *  into dir at `dir_screenshots`.
  *
@@ -238,12 +238,12 @@ FSLAPI void fsl_request_screenshot(void);
  */
 FSLAPI u32 fsl_process_screenshot_request(const str *dir_screenshots, const str *special_text);
 
-/*!
+/**
  *  @brief bind internal framebuffer for rendering.
  */
 FSLAPI void fsl_fbo_bind(void);
 
-/*!
+/**
  *  @brief blit rendered internal framebuffer (e.g., text, ui elements) onto `fbo`.
  */
 FSLAPI void fsl_fbo_blit(GLuint fbo);

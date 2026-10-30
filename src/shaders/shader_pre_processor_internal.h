@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file shader_pre_processor_internal.h
  *
  *  @brief pre-processing glsl shaders.
@@ -29,7 +29,7 @@
 
 #define FSL_SHADER_PRE_PROCESSOR_INCLUDE_RECURSION_MAX 512
 
-/*!
+/**
  *  @internal
  *
  *  @brief process shader before compilation.
@@ -40,7 +40,7 @@
  */
 str *fsl_shader_pre_process_internal(const str *path, u64 *file_len);
 
-/*!
+/**
  *  @internal
  *
  *  @brief get shader type based on file name conventions.

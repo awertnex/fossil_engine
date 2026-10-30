@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file logger.c
  *
  *  @brief logger.
@@ -54,7 +54,7 @@ enum fsl_log_message_flag
 fsl_logger_core logger_core = {0};
 u32 fsl_log_level_max = FSL_LOG_LEVEL_TRACE;
 
-/*!
+/**
  *  @brief each log level's log file name.
  *
  *  @remark initialized in @ref fsl_logger_init().
@@ -98,13 +98,13 @@ static str *esc_code_color[FSL_LOG_LEVEL_COUNT] =
 
 /* ---- section: signatures ------------------------------------------------- */
 
-/*!
+/**
  *  @internal
  */
 static void get_log_str_internal(const str *str_in, str *str_out, u32 flags, b8 verbose,
         u8 level, u32 error_code, const str *src_file, u64 line);
 
-/*!
+/**
  *  @internal
  *
  *  @brief like @ref fsl_is_dir_exists(), but no logging on success, no writing to
@@ -114,7 +114,7 @@ static void get_log_str_internal(const str *str_in, str *str_out, u32 flags, b8 
  */
 static u32 is_dir_exists_internal(const fsl_fs_path *path);
 
-/*!
+/**
  *  @internal
  *
  *  @brief like @ref fsl_append_file(), but no logging on success and no modifying
@@ -124,7 +124,7 @@ static u32 is_dir_exists_internal(const fsl_fs_path *path);
  */
 static u32 append_file_internal(const fsl_fs_path *path, u64 size, void *buf);
 
-/*!
+/**
  *  @internal
  *
  *  @brief like @ref fsl_get_time_str(), but just for the logger.

@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file common.h
  *
  *  @brief main common header; include all common headers.
@@ -34,7 +34,7 @@
 
 /* ---- color conversion macros --------------------------------------------- */
 
-/*!
+/**
  *  @brief convert RGBA color to 4-Byte hex color.
  *  @remark color range [0.0f, 1.0f].
  */

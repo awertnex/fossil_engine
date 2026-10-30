@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file collision.h
  *
  *  @brief collision detection and collision data types.
@@ -49,7 +49,7 @@ struct fsl_collision_info
 
 FSLAPI b8 fsl_is_intersect_aabb(fsl_bounding_box a, fsl_bounding_box b);
 
-/*!
+/**
  *  @brief get collision info between `a` and `b` using the 'Swept AABB' algorithm.
  *
  *  @param displacement displacement of `a`, since this function assumes `b` is static.

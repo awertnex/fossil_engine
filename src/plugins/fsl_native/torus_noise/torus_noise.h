@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file torus_noise.h
  *
  *  @brief Torus Noise plug-in header, for 'Fossil Engine'; seamless-tiling
@@ -35,14 +35,14 @@ typedef struct fsl_torus_buffer
     u64 noise_len;  /* number of noise maps per sampler context */
     u64 sample_len; /* number of samples per noise */
 
-    /*!
+    /**
      *  @brief sample base data per noise type.
      *
      *  @remark entry count = `noise_len` * `sample_len`.
      */
 
     fsl_torus_sample *sample_src_buf;
-    /*!
+    /**
      *  @brief final sample values per noise type, after gradient interpolation,
      *  before sample interpolation.
      *
@@ -50,7 +50,7 @@ typedef struct fsl_torus_buffer
      */
     f64 *sample_dst_buf;
 
-    /*!
+    /**
      *  @brief final noise values, after sample interpolation.
      *
      *  @remark entry count = `noise_len`.
@@ -58,7 +58,7 @@ typedef struct fsl_torus_buffer
     f64 *noise_dst_buf;
 } fsl_torus_buffer;
 
-/*!
+/**
  *  @brief base sampler parameters for noise sampling, persistent as long as map
  *  size doesn't change.
  */
@@ -67,7 +67,7 @@ typedef struct fsl_torus_sampler
     f64 radius[3];      /* map radius, in world-space */
     f64 diameter[3];    /* map diameter, in world-space */
 
-    /*!
+    /**
      *  @brief margin thickness before/after map-edge to trigger blend types,
      *  in world-space.
      */
@@ -75,7 +75,7 @@ typedef struct fsl_torus_sampler
 
     f64 t_scale[3];     /* blend factor scalar */
 
-    /*!
+    /**
      *  @brief buffers of noise data.
      */
     fsl_torus_buffer torus_buf;
@@ -83,12 +83,12 @@ typedef struct fsl_torus_sampler
     b8 initialized;
 } fsl_torus_sampler;
 
-/*!
+/**
  *  @brief fat sampler for noise sampling from 1/2/4/8 location(s) of a map.
  */
 typedef struct fsl_torus_sampler_context
 {
-    /*!
+    /**
      *  @brief current sampler being used for this context.
      */
     fsl_torus_sampler *sampler;
@@ -98,12 +98,12 @@ typedef struct fsl_torus_sampler_context
     f64 diameter[3];        /* map diameter, copied from @ref fsl_torus_sampler */
     f64 margin[3];          /* map margin, copied from @ref fsl_torus_sampler */
 
-    /*!
+    /**
      *  @brief overflow sign when sample is within specified margin.
      */
     i8 sign[3];
 
-    /*!
+    /**
      *  @brief map-sampling position table.
      *
      *  pos[0] for sample position,
@@ -111,7 +111,7 @@ typedef struct fsl_torus_sampler_context
      */
     f64 pos_tab[2][3];
 
-    /*!
+    /**
      *  @brief map-sampling positions that point to `pos_tab`, for each sample.
      */
     f64 *pos[8][3];
@@ -121,13 +121,13 @@ typedef struct fsl_torus_sampler_context
     f64 t[3];               /* blend factor for each axis */
     f64 t_scale[3];         /* blend factor scalar */
 
-    /*!
+    /**
      *  @brief sample indices to re-map sample source to destination in a @ref
      *  fsl_torus_buffer for proper interpolation based on blend-type.
      */
     u32 sample_index[8];
 
-    /*!
+    /**
      *  @brief number of samples to sample and interpolate.
      */
     u32 sample_count;
@@ -135,7 +135,7 @@ typedef struct fsl_torus_sampler_context
     fsl_torus_sample_lerp_func torus_sample_lerp_func;
 } fsl_torus_sampler_context;
 
-/*!
+/**
  *  @brief initialize torus sampler static parameters.
  *
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
@@ -146,12 +146,12 @@ FSLAPI u32 fsl_torus_sampler_init(fsl_torus_sampler *sampler,
         f64 map_diameter_x, f64 map_diameter_y, f64 map_diameter_z,
         f64 map_margin_x, f64 map_margin_y, f64 map_margin_z);
 
-/*!
+/**
  *  @brief free torus sampler buffers.
  */
 FSLAPI void fsl_torus_sampler_free(fsl_torus_sampler *sampler);
 
-/*!
+/**
  *  @brief initialize torus sampler context for a given sampler.
  *
  *  1. initialize basic sampler parameters (sign, radius, diameter).
@@ -167,18 +167,18 @@ FSLAPI void fsl_torus_sampler_free(fsl_torus_sampler *sampler);
 FSLAPI void fsl_torus_sampler_context_init(fsl_torus_sampler *sampler,
         fsl_torus_sampler_context *context, f64 base_x, f64 base_y, f64 base_z);
 
-/*!
+/**
  *  @brief initialize a single axis for a given torus sampler context.
  */
 FSLAPI void fsl_torus_sampler_axis_init(fsl_torus_sampler_context *context, u8 axis, f64 pos);
 
-/*!
+/**
  *  @brief iterate relevant parameters of a single axis for a given torus sampler
  *  context at the beginning of its loop.
  */
 FSLAPI void fsl_torus_sampler_axis_pre_update(fsl_torus_sampler_context *context, u8 axis);
 
-/*!
+/**
  *  @brief iterate relevant parameters of a single axis for a given torus sampler
  *  context at the end of its loop.
  */

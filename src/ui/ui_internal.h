@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file ui_internal.h
  *
  *  @brief UI internal definitions.
@@ -27,7 +27,7 @@
 
 #include "ui_types.h"
 
-/*!
+/**
  *  @brief init text rendering settings (and engine default fonts at @ref fsl_font_buf).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
@@ -41,7 +41,7 @@ void ui_text_align_y_none_internal(u64 end, f32 height);
 void ui_text_align_y_center_internal(u64 end, f32 height);
 void ui_text_align_y_bottom_internal(u64 end, f32 height);
 
-/*!
+/**
  *  @internal
  *
  *  @brief poll event data and parse element's callbacks (e.g., button pressed).

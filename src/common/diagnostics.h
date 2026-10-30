@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file diagnostics.h
  *
  *  @brief error codes, fsl_err, diagnostic colors.
@@ -103,7 +103,7 @@
 #define FSL_ERR_FILE_DATA_CORRUPT           4160
 #define FSL_ERR_DIR_EMPTY                   4161
 
-/*!
+/**
  *  @brief global variable for engine-specific error codes.
  *
  *  @remark must be declared by the user if not including @ref core.c.

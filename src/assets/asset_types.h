@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file asset_types.h
  *
  *  @brief asset types.
@@ -33,12 +33,12 @@
 
 #include "../external/glad/gl.h"
 
-/*!
+/**
  *  @brief an asset's display name (optional).
  */
 typedef str fsl_name;
 
-/*!
+/**
  *  @brief an asset's stable, unique name for asset-search, and logging.
  *  naming convention: "[a-z_][a-z0-9_]*", or:
  *      - no leading digits.
@@ -46,12 +46,12 @@ typedef str fsl_name;
  */
 typedef str fsl_name_id;
 
-/*!
+/**
  *  @brief an asset's file base name.
 */
 typedef str fsl_file;
 
-/*!
+/**
  *  @brief an asset file's parent directory path.
  */
 typedef str fsl_path;
@@ -67,7 +67,7 @@ typedef struct fsl_font             fsl_font;
 typedef struct fsl_projection       fsl_projection;
 typedef struct fsl_camera           fsl_camera;
 
-/*!
+/**
  *  @remark defined in @ref assets.h
  */
 typedef struct fsl_model            fsl_model;
@@ -84,24 +84,25 @@ typedef enum fsl_asset_type
     FSL_ASSET_TYPE_COUNT
 } fsl_asset_type;
 
-/*!
+/**
  *  @remark this struct should be filled using the function @ref fsl_set_asset_metadata().
  */
 struct fsl_asset
 {
-    /*!
-     *  @remark used by @ref glGenTextures() for textures, @ref glCreateShader() for shaders etc..
+    /**
+     *  @remark used by @ref glGenTextures() for textures, @ref glCreateShader()
+     *  for shaders etc..
      */
     GLuint id;
 
     fsl_asset_type type;
 
-    /*!
+    /**
      *  @brief display name, can be used in asset-search (optional).
      */
     fsl_mem_handle name;
 
-    /*!
+    /**
      *  @brief stable, unique name for asset-search, and logging (optional).
      *
      *  naming convention: "[a-z_][a-z0-9_]*", or:
@@ -110,17 +111,17 @@ struct fsl_asset
      */
     fsl_mem_handle name_id;
 
-    /*!
+    /**
      *  @brief base file name (optional).
      */
     fsl_mem_handle file;
 
-    /*!
+    /**
      *  @brief path to asset file without file name (optional).
      */
     fsl_mem_handle path;
 
-    /*!
+    /**
      *  @remark `TRUE` does not mean 'has metadata', it means whatever the asset
      *  requires to be fully initialized and usable is fulfilled
      *  (e.g., texture generated and uploaded to VRAM).
@@ -128,8 +129,9 @@ struct fsl_asset
     b8 initialized;
 }; /* fsl_asset */
 
-/*!
- *  @remark this struct can be filled using the function @ref fsl_get_asset_metadata().
+/**
+ *  @remark this struct can be filled using the function
+ *  @ref fsl_get_asset_metadata().
  */
 struct fsl_asset_metadata
 {
@@ -161,7 +163,7 @@ struct fsl_texture
     fsl_asset asset;
     v2i32 size;
 
-    /*!
+    /**
      *  @brief used by 'OpenGL' extension @ref GL_ARB_bindless_texture.
      */
     u64 bindless_handle;
@@ -169,7 +171,7 @@ struct fsl_texture
     GLint format; /* used by @ref glTexImage2D() */
     GLint filter; /* used by @ref glTexParameteri() */
 
-    /*!
+    /**
      *  @brief number of color channels, used by @ref stbi_load().
      */
     int channels;

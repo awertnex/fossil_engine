@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file math_internal.h
  *
  *  @brief initializing math stuff.
@@ -25,7 +25,7 @@
 
 #include "../common/types.h"
 
-/*!
+/**
  *  @internal
  *
  *  @brief initialize and allocate resources for @ref fsl_rand_tab.
@@ -37,7 +37,7 @@
  */
 u32 noise_init_internal(void);
 
-/*!
+/**
  *  @internal
  */
 void noise_free_internal(void);

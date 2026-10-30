@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file mesh_loader_internal.h
  *
  *  @brief mesh file parsing and loading.
@@ -63,7 +63,7 @@ struct mesh_vertex
     v2f32 uv;
 }; /* mesh_vertex */
 
-/*!
+/**
  *  @internal
  *
  *  @brief check whether a cooked version of the mesh file has been found or not.
@@ -72,7 +72,7 @@ struct mesh_vertex
  */
 b8 mesh_is_cooked(const fsl_fs_path *path);
 
-/*!
+/**
  *  @internal
  *
  *  @brief load a 'Fossil Mesh' (.fmesh) file from disk into specified buffers.
@@ -84,7 +84,7 @@ b8 mesh_is_cooked(const fsl_fs_path *path);
  */
 u32 mesh_load_fmesh_internal(const fsl_fs_path *path, fsl_array *vertex_buf, fsl_array *index_buf);
 
-/*!
+/**
  *  @internal
  *
  *  @brief export a 'Fossil Mesh' (.fmesh) mesh from RAM into `path`.
@@ -93,7 +93,7 @@ u32 mesh_load_fmesh_internal(const fsl_fs_path *path, fsl_array *vertex_buf, fsl
  */
 u32 mesh_export_fmesh_internal(const fsl_fs_path *path, fsl_array vertex_buf, fsl_array index_buf);
 
-/*!
+/**
  *  @internal
  *
  *  @brief load a 'Wavefront Obj' (.obj) mesh from disk into specified buffers.
@@ -105,7 +105,7 @@ u32 mesh_export_fmesh_internal(const fsl_fs_path *path, fsl_array vertex_buf, fs
  */
 u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *index_dst);
 
-/*!
+/**
  *  @internal
  *
  *  @brief load a 'Khronos GLTF' (.gltf) mesh from disk into specified buffers.
@@ -117,7 +117,7 @@ u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_a
  */
 u32 mesh_load_gltf_internal(const fsl_fs_path *path, fsl_array *vertex_buf, fsl_array *index_buf);
 
-/*!
+/**
  *  @internal
  *
  *  @brief load a 'Khronos GLB' (.glb) mesh from disk into specified buffers.

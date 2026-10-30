@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file types.h
  *
  *  @brief engine's data types.
@@ -53,22 +53,22 @@ typedef char        str;
 typedef uint8_t     b8;
 typedef uint32_t    b32;
 
-/*!
+/**
  *  @brief usually size of each index in an array, or total bytes for a single datum.
  */
 typedef u64         fsl_size;
 
-/*!
+/**
  *  @brief usually number of indices in an array, or total bytes for a single datum.
  */
 typedef u64         fsl_len;
 
-/*!
+/**
  *  @brief raw data capacity, in bytes.
  */
 typedef u64         fsl_cap;
 
-/*!
+/**
  *  @brief relative or absolute file system path.
  */
 typedef str         fsl_fs_path;

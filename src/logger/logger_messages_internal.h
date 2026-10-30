@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +14,13 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file logger_messages_internal.h
  *
  *  @brief engine's standardized logger messages and log message conventions.
  */
 
-/*!
+/**
  *  LOG MESSAGE CONVENTIONS:
  *      - action:   string, infinitive verb (e.g., "Open File", not "Opened File").
  *      - subject:  string, subject name (e.g., "door.png", not "Texture").

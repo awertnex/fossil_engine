@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file ui_element.h
  *
  *  @brief composing UI elements and baking transforms.
@@ -69,7 +69,7 @@ struct fsl_ui_element
 
 FSLAPI void fsl_ui_element_set_texture(fsl_ui_element *element, fsl_texture *texture);
 
-/*!
+/**
  *  @brief set UV coordinates of `element` in its texture.
  *
  *  @param pos_x horizontal position in texture, in pixels.
@@ -80,7 +80,7 @@ FSLAPI void fsl_ui_element_set_texture(fsl_ui_element *element, fsl_texture *tex
 FSLAPI void fsl_ui_element_set_uv(fsl_ui_element *element,
         i32 pos_x, i32 pos_y, i32 size_x, i32 size_y);
 
-/*!
+/**
  *  @brief set position of `element` on screen.
  *
  *  @param pos_x horizontal position on screen, in pixels.
@@ -97,7 +97,7 @@ FSLAPI void fsl_ui_element_set_uv(fsl_ui_element *element,
 FSLAPI void fsl_ui_element_set_position(fsl_ui_element *element, i32 pos_x, i32 pos_y,
         i32 offset_x, i32 offset_y, i32 offset_scaled_x, i32 offset_scaled_y);
 
-/*!
+/**
  *  @brief set size of `element` on screen.
  *
  *  @param size_x width on screen, in pixels.
@@ -108,7 +108,7 @@ FSLAPI void fsl_ui_element_set_position(fsl_ui_element *element, i32 pos_x, i32 
 FSLAPI void fsl_ui_element_set_size(fsl_ui_element *element,
         i32 size_x, i32 size_y, i32 size_scaled_x, i32 size_scaled_y);
 
-/*!
+/**
  *  @brief set scaling of `element` for its 'scaled' parameters.
  *
  *  @param scale_x horizontal gui scaling, for 'scaled' parameters.
@@ -116,7 +116,7 @@ FSLAPI void fsl_ui_element_set_size(fsl_ui_element *element,
  */
 FSLAPI void fsl_ui_element_set_scale(fsl_ui_element *element, f32 scale_x, f32 scale_y);
 
-/*!
+/**
  *  @brief set alignment of `element`.
  *
  *  @param align_x horizontal alignment in respect to element's position and size.
@@ -129,7 +129,7 @@ FSLAPI void fsl_ui_element_set_scale(fsl_ui_element *element, f32 scale_x, f32 s
  */
 FSLAPI void fsl_ui_element_set_alignment(fsl_ui_element *element, i32 align_x, i32 align_y);
 
-/*!
+/**
  *  @brief enable/disable 9-slice style rendering for `element`.
  *
  *  @param is_9_slice enable/disable 9-slice.
@@ -137,7 +137,7 @@ FSLAPI void fsl_ui_element_set_alignment(fsl_ui_element *element, i32 align_x, i
  */
 FSLAPI void fsl_ui_element_set_9_slice(fsl_ui_element *element, b8 is_9_slice, i32 slice_size);
 
-/*!
+/**
  *  @brief set an event action callback for `element` (e.g., button press, button hover).
  *
  *  @param element element to enable action callback for.
@@ -149,14 +149,14 @@ FSLAPI void fsl_ui_element_set_callback(fsl_ui_element *element,
         fsl_ui_event_type event_type,
         void (*func)(fsl_ui_event event, void *data), void *data);
 
-/*!
+/**
  *  @brief bake/refresh a UI element's parameters to prepare for rendering.
  *
  *  @remark called automatically from @ref ui_element_draw() if transform dirty.
  */
 FSLAPI void fsl_ui_element_bake(fsl_ui_element *element);
 
-/*!
+/**
  *  @brief draw a UI element on screen.
  *
  *  @remark function @ref fsl_ui_element_bake() must be called to
@@ -164,7 +164,7 @@ FSLAPI void fsl_ui_element_bake(fsl_ui_element *element);
  */
 FSLAPI void fsl_ui_element_draw(fsl_ui_element *element);
 
-/*!
+/**
  *  @brief attach a UI element to another (e.g., button in a menu).
  *
  *  - `child` will draw using `parent` baked transform + its own baked transform.
@@ -174,7 +174,7 @@ FSLAPI void fsl_ui_element_draw(fsl_ui_element *element);
  */
 FSLAPI void fsl_ui_element_attach(fsl_ui_element *parent, fsl_ui_element *child);
 
-/*!
+/**
  *  @brief detach a UI element from its parent (e.g., button in a menu).
  *
  *  @param child element to detach from their parent.

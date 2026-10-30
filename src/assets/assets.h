@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file assets.h
  *
  *  @brief asset parsing, loading and unloading.
@@ -56,12 +56,12 @@ struct fsl_model
     m4f32 mat_model;
 }; /* fsl_model */
 
-/*!
+/**
  *  @brief get an asset's metadata (e.g., name, name_id, etc..).
  */
 FSLAPI fsl_asset_metadata fsl_asset_get_metadata(fsl_asset asset);
 
-/*!
+/**
  *  @brief set a single asset's metadata.
  *
  *  @param type asset type (enum @ref fsl_asset_type).
@@ -82,7 +82,7 @@ FSLAPI fsl_asset_metadata fsl_asset_get_metadata(fsl_asset asset);
 FSLAPI u32 fsl_asset_set_metadata(fsl_asset *asset, fsl_asset_type type,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path);
 
-/*!
+/**
  *  @param target 'OpenGL' buffer target (e.g., GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER).
  *  @param size size of each element in buffer.
  *  @param len number of elements in buffer.
@@ -97,20 +97,20 @@ FSLAPI u32 fsl_vbo_init(fsl_vbo *vbo, fsl_size size, fsl_len len, void *data,
 
 void fsl_vbo_free(fsl_vbo *vbo);
 
-/*!
+/**
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_fbo_init(fsl_fbo *fbo, i32 size_x, i32 size_y, fsl_mesh *mesh_fbo,
         b8 multisample, u32 samples);
 
-/*!
+/**
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_fbo_realloc(fsl_fbo *fbo, i32 size_x, i32 size_y, b8 multisample, u32 samples);
 
 FSLAPI void fsl_fbo_free(fsl_fbo *fbo);
 
-/*!
+/**
  *  @brief load image data from disk into @ref texture->buf and set texture info.
  *
  *  @param name asset display name (optional) (@ref fsl_asset_set_metadata() parameter).
@@ -134,7 +134,7 @@ FSLAPI u32 fsl_texture_init(fsl_texture *texture,
 
 FSLAPI void fsl_texture_free(fsl_texture *texture);
 
-/*!
+/**
  *  @brief load font from file at `path`/`file`.
  *
  *  - generate square texture of diameter `resolution` * 16 and bake bitmap onto it.
@@ -157,7 +157,7 @@ FSLAPI u32 fsl_font_init(fsl_font *font, u32 resolution,
 
 FSLAPI void fsl_font_free(fsl_font *font);
 
-/*!
+/**
  *  @brief update camera position and rotation (in degrees).
  *
  *  @remark rotation limits:
@@ -168,7 +168,7 @@ FSLAPI void fsl_font_free(fsl_font *font);
 FSLAPI void fsl_camera_movement_update(fsl_camera *camera,
         f64 pos_x, f64 pos_y, f64 pos_z, f64 roll, f64 pitch, f64 yaw);
 
-/*!
+/**
  *  @brief update camera lookat angles looking from 'pos' at 'target'.
  *
  *  @remark rotation limits:
@@ -179,7 +179,7 @@ FSLAPI void fsl_camera_movement_update(fsl_camera *camera,
 FSLAPI void fsl_camera_lookat_update(fsl_camera *camera,
         f64 pos_x, f64 pos_y, f64 pos_z, f64 target_x, f64 target_y, f64 target_z);
 
-/*!
+/**
  *  @brief make perspective projection matrices from camera parameters.
  *
  *  - setup camera matrices for Z-up, right-handed coordinates and vertical fov (fovy):
@@ -193,7 +193,7 @@ FSLAPI void fsl_camera_lookat_update(fsl_camera *camera,
  */
 FSLAPI void fsl_projection_perspective_update(fsl_camera camera, fsl_projection *projection, b8 roll);
 
-/*!
+/**
  *  @brief draw model using baked transform and texture ID.
  */
 FSLAPI void fsl_model_draw(const fsl_model *model, const fsl_camera *camera,

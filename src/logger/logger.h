@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file logger.h
  *
  *  @brief main logger module header; include everything regarding logging.
@@ -135,7 +135,7 @@ enum fsl_log_level
     FSL_LOG_LEVEL_COUNT
 }; /* fsl_log_level */
 
-/*!
+/**
  *  @brief global logger buffer, raw log data.
  *
  *  @remark buffer mapped onto @ref mem_arena_internal.
@@ -161,21 +161,21 @@ struct fsl_log_entry
 
 /* ---- section: declarations ----------------------------------------------- */
 
-/*!
+/**
  *  @brief logger core, all logger data.
  *
  *  @remark read-only, initialized internally in @ref _fsl_logger_init().
  */
 FSLAPI extern fsl_logger_core logger_core;
 
-/*!
+/**
  *  @remark read-only, initialized internally in @ref _fsl_logger_init().
  */
 FSLAPI extern u32 fsl_log_level_max;
 
 /* ---- section: signatures ------------------------------------------------- */
 
-/*!
+/**
  *  @internal
  *
  *  @brief allocate and initialize logger resources.
@@ -200,7 +200,7 @@ FSLAPI u32 fsl_logger_init(int argc, char **argv, u64 flags);
 
 FSLAPI void fsl_logger_close(void);
 
-/*!
+/**
  *  @internal
  *
  *  @param flags enum @ref fsl_log_output_flag.
@@ -211,7 +211,7 @@ FSLAPI void fsl_logger_close(void);
 FSLAPI void fsl_log_output_internal(u32 error_code, u32 flags, const str *src_file, u64 src_line,
         u8 level, const str *message);
 
-/*!
+/**
  *  @brief like @ref fsl_stringf(), but used for the logger, since @ref fsl_stringf()
  *  uses features like buffer truncation with `...`, the logger needs the raw string.
  *

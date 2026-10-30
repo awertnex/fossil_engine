@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file mesh.c
  *
  *  @brief mesh loading, generating, unloading and mesh file formats.
@@ -46,7 +46,7 @@
 
 /* ---- section: signatures ------------------------------------------------- */
 
-/*!
+/**
  *  @internal
  *
  *  @brief get mesh file format based on file name conventions.
@@ -61,7 +61,7 @@
  */
 static u32 get_mesh_file_format_internal(const str *file, fsl_mesh_format *format);
 
-/*!
+/**
  *  @brief generate vertex arrays and transforms for a mesh and upload to VRAM.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly on failure.

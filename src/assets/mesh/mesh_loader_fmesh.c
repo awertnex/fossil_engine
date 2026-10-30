@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file mesh_loader_fmesh.c
  *
  *  @brief engine's mesh format 'Fossil Mesh' (.fmesh) file parsing and loading.

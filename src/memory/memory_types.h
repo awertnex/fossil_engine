@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file memory_types.h
  *
  *  @brief memory definitions and data structures.
@@ -25,7 +25,7 @@
 
 #include "../common/types.h"
 
-/*!
+/**
  *  @brief offset specific to memory arena pushes, it is a memory offset from
  *  an arena's base pointer.
  */
@@ -35,7 +35,7 @@ typedef struct fsl_mem_handle fsl_mem_handle;
 typedef struct fsl_mem_arena_handle fsl_mem_arena_handle;
 typedef struct fsl_mem_arena fsl_mem_arena;
 
-/*!
+/**
  *  @remark retrieve allocation address using @ref fsl_mem_handle_get() or @ref fsl_mem_handle_get_i().
  */
 struct fsl_mem_handle

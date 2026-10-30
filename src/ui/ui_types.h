@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file ui_types.h
  *
  *  @brief UI element types.
@@ -82,7 +82,7 @@ struct fsl_ui_transform
     v2i32 size_scaled;      /* size on screen, in pixels (scales with `scale`) */
     v2f32 scale;            /* gui scaling, for 'scaled' parameters */
 
-    /*!
+    /**
      *  @brief alignment in respect to `pos`, `size` and `size_scaled`.
      *  <= -1: left-side/top is at `pos`.
      *  == 0: center is at `pos`.

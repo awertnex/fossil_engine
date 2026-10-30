@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file mesh_loader_obj.c
  *
  *  @brief Wavefront OBJ (.obj) mesh file parsing and loading.
@@ -63,7 +63,7 @@ struct triangle_indices
     u32 prev;
 }; /* triangle_indices */
 
-/*!
+/**
  *  @internal
  *
  *  @brief extract vertex index data from face vertex string (e.g., "f 1/2/4", "f v1/vt2/vn4").

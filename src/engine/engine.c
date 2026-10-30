@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file engine.c
  *
  *  @brief engine init, running, close, windowing, opengl loading and default assets.
@@ -78,28 +78,28 @@ struct /* fsl_core */
         GLuint ndc_scale;
     } ubo;
 
-    /*!
+    /**
      *  @brief global fbo for rendering mostly ui elements.
      *
      *  @remark initialized in @ref fsl_engine_init().
      */
     fsl_fbo fbo;
 
-    /*!
+    /**
      *  @brief global fbo for rendering mostly ui elements, multisampled.
      *
      *  @remark initialized in @ref fsl_engine_init().
      */
     fsl_fbo fbo_msaa;
 
-    /*!
+    /**
      *  @brief function to bind a final framebuffer to draw to based on anti-aliasing setting.
      *
      *  @remark initialized in @ref fsl_engine_init().
      */
     void (*fbo_bind)(void);
 
-    /*!
+    /**
      *  @brief function to draw onto a final framebuffer based on anti-aliasing setting.
      *
      * @remark initialized in @ref fsl_engine_init().
@@ -113,7 +113,7 @@ fsl_render render_internal = {0};
 
 /* ---- section: signatures ------------------------------------------------- */
 
-/*!
+/**
  *  @internal
  *
  *  @brief engine's default error callback for 'GLFW'.
@@ -124,7 +124,7 @@ static void glfw_callback_error(int error, const char* message)
     LOGERROR(FSL_ERR_GLFW, 0, fsl_logger_stringf("GLFW: %s\n", message));
 }
 
-/*!
+/**
  *  @internal
  *
  *  @brief take screenshot and save it into dir at `dir_screenshots`.

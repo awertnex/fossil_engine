@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file input.h
  *
  *  @brief keyboard and mouse input handling.
@@ -52,7 +52,7 @@ struct fsl_key_bind
     u32 mod; /* enum @ref fsl_mod_key_flag (internal enum) */
 }; /* fsl_key_bind */
 
-/*!
+/**
  *  @brief setup a key binding (key combination).
  *
  *  @param key a keyboard key or mouse button.
