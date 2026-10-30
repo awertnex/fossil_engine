@@ -140,19 +140,19 @@ u32 fsl_engine_assets_init(void)
 
     if (
             fsl_font_init(&font_p[FSL_FONT_INDEX_DEJAVU_SANS], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans (ANSI)", "dejavu_sans_ansi", "dejavu-fonts-ttf/dejavu_sans_ansi.ttf",
+                "DejaVu Sans (Latin-1)", "dejavu_sans_latin_1", "dejavu-fonts-ttf/dejavu_sans_latin_1.ttf",
                 FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
 
             fsl_font_init(&font_p[FSL_FONT_INDEX_DEJAVU_SANS_BOLD], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans Bold (ANSI)", "dejavu_sans_bold_ansi", "dejavu-fonts-ttf/dejavu_sans_bold_ansi.ttf",
+                "DejaVu Sans Bold (Latin-1)", "dejavu_sans_bold_latin_1", "dejavu-fonts-ttf/dejavu_sans_bold_latin_1.ttf",
                 FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
 
             fsl_font_init(&font_p[FSL_FONT_INDEX_DEJAVU_SANS_MONO], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans Mono (ANSI)", "dejavu_sans_mono_ansi", "dejavu-fonts-ttf/dejavu_sans_mono_ansi.ttf",
+                "DejaVu Sans Mono (Latin-1)", "dejavu_sans_mono_latin_1", "dejavu-fonts-ttf/dejavu_sans_mono_latin_1.ttf",
                 FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
 
             fsl_font_init(&font_p[FSL_FONT_INDEX_DEJAVU_SANS_MONO_BOLD], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans Mono Bold (ANSI)", "dejavu_sans_mono_bold_ansi", "dejavu-fonts-ttf/dejavu_sans_mono_bold_ansi.ttf",
+                "DejaVu Sans Mono Bold (Latin-1)", "dejavu_sans_mono_bold_latin_1", "dejavu-fonts-ttf/dejavu_sans_mono_bold_latin_1.ttf",
                 FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS)
         goto cleanup;
 

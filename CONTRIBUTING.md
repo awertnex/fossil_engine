@@ -21,8 +21,7 @@ shaders.
   hard-limit, except in the very rare case a symbol name is 120+ characters
   long.
 - in markdown files (`.md`), 80 characters is a hard-limit (except for text that
-  can not be broken into multiple lines, like URLs or demonstrations of long
-  text).
+  can not be broken into multiple lines, like URLs or examples of long text).
 - indent size is 4.
 - tabs are forbidden, all whitespace must use spaces.
 

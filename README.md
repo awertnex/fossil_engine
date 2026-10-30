@@ -87,10 +87,10 @@ cleanup:
     - modifications: change all // comments to /* */ block comments to support C89 standard
 - [dejavu-fonts](https://github.com/dejavu-fonts/dejavu-fonts) (v2.37): fonts of choice (modified)
     - modifications:
-        - (subset: U+0000-00ff): dejavu_sans_ansi.ttf
-        - (subset: U+0000-00ff): dejavu_sans_bold_ansi.ttf
-        - (subset: U+0000-00ff): dejavu_sans_mono_ansi.ttf
-        - (subset: U+0000-00ff): dejavu_sans_mono_bold_ansi.ttf
+        - (subset: U+0000-U+00ff): dejavu_sans_bold_latin_1.ttf
+        - (subset: U+0000-U+00ff): dejavu_sans_latin_1.ttf
+        - (subset: U+0000-U+00ff): dejavu_sans_mono_bold_latin_1.ttf
+        - (subset: U+0000-U+00ff): dejavu_sans_mono_latin_1.ttf
 
 windows-specific:
 - [w64devkit v2.4.0](https://github.com/skeeto/w64devkit): not necessary for runtime, just for building from source
