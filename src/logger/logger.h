@@ -164,12 +164,12 @@ struct fsl_log_entry
 /**
  *  @brief logger core, all logger data.
  *
- *  @remark read-only, initialized internally in @ref _fsl_logger_init().
+ *  @remark read-only, initialized internally in @ref fsl_logger_init().
  */
 FSLAPI extern fsl_logger_core logger_core;
 
 /**
- *  @remark read-only, initialized internally in @ref _fsl_logger_init().
+ *  @remark read-only, initialized internally in @ref fsl_logger_init().
  */
 FSLAPI extern u32 fsl_log_level_max;
 
