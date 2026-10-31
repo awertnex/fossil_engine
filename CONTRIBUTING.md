@@ -325,7 +325,7 @@ typedef void (*fsl_ui_callback_func)(fsl_ui_event event, void *data);
     fsl_mem_handle_get_func()
 ```
 
-#### 2.6.2 order of keywords based on operation
+#### 2.6.2 order of keywords based on type of operation
 operation categories:
 - action (e.g., `fsl_asset_name_get()`, `fsl_mem_arena_push()`).
 - request (e.g., `fsl_request_screenshot()`).
@@ -384,17 +384,19 @@ b8 fsl_engine_is_running();
 
 order of keywords in "`callback`" category:
 ```c
-void fsl_callback_framebuffer_size();
-/*   |   |        |               |
- *   |   |        |               scope qualifier.
- *   |   |        |
- *   |   |        subject.
- *   |   `callback` keyword.
+void fsl_engine_callback_framebuffer_size();
+/*   |   |      |        |               |
+ *   |   |      |        |               scope qualifier.
+ *   |   |      |        subject.
+ *   |   |      `callback` keyword.
+ *   |   module's abbreviation.
  *   engine's abbreviation.
  */
 ```
 
-`func` is another type of callback keyword, but used differently:
+#### 2.6.3 some other naming conventions
+
+`func` is employed for typedeffed functions:
 ```c
 typedef void (*fsl_ui_callback_func)();
 /*             |   |  |        |   |
@@ -406,20 +408,16 @@ typedef void (*fsl_ui_callback_func)();
  */
 ```
 
-both `callback` and `func` are functions called via pointers, but a `callback`
-is specific to functions passed to the `engine/` module and listened to every
-frame, and only on the main thread.
-
-`func` is also used functions that are meant to be called via function-like
-macro wrappers:
+and functions that are called only via function-like macro wrappers:
 ```c
+/* same as the function name, but without `func` */
 #define fsl_mem_handle_get() \
     fsl_mem_handle_get_func()
 
 FSLAPI void fsl_mem_handle_get_func();
 ```
 
-#### 2.6.3 conventional keywords
+#### 2.6.4 conventional keywords
 `get`/`set`:
 ```c
 i32 fsl_engine_metadata_get();
