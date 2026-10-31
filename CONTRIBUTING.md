@@ -162,17 +162,16 @@ i32 function(void)
 }
 ```
 
-that of course applies to functions functions (function-like macro wrappers):
+that of course applies to functions and function-like macro wrappers:
 ```c
 FSLAPI i32 fsl_stringf();
 extern i32 stringf_internal();
 
 #define fsl_mem_arena_pop() \
-    fsl_mem_arena_pop_func_internal();
+    fsl_mem_arena_pop_func()
 ```
 
-it also applies to files, but differently; any files meant to be used only by
-the engine should have `internal` at the end:
+and files:
 ```c
 /* src/
  * | - string/
@@ -183,8 +182,7 @@ the engine should have `internal` at the end:
  */
 ```
 
-declarations should not mix with code, all declarations must be at the top of
-a block, whether globally (top of file) or locally (top of function):
+declarations must not mix with code, they must be at the top of the function:
 ```c
 i32 function(void)
 {
@@ -225,37 +223,38 @@ i32 function_name_for_a_function_that_does_absolutely_nothing_that_is_very_very_
 arguments that take pointers as read-only should be declared `const`:
 ```c
 /**
- *  this function modifies `pointer`, but shouldn't modify `other_pointer`.
+ *  this function can modify contents at `pointer`, but shouldn't modify
+ *  contents at `other_pointer`.
  */
 i32 function_name(i32 *pointer, const i32 *other_pointer);
 ```
 
 ### 2.5 code formatting
 angle brackets should be on a new line so the opening and closing brackets
-align vertically, which makes blocks easier to parse visually.
+align vertically, which makes blocks easier to read:
 ```c
 i32 function(void)
 {
-    if (good) /* good block */
+    if (0)      /* good block */
     {
     }
 
-    if (bad) { /* bad block */
+    if (0) {    /* bad block */
     }
 }
 ```
 
 trailing `else` should be on a new line:
 ```c
-    if (good)
+    if (0)
     {
     }
-    else /* good `else` */
+    else        /* good `else` */
     {
     }
 
-    if (bad) {
-    } else { /* bad `else` */
+    if (0) {
+    } else {    /* bad `else` */
     }
 ```
 
@@ -268,12 +267,11 @@ there shouldn't be padding around enclosing symbols' contents:
     i32 array[] = { 1, 2, 3 };  /* bad */
 ```
 
-when applicable, pre-increment is preferred over post-increment:
+pre-increment is preferred over post-increment when it doesn't make functional
+difference:
 ```c
     for (; i < 10; ++i)         /* yes */
     for (; i < 10; i++)         /* no */
-    x = y++;                    /* this is fine, since `++y` can change the
-                                 * result here */
 ```
 
 trailing commas are forbidden (because C89):
@@ -323,8 +321,8 @@ void ui_event_enter_func_internal(); /* called via a function pointer array */
 
 typedef void (*fsl_ui_callback_func)(fsl_ui_event event, void *data);
 
-#define fsl_mem_handle_get(handle) \
-    fsl_mem_handle_get_func_internal(handle)
+#define fsl_mem_handle_get() \
+    fsl_mem_handle_get_func()
 ```
 
 #### 2.6.2 order of keywords based on operation
@@ -412,6 +410,15 @@ both `callback` and `func` are functions called via pointers, but a `callback`
 is specific to functions passed to the `engine/` module and listened to every
 frame, and only on the main thread.
 
+`func` is also used functions that are meant to be called via function-like
+macro wrappers:
+```c
+#define fsl_mem_handle_get() \
+    fsl_mem_handle_get_func()
+
+FSLAPI void fsl_mem_handle_get_func();
+```
+
 #### 2.6.3 conventional keywords
 `get`/`set`:
 ```c
@@ -425,7 +432,8 @@ i32 fsl_font_init();
 i32 fsl_font_free();
 
 i32 fsl_engine_init();
-i32 fsl_engine_close(); /* special case, because I thought it was cool */
+i32 fsl_engine_close(); /* special case for the engine, because I thought it was
+                         * cool */
 ```
 
 `start`/`stop` for repeatable operations, after initialization:
