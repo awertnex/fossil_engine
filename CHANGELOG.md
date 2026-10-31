@@ -3,13 +3,14 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+and this project adheres to
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 >**NOTES:**
 >- the changelog format is based on
    [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) since engine version
    `v0.16.0-beta`, with some modification: changelogs start as lower-case,
-   change headers are one level smaller.
+   change headers are level 4 instead of level 3.
 >- history is mixed with the repo
    [heaven-hell_continuum](https://github.com/awertnex/heaven-hell_continuum)
    since this engine originated from the making of that game and later was moved
@@ -22,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - add 'len' and 'distance' functions to `math/` module.
 
 #### changed
+- change files 'assets/fonts/dejavu-fonts-ttf/*ansi.ttf' to
+  'assets/fonts/dejavu-fonts-ttf/*latin_1.ttf'.
 - change file 'src/dir.c' to 'src/file_io/file_io.c' and update all references.
 - change file 'src/h/dir.h' to 'src/file_io/file_io.h' and update all
   references.
@@ -50,7 +53,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.16.0-beta] - 2026-07-11
 
 #### changes
-- re-wrote math library to include implementations of all math functions for all math types.
+- re-wrote math library to include implementations of all math functions for all
+  math types.
 - changed all matrix functions names from 'fsl_matrix_*' to 'fsl_*_<type>'.
 - changed function `fsl_get_swept_aabb()` from floats to doubles.
 

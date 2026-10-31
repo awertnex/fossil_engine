@@ -28,14 +28,14 @@ shaders.
 ### 2.2 includes
 includes from within the code-base should be written as a relative path, and in
 quotes (`""`) as oppose to in angle brackets (`<>`):
-```
+```c
 #include "../common/types.h"    /* yes */
 #include <common/types.h>       /* no */
 ```
 
 includes are categorized into alike groups, categories are separated by a
 single empty line:
-```
+```c
 #include "../common/engine_info.h"
 #include "../common/types.h"
 
@@ -70,7 +70,7 @@ within each category, includes are ordered alphabetically.
 
 ### 2.3 code syntax
 all symbol names must be lower-case, words are separated by underscores:
-```
+```c
 i32 good_variable_name;
 i32 badVariableName;
 i32 BadVariableName;
@@ -82,7 +82,7 @@ enum good_enum_name {};
 ```
 
 leading/trailing underscores are not allowed as they are reserved by the C standard:
-```
+```c
 i32 good_variable_name;
 i32 _bad_variable_name;
 i32 __bad_variable_name__;
@@ -90,7 +90,7 @@ i32 __bad_variable_name__;
 
 constants and enum members must be upper-case, words are separated by
 underscores:
-```
+```c
 const i32 GOOD_CONST_NAME = 0;
 const i32 bad_const_name = 0;
 
@@ -103,7 +103,7 @@ enum fsl_constants
 
 defined structs should have their name appear at the bottom, kinda similar to
 typedeffed structs:
-```
+```c
 typedef struct fsl_foo
 {
 } fsl_foo;
@@ -114,7 +114,7 @@ struct fsl_foo
 ```
 
 same applies to unions and enums:
-```
+```c
 typedef union fsl_foo
 {
 } fsl_foo;
@@ -133,13 +133,13 @@ enum fsl_bar
 ```
 
 the pointer symbol (`*`) must go with the name, not the type:
-```
+```c
 i32 *good_pointer;
 i32* bad_pointer;
 ```
 
 symbols that must have `internal` at the end:
-```
+```c
 /* ---- header.h: ----------------------------------------------------------- */
 
 FSLAPI i32 variable_y;              /* exposed by the API, not internal */
@@ -163,7 +163,7 @@ i32 function(void)
 ```
 
 that of course applies to functions functions (function-like macro wrappers):
-```
+```c
 FSLAPI i32 fsl_stringf();
 extern i32 stringf_internal();
 
@@ -173,7 +173,7 @@ extern i32 stringf_internal();
 
 it also applies to files, but differently; any files meant to be used only by
 the engine should have `internal` at the end:
-```
+```c
 /* src/
  * | - string/
  * |   | - string.c
@@ -185,7 +185,7 @@ the engine should have `internal` at the end:
 
 declarations should not mix with code, all declarations must be at the top of
 a block, whether globally (top of file) or locally (top of function):
-```
+```c
 i32 function(void)
 {
     i32 good_declaration_order = 1;
@@ -203,7 +203,7 @@ i32 function(void)
 ```
 
 all declarations must be initialized:
-```
+```c
     i32 good_init_value = 0;
     i32 bad_init_value;
 ```
@@ -212,7 +212,7 @@ all declarations must be initialized:
 the return type, function name, first opening parenthesis and any arguments
 that can fit the rest of the line should be in one line, otherwise only
 arguments can be put into new lines:
-```
+```c
 i32 function_name(i32 parameter, i32 other_parameter);
 
 i32 function_name_that_is_very_very_long(i32 very_very_long_parameter,
@@ -223,7 +223,7 @@ i32 function_name_for_a_function_that_does_absolutely_nothing_that_is_very_very_
 ```
 
 arguments that take pointers as read-only should be declared `const`:
-```
+```c
 /**
  *  this function modifies `pointer`, but shouldn't modify `other_pointer`.
  */
@@ -233,7 +233,7 @@ i32 function_name(i32 *pointer, const i32 *other_pointer);
 ### 2.5 code formatting
 angle brackets should be on a new line so the opening and closing brackets
 align vertically, which makes blocks easier to parse visually.
-```
+```c
 i32 function(void)
 {
     if (good) /* good block */
@@ -246,7 +246,7 @@ i32 function(void)
 ```
 
 trailing `else` should be on a new line:
-```
+```c
     if (good)
     {
     }
@@ -260,7 +260,7 @@ trailing `else` should be on a new line:
 ```
 
 there shouldn't be padding around enclosing symbols' contents:
-```
+```c
     if (condition)              /* good */
     if ( condition )            /* bad */
 
@@ -269,7 +269,7 @@ there shouldn't be padding around enclosing symbols' contents:
 ```
 
 when applicable, pre-increment is preferred over post-increment:
-```
+```c
     for (; i < 10; ++i)         /* yes */
     for (; i < 10; i++)         /* no */
     x = y++;                    /* this is fine, since `++y` can change the
@@ -277,7 +277,7 @@ when applicable, pre-increment is preferred over post-increment:
 ```
 
 trailing commas are forbidden (because C89):
-```
+```c
 typedef enum enumerator
 {
     ENUMERATION_0,
@@ -292,33 +292,33 @@ typedef enum enumerator
 #### 2.6.1 keywords
 the engine's abbreviation "`fsl`" always comes first if the symbol is exposed
 by the API:
-```
+```c
 FSLAPI u32 fsl_engine_init();       /* good name */
 FSLAPI u32 engine_init();           /* bad name */
 ```
 
 the module name/abbreviation comes after the engine's abbreviation:
-```
+```c
 i32 fsl_asset_metadata_get();       /* the module is `assets/` */
 i32 fsl_mem_arena_push();           /* the module is `memory/` */
 ```
 
 the subject comes before the operation by default:
-```
+```c
 i32 fsl_asset_metadata_get();       /* good format */
 i32 fsl_get_asset_metadata();       /* bad format */
 i32 fsl_asset_get_metadata();       /* bad format */
 ```
 
 any scope-specific keywords should come last:
-```
+```c
 i32 fsl_mem_arena_push_internal();  /* scope-specific keyword is `internal` */
 ```
 
 any functions meant to be called via a function pointer, typedeffed function
 signatures and function-like macro wrappers should have the keyword `func` at
 the end:
-```
+```c
 void ui_event_enter_func_internal(); /* called via a function pointer array */
 
 typedef void (*fsl_ui_callback_func)(fsl_ui_event event, void *data);
@@ -335,7 +335,7 @@ operation categories:
 - callback (e.g., `fsl_callback_framebuffer_size()`).
 
 order of keywords in "`action`" category:
-```
+```c
 i32 fsl_asset_name_get();
 
 i32 fsl_asset_name_get_internal();
@@ -351,7 +351,7 @@ i32 fsl_render_settings_update();
 ```
 
 order of keywords in "`request`" category:
-```
+```c
 i32 fsl_request_asset_name();
 /*  |   |       |     |   |
  *  |   |       |     |   scope qualifier (there's none here).
@@ -367,13 +367,13 @@ i32 fsl_request_screenshot();
 
 however, functions that respond to requests should follow the "`action`"
 category:
-```
+```c
 /* using `respond` instead of `process` here to make intent clear */
 i32 fsl_screenshot_request_respond();
 ```
 
 order of keywords in "`query`" category:
-```
+```c
 b8 fsl_engine_is_running();
 /* |   |      |  |      |
  * |   |      |  |      scope qualifier.
@@ -385,7 +385,7 @@ b8 fsl_engine_is_running();
 ```
 
 order of keywords in "`callback`" category:
-```
+```c
 void fsl_callback_framebuffer_size();
 /*   |   |        |               |
  *   |   |        |               scope qualifier.
@@ -397,7 +397,7 @@ void fsl_callback_framebuffer_size();
 ```
 
 `func` is another type of callback keyword, but used differently:
-```
+```c
 typedef void (*fsl_ui_callback_func)();
 /*             |   |  |        |   |
  *             |   |  |        |   scope qualifier.
@@ -414,13 +414,13 @@ frame, and only on the main thread.
 
 #### 2.6.3 conventional keywords
 `get`/`set`:
-```
+```c
 i32 fsl_engine_metadata_get();
 i32 fsl_engine_metadata_set();
 ```
 
 `init`/`free` for initialization/freeing:
-```
+```c
 i32 fsl_font_init();
 i32 fsl_font_free();
 
@@ -429,7 +429,7 @@ i32 fsl_engine_close(); /* special case, because I thought it was cool */
 ```
 
 `start`/`stop` for repeatable operations, after initialization:
-```
+```c
 i32 fsl_text_start(); /* sets up text rendering batch */
 
 /* closes text rendering batch to prepare for drawing, without freeing
@@ -439,19 +439,19 @@ i32 fsl_text_stop();
 ```
 
 `create`/`destroy`:
-```
+```c
 i32 fsl_texture_handle_create();
 i32 fsl_texture_handle_destroy();
 ```
 
 `push`/`pop` for inserting and removing data to/from memory:
-```
+```c
 i32 fsl_mem_arena_push();
 i32 fsl_mem_arena_pop();
 ```
 
 `clear` for erasing memory, `delete` can also be used when applicable:
-```
+```c
 i32 fsl_mem_clear();
 
 /* also erases memory, but it's not the primary purpose */
@@ -465,7 +465,7 @@ other keywords:
 
 ### 3.1 textual rules
 all text must be lower-case except for abbreviations and names that need it:
-```
+```c
 /* examples of keywords that should be upper-case:
  * FSL:     `Fossil` abbreviation.
  * GLFW:    the `GLFW` framework name.
@@ -476,14 +476,14 @@ all text must be lower-case except for abbreviations and names that need it:
 
 ### 3.1 regular comments
 all comments must be written as block comments (`/* comment */`):
-```
+```c
     if (good) /* good comment */
     if (bad) // bad comment
 ```
 
 a "todo" must be written on the same line as a significant (or the relevant)
 piece of code, it shows clearer context when using search tools:
-```
+```c
     if (good) /* TODO: please fix this code */
     {
     }
@@ -497,7 +497,7 @@ piece of code, it shows clearer context when using search tools:
 ### 3.2 symbols
 all function and global symbol documentation must follow javadoc-style doxygen
 formatting:
-```
+```c
 /**
  *  good format
  *  @good_markup_command
@@ -510,7 +510,7 @@ formatting:
 ```
 
 text inside a doxygen comment should be aligned to 4 characters.
-```
+```c
 /**
  *  @brief short description.   <- good alignment
  * @brief short description.    <- bad alignment
@@ -519,7 +519,7 @@ text inside a doxygen comment should be aligned to 4 characters.
 
 long text in a bullet point should return under the start of the text, not the
 bullet point:
-```
+```c
 /**
  *  - some note that takes
  *    two lines.                <- good alignment
@@ -530,7 +530,7 @@ bullet point:
 
 any contiguous body of text that take more than one line should be padded with
 empty lines:
-```
+```c
 /**
  *  - some note.
  *  - another note.
@@ -547,7 +547,7 @@ descriptions that surpass the 80 character limit should be put on multiple lines
 and put on top of the subject instead of next to it and should employ full sized
 block formatting, with padding around the description and the subject
 (whitespace at the top and bottom):
-```
+```c
 typedef struct fsl_foo
 {
     i32 var_1; /* var_1 description */
@@ -564,7 +564,7 @@ typedef struct fsl_foo
 
 this block comes at the top of every file, after the short license placed at the
 very top:
-```
+```c
 /**
  *  @file file_name.c
  *
@@ -573,7 +573,7 @@ very top:
 ```
 
 typedeffed structs, unions and enums should be documented like this:
-```
+```c
 /**
  *  @brief short description of struct.
  *
@@ -600,7 +600,7 @@ typedef struct fsl_foo
 
 structs/unions/enums within other structs/unions should have padding around
 them:
-```
+```c
 struct fsl_foo
 {
     i32 var_1;
@@ -617,7 +617,7 @@ struct fsl_foo
 
 similar markup commands should be next to each other, unless one extends more
 than one line:
-```
+```c
 /**
  *  @brief short description.
  *
@@ -645,7 +645,7 @@ i32 func(i32 first_parameter, i32 second_parameter, i32 third_parameter);
 
 internal symbols should be marked as such in the documentation, even if the
 symbol name says it:
-```
+```c
 /**
  *  @internal
  *
@@ -658,7 +658,7 @@ extern fsl_mem_arena mem_arena_internal;
 
 all source and header files must have the license at the very top, followed
 by the doxygen identifier block for the file, separated by an empty line:
-```
+```c
 /**
  *  license text
  *  ...
@@ -673,7 +673,7 @@ by the doxygen identifier block for the file, separated by an empty line:
 
 for header files, ifdef guards are employed instead of "`pragma once`", and come
 after the file's identifier:
-```
+```c
  *  ...
  */
 
@@ -682,7 +682,7 @@ after the file's identifier:
 ```
 
 every `endif` should mention its pair's text:
-```
+```c
 #if DEBUG_BUILD
 do_the_thing
 #endif /* DEBUG_BUILD */
@@ -690,7 +690,7 @@ do_the_thing
 
 in the case of header guards, the `endif` should be separated from the content
 above it by an empty line:
-```
+```c
 
 #endif /* FSL_FILE_NAME_H */
 ```

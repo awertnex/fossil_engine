@@ -6,8 +6,7 @@
 - to make 2D and/or 3D games, and general software (such as image editors, 3D
   editors, or GUI-based text editors and such)
 - to provide simple, general-purpose (mostly) implementations so to give the
-  user finer control (which makes the engine verbose), although some areas of
-  the engine are less versatile still
+  user finer control, although some areas of the engine are less versatile still
 - to compile using only a C compiler
 
 >**NOTE ABOUT VERSIONING:** all tags before `v0.3.4-beta` belong to the repo
@@ -101,9 +100,9 @@ windows-specific:
 >- for release build, run `./build release`.
 >- if build successful, you can copy/move the files in `fossil/` into your project's root.
 >- files:
->   - `deps/`: required headers for development
->   - `fossil/`: required libraries and files for runtime
->   - `lib/`: required libraries for linking
+>    - `deps/`: required headers for development
+>    - `fossil/`: required libraries and files for runtime
+>    - `lib/`: required libraries for linking
 
 **linux x86_64:**
 

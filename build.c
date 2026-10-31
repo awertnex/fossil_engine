@@ -101,7 +101,7 @@ static str str_make_dir_plugins[][CMD_SIZE] =
     DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/torus_noise/"
 };
 
-static str *copy_targets[][48] =
+static str *str_copy_operations[][48] =
 {
     {DIR_SRC"external/glfw3.h",             DIR_DST DIR_DEPS DIR_DST"external/"},
     {DIR_SRC"external/glad/gl.h",           DIR_DST DIR_DEPS DIR_DST"external/glad/"},
@@ -136,10 +136,13 @@ static str *copy_targets[][48] =
     {DIR_SRC"ui/ui_types.h",                DIR_DST DIR_DEPS DIR_DST"ui/"}
 };
 
-static str *copy_targets_plugins[][48] =
+static str *str_copy_operations_plugins[][48] =
 {
-    {DIR_SRC"plugins/fsl_native/torus_noise/torus_noise.h", DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/torus_noise/"},
-    {DIR_SRC"plugins/fsl_native/torus_noise/torus_sample.h", DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/torus_noise/"}
+    {DIR_SRC"plugins/fsl_native/torus_noise/torus_noise.h",
+        DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/torus_noise/"},
+
+    {DIR_SRC"plugins/fsl_native/torus_noise/torus_sample.h",
+        DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/torus_noise/"}
 };
 
 int main(int argc, char **argv)
@@ -222,12 +225,12 @@ int main(int argc, char **argv)
             copy_dir("lib/"PLATFORM,        DIR_DST DIR_DST, TRUE) != ERR_SUCCESS)
         cmd_fail(&cmd);
 
-    for (i = 0; i < arr_len(copy_targets); ++i)
-        if (copy_file(copy_targets[i][0], copy_targets[i][1]) != ERR_SUCCESS)
+    for (i = 0; i < arr_len(str_copy_operations); ++i)
+        if (copy_file(str_copy_operations[i][0], str_copy_operations[i][1]) != ERR_SUCCESS)
             cmd_fail(&cmd);
 
-    for (i = 0; i < arr_len(copy_targets_plugins); ++i)
-        if (copy_file(copy_targets_plugins[i][0], copy_targets_plugins[i][1]) != ERR_SUCCESS)
+    for (i = 0; i < arr_len(str_copy_operations_plugins); ++i)
+        if (copy_file(str_copy_operations_plugins[i][0], str_copy_operations_plugins[i][1]) != ERR_SUCCESS)
             cmd_fail(&cmd);
 
     return ERR_SUCCESS;
