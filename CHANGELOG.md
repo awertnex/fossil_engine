@@ -23,6 +23,22 @@ and this project adheres to
 - add 'len' and 'distance' functions to `math/` module.
 
 #### changed
+- change function name `fsl_ui_element_set_callback()` to
+  `fsl_ui_element_callback_set()`.
+- change function name `fsl_ui_element_set_9_slice()` to
+  `fsl_ui_element_9_slice_set()`.
+- change function name `fsl_ui_element_set_alignment()` to
+  `fsl_ui_element_alignment_set()`.
+- change function name `fsl_ui_element_set_scale()` to
+  `fsl_ui_element_scale_set()`.
+- change function name `fsl_ui_element_set_size()` to
+  `fsl_ui_element_size_set()`.
+- change function name `fsl_ui_element_set_position()` to
+  `fsl_ui_element_position_set()`.
+- change function name `fsl_ui_element_set_uv()` to
+  `fsl_ui_element_uv_set()`.
+- change function name `fsl_ui_element_set_texture()` to
+  `fsl_ui_element_texture_set()`.
 - change function name `fsl_get_text_height()` to `fsl_text_height_get()`.
 - change function name `fsl_engine_set_runtime_path()` to
   `fsl_engine_runtime_path_set()`.

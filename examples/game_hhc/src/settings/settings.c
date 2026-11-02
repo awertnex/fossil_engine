@@ -98,10 +98,10 @@ void settings_gui_scale_set(f32 scale)
     settings.flag.gui_scale_dirty = TRUE;
     settings.gui_scale = scale;
 
-    fsl_ui_element_set_scale(&ui_element[UI_ELEMENT_CROSSHAIR], scale, scale);
-    fsl_ui_element_set_scale(&ui_element[UI_ELEMENT_HOTBAR], scale, scale);
-    fsl_ui_element_set_scale(&ui_element[UI_ELEMENT_HOTBAR_SELECTED], scale, scale);
-    fsl_ui_element_set_scale(&ui_element[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL], scale, scale);
+    fsl_ui_element_scale_set(&ui_element[UI_ELEMENT_CROSSHAIR], scale, scale);
+    fsl_ui_element_scale_set(&ui_element[UI_ELEMENT_HOTBAR], scale, scale);
+    fsl_ui_element_scale_set(&ui_element[UI_ELEMENT_HOTBAR_SELECTED], scale, scale);
+    fsl_ui_element_scale_set(&ui_element[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL], scale, scale);
 
     super_debugger_gui_scale_set(scale);
 }

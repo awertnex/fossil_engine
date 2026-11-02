@@ -67,7 +67,7 @@ struct fsl_ui_element
 
 /* ---- section: signatures ------------------------------------------------- */
 
-FSLAPI void fsl_ui_element_set_texture(fsl_ui_element *element, fsl_texture *texture);
+FSLAPI void fsl_ui_element_texture_set(fsl_ui_element *element, fsl_texture *texture);
 
 /**
  *  @brief set UV coordinates of `element` in its texture.
@@ -77,7 +77,7 @@ FSLAPI void fsl_ui_element_set_texture(fsl_ui_element *element, fsl_texture *tex
  *  @param size_x width in texture, in pixels.
  *  @param size_y height in texture, in pixels.
  */
-FSLAPI void fsl_ui_element_set_uv(fsl_ui_element *element,
+FSLAPI void fsl_ui_element_uv_set(fsl_ui_element *element,
         i32 pos_x, i32 pos_y, i32 size_x, i32 size_y);
 
 /**
@@ -94,7 +94,7 @@ FSLAPI void fsl_ui_element_set_uv(fsl_ui_element *element,
  *  @param offset_scaled_y vertical offset from position, in pixels. (scales
  *  with `element->transform.scale`)
  */
-FSLAPI void fsl_ui_element_set_position(fsl_ui_element *element, i32 pos_x, i32 pos_y,
+FSLAPI void fsl_ui_element_position_set(fsl_ui_element *element, i32 pos_x, i32 pos_y,
         i32 offset_x, i32 offset_y, i32 offset_scaled_x, i32 offset_scaled_y);
 
 /**
@@ -109,7 +109,7 @@ FSLAPI void fsl_ui_element_set_position(fsl_ui_element *element, i32 pos_x, i32 
  *  @param size_scaled_y height on screen, in pixels. (scales with
  *  `element->transform.scale`)
  */
-FSLAPI void fsl_ui_element_set_size(fsl_ui_element *element,
+FSLAPI void fsl_ui_element_size_set(fsl_ui_element *element,
         i32 size_x, i32 size_y, i32 size_scaled_x, i32 size_scaled_y);
 
 /**
@@ -118,7 +118,7 @@ FSLAPI void fsl_ui_element_set_size(fsl_ui_element *element,
  *  @param scale_x horizontal gui scaling, for 'scaled' parameters.
  *  @param scale_y vertical gui scaling, for 'scaled' parameters.
  */
-FSLAPI void fsl_ui_element_set_scale(fsl_ui_element *element, f32 scale_x, f32 scale_y);
+FSLAPI void fsl_ui_element_scale_set(fsl_ui_element *element, f32 scale_x, f32 scale_y);
 
 /**
  *  @brief set alignment of `element`.
@@ -133,7 +133,7 @@ FSLAPI void fsl_ui_element_set_scale(fsl_ui_element *element, f32 scale_x, f32 s
  *      == 0: center is at position.
  *      >= 1: right-side/bottom is at position.
  */
-FSLAPI void fsl_ui_element_set_alignment(fsl_ui_element *element, i32 align_x, i32 align_y);
+FSLAPI void fsl_ui_element_alignment_set(fsl_ui_element *element, i32 align_x, i32 align_y);
 
 /**
  *  @brief enable/disable 9-slice style rendering for `element`.
@@ -143,7 +143,7 @@ FSLAPI void fsl_ui_element_set_alignment(fsl_ui_element *element, i32 align_x, i
  *  @param slice_size corner slice diameter, middle slices will consume the rest
  *  of the area.
  */
-FSLAPI void fsl_ui_element_set_9_slice(fsl_ui_element *element, b8 is_9_slice, i32 slice_size);
+FSLAPI void fsl_ui_element_9_slice_set(fsl_ui_element *element, b8 is_9_slice, i32 slice_size);
 
 /**
  *  @brief set an event action callback for `element`. (e.g., button press,
@@ -154,7 +154,7 @@ FSLAPI void fsl_ui_element_set_9_slice(fsl_ui_element *element, b8 is_9_slice, i
  *  @param func function to call on `event_type` trigger.
  *  @param data data to pass in to `callback()` on `event_type` trigger.
  */
-FSLAPI void fsl_ui_element_set_callback(fsl_ui_element *element,
+FSLAPI void fsl_ui_element_callback_set(fsl_ui_element *element,
         fsl_ui_event_type event_type,
         void (*func)(fsl_ui_event event, void *data), void *data);
 

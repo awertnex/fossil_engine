@@ -178,7 +178,7 @@ void player_hotbar_selected_set(hhc_player *p, u32 index)
 {
     p->hotbar_slot_selected = index;
 
-    fsl_ui_element_set_position(&ui_element[UI_ELEMENT_HOTBAR_SELECTED],
+    fsl_ui_element_position_set(&ui_element[UI_ELEMENT_HOTBAR_SELECTED],
             0, 0, 0, 0, p->hotbar_slot_selected * 17 - 1, -1);
 }
 
