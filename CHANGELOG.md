@@ -23,6 +23,17 @@ and this project adheres to
 - add 'len' and 'distance' functions to `math/` module.
 
 #### changed
+- change function name `fsl_process_screenshot_request()` to
+  `fsl_screenshot_request_respond()`.
+- change function name `fsl_request_skip_mouse_delta()` to
+  `fsl_request_mouse_delta_skip()`.
+- change function name `fsl_change_render()` to `fsl_render_set()`.
+- change function name `fsl_engine_get_string()` to `fsl_engine_string_get()`.
+- change function name `fsl_update_render_settings()` to
+  `fsl_render_settings_update()`.
+- change function name `fsl_engine_running()` to `fsl_engine_is_running()`.
+- change function name `fsl_asset_get_metadata()` to `fsl_asset_metadata_get()`.
+- change function name `fsl_asset_set_metadata()` to `fsl_asset_metadata_set()`.
 - change files 'assets/fonts/dejavu-fonts-ttf/*ansi.ttf' to
   'assets/fonts/dejavu-fonts-ttf/*latin_1.ttf'.
 - change file 'src/dir.c' to 'src/file_io/file_io.c' and update all references.
