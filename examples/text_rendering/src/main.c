@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 
 page_1:
 
-    while (fsl_engine_running(NULL))
+    while (fsl_engine_is_running(NULL))
     {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         fsl_text_start(font, 22.0f, 0, TRUE);
@@ -60,7 +60,7 @@ page_1:
 
 page_2:
 
-    while (fsl_engine_running(NULL))
+    while (fsl_engine_is_running(NULL))
     {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         fsl_text_start(font, 22.0f, 0, TRUE);

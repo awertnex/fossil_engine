@@ -153,7 +153,7 @@ int main(int argc, char **argv)
 
 workspace_1:
 
-    while (fsl_engine_running(NULL))
+    while (fsl_engine_is_running(NULL))
     {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         if (render->mouse_delta.x || render->mouse_delta.y)
@@ -230,7 +230,7 @@ workspace_1:
 
 workspace_2:
 
-    while (fsl_engine_running(NULL))
+    while (fsl_engine_is_running(NULL))
     {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         if (render->mouse_delta.x || render->mouse_delta.y)

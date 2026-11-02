@@ -197,11 +197,11 @@ int main(int argc, char **argv)
     bind_quit = fsl_key_bind_init(FSL_KEY_Q, 0, 0, 0, 0);
 
     if (
-            fsl_asset_set_metadata(&nine_slice.asset, FSL_ASSET_SHADER_PROGRAM,
+            fsl_asset_metadata_set(&nine_slice.asset, FSL_ASSET_SHADER_PROGRAM,
                 "9-Slice", "nine_slice", NULL, NULL) != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&nine_slice.vertex.asset, FSL_ASSET_SHADER,
+            fsl_asset_metadata_set(&nine_slice.vertex.asset, FSL_ASSET_SHADER,
                 "9-Slice", "nine_slice", "9s.vert", "./") != FSL_ERR_SUCCESS ||
-            fsl_asset_set_metadata(&nine_slice.vertex.asset, FSL_ASSET_SHADER,
+            fsl_asset_metadata_set(&nine_slice.vertex.asset, FSL_ASSET_SHADER,
                 "9-Slice", "nine_slice", "9s.frag", "./") != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -261,7 +261,7 @@ int main(int argc, char **argv)
         core.vao_loaded = TRUE;
     }
 
-    while (fsl_engine_running(NULL))
+    while (fsl_engine_is_running(NULL))
     {
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 
