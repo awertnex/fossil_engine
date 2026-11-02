@@ -1,4 +1,4 @@
-# Fossil Engine - v0.17.0-dev
+# Fossil Engine - v0.18.0-beta
 
 **a headless game engine written in C89, with minimal dependencies.**
 
@@ -20,21 +20,29 @@
 
 ## Engine Modules
 - `src/external/`: engine's external dependencies.
-- `src/common/`: most important module, has common definitions, base data types, error codes and API control.
-- `src/file_io/`: file i/o, creating, copying, moving files/directories and path-handling.
+- `src/common/`: most important module, has common definitions, base data types,
+  error codes and API control.
+- `src/file_io/`: file i/o, creating, copying, moving files/directories and
+  path-handling.
 - `src/string/`: string handling, token-searching and basic hashing algorithms.
 - `src/math/`: math functions, perlin noise functions and some RNG stuff.
-- `src/logger/`: engine's logging system, prints to the command line and an internal history buffer.
-- `src/assets/`: asset handling and pipeline, handles fonts, textures, meshes, camera and projection and graphics API buffers.
+- `src/logger/`: engine's logging system, prints to the command line and an
+  internal history buffer.
+- `src/assets/`: asset handling and pipeline, handles fonts, textures, meshes,
+  camera and projection and graphics API buffers.
 - `src/engine/`: engine's entry point, main functions and engine's own assets.
-- `src/h/`: old global directory for headers, all headers used to be here (still used, but should be removed in the future).
+- `src/h/`: old global directory for headers, all headers used to be here.
+  (still used, but should be removed in the future)
 - `src/input/`: keyboard and mouse input handling.
 - `src/memory/`: memory handling, memory arenas, with some security checks.
 - `src/physics/`: physics-handling, collisions and forces.
-- `src/plugins/`: any external plug-ins that use the engine (right now plug-ins are compiled directly into the engine binary).
-- `src/shaders/`: pre-processing, hot-reloading and fall-back for the graphics API's shaders.
+- `src/plugins/`: any external plug-ins that use the engine. (right now plug-ins
+  are compiled directly into the engine binary)
+- `src/shaders/`: pre-processing, hot-reloading and fall-back for the graphics
+  API's shaders.
 - `src/ui/`: UI library, panels, buttons and interactivity.
-- `src/buildtool_config.h`: definitions and functions that the linking software can use to build with the engine.
+- `src/buildtool_config.h`: definitions and functions that the linking software
+  can use to build with the engine.
 - `src/fossil_engine.h`: header that includes the entire engine.
 
 ## Quick Examples
@@ -72,19 +80,29 @@ cleanup:
 
 ## Dependencies (already bundled)
 
-- [buildtool](https://github.com/awertnex/buildtool) (v1.8.7): build tool used to build the engine
-- [glfw](https://github.com/glfw/glfw) (v3.4): platform-independent windowing (headers modified)
+- [buildtool](https://github.com/awertnex/buildtool) (v1.8.7): build tool used
+  to build the engine
+- [glfw](https://github.com/glfw/glfw) (v3.4): platform-independent windowing
+  (headers modified)
     - modifications: remove `__cplusplus` guard, since the engine is C-only
-- [glad](https://github.com/Dav1dde/glad) (v2.0.8): graphics API loader (header modified)
+- [glad](https://github.com/Dav1dde/glad) (v2.0.8): graphics API loader (header
+  modified)
     - extensions: GL_ARB_bindless_texture
     - modifications: remove `__cplusplus` guard, since the engine is C-only
-- [stb_truetype.h](https://github.com/nothings/stb/blob/master/stb_truetype.h) (v1.26): font loader (modified)
-    - modifications: change all // comments to /* */ block comments to support C89 standard
-- [stb_image.h](https://github.com/nothings/stb/blob/master/stb_image.h) (v2.30): image loader (modified)
-    - modifications: change all // comments to /* */ block comments to support C89 standard
-- [stb_image_write.h](https://github.com/nothings/stb/blob/master/stb_image_write.h) (v1.26): image writer (modified)
-    - modifications: change all // comments to /* */ block comments to support C89 standard
-- [dejavu-fonts](https://github.com/dejavu-fonts/dejavu-fonts) (v2.37): fonts of choice (modified)
+- [stb_truetype.h](https://github.com/nothings/stb/blob/master/stb_truetype.h)
+  (v1.26): font loader (modified)
+    - modifications: change all // comments to /* */ block comments to support
+      C89 standard
+- [stb_image.h](https://github.com/nothings/stb/blob/master/stb_image.h)
+  (v2.30): image loader (modified)
+    - modifications: change all // comments to /* */ block comments to support
+      C89 standard
+- [stb_image_write.h](https://github.com/nothings/stb/blob/master/stb_image_write.h)
+  (v1.26): image writer (modified)
+    - modifications: change all // comments to /* */ block comments to support
+      C89 standard
+- [dejavu-fonts](https://github.com/dejavu-fonts/dejavu-fonts) (v2.37): fonts of
+  choice (modified)
     - modifications:
         - (subset: U+0000-U+00ff): dejavu_sans_bold_latin_1.ttf
         - (subset: U+0000-U+00ff): dejavu_sans_latin_1.ttf
@@ -92,17 +110,19 @@ cleanup:
         - (subset: U+0000-U+00ff): dejavu_sans_mono_latin_1.ttf
 
 windows-specific:
-- [w64devkit v2.4.0](https://github.com/skeeto/w64devkit): not necessary for runtime, just for building from source
+- [w64devkit v2.4.0](https://github.com/skeeto/w64devkit): not necessary for
+  runtime, just for building from source
 
 ## Build From Source
 
 >**NOTES:**
 >- for release build, run `./build release`.
->- if build successful, you can copy/move the files in `fossil/` into your project's root.
+>- if build successful, you can copy/move the files in `fossil/` into your
+   project's root.
 >- files:
->    - `deps/`: required headers for development
->    - `fossil/`: required libraries and files for runtime
->    - `lib/`: required libraries for linking
+>    - `deps/`: required headers for development.
+>    - `fossil/`: required libraries and files for runtime.
+>    - `lib/`: required libraries for linking.
 
 **linux x86_64:**
 
