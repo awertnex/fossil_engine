@@ -36,7 +36,7 @@
 #include <sys/wait.h>
 #include <sys/mman.h>
 
-u32 fsl_get_path_absolute_internal(const fsl_fs_path *path, str *dst)
+u32 path_absolute_get_internal(const fsl_fs_path *path, str *dst)
 {
     if (!realpath(path, dst))
     {
@@ -48,14 +48,14 @@ u32 fsl_get_path_absolute_internal(const fsl_fs_path *path, str *dst)
     return fsl_err;
 }
 
-u32 fsl_get_path_bin_root_internal(str *dst)
+u32 path_bin_root_get_internal(str *dst)
 {
     /* here, "FSL_PATH_CAP - 2" to leave space for a slash (`/`) and a null (`\0`) terminator */
     if (readlink("/proc/self/exe", dst, FSL_PATH_CAP - 2) < 1)
     {
         LOGFATAL(FSL_ERR_GET_PATH_BIN_ROOT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_REASON_FATAL("Get Binary Root", "`fsl_get_path_bin_root_internal()` Failed"));
+                MSG_ACTION_REASON_FATAL("Get Binary Root", "`path_bin_root_get_internal()` Failed"));
         return fsl_err;
     }
 

@@ -62,7 +62,7 @@ struct fsl_key_bind
  *  @param super left or right super.
  *
  *
- *  @return `fsl_key_bind{0}` on failure and @ref fsl_err is set accordingly.
+ *  @return `(fsl_key_bind){0}` on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI fsl_key_bind fsl_key_bind_init(fsl_keyboard_key key,
         fsl_mod_key shift, fsl_mod_key ctrl, fsl_mod_key alt, fsl_mod_key super);

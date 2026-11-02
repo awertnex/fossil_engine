@@ -177,9 +177,9 @@ u32 fsl_engine_init(int argc, char **argv, const str *title,
 
     if (!FSL_SESSION.init_time)
     {
-        FSL_SESSION.init_time = fsl_get_time_raw_usec();
-        fsl_get_time_nsec(); /* initialize start time */
-        fsl_get_time_nsecf(); /* initialize start time */
+        FSL_SESSION.init_time = fsl_time_raw_usec_get();
+        fsl_time_nsec_get(); /* initialize start time */
+        fsl_time_nsecf_get(); /* initialize start time */
     }
 
     if (fsl_logger_init(argc, argv, is_release) != FSL_ERR_SUCCESS)
@@ -202,9 +202,9 @@ u32 fsl_engine_init(int argc, char **argv, const str *title,
 
     if (FSL_SESSION.bin_root == NULL)
     {
-        if (fsl_get_path_bin_root(&FSL_SESSION.bin_root) != FSL_ERR_SUCCESS)
+        if (fsl_path_bin_root_get(&FSL_SESSION.bin_root) != FSL_ERR_SUCCESS)
             goto cleanup;
-        fsl_change_dir(FSL_SESSION.bin_root);
+        fsl_dir_change(FSL_SESSION.bin_root);
     }
 
     if (
@@ -285,7 +285,7 @@ b8 fsl_engine_is_running(void (*callback_framebuffer_size)(i32 size_x, i32 size_
                 MSG_UPDATE_RENDER_SETTINGS_FAIL);
     }
 
-    render_internal.time = fsl_get_time_nsec();
+    render_internal.time = fsl_time_nsec_get();
     if (!time_last)
         time_last = render_internal.time;
     render_internal.time_delta = render_internal.time - time_last;
@@ -603,7 +603,7 @@ static u32 screenshot_take_internal(const str *dir_screenshots, const str *speci
     str file_name_full[FSL_PATH_CAP] = {0};
     str str_dir_screenshots[FSL_PATH_CAP] = {0};
 
-    if (fsl_is_dir_exists(dir_screenshots, FALSE) != FSL_ERR_SUCCESS)
+    if (fsl_dir_is_exists(dir_screenshots, FALSE) != FSL_ERR_SUCCESS)
     {
         LOGERROR(FSL_ERR_SCREENSHOT_FAIL,
                 FSL_FLAG_LOG_CMD,
@@ -612,10 +612,10 @@ static u32 screenshot_take_internal(const str *dir_screenshots, const str *speci
     }
 
     snprintf(str_dir_screenshots, FSL_PATH_CAP, "%s", dir_screenshots);
-    fsl_check_slash(str_dir_screenshots);
-    fsl_posix_slash(str_dir_screenshots);
+    fsl_slash_check(str_dir_screenshots);
+    fsl_slash_posix(str_dir_screenshots);
 
-    fsl_get_time_str(str_time, "%F_%H-%M-%S");
+    fsl_time_str_get(str_time, "%F_%H-%M-%S");
 
     if (special_text[0])
         snprintf(str_special_text, FSL_ID_CAP, "_%s", special_text);
@@ -625,7 +625,7 @@ static u32 screenshot_take_internal(const str *dir_screenshots, const str *speci
     for (i = 0; i < FSL_SCREENSHOT_RATE_MAX; ++i)
     {
         snprintf(file_name_full, FSL_PATH_CAP, "%s_%"PRIu64"%s.png", file_name, i, str_special_text);
-        if (fsl_is_file_exists(file_name_full, FALSE) != FSL_ERR_SUCCESS)
+        if (fsl_file_is_exists(file_name_full, FALSE) != FSL_ERR_SUCCESS)
         {
             glPixelStorei(GL_PACK_ALIGNMENT, 1);
             glReadPixels(0, 0, render_internal.size.x, render_internal.size.y,

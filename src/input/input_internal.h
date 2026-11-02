@@ -325,6 +325,8 @@ static str *fsl_keyboard_key_name[FSL_KEYBOARD_KEYS_MAX] =
 }; /* fsl_keyboard_tab */
 
 /**
+ *  @internal
+ *
  *  @brief like @ref fsl_key_bind_init(), but quiet.
  *
  *  @param key a keyboard key or mouse button.

@@ -140,7 +140,7 @@ u32 chunks_max_init_internal(void)
     u32 chunk_count = 0;
 
     snprintf(path, FSL_PATH_CAP, "%s%s", GAME_DIR_NAME_LOOKUPS, GAME_FILE_NAME_LOOKUP_CHUNKS_MAX);
-    if (fsl_is_file_exists(path, FALSE) == FSL_ERR_SUCCESS)
+    if (fsl_file_is_exists(path, FALSE) == FSL_ERR_SUCCESS)
         goto load_from_disk;
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
@@ -168,7 +168,7 @@ u32 chunks_max_init_internal(void)
         chunk_order.len[i] = chunk_count;
     }
 
-    if (fsl_write_file(path, (SET_RENDER_DISTANCE_MAX + 1) * sizeof(u32),
+    if (fsl_file_write(path, (SET_RENDER_DISTANCE_MAX + 1) * sizeof(u32),
                 chunk_order.len, TRUE, FALSE) != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -177,7 +177,7 @@ u32 chunks_max_init_internal(void)
 
 load_from_disk:
 
-    file_len = fsl_get_file_contents(path, (void*)&file_contents, FALSE);
+    file_len = fsl_file_contents_get(path, (void*)&file_contents, FALSE);
     if (*GAME_ERR != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -213,7 +213,7 @@ u32 chunk_order_init_internal(void)
         return *GAME_ERR;
     }
 
-    if (fsl_is_file_exists(path, FALSE) != FSL_ERR_SUCCESS)
+    if (fsl_file_is_exists(path, FALSE) != FSL_ERR_SUCCESS)
     {
         if (chunk_order_build_internal() != FSL_ERR_SUCCESS)
             return *GAME_ERR;
@@ -296,13 +296,13 @@ u32 chunk_order_build_internal(void)
         data_buf[--bucket_buf[distance_buf[i]].pos] = pos_buf[i];
 
     snprintf(path, FSL_PATH_CAP, "%s%s", GAME_DIR_NAME_LOOKUPS, GAME_FILE_NAME_LOOKUP_CHUNK_ORDER);
-    if (fsl_write_file(path, chunk_count * sizeof(v3i8), data_buf, TRUE, FALSE) != FSL_ERR_SUCCESS)
+    if (fsl_file_write(path, chunk_count * sizeof(v3i8), data_buf, TRUE, FALSE) != FSL_ERR_SUCCESS)
         goto cleanup;
     LOGSUCCESS(FSL_FLAG_LOG_NO_VERBOSE,
             fsl_logger_stringf("`chunk_order` Look-up '%s' Exported\n", path));
 
     snprintf(path, FSL_PATH_CAP, "%s%s", GAME_DIR_NAME_LOOKUPS, GAME_FILE_NAME_LOOKUP_CHUNK_BUCKET);
-    if (fsl_write_file(path, buckets_max * sizeof(hhc_chunk_bucket_format), bucket_buf, TRUE, FALSE) != FSL_ERR_SUCCESS)
+    if (fsl_file_write(path, buckets_max * sizeof(hhc_chunk_bucket_format), bucket_buf, TRUE, FALSE) != FSL_ERR_SUCCESS)
         goto cleanup;
     LOGSUCCESS(FSL_FLAG_LOG_NO_VERBOSE,
             fsl_logger_stringf("`chunk_sched` Look-up '%s' Exported\n", path));
@@ -347,7 +347,7 @@ u32 chunk_order_load_internal(u32 render_distance)
     u32 index = 0;
 
     snprintf(path, FSL_PATH_CAP, "%s%s", GAME_DIR_NAME_LOOKUPS, GAME_FILE_NAME_LOOKUP_CHUNK_ORDER);
-    file_len = fsl_get_file_contents(path, (void*)&file_contents, FALSE);
+    file_len = fsl_file_contents_get(path, (void*)&file_contents, FALSE);
     if (file_contents == NULL)
         goto cleanup;
 
@@ -382,7 +382,7 @@ u32 chunk_bucket_load_internal(void)
     u32 i = 0;
 
     snprintf(path, FSL_PATH_CAP, "%s%s", GAME_DIR_NAME_LOOKUPS, GAME_FILE_NAME_LOOKUP_CHUNK_BUCKET);
-    file_len = fsl_get_file_contents(path, (void*)&file_contents, FALSE);
+    file_len = fsl_file_contents_get(path, (void*)&file_contents, FALSE);
     if (file_contents == NULL)
         goto cleanup;
 
@@ -1048,7 +1048,7 @@ chunk_work_cost chunk_load_internal(hhc_chunk *chunk, chunk_work_budget budget,
             world.path, chunk->pos_wrap.x, chunk->pos_wrap.y, chunk->pos_wrap.z);
 
 #if MODE_INTERNAL_IMPORT_CHUNKS
-    if (fsl_is_file_exists(path, FALSE) == FSL_ERR_SUCCESS)
+    if (fsl_file_is_exists(path, FALSE) == FSL_ERR_SUCCESS)
         chunk_import_internal(path, chunk, receipt);
     else
 #endif /* MODE_INTERNAL_IMPORT_CHUNKS */
@@ -1342,7 +1342,7 @@ finish_export:
     receipt->cost[CHUNK_RECEIPT_ITEM_EXPORT] += cost;
     chunk->receipt.cost[CHUNK_RECEIPT_ITEM_EXPORT] += cost;
 
-    fsl_write_file(path, j * sizeof(u16), buf, TRUE, FALSE);
+    fsl_file_write(path, j * sizeof(u16), buf, TRUE, FALSE);
     return cost;
 }
 
@@ -1360,7 +1360,7 @@ chunk_work_cost chunk_import_internal(const fsl_fs_path *path, hhc_chunk *chunk,
     u32 j = 0;
     u32 rle = 0;
 
-    fsl_get_base_name(path, file_name, FSL_ID_CAP);
+    fsl_base_name_get(path, file_name, FSL_ID_CAP);
 
     for (i = 0; i < 3; ++i)
     {

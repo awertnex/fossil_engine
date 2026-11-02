@@ -225,7 +225,7 @@ workspace_1:
         if (fsl_is_key_press(bind_quit))
             fsl_request_engine_close();
 
-        fsl_limit_framerate(60, render->time);
+        fsl_framerate_limit(60, render->time);
     }
 
 workspace_2:
@@ -254,7 +254,7 @@ workspace_2:
         if (fsl_is_key_press(bind_quit))
             fsl_request_engine_close();
 
-        fsl_limit_framerate(60, render->time);
+        fsl_framerate_limit(60, render->time);
     }
 
 cleanup:

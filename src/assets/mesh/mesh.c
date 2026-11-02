@@ -173,7 +173,7 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
         }
     }
 
-    if (!is_cooked && fsl_is_file_exists(path_temp, FALSE) != FSL_ERR_SUCCESS)
+    if (!is_cooked && fsl_file_is_exists(path_temp, FALSE) != FSL_ERR_SUCCESS)
     {
         snprintf(path_temp, FSL_PATH_CAP, "%s%s", path, file);
         LOGERROR(FSL_ERR_MESH_LOAD_FAIL,
@@ -240,7 +240,7 @@ fallback:
         snprintf(extension, strlen(FSL_FILE_FORMAT_NAME_FOSSIL_MESH) + 1, "%s",
                 FSL_FILE_FORMAT_NAME_FOSSIL_MESH);
     }
-    if (fsl_is_file_exists(path_temp, FALSE) != FSL_ERR_SUCCESS &&
+    if (fsl_file_is_exists(path_temp, FALSE) != FSL_ERR_SUCCESS &&
             mesh_export_fmesh_internal(path_temp, vertex_buf, index_buf) != FSL_ERR_SUCCESS)
         goto cleanup;
 

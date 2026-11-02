@@ -51,7 +51,7 @@ b8 mesh_is_cooked_internal(const fsl_fs_path *path)
         snprintf(extension, strlen(FSL_FILE_FORMAT_NAME_FOSSIL_MESH) + 1, "%s", FSL_FILE_FORMAT_NAME_FOSSIL_MESH);
     }
 
-    if (fsl_is_file_exists(path_temp, FALSE) == FSL_ERR_SUCCESS)
+    if (fsl_file_is_exists(path_temp, FALSE) == FSL_ERR_SUCCESS)
         return TRUE;
     return FALSE;
 }

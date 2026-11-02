@@ -36,7 +36,7 @@ u32 settings_init(void)
                 "settings_init().file_contents_out") != FSL_ERR_SUCCESS)
         return *GAME_ERR;
 
-    if (fsl_is_dir_exists(GAME_DIR_NAME_CONFIG, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_dir_is_exists(GAME_DIR_NAME_CONFIG, TRUE) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     snprintf(file_contents_out, SETTINGS_FILE_SIZE_MAX,
@@ -49,14 +49,14 @@ u32 settings_init(void)
             tokens[2], SET_RENDER_DISTANCE_DEFAULT,
             tokens[3], FSL_TARGET_FPS_DEFAULT);
 
-    if (fsl_is_file_exists(GAME_DIR_NAME_CONFIG GAME_FILE_NAME_SETTINGS, FALSE) != FSL_ERR_SUCCESS)
+    if (fsl_file_is_exists(GAME_DIR_NAME_CONFIG GAME_FILE_NAME_SETTINGS, FALSE) != FSL_ERR_SUCCESS)
     {
-        fsl_write_file(GAME_DIR_NAME_CONFIG GAME_FILE_NAME_SETTINGS,
+        fsl_file_write(GAME_DIR_NAME_CONFIG GAME_FILE_NAME_SETTINGS,
                 strlen(file_contents_out),
                 file_contents_out, TRUE, TRUE);
     }
 
-    fsl_get_file_contents(GAME_DIR_NAME_CONFIG GAME_FILE_NAME_SETTINGS,
+    fsl_file_contents_get(GAME_DIR_NAME_CONFIG GAME_FILE_NAME_SETTINGS,
             (void*)&file_contents_in, TRUE);
     if (*GAME_ERR != FSL_ERR_SUCCESS)
         goto cleanup;

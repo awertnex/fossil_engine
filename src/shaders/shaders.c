@@ -51,7 +51,7 @@ u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created)
     }
 
     snprintf(temp, FSL_PATH_CAP, "%s%s", metadata.path, metadata.file);
-    if (fsl_is_file_exists(temp, FALSE) != FSL_ERR_SUCCESS)
+    if (fsl_file_is_exists(temp, FALSE) != FSL_ERR_SUCCESS)
     {
         fsl_err = FSL_ERR_SHADER_TYPE_NULL;
         return fsl_err;

@@ -127,8 +127,8 @@ u32 fsl_asset_metadata_set(fsl_asset *asset, fsl_asset_type type,
             goto cleanup;
         path_p = fsl_mem_handle_get(asset->path);
         snprintf(path_p, FSL_ID_CAP, "%s", path);
-        fsl_check_slash(path_p);
-        fsl_posix_slash(path_p);
+        fsl_slash_check(path_p);
+        fsl_slash_posix(path_p);
     }
 
     fsl_err = FSL_ERR_SUCCESS;
@@ -451,7 +451,7 @@ u32 fsl_texture_init(fsl_texture *texture,
     metadata = fsl_asset_metadata_get(texture->asset);
 
     snprintf(path_temp, FSL_PATH_CAP, "%s%s", metadata.path, metadata.file);
-    if (fsl_is_file_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_file_is_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     buf = (u8*)stbi_load(path_temp, &texture->size.x, &texture->size.y, &texture->channels, channels);
@@ -566,10 +566,10 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     }
 
     snprintf(path_temp, FSL_PATH_CAP, "%s%s", metadata.path, metadata.file);
-    if (fsl_is_file_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_file_is_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    font->buf_len = fsl_get_file_contents(path_temp, (void*)&file_contents, TRUE);
+    font->buf_len = fsl_file_contents_get(path_temp, (void*)&file_contents, TRUE);
     if (file_contents == NULL)
         return fsl_err;
 

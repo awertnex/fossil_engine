@@ -53,9 +53,9 @@ u32 noise_init_internal(void)
 
     snprintf(path, FSL_PATH_CAP, "%s%s", FSL_DIR_NAME_LOOKUPS, FSL_FILE_NAME_LOOKUP_RAND_TAB);
 
-    if (fsl_is_file_exists(path, FALSE) == FSL_ERR_SUCCESS)
+    if (fsl_file_is_exists(path, FALSE) == FSL_ERR_SUCCESS)
     {
-        file_len = fsl_get_file_contents(path, (void*)&file_contents, FALSE);
+        file_len = fsl_file_contents_get(path, (void*)&file_contents, FALSE);
         if (fsl_err != FSL_ERR_SUCCESS || file_contents == NULL)
             goto cleanup;
 
@@ -70,7 +70,7 @@ u32 noise_init_internal(void)
         for (i = 0; i < FSL_RAND_TAB_VOLUME; ++i)
             fsl_rand_tab[i] = sin((f64)(fsl_rand_u64(i) % 360));
 
-        if (fsl_write_file(path, FSL_RAND_TAB_VOLUME * sizeof(f32),
+        if (fsl_file_write(path, FSL_RAND_TAB_VOLUME * sizeof(f32),
                     fsl_rand_tab, TRUE, FALSE) != FSL_ERR_SUCCESS)
             goto cleanup;
     }

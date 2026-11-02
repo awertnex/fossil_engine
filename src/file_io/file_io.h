@@ -47,7 +47,7 @@ FSLAPI u32 fsl_is_file(const fsl_fs_path *path);
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_is_file_exists(const fsl_fs_path *path, b8 log);
+FSLAPI u32 fsl_file_is_exists(const fsl_fs_path *path, b8 log);
 
 /**
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
@@ -59,7 +59,7 @@ FSLAPI u32 fsl_is_dir(const fsl_fs_path *path);
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_is_dir_exists(const fsl_fs_path *path, b8 log);
+FSLAPI u32 fsl_dir_is_exists(const fsl_fs_path *path, b8 log);
 
 /**
  *  @brief make directory `path` if it doesn't exist.
@@ -68,12 +68,12 @@ FSLAPI u32 fsl_is_dir_exists(const fsl_fs_path *path, b8 log);
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_make_dir(const fsl_fs_path *path);
+FSLAPI u32 fsl_dir_make(const fsl_fs_path *path);
 
 /**
  *  @brief change current working directory.
  */
-FSLAPI int fsl_change_dir(const fsl_fs_path *path);
+FSLAPI int fsl_dir_change(const fsl_fs_path *path);
 
 /**
  *  @brief get file type at `path` and store in `type`.
@@ -85,7 +85,7 @@ FSLAPI int fsl_change_dir(const fsl_fs_path *path);
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_get_file_type(const fsl_fs_path *path, u32 *type);
+FSLAPI u32 fsl_file_type_get(const fsl_fs_path *path, u32 *type);
 
 /**
  *  @brief read file at `path` and write its contents into `*dst`.
@@ -98,14 +98,14 @@ FSLAPI u32 fsl_get_file_type(const fsl_fs_path *path, u32 *type);
  *  @return file size, in bytes.
  *  @return 0 on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u64 fsl_get_file_contents(const fsl_fs_path *path, void **dst, b8 terminate);
+FSLAPI u64 fsl_file_contents_get(const fsl_fs_path *path, void **dst, b8 terminate);
 
 /**
  *  @brief get directory entries at `path`.
  *
  *  @return `(fsl_buf){0}` on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI fsl_buf fsl_get_dir_contents(const fsl_fs_path *path);
+FSLAPI fsl_buf fsl_dir_contents_get(const fsl_fs_path *path);
 
 /**
  *  @brief get directory entry count at 'path'.
@@ -113,7 +113,7 @@ FSLAPI fsl_buf fsl_get_dir_contents(const fsl_fs_path *path);
  *  @return entry count.
  *  @return 0 on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u64 fsl_get_dir_entry_count(const fsl_fs_path *path);
+FSLAPI u64 fsl_dir_entry_count_get(const fsl_fs_path *path);
 
 /**
  *  @brief copy `src` into `dst`, preserve permissions and modification time.
@@ -122,7 +122,7 @@ FSLAPI u64 fsl_get_dir_entry_count(const fsl_fs_path *path);
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_copy_file(const fsl_fs_path *src, const fsl_fs_path *dst);
+FSLAPI u32 fsl_file_copy(const fsl_fs_path *src, const fsl_fs_path *dst);
 
 /**
  *  @brief copy `src` into `dst`, preserve all permissions and modification times.
@@ -135,7 +135,7 @@ FSLAPI u32 fsl_copy_file(const fsl_fs_path *src, const fsl_fs_path *dst);
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_copy_dir(const fsl_fs_path *src, const fsl_fs_path *dst, b8 contents_only);
+FSLAPI u32 fsl_dir_copy(const fsl_fs_path *src, const fsl_fs_path *dst, b8 contents_only);
 
 /**
  *  @brief write contents of `buf` into `path` and create new file if it doesn't exist.
@@ -149,7 +149,7 @@ FSLAPI u32 fsl_copy_dir(const fsl_fs_path *src, const fsl_fs_path *dst, b8 conte
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_write_file(const fsl_fs_path *path, u64 size, void *buf, b8 log, b8 text);
+FSLAPI u32 fsl_file_write(const fsl_fs_path *path, u64 size, void *buf, b8 log, b8 text);
 
 /**
  *  @brief append contents of `buf` into `path` and create new file if it doesn't exist.
@@ -163,7 +163,7 @@ FSLAPI u32 fsl_write_file(const fsl_fs_path *path, u64 size, void *buf, b8 log, 
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_append_file(const fsl_fs_path *path, u64 size, void *buf, b8 log, b8 text);
+FSLAPI u32 fsl_file_append(const fsl_fs_path *path, u64 size, void *buf, b8 log, b8 text);
 
 /**
  *  @brief get calloc'd string of resolved `path`.
@@ -173,12 +173,13 @@ FSLAPI u32 fsl_append_file(const fsl_fs_path *path, u64 size, void *buf, b8 log,
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_get_path_absolute(const fsl_fs_path *path, str **dst);
+FSLAPI u32 fsl_path_absolute_get(const fsl_fs_path *path, str **dst);
 
 /**
+ *  @brief get real path from relative path at `path`.
+ *
  *  @internal
  *
- *  @brief get real path from relative path at `path`.
  *  implemented in `platform_<PLATFORM>.c`.
  *
  *  @param path relative path.
@@ -186,7 +187,7 @@ FSLAPI u32 fsl_get_path_absolute(const fsl_fs_path *path, str **dst);
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 fsl_get_path_absolute_internal(const fsl_fs_path *path, str *dst);
+u32 path_absolute_get_internal(const fsl_fs_path *path, str *dst);
 
 /**
  *  @brief append @ref FSL_SLASH_NATIVE onto `path` if `path` not ending in
@@ -194,28 +195,28 @@ u32 fsl_get_path_absolute_internal(const fsl_fs_path *path, str *dst);
  *
  *  @remark @ref fsl_err is set accordingly on failure.
  */
-FSLAPI void fsl_check_slash(fsl_fs_path *path);
+FSLAPI void fsl_slash_check(fsl_fs_path *path);
 
 /**
  *  @brief normalize all slashes to @ref FSL_SLASH_NATIVE depending on operating system.
  *
  *  @remark @ref fsl_err is set accordingly on failure.
  */
-FSLAPI void fsl_normalize_slash(fsl_fs_path *path);
+FSLAPI void fsl_slash_normalize(fsl_fs_path *path);
 
 /**
  *  @brief change all backslashes (`\`) in `path` to slashes ('/').
  *
  *  @remark @ref fsl_err is set accordingly on failure.
  */
-FSLAPI void fsl_posix_slash(fsl_fs_path *path);
+FSLAPI void fsl_slash_posix(fsl_fs_path *path);
 
 /**
  *  @brief get `path` retracted to its parent directory.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_retract_path(fsl_fs_path *path);
+FSLAPI u32 fsl_path_retract(fsl_fs_path *path);
 
 /**
  *  @brief get base name of `path`.
@@ -224,6 +225,6 @@ FSLAPI u32 fsl_retract_path(fsl_fs_path *path);
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_get_base_name(const fsl_fs_path *path, str *dst, u64 size);
+FSLAPI u32 fsl_base_name_get(const fsl_fs_path *path, str *dst, u64 size);
 
 #endif /* FSL_FILE_IO_H */

@@ -1057,7 +1057,7 @@ section_gameplay:
         world_draw();
 
         fsl_screenshot_request_respond(GAME_DIR_NAME_SCREENSHOTS, world.name);
-        fsl_limit_framerate(settings.target_fps, render->time);
+        fsl_framerate_limit(settings.target_fps, render->time);
 
         if (core.request.menu_back)
         {

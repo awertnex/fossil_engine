@@ -83,7 +83,7 @@ static str *fsl_shader_pre_process_includes_internal(const str *path, u64 *file_
         return NULL;
     }
 
-    buf_len = fsl_get_file_contents(path, (void*)&buf, TRUE);
+    buf_len = fsl_file_contents_get(path, (void*)&buf, TRUE);
     if (fsl_err != FSL_ERR_SUCCESS)
         return NULL;
 
@@ -107,7 +107,7 @@ static str *fsl_shader_pre_process_includes_internal(const str *path, u64 *file_
             j += strlen(token[1]);
 
             snprintf(temp, FSL_PATH_CAP, "%s", path);
-            fsl_retract_path(temp);
+            fsl_path_retract(temp);
             snprintf(temp + strlen(temp), FSL_PATH_CAP - strlen(temp),
                     "%.*s", (int)temp_len, buf + i + strlen(token[0]));
 

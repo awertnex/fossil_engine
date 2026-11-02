@@ -85,10 +85,14 @@ extern fsl_render render_internal;
 /**
  *  @brief initialize engine stuff.
  *
- *  - set 'GLFW' error callback.
- *  - call @ref fsl_change_dir() to change current working directory to the main process'.
- *  - call @ref fsl_logger_init(), @ref fsl_glfw_init(), @ref fsl_window_init(),
- *    @ref fsl_glad_init(), @ref fsl_assets_init() and @ref fsl_ui_init().
+ *  - sets 'GLFW' error callback.
+ *
+ *  - calls @ref fsl_dir_change() to change current working directory to the
+ *    main process'.
+ *
+ *  - calls @ref fsl_logger_init(), @ref fsl_glfw_init(),
+ *    @ref fsl_window_init(), @ref fsl_glad_init(), @ref fsl_assets_init() and
+ *    @ref fsl_ui_init().
  *
  *  @param argc number of arguments in `argv` (if `argv` provided).
  *  @param argv used for logger log level (optional).

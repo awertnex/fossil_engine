@@ -18,8 +18,10 @@ shaders.
 
 ### 2.1 general
 - maximum line width is 80 characters as a soft-limit and 120 characters as a
-  hard-limit, except in the very rare case a symbol name is 120+ characters
-  long.
+  hard-limit, with some exceptions that can extend 120+ characters:
+    - `TODO` comments, it's preferred they stay on one line.
+    - log messages and the message parameter of log function calls.
+    - a symbol name that is for some reason 120+ characters long.
 - in markdown files (`.md`), 80 characters is a hard-limit (except for text that
   can not be broken into multiple lines, like URLs or examples of long text).
 - indent size is 4.
@@ -103,6 +105,13 @@ enum fsl_constants
 }; /* fsl_constants */
 ```
 
+const-like symbols (symbols meant to be initialized at run-time once and never
+modified again) should also be named like constants:
+```c
+/* not `const`, but shouldn't be touched after initialization */
+static u64 SESSION_START_TIME;
+```
+
 defined structs should have their name appear at the bottom, kinda similar to
 typedeffed structs:
 ```c
@@ -152,7 +161,12 @@ extern i32 variable_x_internal;     /* not exposed by the API, internal */
 i32 variable_1 = 0;                 /* exposed by the API, not internal */
 i32 variable_2_internal = 0;        /* not exposed by the API, internal */
 i32 variable_3_internal = 0;        /* declared in source file only, internal */
-static i32 variable_4_internal = 0; /* declared in source file only, internal */
+
+/*
+ *  static variable, shouldn't have `fsl` nor `internal`, static functions
+ *  however should have `internal`.
+ */
+static i32 variable_3 = 0;
 
 i32 function(void)
 {
@@ -164,13 +178,10 @@ i32 function(void)
 }
 ```
 
-that of course applies to functions and function-like macro wrappers:
+that of course applies to functions:
 ```c
 FSLAPI i32 fsl_stringf();
 extern i32 stringf_internal();
-
-#define fsl_mem_arena_pop() \
-    fsl_mem_arena_pop_func()
 ```
 
 and files:
@@ -348,7 +359,7 @@ any scope-specific keywords should come last:
 i32 fsl_mem_arena_push_internal();  /* scope-specific keyword is `internal` */
 ```
 
-any functions meant to be called via a function pointer, typedeffed function
+functions meant to be called via a function pointer, typedeffed function
 signatures and function-like macro wrappers should have the keyword `func` at
 the end:
 ```c
@@ -520,8 +531,9 @@ all comments must be written as block comments (`/* comment */`):
     if (bad) // bad comment
 ```
 
-a "todo" must be written on the same line as a significant (or the relevant)
-piece of code, it shows clearer context when using search tools:
+a `TODO` must be written on the same line as a significant (or the relevant)
+piece of code, it shows clearer context when using search tools, unless the
+comment itself gives good enough context:
 ```c
     if (good) /* TODO: please fix this code */
     {
@@ -674,8 +686,8 @@ than one line:
  *  @param first_parameter description of first_parameter.
  *  @param second_parameter description of second_parameter.
 
- *  @param third_parameter description of third_parameter, this one is quite
- *  long which requires two lines.
+ *  @param third_parameter description of third_parameter, this one is long,
+ *  which requires two lines.
  *
  *  @return return value description.
  */
@@ -686,11 +698,22 @@ internal symbols should be marked as such in the documentation, even if the
 symbol name says it:
 ```c
 /**
- *  @internal
- *
  *  @brief ...
+ *
+ *  @internal
  */
 extern fsl_mem_arena mem_arena_internal;
+```
+
+functions meant to be called via function-like macro wrappers should be
+documented like so:
+```c
+/**
+ *  @brief ...
+ *
+ *  @note called indirectly via a macro-wrapper.
+ */
+FSLAPI void fsl_log_output_func();
 ```
 
 ## 4 file structure

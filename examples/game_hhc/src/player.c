@@ -767,7 +767,7 @@ void player_kill(hhc_player *p)
 
 str *get_death_str(hhc_player *p)
 {
-    u64 index = fsl_rand_u32(fsl_get_time_raw_usec());
+    u64 index = fsl_rand_u32(fsl_time_raw_usec_get());
     index %= DEATH_STRINGS_MAX[p->death];
 
     switch (p->death)

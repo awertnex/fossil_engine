@@ -13,7 +13,7 @@ static void callback_scroll(GLFWwindow *window, double xoffset, double yoffset)
     (void)window;
     (void)xoffset;
 
-    scrool = fsl_clamp_i32(scrool + (i32)yoffset * 4, 0, logger_core.cursor);
+    scrool = fsl_clamp_i32(scrool + (i32)yoffset * 4, 0, fsl_log_core.cursor);
 }
 
 int main(int argc, char **argv)
@@ -77,10 +77,10 @@ page_2:
 
         i32 i = 0;
         u32 index = 0;
-        fsl_log_entry *log_entry = fsl_mem_handle_get(logger_core.buf);
+        fsl_log_entry *log_entry = fsl_mem_handle_get(fsl_log_core.buf);
         for (i = 46; i > 0; --i)
         {
-            index = fsl_mod_i32(logger_core.cursor - i - scrool, FSL_LOGGER_HISTORY_MAX);
+            index = fsl_mod_i32(fsl_log_core.cursor - i - scrool, FSL_LOGGER_HISTORY_MAX);
             fsl_text_push(fsl_stringf("%s\n", log_entry[index].message),
                     MARGIN, render->size.y - MARGIN,
                     0, 0,

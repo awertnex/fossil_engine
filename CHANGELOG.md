@@ -23,6 +23,36 @@ and this project adheres to
 - add 'len' and 'distance' functions to `math/` module.
 
 #### changed
+- change function name `fsl_get_base_name()` to `fsl_base_name_get()`.
+- change function name `fsl_retract_path()` to `fsl_path_retract()`.
+- change function name `fsl_posix_slash()` to `fsl_slash_posix()`.
+- change function name `fsl_normalize_slash()` to `fsl_slash_normalize()`.
+- change function name `fsl_check_slash()` to `fsl_slash_check()`.
+- change function name `fsl_get_path_absolute()` to `fsl_path_absolute_get()`.
+- change function name `fsl_append_file()` to `fsl_file_append()`.
+- change function name `fsl_write_file()` to `fsl_file_write()`.
+- change function name `fsl_copy_dir()` to `fsl_dir_copy()`.
+- change function name `fsl_copy_file()` to `fsl_file_copy()`.
+- change function name `fsl_get_dir_entry_count()` to
+  `fsl_dir_entry_count_get()`.
+- change function name `fsl_get_dir_contents()` to `fsl_dir_contents_get()`.
+- change function name `fsl_get_file_contents()` to `fsl_file_contents_get()`.
+- change function name `fsl_get_file_type()` to `fsl_file_type_get()`.
+- change function name `fsl_change_dir()` to `fsl_dir_change()`.
+- change function name `fsl_make_dir()` to `fsl_dir_make()`.
+- change function name `fsl_is_dir_exists()` to `fsl_dir_is_exists()`.
+- change function name `fsl_is_file_exists()` to `fsl_file_is_exists()`.
+- change function name `fsl_log_output_internal()` to `fsl_log_output_func()`.
+- change symbol `logger_core` to `fsl_log_core`.
+- change function name `fsl_get_time_raw_nsec()` to `fsl_time_raw_nsec_get()`.
+- change function name `fsl_get_time_raw_usec()` to `fsl_time_raw_usec_get()`.
+- change function name `fsl_get_time_nsec()` to `fsl_time_nsec_get()`.
+- change function name `fsl_get_time_nsecf()` to `fsl_time_nsecf_get()`.
+- change function name `fsl_get_time_delta_nsec()` to
+  `fsl_time_delta_nsec_get()`.
+- change function name `fsl_get_time_str()` to `fsl_time_str_get()`.
+- change function name `fsl_limit_framerate()` to `fsl_framerate_limit()`.
+- change function name `fsl_get_path_bin_root()` to `fsl_path_bin_root_get()`.
 - change function name `fsl_process_screenshot_request()` to
   `fsl_screenshot_request_respond()`.
 - change function name `fsl_request_skip_mouse_delta()` to

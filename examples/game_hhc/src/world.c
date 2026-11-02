@@ -71,7 +71,7 @@ u32 world_dir_init(const str *world_name)
         return *GAME_ERR;
     }
 
-    if (fsl_is_dir_exists(FSL_SESSION.bin_root, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_dir_is_exists(FSL_SESSION.bin_root, TRUE) != FSL_ERR_SUCCESS)
     {
         LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
@@ -79,7 +79,7 @@ u32 world_dir_init(const str *world_name)
         return *GAME_ERR;
     }
 
-    if (fsl_is_dir_exists(GAME_DIR_NAME_WORLDS, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_dir_is_exists(GAME_DIR_NAME_WORLDS, TRUE) != FSL_ERR_SUCCESS)
     {
         LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
@@ -88,16 +88,16 @@ u32 world_dir_init(const str *world_name)
     }
 
     snprintf(string, FSL_PATH_CAP, GAME_DIR_NAME_WORLDS"%s", world_name);
-    fsl_check_slash(string);
-    fsl_normalize_slash(string);
+    fsl_slash_check(string);
+    fsl_slash_normalize(string);
 
-    if (fsl_is_dir_exists(string, FALSE) == FSL_ERR_SUCCESS)
+    if (fsl_dir_is_exists(string, FALSE) == FSL_ERR_SUCCESS)
     {
         snprintf(world.path, FSL_PATH_CAP, "%s", string);
         return *GAME_ERR;
     }
 
-    fsl_make_dir(string);
+    fsl_dir_make(string);
     snprintf(world.path, FSL_PATH_CAP, "%s", string);
 
     LOGDEBUG(FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
@@ -106,7 +106,7 @@ u32 world_dir_init(const str *world_name)
     for (i = 0; i < DIR_WORLD_COUNT; ++i)
     {
         snprintf(string, FSL_PATH_CAP, "%s%s", world.path, DIR_WORLD[i]);
-        fsl_make_dir(string);
+        fsl_dir_make(string);
         if (*GAME_ERR != FSL_ERR_SUCCESS && *GAME_ERR != FSL_ERR_DIR_EXISTS)
             return *GAME_ERR;
     }
@@ -132,7 +132,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
         return *GAME_ERR;
     }
 
-    if (fsl_is_dir_exists(FSL_SESSION.bin_root, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_dir_is_exists(FSL_SESSION.bin_root, TRUE) != FSL_ERR_SUCCESS)
     {
         LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
@@ -140,7 +140,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
         return *GAME_ERR;
     }
 
-    if (fsl_is_dir_exists(GAME_DIR_NAME_WORLDS, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_dir_is_exists(GAME_DIR_NAME_WORLDS, TRUE) != FSL_ERR_SUCCESS)
     {
         LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
@@ -149,7 +149,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
     }
 
     snprintf(string[0], FSL_PATH_CAP, GAME_DIR_NAME_WORLDS"%s", world_name);
-    if (fsl_is_dir_exists(string[0], TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_dir_is_exists(string[0], TRUE) != FSL_ERR_SUCCESS)
     {
         LOGERROR(HHC_ERR_WORLD_CREATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE | FSL_FLAG_LOG_CMD,
@@ -171,9 +171,9 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
 
     snprintf(string[0], FSL_PATH_CAP, GAME_DIR_NAME_WORLDS"%s/"GAME_FILE_NAME_WORLD_METADATA,
             world_name);
-    if (fsl_is_file_exists(string[0], FALSE) == FSL_ERR_SUCCESS)
+    if (fsl_file_is_exists(string[0], FALSE) == FSL_ERR_SUCCESS)
     {
-        file_len = fsl_get_file_contents(string[0], (void*)&file_contents, TRUE);
+        file_len = fsl_file_contents_get(string[0], (void*)&file_contents, TRUE);
         if (*GAME_ERR != FSL_ERR_SUCCESS || !file_contents)
             return *GAME_ERR;
         fsl_convert_str_to_u64(file_contents, &seed);
@@ -182,10 +182,10 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
     else
     {
         if (!seed)
-            seed = fsl_rand_u64(fsl_get_time_raw_nsec());
+            seed = fsl_rand_u64(fsl_time_raw_nsec_get());
 
         fsl_convert_u64_to_str(string[1], FSL_ID_CAP, seed);
-        if (fsl_write_file(string[0], strlen(string[1]),
+        if (fsl_file_write(string[0], strlen(string[1]),
                     &string[1], TRUE, TRUE) != FSL_ERR_SUCCESS)
             return *GAME_ERR;
     }
@@ -224,7 +224,7 @@ void world_update(hhc_player *p)
     player_camera_movement_update(p, render->mouse_delta, should_the_mouse_move_the_3d_camera);
 
     if (MODE_INTERNAL_LOAD_CHUNKS &&
-            fsl_is_dir_exists(fsl_stringf("%s"GAME_DIR_WORLD_NAME_CHUNKS,
+            fsl_dir_is_exists(fsl_stringf("%s"GAME_DIR_WORLD_NAME_CHUNKS,
                     world.path), TRUE) == FSL_ERR_SUCCESS)
         chunking_update(p->ch, &p->ch_delta, p->hit);
     player_target_update(p);

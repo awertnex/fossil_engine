@@ -199,10 +199,10 @@ void super_debugger_draw(v2i32 render_size, GLuint fbo)
     fsl_ui_element_draw(&ui_element_sdb[UI_ELEMENT_SDB_PANEL_LOGGER]);
     fsl_text_start(font[FONT_MONO_BOLD], settings.font_size, 0, FALSE);
 
-    log_entry = fsl_mem_handle_get(logger_core.buf);
+    log_entry = fsl_mem_handle_get(fsl_log_core.buf);
     for (i = logger_panel_height / settings.font_size; i > 0; --i)
     {
-        index = fsl_mod_i32(logger_core.cursor - i - logger_scroll_pos, FSL_LOGGER_HISTORY_MAX);
+        index = fsl_mod_i32(fsl_log_core.cursor - i - logger_scroll_pos, FSL_LOGGER_HISTORY_MAX);
         fsl_text_push(fsl_stringf("%s\n", log_entry[index].message),
                 SET_MARGIN * 2, render_size.y - SET_MARGIN * 2,
                 0, 0, render_size.x - SET_MARGIN * 4,
@@ -239,5 +239,5 @@ void super_debugger_gui_scale_set(f32 scale)
 void super_debugger_logger_scroll(i32 delta)
 {
     logger_scroll_pos =
-        fsl_clamp_i32(logger_scroll_pos + delta * SET_CONSOLE_SCROLL_SPEED, 0, logger_core.cursor);
+        fsl_clamp_i32(logger_scroll_pos + delta * SET_CONSOLE_SCROLL_SPEED, 0, fsl_log_core.cursor);
 }
