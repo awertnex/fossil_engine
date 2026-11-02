@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file engine_info.h
  *
  *  @brief engine info, name, version, and some common definitions.
@@ -33,7 +33,7 @@
 #define FSL_ENGINE_VERSION_DEV      "-dev"
 
 #define FSL_ENGINE_VERSION_MAJOR    0
-#define FSL_ENGINE_VERSION_MINOR    17
+#define FSL_ENGINE_VERSION_MINOR    18
 #define FSL_ENGINE_VERSION_PATCH    0
 #define FSL_ENGINE_VERSION_BUILD    FSL_ENGINE_VERSION_BETA
 

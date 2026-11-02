@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +14,11 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file common_values.h
  *
- *  @brief engine's common values, default asset indices and global flag definitions.
+ *  @brief engine's common values, default asset indices and global flag
+ *  definitions.
  */
 
 #ifndef FSL_COMMON_VALUES_H
@@ -25,8 +26,12 @@
 
 enum fsl_flag
 {
-    FSL_FLAG_RELEASE_BUILD =        0x0001, /* output 'TRACE' and 'DEBUG' logs to console */
-    FSL_FLAG_MULTISAMPLE =          0x0002  /* use 'GLFW' multisampling */
+    /*
+     *  output 'TRACE' and 'DEBUG' logs to console.
+     */
+    FSL_FLAG_RELEASE_BUILD =    0x0001,
+
+    FSL_FLAG_MULTISAMPLE =      0x0002  /* use 'GLFW' multisampling */
 }; /* fsl_flag */
 
 #endif /* FSL_COMMON_VALUES_H */

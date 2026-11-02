@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file mesh.c
  *
  *  @brief mesh loading, generating, unloading and mesh file formats.
@@ -23,8 +23,9 @@
 #include "../../common/config.h"
 #include "../../common/diagnostics.h"
 #include "../../common/types.h"
-#include "../assets.h"
+
 #include "../../engine/engine_assets.h"
+#include "../../file_io/file_io.h"
 #include "../../logger/logger.h"
 #include "../../logger/logger_messages_internal.h"
 #include "../../math/math.h"
@@ -33,7 +34,7 @@
 #include "../../shaders/shader_types.h"
 #include "../../string/string_internal.h"
 
-#include "../../h/dir.h"
+#include "../assets.h"
 
 #include "mesh.h"
 #include "mesh_loader_internal.h"
@@ -45,10 +46,10 @@
 
 /* ---- section: signatures ------------------------------------------------- */
 
-/*!
- *  @internal
- *
+/**
  *  @brief get mesh file format based on file name conventions.
+ *
+ *  @internal
  *
  *  examples:
  *      - file name "player.obj" -> mesh format @ref FSL_MESH_FORMAT_OBJ.
@@ -58,18 +59,20 @@
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-static u32 get_mesh_file_format_internal(const str *file, fsl_mesh_format *format);
+static u32 mesh_file_format_get_internal(const str *file, fsl_mesh_format *format);
 
-/*!
+/**
  *  @brief generate vertex arrays and transforms for a mesh and upload to VRAM.
+ *
+ *  @internal
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly on failure.
  */
-static u32 mesh_generate_arrays(fsl_mesh *mesh, fsl_array vertex_buf, fsl_array index_buf);
+static u32 mesh_arrays_generate_internal(fsl_mesh *mesh, fsl_array vertex_buf, fsl_array index_buf);
 
 /* ---- section: implementation --------------------------------------------- */
 
-static u32 get_mesh_file_format_internal(const str *file, fsl_mesh_format *format)
+static u32 mesh_file_format_get_internal(const str *file, fsl_mesh_format *format)
 {
     str base_name[FSL_ID_CAP] = {0};
     str *extension = {0};
@@ -152,7 +155,7 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
 
     snprintf(path_temp, FSL_PATH_CAP, "%s%s", path, file);
     snprintf(file_temp, FSL_ID_CAP, "%s", file);
-    is_cooked = mesh_is_cooked(path_temp);
+    is_cooked = mesh_is_cooked_internal(path_temp);
     if (is_cooked)
     {
         extension = strrchr(file_temp, '.');
@@ -170,7 +173,7 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
         }
     }
 
-    if (!is_cooked && fsl_is_file_exists(path_temp, FALSE) != FSL_ERR_SUCCESS)
+    if (!is_cooked && fsl_file_is_exists(path_temp, FALSE) != FSL_ERR_SUCCESS)
     {
         snprintf(path_temp, FSL_PATH_CAP, "%s%s", path, file);
         LOGERROR(FSL_ERR_MESH_LOAD_FAIL,
@@ -181,7 +184,7 @@ u32 fsl_mesh_load(fsl_mesh *mesh,
 
 fallback:
 
-    if (get_mesh_file_format_internal(file_temp, &format) != FSL_ERR_SUCCESS)
+    if (mesh_file_format_get_internal(file_temp, &format) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     switch(format)
@@ -218,15 +221,15 @@ fallback:
             return fsl_err;
     }
 
-    if (fsl_asset_set_metadata(&mesh_temp.asset, FSL_ASSET_MESH, name, name_id, file, path) != FSL_ERR_SUCCESS)
+    if (fsl_asset_metadata_set(&mesh_temp.asset, FSL_ASSET_MESH, name, name_id, file, path) != FSL_ERR_SUCCESS)
     {
         LOGERROR(FSL_ERR_MESH_GENERATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Load Mesh", name_id, "`fsl_asset_set_metadata()` Failed"));
+                MSG_ACTION_SUBJECT_REASON_ERROR("Load Mesh", name_id, "`fsl_asset_metadata_set()` Failed"));
         goto cleanup;
     }
 
-    if (mesh_generate_arrays(&mesh_temp, vertex_buf, index_buf) != FSL_ERR_SUCCESS)
+    if (mesh_arrays_generate_internal(&mesh_temp, vertex_buf, index_buf) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     snprintf(path_temp, FSL_PATH_CAP, "%s%s", path, file);
@@ -237,7 +240,7 @@ fallback:
         snprintf(extension, strlen(FSL_FILE_FORMAT_NAME_FOSSIL_MESH) + 1, "%s",
                 FSL_FILE_FORMAT_NAME_FOSSIL_MESH);
     }
-    if (fsl_is_file_exists(path_temp, FALSE) != FSL_ERR_SUCCESS &&
+    if (fsl_file_is_exists(path_temp, FALSE) != FSL_ERR_SUCCESS &&
             mesh_export_fmesh_internal(path_temp, vertex_buf, index_buf) != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -376,15 +379,15 @@ u32 fsl_mesh_generate(fsl_mesh *mesh,
         goto cleanup;
     }
 
-    if (fsl_asset_set_metadata(&mesh->asset, FSL_ASSET_MESH, name, name_id, file, path) != FSL_ERR_SUCCESS)
+    if (fsl_asset_metadata_set(&mesh->asset, FSL_ASSET_MESH, name, name_id, file, path) != FSL_ERR_SUCCESS)
     {
         LOGERROR(FSL_ERR_MESH_GENERATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Generate Mesh", name_id, "`fsl_asset_set_metadata()` Failed"));
+                MSG_ACTION_SUBJECT_REASON_ERROR("Generate Mesh", name_id, "`fsl_asset_metadata_set()` Failed"));
         goto cleanup;
     }
 
-    metadata = fsl_asset_get_metadata(mesh->asset);
+    metadata = fsl_asset_metadata_get(mesh->asset);
 
     /* ---- bind mesh ------------------------------------------------------- */
 
@@ -414,20 +417,20 @@ cleanup:
     return fsl_err;
 }
 
-static u32 mesh_generate_arrays(fsl_mesh *mesh, fsl_array vertex_buf, fsl_array index_buf)
+static u32 mesh_arrays_generate_internal(fsl_mesh *mesh, fsl_array vertex_buf, fsl_array index_buf)
 {
     u64 stride_vertex = 2 * sizeof(v3f32) + sizeof(v2f32);
     u64 stride_instance = sizeof(m4f32);
     fsl_asset_metadata metadata = {0};
     i32 i = 0;
 
-    metadata = fsl_asset_get_metadata(mesh->asset);
+    metadata = fsl_asset_metadata_get(mesh->asset);
 
     if (
             fsl_mem_arena_push(&mem_arena_sub_data_internal, &mesh->vertex_buf.buf, vertex_buf.cursor,
-                stringf_internal("mesh_generate_arrays().%s", metadata.name_id)) != FSL_ERR_SUCCESS ||
+                stringf_internal("mesh_arrays_generate_internal().%s", metadata.name_id)) != FSL_ERR_SUCCESS ||
             fsl_mem_arena_push(&mem_arena_sub_data_internal, &mesh->transform_buf.buf, stride_instance,
-                stringf_internal("mesh_generate_arrays().%s", metadata.name_id)) != FSL_ERR_SUCCESS)
+                stringf_internal("mesh_arrays_generate_internal().%s", metadata.name_id)) != FSL_ERR_SUCCESS)
     {
         LOGERROR(FSL_ERR_MESH_GENERATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
@@ -437,7 +440,7 @@ static u32 mesh_generate_arrays(fsl_mesh *mesh, fsl_array vertex_buf, fsl_array 
 
     if (index_buf.cursor &&
             fsl_mem_arena_push(&mem_arena_sub_data_internal, &mesh->index_buf.buf, index_buf.cursor,
-                stringf_internal("mesh_generate_arrays().%s", metadata.name_id)) != FSL_ERR_SUCCESS)
+                stringf_internal("mesh_arrays_generate_internal().%s", metadata.name_id)) != FSL_ERR_SUCCESS)
     {
         LOGERROR(FSL_ERR_MESH_GENERATION_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,

@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file mesh_loader_obj.c
  *
  *  @brief Wavefront OBJ (.obj) mesh file parsing and loading.
@@ -23,6 +23,7 @@
 #include "../../common/diagnostics.h"
 #include "../../common/limits.h"
 #include "../../common/types.h"
+
 #include "../../logger/logger.h"
 #include "../../logger/logger_messages_internal.h"
 #include "../../math/math.h"
@@ -62,13 +63,13 @@ struct triangle_indices
     u32 prev;
 }; /* triangle_indices */
 
-/*!
- *  @internal
- *
+/**
  *  @brief extract vertex index data from face vertex string (e.g., "f 1/2/4", "f v1/vt2/vn4").
  *
- *  support negative indices, unspecified indices, tagged indices (e.g., "f v1/vt1/vn1")
- *  and space-separated indices (e.g., "f 1 2 3").
+ *  @internal
+ *
+ *  supports negative indices, unspecified indices, tagged indices
+ *  (e.g., "f v1/vt1/vn1") and space-separated indices. (e.g., "f 1 2 3")
  *
  *  @param pos_len number of elements in the raw vertex positions buffer.
  *  @param uv_len number of elements in the raw vertex UVs buffer.
@@ -76,7 +77,7 @@ struct triangle_indices
  *
  *  @remark result indices are 1-based so to separate 0 (first index) from 0 (no index).
  */
-static void get_vertex_indices_internal(str *token, struct vertex_indices *vertex,
+static void vertex_indices_get_internal(str *token, struct vertex_indices *vertex,
         fsl_len pos_len, fsl_len uv_len, fsl_len normal_len);
 
 u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *index_dst)
@@ -127,8 +128,8 @@ u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_a
     while (fgets(line_buf, FSL_STRING_MAX, file) != NULL)
     {
         line = line_buf;
-        fsl_strip_non_printable(line_buf);
-        fsl_skip_spaces(&line);
+        fsl_non_printable_strip(line_buf);
+        fsl_whitespace_skip(&line);
         if (!line[0] || line[0] == '#')
             continue;
 
@@ -139,17 +140,17 @@ u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_a
             if (!token[1])
             {
                 token = strtok_r(NULL, delim, &token_save[0]);
-                fsl_convert_str_to_f32(token, &vertex.pos.x);
+                fsl_str_to_f32(token, &vertex.pos.x);
 
                 token = strtok_r(NULL, delim, &token_save[0]);
-                fsl_convert_str_to_f32(token, &vertex.pos.y);
+                fsl_str_to_f32(token, &vertex.pos.y);
 
                 token = strtok_r(NULL, delim, &token_save[0]);
-                fsl_convert_str_to_f32(token, &vertex.pos.z);
+                fsl_str_to_f32(token, &vertex.pos.z);
 
                 token = strtok_r(NULL, delim, &token_save[0]);
                 if (token)
-                    fsl_convert_str_to_f32(token, &vertex_w);
+                    fsl_str_to_f32(token, &vertex_w);
                 else
                     vertex_w = 1.0;
 
@@ -165,11 +166,11 @@ u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_a
             else if (token[1] == 't' && !token[2])
             {
                 token = strtok_r(NULL, delim, &token_save[0]);
-                fsl_convert_str_to_f32(token, &vertex.uv.x);
+                fsl_str_to_f32(token, &vertex.uv.x);
 
                 token = strtok_r(NULL, delim, &token_save[0]);
                 if (token)
-                    fsl_convert_str_to_f32(token, &vertex.uv.y);
+                    fsl_str_to_f32(token, &vertex.uv.y);
                 else
                     vertex.uv.y = 0.0;
 
@@ -178,13 +179,13 @@ u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_a
             else if (token[1] == 'n' && !token[2])
             {
                 token = strtok_r(NULL, delim, &token_save[0]);
-                fsl_convert_str_to_f32(token, &vertex.normal.x);
+                fsl_str_to_f32(token, &vertex.normal.x);
 
                 token = strtok_r(NULL, delim, &token_save[0]);
-                fsl_convert_str_to_f32(token, &vertex.normal.y);
+                fsl_str_to_f32(token, &vertex.normal.y);
 
                 token = strtok_r(NULL, delim, &token_save[0]);
-                fsl_convert_str_to_f32(token, &vertex.normal.z);
+                fsl_str_to_f32(token, &vertex.normal.z);
 
                 fsl_mem_array_push(&normal_buf, &vertex.normal, sizeof(v3f32));
             }
@@ -197,7 +198,7 @@ u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_a
             i = 0;
             while ((token = strtok_r(NULL, delim, &token_save[0])) != NULL)
             {
-                get_vertex_indices_internal(token, &vertex_indices,
+                vertex_indices_get_internal(token, &vertex_indices,
                         vertex_buf.cursor / sizeof(v3f32),
                         uv_buf.cursor / sizeof(v2f32),
                         normal_buf.cursor / sizeof(v3f32));
@@ -269,7 +270,7 @@ cleanup:
     return fsl_err;
 }
 
-static void get_vertex_indices_internal(str *token, struct vertex_indices *vertex,
+static void vertex_indices_get_internal(str *token, struct vertex_indices *vertex,
         fsl_len pos_len, fsl_len uv_len, fsl_len normal_len)
 {
     str *p = token;
@@ -304,7 +305,7 @@ static void get_vertex_indices_internal(str *token, struct vertex_indices *verte
                 while (*p && fsl_is_digit(*p))
                     temp[j++] = *p++;
                 temp[j] = 0;
-                fsl_convert_str_to_i64(temp, &index[i]);
+                fsl_str_to_i64(temp, &index[i]);
                 index[i] *= sign;
                 if (len[i] && index[i] != (i64)len[i])
                     index[i] = fsl_mod_i64(index[i], len[i]);

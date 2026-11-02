@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file mesh_loader_fmesh.c
  *
  *  @brief engine's mesh format 'Fossil Mesh' (.fmesh) file parsing and loading.
@@ -24,12 +24,12 @@
 #include "../../common/diagnostics.h"
 #include "../../common/limits.h"
 #include "../../common/types.h"
+
+#include "../../file_io/file_io.h"
 #include "../../logger/logger.h"
 #include "../../logger/logger_messages_internal.h"
 #include "../../memory/memory.h"
 #include "../../string/string.h"
-
-#include "../../h/dir.h"
 
 #include "../asset_types.h"
 
@@ -38,7 +38,7 @@
 #include <stdio.h>
 #include <string.h>
 
-b8 mesh_is_cooked(const fsl_fs_path *path)
+b8 mesh_is_cooked_internal(const fsl_fs_path *path)
 {
     fsl_fs_path path_temp[FSL_PATH_CAP] = {0};
     str *extension = NULL;
@@ -51,7 +51,7 @@ b8 mesh_is_cooked(const fsl_fs_path *path)
         snprintf(extension, strlen(FSL_FILE_FORMAT_NAME_FOSSIL_MESH) + 1, "%s", FSL_FILE_FORMAT_NAME_FOSSIL_MESH);
     }
 
-    if (fsl_is_file_exists(path_temp, FALSE) == FSL_ERR_SUCCESS)
+    if (fsl_file_is_exists(path_temp, FALSE) == FSL_ERR_SUCCESS)
         return TRUE;
     return FALSE;
 }
@@ -174,4 +174,3 @@ u32 mesh_export_fmesh_internal(const fsl_fs_path *path, fsl_array vertex_buf, fs
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
-

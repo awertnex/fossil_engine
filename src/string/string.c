@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file string.c
  *
  *  @brief string parsing, token searching.
@@ -22,6 +22,7 @@
 
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
+
 #include "../logger/logger.h"
 #include "../logger/logger_messages_internal.h"
 #include "../memory/memory.h"
@@ -33,15 +34,15 @@
 #include <string.h>
 #include <stdarg.h>
 
-void fsl_swap_strings(str *s1, str *s2)
+void fsl_string_swap(str *s1, str *s2)
 {
     u16 len = (strlen(s1) > strlen(s2)) ? strlen(s1) : strlen(s2);
     u16 i = 0;
     for (; i <= len; ++i)
-        fsl_swap_bits(&s1[i], &s2[i]);
+        fsl_bits_swap(&s1[i], &s2[i]);
 }
 
-void fsl_swap_string_char(str *string, char c1, char c2)
+void fsl_string_swap_char(str *string, char c1, char c2)
 {
     u64 i, len = strlen(string);
     if (!len) return;
@@ -99,13 +100,13 @@ str *stringf_internal(const str *format, ...)
     return string;
 }
 
-void fsl_skip_spaces(str **string)
+void fsl_whitespace_skip(str **string)
 {
     while (**string == ' ' || **string == '\t' || **string == '\r')
         ++*string;
 }
 
-void fsl_strip_non_printable(str *string)
+void fsl_non_printable_strip(str *string)
 {
     u64 i = 0;
     u64 j = 0;
@@ -123,7 +124,7 @@ void fsl_strip_non_printable(str *string)
         string[j] = 0;
 }
 
-u64 fsl_find_token(str *arg, int argc, char **argv)
+u64 fsl_token_find(str *arg, int argc, char **argv)
 {
     u32 i = 0;
     for (; (int)i < argc; ++i)
@@ -137,12 +138,12 @@ b8 fsl_is_digit(char n)
     return n >= '0' && n <= '9' ? TRUE : FALSE;
 }
 
-i32 fsl_convert_char_to_int(char n)
+i32 fsl_char_to_int(char n)
 {
     return (i32)n - '0';
 }
 
-u32 fsl_convert_str_to_u32(const str *n, u32 *dst)
+u32 fsl_str_to_u32(const str *n, u32 *dst)
 {
     i32 i = 0;
     i32 len = strlen(n);
@@ -158,7 +159,7 @@ u32 fsl_convert_str_to_u32(const str *n, u32 *dst)
     for (; i < len; ++i)
     {
         if (fsl_is_digit(n[i]))
-            result = result * 10 + fsl_convert_char_to_int(n[i]);
+            result = result * 10 + fsl_char_to_int(n[i]);
         else break;
     }
 
@@ -171,7 +172,7 @@ u32 fsl_convert_str_to_u32(const str *n, u32 *dst)
     return fsl_err;
 }
 
-u32 fsl_convert_str_to_u64(const str *n, u64 *dst)
+u32 fsl_str_to_u64(const str *n, u64 *dst)
 {
     i32 i = 0;
     i32 len = strlen(n);
@@ -187,7 +188,7 @@ u32 fsl_convert_str_to_u64(const str *n, u64 *dst)
     for (; i < len; ++i)
     {
         if (fsl_is_digit(n[i]))
-            result = result * 10 + fsl_convert_char_to_int(n[i]);
+            result = result * 10 + fsl_char_to_int(n[i]);
         else break;
     }
 
@@ -200,7 +201,7 @@ u32 fsl_convert_str_to_u64(const str *n, u64 *dst)
     return fsl_err;
 }
 
-u32 fsl_convert_str_to_i64(const str *n, i64 *dst)
+u32 fsl_str_to_i64(const str *n, i64 *dst)
 {
     i32 i = 0;
     i32 len = strlen(n);
@@ -216,7 +217,7 @@ u32 fsl_convert_str_to_i64(const str *n, i64 *dst)
     for (; i < len; ++i)
     {
         if (fsl_is_digit(n[i]))
-            result = result * 10 + fsl_convert_char_to_int(n[i]);
+            result = result * 10 + fsl_char_to_int(n[i]);
         else break;
     }
 
@@ -229,7 +230,7 @@ u32 fsl_convert_str_to_i64(const str *n, i64 *dst)
     return fsl_err;
 }
 
-u32 fsl_convert_str_to_f32(const str *n, f32 *dst)
+u32 fsl_str_to_f32(const str *n, f32 *dst)
 {
     i32 i = 0;
     i32 len = strlen(n);
@@ -253,7 +254,7 @@ u32 fsl_convert_str_to_f32(const str *n, f32 *dst)
         }
 
         if (fsl_is_digit(n[i]))
-            result = result * 10.0 + fsl_convert_char_to_int(n[i]);
+            result = result * 10.0 + fsl_char_to_int(n[i]);
 
         if (is_decimal)
             divisor *= 10.0;
@@ -269,7 +270,7 @@ u32 fsl_convert_str_to_f32(const str *n, f32 *dst)
     return fsl_err;
 }
 
-u32 fsl_convert_str_to_f64(const str *n, f64 *dst)
+u32 fsl_str_to_f64(const str *n, f64 *dst)
 {
     i32 i = 0;
     i32 len = strlen(n);
@@ -293,7 +294,7 @@ u32 fsl_convert_str_to_f64(const str *n, f64 *dst)
         }
 
         if (fsl_is_digit(n[i]))
-            result = result * 10.0 + fsl_convert_char_to_int(n[i]);
+            result = result * 10.0 + fsl_char_to_int(n[i]);
 
         if (is_decimal)
             divisor *= 10.0;
@@ -309,7 +310,7 @@ u32 fsl_convert_str_to_f64(const str *n, f64 *dst)
     return fsl_err;
 }
 
-u32 fsl_convert_i32_to_str(str *dst, i32 size, i32 n)
+u32 fsl_i32_to_str(str *dst, i32 size, i32 n)
 {
     i32 i = 1, j = 0, len = 0, sign = n;
 
@@ -346,13 +347,13 @@ u32 fsl_convert_i32_to_str(str *dst, i32 size, i32 n)
     dst[i] = '\0';
 
     for (j = i - 1, i = 0; i < j; i++, j--)
-        fsl_swap_bits(&dst[i], &dst[j]);
+        fsl_bits_swap(&dst[i], &dst[j]);
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
 
-u32 fsl_convert_u64_to_str(str *dst, u64 size, u64 n)
+u32 fsl_u64_to_str(str *dst, u64 size, u64 n)
 {
     u64 i = 1, j = 0, len = 0;
 
@@ -385,7 +386,7 @@ u32 fsl_convert_u64_to_str(str *dst, u64 size, u64 n)
     dst[i] = '\0';
 
     for (j = i - 1, i = 0; i < j; i++, j--)
-        fsl_swap_bits(&dst[i], &dst[j]);
+        fsl_bits_swap(&dst[i], &dst[j]);
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;

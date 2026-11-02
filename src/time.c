@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file time.h
  *
  *  @brief get time, limit framerate, set timer and get time window.
@@ -22,6 +22,7 @@
 
 #include "common/config.h"
 #include "common/limits.h"
+
 #include "math/math.h"
 
 #include "h/time.h"
@@ -34,21 +35,21 @@
 
 #else
 
-u64 fsl_get_time_raw_nsec(void)
+u64 fsl_time_raw_nsec_get(void)
 {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     return (u64)(ts.tv_sec * FSL_SEC2NSEC + ts.tv_nsec);
 }
 
-u64 fsl_get_time_raw_usec(void)
+u64 fsl_time_raw_usec_get(void)
 {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     return (u64)(ts.tv_sec * FSL_SEC2USEC + ts.tv_nsec * FSL_MSEC2SEC);
 }
 
-u64 fsl_get_time_nsec(void)
+u64 fsl_time_nsec_get(void)
 {
     static u64 t = 0;
     struct timespec ts;
@@ -57,7 +58,7 @@ u64 fsl_get_time_nsec(void)
     return (u64)(ts.tv_sec * FSL_SEC2NSEC + ts.tv_nsec) - t;
 }
 
-f64 fsl_get_time_nsecf(void)
+f64 fsl_time_nsecf_get(void)
 {
     static u64 t = 0;
     struct timespec ts;
@@ -66,7 +67,7 @@ f64 fsl_get_time_nsecf(void)
     return (f64)(ts.tv_sec - t) + (f64)ts.tv_nsec * FSL_NSEC2SEC;
 }
 
-u64 fsl_get_time_delta_nsec(void)
+u64 fsl_time_delta_nsec_get(void)
 {
     static u64 curr = 0;
     static u64 last = 0;
@@ -80,7 +81,7 @@ u64 fsl_get_time_delta_nsec(void)
     return delta;
 }
 
-void fsl_get_time_str(str *dst, const str *format)
+void fsl_time_str_get(str *dst, const str *format)
 {
     struct timespec ts;
     struct tm *time_metadata = {0};
@@ -129,7 +130,7 @@ b8 fsl_on_time_interval(u64 *t, u64 interval, u64 curr)
     return TRUE;
 }
 
-void fsl_limit_framerate(u64 target_fps, u64 curr)
+void fsl_framerate_limit(u64 target_fps, u64 curr)
 {
     static u64 t = 0;
 

@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file engine_assets.h
  *
  *  @brief loading and unloading engine's default assets.
@@ -25,6 +25,7 @@
 
 #include "../common/api.h"
 #include "../common/types.h"
+
 #include "../assets/mesh/mesh.h"
 #include "../memory/memory_types.h"
 
@@ -66,55 +67,60 @@ enum fsl_mesh_index
 
 /* ---- section: declarations ----------------------------------------------- */
 
-/*!
+/**
  *  @brief engine's default textures.
  *
- *  @remark read-only, declared and initialized internally in @ref fsl_engine_assets_init().
+ *  @remark read-only, declared and initialized internally in
+ *  @ref engine_assets_init_internal().
  */
 FSLAPI extern fsl_mem_handle fsl_texture_buf;
 
-/*!
+/**
  *  @brief engine's default shaders.
  *
- *  @remark read-only, declared and initialized internally in @ref fsl_engine_assets_init().
+ *  @remark read-only, declared and initialized internally in
+ *  @ref engine_assets_init_internal().
  */
 FSLAPI extern fsl_mem_handle fsl_shader_buf;
 
-/*!
+/**
  *  @brief engine's default fonts.
  *
- *  @remark read-only, declared and initialized internally in @ref fsl_engine_assets_init().
+ *  @remark read-only, declared and initialized internally in
+ *  @ref engine_assets_init_internal().
  */
 FSLAPI extern fsl_mem_handle fsl_font_buf;
 
-/*!
+/**
  *  @brief engine's default meshes.
  *
- *  @remark read-only, declared and initialized internally in @ref fsl_engine_assets_init().
+ *  @remark read-only, declared and initialized internally in
+ *  @ref engine_assets_init_internal().
  */
 FSLAPI extern fsl_mem_handle fsl_mesh_buf;
 
-/*!
+/**
  *  @brief engine's default unit quad, with texture coordinates.
  *
- *  @remark read-only, declared and initialized internally in @ref fsl_engine_assets_init().
+ *  @remark read-only, declared and initialized internally in
+ *  @ref engine_assets_init_internal().
  */
 FSLAPI extern fsl_mesh fsl_mesh_unit_quad;
 
 /* ---- section: signatures ------------------------------------------------- */
 
-/*!
+/**
  *  @brief initialize engine's internal assets.
  *
  *  @remark called automatically from @ref fsl_engine_init().
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 fsl_engine_assets_init(void);
+u32 engine_assets_init_internal(void);
 
-/*!
+/**
  *  @brief free all engine's internal assets.
  */
-void fsl_assets_free(void);
+void engine_assets_free_internal(void);
 
 #endif /* FSL_ENGINE_ASSETS_H */

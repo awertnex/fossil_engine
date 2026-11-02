@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +14,18 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file logger_messages_internal.h
  *
  *  @brief engine's standardized logger messages and log message conventions.
+ *
+ *  @internal
  */
 
-/*!
+#ifndef FSL_LOGGER_MESSAGE_H
+#define FSL_LOGGER_MESSAGE_H
+
+/**
  *  LOG MESSAGE CONVENTIONS:
  *      - action:   string, infinitive verb (e.g., "Open File", not "Opened File").
  *      - subject:  string, subject name (e.g., "door.png", not "Texture").
@@ -46,9 +51,6 @@
  *            it is not immediately clear what the last two fields represent, hence
  *            the identifiers inside the brackets.
  */
-
-#ifndef FSL_LOGGER_MESSAGE_H
-#define FSL_LOGGER_MESSAGE_H
 
 #include <stdio.h>
 #include <inttypes.h>
@@ -89,7 +91,7 @@
 #define MSG_DIR_COPY(name_in, name_out)                     fsl_logger_stringf("Directory Copied '%s' -> '%s'\n", name_in, name_out)
 #define MSG_DIR_PERMISSION_COPY_FAIL(name_in, name_out)     fsl_logger_stringf("Failed to Copy Directory Permissions '%s' -> '%s', `fsl_stat()` Failed\n", name_in, name_out)
 #define MSG_PATH_TOO_LONG_FATAL(action, name)               fsl_logger_stringf("Failed to %s, Path Too Long '%s', Process Aborted\n", action, name)
-#define MSG_GET_BASE_NAME_FAIL(name, reason)                fsl_logger_stringf("Failed to Get Base Name '%s', %s\n", name, reason)
+#define MSG_BASE_NAME_GET_FAIL(name, reason)                fsl_logger_stringf("Failed to Get Base Name '%s', %s\n", name, reason)
 
 /* ---- section: memory ----------------------------------------------------- */
 

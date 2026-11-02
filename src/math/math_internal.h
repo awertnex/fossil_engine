@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +14,12 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file math_internal.h
  *
  *  @brief initializing math stuff.
+ *
+ *  @internal
  */
 
 #ifndef FSL_MATH_INTERNAL_H
@@ -25,19 +27,19 @@
 
 #include "../common/types.h"
 
-/*!
- *  @internal
- *
+/**
  *  @brief initialize and allocate resources for @ref fsl_rand_tab.
  *
- *  allocate resources for @ref fsl_rand_tab and load its look-up from disk if found
- *  and build if not found.
+ *  @internal
+ *
+ *  allocates resources for @ref fsl_rand_tab and loads its look-up from disk if
+ *  found and builds if not.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 u32 noise_init_internal(void);
 
-/*!
+/**
  *  @internal
  */
 void noise_free_internal(void);

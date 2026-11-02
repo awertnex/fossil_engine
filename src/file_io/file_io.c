@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,20 +14,22 @@
  *  limitations under the License.
  */
 
-/*!
- *  @file dir.c
+/**
+ *  @file file_io.c
  *
  *  @brief directory and file parsing, writing, copying and path resolution.
  */
 
-#include "common/diagnostics.h"
-#include "common/limits.h"
-#include "logger/logger.h"
-#include "logger/logger_messages_internal.h"
-#include "memory/memory.h"
+#include "../common/diagnostics.h"
+#include "../common/limits.h"
 
-#include "h/dir.h"
-#include "h/process.h"
+#include "../logger/logger.h"
+#include "../logger/logger_messages_internal.h"
+#include "../memory/memory.h"
+
+#include "../h/process.h"
+
+#include "file_io.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -41,7 +43,7 @@ u32 fsl_is_file(const fsl_fs_path *path)
 {
     struct stat stats = {0};
 
-    if (fsl_is_file_exists(path, FALSE) != FSL_ERR_SUCCESS)
+    if (fsl_file_is_exists(path, FALSE) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     if (fsl_stat(path, &stats) == 0)
@@ -57,7 +59,7 @@ u32 fsl_is_file(const fsl_fs_path *path)
     return fsl_err;
 }
 
-u32 fsl_is_file_exists(const fsl_fs_path *path, b8 log)
+u32 fsl_file_is_exists(const fsl_fs_path *path, b8 log)
 {
     struct stat stats = {0};
 
@@ -90,7 +92,7 @@ u32 fsl_is_dir(const fsl_fs_path *path)
 {
     struct stat stats = {0};
 
-    if (fsl_is_dir_exists(path, FALSE) != FSL_ERR_SUCCESS)
+    if (fsl_dir_is_exists(path, FALSE) != FSL_ERR_SUCCESS)
         return fsl_err;
     if (fsl_stat(path, &stats) == 0)
     {
@@ -104,7 +106,7 @@ u32 fsl_is_dir(const fsl_fs_path *path)
     return fsl_err;
 }
 
-u32 fsl_is_dir_exists(const fsl_fs_path *path, b8 log)
+u32 fsl_dir_is_exists(const fsl_fs_path *path, b8 log)
 {
     struct stat stats = {0};
 
@@ -133,7 +135,7 @@ u32 fsl_is_dir_exists(const fsl_fs_path *path, b8 log)
     return fsl_err;
 }
 
-u32 fsl_make_dir(const fsl_fs_path *path)
+u32 fsl_dir_make(const fsl_fs_path *path)
 {
     if (fsl_mkdir(path) == 0)
     {
@@ -158,7 +160,7 @@ u32 fsl_make_dir(const fsl_fs_path *path)
     return fsl_err;
 }
 
-int fsl_change_dir(const fsl_fs_path *path)
+int fsl_dir_change(const fsl_fs_path *path)
 {
     int success = 0;
     success = fsl_chdir(path);
@@ -167,7 +169,7 @@ int fsl_change_dir(const fsl_fs_path *path)
     return success;
 }
 
-u32 fsl_get_file_type(const fsl_fs_path *path, u32 *type)
+u32 fsl_file_type_get(const fsl_fs_path *path, u32 *type)
 {
     struct stat stats = {0};
 
@@ -194,13 +196,13 @@ u32 fsl_get_file_type(const fsl_fs_path *path, u32 *type)
     return fsl_err;
 }
 
-u64 fsl_get_file_contents(const fsl_fs_path *path, void **dst, b8 terminate)
+u64 fsl_file_contents_get(const fsl_fs_path *path, void **dst, b8 terminate)
 {
     FILE *file = NULL;
     u64 cursor = 0;
     u64 len = 0;
 
-    if (fsl_is_file_exists(path, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_file_is_exists(path, TRUE) != FSL_ERR_SUCCESS)
             return 0;
 
     if ((file = fopen(path, "rb")) == NULL)
@@ -215,7 +217,7 @@ u64 fsl_get_file_contents(const fsl_fs_path *path, void **dst, b8 terminate)
     fseek(file, 0, SEEK_SET);
 
     if (fsl_mem_alloc(dst, len + (terminate ? 1 : 0),
-                "fsl_get_file_contents().dst") != FSL_ERR_SUCCESS)
+                "fsl_file_contents_get().dst") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     cursor = fread(*dst, 1, len, file);
@@ -236,7 +238,7 @@ cleanup:
     return 0;
 }
 
-fsl_buf fsl_get_dir_contents(const fsl_fs_path *path)
+fsl_buf fsl_dir_contents_get(const fsl_fs_path *path)
 {
     fsl_buf nobuf = {0};
 
@@ -254,10 +256,10 @@ fsl_buf fsl_get_dir_contents(const fsl_fs_path *path)
         return nobuf;
     }
 
-    if (fsl_is_dir_exists(path, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_dir_is_exists(path, TRUE) != FSL_ERR_SUCCESS)
         return nobuf;
 
-    if (fsl_get_path_absolute(path, &dir_name_absolute) != FSL_ERR_SUCCESS)
+    if (fsl_path_absolute_get(path, &dir_name_absolute) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     snprintf(dir_name_absolute_usable, FSL_PATH_CAP, "%s", dir_name_absolute);
@@ -280,15 +282,15 @@ fsl_buf fsl_get_dir_contents(const fsl_fs_path *path)
         closedir(dir);
         if (dir_name_absolute)
             fsl_mem_free((void*)&dir_name_absolute, strlen(dir_name_absolute),
-                    "fsl_get_dir_contents().dir_name_absolute");
-        fsl_mem_free_buf(&contents, "fsl_get_dir_contents().contents");
+                    "fsl_dir_contents_get().dir_name_absolute");
+        fsl_mem_free_buf(&contents, "fsl_dir_contents_get().contents");
 
         fsl_err = FSL_ERR_DIR_EMPTY;
         return nobuf;
     }
 
     if (fsl_mem_alloc_buf(&contents, contents.memb,
-                FSL_ID_CAP, "fsl_get_dir_contents().contents") != FSL_ERR_SUCCESS)
+                FSL_ID_CAP, "fsl_dir_contents_get().contents") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     rewinddir(dir);
@@ -304,13 +306,13 @@ fsl_buf fsl_get_dir_contents(const fsl_fs_path *path)
         snprintf(entry_name_full, FSL_PATH_CAP, "%s%s", dir_name_absolute_usable, entry->d_name);
 
         if (fsl_is_dir(entry_name_full) == FSL_ERR_SUCCESS)
-            fsl_check_slash(contents.i[i]);
+            fsl_slash_check(contents.i[i]);
         ++i;
     }
 
     closedir(dir);
     fsl_mem_free((void*)&dir_name_absolute, strlen(dir_name_absolute),
-            "fsl_get_dir_contents().dir_name_absolute");
+            "fsl_dir_contents_get().dir_name_absolute");
 
     fsl_err = FSL_ERR_SUCCESS;
     return contents;
@@ -322,12 +324,12 @@ cleanup:
 
     if (dir_name_absolute)
         fsl_mem_free((void*)&dir_name_absolute, strlen(dir_name_absolute),
-                "fsl_get_dir_contents().dir_name_absolute");
-    fsl_mem_free_buf(&contents, "fsl_get_dir_contents().contents");
+                "fsl_dir_contents_get().dir_name_absolute");
+    fsl_mem_free_buf(&contents, "fsl_dir_contents_get().contents");
     return nobuf;
 }
 
-u64 fsl_get_dir_entry_count(const fsl_fs_path *path)
+u64 fsl_dir_entry_count_get(const fsl_fs_path *path)
 {
     DIR *dir = NULL;
     u64 count = 0;
@@ -339,7 +341,7 @@ u64 fsl_get_dir_entry_count(const fsl_fs_path *path)
         return 0;
     }
 
-    if (fsl_is_dir_exists(path, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_dir_is_exists(path, TRUE) != FSL_ERR_SUCCESS)
         return 0;
 
     dir = opendir(path);
@@ -361,7 +363,7 @@ u64 fsl_get_dir_entry_count(const fsl_fs_path *path)
     return count;
 }
 
-u32 fsl_copy_file(const fsl_fs_path *src, const fsl_fs_path *dst)
+u32 fsl_file_copy(const fsl_fs_path *src, const fsl_fs_path *dst)
 {
     str str_dst[FSL_PATH_CAP] = {0};
     str str_lnk[FSL_PATH_CAP] = {0}; /* if is symlink, store symlink's link in this buffer */
@@ -372,19 +374,19 @@ u32 fsl_copy_file(const fsl_fs_path *src, const fsl_fs_path *dst)
     struct stat stats = {0};
     struct timespec ts[2] = {0};
 
-    if (fsl_is_file_exists(src, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_file_is_exists(src, TRUE) != FSL_ERR_SUCCESS)
             return fsl_err;
 
     snprintf(str_dst, FSL_PATH_CAP, "%s", dst);
 
     if (fsl_is_dir(dst) == FSL_ERR_SUCCESS)
     {
-        fsl_check_slash(str_dst);
-        fsl_get_base_name(src, str_dst + strlen(str_dst), FSL_PATH_CAP);
-        fsl_posix_slash(str_dst);
+        fsl_slash_check(str_dst);
+        fsl_base_name_get(src, str_dst + strlen(str_dst), FSL_PATH_CAP);
+        fsl_slash_posix(str_dst);
     }
 
-    if (fsl_get_file_type(src, &file_type) != FSL_ERR_SUCCESS)
+    if (fsl_file_type_get(src, &file_type) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     switch (file_type)
@@ -397,7 +399,7 @@ u32 fsl_copy_file(const fsl_fs_path *src, const fsl_fs_path *dst)
                 return fsl_err;
             }
 
-            len = fsl_get_file_contents(src, (void*)&in_file, FALSE);
+            len = fsl_file_contents_get(src, (void*)&in_file, FALSE);
             if (fsl_err != FSL_ERR_SUCCESS || !in_file)
             {
                 fclose(out_file);
@@ -410,7 +412,7 @@ u32 fsl_copy_file(const fsl_fs_path *src, const fsl_fs_path *dst)
                     MSG_FILE_COPY(src, str_dst));
 
             fclose(out_file);
-            fsl_mem_free((void*)&in_file, strlen(in_file), "fsl_copy_file().in_file");
+            fsl_mem_free((void*)&in_file, strlen(in_file), "fsl_file_copy().in_file");
 
             if (fsl_stat(src, &stats) == 0)
                 fsl_chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
@@ -431,7 +433,7 @@ u32 fsl_copy_file(const fsl_fs_path *src, const fsl_fs_path *dst)
                 return fsl_err;
             }
 
-            if (fsl_is_file_exists(str_dst, FALSE) == FSL_ERR_SUCCESS)
+            if (fsl_file_is_exists(str_dst, FALSE) == FSL_ERR_SUCCESS)
                 remove(str_dst);
 
             str_lnk[strnlen(str_lnk, FSL_PATH_CAP - 1)] = '\0';
@@ -470,7 +472,7 @@ u32 fsl_copy_file(const fsl_fs_path *src, const fsl_fs_path *dst)
     return fsl_err;
 }
 
-u32 fsl_copy_dir(const fsl_fs_path *src, const fsl_fs_path *dst, b8 contents_only)
+u32 fsl_dir_copy(const fsl_fs_path *src, const fsl_fs_path *dst, b8 contents_only)
 {
     fsl_buf dir_contents = {0};
     str str_src[FSL_PATH_CAP] = {0};
@@ -481,32 +483,32 @@ u32 fsl_copy_dir(const fsl_fs_path *src, const fsl_fs_path *dst, b8 contents_onl
     struct stat stats = {0};
     struct timespec ts[2] = {0};
 
-    if (fsl_is_dir_exists(src, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_dir_is_exists(src, TRUE) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    dir_contents = fsl_get_dir_contents(src);
+    dir_contents = fsl_dir_contents_get(src);
     if (contents_only && (fsl_err == FSL_ERR_DIR_EMPTY || !dir_contents.loaded))
         return fsl_err;
     else if (fsl_err != FSL_ERR_SUCCESS && fsl_err != FSL_ERR_DIR_EMPTY)
         return fsl_err;
 
     snprintf(str_src, FSL_PATH_CAP, "%s", src);
-    fsl_check_slash(str_src);
-    fsl_normalize_slash(str_src);
+    fsl_slash_check(str_src);
+    fsl_slash_normalize(str_src);
 
     snprintf(str_dst, FSL_PATH_CAP, "%s", dst);
-    fsl_check_slash(str_dst);
-    fsl_normalize_slash(str_dst);
+    fsl_slash_check(str_dst);
+    fsl_slash_normalize(str_dst);
 
-    if (fsl_is_dir_exists(str_dst, FALSE) == FSL_ERR_SUCCESS && !contents_only)
+    if (fsl_dir_is_exists(str_dst, FALSE) == FSL_ERR_SUCCESS && !contents_only)
     {
-        fsl_get_base_name(str_src, str_dst + strlen(str_dst), FSL_PATH_CAP - strlen(str_dst));
-        fsl_check_slash(str_dst);
-        fsl_posix_slash(str_dst);
-        fsl_make_dir(str_dst);
+        fsl_base_name_get(str_src, str_dst + strlen(str_dst), FSL_PATH_CAP - strlen(str_dst));
+        fsl_slash_check(str_dst);
+        fsl_slash_posix(str_dst);
+        fsl_dir_make(str_dst);
     }
     else
-        fsl_make_dir(str_dst);
+        fsl_dir_make(str_dst);
 
     if (fsl_stat(str_src, &stats) == 0)
         fsl_chmod(str_dst, stats.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
@@ -536,10 +538,10 @@ u32 fsl_copy_dir(const fsl_fs_path *src, const fsl_fs_path *dst, b8 contents_onl
 
         if (fsl_is_dir(in_dir) == FSL_ERR_SUCCESS)
         {
-            fsl_copy_dir(in_dir, out_dir, FALSE);
+            fsl_dir_copy(in_dir, out_dir, FALSE);
             continue;
         }
-        fsl_copy_file(in_dir, out_dir);
+        fsl_file_copy(in_dir, out_dir);
     }
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
@@ -549,7 +551,7 @@ u32 fsl_copy_dir(const fsl_fs_path *src, const fsl_fs_path *dst, b8 contents_onl
     return fsl_err;
 }
 
-u32 fsl_write_file(const fsl_fs_path *path, u64 size, void *buf, b8 log, b8 text)
+u32 fsl_file_write(const fsl_fs_path *path, u64 size, void *buf, b8 log, b8 text)
 {
     FILE *file = NULL;
     if ((file = fopen(path, "wb")) == NULL)
@@ -573,7 +575,7 @@ u32 fsl_write_file(const fsl_fs_path *path, u64 size, void *buf, b8 log, b8 text
     return fsl_err;
 }
 
-u32 fsl_append_file(const fsl_fs_path *path, u64 size, void *buf, b8 log, b8 text)
+u32 fsl_file_append(const fsl_fs_path *path, u64 size, void *buf, b8 log, b8 text)
 {
     FILE *file = NULL;
     if ((file = fopen(path, "ab")) == NULL)
@@ -599,7 +601,7 @@ u32 fsl_append_file(const fsl_fs_path *path, u64 size, void *buf, b8 log, b8 tex
     return fsl_err;
 }
 
-u32 fsl_get_path_absolute(const fsl_fs_path *path, str **dst)
+u32 fsl_path_absolute_get(const fsl_fs_path *path, str **dst)
 {
     str path_absolute[FSL_PATH_CAP] = {0};
     u64 len = 0;
@@ -611,32 +613,32 @@ u32 fsl_get_path_absolute(const fsl_fs_path *path, str **dst)
         return fsl_err;
     }
 
-    if (fsl_is_dir_exists(path, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_dir_is_exists(path, TRUE) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    if (fsl_get_path_absolute_internal(path, path_absolute) != FSL_ERR_SUCCESS)
+    if (path_absolute_get_internal(path, path_absolute) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     len = strlen(path_absolute);
 
     if (!*dst && fsl_mem_alloc((void*)dst, len + 1,
-                "fsl_get_path_absolute().dst") != FSL_ERR_SUCCESS)
+                "fsl_path_absolute_get().dst") != FSL_ERR_SUCCESS)
         return fsl_err;
 
     memcpy(*dst, path_absolute, len);
-    fsl_check_slash(*dst);
+    fsl_slash_check(*dst);
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
 
-u32 fsl_get_path_bin_root(str **dst)
+u32 fsl_path_bin_root_get(str **dst)
 {
     str path_bin_root[FSL_PATH_CAP] = {0};
     u64 len = 0;
     char *last_slash = NULL;
 
-    if (fsl_get_path_bin_root_internal(path_bin_root) != FSL_ERR_SUCCESS)
+    if (path_bin_root_get_internal(path_bin_root) != FSL_ERR_SUCCESS)
         return fsl_err;
 
     len = strlen(path_bin_root);
@@ -649,23 +651,23 @@ u32 fsl_get_path_bin_root(str **dst)
 
     path_bin_root[len] = 0;
     if (!*dst && fsl_mem_alloc((void*)dst, FSL_PATH_CAP,
-                "fsl_get_path_bin_root().dst") != FSL_ERR_SUCCESS)
+                "fsl_path_bin_root_get().dst") != FSL_ERR_SUCCESS)
         return fsl_err;
 
     memcpy(*dst, path_bin_root, FSL_PATH_CAP - 1);
 
-    fsl_posix_slash(*dst);
+    fsl_slash_posix(*dst);
     last_slash = strrchr(*dst, '/');
     if (last_slash)
         *last_slash = 0;
-    fsl_check_slash(*dst);
-    fsl_posix_slash(*dst);
+    fsl_slash_check(*dst);
+    fsl_slash_posix(*dst);
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
 
-void fsl_check_slash(fsl_fs_path *path)
+void fsl_slash_check(fsl_fs_path *path)
 {
     u64 len = 0;
 
@@ -693,7 +695,7 @@ void fsl_check_slash(fsl_fs_path *path)
     fsl_err = FSL_ERR_SUCCESS;
 }
 
-void fsl_normalize_slash(fsl_fs_path *path)
+void fsl_slash_normalize(fsl_fs_path *path)
 {
     u64 len = 0, i = 0;
 
@@ -714,7 +716,7 @@ void fsl_normalize_slash(fsl_fs_path *path)
     fsl_err = FSL_ERR_SUCCESS;
 }
 
-void fsl_posix_slash(fsl_fs_path *path)
+void fsl_slash_posix(fsl_fs_path *path)
 {
     u64 len = 0, i = 0;
 
@@ -735,7 +737,7 @@ void fsl_posix_slash(fsl_fs_path *path)
     fsl_err = FSL_ERR_SUCCESS;
 }
 
-u32 fsl_retract_path(fsl_fs_path *path)
+u32 fsl_path_retract(fsl_fs_path *path)
 {
     u64 len = 0, i = 0, stage = 0;
 
@@ -770,7 +772,7 @@ u32 fsl_retract_path(fsl_fs_path *path)
     return fsl_err;
 }
 
-u32 fsl_get_base_name(const fsl_fs_path *path, str *dst, u64 size)
+u32 fsl_base_name_get(const fsl_fs_path *path, str *dst, u64 size)
 {
     i64 i = 0;
     u64 len = 0;
@@ -779,14 +781,14 @@ u32 fsl_get_base_name(const fsl_fs_path *path, str *dst, u64 size)
     if (size == 0)
     {
         LOGERROR(FSL_ERR_SIZE_TOO_SMALL, 0,
-                MSG_GET_BASE_NAME_FAIL(path, "Size Too Small"));
+                MSG_BASE_NAME_GET_FAIL(path, "Size Too Small"));
         return fsl_err;
     }
 
     if (!path || !path[0] || !dst)
     {
         LOGERROR(FSL_ERR_POINTER_NULL, 0,
-                MSG_GET_BASE_NAME_FAIL(path, "Pointer `NULL`"));
+                MSG_BASE_NAME_GET_FAIL(path, "Pointer `NULL`"));
         return fsl_err;
     }
 
@@ -794,12 +796,12 @@ u32 fsl_get_base_name(const fsl_fs_path *path, str *dst, u64 size)
     if (len > FSL_PATH_CAP - 2)
     {
         LOGERROR(FSL_ERR_PATH_TOO_LONG, 0,
-                MSG_GET_BASE_NAME_FAIL(path, "Path Too Long"));
+                MSG_BASE_NAME_GET_FAIL(path, "Path Too Long"));
         return fsl_err;
     }
 
     snprintf(path_resolved, FSL_PATH_CAP, "%s", path);
-    fsl_posix_slash(path_resolved);
+    fsl_slash_posix(path_resolved);
 
     i = (i64)len - 1;
     if (path_resolved[i] == '/')

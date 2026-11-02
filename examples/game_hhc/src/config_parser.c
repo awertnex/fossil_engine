@@ -26,7 +26,7 @@ void parse_config(void)
     str *file_contents = NULL;
     str string[FSL_ID_CAP] = {0};
     u32 i = 0;
-    u64 file_len = fsl_get_file_contents("Heaven-Hell Continuum/config/settings.txt",
+    u64 file_len = fsl_file_contents_get("Heaven-Hell Continuum/config/settings.txt",
             (void*)&file_contents, TRUE);
 
     snprintf(tokens[HHC_TOKEN_MOUSE_SENSITIVITY], FSL_ID_CAP, "%s", "mouse_sensitivity");

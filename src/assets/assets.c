@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file assets.c
  *
  *  @brief asset parsing, loading and unloading.
@@ -24,14 +24,14 @@
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
 #include "../common/types.h"
+
+#include "../file_io/file_io.h"
 #include "../logger/logger.h"
 #include "../logger/logger_messages_internal.h"
 #include "../math/math.h"
 #include "../math/matrix.h"
 #include "../math/vector.h"
 #include "../memory/memory.h"
-
-#include "../h/dir.h"
 
 #include "assets.h"
 
@@ -46,7 +46,11 @@
 #include <stdio.h>
 #include <string.h>
 
-static f32 vertex_buf_unit_quad_internal[] =
+/**
+ *  @brief standard vertex buffer for a unit quad as an engine default and as a
+ *  solid fallback option.
+ */
+static f32 vertex_buf_unit_quad[] =
 {
     -1.0f, -1.0f, 0.0f, 0.0f,
     -1.0f, 1.0f, 0.0f, 1.0f,
@@ -56,7 +60,7 @@ static f32 vertex_buf_unit_quad_internal[] =
 
 /* ---- section: asset ------------------------------------------------------ */
 
-fsl_asset_metadata fsl_asset_get_metadata(fsl_asset asset)
+fsl_asset_metadata fsl_asset_metadata_get(fsl_asset asset)
 {
     fsl_asset_metadata metadata = {0};
     if (asset.name.arena)
@@ -70,7 +74,7 @@ fsl_asset_metadata fsl_asset_get_metadata(fsl_asset asset)
     return metadata;
 }
 
-u32 fsl_asset_set_metadata(fsl_asset *asset, fsl_asset_type type,
+u32 fsl_asset_metadata_set(fsl_asset *asset, fsl_asset_type type,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path)
 {
     fsl_name *name_p = NULL;
@@ -90,7 +94,7 @@ u32 fsl_asset_set_metadata(fsl_asset *asset, fsl_asset_type type,
     if (name)
     {
         if (fsl_mem_arena_push(&mem_arena_name_internal, &asset->name, FSL_ID_CAP,
-                    "fsl_asset_set_metadata().asset->name") != FSL_ERR_SUCCESS)
+                    "fsl_asset_metadata_set().asset->name") != FSL_ERR_SUCCESS)
             goto cleanup;
         name_p = fsl_mem_handle_get(asset->name),
         snprintf(name_p, FSL_ID_CAP, "%s", name);
@@ -99,7 +103,7 @@ u32 fsl_asset_set_metadata(fsl_asset *asset, fsl_asset_type type,
     if (name_id)
     {
         if (fsl_mem_arena_push(&mem_arena_name_id_internal, &asset->name_id, FSL_ID_CAP,
-                    "fsl_asset_set_metadata().asset->name_id") != FSL_ERR_SUCCESS)
+                    "fsl_asset_metadata_set().asset->name_id") != FSL_ERR_SUCCESS)
             goto cleanup;
         name_id_p = fsl_mem_handle_get(asset->name_id);
         snprintf(name_id_p, FSL_ID_CAP, "%s", name_id);
@@ -108,7 +112,7 @@ u32 fsl_asset_set_metadata(fsl_asset *asset, fsl_asset_type type,
     if (file)
     {
         if (fsl_mem_arena_push(&mem_arena_file_internal, &asset->file, FSL_ID_CAP,
-                    "fsl_asset_set_metadata().asset->file") != FSL_ERR_SUCCESS)
+                    "fsl_asset_metadata_set().asset->file") != FSL_ERR_SUCCESS)
             goto cleanup;
         file_p = fsl_mem_handle_get(asset->file);
         snprintf(file_p, FSL_ID_CAP, "%s", file);
@@ -117,12 +121,12 @@ u32 fsl_asset_set_metadata(fsl_asset *asset, fsl_asset_type type,
     if (path)
     {
         if (fsl_mem_arena_push(&mem_arena_path_internal, &asset->path, FSL_ID_CAP,
-                    "fsl_asset_set_metadata().asset->path") != FSL_ERR_SUCCESS)
+                    "fsl_asset_metadata_set().asset->path") != FSL_ERR_SUCCESS)
             goto cleanup;
         path_p = fsl_mem_handle_get(asset->path);
         snprintf(path_p, FSL_ID_CAP, "%s", path);
-        fsl_check_slash(path_p);
-        fsl_posix_slash(path_p);
+        fsl_slash_check(path_p);
+        fsl_slash_posix(path_p);
     }
 
     fsl_err = FSL_ERR_SUCCESS;
@@ -130,10 +134,10 @@ u32 fsl_asset_set_metadata(fsl_asset *asset, fsl_asset_type type,
 
 cleanup:
 
-    fsl_mem_arena_pop(&asset->name, "fsl_asset_set_metadata().asset->name");
-    fsl_mem_arena_pop(&asset->name_id, "fsl_asset_set_metadata().asset->name_id");
-    fsl_mem_arena_pop(&asset->file, "fsl_asset_set_metadata().asset->file");
-    fsl_mem_arena_pop(&asset->path, "fsl_asset_set_metadata().asset->path");
+    fsl_mem_arena_pop(&asset->name, "fsl_asset_metadata_set().asset->name");
+    fsl_mem_arena_pop(&asset->name_id, "fsl_asset_metadata_set().asset->name_id");
+    fsl_mem_arena_pop(&asset->file, "fsl_asset_metadata_set().asset->file");
+    fsl_mem_arena_pop(&asset->path, "fsl_asset_metadata_set().asset->path");
     return fsl_err;
 }
 
@@ -306,14 +310,14 @@ mesh_fbo_init:
         return FSL_ERR_SUCCESS;
 
     mesh_fbo->vertex_buf.size = sizeof(GLfloat);
-    mesh_fbo->vertex_buf.len = fsl_arr_len(vertex_buf_unit_quad_internal);
+    mesh_fbo->vertex_buf.len = fsl_arr_len(vertex_buf_unit_quad);
     if (fsl_vbo_init(&mesh_fbo->vertex_buf, mesh_fbo->vertex_buf.size, mesh_fbo->vertex_buf.len,
-            vertex_buf_unit_quad_internal, GL_ARRAY_BUFFER, FSL_DRAW_TYPE_STATIC) != FSL_ERR_SUCCESS)
+            vertex_buf_unit_quad, GL_ARRAY_BUFFER, FSL_DRAW_TYPE_STATIC) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    fsl_asset_set_metadata(&mesh_fbo->asset, FSL_ASSET_MESH, "Unit Quad", "unit_quad", NULL, NULL);
+    fsl_asset_metadata_set(&mesh_fbo->asset, FSL_ASSET_MESH, "Unit Quad", "unit_quad", NULL, NULL);
     mesh_fbo_vertex_buf = fsl_mem_handle_get(mesh_fbo->vertex_buf.buf);
-    memcpy(mesh_fbo_vertex_buf, vertex_buf_unit_quad_internal,
+    memcpy(mesh_fbo_vertex_buf, vertex_buf_unit_quad,
             mesh_fbo->vertex_buf.size * mesh_fbo->vertex_buf.len);
 
     /* ---- bind mesh ------------------------------------------------------- */
@@ -439,13 +443,13 @@ u32 fsl_texture_init(fsl_texture *texture,
     u8 *buf = NULL;
     fsl_asset_metadata metadata = {0};
 
-    if (fsl_asset_set_metadata(&texture->asset, FSL_ASSET_TEXTURE, name, name_id, file, path) != FSL_ERR_SUCCESS)
+    if (fsl_asset_metadata_set(&texture->asset, FSL_ASSET_TEXTURE, name, name_id, file, path) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    metadata = fsl_asset_get_metadata(texture->asset);
+    metadata = fsl_asset_metadata_get(texture->asset);
 
     snprintf(path_temp, FSL_PATH_CAP, "%s%s", metadata.path, metadata.file);
-    if (fsl_is_file_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_file_is_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     buf = (u8*)stbi_load(path_temp, &texture->size.x, &texture->size.y, &texture->channels, channels);
@@ -508,7 +512,7 @@ void fsl_texture_free(fsl_texture *texture)
     if (texture == NULL)
         return;
 
-    metadata = fsl_asset_get_metadata(texture->asset);
+    metadata = fsl_asset_metadata_get(texture->asset);
 
     if (texture->bindless)
     {
@@ -546,10 +550,10 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     i32 x1 = 0, y1 = 0;
     fsl_asset_metadata metadata = {0};
 
-    if (fsl_asset_set_metadata(&font->asset, FSL_ASSET_FONT, name, name_id, file, path) != FSL_ERR_SUCCESS)
+    if (fsl_asset_metadata_set(&font->asset, FSL_ASSET_FONT, name, name_id, file, path) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    metadata = fsl_asset_get_metadata(font->asset);
+    metadata = fsl_asset_metadata_get(font->asset);
 
     if (resolution <= 2)
     {
@@ -560,10 +564,10 @@ u32 fsl_font_init(fsl_font *font, u32 resolution,
     }
 
     snprintf(path_temp, FSL_PATH_CAP, "%s%s", metadata.path, metadata.file);
-    if (fsl_is_file_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
+    if (fsl_file_is_exists(path_temp, TRUE) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    font->buf_len = fsl_get_file_contents(path_temp, (void*)&file_contents, TRUE);
+    font->buf_len = fsl_file_contents_get(path_temp, (void*)&file_contents, TRUE);
     if (file_contents == NULL)
         return fsl_err;
 

@@ -8,19 +8,19 @@
 void ui_button_enter_func(fsl_ui_event event, void *data)
 {
     (void)data;
-    fsl_ui_element_set_uv(event.caller, 0, 16, 16, 16);
+    fsl_ui_element_uv_set(event.caller, 0, 16, 16, 16);
 }
 
 void ui_button_leave_func(fsl_ui_event event, void *data)
 {
     (void)data;
-    fsl_ui_element_set_uv(event.caller, 0, 0, 16, 16);
+    fsl_ui_element_uv_set(event.caller, 0, 0, 16, 16);
 }
 
 void ui_button_click_func(fsl_ui_event event, void *data)
 {
     (void)data;
-    fsl_ui_element_set_uv(event.caller, 16, 0, 16, 16);
+    fsl_ui_element_uv_set(event.caller, 16, 0, 16, 16);
 }
 
 void ui_button_release_func(fsl_ui_event event, void *data)

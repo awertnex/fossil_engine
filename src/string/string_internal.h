@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +14,12 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file string_internal.h
  *
  *  @brief engine's internal string functions and definitions.
+ *
+ *  @internal
  */
 
 #ifndef FSL_STRING_INTERNAL_H
@@ -25,15 +27,17 @@
 
 #include "../common/types.h"
 
-/*!
- *  @internal
- *
+/**
  *  @brief write temporary formatted string.
  *
- *  @note the use of @ref stringf_internal more than once in a single expression is not advised.
+ *  @internal
  *
- *  @remark use temporary static buffers internally.
- *  @remark inspired by Raylib: `github.com/raysan5/raylib`: `raylib/src/rtext.c/TextFormat()`.
+ *  @note the use of @ref stringf_internal more than once in a single expression
+ *  is not advised.
+ *
+ *  @remark uses temporary static buffers internally.
+ *  @remark inspired by Raylib:
+ *  `github.com/raysan5/raylib`: `raylib/src/rtext.c/TextFormat()`.
  *
  *  @return static formatted string.
  */

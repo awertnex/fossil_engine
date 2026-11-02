@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +14,11 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file api.h
  *
- *  @brief engine's API control/visibility and general cross-platform macro definitions.
+ *  @brief engine's API control/visibility and general cross-platform macro
+ *  definitions.
  */
 
 #ifndef FSL_API_H

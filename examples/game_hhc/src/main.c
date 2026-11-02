@@ -828,7 +828,7 @@ static void world_draw(void)
         if (player.hit.hit)
         {
             block_id = GET_BLOCK_ID(*player.hit.block);
-            metadata = fsl_asset_get_metadata(blocks_p[block_id].asset);
+            metadata = fsl_asset_metadata_get(blocks_p[block_id].asset);
             fsl_text_push(fsl_stringf(
                         "TARGET      [%u][%s]\n"
                         "XYZ         [%"PRId64" %"PRId64" %"PRId64"]\n",
@@ -856,7 +856,7 @@ static void world_draw(void)
         fsl_text_render(TRUE, FSL_TEXT_COLOR_SHADOW);
         fsl_text_start(font[FONT_MONO], FSL_FONT_SIZE_DEFAULT, 0, FALSE);
 
-        fsl_engine_get_string(engine_version, FSL_ENGINE_STR_INDEX_VERSION);
+        fsl_engine_string_get(engine_version, FSL_ENGINE_STR_INDEX_VERSION);
         fsl_text_push(fsl_stringf(
                     "Game:     %s %s\n"
                     "Author:   %s\n"
@@ -994,7 +994,7 @@ section_menu_title:
 
     enable_cursor;
 
-    while (fsl_engine_running(&callback_framebuffer_size))
+    while (fsl_engine_is_running(&callback_framebuffer_size))
     {
         input_update(&player);
         fsl_ui_start(TRUE);
@@ -1015,7 +1015,7 @@ section_menu_title:
 
 section_menu_pause:
 
-    while (fsl_engine_running(&callback_framebuffer_size))
+    while (fsl_engine_is_running(&callback_framebuffer_size))
     {
         input_update(&player);
         fsl_ui_start(TRUE);
@@ -1050,14 +1050,14 @@ section_gameplay:
             world_init("Poop Consistency Tester", 0, &player) != FSL_ERR_SUCCESS)
             goto cleanup;
 
-    while (fsl_engine_running(&callback_framebuffer_size))
+    while (fsl_engine_is_running(&callback_framebuffer_size))
     {
         input_update(&player);
         world_update(&player);
         world_draw();
 
-        fsl_process_screenshot_request(GAME_DIR_NAME_SCREENSHOTS, world.name);
-        fsl_limit_framerate(settings.target_fps, render->time);
+        fsl_screenshot_request_respond(GAME_DIR_NAME_SCREENSHOTS, world.name);
+        fsl_framerate_limit(settings.target_fps, render->time);
 
         if (core.request.menu_back)
         {

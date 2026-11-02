@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,19 +14,19 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file torus_noise.c
  *
- *  @brief Torus Noise plug-in implementation, for 'Fossil Engine'; seamless-tiling
- *  noise sampler, grid-based, 1D, 2D and 3D support, arbitrary blend margin
- *  thickness per axis and arbitrary final noise map size per axis.
+ *  @brief Torus Noise plug-in implementation, for 'Fossil Engine';
+ *  seamless-tiling noise sampler, grid-based, 1D, 2D and 3D support, arbitrary
+ *  blend margin thickness per axis and arbitrary final noise map size per axis.
  */
+
+#include "../../../common/diagnostics.h"
 
 #include "../../../logger/logger.h"
 #include "../../../logger/logger_messages_internal.h"
 #include "../../../memory/memory.h"
-
-#include "../../../common/diagnostics.h"
 
 #include "torus_noise.h"
 

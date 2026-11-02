@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file input.c
  *
  *  @brief keyboard and mouse input handling.
@@ -23,15 +23,16 @@
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
 #include "../common/types.h"
+
 #include "../engine/engine.h"
 #include "../logger/logger.h"
 #include "../logger/logger_messages_internal.h"
 #include "../math/vector.h"
 
+#include "../h/time.h"
+
 #include "input.h"
 #include "input_internal.h"
-
-#include "../h/time.h"
 
 #include <stdio.h>
 

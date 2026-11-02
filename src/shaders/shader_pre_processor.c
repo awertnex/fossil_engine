@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file shader_pre_processor.c
  *
  *  @brief pre-processing glsl shaders.
@@ -23,11 +23,12 @@
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
 #include "../common/types.h"
+
+#include "../file_io/file_io.h"
 #include "../logger/logger.h"
 #include "../logger/logger_messages_internal.h"
 #include "../memory/memory.h"
 
-#include "../h/dir.h"
 #include "shader_pre_processor_internal.h"
 
 #include <stdio.h>
@@ -35,25 +36,25 @@
 
 /* ---- section: signatures ------------------------------------------------- */
 
-/*!
- *  @internal
- *
+/**
  *  @brief process shader before compilation.
  *
- *  parse includes recursively.
+ *  @internal
+ *
+ *  parses includes recursively.
  *
  *  @return `NULL` on failure and @ref fsl_err is set accordingly.
  */
-static str *fsl_shader_pre_process_includes_internal(const str *path, u64 *file_len, u64 recursion_limit);
+static str *shader_pre_process_includes_internal(const str *path, u64 *file_len, u64 recursion_limit);
 
 /* ---- section: implementation --------------------------------------------- */
 
-str *fsl_shader_pre_process_internal(const str *path, u64 *file_len)
+str *shader_pre_process_internal(const str *path, u64 *file_len)
 {
-    return fsl_shader_pre_process_includes_internal(path, file_len, FSL_SHADER_PRE_PROCESSOR_INCLUDE_RECURSION_MAX);
+    return shader_pre_process_includes_internal(path, file_len, FSL_SHADER_PRE_PROCESSOR_INCLUDE_RECURSION_MAX);
 }
 
-static str *fsl_shader_pre_process_includes_internal(const str *path, u64 *file_len, u64 recursion_limit)
+static str *shader_pre_process_includes_internal(const str *path, u64 *file_len, u64 recursion_limit)
 {
     static str token[2][256] =
     {
@@ -82,12 +83,12 @@ static str *fsl_shader_pre_process_includes_internal(const str *path, u64 *file_
         return NULL;
     }
 
-    buf_len = fsl_get_file_contents(path, (void*)&buf, TRUE);
+    buf_len = fsl_file_contents_get(path, (void*)&buf, TRUE);
     if (fsl_err != FSL_ERR_SUCCESS)
         return NULL;
 
     if (fsl_mem_alloc((void*)&buf_resolved, buf_len + 1,
-                "fsl_shader_pre_process_includes_internal().buf_resolved") != FSL_ERR_SUCCESS)
+                "shader_pre_process_includes_internal().buf_resolved") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     buf_resolved_len = buf_len + 1;
@@ -106,7 +107,7 @@ static str *fsl_shader_pre_process_includes_internal(const str *path, u64 *file_
             j += strlen(token[1]);
 
             snprintf(temp, FSL_PATH_CAP, "%s", path);
-            fsl_retract_path(temp);
+            fsl_path_retract(temp);
             snprintf(temp + strlen(temp), FSL_PATH_CAP - strlen(temp),
                     "%.*s", (int)temp_len, buf + i + strlen(token[0]));
 
@@ -118,10 +119,10 @@ static str *fsl_shader_pre_process_includes_internal(const str *path, u64 *file_
                 goto cleanup;
             }
 
-            buf_include = fsl_shader_pre_process_includes_internal(temp, &buf_include_len, recursion_limit - 1);
+            buf_include = shader_pre_process_includes_internal(temp, &buf_include_len, recursion_limit - 1);
             if (fsl_err != FSL_ERR_SUCCESS ||
                     fsl_mem_realloc((void*)&buf_resolved, buf_resolved_len + buf_include_len + 1,
-                        "fsl_shader_pre_process_includes_internal().buf_resolved") != FSL_ERR_SUCCESS)
+                        "shader_pre_process_includes_internal().buf_resolved") != FSL_ERR_SUCCESS)
                 goto cleanup;
             buf_resolved_len += buf_include_len;
 
@@ -132,7 +133,7 @@ static str *fsl_shader_pre_process_includes_internal(const str *path, u64 *file_
                     buf_resolved_len - cursor, "%s", buf_include);
 
             k = i + j;
-            fsl_mem_free((void*)&buf_include, buf_include_len, "fsl_shader_pre_process_includes_internal().buf_include");
+            fsl_mem_free((void*)&buf_include, buf_include_len, "shader_pre_process_includes_internal().buf_include");
         }
     }
 
@@ -140,7 +141,7 @@ static str *fsl_shader_pre_process_includes_internal(const str *path, u64 *file_
         snprintf(buf_resolved + cursor,
                 buf_resolved_len - cursor, "%s", buf + k);
 
-    fsl_mem_free((void*)&buf, buf_len, "fsl_shader_pre_process_includes_internal().buf");
+    fsl_mem_free((void*)&buf, buf_len, "shader_pre_process_includes_internal().buf");
     if (file_len) *file_len = buf_resolved_len;
 
     fsl_err = FSL_ERR_SUCCESS;
@@ -148,13 +149,13 @@ static str *fsl_shader_pre_process_includes_internal(const str *path, u64 *file_
 
 cleanup:
 
-    fsl_mem_free((void*)&buf_include, buf_include_len, "fsl_shader_pre_process_includes_internal().buf_include");
-    fsl_mem_free((void*)&buf_resolved, buf_resolved_len, "fsl_shader_pre_process_includes_internal().buf_resolved");
-    fsl_mem_free((void*)&buf, buf_len, "fsl_shader_pre_process_includes_internal().buf");
+    fsl_mem_free((void*)&buf_include, buf_include_len, "shader_pre_process_includes_internal().buf_include");
+    fsl_mem_free((void*)&buf_resolved, buf_resolved_len, "shader_pre_process_includes_internal().buf_resolved");
+    fsl_mem_free((void*)&buf, buf_len, "shader_pre_process_includes_internal().buf");
     return NULL;
 }
 
-u32 fsl_shader_get_type_internal(const str *file, GLenum *type)
+u32 fsl_shader_type_get_internal(const str *file, GLenum *type)
 {
     str base_name[FSL_ID_CAP] = {0};
     str *extension = {0};

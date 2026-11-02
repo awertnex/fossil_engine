@@ -23,9 +23,9 @@ v2i32 align = {0};
 
 void ui_update(void)
 {
-    fsl_ui_element_set_position(&element_parent, render->mouse_pos.x, render->mouse_pos.y, 0, 0, 0, 0);
-    fsl_ui_element_set_scale(&element_parent, scale.x, scale.y);
-    fsl_ui_element_set_alignment(&element_parent, align.x, align.y);
+    fsl_ui_element_position_set(&element_parent, render->mouse_pos.x, render->mouse_pos.y, 0, 0, 0, 0);
+    fsl_ui_element_scale_set(&element_parent, scale.x, scale.y);
+    fsl_ui_element_alignment_set(&element_parent, align.x, align.y);
 }
 
 void ui_draw_1(void)
@@ -48,7 +48,7 @@ void ui_draw_2(void)
 void resize(fsl_ui_event event, void *data)
 {
     (void)data;
-    fsl_ui_element_set_scale(event.caller, scale.x, scale.y);
+    fsl_ui_element_scale_set(event.caller, scale.x, scale.y);
     LOGSUCCESS(0, "ENTER\n");
 }
 
@@ -57,7 +57,7 @@ void move(fsl_ui_event event, void *data)
     static i32 i = 0;
 
     (void)data;
-    fsl_ui_element_set_position(event.caller, i, 0, 0, 0, 0, 0);
+    fsl_ui_element_position_set(event.caller, i, 0, 0, 0, 0, 0);
     ++i;
 
     LOGSUCCESS(0, fsl_logger_stringf("HOVER: %d\n", i));
@@ -66,7 +66,7 @@ void move(fsl_ui_event event, void *data)
 void reset(fsl_ui_event event, void *data)
 {
     (void)data;
-    fsl_ui_element_set_position(event.caller, 0, 0, 0, 0, 0, 0);
+    fsl_ui_element_position_set(event.caller, 0, 0, 0, 0, 0, 0);
 
     LOGSUCCESS(0, "LEAVE: 0\n");
 }
@@ -74,19 +74,19 @@ void reset(fsl_ui_event event, void *data)
 void fuck(fsl_ui_event event, void *data)
 {
     v2f64 pos = *(v2f64*)data;
-    fsl_ui_element_set_position(event.caller, pos.x, pos.y, 0, 0, 0, 0);
+    fsl_ui_element_position_set(event.caller, pos.x, pos.y, 0, 0, 0, 0);
 
     LOGSUCCESS(0, "CLICK\n");
 }
 
 void enter(fsl_ui_event event, void *data)
 {
-    fsl_ui_element_set_texture(event.caller, &texture_p[FSL_TEXTURE_INDEX_PANEL_ACTIVE]);
+    fsl_ui_element_texture_set(event.caller, &texture_p[FSL_TEXTURE_INDEX_PANEL_ACTIVE]);
 }
 
 void leave(fsl_ui_event event, void *data)
 {
-    fsl_ui_element_set_texture(event.caller, &texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
+    fsl_ui_element_texture_set(event.caller, &texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
 }
 
 int main(int argc, char **argv)
@@ -123,37 +123,37 @@ int main(int argc, char **argv)
     align.x = -1;
     align.y = -1;
 
-    fsl_ui_element_set_texture(&element_parent, &texture);
-    fsl_ui_element_set_uv(&element_parent, 0, 0, 177, 177);
-    fsl_ui_element_set_position(&element_parent, 0, 0, 0, 0, 0, 0);
-    fsl_ui_element_set_size(&element_parent, 0, 0, 177, 177);
-    fsl_ui_element_set_scale(&element_parent, scale.x, scale.y);
-    fsl_ui_element_set_alignment(&element_parent, align.x, align.y);
+    fsl_ui_element_texture_set(&element_parent, &texture);
+    fsl_ui_element_uv_set(&element_parent, 0, 0, 177, 177);
+    fsl_ui_element_position_set(&element_parent, 0, 0, 0, 0, 0, 0);
+    fsl_ui_element_size_set(&element_parent, 0, 0, 177, 177);
+    fsl_ui_element_scale_set(&element_parent, scale.x, scale.y);
+    fsl_ui_element_alignment_set(&element_parent, align.x, align.y);
 
-    fsl_ui_element_set_texture(&element_child, &texture);
-    fsl_ui_element_set_uv(&element_child, 0, 0, 177, 177);
-    fsl_ui_element_set_position(&element_child, 0, 0, 0, 0, 0, 0);
-    fsl_ui_element_set_size(&element_child, 0, 0, texture.size.x, texture.size.y);
-    fsl_ui_element_set_scale(&element_child, 1.0f, 1.0f);
-    fsl_ui_element_set_alignment(&element_child, -1, -1);
-    fsl_ui_element_set_callback(&element_child, FSL_UI_EVENT_TYPE_ENTER, &resize, NULL);
-    fsl_ui_element_set_callback(&element_child, FSL_UI_EVENT_TYPE_HOVER, &move, NULL);
-    fsl_ui_element_set_callback(&element_child, FSL_UI_EVENT_TYPE_LEAVE, &reset, NULL);
-    fsl_ui_element_set_callback(&element_child, FSL_UI_EVENT_TYPE_CLICK, &fuck, &render->mouse_pos);
+    fsl_ui_element_texture_set(&element_child, &texture);
+    fsl_ui_element_uv_set(&element_child, 0, 0, 177, 177);
+    fsl_ui_element_position_set(&element_child, 0, 0, 0, 0, 0, 0);
+    fsl_ui_element_size_set(&element_child, 0, 0, texture.size.x, texture.size.y);
+    fsl_ui_element_scale_set(&element_child, 1.0f, 1.0f);
+    fsl_ui_element_alignment_set(&element_child, -1, -1);
+    fsl_ui_element_callback_set(&element_child, FSL_UI_EVENT_TYPE_ENTER, &resize, NULL);
+    fsl_ui_element_callback_set(&element_child, FSL_UI_EVENT_TYPE_HOVER, &move, NULL);
+    fsl_ui_element_callback_set(&element_child, FSL_UI_EVENT_TYPE_LEAVE, &reset, NULL);
+    fsl_ui_element_callback_set(&element_child, FSL_UI_EVENT_TYPE_CLICK, &fuck, &render->mouse_pos);
 
-    fsl_ui_element_set_texture(&element_panel, &texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
-    fsl_ui_element_set_uv(&element_panel, 0, 0, 16, 16);
-    fsl_ui_element_set_position(&element_panel, 10, 10, 0, 0, 0, 0);
-    fsl_ui_element_set_size(&element_panel, 0, render->size.y - 20, 400, 0);
-    fsl_ui_element_set_scale(&element_panel, 1.0f, 1.0f);
-    fsl_ui_element_set_alignment(&element_panel, -1, -1);
-    fsl_ui_element_set_9_slice(&element_panel, TRUE, 8);
-    fsl_ui_element_set_callback(&element_panel, FSL_UI_EVENT_TYPE_ENTER, &enter, NULL);
-    fsl_ui_element_set_callback(&element_panel, FSL_UI_EVENT_TYPE_LEAVE, &leave, NULL);
+    fsl_ui_element_texture_set(&element_panel, &texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
+    fsl_ui_element_uv_set(&element_panel, 0, 0, 16, 16);
+    fsl_ui_element_position_set(&element_panel, 10, 10, 0, 0, 0, 0);
+    fsl_ui_element_size_set(&element_panel, 0, render->size.y - 20, 400, 0);
+    fsl_ui_element_scale_set(&element_panel, 1.0f, 1.0f);
+    fsl_ui_element_alignment_set(&element_panel, -1, -1);
+    fsl_ui_element_9_slice_set(&element_panel, TRUE, 8);
+    fsl_ui_element_callback_set(&element_panel, FSL_UI_EVENT_TYPE_ENTER, &enter, NULL);
+    fsl_ui_element_callback_set(&element_panel, FSL_UI_EVENT_TYPE_LEAVE, &leave, NULL);
 
 workspace_1:
 
-    while (fsl_engine_running(NULL))
+    while (fsl_engine_is_running(NULL))
     {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         if (render->mouse_delta.x || render->mouse_delta.y)
@@ -225,12 +225,12 @@ workspace_1:
         if (fsl_is_key_press(bind_quit))
             fsl_request_engine_close();
 
-        fsl_limit_framerate(60, render->time);
+        fsl_framerate_limit(60, render->time);
     }
 
 workspace_2:
 
-    while (fsl_engine_running(NULL))
+    while (fsl_engine_is_running(NULL))
     {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         if (render->mouse_delta.x || render->mouse_delta.y)
@@ -254,7 +254,7 @@ workspace_2:
         if (fsl_is_key_press(bind_quit))
             fsl_request_engine_close();
 
-        fsl_limit_framerate(60, render->time);
+        fsl_framerate_limit(60, render->time);
     }
 
 cleanup:

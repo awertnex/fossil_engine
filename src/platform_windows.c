@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file platform_windows.c
  *
  *  @brief code specific to the platform: windows, abstracted.
@@ -23,12 +23,13 @@
 #include "common/diagnostics.h"
 #include "common/limits.h"
 #include "common/types.h"
+
+#include "file_io/file_io.h"
 #include "logger/logger.h"
 #include "logger/logger_messages_internal.h"
 #include "memory/memory.h"
 #include "string/string_internal.h"
 
-#include "h/dir.h"
 #include "h/process.h"
 
 #include <stdlib.h>
@@ -36,7 +37,7 @@
 #include <windows.h>
 #include <direct.h>
 
-u32 fsl_get_path_absolute_internal(const fsl_fs_path *fs_path, str *dst)
+u32 path_absolute_get_internal(const fsl_fs_path *fs_path, str *dst)
 {
     if (!GetFullPathNameA(fs_path, FSL_PATH_CAP, dst, NULL))
     {
@@ -44,25 +45,25 @@ u32 fsl_get_path_absolute_internal(const fsl_fs_path *fs_path, str *dst)
         return fsl_err;
     }
 
-    posix_slash(dst);
+    fsl_slash_posix(dst);
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
 
-u32 fsl_get_path_bin_root_internal(str *dst)
+u32 path_bin_root_get_internal(str *dst)
 {
     /* here, "FSL_PATH_CAP - 2" to leave space for a slash (`/`) and a null (`\0`) terminator */
     if (strlen(_pgmptr) > FSL_PATH_CAP - 2)
     {
         LOGFATAL(FSL_ERR_GET_PATH_BIN_ROOT_FAIL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_REASON_FATAL("Get Binary Root", "`fsl_get_path_bin_root_internal()` Failed"));
+                MSG_ACTION_REASON_FATAL("Get Binary Root", "`path_bin_root_get_internal()` Failed"));
         return fsl_err;
     }
     memcpy(dst, _pgmptr, FSL_PATH_CAP - 2);
-    fsl_retract_path(dst);
-    fsl_posix_slash(dst);
+    fsl_path_retract(dst);
+    fsl_slash_posix(dst);
 
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
@@ -128,7 +129,7 @@ cleanup:
     return fsl_err;
 }
 
-u32 fsl_mem_map_internal(void **x, u64 size,
+u32 fsl_mem_map_func(void **x, u64 size,
         const str *name, const str *file, u64 line)
 {
     void *temp = NULL;
@@ -166,7 +167,7 @@ u32 fsl_mem_map_internal(void **x, u64 size,
     return fsl_err;
 }
 
-u32 fsl_mem_commit_internal(void **x, void *offset, u64 size,
+u32 fsl_mem_commit_func(void **x, void *offset, u64 size,
         const str *name, const str *file, u64 line)
 {
     if (!x || !*X || !offset)
@@ -193,8 +194,8 @@ u32 fsl_mem_commit_internal(void **x, void *offset, u64 size,
     return fsl_err;
 }
 
-/* TODO: make 'fsl_mem_remap_internal()' for windows */
-u32 fsl_mem_remap_internal(void **x, u64 size_old, u64 size_new,
+/* TODO: make 'fsl_mem_remap_func()' for windows */
+u32 fsl_mem_remap_func(void **x, u64 size_old, u64 size_new,
         const str *name, const str *file, u64 line)
 {
     void *temp = NULL;
@@ -226,7 +227,7 @@ u32 fsl_mem_remap_internal(void **x, u64 size_old, u64 size_new,
     return fsl_err;
 }
 
-void fsl_mem_unmap_internal(void **x, u64 size,
+void fsl_mem_unmap_func(void **x, u64 size,
         const str *name, const str *file, u64 line)
 {
     if (!x || !*x) return;
@@ -239,7 +240,7 @@ void fsl_mem_unmap_internal(void **x, u64 size,
     *x = NULL;
 }
 
-void fsl_mem_arena_free_internal(fsl_mem_arena *x,
+void fsl_mem_arena_free_func(fsl_mem_arena *x,
         const str *name, const str *file, u64 line)
 {
     fsl_mem_arena nomem_arena = {0};

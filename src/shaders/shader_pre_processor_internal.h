@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +14,12 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file shader_pre_processor_internal.h
  *
  *  @brief pre-processing glsl shaders.
+ *
+ *  @internal
  */
 
 #ifndef FSL_SHADER_PRE_PROCESSOR_INTERNAL_H
@@ -29,21 +31,21 @@
 
 #define FSL_SHADER_PRE_PROCESSOR_INCLUDE_RECURSION_MAX 512
 
-/*!
- *  @internal
- *
+/**
  *  @brief process shader before compilation.
  *
- *  - parse includes recursively.
+ *  @internal
+ *
+ *  parses includes recursively.
  *
  *  @return `NULL` on failure and @ref fsl_err is set accordingly.
  */
-str *fsl_shader_pre_process_internal(const str *path, u64 *file_len);
+str *shader_pre_process_internal(const str *path, u64 *file_len);
 
-/*!
- *  @internal
- *
+/**
  *  @brief get shader type based on file name conventions.
+ *
+ *  @internal
  *
  *  examples:
  *      - file name "fbo.vert" -> shader type "GL_VERTEX_SHADER".
@@ -51,6 +53,6 @@ str *fsl_shader_pre_process_internal(const str *path, u64 *file_len);
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 fsl_shader_get_type_internal(const str *file, GLenum *type);
+u32 fsl_shader_type_get_internal(const str *file, GLenum *type);
 
 #endif /* FSL_SHADER_PRE_PROCESSOR_INTERNAL_H */

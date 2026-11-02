@@ -4,7 +4,7 @@
 #include "deps/fossil/logger/logger.h"
 #include "deps/fossil/memory/memory.h"
 
-#include "deps/fossil/h/dir.h"
+#include "deps/fossil/file_io/file_io.h"
 
 #include "h/main.h"
 #include "h/common.h"
@@ -46,9 +46,9 @@ u32 game_init(void)
             fsl_logger_stringf("Creating Main Directories '%s'..\n", FSL_SESSION.bin_root));
 
     for (i = 0; i < DIR_ROOT_COUNT; ++i)
-        if (fsl_is_dir_exists(DIR_ROOT[i], FALSE) != FSL_ERR_SUCCESS)
+        if (fsl_dir_is_exists(DIR_ROOT[i], FALSE) != FSL_ERR_SUCCESS)
         {
-            fsl_make_dir(DIR_ROOT[i]);
+            fsl_dir_make(DIR_ROOT[i]);
             if (*GAME_ERR != FSL_ERR_SUCCESS && *GAME_ERR != FSL_ERR_DIR_EXISTS)
                 return *GAME_ERR;
         }

@@ -100,43 +100,43 @@ void gui_update(v2i32 render_size)
     fsl_texture *texture_p = fsl_mem_handle_get(texture);
 
     /* element: crosshair */
-    fsl_ui_element_set_texture(&ui_element[UI_ELEMENT_CROSSHAIR], &texture_p[TEXTURE_CROSSHAIR]);
-    fsl_ui_element_set_uv(&ui_element[UI_ELEMENT_CROSSHAIR], 0, 0, 16, 16);
-    fsl_ui_element_set_position(&ui_element[UI_ELEMENT_CROSSHAIR],
+    fsl_ui_element_texture_set(&ui_element[UI_ELEMENT_CROSSHAIR], &texture_p[TEXTURE_CROSSHAIR]);
+    fsl_ui_element_uv_set(&ui_element[UI_ELEMENT_CROSSHAIR], 0, 0, 16, 16);
+    fsl_ui_element_position_set(&ui_element[UI_ELEMENT_CROSSHAIR],
             render_size.x / 2, render_size.y / 2, 0, 0, 0, 0);
-    fsl_ui_element_set_size(&ui_element[UI_ELEMENT_CROSSHAIR], 0, 0, 8, 8);
-    fsl_ui_element_set_scale(&ui_element[UI_ELEMENT_CROSSHAIR],
+    fsl_ui_element_size_set(&ui_element[UI_ELEMENT_CROSSHAIR], 0, 0, 8, 8);
+    fsl_ui_element_scale_set(&ui_element[UI_ELEMENT_CROSSHAIR],
             settings.gui_scale, settings.gui_scale);
-    fsl_ui_element_set_alignment(&ui_element[UI_ELEMENT_CROSSHAIR], 0, 0);
+    fsl_ui_element_alignment_set(&ui_element[UI_ELEMENT_CROSSHAIR], 0, 0);
 
     /* element: hotbar */
-    fsl_ui_element_set_texture(&ui_element[UI_ELEMENT_HOTBAR], &texture_p[TEXTURE_HOTBAR]);
-    fsl_ui_element_set_uv(&ui_element[UI_ELEMENT_HOTBAR], 0, 0, 169, 16);
-    fsl_ui_element_set_position(&ui_element[UI_ELEMENT_HOTBAR],
+    fsl_ui_element_texture_set(&ui_element[UI_ELEMENT_HOTBAR], &texture_p[TEXTURE_HOTBAR]);
+    fsl_ui_element_uv_set(&ui_element[UI_ELEMENT_HOTBAR], 0, 0, 169, 16);
+    fsl_ui_element_position_set(&ui_element[UI_ELEMENT_HOTBAR],
             render_size.x / 2, render_size.y, 0, 0, 0, -4);
-    fsl_ui_element_set_size(&ui_element[UI_ELEMENT_HOTBAR], 0, 0, 169, 16);
-    fsl_ui_element_set_scale(&ui_element[UI_ELEMENT_HOTBAR],
+    fsl_ui_element_size_set(&ui_element[UI_ELEMENT_HOTBAR], 0, 0, 169, 16);
+    fsl_ui_element_scale_set(&ui_element[UI_ELEMENT_HOTBAR],
             settings.gui_scale, settings.gui_scale);
-    fsl_ui_element_set_alignment(&ui_element[UI_ELEMENT_HOTBAR], 0, 1);
+    fsl_ui_element_alignment_set(&ui_element[UI_ELEMENT_HOTBAR], 0, 1);
 
     /* element: hotbar selected */
-    fsl_ui_element_set_texture(&ui_element[UI_ELEMENT_HOTBAR_SELECTED], &texture_p[TEXTURE_HOTBAR]);
-    fsl_ui_element_set_uv(&ui_element[UI_ELEMENT_HOTBAR_SELECTED], 0, 16, 18, 18);
-    fsl_ui_element_set_position(&ui_element[UI_ELEMENT_HOTBAR_SELECTED], 0, 0, 0, 0, -1, -1);
-    fsl_ui_element_set_size(&ui_element[UI_ELEMENT_HOTBAR_SELECTED], 0, 0, 18, 18);
-    fsl_ui_element_set_scale(&ui_element[UI_ELEMENT_HOTBAR_SELECTED],
+    fsl_ui_element_texture_set(&ui_element[UI_ELEMENT_HOTBAR_SELECTED], &texture_p[TEXTURE_HOTBAR]);
+    fsl_ui_element_uv_set(&ui_element[UI_ELEMENT_HOTBAR_SELECTED], 0, 16, 18, 18);
+    fsl_ui_element_position_set(&ui_element[UI_ELEMENT_HOTBAR_SELECTED], 0, 0, 0, 0, -1, -1);
+    fsl_ui_element_size_set(&ui_element[UI_ELEMENT_HOTBAR_SELECTED], 0, 0, 18, 18);
+    fsl_ui_element_scale_set(&ui_element[UI_ELEMENT_HOTBAR_SELECTED],
             settings.gui_scale, settings.gui_scale);
-    fsl_ui_element_set_alignment(&ui_element[UI_ELEMENT_HOTBAR_SELECTED], -1, -1);
+    fsl_ui_element_alignment_set(&ui_element[UI_ELEMENT_HOTBAR_SELECTED], -1, -1);
     fsl_ui_element_attach(&ui_element[UI_ELEMENT_HOTBAR], &ui_element[UI_ELEMENT_HOTBAR_SELECTED]);
 
     /* element: container inventory survival */
-    fsl_ui_element_set_texture(&ui_element[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL],
+    fsl_ui_element_texture_set(&ui_element[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL],
             &texture_p[TEXTURE_CONTAINER_INVENTORY_SURVIVAL]);
-    fsl_ui_element_set_uv(&ui_element[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL], 0, 0, 177, 177);
-    fsl_ui_element_set_position(&ui_element[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL],
+    fsl_ui_element_uv_set(&ui_element[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL], 0, 0, 177, 177);
+    fsl_ui_element_position_set(&ui_element[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL],
             render_size.x / 2, render_size.y / 2, 0, 0, 0, 0);
-    fsl_ui_element_set_size(&ui_element[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL], 0, 0, 177, 177);
-    fsl_ui_element_set_scale(&ui_element[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL],
+    fsl_ui_element_size_set(&ui_element[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL], 0, 0, 177, 177);
+    fsl_ui_element_scale_set(&ui_element[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL],
             settings.gui_scale, settings.gui_scale);
 
     gui_menu_title_update(render_size);

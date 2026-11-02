@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file buildtool_config.h
  *
  *  @brief build info to link the engine with external software.
@@ -27,11 +27,12 @@
 #define FSL_BUILDTOOL_CONFIG_H
 
 #include "common/api.h"
+
 #include "external/buildtool/buildtool.h"
 
 #if defined(FSL_PLATFORM_WIN)
 
-    /*!
+    /**
      *  @brief for the engine itself.
      */
     static const str fsl_str_libs_internal[][CMD_SIZE] =
@@ -45,7 +46,7 @@
         "-mwindows"
     };
 
-    /*!
+    /**
      *  @brief for the including software.
      */
     static const str fsl_str_libs[][CMD_SIZE] =
@@ -60,7 +61,7 @@
 
 #else
 
-    /*!
+    /**
      *  @brief for the engine itself.
      */
     static const str fsl_str_libs_internal[][CMD_SIZE] =
@@ -71,7 +72,7 @@
         "-lglfw"
     };
 
-    /*!
+    /**
      *  @brief for the including software.
      */
     static const str fsl_str_libs[][CMD_SIZE] =
@@ -86,23 +87,26 @@
 
 /* ---- section: signatures ------------------------------------------------- */
 
-/*!
- *  @brief link engine's dependencies with the including software for compile time.
+/**
+ *  @brief link engine's dependencies with the including software for compile
+ *  time.
  *
- *  @param cmd cmd to push engine's required libs to, if `NULL`, internal cmd is used.
+ *  @param cmd CMD to push engine's required libs to, if `NULL`, internal CMD is
+ *  used.
  */
-static void fsl_engine_link_libs(bt_buf *cmd);
+static void fsl_engine_libs_link(bt_buf *cmd);
 
-/*!
+/**
  *  @brief link engine's dependencies with the including software for run time.
  *
- *  @param cmd cmd to push application's runtime path to, if `NULL`, internal cmd is used.
+ *  @param cmd CMD to push application's runtime path to, if `NULL`, internal
+ *  CMD is used.
  */
-static void fsl_engine_set_runtime_path(bt_buf *cmd);
+static void fsl_engine_runtime_path_set(bt_buf *cmd);
 
 /* ---- section: implementation --------------------------------------------- */
 
-void fsl_engine_link_libs(bt_buf *cmd)
+void fsl_engine_libs_link(bt_buf *cmd)
 {
     u32 i = 0;
     bt_buf *cmdp = cmd;
@@ -113,7 +117,7 @@ void fsl_engine_link_libs(bt_buf *cmd)
         cmd_push(cmdp, fsl_str_libs[i]);
 }
 
-void fsl_engine_set_runtime_path(bt_buf *cmd)
+void fsl_engine_runtime_path_set(bt_buf *cmd)
 {
     bt_buf *cmdp = cmd;
     if (!cmd)

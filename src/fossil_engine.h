@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,19 +14,24 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file fossil_engine.h
  *
- *  @brief main engine header; include everything.
+ *  @brief engine's API main header; include everything.
+ *
+ *  any new headers created that belong to the engine's API should be included
+ *  here.
  */
 
 #ifndef FSL_FOSSIL_ENGINE_H
 #define FSL_FOSSIL_ENGINE_H
 
 #include "common/common.h"
+
 #include "assets/assets.h"
 #include "engine/engine.h"
 #include "engine/engine_assets.h"
+#include "file_io/file_io.h"
 #include "input/input.h"
 #include "logger/logger.h"
 #include "math/math.h"
@@ -40,7 +45,6 @@
 #include "string/string.h"
 #include "ui/ui.h"
 
-#include "h/dir.h"
 #include "h/process.h"
 #include "h/super_debugger.h"
 #include "h/time.h"

@@ -41,6 +41,7 @@ static str str_files[][CMD_SIZE] =
     DIR_SRC"assets/mesh/mesh_loader_obj.c",
     DIR_SRC"engine/engine.c",
     DIR_SRC"engine/engine_assets.c",
+    DIR_SRC"file_io/file_io.c",
     DIR_SRC"input/input.c",
     DIR_SRC"logger/logger.c",
     DIR_SRC"math/math.c",
@@ -54,7 +55,6 @@ static str str_files[][CMD_SIZE] =
     DIR_SRC"ui/ui.c",
     DIR_SRC"ui/ui_element.c",
     DIR_SRC"ui/ui_event.c",
-    DIR_SRC"dir.c",
     DIR_SRC FSL_FILE_NAME_PLATFORM,
     DIR_SRC"time.c"
 };
@@ -74,6 +74,7 @@ static str str_make_dir[][CMD_SIZE] =
     DIR_DST DIR_DEPS DIR_DST"assets/mesh/",
     DIR_DST DIR_DEPS DIR_DST"common/",
     DIR_DST DIR_DEPS DIR_DST"engine/",
+    DIR_DST DIR_DEPS DIR_DST"file_io/",
     DIR_DST DIR_DEPS DIR_DST"input/",
     DIR_DST DIR_DEPS DIR_DST"external/",
     DIR_DST DIR_DEPS DIR_DST"external/glad/",
@@ -100,7 +101,7 @@ static str str_make_dir_plugins[][CMD_SIZE] =
     DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/torus_noise/"
 };
 
-static str *copy_targets[][48] =
+static str *str_copy_operations[][48] =
 {
     {DIR_SRC"external/glfw3.h",             DIR_DST DIR_DEPS DIR_DST"external/"},
     {DIR_SRC"external/glad/gl.h",           DIR_DST DIR_DEPS DIR_DST"external/glad/"},
@@ -113,6 +114,7 @@ static str *copy_targets[][48] =
     {DIR_SRC"assets/mesh/mesh.h",           DIR_DST DIR_DEPS DIR_DST"assets/mesh/"},
     {DIR_SRC"engine/engine.h",              DIR_DST DIR_DEPS DIR_DST"engine/"},
     {DIR_SRC"engine/engine_assets.h",       DIR_DST DIR_DEPS DIR_DST"engine/"},
+    {DIR_SRC"file_io/file_io.h",            DIR_DST DIR_DEPS DIR_DST"file_io/"},
     {DIR_SRC"input/input.h",                DIR_DST DIR_DEPS DIR_DST"input/"},
     {DIR_SRC"input/input_key_codes.h",      DIR_DST DIR_DEPS DIR_DST"input/"},
     {DIR_SRC"logger/logger.h",              DIR_DST DIR_DEPS DIR_DST"logger/"},
@@ -134,10 +136,13 @@ static str *copy_targets[][48] =
     {DIR_SRC"ui/ui_types.h",                DIR_DST DIR_DEPS DIR_DST"ui/"}
 };
 
-static str *copy_targets_plugins[][48] =
+static str *str_copy_operations_plugins[][48] =
 {
-    {DIR_SRC"plugins/fsl_native/torus_noise/torus_noise.h", DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/torus_noise/"},
-    {DIR_SRC"plugins/fsl_native/torus_noise/torus_sample.h", DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/torus_noise/"}
+    {DIR_SRC"plugins/fsl_native/torus_noise/torus_noise.h",
+        DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/torus_noise/"},
+
+    {DIR_SRC"plugins/fsl_native/torus_noise/torus_sample.h",
+        DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/torus_noise/"}
 };
 
 int main(int argc, char **argv)
@@ -194,7 +199,7 @@ int main(int argc, char **argv)
     for (i = 0; i < arr_len(str_files_plugins); ++i)
         cmd_push(&cmd, str_files_plugins[i]);
 
-    fsl_engine_set_runtime_path(&cmd);
+    fsl_engine_runtime_path_set(&cmd);
     for (i = 0; i < arr_len(fsl_str_libs_internal); ++i)
         cmd_push(&cmd, fsl_str_libs_internal[i]);
 
@@ -220,12 +225,12 @@ int main(int argc, char **argv)
             copy_dir("lib/"PLATFORM,        DIR_DST DIR_DST, TRUE) != ERR_SUCCESS)
         cmd_fail(&cmd);
 
-    for (i = 0; i < arr_len(copy_targets); ++i)
-        if (copy_file(copy_targets[i][0], copy_targets[i][1]) != ERR_SUCCESS)
+    for (i = 0; i < arr_len(str_copy_operations); ++i)
+        if (copy_file(str_copy_operations[i][0], str_copy_operations[i][1]) != ERR_SUCCESS)
             cmd_fail(&cmd);
 
-    for (i = 0; i < arr_len(copy_targets_plugins); ++i)
-        if (copy_file(copy_targets_plugins[i][0], copy_targets_plugins[i][1]) != ERR_SUCCESS)
+    for (i = 0; i < arr_len(str_copy_operations_plugins); ++i)
+        if (copy_file(str_copy_operations_plugins[i][0], str_copy_operations_plugins[i][1]) != ERR_SUCCESS)
             cmd_fail(&cmd);
 
     return ERR_SUCCESS;

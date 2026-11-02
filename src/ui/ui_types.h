@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file ui_types.h
  *
  *  @brief UI element types.
@@ -51,8 +51,8 @@ struct fsl_ui_event
     v2f64 mouse_pos;
     v2f64 mouse_click_pos;
 
-    /* difference between mouse position and element
-     * position on mouse click.
+    /**
+     *  difference between mouse position and element position on mouse click.
      */
     v2f64 mouse_click_pos_diff;
 
@@ -77,21 +77,40 @@ struct fsl_ui_transform
     i32 slice_size;         /* 9-slice slice diameter, in pixels (optional) */
     v2i32 pos;              /* position on screen, in pixels */
     v2i32 offset;           /* offset on screen from `pos`, in pixels */
-    v2i32 offset_scaled;    /* offset on screen from `pos`, in pixels (scales with `scale`) */
+
+    /**
+     *  offset on screen from `pos`, in pixels. (scales with `scale`)
+     */
+    v2i32 offset_scaled;
+
     v2i32 size;             /* size on screen, in pixels */
-    v2i32 size_scaled;      /* size on screen, in pixels (scales with `scale`) */
+
+    /**
+     *  size on screen, in pixels. (scales with `scale`)
+     */
+    v2i32 size_scaled;
+
     v2f32 scale;            /* gui scaling, for 'scaled' parameters */
 
-    /*!
+    /**
      *  @brief alignment in respect to `pos`, `size` and `size_scaled`.
+     *
      *  <= -1: left-side/top is at `pos`.
      *  == 0: center is at `pos`.
      *  >= 1: right-side/bottom is at `pos`.
      */
     v2i32 align;
 
-    v2f32 uv_pos_baked;     /* baked absolute position in texture, in normalized coordinates */
-    v2f32 uv_size_baked;    /* baked absolute size in texture, in normalized coordinates */
+    /**
+     *  baked absolute position in texture, in normalized coordinates.
+     */
+    v2f32 uv_pos_baked;
+
+    /**
+     *  baked absolute size in texture, in normalized coordinates.
+     */
+    v2f32 uv_size_baked;
+
     v2f32 pos_local;        /* baked local position, in pixels */
     v2f32 pos_baked;        /* baked absolute position on screen, in pixels */
     v2f32 size_baked;       /* baked absolute size on screen, in pixels */

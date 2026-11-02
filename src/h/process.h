@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file process.h
  *
  *  @brief execute commands externally, identify current process, fork.
@@ -26,29 +26,33 @@
 #include "../common/api.h"
 #include "../common/types.h"
 
-/*!
- *  @brief get current path of binary/executable, slash (`/`) and null (`\0`) terminated,
- *  assign allocated path string (of size @ref FSL_PATH_CAP) to `dst`.
+/**
+ *  @brief get current path of binary/executable, slash (`/`) and null (`\0`)
+ *  terminated, assign allocated path string (of size @ref FSL_PATH_CAP) to
+ *  `dst`.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_get_path_bin_root(str **dst);
+FSLAPI u32 fsl_path_bin_root_get(str **dst);
 
-/*!
+/**
+ *  @brief get current path of binary/executable and assign to `dst`.
+ *
  *  @internal
  *
- *  @brief get current path of binary/executable and assign to `dst`.
  *  implemented in `platform_<PLATFORM>.c`.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-u32 fsl_get_path_bin_root_internal(str *dst);
+u32 path_bin_root_get_internal(str *dst);
 
-/*!
- *  @brief execute command in a separate child process (use @ref execvp() internally).
+/**
+ *  @brief execute command in a separate child process (use @ref execvp()
+ *  internally).
+ *
  *  implemented in `platform_<PLATFORM>.c`.
  *
- *  @param cmd command and args to execute.
+ *  @param cmd buffer of command and its args to execute.
  *  @param cmd_name command name (for logging).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.

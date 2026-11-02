@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file torus_sample.h
  *
  *  @brief general noise functions used to parse samples.
@@ -25,6 +25,7 @@
 
 #include "../../../common/api.h"
 #include "../../../common/types.h"
+
 #include "../../../math/vector.h"
 
 typedef struct fsl_torus_sample

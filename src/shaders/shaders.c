@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file shaders.c
  *
  *  @brief loading and unloading glsl shaders.
@@ -22,12 +22,12 @@
 
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
+
+#include "../file_io/file_io.h"
 #include "../assets/assets.h"
 #include "../logger/logger.h"
 #include "../logger/logger_messages_internal.h"
 #include "../memory/memory.h"
-
-#include "../h/dir.h"
 
 #include "shader_pre_processor_internal.h"
 #include "shaders.h"
@@ -43,7 +43,7 @@ u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created)
     GLenum type = 0;
     fsl_asset_metadata metadata = {0};
 
-    metadata = fsl_asset_get_metadata(shader->asset);
+    metadata = fsl_asset_metadata_get(shader->asset);
     if (!metadata.file || !metadata.path)
     {
         fsl_err = FSL_ERR_SHADER_TYPE_NULL;
@@ -51,21 +51,21 @@ u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created)
     }
 
     snprintf(temp, FSL_PATH_CAP, "%s%s", metadata.path, metadata.file);
-    if (fsl_is_file_exists(temp, FALSE) != FSL_ERR_SUCCESS)
+    if (fsl_file_is_exists(temp, FALSE) != FSL_ERR_SUCCESS)
     {
         fsl_err = FSL_ERR_SHADER_TYPE_NULL;
         return fsl_err;
     }
 
-    if (fsl_shader_get_type_internal(metadata.file, &type) != FSL_ERR_SUCCESS)
+    if (fsl_shader_type_get_internal(metadata.file, &type) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    shader->source = fsl_shader_pre_process_internal(temp, NULL);
+    shader->source = shader_pre_process_internal(temp, NULL);
     if (!shader->source)
     {
         LOGERROR(FSL_ERR_POINTER_NULL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Shader", metadata.name_id, "`fsl_shader_pre_process_internal()` Failed"));
+                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Shader", metadata.name_id, "`shader_pre_process_internal()` Failed"));
         if (shader_created)
             *shader_created = FALSE;
         return fsl_err;
@@ -228,19 +228,19 @@ u32 fsl_shader_program_init_ex(fsl_shader_program *program,
         const fsl_file *file_shader_fragment,
         const fsl_path *path)
 {
-    if (fsl_asset_set_metadata(&program->asset, FSL_ASSET_SHADER_PROGRAM, name, name_id,
+    if (fsl_asset_metadata_set(&program->asset, FSL_ASSET_SHADER_PROGRAM, name, name_id,
                 NULL, NULL) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    if (fsl_asset_set_metadata(&program->vertex.asset, FSL_ASSET_SHADER, name, name_id,
+    if (fsl_asset_metadata_set(&program->vertex.asset, FSL_ASSET_SHADER, name, name_id,
                 file_shader_vertex, path) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    if (fsl_asset_set_metadata(&program->geometry.asset, FSL_ASSET_SHADER, name, name_id,
+    if (fsl_asset_metadata_set(&program->geometry.asset, FSL_ASSET_SHADER, name, name_id,
                 file_shader_geometry, path) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    if (fsl_asset_set_metadata(&program->fragment.asset, FSL_ASSET_SHADER, name, name_id,
+    if (fsl_asset_metadata_set(&program->fragment.asset, FSL_ASSET_SHADER, name, name_id,
                 file_shader_fragment, path) != FSL_ERR_SUCCESS)
         return fsl_err;
 

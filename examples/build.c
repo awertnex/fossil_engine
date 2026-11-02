@@ -147,8 +147,8 @@ u32 build_game(int argc, char **argv)
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
     cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
-    fsl_engine_set_runtime_path(&cmd);
-    fsl_engine_link_libs(&cmd);
+    fsl_engine_runtime_path_set(&cmd);
+    fsl_engine_libs_link(&cmd);
     cmd_push(&cmd, "-o");
     cmd_push(&cmd, DIR_OUT_GAME"hhc");
     cmd_ready(&cmd);
@@ -181,8 +181,8 @@ u32 build_text_rendering(int argc, char **argv)
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
     cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
-    fsl_engine_link_libs(&cmd);
-    fsl_engine_set_runtime_path(&cmd);
+    fsl_engine_libs_link(&cmd);
+    fsl_engine_runtime_path_set(&cmd);
     cmd_push(&cmd, "-o");
     cmd_push(&cmd, DIR_OUT_TEXT_RENDERING"text_rendering");
     cmd_ready(&cmd);
@@ -214,8 +214,8 @@ u32 build_nine_slice(int argc, char **argv)
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
     cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
-    fsl_engine_link_libs(&cmd);
-    fsl_engine_set_runtime_path(&cmd);
+    fsl_engine_libs_link(&cmd);
+    fsl_engine_runtime_path_set(&cmd);
     cmd_push(&cmd, "-o");
     cmd_push(&cmd, DIR_OUT_NINE_SLICE"9s");
     cmd_ready(&cmd);
@@ -248,8 +248,8 @@ u32 build_composable_ui(int argc, char **argv)
     cmd_push(&cmd, "-std=c89");
     cmd_push(&cmd, "-Ofast");
     cmd_push(&cmd, "-L"DIR_ROOT"lib/"PLATFORM);
-    fsl_engine_link_libs(&cmd);
-    fsl_engine_set_runtime_path(&cmd);
+    fsl_engine_libs_link(&cmd);
+    fsl_engine_runtime_path_set(&cmd);
     cmd_push(&cmd, "-o");
     cmd_push(&cmd, DIR_OUT_COMPOSABLE_UI"ui");
     cmd_ready(&cmd);

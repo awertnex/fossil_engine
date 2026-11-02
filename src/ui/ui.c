@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file ui.c
  *
  *  @brief initializing UI module and drawing things on screen.
@@ -24,6 +24,7 @@
 #include "../common/diagnostics.h"
 #include "../common/limits.h"
 #include "../common/types.h"
+
 #include "../assets/assets.h"
 #include "../assets/asset_types.h"
 #include "../engine/engine.h"
@@ -66,14 +67,15 @@ static struct text_core
     f32 advance;
     v2f32 text_scale;
 
-    /*!
-     *  @brief iterator for `buf`, resets at @ref fsl_text_start() and @ref fsl_text_render().
+    /**
+     *  @brief iterator for `buf`, resets at @ref fsl_text_start() and
+     *  @ref fsl_text_render().
      */
     GLuint cursor;
 
-    /*!
+    /**
      *  @brief text buffer, raw text data.
-    */
+     */
     struct fsl_text_data *buf;
 
     u64 buf_len;
@@ -90,7 +92,7 @@ static struct ui_core
     GLuint vertex_data_curr_quad;
     b8 vao_loaded;
 
-    /*!
+    /**
      *  @brief quad buffer, raw UI quad data.
      */
     fsl_ui_drawable_quad *quad_buf;
@@ -124,7 +126,7 @@ static struct ui_core
 
 /* ---- section: declarations ----------------------------------------------- */
 
-static f32 vertex_buf_ui_unit_quad_internal[] =
+static f32 vertex_buf_ui_unit_quad[] =
 {
     0.0f, -1.0f, 0.0f, 1.0f,
     0.0f, 0.0f, 0.0f, 0.0f,
@@ -133,6 +135,13 @@ static f32 vertex_buf_ui_unit_quad_internal[] =
 };
 
 fsl_render *render = NULL;
+
+static void ui_text_align_x_none_func(const str *text, i64 i, f32 advance);
+static void ui_text_align_x_center_func(const str *text, i64 i, f32 advance);
+static void ui_text_align_x_right_func(const str *text, i64 i, f32 advance);
+static void ui_text_align_y_none_func(u64 end, f32 height);
+static void ui_text_align_y_center_func(u64 end, f32 height);
+static void ui_text_align_y_bottom_func(u64 end, f32 height);
 
 /* ---- section: text ------------------------------------------------------- */
 
@@ -155,8 +164,8 @@ u32 ui_text_init_internal(void)
 
         glGenBuffers(1, &text_core.vertex_data_unit_quad);
         glBindBuffer(GL_ARRAY_BUFFER, text_core.vertex_data_unit_quad);
-        glBufferData(GL_ARRAY_BUFFER, fsl_arr_len(vertex_buf_ui_unit_quad_internal) * sizeof(f32),
-                &vertex_buf_ui_unit_quad_internal, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, fsl_arr_len(vertex_buf_ui_unit_quad) * sizeof(f32),
+                &vertex_buf_ui_unit_quad, GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
@@ -291,8 +300,8 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
     f32 descent = 0.0f, line_height = 0.0f;
     struct fsl_glyphf *g = NULL;
     f32 _window_x = (f32)window_x * render_internal.ndc_scale.x;
-    void (*align_x_func)(const str *, i64, f32) = &ui_text_align_x_none_internal;
-    void (*align_y_func)(u64, f32) = &ui_text_align_y_none_internal;
+    void (*align_x_func)(const str *, i64, f32) = &ui_text_align_x_none_func;
+    void (*align_y_func)(u64, f32) = &ui_text_align_y_none_func;
 
     if (!text_core.buf)
     {
@@ -334,14 +343,14 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
     }
 
     if (align_x == FSL_TEXT_ALIGN_CENTER)
-        align_x_func = &ui_text_align_x_center_internal;
+        align_x_func = &ui_text_align_x_center_func;
     else if (align_x == FSL_TEXT_ALIGN_RIGHT)
-        align_x_func = &ui_text_align_x_right_internal;
+        align_x_func = &ui_text_align_x_right_func;
 
     if (align_y == FSL_TEXT_ALIGN_CENTER)
-        align_y_func = &ui_text_align_y_center_internal;
+        align_y_func = &ui_text_align_y_center_func;
     else if (align_y == FSL_TEXT_ALIGN_BOTTOM)
-        align_y_func = &ui_text_align_y_bottom_internal;
+        align_y_func = &ui_text_align_y_bottom_func;
 
     pos_x *= render_internal.ndc_scale.x;
     pos_y *= render_internal.ndc_scale.y;
@@ -393,7 +402,7 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
     align_y_func(text_core.cursor, text_core.line_height_total);
 }
 
-void ui_text_align_x_center_internal(const str *text, i64 i, f32 advance)
+void ui_text_align_x_center_func(const str *text, i64 i, f32 advance)
 {
     i64 j = 1;
     advance *= 0.5f;
@@ -401,14 +410,14 @@ void ui_text_align_x_center_internal(const str *text, i64 i, f32 advance)
         text_core.buf[text_core.cursor - j].pos.x -= advance;
 }
 
-void ui_text_align_x_right_internal(const str *text, i64 i, f32 advance)
+void ui_text_align_x_right_func(const str *text, i64 i, f32 advance)
 {
     i64 j = 1;
     for (; i - j >= 0 && text[i - j] != '\n' && text[i - j] != '\r'; ++j)
         text_core.buf[text_core.cursor - j].pos.x -= advance;
 }
 
-void ui_text_align_x_none_internal(const str *text, i64 i, f32 advance)
+void ui_text_align_x_none_func(const str *text, i64 i, f32 advance)
 {
     (void)text;
     (void)i;
@@ -416,7 +425,7 @@ void ui_text_align_x_none_internal(const str *text, i64 i, f32 advance)
     return;
 }
 
-void ui_text_align_y_center_internal(u64 end, f32 height)
+void ui_text_align_y_center_func(u64 end, f32 height)
 {
     u64 i = 0;
     height *= 0.5f;
@@ -424,14 +433,14 @@ void ui_text_align_y_center_internal(u64 end, f32 height)
         text_core.buf[i].pos.y += height;
 }
 
-void ui_text_align_y_bottom_internal(u64 end, f32 height)
+void ui_text_align_y_bottom_func(u64 end, f32 height)
 {
     u64 i = 0;
     for (; i < end; ++i)
         text_core.buf[i].pos.y += height;
 }
 
-void ui_text_align_y_none_internal(u64 end, f32 height)
+void ui_text_align_y_none_func(u64 end, f32 height)
 {
     (void)end;
     (void)height;
@@ -474,7 +483,7 @@ void fsl_text_render(b8 shadow, u32 shadow_color)
     text_core.advance = 0.0f;
 }
 
-f32 fsl_get_text_height(void)
+f32 fsl_text_height_get(void)
 {
     return text_core.line_height_total * text_core.text_scale.y;
 }
@@ -501,8 +510,8 @@ u32 fsl_ui_init(void)
 
         glGenBuffers(1, &ui_core.vertex_data_unit_quad);
         glBindBuffer(GL_ARRAY_BUFFER, ui_core.vertex_data_unit_quad);
-        glBufferData(GL_ARRAY_BUFFER, fsl_arr_len(vertex_buf_ui_unit_quad_internal) * sizeof(f32),
-                &vertex_buf_ui_unit_quad_internal, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, fsl_arr_len(vertex_buf_ui_unit_quad) * sizeof(f32),
+                &vertex_buf_ui_unit_quad, GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
@@ -636,7 +645,7 @@ void fsl_ui_element_draw(fsl_ui_element *element)
     {
         if (element->flag & FSL_FLAG_UI_9_SLICE)
         {
-            panel = fsl_get_nine_slice_internal(element);
+            panel = fsl_nine_slice_get_internal(element);
             buf = &panel;
             buf_size = sizeof(fsl_panel_nine_slice);
             instance_count = 9;
@@ -733,7 +742,7 @@ void fsl_ui_free(void)
     }
 }
 
-fsl_panel_nine_slice fsl_get_nine_slice_internal(fsl_ui_element *element)
+fsl_panel_nine_slice fsl_nine_slice_get_internal(fsl_ui_element *element)
 {
     fsl_panel_nine_slice panel = {0};
     fsl_ui_transform *t = &element->transform;

@@ -178,7 +178,7 @@ void player_hotbar_selected_set(hhc_player *p, u32 index)
 {
     p->hotbar_slot_selected = index;
 
-    fsl_ui_element_set_position(&ui_element[UI_ELEMENT_HOTBAR_SELECTED],
+    fsl_ui_element_position_set(&ui_element[UI_ELEMENT_HOTBAR_SELECTED],
             0, 0, 0, 0, p->hotbar_slot_selected * 17 - 1, -1);
 }
 
@@ -279,7 +279,7 @@ void player_collision_update(hhc_player *p, f64 dt)
                     block_box.size.y = 1.0;
                     block_box.size.z = 1.0;
 
-                    p->collision_info = fsl_get_swept_aabb(p->bbox, block_box, displacement);
+                    p->collision_info = fsl_swept_aabb_get(p->bbox, block_box, displacement);
 
                     if (p->collision_info.hit)
                     {
@@ -767,7 +767,7 @@ void player_kill(hhc_player *p)
 
 str *get_death_str(hhc_player *p)
 {
-    u64 index = fsl_rand_u32(fsl_get_time_raw_usec());
+    u64 index = fsl_rand_u32(fsl_time_raw_usec_get());
     index %= DEATH_STRINGS_MAX[p->death];
 
     switch (p->death)

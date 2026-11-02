@@ -1,4 +1,4 @@
-/*!
+/**
  *  Copyright 2026 Lily Awertnex
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/*!
+/**
  *  @file engine_assets.c
  *
  *  @brief loading and unloading engine's default assets.
@@ -23,6 +23,7 @@
 #include "../common/config.h"
 #include "../common/diagnostics.h"
 #include "../common/types.h"
+
 #include "../assets/assets.h"
 #include "../memory/memory.h"
 #include "../shaders/shader_types.h"
@@ -42,8 +43,7 @@ fsl_mesh fsl_mesh_unit_quad = {0};
 
 /* ---- section: implementation --------------------------------------------- */
 
-#include <assert.h>
-u32 fsl_engine_assets_init(void)
+u32 engine_assets_init_internal(void)
 {
     fsl_texture *texture_p = NULL;
     fsl_shader_program *shader_p = NULL;
@@ -53,16 +53,16 @@ u32 fsl_engine_assets_init(void)
     /* ---- engine textures ------------------------------------------------- */
 
     if (fsl_mem_arena_push(&mem_arena_internal, &fsl_texture_buf,
-                FSL_TEXTURE_INDEX_COUNT * sizeof(fsl_texture), "fsl_engine_assets_init().fsl_texture_buf") != FSL_ERR_SUCCESS)
+                FSL_TEXTURE_INDEX_COUNT * sizeof(fsl_texture), "engine_assets_init_internal().fsl_texture_buf") != FSL_ERR_SUCCESS)
         goto cleanup;
     if (fsl_mem_arena_push(&mem_arena_internal, &fsl_shader_buf,
-                FSL_SHADER_INDEX_COUNT * sizeof(fsl_shader_program), "fsl_engine_assets_init().fsl_shader_buf") != FSL_ERR_SUCCESS)
+                FSL_SHADER_INDEX_COUNT * sizeof(fsl_shader_program), "engine_assets_init_internal().fsl_shader_buf") != FSL_ERR_SUCCESS)
         goto cleanup;
     if (fsl_mem_arena_push(&mem_arena_internal, &fsl_font_buf,
-                FSL_FONT_INDEX_COUNT * sizeof(fsl_font), "fsl_engine_assets_init().fsl_font_buf") != FSL_ERR_SUCCESS)
+                FSL_FONT_INDEX_COUNT * sizeof(fsl_font), "engine_assets_init_internal().fsl_font_buf") != FSL_ERR_SUCCESS)
         goto cleanup;
     if (fsl_mem_arena_push(&mem_arena_internal, &fsl_mesh_buf,
-                FSL_MESH_INDEX_COUNT * sizeof(fsl_mesh), "fsl_engine_assets_init().fsl_mesh_buf") != FSL_ERR_SUCCESS)
+                FSL_MESH_INDEX_COUNT * sizeof(fsl_mesh), "engine_assets_init_internal().fsl_mesh_buf") != FSL_ERR_SUCCESS)
         goto cleanup;
 
     texture_p = fsl_mem_handle_get(fsl_texture_buf);
@@ -110,7 +110,7 @@ u32 fsl_engine_assets_init(void)
     if (fsl_mesh_load(&mesh_p[FSL_MESH_INDEX_SKYBOX], "Skybox", "skybox", "skybox.obj", FSL_DIR_NAME_MODELS) != FSL_ERR_SUCCESS)
         goto cleanup;
 
-    if (fsl_asset_set_metadata(&fsl_mesh_unit_quad.asset, FSL_ASSET_MESH, "Unit Quad", "unit_quad", NULL, NULL) != FSL_ERR_SUCCESS)
+    if (fsl_asset_metadata_set(&fsl_mesh_unit_quad.asset, FSL_ASSET_MESH, "Unit Quad", "unit_quad", NULL, NULL) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     /* ---- engine shaders -------------------------------------------------- */
@@ -139,19 +139,19 @@ u32 fsl_engine_assets_init(void)
 
     if (
             fsl_font_init(&font_p[FSL_FONT_INDEX_DEJAVU_SANS], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans (ANSI)", "dejavu_sans_ansi", "dejavu-fonts-ttf/dejavu_sans_ansi.ttf",
+                "DejaVu Sans (Latin-1)", "dejavu_sans_latin_1", "dejavu-fonts-ttf/dejavu_sans_latin_1.ttf",
                 FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
 
             fsl_font_init(&font_p[FSL_FONT_INDEX_DEJAVU_SANS_BOLD], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans Bold (ANSI)", "dejavu_sans_bold_ansi", "dejavu-fonts-ttf/dejavu_sans_bold_ansi.ttf",
+                "DejaVu Sans Bold (Latin-1)", "dejavu_sans_bold_latin_1", "dejavu-fonts-ttf/dejavu_sans_bold_latin_1.ttf",
                 FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
 
             fsl_font_init(&font_p[FSL_FONT_INDEX_DEJAVU_SANS_MONO], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans Mono (ANSI)", "dejavu_sans_mono_ansi", "dejavu-fonts-ttf/dejavu_sans_mono_ansi.ttf",
+                "DejaVu Sans Mono (Latin-1)", "dejavu_sans_mono_latin_1", "dejavu-fonts-ttf/dejavu_sans_mono_latin_1.ttf",
                 FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS ||
 
             fsl_font_init(&font_p[FSL_FONT_INDEX_DEJAVU_SANS_MONO_BOLD], FSL_FONT_RESOLUTION_DEFAULT,
-                "DejaVu Sans Mono Bold (ANSI)", "dejavu_sans_mono_bold_ansi", "dejavu-fonts-ttf/dejavu_sans_mono_bold_ansi.ttf",
+                "DejaVu Sans Mono Bold (Latin-1)", "dejavu_sans_mono_bold_latin_1", "dejavu-fonts-ttf/dejavu_sans_mono_bold_latin_1.ttf",
                 FSL_DIR_NAME_FONTS) != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -163,7 +163,7 @@ cleanup:
     return fsl_err;
 }
 
-void fsl_assets_free(void)
+void engine_assets_free_internal(void)
 {
     i32 i = 0;
     fsl_texture *texture_p = NULL;
