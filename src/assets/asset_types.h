@@ -68,7 +68,8 @@ typedef struct fsl_projection       fsl_projection;
 typedef struct fsl_camera           fsl_camera;
 
 /**
- *  @remark defined in @ref assets.h
+ *  @remark defined in @ref assets.h because the definition requires includes
+ *  that shouldn't be included via this file.
  */
 typedef struct fsl_model            fsl_model;
 
@@ -85,7 +86,13 @@ typedef enum fsl_asset_type
 } fsl_asset_type;
 
 /**
- *  @remark this struct should be filled using the function @ref fsl_set_asset_metadata().
+ *  @brief asset header to distinguish an asset by its unique ID and other
+ *  related data.
+ *
+ *  this definition is embedded at the top of every asset definition.
+ *
+ *  @remark this struct should be filled using the function
+ *  @ref fsl_asset_metadata_set().
  */
 struct fsl_asset
 {
@@ -124,14 +131,14 @@ struct fsl_asset
     /**
      *  @remark `TRUE` does not mean 'has metadata', it means whatever the asset
      *  requires to be fully initialized and usable is fulfilled
-     *  (e.g., texture generated and uploaded to VRAM).
+     *  (e.g., texture is generated and uploaded to VRAM).
      */
     b8 initialized;
 }; /* fsl_asset */
 
 /**
  *  @remark this struct can be filled using the function
- *  @ref fsl_get_asset_metadata().
+ *  @ref fsl_asset_metadata_get().
  */
 struct fsl_asset_metadata
 {
@@ -164,7 +171,7 @@ struct fsl_texture
     v2i32 size;
 
     /**
-     *  @brief used by 'OpenGL' extension @ref GL_ARB_bindless_texture.
+     *  @brief used by 'OpenGL' extension 'GL_ARB_bindless_texture'.
      */
     u64 bindless_handle;
 
@@ -210,15 +217,39 @@ struct fsl_font
     fsl_glyph glyph[FSL_GLYPH_MAX];
 }; /* fsl_font */
 
+/**
+ *  @brief group of matrices required to create a camera perspective matrix.
+ */
 struct fsl_projection
 {
+    /**
+     *  @brief a point in space one unit in front of a camera.
+     *
+     *  this matrix is not multiplied by any matrices here.
+     */
     m4f32 target;
-    m4f32 translation;
-    m4f32 rotation;
+
+    m4f32 translation;  /* position in space */
+    m4f32 rotation;     /* rotation in space */
+
+    /**
+     *  @brief re-orient the view to follow the Cartesian Coordinate System
+     *  (+X forward, +Y left, +Z up).
+     */
     m4f32 orientation;
+
+    /**
+     *  @brief the combination of `translation`, `rotation` and `orientation`.
+     */
     m4f32 view;
-    m4f32 projection;
+
+    m4f32 projection;   /* the projection matrix */
+
+    /**
+     *  @brief the combination of `view` and `projection`, the final matrix.
+     */
     m4f32 perspective;
+
 }; /* fsl_projection */
 
 struct fsl_camera
@@ -228,7 +259,7 @@ struct fsl_camera
     angle_f64 pitch;
     angle_f64 yaw;
     f32 fovy;
-    f32 fovy_smooth;
+    f32 fovy_smooth;    /* used to lerp `fovy` */
     f32 ratio;
     f32 far;
     f32 near;

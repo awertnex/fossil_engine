@@ -52,7 +52,7 @@ FSLAPI void fsl_shader_free(fsl_shader *shader);
  *  - call @ref fsl_shader_init() on all shaders in `program` if
  *    @ref fsl_shader.asset.file and @ref fsl_shader.asset.path are not `NULL`.
  *
- *  @remark function @ref fsl_asset_set_metadata() must be used to initialize paths
+ *  @remark function @ref fsl_asset_metadata_set() must be used to initialize paths
  *  and file names for each shader within the program before calling this function.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
@@ -62,7 +62,7 @@ FSLAPI u32 fsl_shader_program_init(fsl_shader_program *program);
 /**
  *  @brief initialize a shader program explicitly.
  *
- *  instead of calling @ref fsl_asset_set_metadata() on all shaders before
+ *  instead of calling @ref fsl_asset_metadata_set() on all shaders before
  *  calling @ref fsl_shader_program_init(), this function combines these calls.
  *
  *  it is good practice to use this for init time while using @ref fsl_shader_program_init()

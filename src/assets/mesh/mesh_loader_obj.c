@@ -77,7 +77,7 @@ struct triangle_indices
  *
  *  @remark result indices are 1-based so to separate 0 (first index) from 0 (no index).
  */
-static void get_vertex_indices_internal(str *token, struct vertex_indices *vertex,
+static void vertex_indices_get_internal(str *token, struct vertex_indices *vertex,
         fsl_len pos_len, fsl_len uv_len, fsl_len normal_len);
 
 u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_array *index_dst)
@@ -198,7 +198,7 @@ u32 mesh_load_obj_internal(const fsl_fs_path *path, fsl_array *vertex_dst, fsl_a
             i = 0;
             while ((token = strtok_r(NULL, delim, &token_save[0])) != NULL)
             {
-                get_vertex_indices_internal(token, &vertex_indices,
+                vertex_indices_get_internal(token, &vertex_indices,
                         vertex_buf.cursor / sizeof(v3f32),
                         uv_buf.cursor / sizeof(v2f32),
                         normal_buf.cursor / sizeof(v3f32));
@@ -270,7 +270,7 @@ cleanup:
     return fsl_err;
 }
 
-static void get_vertex_indices_internal(str *token, struct vertex_indices *vertex,
+static void vertex_indices_get_internal(str *token, struct vertex_indices *vertex,
         fsl_len pos_len, fsl_len uv_len, fsl_len normal_len)
 {
     str *p = token;

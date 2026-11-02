@@ -43,7 +43,7 @@ u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created)
     GLenum type = 0;
     fsl_asset_metadata metadata = {0};
 
-    metadata = fsl_asset_get_metadata(shader->asset);
+    metadata = fsl_asset_metadata_get(shader->asset);
     if (!metadata.file || !metadata.path)
     {
         fsl_err = FSL_ERR_SHADER_TYPE_NULL;
@@ -228,19 +228,19 @@ u32 fsl_shader_program_init_ex(fsl_shader_program *program,
         const fsl_file *file_shader_fragment,
         const fsl_path *path)
 {
-    if (fsl_asset_set_metadata(&program->asset, FSL_ASSET_SHADER_PROGRAM, name, name_id,
+    if (fsl_asset_metadata_set(&program->asset, FSL_ASSET_SHADER_PROGRAM, name, name_id,
                 NULL, NULL) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    if (fsl_asset_set_metadata(&program->vertex.asset, FSL_ASSET_SHADER, name, name_id,
+    if (fsl_asset_metadata_set(&program->vertex.asset, FSL_ASSET_SHADER, name, name_id,
                 file_shader_vertex, path) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    if (fsl_asset_set_metadata(&program->geometry.asset, FSL_ASSET_SHADER, name, name_id,
+    if (fsl_asset_metadata_set(&program->geometry.asset, FSL_ASSET_SHADER, name, name_id,
                 file_shader_geometry, path) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    if (fsl_asset_set_metadata(&program->fragment.asset, FSL_ASSET_SHADER, name, name_id,
+    if (fsl_asset_metadata_set(&program->fragment.asset, FSL_ASSET_SHADER, name, name_id,
                 file_shader_fragment, path) != FSL_ERR_SUCCESS)
         return fsl_err;
 

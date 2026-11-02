@@ -38,7 +38,7 @@
 #include <stdio.h>
 #include <string.h>
 
-b8 mesh_is_cooked(const fsl_fs_path *path)
+b8 mesh_is_cooked_internal(const fsl_fs_path *path)
 {
     fsl_fs_path path_temp[FSL_PATH_CAP] = {0};
     str *extension = NULL;
@@ -174,4 +174,3 @@ u32 mesh_export_fmesh_internal(const fsl_fs_path *path, fsl_array vertex_buf, fs
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
-

@@ -30,8 +30,8 @@
  *
  *  @brief initialize and allocate resources for @ref fsl_rand_tab.
  *
- *  allocate resources for @ref fsl_rand_tab and load its look-up from disk if found
- *  and build if not found.
+ *  allocates resources for @ref fsl_rand_tab and loads its look-up from disk if
+ *  found and builds if not.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */

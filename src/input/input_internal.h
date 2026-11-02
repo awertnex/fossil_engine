@@ -342,14 +342,14 @@ fsl_key_bind key_bind_init_internal(fsl_keyboard_key key,
  *  - update parameters at @ref fsl_render.mouse_pos and @ref fsl_render.mouse_delta
  *    of the currently bound `fsl_render`.
  *
- *  @remark called automatically from @ref fsl_engine_running().
+ *  @remark called automatically from @ref fsl_engine_is_running().
  */
 void input_mouse_movement_update_internal(void);
 
 /**
  *  @brief update internal mouse and key states: press, double-press, hold and release.
  *
- *  @remark called automatically from @ref fsl_engine_running().
+ *  @remark called automatically from @ref fsl_engine_is_running().
  */
 void input_key_states_update_internal(void);
 

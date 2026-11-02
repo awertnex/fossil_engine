@@ -24,6 +24,8 @@ shaders.
   can not be broken into multiple lines, like URLs or examples of long text).
 - indent size is 4.
 - tabs are forbidden, all whitespace must use spaces.
+- any new headers created that should belong to the engine's API should be
+  included in `src/fossil_engine.h`, which is the engine's API main header.
 
 ### 2.2 includes
 includes from within the code-base should be written as a relative path, and in
@@ -57,7 +59,7 @@ single empty line:
 categories and their order, from top to bottom:
 - `common/` module includes (in `src/common/`).
 - other modules' includes (modules are described in `README.md`).
-- `h/` directory includes (in `src/h/`, will be removed soon).
+- `h/` directory includes.
 - module's own includes (if the including file is within a module).
 - external includes (extensions and/or plug-ins, usually in `src/external/`).
 - system includes.
@@ -180,6 +182,39 @@ and files:
  * |   | - string_internal.h   <- for the engine only
  * | - ui/
  */
+```
+
+symbols declared publicly within source files shouldn't have the engine's
+abbreviation in them:
+```c
+static i32 global_variable_internal;        /* good */
+static i32 fsl_global_variable_internal;    /* bad */
+```
+
+C89 does not allow compound literals, to go around this, declare an empty symbol
+at the top of the function and use it to zero-out the target symbol:
+```c
+void func(fsl_projection *projection)
+{
+    fsl_projection noprojection = {0};
+
+    if (fail)
+    {
+        *projection = noprojection; /* clear the target this way */
+        return;
+    }
+
+    /* more stuff ... */
+}
+```
+
+the symbol should have the same name as the target symbol, with `no` at the
+beginning and no underscore.
+
+function parameters that take `fsl_` typed pointers preferably should have the
+same name as the type without `fsl_`:
+```c
+void func(fsl_projection *projection, fsl_camera *camera, fsl_texture *texture);
 ```
 
 declarations must not mix with code, they must be at the top of the function:
@@ -334,15 +369,13 @@ operation categories:
 
 order of keywords in "`action`" category:
 ```c
-i32 fsl_asset_name_get();
-
 i32 fsl_asset_name_get_internal();
 /*  |   |     |    |   |
  *  |   |     |    |   scope qualifier, if applicable.
  *  |   |     |    operation (e.g., `get`/`set`/`update`/`destroy`/etc..).
  *  |   |     subject (e.g., `name`/`metadata`/etc..).
  *  |   module's abbreviation, if applicable (e.g., `asset`/`log`/`mem`/etc..).
- *  engine's abbreviation.
+ *  engine's abbreviation, if applicable.
  */
 
 i32 fsl_render_settings_update();
@@ -596,10 +629,10 @@ typedef struct fsl_foo
      */
     i32 var_3;
 
-    struct fsl_bar
+    struct /* fsl_bar */
     {
         i32 var_4;
-    };
+    } fsl_bar;
 
 } fsl_foo;
 ```

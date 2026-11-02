@@ -51,7 +51,7 @@ struct fsl_render
     /**
      *  @brief conversion from world-space to screen-space.
      *
-     *  @remark read-only, updated internally in @ref fsl_engine_running().
+     *  @remark read-only, updated internally in @ref fsl_engine_is_running().
      */
     v2f32 ndc_scale;
 
@@ -66,6 +66,7 @@ struct fsl_render
      *  @brief for reading screen pixels back to RAM (e.g., screenshots).
      */
     u8 *screen_buf;
+
 }; /* fsl_render */
 
 /* ---- section: declarations ----------------------------------------------- */
@@ -126,22 +127,25 @@ FSLAPI u32 fsl_engine_init(int argc, char **argv, const str *title,
  *  @return `TRUE` unless @ref glfwWindowShouldClose() returns `FALSE` or
  *  @ref fsl_request_engine_close() has been called.
  */
-FSLAPI b8 fsl_engine_running(void (*callback_framebuffer_size)(i32 size_x, i32 size_y));
+FSLAPI b8 fsl_engine_is_running(void (*callback_framebuffer_size)(i32 size_x, i32 size_y));
 
 /**
  *  @brief update render settings (e.g., render size).
  *
- *  - update @ref fsl_render.size of the currently bound @ref fsl_render to window size.
- *  - update @ref fsl_render.ndc_scale of the currently bound @ref fsl_render.
+ *  - updates @ref fsl_render.size of the currently bound @ref fsl_render to
+ *    window size.
  *
- *  @remark called automatically from @ref fsl_engine_running().
+ *  - updates @ref fsl_render.ndc_scale of the currently bound @ref fsl_render.
+ *
+ *  @remark called automatically from @ref fsl_engine_is_running().
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_update_render_settings(void (*callback_framebuffer_size)(i32 size_x, i32 size_y));
+FSLAPI u32 fsl_render_settings_update(void (*callback_framebuffer_size)(i32 size_x, i32 size_y));
 
 /**
- *  @brief send engine close request to then be processed by @ref fsl_engine_running().
+ *  @brief send engine close request to then be processed by
+ *  @ref fsl_engine_is_running().
  */
 FSLAPI void fsl_request_engine_close(void);
 
@@ -160,7 +164,7 @@ FSLAPI void fsl_engine_close(void);
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_engine_get_string(str *dst, enum fsl_engine_string_index type);
+FSLAPI u32 fsl_engine_string_get(str *dst, enum fsl_engine_string_index type);
 
 /**
  *  @brief initialize 'GLFW'.
@@ -203,21 +207,21 @@ FSLAPI u32 fsl_glad_init(void);
 FSLAPI fsl_render *fsl_render_get(void);
 
 /**
- *  @brief switch engine's currently bound @ref fsl_render to `r`.
+ *  @brief set engine's currently bound @ref fsl_render to `r`.
  */
-FSLAPI u32 fsl_change_render(fsl_render *r);
+FSLAPI u32 fsl_render_set(fsl_render *r);
 
 /**
  *  @brief send skip-mouse-delta request so to not consume mouse delta for a single frame.
  *
  *  centering cursor on screen can produce mouse-delta spikes, this is useful for skipping them.
  */
-FSLAPI void fsl_request_skip_mouse_delta(void);
+FSLAPI void fsl_request_mouse_delta_skip(void);
 
 /**
- *  @brief send screenshot request to then be processed by @ref fsl_process_screenshot_request().
+ *  @brief send screenshot request to then be processed by @ref fsl_screenshot_request_respond().
  *
- *  can be called from anywhere, then @ref fsl_process_screenshot_request() can be called
+ *  can be called from anywhere, then @ref fsl_screenshot_request_respond() can be called
  *  to take the screenshot at the end of the render loop.
  */
 FSLAPI void fsl_request_screenshot(void);
@@ -232,11 +236,9 @@ FSLAPI void fsl_request_screenshot(void);
  *  @remark if directory not found, screenshot is still saved at @ref fsl_render.screen_buf
  *  of the currently bound @ref fsl_render.
  *
- *  @remark this function is a thin wrapper around an internal, heavier function that carries all the logic.
- *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_process_screenshot_request(const str *dir_screenshots, const str *special_text);
+FSLAPI u32 fsl_screenshot_request_respond(const str *dir_screenshots, const str *special_text);
 
 /**
  *  @brief bind internal framebuffer for rendering.
@@ -244,7 +246,7 @@ FSLAPI u32 fsl_process_screenshot_request(const str *dir_screenshots, const str 
 FSLAPI void fsl_fbo_bind(void);
 
 /**
- *  @brief blit rendered internal framebuffer (e.g., text, ui elements) onto `fbo`.
+ *  @brief blit rendered internal framebuffer (e.g., text, UI elements) onto `fbo`.
  */
 FSLAPI void fsl_fbo_blit(GLuint fbo);
 

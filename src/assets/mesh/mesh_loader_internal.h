@@ -70,7 +70,7 @@ struct mesh_vertex
  *
  *  @return FALSE on failure.
  */
-b8 mesh_is_cooked(const fsl_fs_path *path);
+b8 mesh_is_cooked_internal(const fsl_fs_path *path);
 
 /**
  *  @internal

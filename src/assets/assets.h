@@ -59,10 +59,10 @@ struct fsl_model
 /**
  *  @brief get an asset's metadata (e.g., name, name_id, etc..).
  */
-FSLAPI fsl_asset_metadata fsl_asset_get_metadata(fsl_asset asset);
+FSLAPI fsl_asset_metadata fsl_asset_metadata_get(fsl_asset asset);
 
 /**
- *  @brief set a single asset's metadata.
+ *  @brief set an asset's metadata.
  *
  *  @param type asset type (enum @ref fsl_asset_type).
  *  @param name asset display name (optional).
@@ -79,7 +79,7 @@ FSLAPI fsl_asset_metadata fsl_asset_get_metadata(fsl_asset asset);
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-FSLAPI u32 fsl_asset_set_metadata(fsl_asset *asset, fsl_asset_type type,
+FSLAPI u32 fsl_asset_metadata_set(fsl_asset *asset, fsl_asset_type type,
         const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file, const fsl_path *path);
 
 /**
@@ -113,15 +113,15 @@ FSLAPI void fsl_fbo_free(fsl_fbo *fbo);
 /**
  *  @brief load image data from disk into @ref texture->buf and set texture info.
  *
- *  @param name asset display name (optional) (@ref fsl_asset_set_metadata() parameter).
+ *  @param name asset display name (optional) (@ref fsl_asset_metadata_set() parameter).
  *
- *  @param name_id asset stable, unique name for asset-search, and logging (optional) (@ref fsl_asset_set_metadata() parameter).
+ *  @param name_id asset stable, unique name for asset-search, and logging (optional) (@ref fsl_asset_metadata_set() parameter).
  *  naming convention: "[a-z_][a-z0-9_]*", or:
  *      - no leading digits.
  *      - only lowercase characters, digits 0 -> 9 and underscores.
  *
- *  @param file base file name (optional) (@ref fsl_asset_set_metadata() parameter).
- *  @param path path to asset file without file name (optional) (@ref fsl_asset_set_metadata() parameter).
+ *  @param file base file name (optional) (@ref fsl_asset_metadata_set() parameter).
+ *  @param path path to asset file without file name (optional) (@ref fsl_asset_metadata_set() parameter).
  *
  *  @param bindless use 'OpenGL' extension 'GL_ARB_bindless_texture'
  *  (handle is in @ref texture->handle).
@@ -140,15 +140,15 @@ FSLAPI void fsl_texture_free(fsl_texture *texture);
  *  - generate square texture of diameter `resolution` * 16 and bake bitmap onto it.
  *
  *  @param resolution font size (font atlas cell diameter).
- *  @param name asset display name (optional) (@ref fsl_asset_set_metadata() parameter).
+ *  @param name asset display name (optional) (@ref fsl_asset_metadata_set() parameter).
  *
- *  @param name_id asset stable, unique name for asset-search, and logging (optional) (@ref fsl_asset_set_metadata() parameter).
+ *  @param name_id asset stable, unique name for asset-search, and logging (optional) (@ref fsl_asset_metadata_set() parameter).
  *  naming convention: "[a-z_][a-z0-9_]*", or:
  *      - no leading digits.
  *      - only lowercase characters, digits 0 -> 9 and underscores.
  *
- *  @param file base file name (optional) (@ref fsl_asset_set_metadata() parameter).
- *  @param path path to asset file without file name (optional) (@ref fsl_asset_set_metadata() parameter).
+ *  @param file base file name (optional) (@ref fsl_asset_metadata_set() parameter).
+ *  @param path path to asset file without file name (optional) (@ref fsl_asset_metadata_set() parameter).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -182,10 +182,8 @@ FSLAPI void fsl_camera_lookat_update(fsl_camera *camera,
 /**
  *  @brief make perspective projection matrices from camera parameters.
  *
- *  - setup camera matrices for Z-up, right-handed coordinates and vertical fov (fovy):
- *      - +X: forward.
- *      - +Y: left.
- *      - +Z: up.
+ *  - setup camera matrices, in Cartesian Coordinate System
+ *    (+X forward, +Y left, +Z up).
  *
  *  @remark called automatically from @ref fsl_camera_movement_update().
  *

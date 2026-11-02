@@ -17,7 +17,8 @@
 /**
  *  @file api.h
  *
- *  @brief engine's API control/visibility and general cross-platform macro definitions.
+ *  @brief engine's API control/visibility and general cross-platform macro
+ *  definitions.
  */
 
 #ifndef FSL_API_H

@@ -14,7 +14,7 @@
 #define center_cursor \
     do { \
         glfwSetCursorPos(render->window, render->size.x / 2.0f, render->size.y / 2.0f); \
-        fsl_request_skip_mouse_delta(); \
+        fsl_request_mouse_delta_skip(); \
     } while (0)
 
 #define BTN_COUNT 110

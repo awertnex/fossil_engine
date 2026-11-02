@@ -35,7 +35,7 @@
 /* ---- color conversion macros --------------------------------------------- */
 
 /**
- *  @brief convert RGBA color to 4-Byte hex color.
+ *  @brief convert RGBA color to 4-byte hex color.
  *  @remark color range [0.0f, 1.0f].
  */
 #define fsl_color_v4_to_hex(r, g, b, a) \

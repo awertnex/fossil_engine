@@ -17,7 +17,10 @@
 /**
  *  @file fossil_engine.h
  *
- *  @brief main engine header; include everything.
+ *  @brief engine's API main header; include everything.
+ *
+ *  any new headers created that belong to the engine's API should be included
+ *  here.
  */
 
 #ifndef FSL_FOSSIL_ENGINE_H

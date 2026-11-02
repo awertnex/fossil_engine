@@ -509,10 +509,10 @@ void blocks_init(void)
 {
     hhc_block *blocks_p = fsl_mem_handle_get(blocks);
 
-    fsl_asset_set_metadata(&blocks_p[BLOCK_NONE].asset, FSL_ASSET_CUSTOM,
+    fsl_asset_metadata_set(&blocks_p[BLOCK_NONE].asset, FSL_ASSET_CUSTOM,
             "None", "none", NULL, NULL);
 
-    fsl_asset_set_metadata(&blocks_p[BLOCK_GRASS].asset, FSL_ASSET_CUSTOM,
+    fsl_asset_metadata_set(&blocks_p[BLOCK_GRASS].asset, FSL_ASSET_CUSTOM,
             "Grass Block", "block_grass", "block_grass", NULL);
     blocks_p[BLOCK_GRASS].state = BLOCK_STATE_SOLID;
     blocks_p[BLOCK_GRASS].texture_index[0] = TEXTURE_BLOCK_GRASS_SIDE;
@@ -525,7 +525,7 @@ void blocks_init(void)
         fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
                 0.0, 0.0, 0.0, 0.0);
 
-    fsl_asset_set_metadata(&blocks_p[BLOCK_DIRT].asset, FSL_ASSET_CUSTOM,
+    fsl_asset_metadata_set(&blocks_p[BLOCK_DIRT].asset, FSL_ASSET_CUSTOM,
             "Dirt Block", "block_dirt", "block_dirt", NULL);
     blocks_p[BLOCK_DIRT].state = BLOCK_STATE_SOLID;
     blocks_p[BLOCK_DIRT].texture_index[0] = TEXTURE_BLOCK_DIRT;
@@ -538,7 +538,7 @@ void blocks_init(void)
         fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
                 0.0, 0.0, 0.0, 0.0);
 
-    fsl_asset_set_metadata(&blocks_p[BLOCK_DIRTUP].asset, FSL_ASSET_CUSTOM,
+    fsl_asset_metadata_set(&blocks_p[BLOCK_DIRTUP].asset, FSL_ASSET_CUSTOM,
             "Dirtup", "block_dirtup", "block_dirtup", NULL);
     blocks_p[BLOCK_DIRTUP].state = BLOCK_STATE_SOLID;
     blocks_p[BLOCK_DIRTUP].texture_index[0] = TEXTURE_BLOCK_DIRTUP;
@@ -551,7 +551,7 @@ void blocks_init(void)
         fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
                 0.0, 0.0, 0.0, 0.0);
 
-    fsl_asset_set_metadata(&blocks_p[BLOCK_STONE].asset, FSL_ASSET_CUSTOM,
+    fsl_asset_metadata_set(&blocks_p[BLOCK_STONE].asset, FSL_ASSET_CUSTOM,
             "Stone", "block_stone", "block_stone", NULL);
     blocks_p[BLOCK_STONE].state = BLOCK_STATE_SOLID;
     blocks_p[BLOCK_STONE].texture_index[0] = TEXTURE_BLOCK_STONE;
@@ -564,7 +564,7 @@ void blocks_init(void)
         fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
                 0.0, 0.0, 0.0, 0.0);
 
-    fsl_asset_set_metadata(&blocks_p[BLOCK_SAND].asset, FSL_ASSET_CUSTOM,
+    fsl_asset_metadata_set(&blocks_p[BLOCK_SAND].asset, FSL_ASSET_CUSTOM,
             "Sand", "block_sand", "block_sand", NULL);
     blocks_p[BLOCK_SAND].state = BLOCK_STATE_SOLID;
     blocks_p[BLOCK_SAND].texture_index[0] = TEXTURE_BLOCK_SAND;
@@ -577,7 +577,7 @@ void blocks_init(void)
         fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
                 0.0, 0.0, 0.0, 0.0);
 
-    fsl_asset_set_metadata(&blocks_p[BLOCK_GLASS].asset, FSL_ASSET_CUSTOM,
+    fsl_asset_metadata_set(&blocks_p[BLOCK_GLASS].asset, FSL_ASSET_CUSTOM,
             "Glass", "block_glass", "block_glass", NULL);
     blocks_p[BLOCK_GLASS].state = BLOCK_STATE_SOLID;
     blocks_p[BLOCK_GLASS].texture_index[0] = TEXTURE_BLOCK_GLASS;
@@ -590,7 +590,7 @@ void blocks_init(void)
         fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
                 0.0, 0.0, 0.0, 0.0);
 
-    fsl_asset_set_metadata(&blocks_p[BLOCK_WOOD_BIRCH_LOG].asset, FSL_ASSET_CUSTOM,
+    fsl_asset_metadata_set(&blocks_p[BLOCK_WOOD_BIRCH_LOG].asset, FSL_ASSET_CUSTOM,
             "Birch Wood Log", "wood_birch_log", "wood_birch_log", NULL);
     blocks_p[BLOCK_WOOD_BIRCH_LOG].state = BLOCK_STATE_SOLID;
     blocks_p[BLOCK_WOOD_BIRCH_LOG].texture_index[0] = TEXTURE_BLOCK_WOOD_BIRCH_LOG_SIDE;
@@ -603,7 +603,7 @@ void blocks_init(void)
         fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
                 0.0, 0.0, 0.0, 0.0);
 
-    fsl_asset_set_metadata(&blocks_p[BLOCK_WOOD_BIRCH_PLANKS].asset, FSL_ASSET_CUSTOM,
+    fsl_asset_metadata_set(&blocks_p[BLOCK_WOOD_BIRCH_PLANKS].asset, FSL_ASSET_CUSTOM,
             "Birch Wood Planks", "wood_birch_planks", "wood_birch_planks", NULL);
     blocks_p[BLOCK_WOOD_BIRCH_PLANKS].state = BLOCK_STATE_SOLID;
     blocks_p[BLOCK_WOOD_BIRCH_PLANKS].texture_index[0] = TEXTURE_BLOCK_WOOD_BIRCH_PLANKS;
@@ -616,7 +616,7 @@ void blocks_init(void)
         fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
                 0.0, 0.0, 0.0, 0.0);
 
-    fsl_asset_set_metadata(&blocks_p[BLOCK_WOOD_CHERRY_LOG].asset, FSL_ASSET_CUSTOM,
+    fsl_asset_metadata_set(&blocks_p[BLOCK_WOOD_CHERRY_LOG].asset, FSL_ASSET_CUSTOM,
             "Cherry Wood Log", "wood_cherry_log", "wood_cherry_log", NULL);
     blocks_p[BLOCK_WOOD_CHERRY_LOG].state = BLOCK_STATE_SOLID;
     blocks_p[BLOCK_WOOD_CHERRY_LOG].texture_index[0] = TEXTURE_BLOCK_WOOD_CHERRY_LOG_SIDE;
@@ -629,7 +629,7 @@ void blocks_init(void)
         fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
                 0.0, 0.0, 0.0, 0.0);
 
-    fsl_asset_set_metadata(&blocks_p[BLOCK_WOOD_CHERRY_PLANKS].asset, FSL_ASSET_CUSTOM,
+    fsl_asset_metadata_set(&blocks_p[BLOCK_WOOD_CHERRY_PLANKS].asset, FSL_ASSET_CUSTOM,
             "Cherry Wood Planks", "wood_cherry_planks", "wood_cherry_planks", NULL);
     blocks_p[BLOCK_WOOD_CHERRY_PLANKS].state = BLOCK_STATE_SOLID;
     blocks_p[BLOCK_WOOD_CHERRY_PLANKS].texture_index[0] = TEXTURE_BLOCK_WOOD_CHERRY_PLANKS;
@@ -642,7 +642,7 @@ void blocks_init(void)
         fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
                 0.0, 0.0, 0.0, 0.0);
 
-    fsl_asset_set_metadata(&blocks_p[BLOCK_WOOD_OAK_LOG].asset, FSL_ASSET_CUSTOM,
+    fsl_asset_metadata_set(&blocks_p[BLOCK_WOOD_OAK_LOG].asset, FSL_ASSET_CUSTOM,
             "Oak Wood Log", "wood_oak_log", "wood_oak_log", NULL);
     blocks_p[BLOCK_WOOD_OAK_LOG].state = BLOCK_STATE_SOLID;
     blocks_p[BLOCK_WOOD_OAK_LOG].texture_index[0] = TEXTURE_BLOCK_WOOD_OAK_LOG_SIDE;
@@ -655,7 +655,7 @@ void blocks_init(void)
         fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
                 0.0, 0.0, 0.0, 0.0);
 
-    fsl_asset_set_metadata(&blocks_p[BLOCK_WOOD_OAK_PLANKS].asset, FSL_ASSET_CUSTOM,
+    fsl_asset_metadata_set(&blocks_p[BLOCK_WOOD_OAK_PLANKS].asset, FSL_ASSET_CUSTOM,
             "Oak Wood Planks", "wood_oak_planks", "wood_oak_planks", NULL);
     blocks_p[BLOCK_WOOD_OAK_PLANKS].state = BLOCK_STATE_SOLID;
     blocks_p[BLOCK_WOOD_OAK_PLANKS].texture_index[0] = TEXTURE_BLOCK_WOOD_OAK_PLANKS;
@@ -668,7 +668,7 @@ void blocks_init(void)
         fsl_physics_material_init(FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD, FRICTION_BLOCK_HARD,
                 0.0, 0.0, 0.0, 0.0);
 
-    fsl_asset_set_metadata(&blocks_p[BLOCK_BLOOD].asset, FSL_ASSET_CUSTOM,
+    fsl_asset_metadata_set(&blocks_p[BLOCK_BLOOD].asset, FSL_ASSET_CUSTOM,
             "Blood Block", "block_blood", "block_blood", NULL);
     blocks_p[BLOCK_BLOOD].state = BLOCK_STATE_SOLID;
     blocks_p[BLOCK_BLOOD].texture_index[0] = TEXTURE_BLOCK_BLOOD;

@@ -17,7 +17,7 @@
 /**
  *  @file diagnostics.h
  *
- *  @brief error codes, fsl_err, diagnostic colors.
+ *  @brief error codes, @ref fsl_err, diagnostic colors.
  */
 
 #ifndef FSL_DIAGNOSTICS_H
@@ -106,7 +106,7 @@
 /**
  *  @brief global variable for engine-specific error codes.
  *
- *  @remark must be declared by the user if not including @ref core.c.
+ *  @remark must be declared by the user if not including @ref src/engine/engine.c.
  */
 FSLAPI extern u32 fsl_err;
 

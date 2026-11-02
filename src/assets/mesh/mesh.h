@@ -26,8 +26,6 @@
 #include "../../common/api.h"
 #include "../../common/types.h"
 
-#include "../../memory/memory_types.h"
-
 #include "../asset_types.h"
 
 #include "../../external/glad/gl.h"
@@ -66,15 +64,15 @@ struct fsl_mesh
  *
  *  @param mesh pointer to `fsl_mesh` to store mesh data into.
  *
- *  @param name asset display name (optional) (@ref fsl_asset_set_metadata() parameter).
+ *  @param name asset display name (optional) (@ref fsl_asset_metadata_set() parameter).
  *
- *  @param name_id asset stable, unique name for asset-search, and logging (optional) (@ref fsl_asset_set_metadata() parameter).
+ *  @param name_id asset stable, unique name for asset-search, and logging (optional) (@ref fsl_asset_metadata_set() parameter).
  *  naming convention: "[a-z_][a-z0-9_]*", or:
  *      - no leading digits.
  *      - only lowercase characters, digits 0 -> 9 and underscores.
  *
- *  @param file base file name (optional) (@ref fsl_asset_set_metadata() parameter).
- *  @param path path to asset file without file name (optional) (@ref fsl_asset_set_metadata() parameter).
+ *  @param file base file name (optional) (@ref fsl_asset_metadata_set() parameter).
+ *  @param path path to asset file without file name (optional) (@ref fsl_asset_metadata_set() parameter).
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -94,15 +92,15 @@ FSLAPI void fsl_mesh_draw(const fsl_mesh *mesh, const fsl_camera *camera,
  *  @param attrib pointer to a function to set attribute arrays for `mesh->vao`
  *  (e.g., &attrib_vec3, set a single vec3 attribute array).
  *
- *  @param name asset display name (optional) (@ref fsl_asset_set_metadata() parameter).
+ *  @param name asset display name (optional) (@ref fsl_asset_metadata_set() parameter).
  *
- *  @param name_id asset stable, unique name for asset-search, and logging (optional) (@ref fsl_asset_set_metadata() parameter).
+ *  @param name_id asset stable, unique name for asset-search, and logging (optional) (@ref fsl_asset_metadata_set() parameter).
  *  naming convention: "[a-z_][a-z0-9_]*", or:
  *      - no leading digits.
  *      - only lowercase characters, digits 0 -> 9 and underscores.
  *
- *  @param file base file name (optional) (@ref fsl_asset_set_metadata() parameter).
- *  @param path path to asset file without file name (optional) (@ref fsl_asset_set_metadata() parameter).
+ *  @param file base file name (optional) (@ref fsl_asset_metadata_set() parameter).
+ *  @param path path to asset file without file name (optional) (@ref fsl_asset_metadata_set() parameter).
  *  @param usage `GL_<x>_DRAW`.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
