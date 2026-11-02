@@ -70,35 +70,40 @@ enum fsl_mesh_index
 /**
  *  @brief engine's default textures.
  *
- *  @remark read-only, declared and initialized internally in @ref engine_assets_init_internal().
+ *  @remark read-only, declared and initialized internally in
+ *  @ref engine_assets_init_internal().
  */
 FSLAPI extern fsl_mem_handle fsl_texture_buf;
 
 /**
  *  @brief engine's default shaders.
  *
- *  @remark read-only, declared and initialized internally in @ref engine_assets_init_internal().
+ *  @remark read-only, declared and initialized internally in
+ *  @ref engine_assets_init_internal().
  */
 FSLAPI extern fsl_mem_handle fsl_shader_buf;
 
 /**
  *  @brief engine's default fonts.
  *
- *  @remark read-only, declared and initialized internally in @ref engine_assets_init_internal().
+ *  @remark read-only, declared and initialized internally in
+ *  @ref engine_assets_init_internal().
  */
 FSLAPI extern fsl_mem_handle fsl_font_buf;
 
 /**
  *  @brief engine's default meshes.
  *
- *  @remark read-only, declared and initialized internally in @ref engine_assets_init_internal().
+ *  @remark read-only, declared and initialized internally in
+ *  @ref engine_assets_init_internal().
  */
 FSLAPI extern fsl_mem_handle fsl_mesh_buf;
 
 /**
  *  @brief engine's default unit quad, with texture coordinates.
  *
- *  @remark read-only, declared and initialized internally in @ref engine_assets_init_internal().
+ *  @remark read-only, declared and initialized internally in
+ *  @ref engine_assets_init_internal().
  */
 FSLAPI extern fsl_mesh fsl_mesh_unit_quad;
 

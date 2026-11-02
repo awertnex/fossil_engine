@@ -23,6 +23,30 @@ and this project adheres to
 - add 'len' and 'distance' functions to `math/` module.
 
 #### changed
+- change function name `fsl_get_text_height()` to `fsl_text_height_get()`.
+- change function name `fsl_engine_set_runtime_path()` to
+  `fsl_engine_runtime_path_set()`.
+- change function name `fsl_engine_link_libs()` to `fsl_engine_libs_link()`.
+- change function name `fsl_convert_u64_to_str()` to `fsl_u64_to_str()`.
+- change function name `fsl_convert_i32_to_str()` to `fsl_i32_to_str()`.
+- change function name `fsl_convert_str_to_f64()` to `fsl_str_to_f64()`.
+- change function name `fsl_convert_str_to_f32()` to `fsl_str_to_f32()`.
+- change function name `fsl_convert_str_to_i64()` to `fsl_str_to_i64()`.
+- change function name `fsl_convert_str_to_u64()` to `fsl_str_to_u64()`.
+- change function name `fsl_convert_str_to_u32()` to `fsl_str_to_u32()`.
+- change function name `fsl_convert_char_to_int()` to `fsl_char_to_int()`.
+- change function name `fsl_find_token()` to `fsl_token_find()`.
+- change function name `fsl_strip_non_printable()` to
+  `fsl_non_printable_strip()`.
+- change function name `fsl_skip_spaces()` to `fsl_whitespace_skip()`.
+- change function name `fsl_swap_string_char()` to `fsl_string_swap_char()`.
+- change function name `fsl_swap_strings()` to `fsl_string_swap()`.
+- change function name `fsl_swap_bits_u64()` to `fsl_bits_swap_u64()`.
+- change function name `fsl_swap_bits_u32()` to `fsl_bits_swap_u32()`.
+- change function name `fsl_swap_bits_u8()` to `fsl_bits_swap_u8()`.
+- change function name `fsl_swap_bits()` to `fsl_bits_swap()`.
+- change function name `fsl_print_bits()` to `fsl_bits_print()`.
+- change function name `fsl_log_output_internal()` to `fsl_log_output_func()`.
 - change function name `fsl_get_base_name()` to `fsl_base_name_get()`.
 - change function name `fsl_retract_path()` to `fsl_path_retract()`.
 - change function name `fsl_posix_slash()` to `fsl_slash_posix()`.

@@ -47,12 +47,12 @@ fsl_mem_arena mem_arena_name_id_internal = {0};
 fsl_mem_arena mem_arena_file_internal = {0};
 fsl_mem_arena mem_arena_path_internal = {0};
 
-u32 fsl_mem_array_init_internal(fsl_array *array)
+u32 fsl_mem_array_init_func(fsl_array *array)
 {
     if (!array->buf)
     {
         if (fsl_mem_map((void*)&array->buf, MEM_ALLOC_SIZE_MIN,
-                    "fsl_mem_array_init_internal().array->buf") != FSL_ERR_SUCCESS)
+                    "fsl_mem_array_init_func().array->buf") != FSL_ERR_SUCCESS)
             return fsl_err;
         array->cap = MEM_ALLOC_SIZE_MIN;
     }
@@ -61,19 +61,19 @@ u32 fsl_mem_array_init_internal(fsl_array *array)
     return fsl_err;
 }
 
-u32 fsl_mem_array_push_internal(fsl_array *array, void *data, u64 size)
+u32 fsl_mem_array_push_func(fsl_array *array, void *data, u64 size)
 {
     void *buf_temp = NULL;
 
     if (!array->buf && fsl_mem_map((void*)&array->buf, MEM_ALLOC_SIZE_MIN,
-                "fsl_mem_array_push_internal().array->buf") != FSL_ERR_SUCCESS)
+                "fsl_mem_array_push_func().array->buf") != FSL_ERR_SUCCESS)
         return fsl_err;
 
     if (size >= array->cap - array->cursor)
     {
         buf_temp = array->buf;
         if (fsl_mem_remap((void*)&buf_temp, array->cap, array->cap * 2 + size,
-                    "fsl_mem_array_push_internal().array->buf") != FSL_ERR_SUCCESS)
+                    "fsl_mem_array_push_func().array->buf") != FSL_ERR_SUCCESS)
             return fsl_err;
         array->cap = array->cap * 2 + size;
         array->buf = buf_temp;
@@ -87,16 +87,16 @@ u32 fsl_mem_array_push_internal(fsl_array *array, void *data, u64 size)
     return fsl_err;
 }
 
-void fsl_mem_array_free_internal(fsl_array *array)
+void fsl_mem_array_free_func(fsl_array *array)
 {
     fsl_array noarray = {0};
 
     if (array->buf)
-        fsl_mem_unmap((void*)&array->buf, array->cursor, "fsl_mem_array_free_internal().array->buf");
+        fsl_mem_unmap((void*)&array->buf, array->cursor, "fsl_mem_array_free_func().array->buf");
     *array = noarray;
 }
 
-u32 fsl_mem_alloc_internal(void **x, u64 size,
+u32 fsl_mem_alloc_func(void **x, u64 size,
         const str *name, const str *src_file, u64 src_line)
 {
     if (*x)
@@ -121,7 +121,7 @@ u32 fsl_mem_alloc_internal(void **x, u64 size,
     return fsl_err;
 }
 
-u32 fsl_mem_alloc_memb_internal(void **x, u64 memb, u64 size,
+u32 fsl_mem_alloc_memb_func(void **x, u64 memb, u64 size,
         const str *name, const str *src_file, u64 src_line)
 {
     if (*x)
@@ -143,7 +143,7 @@ u32 fsl_mem_alloc_memb_internal(void **x, u64 memb, u64 size,
     return fsl_err;
 }
 
-u32 fsl_mem_alloc_buf_internal(fsl_buf *x, u64 memb, u64 size,
+u32 fsl_mem_alloc_buf_func(fsl_buf *x, u64 memb, u64 size,
         const str *name, const str *src_file, u64 src_line)
 {
     str name_i[FSL_ID_CAP] = {0};
@@ -164,13 +164,13 @@ u32 fsl_mem_alloc_buf_internal(fsl_buf *x, u64 memb, u64 size,
     snprintf(name_i, FSL_ID_CAP, "%s.i", name);
     snprintf(name_buf, FSL_ID_CAP, "%s.buf", name);
 
-    if (fsl_mem_alloc_memb_internal((void*)&x->i,
+    if (fsl_mem_alloc_memb_func((void*)&x->i,
                 memb, sizeof(str*), name_i, src_file, src_line) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    if (fsl_mem_alloc_memb_internal((void*)&x->buf, memb, size, name_buf, src_file, src_line) != FSL_ERR_SUCCESS)
+    if (fsl_mem_alloc_memb_func((void*)&x->buf, memb, size, name_buf, src_file, src_line) != FSL_ERR_SUCCESS)
     {
-        fsl_mem_free_internal((void*)&x->i, memb * sizeof(str*), name_i, src_file, src_line);
+        fsl_mem_free_func((void*)&x->i, memb * sizeof(str*), name_i, src_file, src_line);
         return fsl_err;
     }
 
@@ -185,7 +185,8 @@ u32 fsl_mem_alloc_buf_internal(fsl_buf *x, u64 memb, u64 size,
     return fsl_err;
 }
 
-u32 fsl_mem_alloc_key_val_internal(fsl_key_value *x, u64 memb, u64 size_key, u64 size_val,
+u32 fsl_mem_alloc_key_val_func(fsl_key_value *x, u64 memb,
+        u64 size_key, u64 size_val,
         const str *name, const str *src_file, u64 src_line)
 {
     str name_key[FSL_ID_CAP] = {0};
@@ -208,19 +209,19 @@ u32 fsl_mem_alloc_key_val_internal(fsl_key_value *x, u64 memb, u64 size_key, u64
     snprintf(name_buf_val, FSL_ID_CAP, "%s.buf_val", name);
 
     if (
-            fsl_mem_alloc_memb_internal((void*)&x->key,
+            fsl_mem_alloc_memb_func((void*)&x->key,
                 memb, sizeof(str*), name_key, src_file, src_line) != FSL_ERR_SUCCESS ||
 
-            fsl_mem_alloc_memb_internal((void*)&x->val,
+            fsl_mem_alloc_memb_func((void*)&x->val,
                 memb, sizeof(str*), name_val, src_file, src_line) != FSL_ERR_SUCCESS ||
 
-            fsl_mem_alloc_memb_internal((void*)&x->buf_key,
+            fsl_mem_alloc_memb_func((void*)&x->buf_key,
                 memb, size_key, name_buf_key, src_file, src_line) != FSL_ERR_SUCCESS ||
 
-            fsl_mem_alloc_memb_internal((void*)&x->buf_val,
+            fsl_mem_alloc_memb_func((void*)&x->buf_val,
                 memb, size_val, name_buf_val, src_file, src_line) != FSL_ERR_SUCCESS)
     {
-        fsl_mem_free_key_val_internal(x, name, src_file, src_line);
+        fsl_mem_free_key_val_func(x, name, src_file, src_line);
         return fsl_err;
     }
 
@@ -239,7 +240,7 @@ u32 fsl_mem_alloc_key_val_internal(fsl_key_value *x, u64 memb, u64 size_key, u64
     return fsl_err;
 }
 
-u32 fsl_mem_realloc_internal(void **x, u64 size,
+u32 fsl_mem_realloc_func(void **x, u64 size,
         const str *name, const str *src_file, u64 src_line)
 {
     void *temp = NULL;
@@ -270,7 +271,7 @@ u32 fsl_mem_realloc_internal(void **x, u64 size,
     return fsl_err;
 }
 
-u32 fsl_mem_realloc_memb_internal(void **x, u64 memb, u64 size,
+u32 fsl_mem_realloc_memb_func(void **x, u64 memb, u64 size,
         const str *name, const str *src_file, u64 src_line)
 {
     void *temp = NULL;
@@ -301,7 +302,7 @@ u32 fsl_mem_realloc_memb_internal(void **x, u64 memb, u64 size,
     return fsl_err;
 }
 
-void fsl_mem_free_internal(void **x, u64 size,
+void fsl_mem_free_func(void **x, u64 size,
         const str *name, const str *src_file, u64 src_line)
 {
     void *temp = NULL;
@@ -311,7 +312,7 @@ void fsl_mem_free_internal(void **x, u64 size,
 
     temp = *x;
     if (size)
-        fsl_mem_clear_internal(*x, size, name, src_file, src_line);
+        fsl_mem_clear_func(*x, size, name, src_file, src_line);
     free(*x);
     *x = NULL;
     LOGTRACEEX(0,
@@ -319,7 +320,7 @@ void fsl_mem_free_internal(void **x, u64 size,
             MSG_MEM_FREE(name, temp, size));
 }
 
-void fsl_mem_free_buf_internal(fsl_buf *x,
+void fsl_mem_free_buf_func(fsl_buf *x,
         const str *name, const str *src_file, u64 src_line)
 {
     fsl_buf nobuf = {0};
@@ -335,7 +336,7 @@ void fsl_mem_free_buf_internal(fsl_buf *x,
     if (x->i)
     {
         temp = x->i;
-        fsl_mem_clear_internal(x->i, x->memb * sizeof(str*), name_i, src_file, src_line);
+        fsl_mem_clear_func(x->i, x->memb * sizeof(str*), name_i, src_file, src_line);
         free(x->i);
         LOGTRACEEX(0,
                 src_file, src_line,
@@ -345,7 +346,7 @@ void fsl_mem_free_buf_internal(fsl_buf *x,
     if (x->buf)
     {
         temp = x->buf;
-        fsl_mem_clear_internal(x->buf, x->memb * x->size, name_buf, src_file, src_line);
+        fsl_mem_clear_func(x->buf, x->memb * x->size, name_buf, src_file, src_line);
         free(x->buf);
         LOGTRACEEX(0,
                 src_file, src_line,
@@ -355,7 +356,7 @@ void fsl_mem_free_buf_internal(fsl_buf *x,
     *x = nobuf;
 }
 
-void fsl_mem_free_key_val_internal(fsl_key_value *x,
+void fsl_mem_free_key_val_func(fsl_key_value *x,
         const str *name, const str *src_file, u64 src_line)
 {
     fsl_key_value nokey_value = {0};
@@ -375,7 +376,7 @@ void fsl_mem_free_key_val_internal(fsl_key_value *x,
     if (x->key)
     {
         temp = x->key;
-        fsl_mem_clear_internal(x->key, x->memb * sizeof(str*), name_key, src_file, src_line);
+        fsl_mem_clear_func(x->key, x->memb * sizeof(str*), name_key, src_file, src_line);
         free(x->key);
         LOGTRACEEX(0,
                 src_file, src_line,
@@ -385,7 +386,7 @@ void fsl_mem_free_key_val_internal(fsl_key_value *x,
     if (x->val)
     {
         temp = x->val;
-        fsl_mem_clear_internal(x->val, x->memb * sizeof(str*), name_val, src_file, src_line);
+        fsl_mem_clear_func(x->val, x->memb * sizeof(str*), name_val, src_file, src_line);
         free(x->val);
         LOGTRACEEX(0,
                 src_file, src_line,
@@ -395,7 +396,7 @@ void fsl_mem_free_key_val_internal(fsl_key_value *x,
     if (x->buf_key)
     {
         temp = x->buf_key;
-        fsl_mem_clear_internal(x->buf_key, x->memb * x->size_key, name_buf_key, src_file, src_line);
+        fsl_mem_clear_func(x->buf_key, x->memb * x->size_key, name_buf_key, src_file, src_line);
         free(x->buf_key);
         LOGTRACEEX(0,
                 src_file, src_line,
@@ -405,7 +406,7 @@ void fsl_mem_free_key_val_internal(fsl_key_value *x,
     if (x->buf_val)
     {
         temp = x->buf_val;
-        fsl_mem_clear_internal(x->buf_val, x->memb * x->size_val, name_buf_val, src_file, src_line);
+        fsl_mem_clear_func(x->buf_val, x->memb * x->size_val, name_buf_val, src_file, src_line);
         free(x->buf_val);
         LOGTRACEEX(0,
                 src_file, src_line,
@@ -415,7 +416,7 @@ void fsl_mem_free_key_val_internal(fsl_key_value *x,
     *x = nokey_value;
 }
 
-u32 fsl_mem_clear_internal(void *x, u64 size,
+u32 fsl_mem_clear_func(void *x, u64 size,
         const str *name, const str *src_file, u64 src_line)
 {
     if (!x)
@@ -433,7 +434,7 @@ u32 fsl_mem_clear_internal(void *x, u64 size,
     return fsl_err;
 }
 
-u32 fsl_mem_arena_init_internal(fsl_mem_arena *x,
+u32 fsl_mem_arena_init_func(fsl_mem_arena *x,
         const str *name, const str *src_file, u64 src_line)
 {
     u64 entry_cap = sizeof(fsl_mem_arena_handle) * 2;
@@ -452,9 +453,9 @@ u32 fsl_mem_arena_init_internal(fsl_mem_arena *x,
         return FSL_ERR_SUCCESS;
 
     if (
-            fsl_mem_map_internal((void*)&x->entry, entry_cap, name, src_file, src_line) != FSL_ERR_SUCCESS ||
-            fsl_mem_map_internal((void*)&x->freelist, freelist_cap, name, src_file, src_line) != FSL_ERR_SUCCESS ||
-            fsl_mem_map_internal((void*)&x->buf, buf_cap, name, src_file, src_line) != FSL_ERR_SUCCESS)
+            fsl_mem_map_func((void*)&x->entry, entry_cap, name, src_file, src_line) != FSL_ERR_SUCCESS ||
+            fsl_mem_map_func((void*)&x->freelist, freelist_cap, name, src_file, src_line) != FSL_ERR_SUCCESS ||
+            fsl_mem_map_func((void*)&x->buf, buf_cap, name, src_file, src_line) != FSL_ERR_SUCCESS)
     {
         LOGERROREX(FSL_ERR_MEM_ARENA_MAP_FAIL, 0,
                 src_file, src_line,
@@ -482,8 +483,8 @@ u32 fsl_mem_arena_init_internal(fsl_mem_arena *x,
     return fsl_err;
 }
 
-u32 fsl_mem_arena_push_internal(fsl_mem_arena *x, fsl_mem_handle *handle, u64 size,
-        const str *name, const str *src_file, u64 src_line)
+u32 fsl_mem_arena_push_func(fsl_mem_arena *x, fsl_mem_handle *handle,
+        u64 size, const str *name, const str *src_file, u64 src_line)
 {
     u64 i = 0;
     u64 buf_cap_old = 0;
@@ -548,11 +549,11 @@ u32 fsl_mem_arena_push_internal(fsl_mem_arena *x, fsl_mem_handle *handle, u64 si
     buf_cap_new = x->buf_cap * 2 + size;
     if (size > buf_cap_old - x->buf_cursor)
     {
-        if (fsl_mem_remap_internal((void*)&x->buf, buf_cap_old, buf_cap_new, name, src_file, src_line) != FSL_ERR_SUCCESS)
+        if (fsl_mem_remap_func((void*)&x->buf, buf_cap_old, buf_cap_new, name, src_file, src_line) != FSL_ERR_SUCCESS)
         {
             LOGERROREX(fsl_err, 0,
                     src_file, src_line,
-                    MSG_MEM_ARENA_PUSH_REASON_FAIL(name, (u8*)x->buf + x->buf_cursor, buf_cap_new, "`fsl_mem_remap_internal()` Failed"));
+                    MSG_MEM_ARENA_PUSH_REASON_FAIL(name, (u8*)x->buf + x->buf_cursor, buf_cap_new, "`fsl_mem_remap_func()` Failed"));
             return fsl_err;
         }
         x->buf_cap = buf_cap_new;
@@ -567,11 +568,11 @@ u32 fsl_mem_arena_push_internal(fsl_mem_arena *x, fsl_mem_handle *handle, u64 si
 
     if (entry_pos >= entry_cap)
     {
-        if (fsl_mem_remap_internal((void*)&x->entry, x->entry_cap, x->entry_cap * 2, name, src_file, src_line) != FSL_ERR_SUCCESS)
+        if (fsl_mem_remap_func((void*)&x->entry, x->entry_cap, x->entry_cap * 2, name, src_file, src_line) != FSL_ERR_SUCCESS)
         {
             LOGERROREX(fsl_err, 0,
                     src_file, src_line,
-                    MSG_MEM_ARENA_PUSH_REASON_FAIL(name, x->entry, x->entry_cap, "`fsl_mem_remap_internal()` Failed"));
+                    MSG_MEM_ARENA_PUSH_REASON_FAIL(name, x->entry, x->entry_cap, "`fsl_mem_remap_func()` Failed"));
             return fsl_err;
         }
         x->entry_cap *= 2;
@@ -598,7 +599,7 @@ u32 fsl_mem_arena_push_internal(fsl_mem_arena *x, fsl_mem_handle *handle, u64 si
     return fsl_err;
 }
 
-u32 fsl_mem_arena_pop_internal(fsl_mem_handle *handle,
+u32 fsl_mem_arena_pop_func(fsl_mem_handle *handle,
         const str *name, const str *src_file, u64 src_line)
 {
     fsl_mem_arena *arena = NULL;
@@ -629,11 +630,11 @@ u32 fsl_mem_arena_pop_internal(fsl_mem_handle *handle,
 
         if (freelist_pos >= freelist_cap)
         {
-            if (fsl_mem_remap_internal((void*)&arena->freelist, freelist_cap, freelist_cap * 2, name, src_file, src_line) != FSL_ERR_SUCCESS)
+            if (fsl_mem_remap_func((void*)&arena->freelist, freelist_cap, freelist_cap * 2, name, src_file, src_line) != FSL_ERR_SUCCESS)
             {
                 LOGERROREX(fsl_err, 0,
                         src_file, src_line,
-                        MSG_MEM_ARENA_POP_REASON_FAIL(name, arena, "`fsl_mem_remap_internal()` Failed"));
+                        MSG_MEM_ARENA_POP_REASON_FAIL(name, arena, "`fsl_mem_remap_func()` Failed"));
                 return fsl_err;
             }
             arena->freelist_cap *= 2;
@@ -663,19 +664,19 @@ u32 fsl_mem_arena_pop_internal(fsl_mem_handle *handle,
     return fsl_err;
 }
 
-void *fsl_mem_handle_get_internal(fsl_mem_handle handle)
+void *fsl_mem_handle_get_func(fsl_mem_handle handle)
 {
     return handle.arena ? (void*)((u8*)handle.arena->buf + handle.offset) : NULL;
 }
 
-void fsl_print_bits(u64 x, u8 bit_count)
+void fsl_bits_print(u64 x, u8 bit_count)
 {
     while(bit_count--)
         putchar('0' + ((x >> bit_count) & 1));
     putchar('\n');
 }
 
-void fsl_swap_bits(char *c1, char *c2)
+void fsl_bits_swap(char *c1, char *c2)
 {
     u8 i = 0;
     for (; i < 8; ++i)
@@ -688,21 +689,21 @@ void fsl_swap_bits(char *c1, char *c2)
     }
 }
 
-void fsl_swap_bits_u8(u8 *a, u8 *b)
+void fsl_bits_swap_u8(u8 *a, u8 *b)
 {
     *a ^= *b;
     *b ^= *a;
     *a ^= *b;
 }
 
-void fsl_swap_bits_u32(u32 *a, u32 *b)
+void fsl_bits_swap_u32(u32 *a, u32 *b)
 {
     *a ^= *b;
     *b ^= *a;
     *a ^= *b;
 }
 
-void fsl_swap_bits_u64(u64 *a, u64 *b)
+void fsl_bits_swap_u64(u64 *a, u64 *b)
 {
     *a ^= *b;
     *b ^= *a;
@@ -710,7 +711,7 @@ void fsl_swap_bits_u64(u64 *a, u64 *b)
 }
 
 #if 0
-void fsl_sort_buf(fsl_buf *buf) /* TODO: fucking fix this */
+void fsl_buf_sort(fsl_buf *buf) /* TODO: fucking fix this */
 {
     for (u16 i = 0, smallest = 0; i < buf->memb - 1 && buf->i[i] != NULL; ++i)
     {

@@ -199,7 +199,7 @@ int main(int argc, char **argv)
     for (i = 0; i < arr_len(str_files_plugins); ++i)
         cmd_push(&cmd, str_files_plugins[i]);
 
-    fsl_engine_set_runtime_path(&cmd);
+    fsl_engine_runtime_path_set(&cmd);
     for (i = 0; i < arr_len(fsl_str_libs_internal); ++i)
         cmd_push(&cmd, fsl_str_libs_internal[i]);
 

@@ -31,12 +31,13 @@
  */
 typedef u64 fsl_off;
 
-typedef struct fsl_mem_handle fsl_mem_handle;
-typedef struct fsl_mem_arena_handle fsl_mem_arena_handle;
-typedef struct fsl_mem_arena fsl_mem_arena;
+typedef struct fsl_mem_handle           fsl_mem_handle;
+typedef struct fsl_mem_arena_handle     fsl_mem_arena_handle;
+typedef struct fsl_mem_arena            fsl_mem_arena;
 
 /**
- *  @remark retrieve allocation address using @ref fsl_mem_handle_get() or @ref fsl_mem_handle_get_i().
+ *  @remark retrieve allocation address using @ref fsl_mem_handle_get() or
+ *  @ref fsl_mem_handle_get_i().
  */
 struct fsl_mem_handle
 {

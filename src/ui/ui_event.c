@@ -27,16 +27,26 @@
 #include "ui_element.h"
 #include "ui_types.h"
 
-static void (*ui_event_process_func_internal[FSL_UI_EVENT_TYPE_COUNT])(fsl_ui_element *element,
+static void ui_event_enter_respond_func(fsl_ui_element *element, fsl_ui_callback *callback);
+static void ui_event_hover_respond_func(fsl_ui_element *element, fsl_ui_callback *callback);
+static void ui_event_leave_respond_func(fsl_ui_element *element, fsl_ui_callback *callback);
+static void ui_event_click_respond_func(fsl_ui_element *element, fsl_ui_callback *callback);
+static void ui_event_hold_respond_func(fsl_ui_element *element, fsl_ui_callback *callback);
+static void ui_event_release_respond_func(fsl_ui_element *element, fsl_ui_callback *callback);
+
+/**
+ *  @internal
+ */
+static void (*ui_event_respond_func_internal[FSL_UI_EVENT_TYPE_COUNT])(fsl_ui_element *element,
         fsl_ui_callback *callback) =
 {
     0,
-    ui_event_enter_process_internal,
-    ui_event_hover_process_internal,
-    ui_event_leave_process_internal,
-    ui_event_click_process_internal,
-    ui_event_hold_process_internal,
-    ui_event_release_process_internal
+    ui_event_enter_respond_func,
+    ui_event_hover_respond_func,
+    ui_event_leave_respond_func,
+    ui_event_click_respond_func,
+    ui_event_hold_respond_func,
+    ui_event_release_respond_func
 };
 
 void ui_element_listen_internal(fsl_ui_element *element, v2f64 mouse_pos, v2f64 mouse_delta)
@@ -78,11 +88,11 @@ void ui_element_listen_internal(fsl_ui_element *element, v2f64 mouse_pos, v2f64 
     for (; i < FSL_UI_EVENT_TYPE_COUNT; ++i)
     {
         if (element->callback[i].func)
-            ui_event_process_func_internal[i](element, &element->callback[i]);
+            ui_event_respond_func_internal[i](element, &element->callback[i]);
     }
 }
 
-void ui_event_enter_process_internal(fsl_ui_element *element, fsl_ui_callback *callback)
+static void ui_event_enter_respond_func(fsl_ui_element *element, fsl_ui_callback *callback)
 {
     if (element->event.hover && !element->event.hover_last)
     {
@@ -90,7 +100,7 @@ void ui_event_enter_process_internal(fsl_ui_element *element, fsl_ui_callback *c
     }
 }
 
-void ui_event_hover_process_internal(fsl_ui_element *element, fsl_ui_callback *callback)
+static void ui_event_hover_respond_func(fsl_ui_element *element, fsl_ui_callback *callback)
 {
     if (element->event.hover && element->event.hover_last)
     {
@@ -98,7 +108,7 @@ void ui_event_hover_process_internal(fsl_ui_element *element, fsl_ui_callback *c
     }
 }
 
-void ui_event_leave_process_internal(fsl_ui_element *element, fsl_ui_callback *callback)
+static void ui_event_leave_respond_func(fsl_ui_element *element, fsl_ui_callback *callback)
 {
     if (!element->event.hover && element->event.hover_last)
     {
@@ -106,7 +116,7 @@ void ui_event_leave_process_internal(fsl_ui_element *element, fsl_ui_callback *c
     }
 }
 
-void ui_event_click_process_internal(fsl_ui_element *element, fsl_ui_callback *callback)
+static void ui_event_click_respond_func(fsl_ui_element *element, fsl_ui_callback *callback)
 {
     if (element->event.hover &&
             element->event.mouse_click && !element->event.mouse_click_last)
@@ -122,7 +132,7 @@ void ui_event_click_process_internal(fsl_ui_element *element, fsl_ui_callback *c
     }
 }
 
-void ui_event_hold_process_internal(fsl_ui_element *element, fsl_ui_callback *callback)
+static void ui_event_hold_respond_func(fsl_ui_element *element, fsl_ui_callback *callback)
 {
     if (element->event.hover &&
             element->event.mouse_click && element->event.mouse_click_last)
@@ -131,7 +141,7 @@ void ui_event_hold_process_internal(fsl_ui_element *element, fsl_ui_callback *ca
     }
 }
 
-void ui_event_release_process_internal(fsl_ui_element *element, fsl_ui_callback *callback)
+static void ui_event_release_respond_func(fsl_ui_element *element, fsl_ui_callback *callback)
 {
     if (element->event.hover &&
             !element->event.mouse_click && element->event.mouse_click_last)

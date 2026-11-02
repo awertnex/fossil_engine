@@ -208,7 +208,7 @@ void super_debugger_draw(v2i32 render_size, GLuint fbo)
                 0, 0, render_size.x - SET_MARGIN * 4,
                 log_entry[index].color);
 
-        if ((i32)fsl_get_text_height() + SET_MARGIN * 2 >= logger_panel_height)
+        if ((i32)fsl_text_height_get() + SET_MARGIN * 2 >= logger_panel_height)
             break;
     }
 

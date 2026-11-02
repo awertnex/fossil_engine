@@ -70,16 +70,21 @@ typedef struct fsl_panel_nine_slice
  *
  *  @param size font height, in pixels.
  *
- *  @param length pre-allocate buffer for string (if 0, @ref FSL_STRING_MAX is allocated).
+ *  @param length pre-allocate buffer for string. (if 0, @ref FSL_STRING_MAX is
+ *  allocated)
+ *
  *  @param clear clear the framebuffer before rendering.
  *
  *  @remark disables @ref GL_DEPTH_TEST, @ref fsl_text_stop() re-enables it.
- *  @remark can re-allocate `fbo` with `multisample` setting used in @ref fsl_text_init().
+ *
+ *  @remark can re-allocate `fbo` with `multisample` setting used in
+ *  @ref fsl_text_init().
  */
 FSLAPI void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear);
 
 /**
- *  @brief push string's glyph metrics, position, alignment and color to internal text queue.
+ *  @brief push string's glyph metrics, position, alignment and color to
+ *  internal text queue.
  *
  *  @param align_x enum @ref fsl_text_alignment:
  *      FSL_TEXT_ALIGN_RIGHT.
@@ -97,8 +102,8 @@ FSLAPI void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear);
  *
  *  @remark default alignment is top left (0, 0).
  *
- *  @remark the macros @ref fsl_color_hex_to_v4(), @ref fsl_color_v4_to_hex() can be
- *  used to convert from u32 hex color to v4f32 color and vice-versa.
+ *  @remark the macros @ref fsl_color_hex_to_v4(), @ref fsl_color_v4_to_hex()
+ *  can be used to convert from `u32` hex color to `v4f32` color and vice-versa.
  *
  *  @remark can be called multiple times within a text rendering batch.
  */
@@ -108,11 +113,11 @@ FSLAPI void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 
 /**
  *  @brief render text to framebuffer.
  *
- *  @param shadow_color shadow color (if `shadow` is `TRUE`) (optional),
+ *  @param shadow_color shadow color. (if `shadow` is `TRUE`) (optional)
  *  format: 0xrrggbbaa.
  *
- *  @remark the macros @ref fsl_color_hex_to_v4(), @ref fsl_color_v4_to_hex() can be
- *  used to convert from `u32` hex color to `v4f32` color and vice-versa.
+ *  @remark the macros @ref fsl_color_hex_to_v4(), @ref fsl_color_v4_to_hex()
+ *  can be used to convert from `u32` hex color to `v4f32` color and vice-versa.
  *
  *  @remark can be called multiple times within a text rendering batch.
  */
@@ -123,7 +128,7 @@ FSLAPI void fsl_text_render(b8 shadow, u32 shadow_color);
  *
  *  @remark call before @ref fsl_text_render().
  */
-FSLAPI f32 fsl_get_text_height(void);
+FSLAPI f32 fsl_text_height_get(void);
 
 /**
  *  @brief initialize ui.
@@ -146,7 +151,8 @@ FSLAPI void fsl_ui_start(b8 clear);
 /**
  *  @brief draw a texture as a UI element.
  *
- *  @remark if `size_x` is 0, `texture->size.x` is used, and likewise for `size_y`.
+ *  @remark if `size_x` is 0, `texture->size.x` is used, and likewise for
+ *  `size_y`.
  */
 FSLAPI void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y,
         i32 size_x, i32 size_y, u32 tint);
@@ -160,7 +166,9 @@ FSLAPI void fsl_ui_free(void);
 
 /**
  *  @brief make a 9-slice panel.
+ *
+ *  @internal
  */
-fsl_panel_nine_slice fsl_get_nine_slice_internal(fsl_ui_element *element);
+fsl_panel_nine_slice fsl_nine_slice_get_internal(fsl_ui_element *element);
 
 #endif /* FSL_UI_H */

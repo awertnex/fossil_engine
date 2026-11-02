@@ -47,9 +47,9 @@
 /* ---- section: signatures ------------------------------------------------- */
 
 /**
- *  @internal
- *
  *  @brief get mesh file format based on file name conventions.
+ *
+ *  @internal
  *
  *  examples:
  *      - file name "player.obj" -> mesh format @ref FSL_MESH_FORMAT_OBJ.
@@ -62,9 +62,9 @@
 static u32 mesh_file_format_get_internal(const str *file, fsl_mesh_format *format);
 
 /**
- *  @internal
- *
  *  @brief generate vertex arrays and transforms for a mesh and upload to VRAM.
+ *
+ *  @internal
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly on failure.
  */

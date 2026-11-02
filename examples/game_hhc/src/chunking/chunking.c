@@ -1364,7 +1364,7 @@ chunk_work_cost chunk_import_internal(const fsl_fs_path *path, hhc_chunk *chunk,
 
     for (i = 0; i < 3; ++i)
     {
-        fsl_convert_str_to_i64(cursor, &pos_cache[i]);
+        fsl_str_to_i64(cursor, &pos_cache[i]);
         while (cursor && *cursor++ != '.')
         {}
         if (!cursor)

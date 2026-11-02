@@ -15,13 +15,15 @@
  */
 
 /**
- *  @file math_implementation.h
+ *  @file math_implementation_internal.h
  *
  *  @brief implementation specification of math functions.
+ *
+ *  @internal
  */
 
-#ifndef FSL_MATH_IMPLEMENTATION_H
-#define FSL_MATH_IMPLEMENTATION_H
+#ifndef FSL_MATH_IMPLEMENTATION_INTERNAL_H
+#define FSL_MATH_IMPLEMENTATION_INTERNAL_H
 
 /* ---- section: scalar ----------------------------------------------------- */
 
@@ -772,4 +774,4 @@
     return m; \
 }
 
-#endif /* FSL_MATH_IMPLEMENTATION_H */
+#endif /* FSL_MATH_IMPLEMENTATION_INTERNAL_H */

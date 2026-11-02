@@ -88,22 +88,25 @@
 /* ---- section: signatures ------------------------------------------------- */
 
 /**
- *  @brief link engine's dependencies with the including software for compile time.
+ *  @brief link engine's dependencies with the including software for compile
+ *  time.
  *
- *  @param cmd cmd to push engine's required libs to, if `NULL`, internal cmd is used.
+ *  @param cmd CMD to push engine's required libs to, if `NULL`, internal CMD is
+ *  used.
  */
-static void fsl_engine_link_libs(bt_buf *cmd);
+static void fsl_engine_libs_link(bt_buf *cmd);
 
 /**
  *  @brief link engine's dependencies with the including software for run time.
  *
- *  @param cmd cmd to push application's runtime path to, if `NULL`, internal cmd is used.
+ *  @param cmd CMD to push application's runtime path to, if `NULL`, internal
+ *  CMD is used.
  */
-static void fsl_engine_set_runtime_path(bt_buf *cmd);
+static void fsl_engine_runtime_path_set(bt_buf *cmd);
 
 /* ---- section: implementation --------------------------------------------- */
 
-void fsl_engine_link_libs(bt_buf *cmd)
+void fsl_engine_libs_link(bt_buf *cmd)
 {
     u32 i = 0;
     bt_buf *cmdp = cmd;
@@ -114,7 +117,7 @@ void fsl_engine_link_libs(bt_buf *cmd)
         cmd_push(cmdp, fsl_str_libs[i]);
 }
 
-void fsl_engine_set_runtime_path(bt_buf *cmd)
+void fsl_engine_runtime_path_set(bt_buf *cmd)
 {
     bt_buf *cmdp = cmd;
     if (!cmd)

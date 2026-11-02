@@ -176,7 +176,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
         file_len = fsl_file_contents_get(string[0], (void*)&file_contents, TRUE);
         if (*GAME_ERR != FSL_ERR_SUCCESS || !file_contents)
             return *GAME_ERR;
-        fsl_convert_str_to_u64(file_contents, &seed);
+        fsl_str_to_u64(file_contents, &seed);
         fsl_mem_free((void*)&file_contents, file_len, "world_load().file_contents");
     }
     else
@@ -184,7 +184,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed)
         if (!seed)
             seed = fsl_rand_u64(fsl_time_raw_nsec_get());
 
-        fsl_convert_u64_to_str(string[1], FSL_ID_CAP, seed);
+        fsl_u64_to_str(string[1], FSL_ID_CAP, seed);
         if (fsl_file_write(string[0], strlen(string[1]),
                     &string[1], TRUE, TRUE) != FSL_ERR_SUCCESS)
             return *GAME_ERR;

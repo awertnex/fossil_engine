@@ -18,6 +18,8 @@
  *  @file math_internal.h
  *
  *  @brief initializing math stuff.
+ *
+ *  @internal
  */
 
 #ifndef FSL_MATH_INTERNAL_H
@@ -26,9 +28,9 @@
 #include "../common/types.h"
 
 /**
- *  @internal
- *
  *  @brief initialize and allocate resources for @ref fsl_rand_tab.
+ *
+ *  @internal
  *
  *  allocates resources for @ref fsl_rand_tab and loads its look-up from disk if
  *  found and builds if not.

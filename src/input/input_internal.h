@@ -18,6 +18,8 @@
  *  @file input_internal.h
  *
  *  @brief input module internal definitions.
+ *
+ *  @internal
  */
 
 #ifndef FSL_INPUT_INTERNAL_H
@@ -325,9 +327,9 @@ static str *fsl_keyboard_key_name[FSL_KEYBOARD_KEYS_MAX] =
 }; /* fsl_keyboard_tab */
 
 /**
- *  @internal
- *
  *  @brief like @ref fsl_key_bind_init(), but quiet.
+ *
+ *  @internal
  *
  *  @param key a keyboard key or mouse button.
  *  @param shift left or right shift.
@@ -341,15 +343,20 @@ fsl_key_bind key_bind_init_internal(fsl_keyboard_key key,
 /**
  *  @brief update mouse movement.
  *
- *  - update parameters at @ref fsl_render.mouse_pos and @ref fsl_render.mouse_delta
- *    of the currently bound `fsl_render`.
+ *  @internal
+ *
+ *  - updates parameters at @ref fsl_render.mouse_pos and
+ *    @ref fsl_render.mouse_delta of the currently bound @ref fsl_render.
  *
  *  @remark called automatically from @ref fsl_engine_is_running().
  */
 void input_mouse_movement_update_internal(void);
 
 /**
- *  @brief update internal mouse and key states: press, double-press, hold and release.
+ *  @brief update internal mouse and key states: press, double-press, hold and
+ *  release.
+ *
+ *  @internal
  *
  *  @remark called automatically from @ref fsl_engine_is_running().
  */

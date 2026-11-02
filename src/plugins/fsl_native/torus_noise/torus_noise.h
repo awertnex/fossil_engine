@@ -56,6 +56,7 @@ typedef struct fsl_torus_buffer
      *  @remark entry count = `noise_len`.
      */
     f64 *noise_dst_buf;
+
 } fsl_torus_buffer;
 
 /**
@@ -154,15 +155,15 @@ FSLAPI void fsl_torus_sampler_free(fsl_torus_sampler *sampler);
 /**
  *  @brief initialize torus sampler context for a given sampler.
  *
- *  1. initialize basic sampler parameters (sign, radius, diameter).
- *  2. initialize axis-dependent parameters based on provided position
+ *  1. initializes basic sampler parameters (sign, radius, diameter).
+ *  2. initializes axis-dependent parameters based on provided position
  *     (blend_type, axis, pos).
- *  3. initialize scalar translator from map-size to normalized coordinates,
- *  used in blending before/after map-edge.
+ *  3. initializes scalar translator from map-size to normalized coordinates,
+ *     used in blending before/after map-edge.
  *
- *  @remark initialization valid as long as `base_x`, `base_y` and `base_z` don't change,
- *  and valid while advancing @ref fsl_torus_sampler.pos_tab, otherwise, must
- *  re-initialize.
+ *  @remark initialization valid as long as `base_x`, `base_y` and `base_z`
+ *  don't change, and valid while advancing @ref fsl_torus_sampler.pos_tab,
+ *  otherwise, must re-initialize.
  */
 FSLAPI void fsl_torus_sampler_context_init(fsl_torus_sampler *sampler,
         fsl_torus_sampler_context *context, f64 base_x, f64 base_y, f64 base_z);
@@ -173,14 +174,14 @@ FSLAPI void fsl_torus_sampler_context_init(fsl_torus_sampler *sampler,
 FSLAPI void fsl_torus_sampler_axis_init(fsl_torus_sampler_context *context, u8 axis, f64 pos);
 
 /**
- *  @brief iterate relevant parameters of a single axis for a given torus sampler
- *  context at the beginning of its loop.
+ *  @brief iterate relevant parameters of a single axis for a given torus
+ *  sampler context at the beginning of its loop.
  */
 FSLAPI void fsl_torus_sampler_axis_pre_update(fsl_torus_sampler_context *context, u8 axis);
 
 /**
- *  @brief iterate relevant parameters of a single axis for a given torus sampler
- *  context at the end of its loop.
+ *  @brief iterate relevant parameters of a single axis for a given torus
+ *  sampler context at the end of its loop.
  */
 FSLAPI void fsl_torus_sampler_axis_post_update(fsl_torus_sampler_context *context, u8 axis);
 

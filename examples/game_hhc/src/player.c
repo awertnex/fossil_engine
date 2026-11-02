@@ -279,7 +279,7 @@ void player_collision_update(hhc_player *p, f64 dt)
                     block_box.size.y = 1.0;
                     block_box.size.z = 1.0;
 
-                    p->collision_info = fsl_get_swept_aabb(p->bbox, block_box, displacement);
+                    p->collision_info = fsl_swept_aabb_get(p->bbox, block_box, displacement);
 
                     if (p->collision_info.hit)
                     {

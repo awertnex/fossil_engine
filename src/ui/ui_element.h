@@ -88,11 +88,11 @@ FSLAPI void fsl_ui_element_set_uv(fsl_ui_element *element,
  *  @param offset_x horizontal offset from position, in pixels.
  *  @param offset_y vertical offset from position, in pixels.
  *
- *  @param offset_scaled_x horizontal offset from position, in pixels (scales with
- *  `element->transform.scale`).
+ *  @param offset_scaled_x horizontal offset from position, in pixels. (scales
+ *  with `element->transform.scale`)
  *
- *  @param offset_scaled_y vertical offset from position, in pixels (scales with
- *  `element->transform.scale`).
+ *  @param offset_scaled_y vertical offset from position, in pixels. (scales
+ *  with `element->transform.scale`)
  */
 FSLAPI void fsl_ui_element_set_position(fsl_ui_element *element, i32 pos_x, i32 pos_y,
         i32 offset_x, i32 offset_y, i32 offset_scaled_x, i32 offset_scaled_y);
@@ -102,8 +102,12 @@ FSLAPI void fsl_ui_element_set_position(fsl_ui_element *element, i32 pos_x, i32 
  *
  *  @param size_x width on screen, in pixels.
  *  @param size_y height on screen, in pixels.
- *  @param size_scaled_x width on screen, in pixels (scales with `element->transform.scale`).
- *  @param size_scaled_y height on screen, in pixels (scales with `element->transform.scale`).
+ *
+ *  @param size_scaled_x width on screen, in pixels. (scales with
+ *  `element->transform.scale`)
+ *
+ *  @param size_scaled_y height on screen, in pixels. (scales with
+ *  `element->transform.scale`)
  */
 FSLAPI void fsl_ui_element_set_size(fsl_ui_element *element,
         i32 size_x, i32 size_y, i32 size_scaled_x, i32 size_scaled_y);
@@ -119,7 +123,9 @@ FSLAPI void fsl_ui_element_set_scale(fsl_ui_element *element, f32 scale_x, f32 s
 /**
  *  @brief set alignment of `element`.
  *
- *  @param align_x horizontal alignment in respect to element's position and size.
+ *  @param align_x horizontal alignment in respect to element's position and
+ *  size.
+ *
  *  @param align_y vertical alignment in respect to element's position and size.
  *
  *  format:
@@ -133,12 +139,15 @@ FSLAPI void fsl_ui_element_set_alignment(fsl_ui_element *element, i32 align_x, i
  *  @brief enable/disable 9-slice style rendering for `element`.
  *
  *  @param is_9_slice enable/disable 9-slice.
- *  @param slice_size corner slice diameter, middle slices will consume the rest of the area.
+ *
+ *  @param slice_size corner slice diameter, middle slices will consume the rest
+ *  of the area.
  */
 FSLAPI void fsl_ui_element_set_9_slice(fsl_ui_element *element, b8 is_9_slice, i32 slice_size);
 
 /**
- *  @brief set an event action callback for `element` (e.g., button press, button hover).
+ *  @brief set an event action callback for `element`. (e.g., button press,
+ *  button hover)
  *
  *  @param element element to enable action callback for.
  *  @param event_type type of event that will trigger `callback()`.
@@ -167,7 +176,7 @@ FSLAPI void fsl_ui_element_draw(fsl_ui_element *element);
 /**
  *  @brief attach a UI element to another (e.g., button in a menu).
  *
- *  - `child` will draw using `parent` baked transform + its own baked transform.
+ *  `child` will draw using `parent` baked transform + its own baked transform.
  *
  *  @param parent element to attach to.
  *  @param child element to attach.

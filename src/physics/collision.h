@@ -54,7 +54,7 @@ FSLAPI b8 fsl_is_intersect_aabb(fsl_bounding_box a, fsl_bounding_box b);
  *
  *  @param displacement displacement of `a`, since this function assumes `b` is static.
  */
-FSLAPI fsl_collision_info fsl_get_swept_aabb(fsl_bounding_box a, fsl_bounding_box b,
+FSLAPI fsl_collision_info fsl_swept_aabb_get(fsl_bounding_box a, fsl_bounding_box b,
         v3f64 displacement);
 
 #endif /* FSL_COLLISION_H */

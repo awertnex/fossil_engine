@@ -34,7 +34,7 @@ b8 fsl_is_intersect_aabb(fsl_bounding_box a, fsl_bounding_box b)
             a.pos.z >= b.pos.z + b.size.z || b.pos.z >= a.pos.z + a.size.z);
 }
 
-fsl_collision_info fsl_get_swept_aabb(fsl_bounding_box a, fsl_bounding_box b,
+fsl_collision_info fsl_swept_aabb_get(fsl_bounding_box a, fsl_bounding_box b,
         v3f64 displacement)
 {
     fsl_collision_info c = {0};

@@ -36,9 +36,10 @@
 FSLAPI u32 fsl_path_bin_root_get(str **dst);
 
 /**
+ *  @brief get current path of binary/executable and assign to `dst`.
+ *
  *  @internal
  *
- *  @brief get current path of binary/executable and assign to `dst`.
  *  implemented in `platform_<PLATFORM>.c`.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.

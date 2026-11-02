@@ -116,8 +116,6 @@ fsl_render render_internal = {0};
 /* ---- section: signatures ------------------------------------------------- */
 
 /**
- *  @internal
- *
  *  @brief engine's default error callback for 'GLFW'.
  */
 static void glfw_callback_error(int error, const char* message)
@@ -127,8 +125,6 @@ static void glfw_callback_error(int error, const char* message)
 }
 
 /**
- *  @internal
- *
  *  @brief take screenshot and save it into dir at `dir_screenshots`.
  *
  *  saves pixel data as RGB into @ref fsl_render.screen_buf.
@@ -144,27 +140,12 @@ static void glfw_callback_error(int error, const char* message)
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
-static u32 screenshot_take_internal(const str *dir_screenshots, const str *special_text);
+static u32 screenshot_take(const str *dir_screenshots, const str *special_text);
 
-/**
- *  @internal
- */
-static void fbo_bind_internal(void);
-
-/**
- *  @internal
- */
-static void fbo_bind_msaa_internal(void);
-
-/**
- *  @internal
- */
-static void fbo_blit_internal(GLuint fbo);
-
-/**
- *  @internal
- */
-static void fbo_blit_msaa_internal(GLuint fbo);
+static void fbo_bind_func(void);
+static void fbo_bind_msaa_func(void);
+static void fbo_blit_func(GLuint fbo);
+static void fbo_blit_msaa_func(GLuint fbo);
 
 /* ---- section: init ------------------------------------------------------- */
 
@@ -237,13 +218,13 @@ u32 fsl_engine_init(int argc, char **argv, const str *title,
 
     if (flags & FSL_FLAG_MULTISAMPLE)
     {
-        fsl_core.fbo_bind = &fbo_bind_msaa_internal;
-        fsl_core.fbo_blit = &fbo_blit_msaa_internal;
+        fsl_core.fbo_bind = &fbo_bind_msaa_func;
+        fsl_core.fbo_blit = &fbo_blit_msaa_func;
     }
     else
     {
-        fsl_core.fbo_bind = &fbo_bind_internal;
-        fsl_core.fbo_blit = &fbo_blit_internal;
+        fsl_core.fbo_bind = &fbo_bind_func;
+        fsl_core.fbo_blit = &fbo_blit_func;
     }
 
     /* ---- engine uniform buffers ------------------------------------------ */
@@ -589,12 +570,12 @@ u32 fsl_screenshot_request_respond(const str *dir_screenshots, const str *specia
     if (fsl_core.request.screenshot_take)
     {
         fsl_core.request.screenshot_take = FALSE;
-        return screenshot_take_internal(dir_screenshots, special_text);
+        return screenshot_take(dir_screenshots, special_text);
     }
     return FSL_ERR_SUCCESS;
 }
 
-static u32 screenshot_take_internal(const str *dir_screenshots, const str *special_text)
+static u32 screenshot_take(const str *dir_screenshots, const str *special_text)
 {
     u64 i = 0;
     str str_time[FSL_TIME_STRING_MAX] = {0};
@@ -654,12 +635,12 @@ void fsl_fbo_bind(void)
     fsl_core.fbo_bind();
 }
 
-static void fbo_bind_internal(void)
+static void fbo_bind_func(void)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, fsl_core.fbo.fbo);
 }
 
-static void fbo_bind_msaa_internal(void)
+static void fbo_bind_msaa_func(void)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, fsl_core.fbo_msaa.fbo);
 }
@@ -669,7 +650,7 @@ void fsl_fbo_blit(GLuint fbo)
     fsl_core.fbo_blit(fbo);
 }
 
-static void fbo_blit_internal(GLuint fbo)
+static void fbo_blit_func(GLuint fbo)
 {
     fsl_shader_program *shader_unit_quad = fsl_mem_handle_get(fsl_shader_buf);
     shader_unit_quad = &shader_unit_quad[FSL_SHADER_INDEX_UNIT_QUAD];
@@ -682,7 +663,7 @@ static void fbo_blit_internal(GLuint fbo)
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
-static void fbo_blit_msaa_internal(GLuint fbo)
+static void fbo_blit_msaa_func(GLuint fbo)
 {
     fsl_shader_program *shader_unit_quad = fsl_mem_handle_get(fsl_shader_buf);
     shader_unit_quad = &shader_unit_quad[FSL_SHADER_INDEX_UNIT_QUAD];

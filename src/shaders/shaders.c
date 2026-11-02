@@ -57,15 +57,15 @@ u32 fsl_shader_init(fsl_shader *shader, b8 *shader_created)
         return fsl_err;
     }
 
-    if (fsl_shader_get_type_internal(metadata.file, &type) != FSL_ERR_SUCCESS)
+    if (fsl_shader_type_get_internal(metadata.file, &type) != FSL_ERR_SUCCESS)
         return fsl_err;
 
-    shader->source = fsl_shader_pre_process_internal(temp, NULL);
+    shader->source = shader_pre_process_internal(temp, NULL);
     if (!shader->source)
     {
         LOGERROR(FSL_ERR_POINTER_NULL,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Shader", metadata.name_id, "`fsl_shader_pre_process_internal()` Failed"));
+                MSG_ACTION_SUBJECT_REASON_ERROR("Initialize Shader", metadata.name_id, "`shader_pre_process_internal()` Failed"));
         if (shader_created)
             *shader_created = FALSE;
         return fsl_err;

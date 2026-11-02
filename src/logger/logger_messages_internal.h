@@ -18,6 +18,8 @@
  *  @file logger_messages_internal.h
  *
  *  @brief engine's standardized logger messages and log message conventions.
+ *
+ *  @internal
  */
 
 #ifndef FSL_LOGGER_MESSAGE_H

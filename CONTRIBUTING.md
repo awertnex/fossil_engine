@@ -694,8 +694,8 @@ than one line:
 i32 func(i32 first_parameter, i32 second_parameter, i32 third_parameter);
 ```
 
-internal symbols should be marked as such in the documentation, even if the
-symbol name says it:
+internal symbols (and files) should be marked as such in the documentation, even
+if the symbol name says it:
 ```c
 /**
  *  @brief ...

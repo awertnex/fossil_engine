@@ -47,12 +47,10 @@
 #include <string.h>
 
 /**
- *  @internal
- *
  *  @brief standard vertex buffer for a unit quad as an engine default and as a
  *  solid fallback option.
  */
-static f32 vertex_buf_unit_quad_internal[] =
+static f32 vertex_buf_unit_quad[] =
 {
     -1.0f, -1.0f, 0.0f, 0.0f,
     -1.0f, 1.0f, 0.0f, 1.0f,
@@ -312,14 +310,14 @@ mesh_fbo_init:
         return FSL_ERR_SUCCESS;
 
     mesh_fbo->vertex_buf.size = sizeof(GLfloat);
-    mesh_fbo->vertex_buf.len = fsl_arr_len(vertex_buf_unit_quad_internal);
+    mesh_fbo->vertex_buf.len = fsl_arr_len(vertex_buf_unit_quad);
     if (fsl_vbo_init(&mesh_fbo->vertex_buf, mesh_fbo->vertex_buf.size, mesh_fbo->vertex_buf.len,
-            vertex_buf_unit_quad_internal, GL_ARRAY_BUFFER, FSL_DRAW_TYPE_STATIC) != FSL_ERR_SUCCESS)
+            vertex_buf_unit_quad, GL_ARRAY_BUFFER, FSL_DRAW_TYPE_STATIC) != FSL_ERR_SUCCESS)
         goto cleanup;
 
     fsl_asset_metadata_set(&mesh_fbo->asset, FSL_ASSET_MESH, "Unit Quad", "unit_quad", NULL, NULL);
     mesh_fbo_vertex_buf = fsl_mem_handle_get(mesh_fbo->vertex_buf.buf);
-    memcpy(mesh_fbo_vertex_buf, vertex_buf_unit_quad_internal,
+    memcpy(mesh_fbo_vertex_buf, vertex_buf_unit_quad,
             mesh_fbo->vertex_buf.size * mesh_fbo->vertex_buf.len);
 
     /* ---- bind mesh ------------------------------------------------------- */

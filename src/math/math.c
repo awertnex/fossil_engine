@@ -28,7 +28,7 @@
 #include "../memory/memory.h"
 
 #include "math.h"
-#include "math_implementation.h"
+#include "math_implementation_internal.h"
 #include "math_internal.h"
 #include "matrix.h"
 #include "noise.h"

@@ -72,11 +72,12 @@ struct fsl_render
 /* ---- section: declarations ----------------------------------------------- */
 
 /**
- *  @internal
- *
  *  @brief engine's default render.
  *
- *  @remark declared and initialized internally, retrieve reference using @ref fsl_render_get().
+ *  @internal
+ *
+ *  @remark declared and initialized internally, retrieve reference using
+ *  @ref fsl_render_get().
  */
 extern fsl_render render_internal;
 
