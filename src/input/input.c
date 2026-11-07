@@ -331,7 +331,6 @@ void input_mouse_movement_update_internal(void)
 
 void input_key_states_update_internal(void)
 {
-    GLFWwindow *window = render_internal.window;
     u64 _time = render_internal.time;
     static u64 double_press_time_interval = (u64)(FSL_DOUBLE_PRESS_TIME_INTERVAL * FSL_SEC2NSEC);
     static u64 key_press_start_time[FSL_KEYBOARD_KEYS_MAX] = {0};
@@ -345,8 +344,8 @@ void input_key_states_update_internal(void)
 
     for (i = 0; i < FSL_MOUSE_BUTTONS_MAX; ++i)
     {
-        mouse_press = glfwGetMouseButton(window, i) == GLFW_PRESS;
-        mouse_release = glfwGetMouseButton(window, i) == GLFW_RELEASE;
+        mouse_press = glfwGetMouseButton(render_internal.window, i) == GLFW_PRESS;
+        mouse_release = glfwGetMouseButton(render_internal.window, i) == GLFW_RELEASE;
 
         if (mouse_press &&
                 (mouse_button[i] == STATE_INPUT_IDLE))
@@ -369,8 +368,8 @@ void input_key_states_update_internal(void)
 
     for (i = 0; i < FSL_KEYBOARD_KEYS_MAX; ++i)
     {
-        key_press = glfwGetKey(window, fsl_keyboard_tab[i]) == GLFW_PRESS;
-        key_release = glfwGetKey(window, fsl_keyboard_tab[i]) == GLFW_RELEASE;
+        key_press = glfwGetKey(render_internal.window, fsl_keyboard_tab[i]) == GLFW_PRESS;
+        key_release = glfwGetKey(render_internal.window, fsl_keyboard_tab[i]) == GLFW_RELEASE;
 
         if (key_press)
         {
