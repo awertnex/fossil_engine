@@ -46,6 +46,6 @@ struct fsl_engine_session
 /**
  *  @remark declared and initialized in @ref fsl_engine_init().
  */
-FSLAPI extern fsl_engine_session FSL_SESSION;
+FSLAPI fsl_engine_session FSL_SESSION;
 
 #endif /* FSL_SESSION_H */

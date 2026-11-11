@@ -43,25 +43,25 @@
 
 /* ---- section: definitions ------------------------------------------------ */
 
-struct fsl_glyphf
+struct glyphf
 {
     v2f32 scale;
     v2f32 bearing;
     f32 advance;
     b8 loaded;
-}; /* fsl_glyphf */
+}; /* glyphf */
 
-struct fsl_text_data
+struct glyph_render_data
 {
     v2f32 pos;
     u32 char_index;
     u32 color;
-}; /* fsl_text_data */
+}; /* glyph_render_data */
 
 static struct text_core
 {
     fsl_font *font;
-    struct fsl_glyphf glyph[FSL_GLYPH_MAX];
+    struct glyphf glyph[FSL_GLYPH_MAX];
     f32 font_size;
     f32 line_height_total;
     f32 advance;
@@ -74,16 +74,18 @@ static struct text_core
     GLuint cursor;
 
     /**
-     *  @brief text buffer, raw text data.
+     *  @brief glyph buffer, raw glyph data.
+     *
+     *  stores render data of a text batch.
      */
-    struct fsl_text_data *buf;
+    struct glyph_render_data *buf;
 
     u64 buf_len;
     GLuint vao;
     GLuint vertex_data_unit_quad;
     GLuint vbo_text_data;
     b8 vao_loaded;
-} text_core;
+} text_core = {0};
 
 static struct ui_core
 {
@@ -122,7 +124,7 @@ static struct ui_core
 
     } uniform;
 
-} ui_core;
+} ui_core = {0};
 
 /* ---- section: declarations ----------------------------------------------- */
 
@@ -133,8 +135,6 @@ static f32 vertex_buf_ui_unit_quad[] =
     1.0f, 0.0f, 1.0f, 0.0f,
     1.0f, -1.0f, 1.0f, 1.0f
 };
-
-fsl_render *render = NULL;
 
 static void ui_text_align_x_none_func(const str *text, i64 i, f32 advance);
 static void ui_text_align_x_center_func(const str *text, i64 i, f32 advance);
@@ -149,7 +149,7 @@ u32 ui_text_init_internal(void)
 {
     fsl_shader_program *shader_p = fsl_mem_handle_get(fsl_shader_buf);
 
-    if (fsl_mem_map((void*)&text_core.buf, FSL_STRING_MAX * sizeof(struct fsl_text_data),
+    if (fsl_mem_map((void*)&text_core.buf, FSL_STRING_MAX * sizeof(struct glyph_render_data),
                 "ui_text_init_internal().text_core.buf") != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -179,22 +179,22 @@ u32 ui_text_init_internal(void)
 
         glGenBuffers(1, &text_core.vbo_text_data);
         glBindBuffer(GL_ARRAY_BUFFER, text_core.vbo_text_data);
-        glBufferData(GL_ARRAY_BUFFER, text_core.buf_len * sizeof(struct fsl_text_data),
+        glBufferData(GL_ARRAY_BUFFER, text_core.buf_len * sizeof(struct glyph_render_data),
                 NULL, GL_DYNAMIC_DRAW);
 
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
-                sizeof(struct fsl_text_data), (void*)0);
+                sizeof(struct glyph_render_data), (void*)0);
         glVertexAttribDivisor(2, 1);
 
         glEnableVertexAttribArray(3);
         glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT,
-                sizeof(struct fsl_text_data), (void*)(2 * sizeof(f32)));
+                sizeof(struct glyph_render_data), (void*)(2 * sizeof(f32)));
         glVertexAttribDivisor(3, 1);
 
         glEnableVertexAttribArray(4);
         glVertexAttribIPointer(4, 1, GL_UNSIGNED_INT,
-                sizeof(struct fsl_text_data), (void*)(2 * sizeof(f32) + sizeof(u32)));
+                sizeof(struct glyph_render_data), (void*)(2 * sizeof(f32) + sizeof(u32)));
         glVertexAttribDivisor(4, 1);
 
         glBindVertexArray(0);
@@ -223,7 +223,7 @@ void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear)
 {
     static v2i32 render_size = {0};
     f32 scale = 0.0f;
-    struct fsl_glyphf *g = NULL;
+    struct glyphf *g = NULL;
     u32 i = 0;
 
     fsl_fbo_bind();
@@ -234,15 +234,15 @@ void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear)
     {
         if (
                 fsl_mem_remap((void*)&text_core.buf,
-                    text_core.buf_len * sizeof(struct fsl_text_data),
-                    length * sizeof(struct fsl_text_data),
+                    text_core.buf_len * sizeof(struct glyph_render_data),
+                    length * sizeof(struct glyph_render_data),
                     "fsl_text_start().text_core.buf") != FSL_ERR_SUCCESS)
             goto cleanup;
 
         text_core.buf_len = length;
 
         glBindBuffer(GL_ARRAY_BUFFER, text_core.vbo_text_data);
-        glBufferData(GL_ARRAY_BUFFER, text_core.buf_len * sizeof(struct fsl_text_data),
+        glBufferData(GL_ARRAY_BUFFER, text_core.buf_len * sizeof(struct glyph_render_data),
                 NULL, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
@@ -298,7 +298,7 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
 {
     u64 len = 0, i = 0;
     f32 descent = 0.0f, line_height = 0.0f;
-    struct fsl_glyphf *g = NULL;
+    struct glyphf *g = NULL;
     f32 _window_x = (f32)window_x * render_internal.ndc_scale.x;
     void (*align_x_func)(const str *, i64, f32) = &ui_text_align_x_none_func;
     void (*align_y_func)(u64, f32) = &ui_text_align_y_none_func;
@@ -324,8 +324,8 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
     {
         if (
                 fsl_mem_remap((void*)&text_core.buf,
-                    text_core.buf_len * sizeof(struct fsl_text_data),
-                    (text_core.buf_len + FSL_STRING_MAX) * sizeof(struct fsl_text_data),
+                    text_core.buf_len * sizeof(struct glyph_render_data),
+                    (text_core.buf_len + FSL_STRING_MAX) * sizeof(struct glyph_render_data),
                     "fsl_text_push().text_core.buf") != FSL_ERR_SUCCESS)
         {
             LOGERROR(fsl_err,
@@ -337,7 +337,7 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
         text_core.buf_len += FSL_STRING_MAX;
 
         glBindBuffer(GL_ARRAY_BUFFER, text_core.vbo_text_data);
-        glBufferData(GL_ARRAY_BUFFER, text_core.buf_len * sizeof(struct fsl_text_data),
+        glBufferData(GL_ARRAY_BUFFER, text_core.buf_len * sizeof(struct glyph_render_data),
                 NULL, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
@@ -402,6 +402,47 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
     align_y_func(text_core.cursor, text_core.line_height_total);
 }
 
+void fsl_text_render(b8 shadow, u32 shadow_color)
+{
+    if (!text_core.buf)
+    {
+        LOGERROR(FSL_ERR_BUFFER_EMPTY,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                MSG_ACTION_REASON_ERROR("Render Text", "`text_core.buf` `NULL`"));
+        return;
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, text_core.vbo_text_data);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, text_core.cursor * sizeof(struct glyph_render_data),
+            text_core.buf);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(text_core.vao);
+
+    if (shadow)
+    {
+        glUniform1i(ui_core.uniform.text.draw_shadow, TRUE);
+        glUniform4f(ui_core.uniform.text.shadow_color,
+                (f32)((shadow_color >> 0x18) & 0xff) / 0xff,
+                (f32)((shadow_color >> 0x10) & 0xff) / 0xff,
+                (f32)((shadow_color >> 0x08) & 0xff) / 0xff,
+                (f32)((shadow_color >> 0x00) & 0xff) / 0xff);
+        glUniform2f(ui_core.uniform.text.shadow_offset, FSL_TEXT_OFFSET_SHADOW, FSL_TEXT_OFFSET_SHADOW);
+        glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, text_core.cursor);
+    }
+
+    glUniform1i(ui_core.uniform.text.draw_shadow, FALSE);
+    glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, text_core.cursor);
+
+    text_core.cursor = 0;
+    text_core.line_height_total = 0;
+    text_core.advance = 0.0f;
+}
+
+f32 fsl_text_height_get(void)
+{
+    return text_core.line_height_total * text_core.text_scale.y;
+}
+
 void ui_text_align_x_center_func(const str *text, i64 i, f32 advance)
 {
     i64 j = 1;
@@ -447,54 +488,12 @@ void ui_text_align_y_none_func(u64 end, f32 height)
     return;
 }
 
-void fsl_text_render(b8 shadow, u32 shadow_color)
-{
-    if (!text_core.buf)
-    {
-        LOGERROR(FSL_ERR_BUFFER_EMPTY,
-                FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_REASON_ERROR("Render Text", "`text_core.buf` `NULL`"));
-        return;
-    }
-
-    glBindBuffer(GL_ARRAY_BUFFER, text_core.vbo_text_data);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, text_core.cursor * sizeof(struct fsl_text_data),
-            text_core.buf);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(text_core.vao);
-
-    if (shadow)
-    {
-        glUniform1i(ui_core.uniform.text.draw_shadow, TRUE);
-        glUniform4f(ui_core.uniform.text.shadow_color,
-                (f32)((shadow_color >> 0x18) & 0xff) / 0xff,
-                (f32)((shadow_color >> 0x10) & 0xff) / 0xff,
-                (f32)((shadow_color >> 0x08) & 0xff) / 0xff,
-                (f32)((shadow_color >> 0x00) & 0xff) / 0xff);
-        glUniform2f(ui_core.uniform.text.shadow_offset, FSL_TEXT_OFFSET_SHADOW, FSL_TEXT_OFFSET_SHADOW);
-        glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, text_core.cursor);
-    }
-
-    glUniform1i(ui_core.uniform.text.draw_shadow, FALSE);
-    glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, text_core.cursor);
-
-    text_core.cursor = 0;
-    text_core.line_height_total = 0;
-    text_core.advance = 0.0f;
-}
-
-f32 fsl_text_height_get(void)
-{
-    return text_core.line_height_total * text_core.text_scale.y;
-}
 
 /* ---- section: ui --------------------------------------------------------- */
 
 u32 fsl_ui_init(void)
 {
     fsl_shader_program *shader_p = fsl_mem_handle_get(fsl_shader_buf);
-
-    render = fsl_render_get();
 
     if (ui_text_init_internal() != FSL_ERR_SUCCESS)
         return fsl_err;
@@ -639,7 +638,7 @@ void fsl_ui_element_draw(fsl_ui_element *element)
             element->transform.pos_local.y + element->parent->transform.pos_baked.y;
     }
 
-    ui_element_listen_internal(element, render->mouse_pos, render->mouse_delta);
+    ui_element_listen_internal(element, render_internal.mouse_pos, render_internal.mouse_delta);
 
     if (element->texture)
     {
@@ -656,10 +655,10 @@ void fsl_ui_element_draw(fsl_ui_element *element)
             drawable.uv_pos.y = element->transform.uv_pos_baked.y;
             drawable.uv_size.x = element->transform.uv_size_baked.x;
             drawable.uv_size.y = element->transform.uv_size_baked.y;
-            drawable.pos.x = element->transform.pos_baked.x * render->ndc_scale.x;
-            drawable.pos.y = element->transform.pos_baked.y * render->ndc_scale.y;
-            drawable.size.x = element->transform.size_baked.x * render->ndc_scale.x;
-            drawable.size.y = element->transform.size_baked.y * render->ndc_scale.y;
+            drawable.pos.x = element->transform.pos_baked.x * render_internal.ndc_scale.x;
+            drawable.pos.y = element->transform.pos_baked.y * render_internal.ndc_scale.y;
+            drawable.size.x = element->transform.size_baked.x * render_internal.ndc_scale.x;
+            drawable.size.y = element->transform.size_baked.y * render_internal.ndc_scale.y;
 
             drawable.pos.x = drawable.pos.x - 1.0f;
             drawable.pos.y = 1.0f - drawable.pos.y;
@@ -685,7 +684,7 @@ void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y,
         i32 size_x, i32 size_y, u32 tint)
 {
     fsl_ui_drawable_quad drawable = {0};
-    v2f32 ndc_scale = render->ndc_scale;
+    v2f32 ndc_scale = render_internal.ndc_scale;
 
     if (!size_x) size_x = texture->size.x;
     if (!size_y) size_y = texture->size.y;
@@ -731,7 +730,7 @@ void fsl_ui_free(void)
         glDeleteBuffers(1, &text_core.vbo_text_data);
     }
 
-    fsl_mem_unmap((void*)&text_core.buf, text_core.buf_len * sizeof(struct fsl_text_data),
+    fsl_mem_unmap((void*)&text_core.buf, text_core.buf_len * sizeof(struct glyph_render_data),
             "fsl_ui_free().text_core.buf");
 
     if (ui_core.vao_loaded)
@@ -748,7 +747,7 @@ fsl_panel_nine_slice fsl_nine_slice_get_internal(fsl_ui_element *element)
     fsl_ui_transform *t = &element->transform;
     f32 slice_size = t->slice_size;
     v2f32 slice_size_scaled = {0};
-    v2f32 ndc_scale = render->ndc_scale;
+    v2f32 ndc_scale = render_internal.ndc_scale;
     v2f32 uv_scale = {0};
     v2f32 uv_pos[3] = {0};
     v2f32 uv_size[3] = {0};

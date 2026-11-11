@@ -108,6 +108,6 @@
  *
  *  @remark must be declared by the user if not including @ref src/engine/engine.c.
  */
-FSLAPI extern u32 fsl_err;
+FSLAPI u32 fsl_err;
 
 #endif /* FSL_DIAGNOSTICS_H */

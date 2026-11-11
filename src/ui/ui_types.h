@@ -67,7 +67,7 @@ typedef void (*fsl_ui_callback_func)(fsl_ui_event event, void *data);
 struct fsl_ui_callback
 {
     fsl_ui_callback_func func;
-    void *data;
+    void *data;             /* data to pass into `func` */
 }; /* fsl_ui_callback */
 
 struct fsl_ui_transform

@@ -89,14 +89,17 @@ void fsl_ui_element_9_slice_set(fsl_ui_element *element, b8 is_9_slice, i32 slic
 
 void fsl_ui_element_callback_set(fsl_ui_element *element,
         fsl_ui_event_type event_type,
-        void (*func)(fsl_ui_event event, void *data), void *data)
+        fsl_ui_callback_func func, void *data)
 {
-    element->callback[event_type].func = func;
-    element->callback[event_type].data = data;
+    element->event_func[event_type].func = func;
+    element->event_func[event_type].data = data;
 }
 
 void fsl_ui_element_attach(fsl_ui_element *parent, fsl_ui_element *child)
 {
+    if (!parent)
+        return;
+
     parent->flag |= FSL_FLAG_UI_DIRTY_CHILDREN;
     child->flag |= FSL_FLAG_UI_DIRTY_PARENT;
     child->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;

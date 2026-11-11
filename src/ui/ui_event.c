@@ -87,8 +87,8 @@ void ui_element_listen_internal(fsl_ui_element *element, v2f64 mouse_pos, v2f64 
 
     for (; i < FSL_UI_EVENT_TYPE_COUNT; ++i)
     {
-        if (element->callback[i].func)
-            ui_event_respond_func_internal[i](element, &element->callback[i]);
+        if (element->event_func[i].func)
+            ui_event_respond_func_internal[i](element, &element->event_func[i]);
     }
 }
 

@@ -61,8 +61,8 @@ struct fsl_ui_element
     fsl_array children_buf;
     fsl_ui_element **children;  /* cached pointer from `children_buf` */
 
-    fsl_ui_callback callback[FSL_UI_EVENT_TYPE_COUNT];
     fsl_ui_event event;
+    fsl_ui_callback event_func[FSL_UI_EVENT_TYPE_COUNT];
 }; /* fsl_ui_element */
 
 /* ---- section: signatures ------------------------------------------------- */
