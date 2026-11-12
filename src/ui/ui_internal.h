@@ -44,7 +44,7 @@ u32 ui_text_init_internal(void);
  *
  *  @internal
  *
- *  @remark called automatically from @ref ui_element_draw().
+ *  @remark called automatically from @ref fsl_ui_element_draw().
  */
 void ui_element_listen_internal(fsl_ui_element *element, v2f64 mouse_pos, v2f64 mouse_delta);
 

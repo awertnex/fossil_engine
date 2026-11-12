@@ -32,6 +32,12 @@
 
 /* ---- section: definitions ------------------------------------------------ */
 
+typedef void fsl_ui_element_data;
+
+typedef struct fsl_ui_element_panel fsl_ui_element_panel;
+typedef struct fsl_ui_panel_9_slice fsl_ui_panel_9_slice;
+typedef struct fsl_panel_nine_slice fsl_panel_nine_slice;
+
 enum fsl_ui_element_flag
 {
     FSL_FLAG_UI_INACTIVE =          (1 << 0),
@@ -46,13 +52,16 @@ typedef enum fsl_ui_element_type
     FSL_UI_ELEMENT_TYPE_NONE,
     FSL_UI_ELEMENT_TYPE_CONTAINER,
     FSL_UI_ELEMENT_TYPE_PANEL,
+    FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE,
     FSL_UI_ELEMENT_TYPE_BUTTON,
+    FSL_UI_ELEMENT_TYPE_CUSTOM,         /* custom drawables (e.g., debug visuals) */
     FSL_UI_ELEMENT_TYPE_COUNT
 } fsl_ui_element_type;
 
 struct fsl_ui_element
 {
     fsl_ui_element_type type;
+    fsl_ui_element_data *data;  /* processed on element draw */
     fsl_texture *texture;
     fsl_ui_transform transform;
 
@@ -64,6 +73,32 @@ struct fsl_ui_element
     fsl_ui_event event;
     fsl_ui_callback event_func[FSL_UI_EVENT_TYPE_COUNT];
 }; /* fsl_ui_element */
+
+/* ---- section: definitions: element types --------------------------------- */
+
+struct fsl_ui_element_panel
+{
+    fsl_texture *texture;
+    fsl_ui_drawable_quad quad;
+}; /* fsl_ui_element_panel */
+
+/**
+ *  @brief one 9-slice panel.
+ */
+struct fsl_ui_panel_9_slice
+{
+    fsl_ui_transform slice[9];
+}; /* fsl_ui_panel_9_slice */
+
+/**
+ *  @brief one 9-slice panel.
+ *
+ *  -- DEPRECATED IN v0.10.0-beta --;
+ */
+struct fsl_panel_nine_slice
+{
+    fsl_ui_drawable_quad slice[9];
+}; /* fsl_panel_nine_slice */
 
 /* ---- section: signatures ------------------------------------------------- */
 

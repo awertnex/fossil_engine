@@ -31,38 +31,6 @@
 #include "ui_types.h"
 #include "ui_element.h"
 
-/* ---- section: definitions ------------------------------------------------ */
-
-#define FSL_UI_PANEL_GAP_DEFAULT 10
-#define FSL_UI_PANEL_PADDING_DEFAULT 10
-#define FSL_UI_SLICE_SIZE_DEFAULT 8
-
-/**
- *  @brief one 9-slice panel.
- */
-typedef struct fsl_ui_panel_9_slice
-{
-    fsl_ui_transform slice[9];
-} fsl_ui_panel_9_slice;
-
-typedef struct fsl_ui_drawable_quad
-{
-    v2f32 uv_pos;
-    v2f32 uv_size;
-    v2f32 pos;
-    v2f32 size;
-} fsl_ui_drawable_quad;
-
-/**
- *  @brief one 9-slice panel.
- *
- *  -- DEPRECATED IN v0.10.0-beta --;
- */
-typedef struct fsl_panel_nine_slice
-{
-    fsl_ui_drawable_quad slice[9];
-} fsl_panel_nine_slice;
-
 /* ---- section: signatures ------------------------------------------------- */
 
 /**

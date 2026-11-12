@@ -632,13 +632,14 @@ void fsl_ui_element_draw(fsl_ui_element *element)
 
     if (element->parent)
     {
-        element->transform.pos_baked.x =
-            element->transform.pos_local.x + element->parent->transform.pos_baked.x;
-        element->transform.pos_baked.y =
-            element->transform.pos_local.y + element->parent->transform.pos_baked.y;
+        element->transform.pos_baked.x = element->transform.pos_local.x +
+            element->parent->transform.pos_baked.x;
+        element->transform.pos_baked.y = element->transform.pos_local.y +
+            element->parent->transform.pos_baked.y;
     }
 
-    ui_element_listen_internal(element, render_internal.mouse_pos, render_internal.mouse_delta);
+    ui_element_listen_internal(element,
+            render_internal.mouse_pos, render_internal.mouse_delta);
 
     if (element->texture)
     {

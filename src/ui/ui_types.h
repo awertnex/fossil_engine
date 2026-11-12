@@ -29,6 +29,7 @@ typedef struct fsl_ui_event     fsl_ui_event;
 typedef struct fsl_ui_callback  fsl_ui_callback;
 typedef struct fsl_ui_transform fsl_ui_transform;
 typedef struct fsl_ui_element   fsl_ui_element;
+typedef struct fsl_ui_drawable_quad fsl_ui_drawable_quad;
 
 typedef enum fsl_ui_event_type
 {
@@ -79,14 +80,14 @@ struct fsl_ui_transform
     v2i32 offset;           /* offset on screen from `pos`, in pixels */
 
     /**
-     *  offset on screen from `pos`, in pixels. (scales with `scale`)
+     *  @brief offset on screen from `pos`, in pixels. (scales with `scale`)
      */
     v2i32 offset_scaled;
 
     v2i32 size;             /* size on screen, in pixels */
 
     /**
-     *  size on screen, in pixels. (scales with `scale`)
+     *  @brief size on screen, in pixels. (scales with `scale`)
      */
     v2i32 size_scaled;
 
@@ -102,12 +103,12 @@ struct fsl_ui_transform
     v2i32 align;
 
     /**
-     *  baked absolute position in texture, in normalized coordinates.
+     *  @brief baked absolute position in texture, in normalized coordinates.
      */
     v2f32 uv_pos_baked;
 
     /**
-     *  baked absolute size in texture, in normalized coordinates.
+     *  @brief baked absolute size in texture, in normalized coordinates.
      */
     v2f32 uv_size_baked;
 
@@ -115,5 +116,13 @@ struct fsl_ui_transform
     v2f32 pos_baked;        /* baked absolute position on screen, in pixels */
     v2f32 size_baked;       /* baked absolute size on screen, in pixels */
 }; /* fsl_ui_transform */
+
+struct fsl_ui_drawable_quad
+{
+    v2f32 uv_pos;
+    v2f32 uv_size;
+    v2f32 pos;
+    v2f32 size;
+}; /* fsl_ui_drawable_quad */
 
 #endif /* FSL_UI_TYPES_H */
