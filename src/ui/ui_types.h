@@ -17,7 +17,7 @@
 /**
  *  @file ui_types.h
  *
- *  @brief UI element types.
+ *  @brief UI types.
  */
 
 #ifndef FSL_UI_TYPES_H
@@ -25,11 +25,11 @@
 
 #include "../math/vector.h"
 
-typedef struct fsl_ui_event     fsl_ui_event;
-typedef struct fsl_ui_callback  fsl_ui_callback;
-typedef struct fsl_ui_transform fsl_ui_transform;
-typedef struct fsl_ui_element   fsl_ui_element;
-typedef struct fsl_ui_drawable_quad fsl_ui_drawable_quad;
+typedef struct fsl_ui_event             fsl_ui_event;
+typedef struct fsl_ui_callback          fsl_ui_callback;
+typedef struct fsl_ui_transform_baked   fsl_ui_transform_baked;
+typedef struct fsl_ui_transform         fsl_ui_transform;
+typedef struct fsl_ui_element           fsl_ui_element;
 
 typedef enum fsl_ui_event_type
 {
@@ -71,6 +71,25 @@ struct fsl_ui_callback
     void *data;             /* data to pass into `func` */
 }; /* fsl_ui_callback */
 
+/**
+ *  @brief finalized transforms from @ref fsl_ui_transform, ready for rendering.
+ */
+struct fsl_ui_transform_baked
+{
+    /**
+     *  @brief baked absolute position in texture, in normalized coordinates.
+     */
+    v2f32 uv_pos;
+
+    /**
+     *  @brief baked absolute size in texture, in normalized coordinates.
+     */
+    v2f32 uv_size;
+
+    v2f32 pos;              /* baked absolute position on screen, in pixels */
+    v2f32 size;             /* baked absolute size on screen, in pixels */
+}; /* fsl_ui_transform_baked */
+
 struct fsl_ui_transform
 {
     v2i32 uv_pos;           /* position in texture, in pixels */
@@ -102,27 +121,8 @@ struct fsl_ui_transform
      */
     v2i32 align;
 
-    /**
-     *  @brief baked absolute position in texture, in normalized coordinates.
-     */
-    v2f32 uv_pos_baked;
-
-    /**
-     *  @brief baked absolute size in texture, in normalized coordinates.
-     */
-    v2f32 uv_size_baked;
-
     v2f32 pos_local;        /* baked local position, in pixels */
-    v2f32 pos_baked;        /* baked absolute position on screen, in pixels */
-    v2f32 size_baked;       /* baked absolute size on screen, in pixels */
+    fsl_ui_transform_baked baked;
 }; /* fsl_ui_transform */
-
-struct fsl_ui_drawable_quad
-{
-    v2f32 uv_pos;
-    v2f32 uv_size;
-    v2f32 pos;
-    v2f32 size;
-}; /* fsl_ui_drawable_quad */
 
 #endif /* FSL_UI_TYPES_H */

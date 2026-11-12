@@ -34,9 +34,9 @@
 
 typedef void fsl_ui_element_data;
 
-typedef struct fsl_ui_element_panel fsl_ui_element_panel;
-typedef struct fsl_ui_panel_9_slice fsl_ui_panel_9_slice;
-typedef struct fsl_panel_nine_slice fsl_panel_nine_slice;
+typedef struct fsl_ui_element_container         fsl_ui_element_container;
+typedef struct fsl_ui_element_panel             fsl_ui_element_panel;
+typedef struct fsl_ui_element_panel_9_slice     fsl_ui_element_panel_9_slice;
 
 enum fsl_ui_element_flag
 {
@@ -58,10 +58,14 @@ typedef enum fsl_ui_element_type
     FSL_UI_ELEMENT_TYPE_COUNT
 } fsl_ui_element_type;
 
+/**
+ *  @brief base UI element requirement.
+ *
+ *  must be placed at the top of every UI element's struct definition.
+ */
 struct fsl_ui_element
 {
     fsl_ui_element_type type;
-    fsl_ui_element_data *data;  /* processed on element draw */
     fsl_texture *texture;
     fsl_ui_transform transform;
 
@@ -74,31 +78,25 @@ struct fsl_ui_element
     fsl_ui_callback event_func[FSL_UI_EVENT_TYPE_COUNT];
 }; /* fsl_ui_element */
 
-/* ---- section: definitions: element types --------------------------------- */
+struct fsl_ui_element_container
+{
+    fsl_ui_element header; /* element header info */
+    fsl_ui_transform_baked transform;
+}; /* fsl_ui_element_container */
 
 struct fsl_ui_element_panel
 {
+    fsl_ui_element header;
     fsl_texture *texture;
-    fsl_ui_drawable_quad quad;
+    fsl_ui_transform_baked transform;
 }; /* fsl_ui_element_panel */
 
-/**
- *  @brief one 9-slice panel.
- */
-struct fsl_ui_panel_9_slice
+struct fsl_ui_element_panel_9_slice
 {
-    fsl_ui_transform slice[9];
-}; /* fsl_ui_panel_9_slice */
-
-/**
- *  @brief one 9-slice panel.
- *
- *  -- DEPRECATED IN v0.10.0-beta --;
- */
-struct fsl_panel_nine_slice
-{
-    fsl_ui_drawable_quad slice[9];
-}; /* fsl_panel_nine_slice */
+    fsl_ui_element header;
+    fsl_texture *texture;
+    fsl_ui_transform_baked transform[9];
+}; /* fsl_ui_element_panel_9_slice */
 
 /* ---- section: signatures ------------------------------------------------- */
 

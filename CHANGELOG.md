@@ -19,6 +19,14 @@ and this project adheres to
 
 ## unreleased
 
+#### removed
+- remove parameters `uv_pos_baked`, `uv_size_baked`, `pos_baked` and
+  `size_baked` from struct `fsl_ui_transform` and put in new struct
+  `fsl_ui_transform_baked`.
+- remove struct `fsl_ui_drawable_quad` and replace with struct
+  `fsl_ui_transform_baked`.
+- remove deprecated struct `fsl_ui_panel_nine_slice`.
+
 ## [0.18.0-beta] - 2026-11-02
 
 #### added

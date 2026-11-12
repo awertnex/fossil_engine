@@ -136,19 +136,19 @@ void super_debugger_update(v2i32 render_size)
     fsl_ui_element_bake(&ui_element_sdb[UI_ELEMENT_SDB_PANEL]);
 
     fsl_ui_element_position_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
-            ui_element_sdb[UI_ELEMENT_SDB_PANEL].transform.size_baked.x,
+            ui_element_sdb[UI_ELEMENT_SDB_PANEL].transform.baked.size.x,
             0, 0, 0, -SET_MARGIN, SET_MARGIN);
     fsl_ui_element_position_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
-            ui_element_sdb[UI_ELEMENT_SDB_PANEL].transform.size_baked.x,
+            ui_element_sdb[UI_ELEMENT_SDB_PANEL].transform.baked.size.x,
             0, 0, 0, -SET_MARGIN, SET_MARGIN);
     fsl_ui_element_position_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS],
-            ui_element_sdb[UI_ELEMENT_SDB_PANEL].transform.size_baked.x,
+            ui_element_sdb[UI_ELEMENT_SDB_PANEL].transform.baked.size.x,
             0, 0, 0, -SET_MARGIN, SET_MARGIN);
     fsl_ui_element_position_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO],
-            ui_element_sdb[UI_ELEMENT_SDB_PANEL].transform.size_baked.x,
+            ui_element_sdb[UI_ELEMENT_SDB_PANEL].transform.baked.size.x,
             0, 0, 0, -SET_MARGIN, SET_MARGIN);
     fsl_ui_element_position_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
-            ui_element_sdb[UI_ELEMENT_SDB_PANEL].transform.size_baked.x,
+            ui_element_sdb[UI_ELEMENT_SDB_PANEL].transform.baked.size.x,
             0, 0, 0, -SET_MARGIN, SET_MARGIN);
 
     fsl_ui_element_size_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS], 0, 0, 32, 16);
@@ -184,7 +184,7 @@ void super_debugger_draw(v2i32 render_size, GLuint fbo)
     i32 i = 0;
     u32 index = 0;
     i32 logger_panel_height =
-        ui_element_sdb[UI_ELEMENT_SDB_PANEL_LOGGER].transform.size_baked.y - SET_MARGIN * 2;
+        ui_element_sdb[UI_ELEMENT_SDB_PANEL_LOGGER].transform.baked.size.y - SET_MARGIN * 2;
     fsl_log_entry *log_entry = NULL;
 
     fsl_ui_start(FALSE);

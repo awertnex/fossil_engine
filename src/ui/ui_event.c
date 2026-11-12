@@ -60,10 +60,10 @@ void ui_element_listen_internal(fsl_ui_element *element, v2f64 mouse_pos, v2f64 
 
     element->event.caller = element;
     element->event.mouse_pos = mouse_pos;
-    area_start.x = element->transform.pos_baked.x;
-    area_start.y = element->transform.pos_baked.y;
-    area_end.x = area_start.x + element->transform.size_baked.x;
-    area_end.y = area_start.y + element->transform.size_baked.y;
+    area_start.x = element->transform.baked.pos.x;
+    area_start.y = element->transform.baked.pos.y;
+    area_end.x = area_start.x + element->transform.baked.size.x;
+    area_end.y = area_start.y + element->transform.baked.size.y;
 
     bind_click_left = key_bind_init_internal(FSL_MOUSE_BUTTON_LEFT, 0, 0, 0, 0);
     bind_click_right = key_bind_init_internal(FSL_MOUSE_BUTTON_RIGHT, 0, 0, 0, 0);
@@ -124,9 +124,9 @@ static void ui_event_click_respond_func(fsl_ui_element *element, fsl_ui_callback
         element->event.mouse_click_pos = element->event.mouse_pos;
 
         element->event.mouse_click_pos_diff.x =
-            element->event.mouse_pos.x - element->transform.pos_baked.x;
+            element->event.mouse_pos.x - element->transform.baked.pos.x;
         element->event.mouse_click_pos_diff.y =
-            element->event.mouse_pos.y - element->transform.pos_baked.y;
+            element->event.mouse_pos.y - element->transform.baked.pos.y;
 
         callback->func(element->event, callback->data);
     }
