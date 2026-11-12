@@ -137,7 +137,6 @@ FSLAPI void fsl_ui_free(void);
  *
  *  @internal
  */
-fsl_ui_element_panel_9_slice fsl_ui_element_panel_9_slice_make_internal(
-    fsl_ui_element *element);
+void ui_element_panel_9_slice_make_internal(fsl_ui_element_panel_9_slice *element);
 
 #endif /* FSL_UI_H */

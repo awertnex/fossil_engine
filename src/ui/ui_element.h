@@ -32,8 +32,6 @@
 
 /* ---- section: definitions ------------------------------------------------ */
 
-typedef void fsl_ui_element_data;
-
 typedef struct fsl_ui_element_container         fsl_ui_element_container;
 typedef struct fsl_ui_element_panel             fsl_ui_element_panel;
 typedef struct fsl_ui_element_panel_9_slice     fsl_ui_element_panel_9_slice;

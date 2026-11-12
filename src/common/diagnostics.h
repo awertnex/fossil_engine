@@ -102,6 +102,7 @@
 #define FSL_ERR_FILE_FORMAT_INVALID         4159
 #define FSL_ERR_FILE_DATA_CORRUPT           4160
 #define FSL_ERR_DIR_EMPTY                   4161
+#define FSL_ERR_TYPE_MISMATCH               4162
 
 /**
  *  @brief global variable for engine-specific error codes.

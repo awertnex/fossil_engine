@@ -19,6 +19,11 @@ and this project adheres to
 
 ## unreleased
 
+#### added
+- add error code `FSL_ERR_TYPE_MISMATCH`: data types not matching requirements,
+  used first by functions `ui_element_*_draw_func()` to invalidate wrong element
+  types.
+
 #### removed
 - remove parameters `uv_pos_baked`, `uv_size_baked`, `pos_baked` and
   `size_baked` from struct `fsl_ui_transform` and put in new struct

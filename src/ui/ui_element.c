@@ -17,8 +17,8 @@
 /**
  *  @file ui_element.c
  *
- *  @brief initializing, setting up, drawing and attaching/detaching UI elements
- *  to/from one another.
+ *  @brief initializing, setting up, drawing and attaching/detaching UI
+ *  elements.
  */
 
 #include "ui_element.h"

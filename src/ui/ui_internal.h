@@ -27,17 +27,8 @@
 
 #include "../common/types.h"
 
+#include "ui_element.h"
 #include "ui_types.h"
-
-/**
- *  @brief init text rendering settings. (and engine default fonts at
- *  @ref fsl_font_buf)
- *
- *  @internal
- *
- *  @return non-zero on failure and @ref fsl_err is set accordingly.
- */
-u32 ui_text_init_internal(void);
 
 /**
  *  @brief poll event data and parse element's callbacks (e.g., button pressed).
@@ -47,5 +38,32 @@ u32 ui_text_init_internal(void);
  *  @remark called automatically from @ref fsl_ui_element_draw().
  */
 void ui_element_listen_internal(fsl_ui_element *element, v2f64 mouse_pos, v2f64 mouse_delta);
+
+/**
+ *  @brief draw nothing, placeholder for non-drawable element types.
+ *
+ *  @internal
+ *
+ *  @note called indirectly via a function pointer array.
+ */
+void ui_element_none_draw_func(fsl_ui_element *element);
+
+/**
+ *  @brief draw a panel.
+ *
+ *  @internal
+ *
+ *  @note called indirectly via a function pointer array.
+ */
+void ui_element_panel_draw_func(fsl_ui_element *element);
+
+/**
+ *  @brief draw a 9-slice panel.
+ *
+ *  @internal
+ *
+ *  @note called indirectly via a function pointer array.
+ */
+void ui_element_panel_9_slice_draw_func(fsl_ui_element *element);
 
 #endif /* FSL_UI_INTERNAL_H */

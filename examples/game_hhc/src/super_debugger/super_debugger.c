@@ -15,12 +15,19 @@
 #include "super_debugger.h"
 #include "super_debugger_callbacks.h"
 
+static fsl_ui_element_panel_9_slice panell = {0};
+
 static i32 logger_scroll_pos = 0;
 fsl_ui_element ui_element_sdb[UI_ELEMENT_SDB_COUNT] = {0};
 
 void super_debugger_init(v2i32 render_size)
 {
     fsl_texture *fsl_texture_p = fsl_mem_handle_get(fsl_texture_buf);
+
+    panell.header.type = FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE;
+    fsl_ui_element_texture_set(&panell.header, &fsl_texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
+    fsl_ui_element_uv_set(&panell.header, 0, 0, 16, 16);
+    fsl_ui_element_9_slice_set(&panell.header, FALSE, 8);
 
     fsl_ui_element_texture_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL],
             &fsl_texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
@@ -124,6 +131,10 @@ void super_debugger_init(v2i32 render_size)
 
 void super_debugger_update(v2i32 render_size)
 {
+    fsl_ui_element_position_set(&panell.header, 0, 0, SET_MARGIN, SET_MARGIN, 0, 0);
+    fsl_ui_element_size_set(&panell.header, 400, render_size.y - SET_MARGIN * 2, 0, 0);
+    fsl_ui_element_bake(&panell.header);
+
     fsl_ui_element_position_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL],
             0, 0, SET_MARGIN, SET_MARGIN, 0, 0);
     fsl_ui_element_position_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL_LOGGER],
@@ -188,6 +199,8 @@ void super_debugger_draw(v2i32 render_size, GLuint fbo)
     fsl_log_entry *log_entry = NULL;
 
     fsl_ui_start(FALSE);
+
+    fsl_ui_element_draw(&panell.header);
 
     fsl_ui_element_draw(&ui_element_sdb[UI_ELEMENT_SDB_PANEL]);
     fsl_ui_element_draw(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS]);
