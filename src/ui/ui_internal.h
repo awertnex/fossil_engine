@@ -30,6 +30,24 @@
 #include "ui_element.h"
 #include "ui_types.h"
 
+enum ui_element_flag_internal
+{
+    FSL_FLAG_UI_INACTIVE =          (1 << 0),
+    FSL_FLAG_UI_DIRTY_TRANSFORM =   (1 << 1),
+    FSL_FLAG_UI_DIRTY_PARENT =      (1 << 2),
+    FSL_FLAG_UI_DIRTY_CHILDREN =    (1 << 3),
+    FSL_FLAG_UI_EXPAND_X =          (1 << 4),
+    FSL_FLAG_UI_EXPAND_Y =          (1 << 5)
+}; /* fsl_ui_element_flag */
+
+enum ui_element_capability_internal
+{
+    FSL_FLAG_UI_CAN_TEXTURE =       (1 << 0),
+    FSL_FLAG_UI_CAN_9_SLICE =       (1 << 1),
+    FSL_FLAG_UI_CAN_EXPAND_X =      (1 << 2),
+    FSL_FLAG_UI_CAN_EXPAND_Y =      (1 << 3)
+}; /* ui_element_capability_internal */
+
 /**
  *  @brief poll event data and parse element's callbacks (e.g., button pressed).
  *

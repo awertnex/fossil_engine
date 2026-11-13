@@ -20,9 +20,18 @@ and this project adheres to
 ## unreleased
 
 #### added
+- add new function `fsl_ui_element_type_set()`.
 - add error code `FSL_ERR_TYPE_MISMATCH`: data types not matching requirements,
   used first by functions `ui_element_*_draw_func()` to invalidate wrong element
   types.
+
+#### changed
+- move parameter `slice_size` from struct `fsl_ui_transform` to structs
+  `fsl_ui_element_panel` and `fsl_ui_element_panel_9_slice`.
+
+#### deprecated
+- deprecated parameter `is_9_slice` in function ``, 9-slice is now reliant on
+  element type.
 
 #### removed
 - remove parameters `uv_pos_baked`, `uv_size_baked`, `pos_baked` and

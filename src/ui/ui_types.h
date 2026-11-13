@@ -94,7 +94,6 @@ struct fsl_ui_transform
 {
     v2i32 uv_pos;           /* position in texture, in pixels */
     v2i32 uv_size;          /* size in texture, in pixels */
-    i32 slice_size;         /* 9-slice slice diameter, in pixels (optional) */
     v2i32 pos;              /* position on screen, in pixels */
     v2i32 offset;           /* offset on screen from `pos`, in pixels */
 
@@ -116,7 +115,7 @@ struct fsl_ui_transform
      *  @brief alignment in respect to `pos`, `size` and `size_scaled`.
      *
      *  <= -1: left-side/top is at `pos`.
-     *  == 0: center is at `pos`.
+     *  == 0: center/center is at `pos`.
      *  >= 1: right-side/bottom is at `pos`.
      */
     v2i32 align;

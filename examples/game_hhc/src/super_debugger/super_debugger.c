@@ -24,10 +24,14 @@ void super_debugger_init(v2i32 render_size)
 {
     fsl_texture *fsl_texture_p = fsl_mem_handle_get(fsl_texture_buf);
 
-    panell.header.type = FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE;
-    fsl_ui_element_texture_set(&panell.header, &fsl_texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
-    fsl_ui_element_uv_set(&panell.header, 0, 0, 16, 16);
-    fsl_ui_element_9_slice_set(&panell.header, FALSE, 8);
+    fsl_ui_element_type_set((fsl_ui_element*)&panell, FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE);
+    fsl_ui_element_texture_set((fsl_ui_element*)&panell, &fsl_texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
+    fsl_ui_element_uv_set((fsl_ui_element*)&panell, 0, 0, 16, 16);
+    fsl_ui_element_9_slice_set((fsl_ui_element*)&panell, FALSE, 8);
+    fsl_ui_element_position_set((fsl_ui_element*)&panell, 0, 0, SET_MARGIN, SET_MARGIN, 0, 0);
+    fsl_ui_element_size_set((fsl_ui_element*)&panell, 400, render_size.y - SET_MARGIN * 2, 0, 0);
+    fsl_ui_element_alignment_set((fsl_ui_element*)&panell, -1, -1);
+    fsl_ui_element_bake((fsl_ui_element*)&panell);
 
     fsl_ui_element_texture_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL],
             &fsl_texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
@@ -200,7 +204,7 @@ void super_debugger_draw(v2i32 render_size, GLuint fbo)
 
     fsl_ui_start(FALSE);
 
-    fsl_ui_element_draw(&panell.header);
+    fsl_ui_element_draw((fsl_ui_element*)&panell);
 
     fsl_ui_element_draw(&ui_element_sdb[UI_ELEMENT_SDB_PANEL]);
     fsl_ui_element_draw(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS]);
@@ -235,6 +239,8 @@ void super_debugger_draw(v2i32 render_size, GLuint fbo)
 
 void super_debugger_gui_scale_set(f32 scale)
 {
+    fsl_ui_element_scale_set((fsl_ui_element*)&panell, scale, scale);
+
     fsl_ui_element_scale_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL], scale, scale);
     fsl_ui_element_scale_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL_LOGGER], scale, scale);
     fsl_ui_element_scale_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],

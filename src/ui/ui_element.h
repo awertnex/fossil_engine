@@ -36,15 +36,6 @@ typedef struct fsl_ui_element_container         fsl_ui_element_container;
 typedef struct fsl_ui_element_panel             fsl_ui_element_panel;
 typedef struct fsl_ui_element_panel_9_slice     fsl_ui_element_panel_9_slice;
 
-enum fsl_ui_element_flag
-{
-    FSL_FLAG_UI_INACTIVE =          (1 << 0),
-    FSL_FLAG_UI_9_SLICE =           (1 << 1),
-    FSL_FLAG_UI_DIRTY_TRANSFORM =   (1 << 2),
-    FSL_FLAG_UI_DIRTY_PARENT =      (1 << 3),
-    FSL_FLAG_UI_DIRTY_CHILDREN =    (1 << 4)
-}; /* fsl_ui_element_flag */
-
 typedef enum fsl_ui_element_type
 {
     FSL_UI_ELEMENT_TYPE_NONE,
@@ -64,40 +55,63 @@ typedef enum fsl_ui_element_type
 struct fsl_ui_element
 {
     fsl_ui_element_type type;
-    fsl_texture *texture;
+    u32 flag;                   /* enum @ref fsl_ui_element_flag */
+    u64 capabilities;           /* enum @ref fsl_ui_element_capability */
     fsl_ui_transform transform;
 
-    u32 flag; /* enum @ref fsl_ui_element_flag */
     fsl_ui_element *parent;
     fsl_array children_buf;
     fsl_ui_element **children;  /* cached pointer from `children_buf` */
 
     fsl_ui_event event;
     fsl_ui_callback event_func[FSL_UI_EVENT_TYPE_COUNT];
+
+    fsl_texture *texture;       /* -- DEPRECATED IN v0.18.0-dev -- */
 }; /* fsl_ui_element */
 
 struct fsl_ui_element_container
 {
-    fsl_ui_element header; /* element header info */
-    fsl_ui_transform_baked transform;
+    fsl_ui_element header;
+    fsl_ui_transform_baked quad;
 }; /* fsl_ui_element_container */
 
 struct fsl_ui_element_panel
 {
     fsl_ui_element header;
+    fsl_ui_transform_baked quad;
     fsl_texture *texture;
-    fsl_ui_transform_baked transform;
+
+    /**
+     *  9-slice corner slice diameter, in pixels.
+     */
+    i32 slice_size;
+
 }; /* fsl_ui_element_panel */
 
 struct fsl_ui_element_panel_9_slice
 {
     fsl_ui_element header;
+    fsl_ui_transform_baked quad[9];
     fsl_texture *texture;
-    fsl_ui_transform_baked transform[9];
+
+    /**
+     *  9-slice corner slice diameter, in pixels.
+     */
+    i32 slice_size;
+
 }; /* fsl_ui_element_panel_9_slice */
 
 /* ---- section: signatures ------------------------------------------------- */
 
+/**
+ *  @brief set element type of `element` so to process accordingly, first step
+ *  in initializing a UI element before using.
+ */
+FSLAPI void fsl_ui_element_type_set(fsl_ui_element *element, fsl_ui_element_type type);
+
+/**
+ *  @brief set texture for `element` if element type supports it.
+ */
 FSLAPI void fsl_ui_element_texture_set(fsl_ui_element *element, fsl_texture *texture);
 
 /**
@@ -167,9 +181,9 @@ FSLAPI void fsl_ui_element_scale_set(fsl_ui_element *element, f32 scale_x, f32 s
 FSLAPI void fsl_ui_element_alignment_set(fsl_ui_element *element, i32 align_x, i32 align_y);
 
 /**
- *  @brief enable/disable 9-slice style rendering for `element`.
+ *  @brief set 9-slice corner slice diameter for `element`.
  *
- *  @param is_9_slice enable/disable 9-slice.
+ *  @param is_9_slice enable/disable 9-slice. (-- DEPRECATED IN v0.18.0-dev --)
  *
  *  @param slice_size corner slice diameter, middle slices will consume the rest
  *  of the area.
@@ -186,8 +200,7 @@ FSLAPI void fsl_ui_element_9_slice_set(fsl_ui_element *element, b8 is_9_slice, i
  *  @param data data to pass in to `callback()` on `event_type` trigger.
  */
 FSLAPI void fsl_ui_element_callback_set(fsl_ui_element *element,
-        fsl_ui_event_type event_type,
-        void (*func)(fsl_ui_event event, void *data), void *data);
+        fsl_ui_event_type event_type, fsl_ui_callback_func func, void *data);
 
 /**
  *  @brief bake/refresh a UI element's parameters to prepare for rendering.
