@@ -56,13 +56,11 @@ static u64 ui_element_capability_def_internal[FSL_UI_ELEMENT_TYPE_COUNT] =
         FSL_FLAG_UI_CAN_EXPAND_X |
         FSL_FLAG_UI_CAN_EXPAND_Y,
 
-    FSL_FLAG_UI_CAN_TEXTURE |
-        FSL_FLAG_UI_CAN_9_SLICE |
-        FSL_FLAG_UI_CAN_EXPAND_X |
+    FSL_FLAG_UI_CAN_EXPAND_X |
         FSL_FLAG_UI_CAN_EXPAND_Y
 };
 
-void fsl_ui_element_type_set(fsl_ui_element *element, fsl_ui_element_type type)
+void fsl_ui_element_type_set_func(fsl_ui_element *element, fsl_ui_element_type type)
 {
     element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
 
@@ -70,7 +68,7 @@ void fsl_ui_element_type_set(fsl_ui_element *element, fsl_ui_element_type type)
     element->capabilities = ui_element_capability_def_internal[type];
 }
 
-void fsl_ui_element_texture_set(fsl_ui_element *element, fsl_texture *texture)
+void fsl_ui_element_texture_set_func(fsl_ui_element *element, fsl_texture *texture)
 {
     if (!(element->capabilities & FSL_FLAG_UI_CAN_TEXTURE))
     {
@@ -97,7 +95,7 @@ void fsl_ui_element_texture_set(fsl_ui_element *element, fsl_texture *texture)
     }
 }
 
-void fsl_ui_element_uv_set(fsl_ui_element *element,
+void fsl_ui_element_uv_set_func(fsl_ui_element *element,
         i32 uv_pos_x, i32 uv_pos_y, i32 uv_size_x, i32 uv_size_y)
 {
     element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
@@ -108,8 +106,9 @@ void fsl_ui_element_uv_set(fsl_ui_element *element,
     element->transform.uv_size.y = uv_size_y;
 }
 
-void fsl_ui_element_position_set(fsl_ui_element *element, i32 pos_x, i32 pos_y,
-        i32 offset_x, i32 offset_y, i32 offset_scaled_x, i32 offset_scaled_y)
+void fsl_ui_element_position_set_func(fsl_ui_element *element,
+        i32 pos_x, i32 pos_y, i32 offset_x, i32 offset_y,
+        i32 offset_scaled_x, i32 offset_scaled_y)
 {
     element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
 
@@ -121,7 +120,7 @@ void fsl_ui_element_position_set(fsl_ui_element *element, i32 pos_x, i32 pos_y,
     element->transform.offset_scaled.y = offset_scaled_y;
 }
 
-void fsl_ui_element_size_set(fsl_ui_element *element,
+void fsl_ui_element_size_set_func(fsl_ui_element *element,
         i32 size_x, i32 size_y, i32 size_scaled_x, i32 size_scaled_y)
 {
     element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
@@ -132,7 +131,8 @@ void fsl_ui_element_size_set(fsl_ui_element *element,
     element->transform.size_scaled.y = size_scaled_y;
 }
 
-void fsl_ui_element_scale_set(fsl_ui_element *element, f32 scale_x, f32 scale_y)
+void fsl_ui_element_scale_set_func(fsl_ui_element *element,
+        f32 scale_x, f32 scale_y)
 {
     element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
 
@@ -140,7 +140,8 @@ void fsl_ui_element_scale_set(fsl_ui_element *element, f32 scale_x, f32 scale_y)
     element->transform.scale.y = scale_y;
 }
 
-void fsl_ui_element_alignment_set(fsl_ui_element *element, i32 align_x, i32 align_y)
+void fsl_ui_element_alignment_set_func(fsl_ui_element *element,
+        i32 align_x, i32 align_y)
 {
     element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
 
@@ -148,7 +149,8 @@ void fsl_ui_element_alignment_set(fsl_ui_element *element, i32 align_x, i32 alig
     element->transform.align.y = align_y;
 }
 
-void fsl_ui_element_9_slice_set(fsl_ui_element *element, b8 is_9_slice, i32 slice_size)
+void fsl_ui_element_9_slice_set_func(fsl_ui_element *element,
+        b8 is_9_slice, i32 slice_size)
 {
     (void)is_9_slice;
 
@@ -164,23 +166,46 @@ void fsl_ui_element_9_slice_set(fsl_ui_element *element, b8 is_9_slice, i32 slic
     switch (element->type)
     {
         case FSL_UI_ELEMENT_TYPE_PANEL:
-            ((fsl_ui_element_panel*)(element))->slice_size = slice_size;
+            ((fsl_ui_element_panel*)element)->slice_size = slice_size;
             break;
 
         case FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE:
-            ((fsl_ui_element_panel_9_slice*)(element))->slice_size = slice_size;
+            ((fsl_ui_element_panel_9_slice*)element)->slice_size = slice_size;
+            break;
+
+        case FSL_UI_ELEMENT_TYPE_BUTTON:
+            ((fsl_ui_element_button*)element)->slice_size = slice_size;
+            break;
+
+        default:
             break;
     }
 }
 
-void fsl_ui_element_callback_set(fsl_ui_element *element,
-        fsl_ui_event_type event_type, fsl_ui_callback_func func, void *data)
+void fsl_ui_element_callback_set_func(fsl_ui_element *element,
+        fsl_ui_event_type event_type, fsl_ui_event_func func, void *data)
 {
     element->event_func[event_type].func = func;
     element->event_func[event_type].data = data;
 }
 
-void fsl_ui_element_attach(fsl_ui_element *parent, fsl_ui_element *child)
+void fsl_ui_element_draw_callback_set_func(fsl_ui_element *element,
+        fsl_ui_draw_func func, void *data, fsl_fbo *fbo)
+{
+    switch (element->type)
+    {
+        case FSL_UI_ELEMENT_TYPE_CUSTOM:
+            ((fsl_ui_element_custom*)element)->draw_func.func = func;
+            ((fsl_ui_element_custom*)element)->draw_func.data = data;
+            ((fsl_ui_element_custom*)element)->draw_func.fbo = fbo;
+            break;
+
+        default:
+            break;
+    }
+}
+
+void fsl_ui_element_attach_func(fsl_ui_element *parent, fsl_ui_element *child)
 {
     if (!parent)
         return;
@@ -191,7 +216,7 @@ void fsl_ui_element_attach(fsl_ui_element *parent, fsl_ui_element *child)
     child->parent = parent;
 }
 
-void fsl_ui_element_detach(fsl_ui_element *child)
+void fsl_ui_element_detach_func(fsl_ui_element *child)
 {
     if (child->parent)
         child->parent->flag |= FSL_FLAG_UI_DIRTY_CHILDREN;

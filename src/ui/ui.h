@@ -132,11 +132,4 @@ FSLAPI void fsl_ui_stop(void);
 
 FSLAPI void fsl_ui_free(void);
 
-/**
- *  @brief make a 9-slice panel.
- *
- *  @internal
- */
-void ui_element_panel_9_slice_make_internal(fsl_ui_element_panel_9_slice *element);
-
 #endif /* FSL_UI_H */

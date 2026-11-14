@@ -26,7 +26,7 @@
 #include "../math/vector.h"
 
 typedef struct fsl_ui_event             fsl_ui_event;
-typedef struct fsl_ui_callback          fsl_ui_callback;
+typedef struct fsl_ui_event_callback    fsl_ui_event_callback;
 typedef struct fsl_ui_transform_baked   fsl_ui_transform_baked;
 typedef struct fsl_ui_transform         fsl_ui_transform;
 typedef struct fsl_ui_element           fsl_ui_element;
@@ -46,6 +46,9 @@ typedef enum fsl_ui_event_type
     FSL_UI_EVENT_TYPE_COUNT
 } fsl_ui_event_type;
 
+typedef void (*fsl_ui_event_func)(fsl_ui_event event, void *data);
+typedef void (*fsl_ui_draw_func)(fsl_ui_element *element, void *data);
+
 struct fsl_ui_event
 {
     fsl_ui_element *caller;
@@ -63,13 +66,11 @@ struct fsl_ui_event
     b8 mouse_click_last;
 }; /* fsl_ui_event */
 
-typedef void (*fsl_ui_callback_func)(fsl_ui_event event, void *data);
-
-struct fsl_ui_callback
+struct fsl_ui_event_callback
 {
-    fsl_ui_callback_func func;
+    fsl_ui_event_func func;
     void *data;             /* data to pass into `func` */
-}; /* fsl_ui_callback */
+}; /* fsl_ui_event_callback */
 
 /**
  *  @brief finalized transforms from @ref fsl_ui_transform, ready for rendering.

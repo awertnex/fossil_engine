@@ -20,6 +20,10 @@ and this project adheres to
 ## unreleased
 
 #### added
+- add new function `fsl_ui_element_draw_callback_set()` for custom drawables.
+- add new type `fsl_ui_element_container`: invisible container to attach other
+  UI elements to.
+- add new type `fsl_ui_element_button`: basic button panel.
 - add new function `fsl_ui_element_type_set()`.
 - add error code `FSL_ERR_TYPE_MISMATCH`: data types not matching requirements,
   used first by functions `ui_element_*_draw_func()` to invalidate wrong element

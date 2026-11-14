@@ -58,6 +58,31 @@ enum ui_element_capability_internal
 void ui_element_listen_internal(fsl_ui_element *element, v2f64 mouse_pos, v2f64 mouse_delta);
 
 /**
+ *  @brief bake nothing, placeholder for non-bake-able element types.
+ *
+ *  @internal
+ *
+ *  @note called indirectly via a function pointer array.
+ */
+void ui_element_none_bake_func(fsl_ui_element *element);
+
+/**
+ *  @brief bake a panel.
+ *
+ *  @internal
+ *
+ *  @note called indirectly via a function pointer array.
+ */
+void ui_element_panel_bake_func(fsl_ui_element *element);
+
+/**
+ *  @brief bake a 9-slice panel.
+ *
+ *  @internal
+ */
+void ui_element_panel_9_slice_bake_func(fsl_ui_element *element);
+
+/**
  *  @brief draw nothing, placeholder for non-drawable element types.
  *
  *  @internal
@@ -83,5 +108,14 @@ void ui_element_panel_draw_func(fsl_ui_element *element);
  *  @note called indirectly via a function pointer array.
  */
 void ui_element_panel_9_slice_draw_func(fsl_ui_element *element);
+
+/**
+ *  @brief draw a custom UI element.
+ *
+ *  @internal
+ *
+ *  @note called indirectly via a function pointer array.
+ */
+void ui_element_custom_draw_func(fsl_ui_element *element);
 
 #endif /* FSL_UI_INTERNAL_H */

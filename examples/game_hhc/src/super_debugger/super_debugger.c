@@ -24,14 +24,14 @@ void super_debugger_init(v2i32 render_size)
 {
     fsl_texture *fsl_texture_p = fsl_mem_handle_get(fsl_texture_buf);
 
-    fsl_ui_element_type_set((fsl_ui_element*)&panell, FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE);
-    fsl_ui_element_texture_set((fsl_ui_element*)&panell, &fsl_texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
-    fsl_ui_element_uv_set((fsl_ui_element*)&panell, 0, 0, 16, 16);
-    fsl_ui_element_9_slice_set((fsl_ui_element*)&panell, FALSE, 8);
-    fsl_ui_element_position_set((fsl_ui_element*)&panell, 0, 0, SET_MARGIN, SET_MARGIN, 0, 0);
-    fsl_ui_element_size_set((fsl_ui_element*)&panell, 400, render_size.y - SET_MARGIN * 2, 0, 0);
-    fsl_ui_element_alignment_set((fsl_ui_element*)&panell, -1, -1);
-    fsl_ui_element_bake((fsl_ui_element*)&panell);
+    fsl_ui_element_type_set(&panell, FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE);
+    fsl_ui_element_texture_set(&panell, &fsl_texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
+    fsl_ui_element_uv_set(&panell, 0, 0, 16, 16);
+    fsl_ui_element_9_slice_set(&panell, FALSE, 8);
+    fsl_ui_element_position_set(&panell, 0, 0, SET_MARGIN, SET_MARGIN, 0, 0);
+    fsl_ui_element_size_set(&panell, 400, render_size.y - SET_MARGIN * 2, 0, 0);
+    fsl_ui_element_alignment_set(&panell, -1, -1);
+    fsl_ui_element_bake(&panell);
 
     fsl_ui_element_texture_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL],
             &fsl_texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
