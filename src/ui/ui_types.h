@@ -111,7 +111,7 @@ struct fsl_ui_quad_9_slice
 struct fsl_ui_transform
 {
     v2i32 uv_pos;           /* position in texture, in pixels */
-    v2i32 uv_size;          /* size in texture, in pixels */
+    v2i32 uv_size;          /* size of texture, in pixels */
     v2i32 pos;              /* position on screen, in pixels */
     v2i32 offset;           /* offset on screen from `pos`, in pixels */
 

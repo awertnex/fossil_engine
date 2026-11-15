@@ -20,14 +20,19 @@ and this project adheres to
 ## unreleased
 
 #### added
+- add function `fsl_ui_element_tint_rgba_set()`: set tint/color of a UI element,
+  in RGBA format.
+- add function `fsl_ui_element_tint_hex_set()`: set tint/color of a UI element,
+  in hex format.
 - add function `fsl_str_to_i32()`: convert a string to a signed 32-bit integer.
+- add function `fsl_ui_element_draw_callback_set()` for custom drawables.
+- add function `fsl_ui_element_type_set()`: set element type and default values.
 - add type `fsl_ui_quad_1_slice`: a 1-slice quad. (a sprite)
 - add type `fsl_ui_quad_9_slice`: a 9-slice quad.
-- add function `fsl_ui_element_draw_callback_set()` for custom drawables.
+- add type `fsl_ui_element_rectangle`: solid colored rectangle.
 - add type `fsl_ui_element_container`: invisible container to attach other UI
   elements to.
 - add type `fsl_ui_element_button`: basic button panel.
-- add function `fsl_ui_element_type_set()`: set element type and default values.
 - add error code `FSL_ERR_TYPE_MISMATCH`: data types not matching requirements.
 
 #### changed

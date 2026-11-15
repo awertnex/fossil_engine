@@ -129,6 +129,8 @@ static f32 vertex_buf_ui_unit_quad[] =
     1.0f, -1.0f, 1.0f, 1.0f
 };
 
+fsl_texture ui_texture_rectangle_internal = {0};
+
 /**
  *  @internal
  */
@@ -137,10 +139,11 @@ static void (*ui_element_bake_func_internal[FSL_UI_ELEMENT_TYPE_COUNT])(
 {
     ui_element_none_bake_func,
     ui_element_none_bake_func,      /* TODO: make function `ui_element_container_bake_func()` */
+    ui_element_rectangle_bake_func,
     ui_element_sprite_bake_func,
     ui_element_panel_9_slice_bake_func,
     ui_element_none_bake_func,      /* TODO: make function `ui_element_label_bake_func()` */
-    ui_element_button_bake_func,    /* TODO: make function `ui_element_button_bake_func()` */
+    ui_element_button_bake_func,
     ui_element_none_bake_func       /* TODO: make function `ui_element_custom_bake_func()` */
 };
 
@@ -152,6 +155,7 @@ static void (*ui_element_draw_func_internal[FSL_UI_ELEMENT_TYPE_COUNT])(
 {
     ui_element_none_draw_func,
     ui_element_container_draw_func, /* TODO: make function `ui_element_container_draw_func()` */
+    ui_element_rectangle_draw_func,
     ui_element_sprite_draw_func,
     ui_element_panel_9_slice_draw_func,
     ui_element_none_draw_func,      /* TODO: make function `ui_element_label_draw_func()` */
@@ -590,6 +594,11 @@ u32 fsl_ui_init(void)
     ui_core.uniform.ui.tint =
         glGetUniformLocation(ui_core.shader.ui->asset.id, "tint");
 
+    if (fsl_texture_init(&ui_texture_rectangle_internal,
+        "UI Rectangle", "ui_rectangle", "ui_rectangle.png", FSL_DIR_NAME_TEXTURES,
+        GL_RGBA, GL_NEAREST, FSL_COLOR_CHANNELS_RGBA, FALSE, FALSE) != FSL_ERR_SUCCESS)
+        return fsl_err;
+
     fsl_err = FSL_ERR_SUCCESS;
     return fsl_err;
 }
@@ -605,6 +614,36 @@ void fsl_ui_start(b8 clear)
     glDisable(GL_DEPTH_TEST);
     if (clear)
         glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void fsl_ui_stop(void)
+{
+    glBindVertexArray(0);
+    glEnable(GL_DEPTH_TEST);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void fsl_ui_free(void)
+{
+    if (text_core.vao_loaded)
+    {
+        glDeleteVertexArrays(1, &text_core.vao);
+        glDeleteBuffers(1, &text_core.vertex_data_unit_quad);
+        glDeleteBuffers(1, &text_core.vbo_text_data);
+    }
+
+    fsl_texture_free(&ui_texture_rectangle_internal);
+
+    fsl_mem_unmap((void*)&text_core.buf, text_core.buf_len * sizeof(fsl_glyph_render_data),
+            "fsl_ui_free().text_core.buf");
+
+    if (ui_core.vao_loaded)
+    {
+        glDeleteVertexArrays(1, &ui_core.vao);
+        glDeleteBuffers(1, &ui_core.vertex_data_unit_quad);
+        glDeleteBuffers(1, &ui_core.vertex_data_curr_quad);
+    }
 }
 
 /* ---- section: ui element ------------------------------------------------- */
@@ -653,6 +692,14 @@ void fsl_ui_element_bake_func(fsl_ui_element *element)
 void ui_element_none_bake_func(fsl_ui_element *element)
 {
     (void)element;
+}
+
+void ui_element_rectangle_bake_func(fsl_ui_element *element)
+{
+    fsl_ui_element_rectangle *rectangle = (fsl_ui_element_rectangle*)element;
+    v2i32 texture_size = {FSL_TEXTURE_WIDTH_MIN, FSL_TEXTURE_HEIGHT_MIN};
+
+    ui_element_quad_1_slice_make_internal(element, &rectangle->quad, texture_size);
 }
 
 void ui_element_sprite_bake_func(fsl_ui_element *element)
@@ -866,6 +913,29 @@ void ui_element_container_draw_func(fsl_ui_element *element)
     (void)element;
 }
 
+void ui_element_rectangle_draw_func(fsl_ui_element *element)
+{
+    fsl_ui_element_rectangle *rectangle = (fsl_ui_element_rectangle*)element;
+    u32 buf_size = sizeof(fsl_ui_quad);
+
+    if (rectangle->texture)
+    {
+        glUniform4f(ui_core.uniform.ui.tint,
+                rectangle->tint.x,
+                rectangle->tint.y,
+                rectangle->tint.z,
+                rectangle->tint.w);
+
+        glBindBuffer(GL_ARRAY_BUFFER, ui_core.vertex_data_curr_quad);
+        glBufferData(GL_ARRAY_BUFFER, buf_size, &rectangle->quad.quad, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        glBindVertexArray(ui_core.vao);
+        glBindTexture(GL_TEXTURE_2D, rectangle->texture->asset.id);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    }
+}
+
 void ui_element_sprite_draw_func(fsl_ui_element *element)
 {
     fsl_ui_element_sprite *sprite = (fsl_ui_element_sprite*)element;
@@ -969,32 +1039,4 @@ void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y,
     glBindVertexArray(ui_core.vao);
     glBindTexture(GL_TEXTURE_2D, texture->asset.id);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-}
-
-void fsl_ui_stop(void)
-{
-    glBindVertexArray(0);
-    glEnable(GL_DEPTH_TEST);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void fsl_ui_free(void)
-{
-    if (text_core.vao_loaded)
-    {
-        glDeleteVertexArrays(1, &text_core.vao);
-        glDeleteBuffers(1, &text_core.vertex_data_unit_quad);
-        glDeleteBuffers(1, &text_core.vbo_text_data);
-    }
-
-    fsl_mem_unmap((void*)&text_core.buf, text_core.buf_len * sizeof(fsl_glyph_render_data),
-            "fsl_ui_free().text_core.buf");
-
-    if (ui_core.vao_loaded)
-    {
-        glDeleteVertexArrays(1, &ui_core.vao);
-        glDeleteBuffers(1, &ui_core.vertex_data_unit_quad);
-        glDeleteBuffers(1, &ui_core.vertex_data_curr_quad);
-    }
 }

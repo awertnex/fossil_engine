@@ -117,6 +117,13 @@ FSLAPI u32 fsl_ui_init(void);
 FSLAPI void fsl_ui_start(b8 clear);
 
 /**
+ *  @remark enable @ref GL_DEPTH_TEST.
+ */
+FSLAPI void fsl_ui_stop(void);
+
+FSLAPI void fsl_ui_free(void);
+
+/**
  *  @brief draw a texture as a UI element.
  *
  *  @remark if `size_x` is 0, `texture->size.x` is used, and likewise for
@@ -124,12 +131,5 @@ FSLAPI void fsl_ui_start(b8 clear);
  */
 FSLAPI void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y,
         i32 size_x, i32 size_y, u32 tint);
-
-/**
- *  @remark enable @ref GL_DEPTH_TEST.
- */
-FSLAPI void fsl_ui_stop(void);
-
-FSLAPI void fsl_ui_free(void);
 
 #endif /* FSL_UI_H */

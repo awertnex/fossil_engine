@@ -22,8 +22,11 @@
  */
 
 
+#include "../common/config.h"
+
 #include "../logger/logger.h"
 #include "../logger/logger_messages_internal.h"
+#include "../math/math.h"
 
 #include "ui_config.h"
 #include "ui_element.h"
@@ -39,6 +42,7 @@ str str_element_type_name_internal[FSL_UI_ELEMENT_TYPE_COUNT][FSL_ID_CAP] =
 {
     "none",
     "container",
+    "rectangle",
     "sprite",
     "panel",
     "label",
@@ -59,6 +63,12 @@ static u64 ui_element_capability_def_internal[FSL_UI_ELEMENT_TYPE_COUNT] =
     /* container */
     FSL_FLAG_UI_CAN_EXPAND_X |
         FSL_FLAG_UI_CAN_EXPAND_Y,
+
+    /* rectangle */
+    FSL_FLAG_UI_CAN_TEXTURE |
+        FSL_FLAG_UI_CAN_EXPAND_X |
+        FSL_FLAG_UI_CAN_EXPAND_Y |
+        FSL_FLAG_UI_CAN_TINT,
 
     /* sprite */
     FSL_FLAG_UI_CAN_TEXTURE |
@@ -120,7 +130,7 @@ static void ui_element_transform_defaults_set_internal(fsl_ui_element *element)
     t->offset_scaled.y = 0;
 
     t->size.x = FSL_UI_SIZE_X_DEFAULT;
-    t->size.y = FSL_UI_SIZE_X_DEFAULT;
+    t->size.y = FSL_UI_SIZE_Y_DEFAULT;
     t->size_scaled.x = 0;
     t->size_scaled.y = 0;
 
@@ -133,6 +143,7 @@ static void ui_element_transform_defaults_set_internal(fsl_ui_element *element)
 void fsl_ui_element_type_set_func(fsl_ui_element *element, fsl_ui_element_type type)
 {
     fsl_ui_element_type type_cache = element->type;
+    v4f32 tint = {1.0f, 1.0f, 1.0f, 1.0f};
 
     element->type = type;
 
@@ -148,6 +159,16 @@ void fsl_ui_element_type_set_func(fsl_ui_element *element, fsl_ui_element_type t
     {
         case FSL_UI_ELEMENT_TYPE_CONTAINER:
             ui_element_transform_defaults_set_internal(element);
+            break;
+
+        case FSL_UI_ELEMENT_TYPE_RECTANGLE:
+            ui_element_transform_defaults_set_internal(element);
+            ((fsl_ui_element_rectangle*)element)->texture = &ui_texture_rectangle_internal;
+            ((fsl_ui_element_rectangle*)element)->tint = tint;
+            element->transform.uv_pos.x = 0;
+            element->transform.uv_pos.y = 0;
+            element->transform.uv_size.x = ui_texture_rectangle_internal.size.x;
+            element->transform.uv_size.y = ui_texture_rectangle_internal.size.y;
             break;
 
         case FSL_UI_ELEMENT_TYPE_SPRITE:
@@ -180,7 +201,7 @@ void fsl_ui_element_texture_set_func(fsl_ui_element *element, fsl_texture *textu
     {
         LOGERROR(FSL_ERR_TYPE_MISMATCH,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_REASON_ERROR("Set UI Element Texture", "Element Does Support Textures"));
+                MSG_ACTION_REASON_ERROR("Set UI Element Texture", "Element Does Not Support Textures"));
         return;
     }
 
@@ -280,7 +301,7 @@ void fsl_ui_element_9_slice_set_func(fsl_ui_element *element,
     {
         LOGERROR(FSL_ERR_TYPE_MISMATCH,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_REASON_ERROR("Set UI Element Slice Size", "Element Does Support 9-Slice"));
+                MSG_ACTION_REASON_ERROR("Set UI Element Slice Size", "Element Does Not Support 9-Slice"));
         return;
     }
 
@@ -321,7 +342,7 @@ void fsl_ui_element_draw_callback_set_func(fsl_ui_element *element,
     {
         LOGERROR(FSL_ERR_TYPE_MISMATCH,
                 FSL_FLAG_LOG_NO_VERBOSE,
-                MSG_ACTION_REASON_ERROR("Set UI Element Draw Callback", "Element Does Support Custom Draw"));
+                MSG_ACTION_REASON_ERROR("Set UI Element Draw Callback", "Element Does Not Support Custom Draw"));
         return;
     }
 
@@ -331,6 +352,63 @@ void fsl_ui_element_draw_callback_set_func(fsl_ui_element *element,
             ((fsl_ui_element_custom*)element)->draw_func.func = func;
             ((fsl_ui_element_custom*)element)->draw_func.data = data;
             ((fsl_ui_element_custom*)element)->draw_func.fbo = fbo;
+            break;
+
+        default:
+            break;
+    }
+}
+
+void fsl_ui_element_tint_hex_set_func(fsl_ui_element *element, u32 tint)
+{
+    v4f32 tint_v = {0};
+
+    if (!(element->capabilities & FSL_FLAG_UI_CAN_TINT))
+    {
+        LOGERROR(FSL_ERR_TYPE_MISMATCH,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                MSG_ACTION_REASON_ERROR("Set UI Element Tint", "Element Does Not Support Tint"));
+        return;
+    }
+
+    tint_v.x = (f32)((tint >> 0x18) & 0xff) / 0xff;
+    tint_v.y = (f32)((tint >> 0x10) & 0xff) / 0xff;
+    tint_v.z = (f32)((tint >> 0x08) & 0xff) / 0xff;
+    tint_v.w = (f32)((tint >> 0x00) & 0xff) / 0xff;
+
+    switch (element->type)
+    {
+        case FSL_UI_ELEMENT_TYPE_RECTANGLE:
+            ((fsl_ui_element_rectangle*)element)->tint = tint_v;
+            break;
+
+        default:
+            break;
+    }
+}
+
+void fsl_ui_element_tint_rgba_set_func(fsl_ui_element *element,
+        f32 tint_r, f32 tint_g, f32 tint_b, f32 tint_a)
+{
+    v4f32 tint_v = {0};
+
+    if (!(element->capabilities & FSL_FLAG_UI_CAN_TINT))
+    {
+        LOGERROR(FSL_ERR_TYPE_MISMATCH,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                MSG_ACTION_REASON_ERROR("Set UI Element Tint", "Element Does Not Support Tint"));
+        return;
+    }
+
+    tint_v.x = fsl_clamp_f32(tint_r, 0.0f, 1.0f);
+    tint_v.y = fsl_clamp_f32(tint_g, 0.0f, 1.0f);
+    tint_v.z = fsl_clamp_f32(tint_b, 0.0f, 1.0f);
+    tint_v.w = fsl_clamp_f32(tint_a, 0.0f, 1.0f);
+
+    switch (element->type)
+    {
+        case FSL_UI_ELEMENT_TYPE_RECTANGLE:
+            ((fsl_ui_element_rectangle*)element)->tint = tint_v;
             break;
 
         default:

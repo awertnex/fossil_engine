@@ -62,6 +62,13 @@
 #define fsl_ui_element_9_slice_set(element, is_9_slice, slice_size) \
     fsl_ui_element_9_slice_set_func((fsl_ui_element*)(element), (is_9_slice), (slice_size))
 
+#define fsl_ui_element_tint_hex_set(element, tint) \
+    fsl_ui_element_tint_hex_set_func((fsl_ui_element*)(element), (tint))
+
+#define fsl_ui_element_tint_rgba_set(element, tint_r, tint_g, tint_b, tint_a) \
+    fsl_ui_element_tint_rgba_set_func((fsl_ui_element*)(element), \
+            (tint_r), (tint_g), (tint_b), (tint_a))
+
 #define fsl_ui_element_callback_set(element, \
         event_type, func, data) \
         fsl_ui_element_callback_set_func((fsl_ui_element*)(element), (event_type), (func), (data))
@@ -69,20 +76,21 @@
 #define fsl_ui_element_draw_callback_set(element, func, data, fbo) \
     fsl_ui_element_draw_callback_set_func((fsl_ui_element*)(element), (func), (data), (fbo))
 
-#define fsl_ui_element_bake(element) \
-    fsl_ui_element_bake_func((fsl_ui_element*)(element))
-
-#define fsl_ui_element_draw(element) \
-    fsl_ui_element_draw_func((fsl_ui_element*)(element))
-
 #define fsl_ui_element_attach(parent, child) \
     fsl_ui_element_attach_func((fsl_ui_element*)(parent), (fsl_ui_element*)(child))
 
 #define fsl_ui_element_detach(child) \
     fsl_ui_element_detach_func((fsl_ui_element*)(child))
 
+#define fsl_ui_element_bake(element) \
+    fsl_ui_element_bake_func((fsl_ui_element*)(element))
+
+#define fsl_ui_element_draw(element) \
+    fsl_ui_element_draw_func((fsl_ui_element*)(element))
+
 typedef struct fsl_ui_draw_callback             fsl_ui_draw_callback;
 typedef struct fsl_ui_element_container         fsl_ui_element_container;
+typedef struct fsl_ui_element_rectangle         fsl_ui_element_rectangle;
 typedef struct fsl_ui_element_sprite            fsl_ui_element_sprite;
 typedef struct fsl_ui_element_panel_9_slice     fsl_ui_element_panel_9_slice;
 typedef struct fsl_ui_element_label             fsl_ui_element_label;
@@ -93,6 +101,7 @@ typedef struct fsl_ui_element_custom            fsl_ui_element_custom;
  *  @brief UI element types.
  *
  *  requirements for adding element types:
+ *      - element type enum entry.
  *      - element struct definition.
  *      - ui.c: add bake function entry in bake callback table.
  *      - ui.c: add draw function entry in draw callback table.
@@ -103,6 +112,7 @@ typedef enum fsl_ui_element_type
 {
     FSL_UI_ELEMENT_TYPE_NONE,
     FSL_UI_ELEMENT_TYPE_CONTAINER,
+    FSL_UI_ELEMENT_TYPE_RECTANGLE,
     FSL_UI_ELEMENT_TYPE_SPRITE,
     FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE,
     FSL_UI_ELEMENT_TYPE_LABEL,
@@ -145,6 +155,14 @@ struct fsl_ui_element_container
     fsl_ui_element_header header;
     fsl_ui_quad_1_slice quad;
 }; /* fsl_ui_element_container */
+
+struct fsl_ui_element_rectangle
+{
+    fsl_ui_element_header header;
+    fsl_ui_quad_1_slice quad;
+    fsl_texture *texture;
+    v4f32 tint;
+}; /* fsl_ui_element_rectangle */
 
 struct fsl_ui_element_sprite
 {
@@ -276,6 +294,19 @@ FSLAPI void fsl_ui_element_9_slice_set_func(fsl_ui_element *element,
         b8 is_9_slice, i32 slice_size);
 
 /**
+ *  @brief set tint/color for `element`, in HEX format.
+ */
+FSLAPI void fsl_ui_element_tint_hex_set_func(fsl_ui_element *element, u32 tint);
+
+/**
+ *  @brief set tint/color for `element`, in RGBA format.
+ *
+ *  @remark color range [0.0f, 1.0f].
+ */
+FSLAPI void fsl_ui_element_tint_rgba_set_func(fsl_ui_element *element,
+        f32 tint_r, f32 tint_g, f32 tint_b, f32 tint_a);
+
+/**
  *  @brief set an event action callback for `element`. (e.g., button press,
  *  button hover)
  *
@@ -298,21 +329,6 @@ FSLAPI void fsl_ui_element_draw_callback_set_func(fsl_ui_element *element,
         fsl_ui_draw_func func, void *data, fsl_fbo *fbo);
 
 /**
- *  @brief bake/refresh a UI element's parameters to prepare for rendering.
- *
- *  @remark called automatically from @ref ui_element_draw() if transform dirty.
- */
-FSLAPI void fsl_ui_element_bake_func(fsl_ui_element *element);
-
-/**
- *  @brief draw a UI element on screen.
- *
- *  @remark function @ref fsl_ui_element_bake() must be called to
- *  prepare/refresh parameters for rendering.
- */
-FSLAPI void fsl_ui_element_draw_func(fsl_ui_element *element);
-
-/**
  *  @brief attach a UI element to another (e.g., button in a menu).
  *
  *  `child` will draw using `parent` baked transform + its own baked transform.
@@ -328,5 +344,20 @@ FSLAPI void fsl_ui_element_attach_func(fsl_ui_element *parent, fsl_ui_element *c
  *  @param child element to detach from their parent.
  */
 FSLAPI void fsl_ui_element_detach_func(fsl_ui_element *child);
+
+/**
+ *  @brief bake/refresh a UI element's parameters to prepare for rendering.
+ *
+ *  @remark called automatically from @ref ui_element_draw() if transform dirty.
+ */
+FSLAPI void fsl_ui_element_bake_func(fsl_ui_element *element);
+
+/**
+ *  @brief draw a UI element on screen.
+ *
+ *  @remark function @ref fsl_ui_element_bake() must be called to
+ *  prepare/refresh parameters for rendering.
+ */
+FSLAPI void fsl_ui_element_draw_func(fsl_ui_element *element);
 
 #endif /* FSL_UI_ELEMENT_H */

@@ -47,8 +47,14 @@ enum ui_element_capability_internal
     FSL_FLAG_UI_CAN_9_SLICE =       (1 << 1),
     FSL_FLAG_UI_CAN_EXPAND_X =      (1 << 2),
     FSL_FLAG_UI_CAN_EXPAND_Y =      (1 << 3),
-    FSL_FLAG_UI_CAN_CUSTOM_DRAW =   (1 << 4)
+    FSL_FLAG_UI_CAN_CUSTOM_DRAW =   (1 << 4),
+    FSL_FLAG_UI_CAN_TINT =          (1 << 5)
 }; /* ui_element_capability_internal */
+
+/**
+ *  @internal
+ */
+extern fsl_texture ui_texture_rectangle_internal;
 
 extern str str_element_type_name_internal[FSL_UI_ELEMENT_TYPE_COUNT][FSL_ID_CAP];
 
@@ -81,6 +87,15 @@ void ui_element_listen_internal(fsl_ui_element *element, v2f64 mouse_pos, v2f64 
  *  @note called indirectly via a function pointer array.
  */
 void ui_element_none_bake_func(fsl_ui_element *element);
+
+/**
+ *  @brief bake a rectangle.
+ *
+ *  @internal
+ *
+ *  @note called indirectly via a function pointer array.
+ */
+void ui_element_rectangle_bake_func(fsl_ui_element *element);
 
 /**
  *  @brief bake a sprite.
@@ -145,6 +160,15 @@ void ui_element_none_draw_func(fsl_ui_element *element);
  *  @note called indirectly via a function pointer array.
  */
 void ui_element_container_draw_func(fsl_ui_element *element);
+
+/**
+ *  @brief draw a rectangle.
+ *
+ *  @internal
+ *
+ *  @note called indirectly via a function pointer array.
+ */
+void ui_element_rectangle_draw_func(fsl_ui_element *element);
 
 /**
  *  @brief draw a sprite.
