@@ -32,6 +32,16 @@
 
 #include <stddef.h>
 
+str str_element_type_name_internal[FSL_UI_ELEMENT_TYPE_COUNT][FSL_ID_CAP] =
+{
+    "None",
+    "Container",
+    "Sprite",
+    "Panel",
+    "Button",
+    "Custom"
+};
+
 /**
  *  @brief define capabilities of every element type.
  */
@@ -61,12 +71,57 @@ static u64 ui_element_capability_def_internal[FSL_UI_ELEMENT_TYPE_COUNT] =
         FSL_FLAG_UI_CAN_CUSTOM_DRAW
 };
 
+static void ui_element_transform_defaults_set_internal(fsl_ui_element *element)
+{
+    fsl_ui_transform *t = &element->transform;
+
+    t->pos.x = 0;
+    t->pos.y = 0;
+    t->offset.x = 0;
+    t->offset.y = 0;
+    t->offset_scaled.x = 0;
+    t->offset_scaled.y = 0;
+
+    t->size.x = FSL_UI_SIZE_X_DEFAULT;
+    t->size.y = FSL_UI_SIZE_X_DEFAULT;
+    t->size_scaled.x = 0;
+    t->size_scaled.y = 0;
+
+    t->scale.x = 1.0f;
+    t->scale.y = 1.0f;
+    t->align.x = -1;
+    t->align.y = -1;
+}
+
 void fsl_ui_element_type_set_func(fsl_ui_element *element, fsl_ui_element_type type)
 {
     element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
 
     element->type = type;
     element->capabilities = ui_element_capability_def_internal[type];
+
+    switch (element->type)
+    {
+        case FSL_UI_ELEMENT_TYPE_CONTAINER:
+            ui_element_transform_defaults_set_internal(element);
+            break;
+
+        case FSL_UI_ELEMENT_TYPE_SPRITE:
+            ui_element_transform_defaults_set_internal(element);
+            break;
+
+        case FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE:
+            ui_element_transform_defaults_set_internal(element);
+            break;
+
+        case FSL_UI_ELEMENT_TYPE_BUTTON:
+            ui_element_transform_defaults_set_internal(element);
+            break;
+
+        case FSL_UI_ELEMENT_TYPE_CUSTOM:
+            ui_element_transform_defaults_set_internal(element);
+            break;
+    }
 }
 
 void fsl_ui_element_texture_set_func(fsl_ui_element *element, fsl_texture *texture)

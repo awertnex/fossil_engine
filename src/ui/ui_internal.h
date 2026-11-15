@@ -25,6 +25,7 @@
 #ifndef FSL_UI_INTERNAL_H
 #define FSL_UI_INTERNAL_H
 
+#include "../common/limits.h"
 #include "../common/types.h"
 
 #include "ui_element.h"
@@ -48,6 +49,8 @@ enum ui_element_capability_internal
     FSL_FLAG_UI_CAN_EXPAND_Y =      (1 << 3),
     FSL_FLAG_UI_CAN_CUSTOM_DRAW =   (1 << 4)
 }; /* ui_element_capability_internal */
+
+extern str str_element_type_name_internal[FSL_UI_ELEMENT_TYPE_COUNT][FSL_ID_CAP];
 
 /**
  *  @brief poll event data and parse element's callbacks (e.g., button pressed).

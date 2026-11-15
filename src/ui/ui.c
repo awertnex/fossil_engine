@@ -640,7 +640,7 @@ void fsl_ui_element_bake_func(fsl_ui_element *element)
     }
 
     LOGTRACE(FSL_FLAG_LOG_NO_VERBOSE,
-            MSG_UI_ELEMENT_BAKE(t->baked.pos.x, t->baked.pos.y, t->baked.size.x, t->baked.size.y));
+            MSG_UI_ELEMENT_BAKE(str_element_type_name_internal[element->type], t->baked.pos.x, t->baked.pos.y, t->baked.size.x, t->baked.size.y));
 
     ui_element_bake_func_internal[element->type](element);
 }
