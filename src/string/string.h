@@ -94,15 +94,32 @@ FSLAPI i32 fsl_char_to_int(char n);
 
 /**
  *  @brief convert a string representation of a number into an unsigned 32-bit
- *  integer and write into `dst`.
+ *  integer.
+ *
+ *  @param n buffer to read value from.
+ *  @param dst pointer to variable to store value.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_str_to_u32(const str *n, u32 *dst);
 
 /**
+ *  @brief convert a string representation of a number into a signed 32-bit
+ *  integer.
+ *
+ *  @param n buffer to read value from.
+ *  @param dst pointer to variable to store value.
+ *
+ *  @return non-zero on failure and @ref fsl_err is set accordingly.
+ */
+FSLAPI u32 fsl_str_to_i32(const str *n, i32 *dst);
+
+/**
  *  @brief convert a string representation of a number into an unsigned 64-bit
- *  integer and write into `dst`.
+ *  integer.
+ *
+ *  @param n buffer to read value from.
+ *  @param dst pointer to variable to store value.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -110,39 +127,52 @@ FSLAPI u32 fsl_str_to_u64(const str *n, u64 *dst);
 
 /**
  *  @brief convert a string representation of a number into a signed 64-bit
- *  integer and write into `dst`.
+ *  integer.
+ *
+ *  @param n buffer to read value from.
+ *  @param dst pointer to variable to store value.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_str_to_i64(const str *n, i64 *dst);
 
 /**
- *  @brief convert a string representation of a number into a 32-bit float and
- *  write into `dst`.
+ *  @brief convert a string representation of a number into a 32-bit float.
+ *
+ *  @param n buffer to read value from.
+ *  @param dst pointer to variable to store value.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_str_to_f32(const str *n, f32 *dst);
 
 /**
- *  @brief convert a string representation of a number into a 64-bit float and
- *  write into `dst`.
+ *  @brief convert a string representation of a number into a 64-bit float.
+ *
+ *  @param n buffer to read value from.
+ *  @param dst pointer to variable to store value.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_str_to_f64(const str *n, f64 *dst);
 
 /**
- *  @brief convert a signed 32-bit integer into a string and write into `dst`
- *  at most `size` bytes.
+ *  @brief convert a signed 32-bit integer into a string.
+ *
+ *  @param dst pointer to buffer to store string.
+ *  @param size `dst` buffer size max.
+ *  @param n number to convert.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
 FSLAPI u32 fsl_i32_to_str(str *dst, i32 size, i32 n);
 
 /**
- *  @brief convert an unsigned 64-bit integer into a string and write into `dst`
- *  at most `size` bytes.
+ *  @brief convert an unsigned 64-bit integer into a string.
+ *
+ *  @param dst pointer to buffer to store string.
+ *  @param size `dst` buffer size max.
+ *  @param n number to convert.
  *
  *  @return non-zero on failure and @ref fsl_err is set accordingly.
  */
@@ -152,6 +182,7 @@ FSLAPI u32 fsl_u64_to_str(str *dst, u64 size, u64 n);
  *  @brief use Run-Length Encoding (RLE) algorithm on `data` using the first
  *  datum.
  *
+ *  @param data data to read.
  *  @param size size of each element in `data`.
  *  @param len number of elements in `data`.
  *
@@ -162,6 +193,7 @@ FSLAPI u64 fsl_rle(void *data, fsl_size size, fsl_len len);
 /**
  *  @brief create basic 'djb2' hash from `data`.
  *
+ *  @param data data to hash.
  *  @param len data size, in bytes (0 auto-detects size, useful for strings).
  *
  *  @return hash.
@@ -171,6 +203,7 @@ FSLAPI u64 fsl_hash_djb2_u64(void *data, fsl_cap len);
 /**
  *  @brief create basic 'FNV-1a' hash from `data`.
  *
+ *  @param data data to hash.
  *  @param len data size, in bytes (0 auto-detects size, useful for strings).
  *
  *  @return hash.
@@ -180,7 +213,9 @@ FSLAPI u64 fsl_hash_fnv1a_u64(void *data, fsl_cap len);
 /**
  *  @brief find an unsigned 64-bit hash within `buf` that matches `hash`.
  *
- *  @param dst recipient of hash index if found.
+ *  @param hash hash to search for.
+ *  @param buf hash buffer to search.
+ *  @param dst pointer to buffer to store hash index if found.
  *  @param len number of elements in `buf`.
  *
  *  @remark modifies `dst` on success only.

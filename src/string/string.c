@@ -172,6 +172,35 @@ u32 fsl_str_to_u32(const str *n, u32 *dst)
     return fsl_err;
 }
 
+u32 fsl_str_to_i32(const str *n, i32 *dst)
+{
+    i32 i = 0;
+    i32 len = strlen(n);
+    i32 result = 0;
+    b8 is_negative = FALSE;
+
+    if (n[0] == '-')
+    {
+        ++i;
+        is_negative = TRUE;
+    }
+
+    for (; i < len; ++i)
+    {
+        if (fsl_is_digit(n[i]))
+            result = result * 10 + fsl_char_to_int(n[i]);
+        else break;
+    }
+
+    if (is_negative)
+        result = -result;
+
+    *dst = result;
+
+    fsl_err = FSL_ERR_SUCCESS;
+    return fsl_err;
+}
+
 u32 fsl_str_to_u64(const str *n, u64 *dst)
 {
     i32 i = 0;

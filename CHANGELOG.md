@@ -20,14 +20,14 @@ and this project adheres to
 ## unreleased
 
 #### added
-- add new type `fsl_ui_quad_1_slice`: a 1-slice quad. (a sprite)
-- add new type `fsl_ui_quad_9_slice`: a 9-slice quad.
-- add new function `fsl_ui_element_draw_callback_set()` for custom drawables.
-- add new type `fsl_ui_element_container`: invisible container to attach other
-  UI elements to.
-- add new type `fsl_ui_element_button`: basic button panel.
-- add new function `fsl_ui_element_type_set()`: set element type and default
-  values.
+- add function `fsl_str_to_i32()`: convert a string to a signed 32-bit integer.
+- add type `fsl_ui_quad_1_slice`: a 1-slice quad. (a sprite)
+- add type `fsl_ui_quad_9_slice`: a 9-slice quad.
+- add function `fsl_ui_element_draw_callback_set()` for custom drawables.
+- add type `fsl_ui_element_container`: invisible container to attach other UI
+  elements to.
+- add type `fsl_ui_element_button`: basic button panel.
+- add function `fsl_ui_element_type_set()`: set element type and default values.
 - add error code `FSL_ERR_TYPE_MISMATCH`: data types not matching requirements.
 
 #### changed
