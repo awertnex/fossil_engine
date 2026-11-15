@@ -45,7 +45,8 @@ enum ui_element_capability_internal
     FSL_FLAG_UI_CAN_TEXTURE =       (1 << 0),
     FSL_FLAG_UI_CAN_9_SLICE =       (1 << 1),
     FSL_FLAG_UI_CAN_EXPAND_X =      (1 << 2),
-    FSL_FLAG_UI_CAN_EXPAND_Y =      (1 << 3)
+    FSL_FLAG_UI_CAN_EXPAND_Y =      (1 << 3),
+    FSL_FLAG_UI_CAN_CUSTOM_DRAW =   (1 << 4)
 }; /* ui_element_capability_internal */
 
 /**
@@ -67,13 +68,13 @@ void ui_element_listen_internal(fsl_ui_element *element, v2f64 mouse_pos, v2f64 
 void ui_element_none_bake_func(fsl_ui_element *element);
 
 /**
- *  @brief bake a panel.
+ *  @brief bake a sprite.
  *
  *  @internal
  *
  *  @note called indirectly via a function pointer array.
  */
-void ui_element_panel_bake_func(fsl_ui_element *element);
+void ui_element_sprite_bake_func(fsl_ui_element *element);
 
 /**
  *  @brief bake a 9-slice panel.
@@ -81,6 +82,13 @@ void ui_element_panel_bake_func(fsl_ui_element *element);
  *  @internal
  */
 void ui_element_panel_9_slice_bake_func(fsl_ui_element *element);
+
+/**
+ *  @brief bake a button.
+ *
+ *  @internal
+ */
+void ui_element_button_bake_func(fsl_ui_element *element);
 
 /**
  *  @brief draw nothing, placeholder for non-drawable element types.
@@ -92,13 +100,13 @@ void ui_element_panel_9_slice_bake_func(fsl_ui_element *element);
 void ui_element_none_draw_func(fsl_ui_element *element);
 
 /**
- *  @brief draw a panel.
+ *  @brief draw a sprite.
  *
  *  @internal
  *
  *  @note called indirectly via a function pointer array.
  */
-void ui_element_panel_draw_func(fsl_ui_element *element);
+void ui_element_sprite_draw_func(fsl_ui_element *element);
 
 /**
  *  @brief draw a 9-slice panel.
@@ -108,6 +116,15 @@ void ui_element_panel_draw_func(fsl_ui_element *element);
  *  @note called indirectly via a function pointer array.
  */
 void ui_element_panel_9_slice_draw_func(fsl_ui_element *element);
+
+/**
+ *  @brief draw a button.
+ *
+ *  @internal
+ *
+ *  @note called indirectly via a function pointer array.
+ */
+void ui_element_button_draw_func(fsl_ui_element *element);
 
 /**
  *  @brief draw a custom UI element.

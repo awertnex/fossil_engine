@@ -204,7 +204,7 @@ struct fsl_font
     i32 line_gap;
     i32 line_height;
 
-    /*
+    /**
      *  divisor for converting 'font units' to 'pixel height'.
      */
     i32 fheight;

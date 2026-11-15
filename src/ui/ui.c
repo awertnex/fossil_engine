@@ -36,6 +36,7 @@
 #include "../shaders/shader_types.h"
 
 #include "ui.h"
+#include "ui_config.h"
 #include "ui_internal.h"
 #include "ui_types.h"
 
@@ -50,13 +51,6 @@ struct glyphf
     f32 advance;
     b8 loaded;
 }; /* glyphf */
-
-struct glyph_render_data
-{
-    v2f32 pos;
-    u32 char_index;
-    u32 color;
-}; /* glyph_render_data */
 
 /* ---- section: declarations ----------------------------------------------- */
 
@@ -80,7 +74,7 @@ static struct text_core
      *
      *  stores render data of a text batch.
      */
-    struct glyph_render_data *buf;
+    fsl_glyph_render_data *buf;
 
     u64 buf_len;
     GLuint vao;
@@ -99,7 +93,7 @@ static struct ui_core
     /**
      *  @brief quad buffer, raw UI quad data.
      */
-    fsl_ui_transform_baked *quad_buf;
+    fsl_ui_quad *quad_buf;
 
     u64 quad_count;
 
@@ -144,10 +138,10 @@ static void (*ui_element_bake_func_internal[FSL_UI_ELEMENT_TYPE_COUNT])(
 {
     ui_element_none_bake_func,
     ui_element_none_bake_func,      /* TODO: make function `ui_element_container_bake_func()` */
-    ui_element_panel_bake_func,
+    ui_element_sprite_bake_func,
     ui_element_panel_9_slice_bake_func,
-    ui_element_none_bake_func,      /* TODO: make function `ui_element_button_bake_func()` */
-    ui_element_none_bake_func,      /* TODO: make function `ui_element_custom_bake_func()` */
+    ui_element_button_bake_func,    /* TODO: make function `ui_element_button_bake_func()` */
+    ui_element_none_bake_func       /* TODO: make function `ui_element_custom_bake_func()` */
 };
 
 /**
@@ -158,10 +152,10 @@ static void (*ui_element_draw_func_internal[FSL_UI_ELEMENT_TYPE_COUNT])(
 {
     ui_element_none_draw_func,
     ui_element_none_draw_func,
-    ui_element_panel_draw_func,
+    ui_element_sprite_draw_func,
     ui_element_panel_9_slice_draw_func,
-    ui_element_none_draw_func,      /* TODO: make function `ui_element_button_draw_func()` */
-    ui_element_custom_draw_func,
+    ui_element_button_draw_func,
+    ui_element_custom_draw_func
 };
 
 /* ---- section: signatures ------------------------------------------------- */
@@ -189,7 +183,7 @@ static u32 ui_text_init_internal(void)
 {
     fsl_shader_program *shader_p = fsl_mem_handle_get(fsl_shader_buf);
 
-    if (fsl_mem_map((void*)&text_core.buf, FSL_STRING_MAX * sizeof(struct glyph_render_data),
+    if (fsl_mem_map((void*)&text_core.buf, FSL_STRING_MAX * sizeof(fsl_glyph_render_data),
                 "ui_text_init_internal().text_core.buf") != FSL_ERR_SUCCESS)
         goto cleanup;
 
@@ -219,22 +213,22 @@ static u32 ui_text_init_internal(void)
 
         glGenBuffers(1, &text_core.vbo_text_data);
         glBindBuffer(GL_ARRAY_BUFFER, text_core.vbo_text_data);
-        glBufferData(GL_ARRAY_BUFFER, text_core.buf_len * sizeof(struct glyph_render_data),
+        glBufferData(GL_ARRAY_BUFFER, text_core.buf_len * sizeof(fsl_glyph_render_data),
                 NULL, GL_DYNAMIC_DRAW);
 
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
-                sizeof(struct glyph_render_data), (void*)0);
+                sizeof(fsl_glyph_render_data), (void*)0);
         glVertexAttribDivisor(2, 1);
 
         glEnableVertexAttribArray(3);
         glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT,
-                sizeof(struct glyph_render_data), (void*)(2 * sizeof(f32)));
+                sizeof(fsl_glyph_render_data), (void*)(2 * sizeof(f32)));
         glVertexAttribDivisor(3, 1);
 
         glEnableVertexAttribArray(4);
         glVertexAttribIPointer(4, 1, GL_UNSIGNED_INT,
-                sizeof(struct glyph_render_data), (void*)(2 * sizeof(f32) + sizeof(u32)));
+                sizeof(fsl_glyph_render_data), (void*)(2 * sizeof(f32) + sizeof(u32)));
         glVertexAttribDivisor(4, 1);
 
         glBindVertexArray(0);
@@ -274,15 +268,15 @@ void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear)
     {
         if (
                 fsl_mem_remap((void*)&text_core.buf,
-                    text_core.buf_len * sizeof(struct glyph_render_data),
-                    length * sizeof(struct glyph_render_data),
+                    text_core.buf_len * sizeof(fsl_glyph_render_data),
+                    length * sizeof(fsl_glyph_render_data),
                     "fsl_text_start().text_core.buf") != FSL_ERR_SUCCESS)
             goto cleanup;
 
         text_core.buf_len = length;
 
         glBindBuffer(GL_ARRAY_BUFFER, text_core.vbo_text_data);
-        glBufferData(GL_ARRAY_BUFFER, text_core.buf_len * sizeof(struct glyph_render_data),
+        glBufferData(GL_ARRAY_BUFFER, text_core.buf_len * sizeof(fsl_glyph_render_data),
                 NULL, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
@@ -304,6 +298,7 @@ void fsl_text_start(fsl_font *font, f32 size, u64 length, b8 clear)
         {
             if (!text_core.font->glyph[i].loaded)
                 continue;
+
             g = &text_core.glyph[i];
 
             g->bearing.x = text_core.font->glyph[i].bearing.x * text_core.text_scale.x;
@@ -364,8 +359,8 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
     {
         if (
                 fsl_mem_remap((void*)&text_core.buf,
-                    text_core.buf_len * sizeof(struct glyph_render_data),
-                    (text_core.buf_len + FSL_STRING_MAX) * sizeof(struct glyph_render_data),
+                    text_core.buf_len * sizeof(fsl_glyph_render_data),
+                    (text_core.buf_len + FSL_STRING_MAX) * sizeof(fsl_glyph_render_data),
                     "fsl_text_push().text_core.buf") != FSL_ERR_SUCCESS)
         {
             LOGERROR(fsl_err,
@@ -377,7 +372,7 @@ void fsl_text_push(const str *text, f32 pos_x, f32 pos_y, i8 align_x, i8 align_y
         text_core.buf_len += FSL_STRING_MAX;
 
         glBindBuffer(GL_ARRAY_BUFFER, text_core.vbo_text_data);
-        glBufferData(GL_ARRAY_BUFFER, text_core.buf_len * sizeof(struct glyph_render_data),
+        glBufferData(GL_ARRAY_BUFFER, text_core.buf_len * sizeof(fsl_glyph_render_data),
                 NULL, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
@@ -453,7 +448,7 @@ void fsl_text_render(b8 shadow, u32 shadow_color)
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, text_core.vbo_text_data);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, text_core.cursor * sizeof(struct glyph_render_data),
+    glBufferSubData(GL_ARRAY_BUFFER, 0, text_core.cursor * sizeof(fsl_glyph_render_data),
             text_core.buf);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(text_core.vao);
@@ -614,24 +609,12 @@ void fsl_ui_start(b8 clear)
 void fsl_ui_element_bake_func(fsl_ui_element *element)
 {
     fsl_ui_transform *t = &element->transform;
-    v2f32 uv_scale = {0};
     v2f32 size = {0};
     v2f32 size_half = {0};
     v2f32 alignment = {0};
     v2f32 pos = {0};
 
     element->flag &= ~FSL_FLAG_UI_DIRTY_TRANSFORM;
-
-    if (element->texture)
-    {
-        uv_scale.x = 1.0f / element->texture->size.x;
-        uv_scale.y = 1.0f / element->texture->size.y;
-
-        t->baked.uv_pos.x = t->uv_pos.x * uv_scale.x;
-        t->baked.uv_pos.y = t->uv_pos.y * uv_scale.y;
-        t->baked.uv_size.x = t->uv_size.x * uv_scale.x;
-        t->baked.uv_size.y = t->uv_size.y * uv_scale.y;
-    }
 
     size.x = t->size.x + t->size_scaled.x * t->scale.x;
     size.y = t->size.y + t->size_scaled.y * t->scale.y;
@@ -666,30 +649,39 @@ void ui_element_none_bake_func(fsl_ui_element *element)
     (void)element;
 }
 
-void ui_element_panel_bake_func(fsl_ui_element *element)
+void ui_element_sprite_bake_func(fsl_ui_element *element)
 {
-    fsl_ui_element_panel *panel = (fsl_ui_element_panel*)element;
+    fsl_ui_element_sprite *sprite = (fsl_ui_element_sprite*)element;
     fsl_ui_transform *t = &element->transform;
     v2f32 ndc_scale = render_internal.ndc_scale;
+    v2f32 uv_scale = {0};
 
-    panel->quad.uv_pos.x = t->baked.uv_pos.x;
-    panel->quad.uv_pos.y = t->baked.uv_pos.y;
-    panel->quad.uv_size.x = t->baked.uv_size.x;
-    panel->quad.uv_size.y = t->baked.uv_size.y;
-    panel->quad.pos.x = t->baked.pos.x * ndc_scale.x;
-    panel->quad.pos.y = t->baked.pos.y * ndc_scale.y;
-    panel->quad.size.x = t->baked.size.x * ndc_scale.x;
-    panel->quad.size.y = t->baked.size.y * ndc_scale.y;
+    uv_scale.x = 1.0f / sprite->texture->size.x;
+    uv_scale.y = 1.0f / sprite->texture->size.y;
 
-    panel->quad.pos.x = panel->quad.pos.x - 1.0f;
-    panel->quad.pos.y = 1.0f - panel->quad.pos.y;
+    t->baked.uv_pos.x = t->uv_pos.x * uv_scale.x;
+    t->baked.uv_pos.y = t->uv_pos.y * uv_scale.y;
+    t->baked.uv_size.x = t->uv_size.x * uv_scale.x;
+    t->baked.uv_size.y = t->uv_size.y * uv_scale.y;
+
+    sprite->quad.uv_pos.x = t->baked.uv_pos.x;
+    sprite->quad.uv_pos.y = t->baked.uv_pos.y;
+    sprite->quad.uv_size.x = t->baked.uv_size.x;
+    sprite->quad.uv_size.y = t->baked.uv_size.y;
+    sprite->quad.pos.x = t->baked.pos.x * ndc_scale.x;
+    sprite->quad.pos.y = t->baked.pos.y * ndc_scale.y;
+    sprite->quad.size.x = t->baked.size.x * ndc_scale.x;
+    sprite->quad.size.y = t->baked.size.y * ndc_scale.y;
+
+    sprite->quad.pos.x = sprite->quad.pos.x - 1.0f;
+    sprite->quad.pos.y = 1.0f - sprite->quad.pos.y;
 }
 
 void ui_element_panel_9_slice_bake_func(fsl_ui_element *element)
 {
     fsl_ui_element_panel_9_slice *panel = (fsl_ui_element_panel_9_slice*)element;
     fsl_ui_transform *t = &element->transform;
-    f32 slice_size = panel->slice_size;
+    f32 slice_size = 0.0f;
     v2f32 slice_size_scaled = {0};
     v2f32 ndc_scale = render_internal.ndc_scale;
     v2f32 uv_scale = {0};
@@ -700,6 +692,10 @@ void ui_element_panel_9_slice_bake_func(fsl_ui_element *element)
     v2f32 pos_buf[3] = {0};
     v2f32 size_buf[3] = {0};
 
+    if (panel->slice_size <= 0)
+        panel->slice_size = FSL_UI_SLICE_SIZE_DEFAULT;
+
+    slice_size = (f32)panel->slice_size;
     slice_size_scaled.x = slice_size * t->scale.x;
     slice_size_scaled.y = slice_size * t->scale.y;
     uv_scale.x = 1.0f / (f32)panel->texture->size.x;
@@ -816,6 +812,141 @@ void ui_element_panel_9_slice_bake_func(fsl_ui_element *element)
     panel->quad[8].size.y = size_buf[2].y;
 }
 
+void ui_element_button_bake_func(fsl_ui_element *element)
+{
+    fsl_ui_element_button *button = (fsl_ui_element_button*)element;
+    fsl_ui_transform *t = &element->transform;
+    f32 slice_size = 0.0f;
+    v2f32 slice_size_scaled = {0};
+    v2f32 ndc_scale = render_internal.ndc_scale;
+    v2f32 uv_scale = {0};
+    v2f32 uv_pos_buf[3] = {0};
+    v2f32 uv_size_buf[3] = {0};
+    v2f32 pos = {0};
+    v2f32 size = {0};
+    v2f32 pos_buf[3] = {0};
+    v2f32 size_buf[3] = {0};
+
+    if (button->slice_size <= 0)
+        button->slice_size = FSL_UI_SLICE_SIZE_DEFAULT;
+
+    slice_size = (f32)button->slice_size;
+    slice_size_scaled.x = slice_size * t->scale.x;
+    slice_size_scaled.y = slice_size * t->scale.y;
+    uv_scale.x = 1.0f / (f32)button->texture->size.x;
+    uv_scale.y = 1.0f / (f32)button->texture->size.y;
+    uv_pos_buf[0].x = t->baked.uv_pos.x;
+    uv_pos_buf[0].y = t->baked.uv_pos.y;
+    uv_pos_buf[1].x = uv_pos_buf[0].x + slice_size * uv_scale.x;
+    uv_pos_buf[1].y = uv_pos_buf[0].y + slice_size * uv_scale.y;
+    uv_pos_buf[2].x = uv_pos_buf[0].x + (t->uv_size.x - slice_size) * uv_scale.x;
+    uv_pos_buf[2].y = uv_pos_buf[0].y + (t->uv_size.y - slice_size) * uv_scale.y;
+    uv_size_buf[0].x = slice_size * uv_scale.x;
+    uv_size_buf[0].y = slice_size * uv_scale.y;
+    uv_size_buf[1].x = (t->uv_size.x - slice_size * 2.0f) * uv_scale.x;
+    uv_size_buf[1].y = (t->uv_size.y - slice_size * 2.0f) * uv_scale.y;
+    uv_size_buf[2].x = slice_size * uv_scale.x;
+    uv_size_buf[2].y = slice_size * uv_scale.y;
+
+    pos.x = t->baked.pos.x;
+    pos.y = t->baked.pos.y;
+    size.x = t->baked.size.x;
+    size.y = t->baked.size.y;
+    pos_buf[0].x = pos.x * ndc_scale.x - 1.0f;
+    pos_buf[0].y = 1.0f - pos.y * ndc_scale.y;
+    pos_buf[1].x = ((pos.x + slice_size_scaled.x) * ndc_scale.x) - 1.0f;
+    pos_buf[1].y = 1.0f - (pos.y + slice_size_scaled.y) * ndc_scale.y;
+    pos_buf[2].x = ((pos.x + size.x - slice_size_scaled.x) * ndc_scale.x) - 1.0f;
+    pos_buf[2].y = 1.0f - (pos.y + size.y - slice_size_scaled.y) * ndc_scale.y;
+    size_buf[0].x = slice_size_scaled.x * ndc_scale.x;
+    size_buf[0].y = slice_size_scaled.y * ndc_scale.y;
+    size_buf[1].x = (size.x - slice_size_scaled.x * 2.0f) * ndc_scale.x;
+    size_buf[1].y = (size.y - slice_size_scaled.y * 2.0f) * ndc_scale.y;
+    size_buf[2].x = slice_size_scaled.x * ndc_scale.x;
+    size_buf[2].y = slice_size_scaled.y * ndc_scale.y;
+
+    button->quad[0].uv_pos.x = uv_pos_buf[0].x;
+    button->quad[0].uv_pos.y = uv_pos_buf[0].y;
+    button->quad[0].uv_size.x = uv_size_buf[0].x;
+    button->quad[0].uv_size.y = uv_size_buf[0].y;
+    button->quad[0].pos.x = pos_buf[0].x;
+    button->quad[0].pos.y = pos_buf[0].y;
+    button->quad[0].size.x = size_buf[0].x;
+    button->quad[0].size.y = size_buf[0].y;
+
+    button->quad[1].uv_pos.x = uv_pos_buf[1].x;
+    button->quad[1].uv_pos.y = uv_pos_buf[0].y;
+    button->quad[1].uv_size.x = uv_size_buf[1].x;
+    button->quad[1].uv_size.y = uv_size_buf[0].y;
+    button->quad[1].pos.x = pos_buf[1].x;
+    button->quad[1].pos.y = pos_buf[0].y;
+    button->quad[1].size.x = size_buf[1].x;
+    button->quad[1].size.y = size_buf[0].y;
+
+    button->quad[2].uv_pos.x = uv_pos_buf[2].x;
+    button->quad[2].uv_pos.y = uv_pos_buf[0].y;
+    button->quad[2].uv_size.x = uv_size_buf[2].x;
+    button->quad[2].uv_size.y = uv_size_buf[0].y;
+    button->quad[2].pos.x = pos_buf[2].x;
+    button->quad[2].pos.y = pos_buf[0].y;
+    button->quad[2].size.x = size_buf[2].x;
+    button->quad[2].size.y = size_buf[0].y;
+
+    button->quad[3].uv_pos.x = uv_pos_buf[0].x;
+    button->quad[3].uv_pos.y = uv_pos_buf[1].y;
+    button->quad[3].uv_size.x = uv_size_buf[0].x;
+    button->quad[3].uv_size.y = uv_size_buf[1].y;
+    button->quad[3].pos.x = pos_buf[0].x;
+    button->quad[3].pos.y = pos_buf[1].y;
+    button->quad[3].size.x = size_buf[0].x;
+    button->quad[3].size.y = size_buf[1].y;
+
+    button->quad[4].uv_pos.x = uv_pos_buf[1].x;
+    button->quad[4].uv_pos.y = uv_pos_buf[1].y;
+    button->quad[4].uv_size.x = uv_size_buf[1].x;
+    button->quad[4].uv_size.y = uv_size_buf[1].y;
+    button->quad[4].pos.x = pos_buf[1].x;
+    button->quad[4].pos.y = pos_buf[1].y;
+    button->quad[4].size.x = size_buf[1].x;
+    button->quad[4].size.y = size_buf[1].y;
+
+    button->quad[5].uv_pos.x = uv_pos_buf[2].x;
+    button->quad[5].uv_pos.y = uv_pos_buf[1].y;
+    button->quad[5].uv_size.x = uv_size_buf[2].x;
+    button->quad[5].uv_size.y = uv_size_buf[1].y;
+    button->quad[5].pos.x = pos_buf[2].x;
+    button->quad[5].pos.y = pos_buf[1].y;
+    button->quad[5].size.x = size_buf[2].x;
+    button->quad[5].size.y = size_buf[1].y;
+
+    button->quad[6].uv_pos.x = uv_pos_buf[0].x;
+    button->quad[6].uv_pos.y = uv_pos_buf[2].y;
+    button->quad[6].uv_size.x = uv_size_buf[0].x;
+    button->quad[6].uv_size.y = uv_size_buf[2].y;
+    button->quad[6].pos.x = pos_buf[0].x;
+    button->quad[6].pos.y = pos_buf[2].y;
+    button->quad[6].size.x = size_buf[0].x;
+    button->quad[6].size.y = size_buf[2].y;
+
+    button->quad[7].uv_pos.x = uv_pos_buf[1].x;
+    button->quad[7].uv_pos.y = uv_pos_buf[2].y;
+    button->quad[7].uv_size.x = uv_size_buf[1].x;
+    button->quad[7].uv_size.y = uv_size_buf[2].y;
+    button->quad[7].pos.x = pos_buf[1].x;
+    button->quad[7].pos.y = pos_buf[2].y;
+    button->quad[7].size.x = size_buf[1].x;
+    button->quad[7].size.y = size_buf[2].y;
+
+    button->quad[8].uv_pos.x = uv_pos_buf[2].x;
+    button->quad[8].uv_pos.y = uv_pos_buf[2].y;
+    button->quad[8].uv_size.x = uv_size_buf[2].x;
+    button->quad[8].uv_size.y = uv_size_buf[2].y;
+    button->quad[8].pos.x = pos_buf[2].x;
+    button->quad[8].pos.y = pos_buf[2].y;
+    button->quad[8].size.x = size_buf[2].x;
+    button->quad[8].size.y = size_buf[2].y;
+}
+
 void fsl_ui_element_draw_func(fsl_ui_element *element)
 {
     if (element->flag & FSL_FLAG_UI_DIRTY_TRANSFORM)
@@ -841,26 +972,26 @@ void ui_element_none_draw_func(fsl_ui_element *element)
     (void)element;
 }
 
-void ui_element_panel_draw_func(fsl_ui_element *element)
+void ui_element_sprite_draw_func(fsl_ui_element *element)
 {
-    fsl_ui_element_panel *panel = (fsl_ui_element_panel*)element;
-    u32 buf_size = sizeof(fsl_ui_transform_baked);
+    fsl_ui_element_sprite *sprite = (fsl_ui_element_sprite*)element;
+    u32 buf_size = sizeof(fsl_ui_quad);
 
-    if (element->type != FSL_UI_ELEMENT_TYPE_PANEL)
+    if (element->type != FSL_UI_ELEMENT_TYPE_SPRITE)
     {
         LOGERROR(FSL_ERR_TYPE_MISMATCH,
-                FSL_FLAG_LOG_NO_VERBOSE, "Dafuq? That's the wrong element type, please draw a panel\n");
+                FSL_FLAG_LOG_NO_VERBOSE, "Dafuq? That's the wrong element type, please draw a sprite\n");
         return;
     }
 
-    if (panel->texture)
+    if (sprite->texture)
     {
         glBindBuffer(GL_ARRAY_BUFFER, ui_core.vertex_data_curr_quad);
-        glBufferData(GL_ARRAY_BUFFER, buf_size, &panel->quad, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, buf_size, &sprite->quad, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         glBindVertexArray(ui_core.vao);
-        glBindTexture(GL_TEXTURE_2D, panel->texture->asset.id);
+        glBindTexture(GL_TEXTURE_2D, sprite->texture->asset.id);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
 }
@@ -869,7 +1000,7 @@ void ui_element_panel_9_slice_draw_func(fsl_ui_element *element)
 {
     fsl_ui_element_panel_9_slice *panel = (fsl_ui_element_panel_9_slice*)element;
     u32 instance_count = 9;
-    u32 buf_size = sizeof(fsl_ui_transform_baked) * instance_count;
+    u32 buf_size = sizeof(fsl_ui_quad) * instance_count;
 
     if (element->type != FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE)
     {
@@ -890,10 +1021,35 @@ void ui_element_panel_9_slice_draw_func(fsl_ui_element *element)
     }
 }
 
+void ui_element_button_draw_func(fsl_ui_element *element)
+{
+    fsl_ui_element_button *button = (fsl_ui_element_button*)element;
+    u32 instance_count = 9;
+    u32 buf_size = sizeof(fsl_ui_quad) * instance_count;
+
+    if (element->type != FSL_UI_ELEMENT_TYPE_BUTTON)
+    {
+        LOGERROR(FSL_ERR_TYPE_MISMATCH,
+                FSL_FLAG_LOG_NO_VERBOSE, "Dafuq? That's the wrong element type, please draw a button\n");
+        return;
+    }
+
+    if (button->texture)
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, ui_core.vertex_data_curr_quad);
+        glBufferData(GL_ARRAY_BUFFER, buf_size, button->quad, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        glBindVertexArray(ui_core.vao);
+        glBindTexture(GL_TEXTURE_2D, button->texture->asset.id);
+        glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, instance_count);
+    }
+}
+
 void ui_element_custom_draw_func(fsl_ui_element *element)
 {
     fsl_ui_element_custom *custom = (fsl_ui_element_custom*)element;
-    u32 buf_size = sizeof(fsl_ui_transform_baked);
+    u32 buf_size = sizeof(fsl_ui_quad);
 
     if (custom->draw_func.func)
         custom->draw_func.func(element, custom->draw_func.data);
@@ -913,22 +1069,22 @@ void ui_element_custom_draw_func(fsl_ui_element *element)
 void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y,
         i32 size_x, i32 size_y, u32 tint)
 {
-    fsl_ui_transform_baked drawable = {0};
+    fsl_ui_quad quad = {0};
 
     if (!size_x) size_x = texture->size.x;
     if (!size_y) size_y = texture->size.y;
 
-    drawable.uv_pos.x = 0.0f;
-    drawable.uv_pos.y = 0.0f;
-    drawable.uv_size.x = 1.0f;
-    drawable.uv_size.y = 1.0f;
-    drawable.pos.x = pos_x * render_internal.ndc_scale.x;
-    drawable.pos.y = pos_y * render_internal.ndc_scale.y;
-    drawable.size.x = size_x * render_internal.ndc_scale.x;
-    drawable.size.y = size_y * render_internal.ndc_scale.y;
+    quad.uv_pos.x = 0.0f;
+    quad.uv_pos.y = 0.0f;
+    quad.uv_size.x = 1.0f;
+    quad.uv_size.y = 1.0f;
+    quad.pos.x = pos_x * render_internal.ndc_scale.x;
+    quad.pos.y = pos_y * render_internal.ndc_scale.y;
+    quad.size.x = size_x * render_internal.ndc_scale.x;
+    quad.size.y = size_y * render_internal.ndc_scale.y;
 
     glBindBuffer(GL_ARRAY_BUFFER, ui_core.vertex_data_curr_quad);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(fsl_ui_transform_baked), &drawable, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(fsl_ui_quad), &quad, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glUniform4f(ui_core.uniform.ui.tint,
@@ -959,7 +1115,7 @@ void fsl_ui_free(void)
         glDeleteBuffers(1, &text_core.vbo_text_data);
     }
 
-    fsl_mem_unmap((void*)&text_core.buf, text_core.buf_len * sizeof(struct glyph_render_data),
+    fsl_mem_unmap((void*)&text_core.buf, text_core.buf_len * sizeof(fsl_glyph_render_data),
             "fsl_ui_free().text_core.buf");
 
     if (ui_core.vao_loaded)

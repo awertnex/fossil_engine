@@ -99,7 +99,7 @@ extern u32 menu_layer[5];
 extern u32 state_menu_depth;
 extern b8 is_menu_ready;
 extern u32 buttons[BTN_COUNT];
-extern fsl_ui_element ui_element[UI_ELEMENT_COUNT];
+extern fsl_ui_element_sprite ui_element_sprite[UI_ELEMENT_COUNT];
 
 /*!
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.

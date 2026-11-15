@@ -30,6 +30,7 @@ and this project adheres to
   types.
 
 #### changed
+- change struct name `fsl_ui_element_panel` to `fsl_ui_element_sprite`.
 - move parameter `slice_size` from struct `fsl_ui_transform` to structs
   `fsl_ui_element_panel` and `fsl_ui_element_panel_9_slice`.
 
@@ -40,9 +41,8 @@ and this project adheres to
 #### removed
 - remove parameters `uv_pos_baked`, `uv_size_baked`, `pos_baked` and
   `size_baked` from struct `fsl_ui_transform` and put in new struct
-  `fsl_ui_transform_baked`.
-- remove struct `fsl_ui_drawable_quad` and replace with struct
-  `fsl_ui_transform_baked`.
+  `fsl_ui_quad`.
+- remove struct `fsl_ui_drawable_quad` and replace with struct `fsl_ui_quad`.
 - remove deprecated struct `fsl_ui_panel_nine_slice`.
 
 ## [0.18.0-beta] - 2026-11-02

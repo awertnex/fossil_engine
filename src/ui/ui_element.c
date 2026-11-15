@@ -42,7 +42,6 @@ static u64 ui_element_capability_def_internal[FSL_UI_ELEMENT_TYPE_COUNT] =
         FSL_FLAG_UI_CAN_EXPAND_Y,
 
     FSL_FLAG_UI_CAN_TEXTURE |
-        FSL_FLAG_UI_CAN_9_SLICE |
         FSL_FLAG_UI_CAN_EXPAND_X |
         FSL_FLAG_UI_CAN_EXPAND_Y,
 
@@ -57,7 +56,8 @@ static u64 ui_element_capability_def_internal[FSL_UI_ELEMENT_TYPE_COUNT] =
         FSL_FLAG_UI_CAN_EXPAND_Y,
 
     FSL_FLAG_UI_CAN_EXPAND_X |
-        FSL_FLAG_UI_CAN_EXPAND_Y
+        FSL_FLAG_UI_CAN_EXPAND_Y |
+        FSL_FLAG_UI_CAN_CUSTOM_DRAW
 };
 
 void fsl_ui_element_type_set_func(fsl_ui_element *element, fsl_ui_element_type type)
@@ -81,16 +81,19 @@ void fsl_ui_element_texture_set_func(fsl_ui_element *element, fsl_texture *textu
 
     switch (element->type)
     {
-        case FSL_UI_ELEMENT_TYPE_PANEL:
-            ((fsl_ui_element_panel*)(element))->texture = texture;
+        case FSL_UI_ELEMENT_TYPE_SPRITE:
+            ((fsl_ui_element_sprite*)element)->texture = texture;
             break;
 
         case FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE:
-            ((fsl_ui_element_panel_9_slice*)(element))->texture = texture;
+            ((fsl_ui_element_panel_9_slice*)element)->texture = texture;
+            break;
+
+        case FSL_UI_ELEMENT_TYPE_BUTTON:
+            ((fsl_ui_element_button*)element)->texture = texture;
             break;
 
         default:
-            element->texture = texture;
             break;
     }
 }
@@ -165,10 +168,6 @@ void fsl_ui_element_9_slice_set_func(fsl_ui_element *element,
 
     switch (element->type)
     {
-        case FSL_UI_ELEMENT_TYPE_PANEL:
-            ((fsl_ui_element_panel*)element)->slice_size = slice_size;
-            break;
-
         case FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE:
             ((fsl_ui_element_panel_9_slice*)element)->slice_size = slice_size;
             break;
@@ -192,6 +191,13 @@ void fsl_ui_element_callback_set_func(fsl_ui_element *element,
 void fsl_ui_element_draw_callback_set_func(fsl_ui_element *element,
         fsl_ui_draw_func func, void *data, fsl_fbo *fbo)
 {
+    if (!(element->capabilities & FSL_FLAG_UI_CAN_CUSTOM_DRAW))
+    {
+        LOGERROR(FSL_ERR_TYPE_MISMATCH, FSL_FLAG_LOG_NO_VERBOSE,
+                MSG_ACTION_REASON_ERROR("Set UI Element Draw Callback", "Element Does Support Custom Draw"));
+        return;
+    }
+
     switch (element->type)
     {
         case FSL_UI_ELEMENT_TYPE_CUSTOM:

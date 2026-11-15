@@ -32,6 +32,8 @@
 
 /* ---- section: definitions ------------------------------------------------ */
 
+#define FSL_UI_LABEL_TEXT_CAP 512
+
 #define fsl_ui_element_type_set(element, type) \
     fsl_ui_element_type_set_func((fsl_ui_element*)(element), (type))
 
@@ -81,8 +83,9 @@
 
 typedef struct fsl_ui_draw_callback             fsl_ui_draw_callback;
 typedef struct fsl_ui_element_container         fsl_ui_element_container;
-typedef struct fsl_ui_element_panel             fsl_ui_element_panel;
+typedef struct fsl_ui_element_sprite            fsl_ui_element_sprite;
 typedef struct fsl_ui_element_panel_9_slice     fsl_ui_element_panel_9_slice;
+typedef struct fsl_ui_element_label             fsl_ui_element_label;
 typedef struct fsl_ui_element_button            fsl_ui_element_button;
 typedef struct fsl_ui_element_custom            fsl_ui_element_custom;
 
@@ -90,10 +93,10 @@ typedef enum fsl_ui_element_type
 {
     FSL_UI_ELEMENT_TYPE_NONE,
     FSL_UI_ELEMENT_TYPE_CONTAINER,
-    FSL_UI_ELEMENT_TYPE_PANEL,
+    FSL_UI_ELEMENT_TYPE_SPRITE,
     FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE,
     FSL_UI_ELEMENT_TYPE_BUTTON,
-    FSL_UI_ELEMENT_TYPE_CUSTOM,         /* custom drawables (e.g., debug visuals) */
+    FSL_UI_ELEMENT_TYPE_CUSTOM, /* custom drawables (e.g., debug visuals) */
     FSL_UI_ELEMENT_TYPE_COUNT
 } fsl_ui_element_type;
 
@@ -102,14 +105,14 @@ struct fsl_ui_draw_callback
     fsl_ui_draw_func func;
     void *data;             /* data to pass into `func` */
     fsl_fbo *fbo;           /* framebuffer for the raw render result */
-}; /* fsl_ui_callback_draw */
+}; /* fsl_ui_draw_callback */
 
 /**
  *  @brief base UI element requirement.
  *
  *  must be placed at the top of every UI element's struct definition.
  */
-struct fsl_ui_element
+struct fsl_ui_element_header
 {
     fsl_ui_element_type type;
     u32 flag;                   /* enum @ref fsl_ui_element_flag */
@@ -124,31 +127,25 @@ struct fsl_ui_element
     fsl_ui_event_callback event_func[FSL_UI_EVENT_TYPE_COUNT];
 
     fsl_texture *texture;       /* -- DEPRECATED IN v0.18.0-dev -- */
-}; /* fsl_ui_element */
+}; /* fsl_ui_element_header */
 
 struct fsl_ui_element_container
 {
-    fsl_ui_element header;
-    fsl_ui_transform_baked quad;
+    fsl_ui_element_header header;
+    fsl_ui_quad quad;
 }; /* fsl_ui_element_container */
 
-struct fsl_ui_element_panel
+struct fsl_ui_element_sprite
 {
-    fsl_ui_element header;
-    fsl_ui_transform_baked quad;
+    fsl_ui_element_header header;
+    fsl_ui_quad quad;
     fsl_texture *texture;
-
-    /**
-     *  9-slice corner slice diameter, in pixels.
-     */
-    i32 slice_size;
-
-}; /* fsl_ui_element_panel */
+}; /* fsl_ui_element_sprite */
 
 struct fsl_ui_element_panel_9_slice
 {
-    fsl_ui_element header;
-    fsl_ui_transform_baked quad[9];
+    fsl_ui_element_header header;
+    fsl_ui_quad quad[9];
     fsl_texture *texture;
 
     /**
@@ -160,8 +157,8 @@ struct fsl_ui_element_panel_9_slice
 
 struct fsl_ui_element_button
 {
-    fsl_ui_element header;
-    fsl_ui_transform_baked quad[9];
+    fsl_ui_element_header header;
+    fsl_ui_quad quad[9];
     fsl_texture *texture;
 
     /**
@@ -171,10 +168,18 @@ struct fsl_ui_element_button
 
 }; /* fsl_ui_element_button */
 
+struct fsl_ui_element_label
+{
+    fsl_ui_element_header header;
+    fsl_ui_quad quad;
+    str text[FSL_UI_LABEL_TEXT_CAP];
+    fsl_glyph_render_data buf[FSL_UI_LABEL_TEXT_CAP];
+}; /* fsl_ui_element_label */
+
 struct fsl_ui_element_custom
 {
-    fsl_ui_element header;
-    fsl_ui_transform_baked quad;
+    fsl_ui_element_header header;
+    fsl_ui_quad quad;
     fsl_ui_draw_callback draw_func;
 }; /* fsl_ui_element_custom */
 

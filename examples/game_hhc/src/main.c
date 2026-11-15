@@ -418,10 +418,10 @@ static void ui_hud_draw(void)
         return;
 
     if (!core.flag.debug)
-        fsl_ui_element_draw(&ui_element[UI_ELEMENT_CROSSHAIR]);
+        fsl_ui_element_draw(&ui_element_sprite[UI_ELEMENT_CROSSHAIR]);
 
-    fsl_ui_element_draw(&ui_element[UI_ELEMENT_HOTBAR]);
-    fsl_ui_element_draw(&ui_element[UI_ELEMENT_HOTBAR_SELECTED]);
+    fsl_ui_element_draw(&ui_element_sprite[UI_ELEMENT_HOTBAR]);
+    fsl_ui_element_draw(&ui_element_sprite[UI_ELEMENT_HOTBAR_SELECTED]);
 
     gui_start_ui_items(render->size);
 
@@ -447,7 +447,7 @@ static void ui_hud_draw(void)
         switch (player.menu_state)
         {
             case STATE_PLAYER_MENU_INVENTORY_SURVIVAL:
-                fsl_ui_element_draw(&ui_element[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL]);
+                fsl_ui_element_draw(&ui_element_sprite[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL]);
                 break;
 
             default:
