@@ -91,6 +91,26 @@ void ui_element_panel_9_slice_bake_func(fsl_ui_element *element);
 void ui_element_button_bake_func(fsl_ui_element *element);
 
 /**
+ *  @brief make a 1-slice quad.
+ *
+ *  @internal
+ *
+ *  makes a render-ready quad from an element's baked transform.
+ */
+void ui_element_quad_1_slice_make_internal(fsl_ui_element *element, fsl_ui_quad *quad,
+        v2i32 texture_size);
+
+/**
+ *  @brief make a 9-slice quad.
+ *
+ *  @internal
+ *
+ *  makes 9 render-ready quads from an element's baked transform for 9-slice
+ *  rendering.
+ */
+void ui_element_quad_9_slice_make_internal(fsl_ui_element *element, fsl_ui_quad *quad,
+        v2i32 texture_size, i32 *slice_size);
+/**
  *  @brief draw nothing, placeholder for non-drawable element types.
  *
  *  @internal

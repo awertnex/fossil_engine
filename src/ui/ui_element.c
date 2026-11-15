@@ -25,6 +25,7 @@
 #include "../logger/logger.h"
 #include "../logger/logger_messages_internal.h"
 
+#include "ui_config.h"
 #include "ui_element.h"
 #include "ui_internal.h"
 #include "ui_types.h"
@@ -165,6 +166,9 @@ void fsl_ui_element_9_slice_set_func(fsl_ui_element *element,
     }
 
     element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
+
+    if (slice_size <= 0)
+        slice_size = FSL_UI_SLICE_SIZE_DEFAULT;
 
     switch (element->type)
     {
