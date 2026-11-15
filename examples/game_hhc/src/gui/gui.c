@@ -142,6 +142,7 @@ void gui_update(v2i32 render_size)
     fsl_ui_element_size_set(&ui_element_sprite[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL], 0, 0, 177, 177);
     fsl_ui_element_scale_set(&ui_element_sprite[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL],
             settings.gui_scale, settings.gui_scale);
+    fsl_ui_element_alignment_set(&ui_element_sprite[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL], 0, 0);
 
     gui_menu_title_update(render_size);
     gui_menu_pause_update(render_size);

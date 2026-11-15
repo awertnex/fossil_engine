@@ -20,23 +20,24 @@ and this project adheres to
 ## unreleased
 
 #### added
+- add new type `fsl_ui_quad_1_slice`: a 1-slice quad. (a sprite)
+- add new type `fsl_ui_quad_9_slice`: a 9-slice quad.
 - add new function `fsl_ui_element_draw_callback_set()` for custom drawables.
 - add new type `fsl_ui_element_container`: invisible container to attach other
   UI elements to.
 - add new type `fsl_ui_element_button`: basic button panel.
-- add new function `fsl_ui_element_type_set()`.
-- add error code `FSL_ERR_TYPE_MISMATCH`: data types not matching requirements,
-  used first by functions `ui_element_*_draw_func()` to invalidate wrong element
-  types.
+- add new function `fsl_ui_element_type_set()`: set element type and default
+  values.
+- add error code `FSL_ERR_TYPE_MISMATCH`: data types not matching requirements.
 
 #### changed
 - change struct name `fsl_ui_element_panel` to `fsl_ui_element_sprite`.
-- move parameter `slice_size` from struct `fsl_ui_transform` to structs
-  `fsl_ui_element_panel` and `fsl_ui_element_panel_9_slice`.
+- move parameter `slice_size` from struct `fsl_ui_transform` to struct
+  `fsl_ui_quad_9_slice`.
 
 #### deprecated
-- deprecated parameter `is_9_slice` in function ``, 9-slice is now reliant on
-  element type.
+- deprecated parameter `is_9_slice` in function `fsl_ui_element_9_slice_set()`,
+  9-slice is now reliant on element type.
 
 #### removed
 - remove parameters `uv_pos_baked`, `uv_size_baked`, `pos_baked` and

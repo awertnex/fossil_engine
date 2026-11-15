@@ -89,12 +89,23 @@ typedef struct fsl_ui_element_label             fsl_ui_element_label;
 typedef struct fsl_ui_element_button            fsl_ui_element_button;
 typedef struct fsl_ui_element_custom            fsl_ui_element_custom;
 
+/**
+ *  @brief UI element types.
+ *
+ *  requirements for adding element types:
+ *      - element struct definition.
+ *      - ui.c: add bake function entry in bake callback table.
+ *      - ui.c: add draw function entry in draw callback table.
+ *      - ui_element.c: write debug name in internal array.
+ *      - ui_element.c: add capabilities in internal array.
+ */
 typedef enum fsl_ui_element_type
 {
     FSL_UI_ELEMENT_TYPE_NONE,
     FSL_UI_ELEMENT_TYPE_CONTAINER,
     FSL_UI_ELEMENT_TYPE_SPRITE,
     FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE,
+    FSL_UI_ELEMENT_TYPE_LABEL,
     FSL_UI_ELEMENT_TYPE_BUTTON,
     FSL_UI_ELEMENT_TYPE_CUSTOM, /* custom drawables (e.g., debug visuals) */
     FSL_UI_ELEMENT_TYPE_COUNT
@@ -116,7 +127,7 @@ struct fsl_ui_element_header
 {
     fsl_ui_element_type type;
     u32 flag;                   /* enum @ref fsl_ui_element_flag */
-    u64 capabilities;           /* enum @ref fsl_ui_element_capability */
+    u32 capabilities;           /* enum @ref fsl_ui_element_capability */
     fsl_ui_transform transform;
 
     fsl_ui_element *parent;
@@ -132,46 +143,34 @@ struct fsl_ui_element_header
 struct fsl_ui_element_container
 {
     fsl_ui_element_header header;
-    fsl_ui_quad quad;
+    fsl_ui_quad_1_slice quad;
 }; /* fsl_ui_element_container */
 
 struct fsl_ui_element_sprite
 {
     fsl_ui_element_header header;
-    fsl_ui_quad quad;
+    fsl_ui_quad_1_slice quad;
     fsl_texture *texture;
 }; /* fsl_ui_element_sprite */
 
 struct fsl_ui_element_panel_9_slice
 {
     fsl_ui_element_header header;
-    fsl_ui_quad quad[9];
+    fsl_ui_quad_9_slice quad;
     fsl_texture *texture;
-
-    /**
-     *  9-slice corner slice diameter, in pixels.
-     */
-    i32 slice_size;
-
 }; /* fsl_ui_element_panel_9_slice */
 
 struct fsl_ui_element_button
 {
     fsl_ui_element_header header;
-    fsl_ui_quad quad[9];
+    fsl_ui_quad_9_slice quad;
     fsl_texture *texture;
-
-    /**
-     *  9-slice corner slice diameter, in pixels.
-     */
-    i32 slice_size;
-
 }; /* fsl_ui_element_button */
 
 struct fsl_ui_element_label
 {
     fsl_ui_element_header header;
-    fsl_ui_quad quad;
+    fsl_ui_quad_1_slice quad;
     str text[FSL_UI_LABEL_TEXT_CAP];
     fsl_glyph_render_data buf[FSL_UI_LABEL_TEXT_CAP];
 }; /* fsl_ui_element_label */
@@ -179,7 +178,7 @@ struct fsl_ui_element_label
 struct fsl_ui_element_custom
 {
     fsl_ui_element_header header;
-    fsl_ui_quad quad;
+    fsl_ui_quad_1_slice quad;
     fsl_ui_draw_callback draw_func;
 }; /* fsl_ui_element_custom */
 

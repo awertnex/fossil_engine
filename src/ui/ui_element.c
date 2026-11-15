@@ -32,44 +32,81 @@
 
 #include <stddef.h>
 
+/**
+ *  @internal
+ */
 str str_element_type_name_internal[FSL_UI_ELEMENT_TYPE_COUNT][FSL_ID_CAP] =
 {
-    "None",
-    "Container",
-    "Sprite",
-    "Panel",
-    "Button",
-    "Custom"
+    "none",
+    "container",
+    "sprite",
+    "panel",
+    "label",
+    "button",
+    "custom"
 };
 
 /**
  *  @brief define capabilities of every element type.
+ *
+ *  @internal
  */
 static u64 ui_element_capability_def_internal[FSL_UI_ELEMENT_TYPE_COUNT] =
 {
+    /* none */
     0,
 
+    /* container */
     FSL_FLAG_UI_CAN_EXPAND_X |
         FSL_FLAG_UI_CAN_EXPAND_Y,
 
+    /* sprite */
     FSL_FLAG_UI_CAN_TEXTURE |
         FSL_FLAG_UI_CAN_EXPAND_X |
         FSL_FLAG_UI_CAN_EXPAND_Y,
 
-    FSL_FLAG_UI_CAN_TEXTURE |
-        FSL_FLAG_UI_CAN_9_SLICE |
-        FSL_FLAG_UI_CAN_EXPAND_X |
-        FSL_FLAG_UI_CAN_EXPAND_Y,
-
+    /* panel */
     FSL_FLAG_UI_CAN_TEXTURE |
         FSL_FLAG_UI_CAN_9_SLICE |
         FSL_FLAG_UI_CAN_EXPAND_X |
         FSL_FLAG_UI_CAN_EXPAND_Y,
 
+    /* label */
+    0,
+
+    /* button */
+    FSL_FLAG_UI_CAN_TEXTURE |
+        FSL_FLAG_UI_CAN_9_SLICE |
+        FSL_FLAG_UI_CAN_EXPAND_X |
+        FSL_FLAG_UI_CAN_EXPAND_Y,
+
+    /* custom */
     FSL_FLAG_UI_CAN_EXPAND_X |
         FSL_FLAG_UI_CAN_EXPAND_Y |
         FSL_FLAG_UI_CAN_CUSTOM_DRAW
 };
+
+/**
+ *  @brief set default transforms for an element.
+ *
+ *  @internal
+ */
+static void ui_element_transform_defaults_set_internal(fsl_ui_element *element);
+
+/* ---- section: implementation --------------------------------------------- */
+
+b8 ui_element_is_valid_internal(fsl_ui_element *element)
+{
+    if (element->type <= 0 || element->type >= FSL_UI_ELEMENT_TYPE_COUNT)
+    {
+        LOGERROR(FSL_ERR_TYPE_MISMATCH,
+                FSL_FLAG_LOG_NO_VERBOSE,
+                "UI Element Type Invalid\n");
+        return FALSE;
+    }
+
+    return TRUE;
+}
 
 static void ui_element_transform_defaults_set_internal(fsl_ui_element *element)
 {
@@ -95,9 +132,16 @@ static void ui_element_transform_defaults_set_internal(fsl_ui_element *element)
 
 void fsl_ui_element_type_set_func(fsl_ui_element *element, fsl_ui_element_type type)
 {
-    element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
+    fsl_ui_element_type type_cache = element->type;
 
     element->type = type;
+
+    if (!ui_element_is_valid_internal(element))
+    {
+        element->type = type_cache;
+        return;
+    }
+
     element->capabilities = ui_element_capability_def_internal[type];
 
     switch (element->type)
@@ -121,14 +165,21 @@ void fsl_ui_element_type_set_func(fsl_ui_element *element, fsl_ui_element_type t
         case FSL_UI_ELEMENT_TYPE_CUSTOM:
             ui_element_transform_defaults_set_internal(element);
             break;
+
+        default:
+            break;
     }
 }
 
 void fsl_ui_element_texture_set_func(fsl_ui_element *element, fsl_texture *texture)
 {
+    if (!ui_element_is_valid_internal(element))
+        return;
+
     if (!(element->capabilities & FSL_FLAG_UI_CAN_TEXTURE))
     {
-        LOGERROR(FSL_ERR_TYPE_MISMATCH, FSL_FLAG_LOG_NO_VERBOSE,
+        LOGERROR(FSL_ERR_TYPE_MISMATCH,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 MSG_ACTION_REASON_ERROR("Set UI Element Texture", "Element Does Support Textures"));
         return;
     }
@@ -157,6 +208,9 @@ void fsl_ui_element_texture_set_func(fsl_ui_element *element, fsl_texture *textu
 void fsl_ui_element_uv_set_func(fsl_ui_element *element,
         i32 uv_pos_x, i32 uv_pos_y, i32 uv_size_x, i32 uv_size_y)
 {
+    if (!ui_element_is_valid_internal(element))
+        return;
+
     element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
 
     element->transform.uv_pos.x = uv_pos_x;
@@ -169,6 +223,9 @@ void fsl_ui_element_position_set_func(fsl_ui_element *element,
         i32 pos_x, i32 pos_y, i32 offset_x, i32 offset_y,
         i32 offset_scaled_x, i32 offset_scaled_y)
 {
+    if (!ui_element_is_valid_internal(element))
+        return;
+
     element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
 
     element->transform.pos.x = pos_x;
@@ -182,6 +239,9 @@ void fsl_ui_element_position_set_func(fsl_ui_element *element,
 void fsl_ui_element_size_set_func(fsl_ui_element *element,
         i32 size_x, i32 size_y, i32 size_scaled_x, i32 size_scaled_y)
 {
+    if (!ui_element_is_valid_internal(element))
+        return;
+
     element->flag |= FSL_FLAG_UI_DIRTY_TRANSFORM;
 
     element->transform.size.x = size_x;
@@ -213,9 +273,13 @@ void fsl_ui_element_9_slice_set_func(fsl_ui_element *element,
 {
     (void)is_9_slice;
 
+    if (!ui_element_is_valid_internal(element))
+        return;
+
     if (!(element->capabilities & FSL_FLAG_UI_CAN_9_SLICE))
     {
-        LOGERROR(FSL_ERR_TYPE_MISMATCH, FSL_FLAG_LOG_NO_VERBOSE,
+        LOGERROR(FSL_ERR_TYPE_MISMATCH,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 MSG_ACTION_REASON_ERROR("Set UI Element Slice Size", "Element Does Support 9-Slice"));
         return;
     }
@@ -228,11 +292,11 @@ void fsl_ui_element_9_slice_set_func(fsl_ui_element *element,
     switch (element->type)
     {
         case FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE:
-            ((fsl_ui_element_panel_9_slice*)element)->slice_size = slice_size;
+            ((fsl_ui_element_panel_9_slice*)element)->quad.slice_size = slice_size;
             break;
 
         case FSL_UI_ELEMENT_TYPE_BUTTON:
-            ((fsl_ui_element_button*)element)->slice_size = slice_size;
+            ((fsl_ui_element_button*)element)->quad.slice_size = slice_size;
             break;
 
         default:
@@ -243,6 +307,9 @@ void fsl_ui_element_9_slice_set_func(fsl_ui_element *element,
 void fsl_ui_element_callback_set_func(fsl_ui_element *element,
         fsl_ui_event_type event_type, fsl_ui_event_func func, void *data)
 {
+    if (!ui_element_is_valid_internal(element))
+        return;
+
     element->event_func[event_type].func = func;
     element->event_func[event_type].data = data;
 }
@@ -252,7 +319,8 @@ void fsl_ui_element_draw_callback_set_func(fsl_ui_element *element,
 {
     if (!(element->capabilities & FSL_FLAG_UI_CAN_CUSTOM_DRAW))
     {
-        LOGERROR(FSL_ERR_TYPE_MISMATCH, FSL_FLAG_LOG_NO_VERBOSE,
+        LOGERROR(FSL_ERR_TYPE_MISMATCH,
+                FSL_FLAG_LOG_NO_VERBOSE,
                 MSG_ACTION_REASON_ERROR("Set UI Element Draw Callback", "Element Does Support Custom Draw"));
         return;
     }

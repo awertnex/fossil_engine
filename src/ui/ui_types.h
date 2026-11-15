@@ -28,6 +28,8 @@
 typedef struct fsl_ui_event             fsl_ui_event;
 typedef struct fsl_ui_event_callback    fsl_ui_event_callback;
 typedef struct fsl_ui_quad              fsl_ui_quad;
+typedef struct fsl_ui_quad_1_slice      fsl_ui_quad_1_slice;
+typedef struct fsl_ui_quad_9_slice      fsl_ui_quad_9_slice;
 typedef struct fsl_ui_transform         fsl_ui_transform;
 
 typedef struct fsl_glyph_render_data    fsl_glyph_render_data;
@@ -94,6 +96,17 @@ struct fsl_ui_quad
     v2f32 pos;              /* baked absolute position on screen, in pixels */
     v2f32 size;             /* baked absolute size on screen, in pixels */
 }; /* fsl_ui_quad */
+
+struct fsl_ui_quad_1_slice
+{
+    fsl_ui_quad quad;
+}; /* fsl_ui_quad_1_slice */
+
+struct fsl_ui_quad_9_slice
+{
+    fsl_ui_quad quad[9];
+    i32 slice_size;         /* corner slice diameter, in pixels */
+}; /* fsl_ui_quad_9_slice */
 
 struct fsl_ui_transform
 {

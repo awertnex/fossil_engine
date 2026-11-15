@@ -52,6 +52,18 @@ enum ui_element_capability_internal
 
 extern str str_element_type_name_internal[FSL_UI_ELEMENT_TYPE_COUNT][FSL_ID_CAP];
 
+/* ---- section: signatures ------------------------------------------------- */
+
+/**
+ *  @brief general error-checking for element validity.
+ *
+ *  @internal
+ *
+ *  checks for out-of-range values and logs accordingly, and possibly checks
+ *  other stuff.
+ */
+b8 ui_element_is_valid_internal(fsl_ui_element *element);
+
 /**
  *  @brief poll event data and parse element's callbacks (e.g., button pressed).
  *
@@ -100,8 +112,8 @@ void ui_element_button_bake_func(fsl_ui_element *element);
  *
  *  makes a render-ready quad from an element's baked transform.
  */
-void ui_element_quad_1_slice_make_internal(fsl_ui_element *element, fsl_ui_quad *quad,
-        v2i32 texture_size);
+void ui_element_quad_1_slice_make_internal(fsl_ui_element *element,
+        fsl_ui_quad_1_slice *quad, v2i32 texture_size);
 
 /**
  *  @brief make a 9-slice quad.
@@ -111,8 +123,9 @@ void ui_element_quad_1_slice_make_internal(fsl_ui_element *element, fsl_ui_quad 
  *  makes 9 render-ready quads from an element's baked transform for 9-slice
  *  rendering.
  */
-void ui_element_quad_9_slice_make_internal(fsl_ui_element *element, fsl_ui_quad *quad,
-        v2i32 texture_size, i32 *slice_size);
+void ui_element_quad_9_slice_make_internal(fsl_ui_element *element,
+        fsl_ui_quad_9_slice *quad, v2i32 texture_size);
+
 /**
  *  @brief draw nothing, placeholder for non-drawable element types.
  *
@@ -121,6 +134,17 @@ void ui_element_quad_9_slice_make_internal(fsl_ui_element *element, fsl_ui_quad 
  *  @note called indirectly via a function pointer array.
  */
 void ui_element_none_draw_func(fsl_ui_element *element);
+
+/**
+ *  @brief draw a container.
+ *
+ *  @internal
+ *
+ *  only draws attached children.
+ *
+ *  @note called indirectly via a function pointer array.
+ */
+void ui_element_container_draw_func(fsl_ui_element *element);
 
 /**
  *  @brief draw a sprite.
