@@ -15,167 +15,184 @@
 #include "super_debugger.h"
 #include "super_debugger_callbacks.h"
 
+fsl_ui_element_panel_9_slice ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_COUNT] = {0};
+fsl_ui_element_button ui_element_sdb_button[UI_ELEMENT_SDB_BUTTON_COUNT] = {0};
+
 static i32 logger_scroll_pos = 0;
-fsl_ui_element ui_element_sdb[UI_ELEMENT_SDB_COUNT] = {0};
 
 void super_debugger_init(v2i32 render_size)
 {
     fsl_texture *fsl_texture_p = fsl_mem_handle_get(fsl_texture_buf);
 
-    fsl_ui_element_texture_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL],
+    fsl_ui_element_type_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL],
+            FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE);
+    fsl_ui_element_type_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_LOGGER],
+            FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE);
+    fsl_ui_element_type_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
+            FSL_UI_ELEMENT_TYPE_BUTTON);
+    fsl_ui_element_type_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
+            FSL_UI_ELEMENT_TYPE_BUTTON);
+    fsl_ui_element_type_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS],
+            FSL_UI_ELEMENT_TYPE_BUTTON);
+    fsl_ui_element_type_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO],
+            FSL_UI_ELEMENT_TYPE_BUTTON);
+    fsl_ui_element_type_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
+            FSL_UI_ELEMENT_TYPE_BUTTON);
+
+    fsl_ui_element_texture_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL],
             &fsl_texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
-    fsl_ui_element_texture_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL_LOGGER],
+    fsl_ui_element_texture_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_LOGGER],
             &fsl_texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
-    fsl_ui_element_texture_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
+    fsl_ui_element_texture_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
             &fsl_texture_p[FSL_TEXTURE_INDEX_BUTTON_ACTIVE]);
-    fsl_ui_element_texture_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
+    fsl_ui_element_texture_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
             &fsl_texture_p[FSL_TEXTURE_INDEX_BUTTON_ACTIVE]);
-    fsl_ui_element_texture_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS],
+    fsl_ui_element_texture_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS],
             &fsl_texture_p[FSL_TEXTURE_INDEX_BUTTON_ACTIVE]);
-    fsl_ui_element_texture_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO],
+    fsl_ui_element_texture_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO],
             &fsl_texture_p[FSL_TEXTURE_INDEX_BUTTON_ACTIVE]);
-    fsl_ui_element_texture_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
+    fsl_ui_element_texture_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
             &fsl_texture_p[FSL_TEXTURE_INDEX_BUTTON_ACTIVE]);
 
-    fsl_ui_element_uv_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL], 0, 0, 16, 16);
-    fsl_ui_element_uv_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL_LOGGER], 0, 0, 16, 16);
-    fsl_ui_element_uv_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS], 0, 0, 16, 16);
-    fsl_ui_element_uv_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES], 0, 0, 16, 16);
-    fsl_ui_element_uv_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS], 0, 0, 16, 16);
-    fsl_ui_element_uv_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO], 0, 0, 16, 16);
-    fsl_ui_element_uv_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
+    fsl_ui_element_uv_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL], 0, 0, 16, 16);
+    fsl_ui_element_uv_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_LOGGER], 0, 0, 16, 16);
+    fsl_ui_element_uv_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS], 0, 0, 16, 16);
+    fsl_ui_element_uv_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES], 0, 0, 16, 16);
+    fsl_ui_element_uv_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS], 0, 0, 16, 16);
+    fsl_ui_element_uv_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO], 0, 0, 16, 16);
+    fsl_ui_element_uv_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
             0, 0, 16, 16);
 
-    fsl_ui_element_9_slice_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL], TRUE, 8);
-    fsl_ui_element_9_slice_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL_LOGGER], TRUE, 8);
-    fsl_ui_element_9_slice_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS], TRUE, 8);
-    fsl_ui_element_9_slice_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES], TRUE, 8);
-    fsl_ui_element_9_slice_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS], TRUE, 8);
-    fsl_ui_element_9_slice_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO], TRUE, 8);
-    fsl_ui_element_9_slice_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
+    fsl_ui_element_9_slice_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL], TRUE, 8);
+    fsl_ui_element_9_slice_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_LOGGER], TRUE, 8);
+    fsl_ui_element_9_slice_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS], TRUE, 8);
+    fsl_ui_element_9_slice_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES], TRUE, 8);
+    fsl_ui_element_9_slice_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS], TRUE, 8);
+    fsl_ui_element_9_slice_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO], TRUE, 8);
+    fsl_ui_element_9_slice_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
             TRUE, 8);
 
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL],
+    fsl_ui_element_callback_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL],
             FSL_UI_EVENT_TYPE_ENTER, super_debugger_panel_enter_func, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL_LOGGER],
+    fsl_ui_element_callback_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_LOGGER],
             FSL_UI_EVENT_TYPE_ENTER, super_debugger_panel_enter_func, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
             FSL_UI_EVENT_TYPE_ENTER, super_debugger_button_enter_func, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
             FSL_UI_EVENT_TYPE_ENTER, super_debugger_button_enter_func, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS],
             FSL_UI_EVENT_TYPE_ENTER, super_debugger_button_enter_func, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO],
             FSL_UI_EVENT_TYPE_ENTER, super_debugger_button_enter_func, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
             FSL_UI_EVENT_TYPE_ENTER, super_debugger_button_enter_func, NULL);
 
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL],
+    fsl_ui_element_callback_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL],
             FSL_UI_EVENT_TYPE_LEAVE, super_debugger_panel_leave_func, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL_LOGGER],
+    fsl_ui_element_callback_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_LOGGER],
             FSL_UI_EVENT_TYPE_LEAVE, super_debugger_panel_leave_func, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
             FSL_UI_EVENT_TYPE_LEAVE, super_debugger_button_leave_func, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
             FSL_UI_EVENT_TYPE_LEAVE, super_debugger_button_leave_func, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS],
             FSL_UI_EVENT_TYPE_LEAVE, super_debugger_button_leave_func, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO],
             FSL_UI_EVENT_TYPE_LEAVE, super_debugger_button_leave_func, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
             FSL_UI_EVENT_TYPE_LEAVE, super_debugger_button_leave_func, NULL);
 
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
             FSL_UI_EVENT_TYPE_CLICK, super_debugger_button_click_func_toggle_trans_blocks, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
             FSL_UI_EVENT_TYPE_CLICK, super_debugger_button_click_func_toggle_bounding_boxes, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS],
             FSL_UI_EVENT_TYPE_CLICK, super_debugger_button_click_func_toggle_chunk_bounds, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO],
             FSL_UI_EVENT_TYPE_CLICK, super_debugger_button_click_func_toggle_chunk_gizmo, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
             FSL_UI_EVENT_TYPE_CLICK, super_debugger_button_click_func_toggle_chunk_scheduler_visualizer,
             NULL);
 
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
             FSL_UI_EVENT_TYPE_RELEASE, super_debugger_button_release_func, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
             FSL_UI_EVENT_TYPE_RELEASE, super_debugger_button_release_func, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS],
             FSL_UI_EVENT_TYPE_RELEASE, super_debugger_button_release_func, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO],
             FSL_UI_EVENT_TYPE_RELEASE, super_debugger_button_release_func, NULL);
-    fsl_ui_element_callback_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
+    fsl_ui_element_callback_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
             FSL_UI_EVENT_TYPE_RELEASE, super_debugger_button_release_func, NULL);
 
-    fsl_ui_element_attach(&ui_element_sdb[UI_ELEMENT_SDB_PANEL],
-            &ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS]);
-    fsl_ui_element_attach(&ui_element_sdb[UI_ELEMENT_SDB_PANEL],
-            &ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES]);
-    fsl_ui_element_attach(&ui_element_sdb[UI_ELEMENT_SDB_PANEL],
-            &ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS]);
-    fsl_ui_element_attach(&ui_element_sdb[UI_ELEMENT_SDB_PANEL],
-            &ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO]);
-    fsl_ui_element_attach(&ui_element_sdb[UI_ELEMENT_SDB_PANEL],
-            &ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER]);
+    fsl_ui_element_attach(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL],
+            &ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS]);
+    fsl_ui_element_attach(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL],
+            &ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES]);
+    fsl_ui_element_attach(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL],
+            &ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS]);
+    fsl_ui_element_attach(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL],
+            &ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO]);
+    fsl_ui_element_attach(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL],
+            &ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER]);
 
     super_debugger_update(render_size);
 }
 
 void super_debugger_update(v2i32 render_size)
 {
-    fsl_ui_element_position_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL],
+    fsl_ui_element_position_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL],
             0, 0, SET_MARGIN, SET_MARGIN, 0, 0);
-    fsl_ui_element_position_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL_LOGGER],
+    fsl_ui_element_position_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_LOGGER],
             0, render_size.y, SET_MARGIN, -SET_MARGIN, 0, 0);
-    fsl_ui_element_size_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL],
+    fsl_ui_element_size_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL],
             400, render_size.y - SET_MARGIN * 2, 0, 0);
-    fsl_ui_element_size_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL_LOGGER],
+    fsl_ui_element_size_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_LOGGER],
             render_size.x - SET_MARGIN * 2, 400, 0, 0);
 
-    fsl_ui_element_bake(&ui_element_sdb[UI_ELEMENT_SDB_PANEL]);
+    fsl_ui_element_bake(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL]);
 
-    fsl_ui_element_position_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
-            ui_element_sdb[UI_ELEMENT_SDB_PANEL].transform.baked.size.x,
+    fsl_ui_element_position_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
+            ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL].header.transform.baked.size.x,
             0, 0, 0, -SET_MARGIN, SET_MARGIN);
-    fsl_ui_element_position_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
-            ui_element_sdb[UI_ELEMENT_SDB_PANEL].transform.baked.size.x,
+    fsl_ui_element_position_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
+            ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL].header.transform.baked.size.x,
             0, 0, 0, -SET_MARGIN, SET_MARGIN);
-    fsl_ui_element_position_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS],
-            ui_element_sdb[UI_ELEMENT_SDB_PANEL].transform.baked.size.x,
+    fsl_ui_element_position_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS],
+            ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL].header.transform.baked.size.x,
             0, 0, 0, -SET_MARGIN, SET_MARGIN);
-    fsl_ui_element_position_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO],
-            ui_element_sdb[UI_ELEMENT_SDB_PANEL].transform.baked.size.x,
+    fsl_ui_element_position_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO],
+            ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL].header.transform.baked.size.x,
             0, 0, 0, -SET_MARGIN, SET_MARGIN);
-    fsl_ui_element_position_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
-            ui_element_sdb[UI_ELEMENT_SDB_PANEL].transform.baked.size.x,
+    fsl_ui_element_position_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
+            ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL].header.transform.baked.size.x,
             0, 0, 0, -SET_MARGIN, SET_MARGIN);
 
-    fsl_ui_element_size_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS], 0, 0, 32, 16);
-    fsl_ui_element_size_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES], 0, 0, 32, 16);
-    fsl_ui_element_size_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS], 0, 0, 32, 16);
-    fsl_ui_element_size_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO], 0, 0, 32, 16);
-    fsl_ui_element_size_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
+    fsl_ui_element_size_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS], 0, 0, 32, 16);
+    fsl_ui_element_size_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES], 0, 0, 32, 16);
+    fsl_ui_element_size_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS], 0, 0, 32, 16);
+    fsl_ui_element_size_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO], 0, 0, 32, 16);
+    fsl_ui_element_size_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
             0, 0, 32, 16);
 
-    fsl_ui_element_scale_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
+    fsl_ui_element_scale_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
             settings.gui_scale, settings.gui_scale);
-    fsl_ui_element_scale_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
+    fsl_ui_element_scale_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
             settings.gui_scale, settings.gui_scale);
-    fsl_ui_element_scale_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS],
+    fsl_ui_element_scale_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS],
             settings.gui_scale, settings.gui_scale);
-    fsl_ui_element_scale_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO],
+    fsl_ui_element_scale_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO],
             settings.gui_scale, settings.gui_scale);
-    fsl_ui_element_scale_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
+    fsl_ui_element_scale_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
             settings.gui_scale, settings.gui_scale);
 
-    fsl_ui_element_alignment_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL], -1, -1);
-    fsl_ui_element_alignment_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL_LOGGER], -1, 1);
-    fsl_ui_element_alignment_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS], 1, -1);
-    fsl_ui_element_alignment_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES], 1, -4);
-    fsl_ui_element_alignment_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS], 1, -7);
-    fsl_ui_element_alignment_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO], 1, -10);
-    fsl_ui_element_alignment_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
+    fsl_ui_element_alignment_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL], -1, -1);
+    fsl_ui_element_alignment_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_LOGGER], -1, 1);
+    fsl_ui_element_alignment_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS], 1, -1);
+    fsl_ui_element_alignment_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES], 1, -4);
+    fsl_ui_element_alignment_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS], 1, -7);
+    fsl_ui_element_alignment_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO], 1, -10);
+    fsl_ui_element_alignment_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
             1, -13);
 }
 
@@ -184,19 +201,19 @@ void super_debugger_draw(v2i32 render_size, GLuint fbo)
     i32 i = 0;
     u32 index = 0;
     i32 logger_panel_height =
-        ui_element_sdb[UI_ELEMENT_SDB_PANEL_LOGGER].transform.baked.size.y - SET_MARGIN * 2;
+        ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_LOGGER].header.transform.baked.size.y - SET_MARGIN * 2;
     fsl_log_entry *log_entry = NULL;
 
     fsl_ui_start(FALSE);
 
-    fsl_ui_element_draw(&ui_element_sdb[UI_ELEMENT_SDB_PANEL]);
-    fsl_ui_element_draw(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS]);
-    fsl_ui_element_draw(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES]);
-    fsl_ui_element_draw(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS]);
-    fsl_ui_element_draw(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO]);
-    fsl_ui_element_draw(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER]);
+    fsl_ui_element_draw(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL]);
+    fsl_ui_element_draw(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS]);
+    fsl_ui_element_draw(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES]);
+    fsl_ui_element_draw(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS]);
+    fsl_ui_element_draw(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO]);
+    fsl_ui_element_draw(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER]);
 
-    fsl_ui_element_draw(&ui_element_sdb[UI_ELEMENT_SDB_PANEL_LOGGER]);
+    fsl_ui_element_draw(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_LOGGER]);
     fsl_text_start(font[FONT_MONO_BOLD], settings.font_size, 0, FALSE);
 
     log_entry = fsl_mem_handle_get(fsl_log_core.buf);
@@ -222,17 +239,17 @@ void super_debugger_draw(v2i32 render_size, GLuint fbo)
 
 void super_debugger_gui_scale_set(f32 scale)
 {
-    fsl_ui_element_scale_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL], scale, scale);
-    fsl_ui_element_scale_set(&ui_element_sdb[UI_ELEMENT_SDB_PANEL_LOGGER], scale, scale);
-    fsl_ui_element_scale_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
+    fsl_ui_element_scale_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL], scale, scale);
+    fsl_ui_element_scale_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_LOGGER], scale, scale);
+    fsl_ui_element_scale_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
             scale, scale);
-    fsl_ui_element_scale_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
+    fsl_ui_element_scale_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
             scale, scale);
-    fsl_ui_element_scale_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS],
+    fsl_ui_element_scale_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS],
             scale, scale);
-    fsl_ui_element_scale_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO],
+    fsl_ui_element_scale_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO],
             scale, scale);
-    fsl_ui_element_scale_set(&ui_element_sdb[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
+    fsl_ui_element_scale_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
             scale, scale);
 }
 

@@ -117,15 +117,6 @@ FSLAPI u32 fsl_ui_init(void);
 FSLAPI void fsl_ui_start(b8 clear);
 
 /**
- *  @brief draw a texture as a UI element.
- *
- *  @remark if `size_x` is 0, `texture->size.x` is used, and likewise for
- *  `size_y`.
- */
-FSLAPI void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y,
-        i32 size_x, i32 size_y, u32 tint);
-
-/**
  *  @remark enable @ref GL_DEPTH_TEST.
  */
 FSLAPI void fsl_ui_stop(void);
@@ -133,11 +124,12 @@ FSLAPI void fsl_ui_stop(void);
 FSLAPI void fsl_ui_free(void);
 
 /**
- *  @brief make a 9-slice panel.
+ *  @brief draw a texture as a UI element.
  *
- *  @internal
+ *  @remark if `size_x` is 0, `texture->size.x` is used, and likewise for
+ *  `size_y`.
  */
-fsl_ui_element_panel_9_slice fsl_ui_element_panel_9_slice_make_internal(
-    fsl_ui_element *element);
+FSLAPI void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y,
+        i32 size_x, i32 size_y, u32 tint);
 
 #endif /* FSL_UI_H */

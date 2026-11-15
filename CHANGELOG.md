@@ -19,12 +19,36 @@ and this project adheres to
 
 ## unreleased
 
+#### added
+- add function `fsl_ui_element_tint_rgba_set()`: set tint/color of a UI element,
+  in RGBA format.
+- add function `fsl_ui_element_tint_hex_set()`: set tint/color of a UI element,
+  in hex format.
+- add function `fsl_str_to_i32()`: convert a string to a signed 32-bit integer.
+- add function `fsl_ui_element_draw_callback_set()` for custom drawables.
+- add function `fsl_ui_element_type_set()`: set element type and default values.
+- add type `fsl_ui_quad_1_slice`: a 1-slice quad. (a sprite)
+- add type `fsl_ui_quad_9_slice`: a 9-slice quad.
+- add type `fsl_ui_element_rectangle`: solid colored rectangle.
+- add type `fsl_ui_element_container`: invisible container to attach other UI
+  elements to.
+- add type `fsl_ui_element_button`: basic button panel.
+- add error code `FSL_ERR_TYPE_MISMATCH`: data types not matching requirements.
+
+#### changed
+- change struct name `fsl_ui_element_panel` to `fsl_ui_element_sprite`.
+- move parameter `slice_size` from struct `fsl_ui_transform` to struct
+  `fsl_ui_quad_9_slice`.
+
+#### deprecated
+- deprecated parameter `is_9_slice` in function `fsl_ui_element_9_slice_set()`,
+  9-slice is now reliant on element type.
+
 #### removed
 - remove parameters `uv_pos_baked`, `uv_size_baked`, `pos_baked` and
   `size_baked` from struct `fsl_ui_transform` and put in new struct
-  `fsl_ui_transform_baked`.
-- remove struct `fsl_ui_drawable_quad` and replace with struct
-  `fsl_ui_transform_baked`.
+  `fsl_ui_quad`.
+- remove struct `fsl_ui_drawable_quad` and replace with struct `fsl_ui_quad`.
 - remove deprecated struct `fsl_ui_panel_nine_slice`.
 
 ## [0.18.0-beta] - 2026-11-02
