@@ -17,7 +17,8 @@
 /**
  *  @file torus_noise.c
  *
- *  @brief Torus Noise plug-in implementation, for 'Fossil Engine';
+ *  @brief Torus Noise plug-in implementation, for 'Fossil Engine'.
+ *
  *  seamless-tiling noise sampler, grid-based, 1D, 2D and 3D support, arbitrary
  *  blend margin thickness per axis and arbitrary final noise map size per axis.
  */

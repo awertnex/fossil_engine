@@ -20,6 +20,7 @@ and this project adheres to
 ## unreleased
 
 #### added
+- add plugin `big_num_separator`: separate big numbers with commas.
 - add function `fsl_ui_element_tint_rgba_set()`: set tint/color of a UI element,
   in RGBA format.
 - add function `fsl_ui_element_tint_hex_set()`: set tint/color of a UI element,

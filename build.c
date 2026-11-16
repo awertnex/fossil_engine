@@ -61,6 +61,7 @@ static str str_files[][CMD_SIZE] =
 
 static str str_files_plugins[][CMD_SIZE] =
 {
+    DIR_SRC"plugins/fsl_native/big_num_separator/big_num_separator.c",
     DIR_SRC"plugins/fsl_native/torus_noise/torus_noise.c",
     DIR_SRC"plugins/fsl_native/torus_noise/torus_sample.c"
 };
@@ -98,6 +99,7 @@ static str str_make_dir_plugins[][CMD_SIZE] =
 {
     DIR_DST DIR_DEPS DIR_DST"plugins/",
     DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/",
+    DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/big_num_separator/",
     DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/torus_noise/"
 };
 
@@ -140,6 +142,9 @@ static str *str_copy_operations[][48] =
 
 static str *str_copy_operations_plugins[][48] =
 {
+    {DIR_SRC"plugins/fsl_native/big_num_separator/big_num_separator.h",
+        DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/big_num_separator/"},
+
     {DIR_SRC"plugins/fsl_native/torus_noise/torus_noise.h",
         DIR_DST DIR_DEPS DIR_DST"plugins/fsl_native/torus_noise/"},
 

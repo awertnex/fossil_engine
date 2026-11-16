@@ -4,6 +4,7 @@
 #include "deps/fossil/common/engine_info.h"
 #include "deps/fossil/common/limits.h"
 #include "deps/fossil/common/types.h"
+
 #include "deps/fossil/assets/assets.h"
 #include "deps/fossil/engine/engine.h"
 #include "deps/fossil/engine/engine_assets.h"
@@ -26,7 +27,6 @@
 #include "chunking/chunking_debug_tools.h"
 #include "gui/gui.h"
 #include "gui/gui_menus.h"
-#include "plugins/big_num_separator/big_num_separator.h"
 #include "settings/settings.h"
 #include "super_debugger/super_debugger.h"
 
