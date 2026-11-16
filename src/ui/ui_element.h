@@ -28,6 +28,7 @@
 
 #include "../assets/asset_types.h"
 
+#include "ui_event.h"
 #include "ui_types.h"
 
 /* ---- section: definitions ------------------------------------------------ */
@@ -96,6 +97,8 @@ typedef struct fsl_ui_element_panel_9_slice     fsl_ui_element_panel_9_slice;
 typedef struct fsl_ui_element_label             fsl_ui_element_label;
 typedef struct fsl_ui_element_button            fsl_ui_element_button;
 typedef struct fsl_ui_element_custom            fsl_ui_element_custom;
+
+typedef void (*fsl_ui_draw_func)(fsl_ui_element *element, void *data);
 
 /**
  *  @brief UI element types.
