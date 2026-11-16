@@ -4,6 +4,7 @@
 #include "deps/fossil/common/engine_info.h"
 #include "deps/fossil/common/limits.h"
 #include "deps/fossil/common/types.h"
+
 #include "deps/fossil/assets/assets.h"
 #include "deps/fossil/engine/engine.h"
 #include "deps/fossil/engine/engine_assets.h"
@@ -26,7 +27,6 @@
 #include "chunking/chunking_debug_tools.h"
 #include "gui/gui.h"
 #include "gui/gui_menus.h"
-#include "plugins/big_num_separator/big_num_separator.h"
 #include "settings/settings.h"
 #include "super_debugger/super_debugger.h"
 
@@ -418,10 +418,10 @@ static void ui_hud_draw(void)
         return;
 
     if (!core.flag.debug)
-        fsl_ui_element_draw(&ui_element[UI_ELEMENT_CROSSHAIR]);
+        fsl_ui_element_draw(&ui_element_sprite[UI_ELEMENT_CROSSHAIR]);
 
-    fsl_ui_element_draw(&ui_element[UI_ELEMENT_HOTBAR]);
-    fsl_ui_element_draw(&ui_element[UI_ELEMENT_HOTBAR_SELECTED]);
+    fsl_ui_element_draw(&ui_element_sprite[UI_ELEMENT_HOTBAR]);
+    fsl_ui_element_draw(&ui_element_sprite[UI_ELEMENT_HOTBAR_SELECTED]);
 
     gui_start_ui_items(render->size);
 
@@ -447,7 +447,7 @@ static void ui_hud_draw(void)
         switch (player.menu_state)
         {
             case STATE_PLAYER_MENU_INVENTORY_SURVIVAL:
-                fsl_ui_element_draw(&ui_element[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL]);
+                fsl_ui_element_draw(&ui_element_sprite[UI_ELEMENT_CONTAINER_INVENTORY_SURVIVAL]);
                 break;
 
             default:

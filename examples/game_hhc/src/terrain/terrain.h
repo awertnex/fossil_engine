@@ -34,17 +34,17 @@ typedef struct hhc_terrain_sample
     f64 value;
 } hhc_terrain_sample;
 
-/*!
+/**
  *  @brief initialize default terrain settings and biome parameters.
  */
 void terrain_init(void);
 
-/*!
+/**
  *  @brief set internal parameter preferences for a given terrain noise type.
  */
 void terrain_spec_set(hhc_terrain_noise_index noise_index, f64 amp, f64 freq, f64 post_offset);
 
-/*!
+/**
  *  @brief update a single axis from each sample of each pre-defined 2D noise,
  *  for as many samples per noise as specified in `ctx`.
  *
@@ -52,7 +52,7 @@ void terrain_spec_set(hhc_terrain_noise_index noise_index, f64 amp, f64 freq, f6
  */
 chunk_work_cost sampler_noise_axis_update_2d(fsl_torus_sampler_context *ctx, u8 axis);
 
-/*!
+/**
  *  @brief finalize and bake all pre-defined 2D and 3D noise maps to ready for
  *  terrain generation.
  *
@@ -60,7 +60,7 @@ chunk_work_cost sampler_noise_axis_update_2d(fsl_torus_sampler_context *ctx, u8 
  */
 chunk_work_cost sampler_noise_bake(fsl_torus_sampler_context *ctx);
 
-/*!
+/**
  *  @brief default terrain shaping function.
  */
 chunk_work_cost terrain_shape(hhc_terrain_sample *terrain, fsl_torus_sampler_context *ctx);

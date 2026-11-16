@@ -102,12 +102,13 @@
 #define FSL_ERR_FILE_FORMAT_INVALID         4159
 #define FSL_ERR_FILE_DATA_CORRUPT           4160
 #define FSL_ERR_DIR_EMPTY                   4161
+#define FSL_ERR_TYPE_MISMATCH               4162
 
 /**
  *  @brief global variable for engine-specific error codes.
  *
  *  @remark must be declared by the user if not including @ref src/engine/engine.c.
  */
-FSLAPI extern u32 fsl_err;
+FSLAPI u32 fsl_err;
 
 #endif /* FSL_DIAGNOSTICS_H */

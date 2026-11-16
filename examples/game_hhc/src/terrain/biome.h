@@ -31,18 +31,18 @@ typedef struct hhc_biome
     f64 spec[BIOME_NOISE_COUNT]; /* preferred value for each noise */
 } hhc_biome;
 
-/*!
+/**
  *  @brief initialize a biome.
  */
 hhc_biome biome_init(str *name, f64 temperature, f64 humidity, f64 extremity,
         f64 roughness, f64 depth, f64 life);
 
-/*!
+/**
  *  @brief initialize a single parameter for a biome.
  */
 f64 biome_param_set(f64 param, f64 min, f64 max);
 
-/*!
+/**
  *  @brief compare likelihood of biomes `a` and `b` matching.
  *
  *  euclidean distance between relevant parameters is used.

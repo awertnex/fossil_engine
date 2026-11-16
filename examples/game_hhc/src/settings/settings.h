@@ -46,7 +46,7 @@ typedef struct hhc_settings
 
 extern hhc_settings settings;
 
-/*!
+/**
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
 u32 settings_init(void);

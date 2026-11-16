@@ -57,9 +57,9 @@
 #endif /* FSL_PLATFORM */
 
 #if defined(FSL_PLATFORM_WIN)
-#   define FSLAPI __declspec(dllexport)
+#   define FSLAPI __declspec(dllexport) extern
 #else
-#   define FSLAPI __attribute__((visibility("default")))
+#   define FSLAPI __attribute__((visibility("default"))) extern
 #endif /* FSL_PLATFORM */
 
 #ifndef FSLAPI

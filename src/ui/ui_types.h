@@ -17,7 +17,7 @@
 /**
  *  @file ui_types.h
  *
- *  @brief UI element types.
+ *  @brief UI types.
  */
 
 #ifndef FSL_UI_TYPES_H
@@ -25,68 +25,61 @@
 
 #include "../math/vector.h"
 
-typedef struct fsl_ui_event     fsl_ui_event;
-typedef struct fsl_ui_callback  fsl_ui_callback;
-typedef struct fsl_ui_transform fsl_ui_transform;
-typedef struct fsl_ui_element   fsl_ui_element;
+typedef struct fsl_ui_quad              fsl_ui_quad;
+typedef struct fsl_ui_quad_1_slice      fsl_ui_quad_1_slice;
+typedef struct fsl_ui_quad_9_slice      fsl_ui_quad_9_slice;
+typedef struct fsl_ui_transform         fsl_ui_transform;
+typedef struct fsl_glyph_render_data    fsl_glyph_render_data;
 
-typedef enum fsl_ui_event_type
-{
-    FSL_UI_EVENT_TYPE_NONE,
-    FSL_UI_EVENT_TYPE_ENTER,
-    FSL_UI_EVENT_TYPE_HOVER,
-    FSL_UI_EVENT_TYPE_LEAVE,
-    FSL_UI_EVENT_TYPE_CLICK,
-    FSL_UI_EVENT_TYPE_HOLD,
-    FSL_UI_EVENT_TYPE_RELEASE,
-    FSL_UI_EVENT_TYPE_SCROLL,
-    FSL_UI_EVENT_TYPE_DRAG,
-    FSL_UI_EVENT_TYPE_DROP,
-    FSL_UI_EVENT_TYPE_COUNT
-} fsl_ui_event_type;
+typedef struct fsl_ui_element_header    fsl_ui_element_header;
+typedef fsl_ui_element_header           fsl_ui_element;
 
-struct fsl_ui_event
+/**
+ *  @brief finalized transforms from @ref fsl_ui_transform, ready for rendering.
+ */
+struct fsl_ui_quad
 {
-    fsl_ui_element *caller;
-    v2f64 mouse_pos;
-    v2f64 mouse_click_pos;
+    /**
+     *  @brief baked absolute position in texture, in normalized coordinates.
+     */
+    v2f32 uv_pos;
 
     /**
-     *  difference between mouse position and element position on mouse click.
+     *  @brief baked absolute size in texture, in normalized coordinates.
      */
-    v2f64 mouse_click_pos_diff;
+    v2f32 uv_size;
 
-    b8 hover;
-    b8 hover_last;
-    b8 mouse_click;
-    b8 mouse_click_last;
-}; /* fsl_ui_event */
+    v2f32 pos;              /* baked absolute position on screen, in pixels */
+    v2f32 size;             /* baked absolute size on screen, in pixels */
+}; /* fsl_ui_quad */
 
-typedef void (*fsl_ui_callback_func)(fsl_ui_event event, void *data);
-
-struct fsl_ui_callback
+struct fsl_ui_quad_1_slice
 {
-    fsl_ui_callback_func func;
-    void *data;
-}; /* fsl_ui_callback */
+    fsl_ui_quad quad;
+}; /* fsl_ui_quad_1_slice */
+
+struct fsl_ui_quad_9_slice
+{
+    fsl_ui_quad quad[9];
+    i32 slice_size;         /* corner slice diameter, in pixels */
+}; /* fsl_ui_quad_9_slice */
 
 struct fsl_ui_transform
 {
     v2i32 uv_pos;           /* position in texture, in pixels */
-    v2i32 uv_size;          /* size in texture, in pixels */
-    i32 slice_size;         /* 9-slice slice diameter, in pixels (optional) */
+    v2i32 uv_size;          /* size of texture, in pixels */
     v2i32 pos;              /* position on screen, in pixels */
     v2i32 offset;           /* offset on screen from `pos`, in pixels */
 
     /**
-     *  offset on screen from `pos`, in pixels. (scales with `scale`)
+     *  @brief offset on screen from `pos`, in pixels. (scales with `scale`)
      */
     v2i32 offset_scaled;
 
     v2i32 size;             /* size on screen, in pixels */
 
     /**
-     *  size on screen, in pixels. (scales with `scale`)
+     *  @brief size on screen, in pixels. (scales with `scale`)
      */
     v2i32 size_scaled;
 
@@ -96,24 +89,28 @@ struct fsl_ui_transform
      *  @brief alignment in respect to `pos`, `size` and `size_scaled`.
      *
      *  <= -1: left-side/top is at `pos`.
-     *  == 0: center is at `pos`.
+     *  == 0: center/center is at `pos`.
      *  >= 1: right-side/bottom is at `pos`.
      */
     v2i32 align;
 
-    /**
-     *  baked absolute position in texture, in normalized coordinates.
-     */
-    v2f32 uv_pos_baked;
-
-    /**
-     *  baked absolute size in texture, in normalized coordinates.
-     */
-    v2f32 uv_size_baked;
-
     v2f32 pos_local;        /* baked local position, in pixels */
-    v2f32 pos_baked;        /* baked absolute position on screen, in pixels */
-    v2f32 size_baked;       /* baked absolute size on screen, in pixels */
+
+    /**
+     *  @brief baked screen quad.
+     *
+     *  not necessarily final, it depends on what else an element needs to be
+     *  drawn on screem.
+     */
+    fsl_ui_quad baked;
+
 }; /* fsl_ui_transform */
+
+struct fsl_glyph_render_data
+{
+    v2f32 pos;
+    u32 char_index;
+    u32 color;
+}; /* fsl_glyph_render_data */
 
 #endif /* FSL_UI_TYPES_H */

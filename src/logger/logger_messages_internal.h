@@ -164,6 +164,6 @@
 
 /* ---- section: ui --------------------------------------------------------- */
 
-#define MSG_UI_ELEMENT_BAKE(pos_x, pos_y, size_x, size_y)   fsl_logger_stringf("Element Baked [pos.x: %.1f, pos.y: %.1f][size.x: %.1f, size.y: %.1f]\n", pos_x, pos_y, size_x, size_y)
+#define MSG_UI_ELEMENT_BAKE(element_type, pos_x, pos_y, size_x, size_y) fsl_logger_stringf("Element Baked [type: %s][pos.x: %.1f, pos.y: %.1f][size.x: %.1f, size.y: %.1f]\n", element_type, pos_x, pos_y, size_x, size_y)
 
 #endif /* FSL_LOGGER_MESSAGE_H */

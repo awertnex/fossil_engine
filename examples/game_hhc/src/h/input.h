@@ -25,7 +25,7 @@ extern fsl_key_bind bind_build_or_use;
 extern fsl_key_bind bind_sample_block;
 /* extern fsl_key_bind bind_drop_item; */
 
-/*!
+/**
  *  @remark two arrays for number keys and numberpad keys.
  */
 extern fsl_key_bind bind_hotbar[2][CONTAINER_HOTBAR_SLOTS_MAX];
@@ -58,12 +58,12 @@ extern fsl_key_bind bind_reload_shaders;
 extern u32 bind_debug_mod;
 extern fsl_key_bind bind_toggle_super_debug;
 
-/*!
+/**
  *  @brief setup all key binding values and rules.
  */
 void input_init(void);
 
-/*!
+/**
  *  @brief update input from keyboard.
  *
  *  handle all key binds listed above and perform their logic on mostly `p->flag`.

@@ -20,7 +20,7 @@
 
 /* ---- section: definitions ------------------------------------------------ */
 
-/*!
+/**
  *  @brief chunk gizmo render buffer data for chunk colors.
  *
  *  for rendering chunk gizmo in one draw call.
@@ -40,12 +40,12 @@ typedef struct hhc_chunk_gizmo
 
 static fsl_mem_arena memory_arena_chunk_debug_internal = {0};
 
-/*!
+/**
  *  @brief buffer data for opaque chunk colors.
  */
 hhc_chunk_gizmo chunk_gizmo_loaded = {0};
 
-/*!
+/**
  *  @brief buffer data for transparent chunk colors.
  */
 hhc_chunk_gizmo chunk_gizmo_visible = {0};

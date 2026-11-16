@@ -46,7 +46,7 @@
  *
  *  @remark read-only, initialized internally in @ref fsl_noise_init().
  */
-FSLAPI extern f32 *fsl_rand_tab;
+FSLAPI f32 *fsl_rand_tab;
 
 /**
  *  @brief get a gradient value between two 1D points.

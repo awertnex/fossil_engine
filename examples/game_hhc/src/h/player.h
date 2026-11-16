@@ -63,7 +63,7 @@ enum player_flag
     FLAG_PLAYER_OVERFLOW_Y =        1 << 11,
     FLAG_PLAYER_OVERFLOW_Z =        1 << 12,
 
-    /*!
+    /**
      *  @brief positive overflow direction flags.
      *
      *  @remark default is 0 for negative overflow (underflow).
@@ -133,13 +133,13 @@ typedef struct hhc_player
 
     fsl_camera camera;
 
-    /*!
+    /**
      *  @brief camera for HUD 3D elements responsive to player movement
      *  (e.g., 3D gizmo (<F3>), chunk gizmo (<Alt + G>).
      */
     fsl_camera camera_hud;
 
-    /*!
+    /**
      *  @brief camera for UI elements non-responsive to player movement
      *  (e.g., items in item slots).
      */
@@ -163,7 +163,7 @@ typedef struct hhc_player
     hhc_player_death_reason death;
 } hhc_player;
 
-/*!
+/**
  *  @brief look-up table for @ref str_death_<x> buffer sizes.
  *
  *  @remark read-only, initialized internally in @ref common.c.
@@ -176,7 +176,7 @@ extern str str_death_collision_ceiling[DEATH_STRING_COLLISION_CEILING_COUNT][PLA
 
 u32 player_init(hhc_player *p, const str *name);
 
-/*!
+/**
  *  @brief update everything related to a player.
  *
  *  1. update kinematics and movement permissions based on `p->flag`.
@@ -196,7 +196,7 @@ void player_hotbar_selected_advance(hhc_player *p, i32 offset);
 void player_collision_update(hhc_player *p, f64 dt);
 void player_bounding_box_update(hhc_player *p);
 
-/*!
+/**
  *  @brief make a collision capsule for collision detection.
  *
  *  make a capsule encapsulating `b`, plus a padding of 1 in each direction.
@@ -209,7 +209,7 @@ void player_bounding_box_update(hhc_player *p);
  */
 fsl_bounding_box make_collision_capsule(fsl_bounding_box b, v3i32 ch, v3f64 velocity);
 
-/*!
+/**
  *  @brief calculate camera rotations and mechanics based on `p->camera_mode`.
  *
  *  @param use_mouse let mouse delta move the camera, useful for interacting
@@ -221,31 +221,31 @@ void player_target_update(hhc_player *p);
 void player_set_pos(hhc_player *p, f64 x, f64 y, f64 z);
 void player_set_block(hhc_player *p, i64 x, i64 y, i64 z);
 
-/*!
+/**
  *  @brief set player spawn point.
  */
 void player_set_spawn(hhc_player *p, i64 x, i64 y, i64 z);
 
-/*!
+/**
  *  @brief re-spawn player.
  *
  *  @param hard `TRUE` will reset all player stats, `FALSE` will only teleport to spawn.
  */
 void player_spawn(hhc_player *p, b8 hard);
 
-/*!
+/**
  *  @brief enable/disable flying for a player.
  */
 void player_toggle_flying(hhc_player *p);
 
-/*!
+/**
  *  @brief enable/disable cinematic motion for a player (only seem while flying).
  */
 void player_toggle_cinematic_motion(hhc_player *p);
 
 void player_kill(hhc_player *p);
 
-/*!
+/**
  *  @brief get random string from string buffers in @ref common.c for player death reason.
  *
  *  @return `NULL` on failure.

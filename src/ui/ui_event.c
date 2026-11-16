@@ -25,20 +25,21 @@
 
 #include "ui_internal.h"
 #include "ui_element.h"
+#include "ui_event.h"
 #include "ui_types.h"
 
-static void ui_event_enter_respond_func(fsl_ui_element *element, fsl_ui_callback *callback);
-static void ui_event_hover_respond_func(fsl_ui_element *element, fsl_ui_callback *callback);
-static void ui_event_leave_respond_func(fsl_ui_element *element, fsl_ui_callback *callback);
-static void ui_event_click_respond_func(fsl_ui_element *element, fsl_ui_callback *callback);
-static void ui_event_hold_respond_func(fsl_ui_element *element, fsl_ui_callback *callback);
-static void ui_event_release_respond_func(fsl_ui_element *element, fsl_ui_callback *callback);
+static void ui_event_enter_respond_func(fsl_ui_element *element, fsl_ui_event_callback *callback);
+static void ui_event_hover_respond_func(fsl_ui_element *element, fsl_ui_event_callback *callback);
+static void ui_event_leave_respond_func(fsl_ui_element *element, fsl_ui_event_callback *callback);
+static void ui_event_click_respond_func(fsl_ui_element *element, fsl_ui_event_callback *callback);
+static void ui_event_hold_respond_func(fsl_ui_element *element, fsl_ui_event_callback *callback);
+static void ui_event_release_respond_func(fsl_ui_element *element, fsl_ui_event_callback *callback);
 
 /**
  *  @internal
  */
-static void (*ui_event_respond_func_internal[FSL_UI_EVENT_TYPE_COUNT])(fsl_ui_element *element,
-        fsl_ui_callback *callback) =
+static void (*ui_event_respond_func_internal[FSL_UI_EVENT_TYPE_COUNT])(
+        fsl_ui_element *element, fsl_ui_event_callback *callback) =
 {
     0,
     ui_event_enter_respond_func,
@@ -60,10 +61,10 @@ void ui_element_listen_internal(fsl_ui_element *element, v2f64 mouse_pos, v2f64 
 
     element->event.caller = element;
     element->event.mouse_pos = mouse_pos;
-    area_start.x = element->transform.pos_baked.x;
-    area_start.y = element->transform.pos_baked.y;
-    area_end.x = area_start.x + element->transform.size_baked.x;
-    area_end.y = area_start.y + element->transform.size_baked.y;
+    area_start.x = element->transform.baked.pos.x;
+    area_start.y = element->transform.baked.pos.y;
+    area_end.x = area_start.x + element->transform.baked.size.x;
+    area_end.y = area_start.y + element->transform.baked.size.y;
 
     bind_click_left = key_bind_init_internal(FSL_MOUSE_BUTTON_LEFT, 0, 0, 0, 0);
     bind_click_right = key_bind_init_internal(FSL_MOUSE_BUTTON_RIGHT, 0, 0, 0, 0);
@@ -87,12 +88,12 @@ void ui_element_listen_internal(fsl_ui_element *element, v2f64 mouse_pos, v2f64 
 
     for (; i < FSL_UI_EVENT_TYPE_COUNT; ++i)
     {
-        if (element->callback[i].func)
-            ui_event_respond_func_internal[i](element, &element->callback[i]);
+        if (element->event_func[i].func)
+            ui_event_respond_func_internal[i](element, &element->event_func[i]);
     }
 }
 
-static void ui_event_enter_respond_func(fsl_ui_element *element, fsl_ui_callback *callback)
+static void ui_event_enter_respond_func(fsl_ui_element *element, fsl_ui_event_callback *callback)
 {
     if (element->event.hover && !element->event.hover_last)
     {
@@ -100,7 +101,7 @@ static void ui_event_enter_respond_func(fsl_ui_element *element, fsl_ui_callback
     }
 }
 
-static void ui_event_hover_respond_func(fsl_ui_element *element, fsl_ui_callback *callback)
+static void ui_event_hover_respond_func(fsl_ui_element *element, fsl_ui_event_callback *callback)
 {
     if (element->event.hover && element->event.hover_last)
     {
@@ -108,7 +109,7 @@ static void ui_event_hover_respond_func(fsl_ui_element *element, fsl_ui_callback
     }
 }
 
-static void ui_event_leave_respond_func(fsl_ui_element *element, fsl_ui_callback *callback)
+static void ui_event_leave_respond_func(fsl_ui_element *element, fsl_ui_event_callback *callback)
 {
     if (!element->event.hover && element->event.hover_last)
     {
@@ -116,7 +117,7 @@ static void ui_event_leave_respond_func(fsl_ui_element *element, fsl_ui_callback
     }
 }
 
-static void ui_event_click_respond_func(fsl_ui_element *element, fsl_ui_callback *callback)
+static void ui_event_click_respond_func(fsl_ui_element *element, fsl_ui_event_callback *callback)
 {
     if (element->event.hover &&
             element->event.mouse_click && !element->event.mouse_click_last)
@@ -124,15 +125,15 @@ static void ui_event_click_respond_func(fsl_ui_element *element, fsl_ui_callback
         element->event.mouse_click_pos = element->event.mouse_pos;
 
         element->event.mouse_click_pos_diff.x =
-            element->event.mouse_pos.x - element->transform.pos_baked.x;
+            element->event.mouse_pos.x - element->transform.baked.pos.x;
         element->event.mouse_click_pos_diff.y =
-            element->event.mouse_pos.y - element->transform.pos_baked.y;
+            element->event.mouse_pos.y - element->transform.baked.pos.y;
 
         callback->func(element->event, callback->data);
     }
 }
 
-static void ui_event_hold_respond_func(fsl_ui_element *element, fsl_ui_callback *callback)
+static void ui_event_hold_respond_func(fsl_ui_element *element, fsl_ui_event_callback *callback)
 {
     if (element->event.hover &&
             element->event.mouse_click && element->event.mouse_click_last)
@@ -141,7 +142,7 @@ static void ui_event_hold_respond_func(fsl_ui_element *element, fsl_ui_callback 
     }
 }
 
-static void ui_event_release_respond_func(fsl_ui_element *element, fsl_ui_callback *callback)
+static void ui_event_release_respond_func(fsl_ui_element *element, fsl_ui_event_callback *callback)
 {
     if (element->event.hover &&
             !element->event.mouse_click && element->event.mouse_click_last)

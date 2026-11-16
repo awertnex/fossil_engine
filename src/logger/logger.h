@@ -171,12 +171,12 @@ struct fsl_log_entry
  *
  *  @remark read-only, initialized internally in @ref fsl_logger_init().
  */
-FSLAPI extern fsl_logger_core fsl_log_core;
+FSLAPI fsl_logger_core fsl_log_core;
 
 /**
  *  @remark read-only, initialized internally in @ref fsl_logger_init().
  */
-FSLAPI extern u32 fsl_log_level_max;
+FSLAPI u32 fsl_log_level_max;
 
 /* ---- section: signatures ------------------------------------------------- */
 

@@ -1,6 +1,6 @@
 #include "deps/fossil/common/api.h"
 
-#include "../plugins/big_num_separator/big_num_separator.h"
+#include "deps/fossil/plugins/fsl_native/big_num_separator/big_num_separator.h"
 
 #include "chunk_work.h"
 
@@ -28,11 +28,11 @@ void chunk_receipt_print(hhc_chunk_receipt *src, hhc_chunk_receipt_printed *dst)
     u32 i = 0;
 
     for (; i < CHUNK_RECEIPT_ITEM_COUNT; ++i)
-        snprintf(dst->cost[i], FSL_ID_CAP, "$%s", big_num_separator_i64(src->cost[i]));
+        snprintf(dst->cost[i], FSL_ID_CAP, "$%s", fsl_big_num_separator_i64(src->cost[i]));
 
-    snprintf(dst->subtotal, FSL_ID_CAP, "$%s", big_num_separator_i64(src->subtotal));
+    snprintf(dst->subtotal, FSL_ID_CAP, "$%s", fsl_big_num_separator_i64(src->subtotal));
     snprintf(dst->priority_rate, FSL_ID_CAP, "%.2f%%", src->priority_rate);
-    snprintf(dst->total, FSL_ID_CAP, "$%s", big_num_separator_i64(src->total));
+    snprintf(dst->total, FSL_ID_CAP, "$%s", fsl_big_num_separator_i64(src->total));
 
 
     snprintf(dst->printed, CHUNK_RECEIPT_CAP,

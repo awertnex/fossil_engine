@@ -31,38 +31,6 @@
 #include "ui_types.h"
 #include "ui_element.h"
 
-/* ---- section: definitions ------------------------------------------------ */
-
-#define FSL_UI_PANEL_GAP_DEFAULT 10
-#define FSL_UI_PANEL_PADDING_DEFAULT 10
-#define FSL_UI_SLICE_SIZE_DEFAULT 8
-
-/**
- *  @brief one 9-slice panel.
- */
-typedef struct fsl_ui_panel_9_slice
-{
-    fsl_ui_transform slice[9];
-} fsl_ui_panel_9_slice;
-
-typedef struct fsl_ui_drawable_quad
-{
-    v2f32 uv_pos;
-    v2f32 uv_size;
-    v2f32 pos;
-    v2f32 size;
-} fsl_ui_drawable_quad;
-
-/**
- *  @brief one 9-slice panel.
- *
- *  -- DEPRECATED IN v0.10.0-beta --;
- */
-typedef struct fsl_panel_nine_slice
-{
-    fsl_ui_drawable_quad slice[9];
-} fsl_panel_nine_slice;
-
 /* ---- section: signatures ------------------------------------------------- */
 
 /**
@@ -149,15 +117,6 @@ FSLAPI u32 fsl_ui_init(void);
 FSLAPI void fsl_ui_start(b8 clear);
 
 /**
- *  @brief draw a texture as a UI element.
- *
- *  @remark if `size_x` is 0, `texture->size.x` is used, and likewise for
- *  `size_y`.
- */
-FSLAPI void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y,
-        i32 size_x, i32 size_y, u32 tint);
-
-/**
  *  @remark enable @ref GL_DEPTH_TEST.
  */
 FSLAPI void fsl_ui_stop(void);
@@ -165,10 +124,12 @@ FSLAPI void fsl_ui_stop(void);
 FSLAPI void fsl_ui_free(void);
 
 /**
- *  @brief make a 9-slice panel.
+ *  @brief draw a texture as a UI element.
  *
- *  @internal
+ *  @remark if `size_x` is 0, `texture->size.x` is used, and likewise for
+ *  `size_y`.
  */
-fsl_panel_nine_slice fsl_nine_slice_get_internal(fsl_ui_element *element);
+FSLAPI void fsl_ui_draw(fsl_texture *texture, i32 pos_x, i32 pos_y,
+        i32 size_x, i32 size_y, u32 tint);
 
 #endif /* FSL_UI_H */

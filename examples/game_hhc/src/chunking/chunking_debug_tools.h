@@ -3,7 +3,7 @@
 
 #include "deps/fossil/assets/asset_types.h"
 
-/*!
+/**
  *  @brief convert RGBA color to 4-Byte hex color.
  *  @remark color range [0.0f, 1.0f].
  *  @remark temporary, working version, til the version in the engine is fixed.

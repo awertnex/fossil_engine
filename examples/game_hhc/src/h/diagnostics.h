@@ -7,7 +7,7 @@
 #define HHC_ERR_WORLD_EXISTS        513
 #define HHC_ERR_WORLD_CREATION_FAIL 514
 
-/*!
+/**
  *  @brief global pointer to error variable.
  *
  *  @remark declared and initialized internally in @ref main.c.

@@ -10,7 +10,7 @@
 
 /* ---- section: definitions ------------------------------------------------ */
 
-/*!
+/**
  *  @brief count of temporary static buffers in function @ref chunk_mesh_update_internal().
  */
 #define BLOCK_BUFFERS_MAX 2
@@ -41,7 +41,7 @@
  *  31 [00000000 00100000 00000000 00000000] 00; */
 #define FLAG_BLOCK_FACE_NZ      0x0000000000200000
 
-/*!
+/**
  *  @brief run-length encoding, for chunk serialization.
  *
  *  63 [00000000 00000000 00000000 00000000] 32;
@@ -60,12 +60,12 @@ enum chunk_shift_state
     STATE_CHUNK_SHIFT_NZ = 6
 }; /* chunk_shift_state */
 
-/*!
+/**
  *  @brief chunk buffer, raw chunk data.
  */
 typedef struct hhc_chunk_buffer
 {
-    /*!
+    /**
      *  @brief position of first empty slot in `p`.
      */
     u32 cursor;
@@ -74,7 +74,7 @@ typedef struct hhc_chunk_buffer
     hhc_chunk *p;           /* cached pointer from `handle` */
 } hhc_chunk_buffer;
 
-/*!
+/**
  *  @brief a chunk and all six neighbors surrounding it.
  */
 typedef struct hhc_chunk_neighbors
@@ -82,7 +82,7 @@ typedef struct hhc_chunk_neighbors
     hhc_chunk *ch, *px, *nx, *py, *ny, *pz, *nz;
 } hhc_chunk_neighbors;
 
-/*!
+/**
  *  @brief chunk-scheduler bucket for a unique distance away from @ref chunk_tab center index.
  */
 typedef struct hhc_chunk_bucket
@@ -94,7 +94,7 @@ typedef struct hhc_chunk_bucket
     u32 pop;    /* pop position within bucket */
 } hhc_chunk_bucket;
 
-/*!
+/**
  *  @brief chunk_bucket look-up file format struct.
  */
 typedef struct hhc_chunk_bucket_format
@@ -103,7 +103,7 @@ typedef struct hhc_chunk_bucket_format
     u32 len;    /* total number of slots in bucket */
 } hhc_chunk_bucket_format;
 
-/*!
+/**
  *  @brief schedule of chunks to be processed.
  */
 typedef struct hhc_chunk_scheduler
@@ -134,7 +134,7 @@ extern hhc_chunk_scheduler chunk_sched;
 
 u32 chunks_max_init_internal(void);
 
-/*!
+/**
  *  @brief initialize @ref chunk_order.
  *
  *  write lookup to disk, and load if exists.
@@ -143,7 +143,7 @@ u32 chunks_max_init_internal(void);
  */
 u32 chunk_order_init_internal(void);
 
-/*!
+/**
  *  @brief build @ref chunk_order look-up and write to disk.
  *
  *  format:
@@ -157,7 +157,7 @@ u32 chunk_order_init_internal(void);
  */
 u32 chunk_order_build_internal(void);
 
-/*!
+/**
  *  @brief load @ref chunk_order look-up from disk.
  *
  *  can be called again when changing render distance.
@@ -168,21 +168,21 @@ u32 chunk_order_build_internal(void);
  */
 u32 chunk_order_load_internal(u32 render_distance);
 
-/*!
+/**
  *  @brief load @ref chunk_sched.bucket look-up from disk.
  *
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
 u32 chunk_bucket_load_internal(void);
 
-/*!
+/**
  *  @brief initialize resources required by chunk debug tools.
  */
 u32 chunk_debug_init_internal(fsl_len chunk_count);
 
 void chunk_debug_free_internal(void);
 
-/*!
+/**
  *  @brief get block faces based on neighboring blocks.
  *
  *  @return block with modified faces.
@@ -194,19 +194,19 @@ void block_add_internal(hhc_chunk_neighbors *chunk_neighbors, i32 x, i32 y, i32 
 
 void block_remove_internal(hhc_chunk_neighbors *chunk_neighbors, i32 x, i32 y, i32 z);
 
-/*!
+/**
  *  @brief execute block logic on the block based on its ID (e.g., make grass
  *  turn to dirt when under another block).
  */
 void block_evaluate_internal(hhc_chunk_neighbors *chunk_neighbors,
         i32 x, i32 y, i32 z, enum block_id block_id);
 
-/*!
+/**
  *  @brief get radius of sphere squared as per internal conventions.
  */
 u32 chunk_sphere_radius_get_internal(u32 radius);
 
-/*!
+/**
  *  @brief set new chunk position.
  *
  *  set chunk position and wrapped position.
@@ -215,7 +215,7 @@ u32 chunk_sphere_radius_get_internal(u32 radius);
 void chunk_pos_set_internal(hhc_chunk *chunk,
         v3i32 player_chunk_delta, v3u32 chunk_tab_coordinates);
 
-/*!
+/**
  *  @brief generate chunk blocks.
  *
  *  @remark calls @ref chunk_mesh_update_internal() when done generating.
@@ -228,7 +228,7 @@ chunk_work_cost chunk_load_internal(hhc_chunk *chunk, chunk_work_budget budget,
 
 hhc_chunk_neighbors chunk_neighbors_get_internal(hhc_chunk *chunk);
 
-/*!
+/**
  *  @brief generate chunk blocks.
  *
  *  automatically called from @ref chunk_load_internal().
@@ -241,19 +241,19 @@ hhc_chunk_neighbors chunk_neighbors_get_internal(hhc_chunk *chunk);
 chunk_work_cost chunk_generate_internal(hhc_chunk *chunk, chunk_work_budget budget,
         hhc_chunk_receipt *receipt);
 
-/*!
+/**
  *  @return cost of operation (used in @ref chunk_scheduler_update_internal()).
  */
 chunk_work_cost chunk_mesh_update_internal(hhc_chunk *chunk, hhc_chunk_receipt *receipt);
 
-/*!
+/**
  *  @brief write chunk into disk.
  *
  *  @return cost of operation (used in @ref chunk_scheduler_update_internal()).
  */
 chunk_work_cost chunk_export_internal(hhc_chunk *chunk, hhc_chunk_receipt *receipt);
 
-/*!
+/**
  *  @brief read chunk from disk.
  *
  *  @return cost of operation (used in @ref chunk_scheduler_update_internal()).

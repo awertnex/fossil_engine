@@ -131,7 +131,6 @@ u32 build_game(int argc, char **argv)
     cmd_push(&cmd, DIR_SRC_GAME"gui/gui.c");
     cmd_push(&cmd, DIR_SRC_GAME"gui/gui_callbacks.c");
     cmd_push(&cmd, DIR_SRC_GAME"gui/gui_menus.c");
-    cmd_push(&cmd, DIR_SRC_GAME"plugins/big_num_separator/big_num_separator.c");
     cmd_push(&cmd, DIR_SRC_GAME"settings/settings.c");
     cmd_push(&cmd, DIR_SRC_GAME"super_debugger/super_debugger.c");
     cmd_push(&cmd, DIR_SRC_GAME"super_debugger/super_debugger_callbacks.c");

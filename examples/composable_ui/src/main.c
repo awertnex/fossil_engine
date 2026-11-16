@@ -15,9 +15,9 @@ fsl_key_bind bind_element_attach = {0};
 fsl_key_bind bind_switch_workspace = {0};
 fsl_texture texture = {0};
 fsl_texture texture_9s = {0};
-fsl_ui_element element_parent = {0};
-fsl_ui_element element_child = {0};
-fsl_ui_element element_panel = {0};
+fsl_ui_element_sprite element_parent = {0};
+fsl_ui_element_sprite element_child = {0};
+fsl_ui_element_panel_9_slice element_panel = {0};
 v2f32 scale = {0};
 v2i32 align = {0};
 
@@ -123,6 +123,8 @@ int main(int argc, char **argv)
     align.x = -1;
     align.y = -1;
 
+    /* element: parent */
+    fsl_ui_element_type_set(&element_parent, FSL_UI_ELEMENT_TYPE_SPRITE);
     fsl_ui_element_texture_set(&element_parent, &texture);
     fsl_ui_element_uv_set(&element_parent, 0, 0, 177, 177);
     fsl_ui_element_position_set(&element_parent, 0, 0, 0, 0, 0, 0);
@@ -130,6 +132,8 @@ int main(int argc, char **argv)
     fsl_ui_element_scale_set(&element_parent, scale.x, scale.y);
     fsl_ui_element_alignment_set(&element_parent, align.x, align.y);
 
+    /* element: child */
+    fsl_ui_element_type_set(&element_child, FSL_UI_ELEMENT_TYPE_SPRITE);
     fsl_ui_element_texture_set(&element_child, &texture);
     fsl_ui_element_uv_set(&element_child, 0, 0, 177, 177);
     fsl_ui_element_position_set(&element_child, 0, 0, 0, 0, 0, 0);
@@ -141,6 +145,8 @@ int main(int argc, char **argv)
     fsl_ui_element_callback_set(&element_child, FSL_UI_EVENT_TYPE_LEAVE, &reset, NULL);
     fsl_ui_element_callback_set(&element_child, FSL_UI_EVENT_TYPE_CLICK, &fuck, &render->mouse_pos);
 
+    /* element: panel */
+    fsl_ui_element_type_set(&element_panel, FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE);
     fsl_ui_element_texture_set(&element_panel, &texture_p[FSL_TEXTURE_INDEX_PANEL_INACTIVE]);
     fsl_ui_element_uv_set(&element_panel, 0, 0, 16, 16);
     fsl_ui_element_position_set(&element_panel, 10, 10, 0, 0, 0, 0);
@@ -209,7 +215,7 @@ workspace_1:
 
         if (fsl_is_key_press(bind_element_attach))
         {
-            if (element_child.parent)
+            if (element_child.header.parent)
                 fsl_ui_element_detach(&element_child);
             else
                 fsl_ui_element_attach(&element_parent, &element_child);
@@ -238,7 +244,7 @@ workspace_2:
 
         if (fsl_is_key_press(bind_element_attach))
         {
-            if (element_panel.parent)
+            if (element_panel.header.parent)
                 fsl_ui_element_detach(&element_panel);
             else
                 fsl_ui_element_attach(&element_parent, &element_panel);
