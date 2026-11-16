@@ -25,6 +25,7 @@
 
 #include "ui_internal.h"
 #include "ui_element.h"
+#include "ui_event.h"
 #include "ui_types.h"
 
 static void ui_event_enter_respond_func(fsl_ui_element *element, fsl_ui_event_callback *callback);
@@ -37,8 +38,8 @@ static void ui_event_release_respond_func(fsl_ui_element *element, fsl_ui_event_
 /**
  *  @internal
  */
-static void (*ui_event_respond_func_internal[FSL_UI_EVENT_TYPE_COUNT])(fsl_ui_element *element,
-        fsl_ui_event_callback *callback) =
+static void (*ui_event_respond_func_internal[FSL_UI_EVENT_TYPE_COUNT])(
+        fsl_ui_element *element, fsl_ui_event_callback *callback) =
 {
     0,
     ui_event_enter_respond_func,

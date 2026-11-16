@@ -134,6 +134,7 @@ static str *str_copy_operations[][48] =
     {DIR_SRC"ui/ui.h",                      DIR_DST DIR_DEPS DIR_DST"ui/"},
     {DIR_SRC"ui/ui_config.h",               DIR_DST DIR_DEPS DIR_DST"ui/"},
     {DIR_SRC"ui/ui_element.h",              DIR_DST DIR_DEPS DIR_DST"ui/"},
+    {DIR_SRC"ui/ui_event.h",                DIR_DST DIR_DEPS DIR_DST"ui/"},
     {DIR_SRC"ui/ui_types.h",                DIR_DST DIR_DEPS DIR_DST"ui/"}
 };
 

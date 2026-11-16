@@ -25,58 +25,14 @@
 
 #include "../math/vector.h"
 
-typedef struct fsl_ui_event             fsl_ui_event;
-typedef struct fsl_ui_event_callback    fsl_ui_event_callback;
 typedef struct fsl_ui_quad              fsl_ui_quad;
 typedef struct fsl_ui_quad_1_slice      fsl_ui_quad_1_slice;
 typedef struct fsl_ui_quad_9_slice      fsl_ui_quad_9_slice;
 typedef struct fsl_ui_transform         fsl_ui_transform;
-
 typedef struct fsl_glyph_render_data    fsl_glyph_render_data;
 
 typedef struct fsl_ui_element_header    fsl_ui_element_header;
 typedef fsl_ui_element_header           fsl_ui_element;
-
-typedef enum fsl_ui_event_type
-{
-    FSL_UI_EVENT_TYPE_NONE,
-    FSL_UI_EVENT_TYPE_ENTER,
-    FSL_UI_EVENT_TYPE_HOVER,
-    FSL_UI_EVENT_TYPE_LEAVE,
-    FSL_UI_EVENT_TYPE_CLICK,
-    FSL_UI_EVENT_TYPE_HOLD,
-    FSL_UI_EVENT_TYPE_RELEASE,
-    FSL_UI_EVENT_TYPE_SCROLL,
-    FSL_UI_EVENT_TYPE_DRAG,
-    FSL_UI_EVENT_TYPE_DROP,
-    FSL_UI_EVENT_TYPE_COUNT
-} fsl_ui_event_type;
-
-typedef void (*fsl_ui_event_func)(fsl_ui_event event, void *data);
-typedef void (*fsl_ui_draw_func)(fsl_ui_element *element, void *data);
-
-struct fsl_ui_event
-{
-    fsl_ui_element *caller;
-    v2f64 mouse_pos;
-    v2f64 mouse_click_pos;
-
-    /**
-     *  difference between mouse position and element position on mouse click.
-     */
-    v2f64 mouse_click_pos_diff;
-
-    b8 hover;
-    b8 hover_last;
-    b8 mouse_click;
-    b8 mouse_click_last;
-}; /* fsl_ui_event */
-
-struct fsl_ui_event_callback
-{
-    fsl_ui_event_func func;
-    void *data;             /* data to pass into `func` */
-}; /* fsl_ui_event_callback */
 
 /**
  *  @brief finalized transforms from @ref fsl_ui_transform, ready for rendering.

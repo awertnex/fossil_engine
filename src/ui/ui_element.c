@@ -22,8 +22,6 @@
  */
 
 
-#include "../common/config.h"
-
 #include "../logger/logger.h"
 #include "../logger/logger_messages_internal.h"
 #include "../math/math.h"
@@ -129,8 +127,8 @@ static void ui_element_transform_defaults_set_internal(fsl_ui_element *element)
     t->offset_scaled.x = 0;
     t->offset_scaled.y = 0;
 
-    t->size.x = FSL_UI_SIZE_X_DEFAULT;
-    t->size.y = FSL_UI_SIZE_Y_DEFAULT;
+    t->size.x = FSL_UI_WIDTH_DEFAULT;
+    t->size.y = FSL_UI_HEIGHT_DEFAULT;
     t->size_scaled.x = 0;
     t->size_scaled.y = 0;
 
