@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <math.h>
 
-/*!
+/**
  *  @internal
  *
  *  @brief handle player being near or past a world edge.

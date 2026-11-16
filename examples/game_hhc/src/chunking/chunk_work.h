@@ -41,7 +41,7 @@ typedef struct hhc_chunk_receipt_printed
     str printed[CHUNK_RECEIPT_CAP];
 } hhc_chunk_receipt_printed;
 
-/*!
+/**
  *  @brief cost of work requested by chunks in a @ref hhc_chunk_scheduler.
  */
 typedef enum chunk_work_cost_table

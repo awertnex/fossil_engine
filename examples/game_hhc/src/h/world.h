@@ -27,14 +27,14 @@ typedef struct world_info
     fsl_physics_force gravity;
 } world_info;
 
-/*!
+/**
  *  @brief info of current world loaded.
  *
  *  @remark declared internally in @ref world.c.
  */
 extern world_info world;
 
-/*!
+/**
  *  @brief initialize, create and load world.
  *
  *  @remark if `seed` is 0, a random seed will be generated.
@@ -43,7 +43,7 @@ extern world_info world;
  */
 u32 world_init(str *name, u64 seed, hhc_player *p);
 
-/*!
+/**
  *  @brief initialize world directory structure.
  *
  *  create world directories needed on disk.
@@ -54,7 +54,7 @@ u32 world_init(str *name, u64 seed, hhc_player *p);
  */
 u32 world_dir_init(const str *world_name);
 
-/*!
+/**
  *  @brief load world and initialize files if not present.
  *
  *  load world data into memory if present and generate and write to disk if not:
@@ -72,7 +72,7 @@ u32 world_load(world_info *world, const str *world_name, u64 seed);
 
 void world_update(hhc_player *p);
 
-/*!
+/**
  *  @brief write world state into disk on specific time intervals.
  *
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.

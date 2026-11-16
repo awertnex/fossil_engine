@@ -1,4 +1,4 @@
-/*!
+/**
  *  @file big_num_separator.h
  *  @author Lily Awertnex
  *

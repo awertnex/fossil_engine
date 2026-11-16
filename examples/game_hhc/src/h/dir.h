@@ -38,7 +38,7 @@ enum dir_world_index
 extern str DIR_ROOT[DIR_ROOT_COUNT][FSL_ID_CAP];
 extern str DIR_WORLD[DIR_WORLD_COUNT][FSL_ID_CAP];
 
-/*!
+/**
  *  @brief initialize game stuff.
  *
  *  @remark will create directories if not found next to the binary.

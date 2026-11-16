@@ -101,7 +101,7 @@ extern b8 is_menu_ready;
 extern u32 buttons[BTN_COUNT];
 extern fsl_ui_element_sprite ui_element_sprite[UI_ELEMENT_COUNT];
 
-/*!
+/**
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
 u32 gui_init(v2i32 render_size);
@@ -109,12 +109,12 @@ u32 gui_init(v2i32 render_size);
 void gui_update(v2i32 render_size);
 void gui_free(void);
 
-/*!
+/**
  *  @brief bind correct resources to start drawing UI items.
  */
 void gui_start_ui_items(v2i32 render_size);
 
-/*!
+/**
  *  @brief draw UI item (e.g., hotbar items, container items).
  */
 void gui_draw_ui_item(u32 item_id, f32 pos_x, f32 pos_y, v2i32 render_size);

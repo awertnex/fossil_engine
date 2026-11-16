@@ -110,7 +110,7 @@ typedef struct hhc_block
 
 /* ---- section: declarations ----------------------------------------------- */
 
-/*!
+/**
  *  @internal
  *
  *  @brief global memory arena, manages all asset data for the game.
@@ -130,14 +130,14 @@ extern fsl_font *font[FONT_COUNT];
 
 /* ---- section: signatures ------------------------------------------------- */
 
-/*!
+/**
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
 u32 assets_init(void);
 
 void assets_free(void);
 
-/*!
+/**
  *  @brief initialize a rendering G-buffer.
  *
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
@@ -147,14 +147,14 @@ u32 g_buffer_init(hhc_g_buffer *buf, i32 size_x, i32 size_y);
 void g_buffer_free(hhc_g_buffer *buf);
 void ssao_init(hhc_ssao *ssao);
 
-/*!
+/**
  *  @param index index into @ref block_textures.
  *
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
 u32 block_texture_init(u32 index, const fsl_name *name, const fsl_name_id *name_id, const fsl_file *file);
 
-/*!
+/**
  *  @return non-zero on failure and @ref *GAME_ERR is set accordingly.
  */
 void blocks_init(void);
