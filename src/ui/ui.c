@@ -141,7 +141,7 @@ static void (*ui_element_bake_func_internal[FSL_UI_ELEMENT_TYPE_COUNT])(
     ui_element_none_bake_func,      /* TODO: make function `ui_element_container_bake_func()` */
     ui_element_rectangle_bake_func,
     ui_element_sprite_bake_func,
-    ui_element_panel_9_slice_bake_func,
+    ui_element_panel_bake_func,
     ui_element_none_bake_func,      /* TODO: make function `ui_element_label_bake_func()` */
     ui_element_button_bake_func,
     ui_element_none_bake_func       /* TODO: make function `ui_element_custom_bake_func()` */
@@ -157,7 +157,7 @@ static void (*ui_element_draw_func_internal[FSL_UI_ELEMENT_TYPE_COUNT])(
     ui_element_container_draw_func, /* TODO: make function `ui_element_container_draw_func()` */
     ui_element_rectangle_draw_func,
     ui_element_sprite_draw_func,
-    ui_element_panel_9_slice_draw_func,
+    ui_element_panel_draw_func,
     ui_element_none_draw_func,      /* TODO: make function `ui_element_label_draw_func()` */
     ui_element_button_draw_func,
     ui_element_custom_draw_func
@@ -708,9 +708,9 @@ void ui_element_sprite_bake_func(fsl_ui_element *element)
     ui_element_quad_1_slice_make_internal(element, &sprite->quad, sprite->texture->size);
 }
 
-void ui_element_panel_9_slice_bake_func(fsl_ui_element *element)
+void ui_element_panel_bake_func(fsl_ui_element *element)
 {
-    fsl_ui_element_panel_9_slice *panel = (fsl_ui_element_panel_9_slice*)element;
+    fsl_ui_element_panel *panel = (fsl_ui_element_panel*)element;
     ui_element_quad_9_slice_make_internal(element, &panel->quad, panel->texture->size);
 }
 
@@ -953,9 +953,9 @@ void ui_element_sprite_draw_func(fsl_ui_element *element)
     }
 }
 
-void ui_element_panel_9_slice_draw_func(fsl_ui_element *element)
+void ui_element_panel_draw_func(fsl_ui_element *element)
 {
-    fsl_ui_element_panel_9_slice *panel = (fsl_ui_element_panel_9_slice*)element;
+    fsl_ui_element_panel *panel = (fsl_ui_element_panel*)element;
     u32 instance_count = 9;
     u32 buf_size = sizeof(fsl_ui_quad) * instance_count;
 

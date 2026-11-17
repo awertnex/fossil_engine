@@ -15,7 +15,7 @@
 #include "super_debugger.h"
 #include "super_debugger_callbacks.h"
 
-fsl_ui_element_panel_9_slice ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_COUNT] = {0};
+fsl_ui_element_panel ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_COUNT] = {0};
 fsl_ui_element_button ui_element_sdb_button[UI_ELEMENT_SDB_BUTTON_COUNT] = {0};
 
 static i32 logger_scroll_pos = 0;
@@ -25,9 +25,9 @@ void super_debugger_init(v2i32 render_size)
     fsl_texture *fsl_texture_p = fsl_mem_handle_get(fsl_texture_buf);
 
     fsl_ui_element_type_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL],
-            FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE);
+            FSL_UI_ELEMENT_TYPE_PANEL);
     fsl_ui_element_type_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_LOGGER],
-            FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE);
+            FSL_UI_ELEMENT_TYPE_PANEL);
     fsl_ui_element_type_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS],
             FSL_UI_ELEMENT_TYPE_BUTTON);
     fsl_ui_element_type_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES],
@@ -63,14 +63,13 @@ void super_debugger_init(v2i32 render_size)
     fsl_ui_element_uv_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
             0, 0, 16, 16);
 
-    fsl_ui_element_9_slice_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL], TRUE, 8);
-    fsl_ui_element_9_slice_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_LOGGER], TRUE, 8);
-    fsl_ui_element_9_slice_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS], TRUE, 8);
-    fsl_ui_element_9_slice_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES], TRUE, 8);
-    fsl_ui_element_9_slice_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS], TRUE, 8);
-    fsl_ui_element_9_slice_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO], TRUE, 8);
-    fsl_ui_element_9_slice_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER],
-            TRUE, 8);
+    fsl_ui_element_corner_size_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL], 8);
+    fsl_ui_element_corner_size_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_LOGGER], 8);
+    fsl_ui_element_corner_size_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_TRANS_BLOCKS], 8);
+    fsl_ui_element_corner_size_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_BOUNDING_BOXES], 8);
+    fsl_ui_element_corner_size_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_BOUNDS], 8);
+    fsl_ui_element_corner_size_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_GIZMO], 8);
+    fsl_ui_element_corner_size_set(&ui_element_sdb_button[UI_ELEMENT_SDB_TOGGLE_CHUNK_SCHEDULER_VISUALIZER], 8);
 
     fsl_ui_element_callback_set(&ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL],
             FSL_UI_EVENT_TYPE_ENTER, super_debugger_panel_enter_func, NULL);

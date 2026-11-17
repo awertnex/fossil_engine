@@ -21,7 +21,7 @@ enum ui_element_button_sdb_index
     UI_ELEMENT_SDB_BUTTON_COUNT
 }; /* ui_element_button_sdb_index */
 
-extern fsl_ui_element_panel_9_slice ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_COUNT];
+extern fsl_ui_element_panel ui_element_sdb_panel[UI_ELEMENT_SDB_PANEL_COUNT];
 extern fsl_ui_element_button ui_element_sdb_button[UI_ELEMENT_SDB_BUTTON_COUNT];
 
 void super_debugger_init(v2i32 render_size);

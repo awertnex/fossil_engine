@@ -86,20 +86,13 @@ void gui_menus_init(v2i32 render_size)
     fsl_ui_element_uv_set(&ui_element_menu_button[UI_ELEMENT_MENU_PAUSE_BUTTON_QUIT_TO_TITLE],
             0, 0, 16, 16);
 
-    fsl_ui_element_9_slice_set(&ui_element_menu_button[UI_ELEMENT_MENU_TITLE_BUTTON_SINGLEPLAYER],
-            TRUE, 8);
-    fsl_ui_element_9_slice_set(&ui_element_menu_button[UI_ELEMENT_MENU_TITLE_BUTTON_MULTIPLAYER],
-            TRUE, 8);
-    fsl_ui_element_9_slice_set(&ui_element_menu_button[UI_ELEMENT_MENU_TITLE_BUTTON_SETTINGS],
-            TRUE, 8);
-    fsl_ui_element_9_slice_set(&ui_element_menu_button[UI_ELEMENT_MENU_TITLE_BUTTON_QUIT],
-            TRUE, 8);
-    fsl_ui_element_9_slice_set(&ui_element_menu_button[UI_ELEMENT_MENU_PAUSE_BUTTON_RESUME],
-            TRUE, 8);
-    fsl_ui_element_9_slice_set(&ui_element_menu_button[UI_ELEMENT_MENU_PAUSE_BUTTON_SETTINGS],
-            TRUE, 8);
-    fsl_ui_element_9_slice_set(&ui_element_menu_button[UI_ELEMENT_MENU_PAUSE_BUTTON_QUIT_TO_TITLE],
-            TRUE, 8);
+    fsl_ui_element_corner_size_set(&ui_element_menu_button[UI_ELEMENT_MENU_TITLE_BUTTON_SINGLEPLAYER], 8);
+    fsl_ui_element_corner_size_set(&ui_element_menu_button[UI_ELEMENT_MENU_TITLE_BUTTON_MULTIPLAYER], 8);
+    fsl_ui_element_corner_size_set(&ui_element_menu_button[UI_ELEMENT_MENU_TITLE_BUTTON_SETTINGS], 8);
+    fsl_ui_element_corner_size_set(&ui_element_menu_button[UI_ELEMENT_MENU_TITLE_BUTTON_QUIT], 8);
+    fsl_ui_element_corner_size_set(&ui_element_menu_button[UI_ELEMENT_MENU_PAUSE_BUTTON_RESUME], 8);
+    fsl_ui_element_corner_size_set(&ui_element_menu_button[UI_ELEMENT_MENU_PAUSE_BUTTON_SETTINGS], 8);
+    fsl_ui_element_corner_size_set(&ui_element_menu_button[UI_ELEMENT_MENU_PAUSE_BUTTON_QUIT_TO_TITLE], 8);
 
     fsl_ui_element_callback_set(&ui_element_menu_button[UI_ELEMENT_MENU_TITLE_BUTTON_SINGLEPLAYER],
             FSL_UI_EVENT_TYPE_ENTER, ui_button_enter_func, NULL);

@@ -46,7 +46,6 @@
 #include "ui/ui.h"
 
 #include "h/process.h"
-#include "h/super_debugger.h"
 #include "h/time.h"
 
 #endif /* FSL_FOSSIL_ENGINE_H */

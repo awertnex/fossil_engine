@@ -15,9 +15,10 @@
  */
 
 /**
- *  @file super_debugger.h
+ *  @file fsl_super_debugger.h
  *
- *  @brief gui debugger.
+ *  @brief Super Debugger plug-in header, for 'Fossil Engnie'; flexible GUI
+ *  debugger.
  */
 
 #ifndef FSL_SUPER_DEBUGGER_H

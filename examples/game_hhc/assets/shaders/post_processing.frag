@@ -30,7 +30,7 @@ const float kernel_scale = 1.0 / 64.0;
 
 /* ---- settings ------------------------------------------------------------ */
 
-float setting_grain_intensity = 0.2;
+float setting_grain_intensity = 0.1;
 
 /* ---- implementation ------------------------------------------------------ */
 

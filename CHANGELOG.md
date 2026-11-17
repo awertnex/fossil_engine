@@ -17,6 +17,21 @@ and this project adheres to
    here at engine version `v0.3.3-beta` (2026-01-24), which makes `v0.3.4-beta`
    the first version of the engine as standalone in this repo.
 
+## unreleased
+
+#### changed
+- change UI element struct name `fsl_ui_element_panel_9_slice` to
+  `fsl_ui_element_panel`.
+- change UI element type name `FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE` to
+  `FSL_UI_ELEMENT_TYPE_PANEL`.
+- change function name `fsl_ui_element_9_slice_set()` to
+  `fsl_ui_element_corner_size_set()`.
+
+#### removed
+- remove deprecated parameter `is_9_slice` from function
+  `fsl_ui_element_9_slice_set()`. (function now named
+  `fsl_ui_element_corner_size_set()`.
+
 ## [0.19.0-beta] - 2026-11-16
 
 #### added

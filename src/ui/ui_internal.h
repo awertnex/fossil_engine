@@ -111,7 +111,7 @@ void ui_element_sprite_bake_func(fsl_ui_element *element);
  *
  *  @internal
  */
-void ui_element_panel_9_slice_bake_func(fsl_ui_element *element);
+void ui_element_panel_bake_func(fsl_ui_element *element);
 
 /**
  *  @brief bake a button.
@@ -186,7 +186,7 @@ void ui_element_sprite_draw_func(fsl_ui_element *element);
  *
  *  @note called indirectly via a function pointer array.
  */
-void ui_element_panel_9_slice_draw_func(fsl_ui_element *element);
+void ui_element_panel_draw_func(fsl_ui_element *element);
 
 /**
  *  @brief draw a button.

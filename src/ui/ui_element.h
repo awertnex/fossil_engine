@@ -60,8 +60,8 @@
 #define fsl_ui_element_alignment_set(element, align_x, align_y) \
     fsl_ui_element_alignment_set_func((fsl_ui_element*)(element), (align_x), (align_y))
 
-#define fsl_ui_element_9_slice_set(element, is_9_slice, slice_size) \
-    fsl_ui_element_9_slice_set_func((fsl_ui_element*)(element), (is_9_slice), (slice_size))
+#define fsl_ui_element_corner_size_set(element, slice_size) \
+    fsl_ui_element_corner_size_set_func((fsl_ui_element*)(element), (slice_size))
 
 #define fsl_ui_element_tint_hex_set(element, tint) \
     fsl_ui_element_tint_hex_set_func((fsl_ui_element*)(element), (tint))
@@ -93,7 +93,7 @@ typedef struct fsl_ui_draw_callback             fsl_ui_draw_callback;
 typedef struct fsl_ui_element_container         fsl_ui_element_container;
 typedef struct fsl_ui_element_rectangle         fsl_ui_element_rectangle;
 typedef struct fsl_ui_element_sprite            fsl_ui_element_sprite;
-typedef struct fsl_ui_element_panel_9_slice     fsl_ui_element_panel_9_slice;
+typedef struct fsl_ui_element_panel             fsl_ui_element_panel;
 typedef struct fsl_ui_element_label             fsl_ui_element_label;
 typedef struct fsl_ui_element_button            fsl_ui_element_button;
 typedef struct fsl_ui_element_custom            fsl_ui_element_custom;
@@ -117,7 +117,7 @@ typedef enum fsl_ui_element_type
     FSL_UI_ELEMENT_TYPE_CONTAINER,
     FSL_UI_ELEMENT_TYPE_RECTANGLE,
     FSL_UI_ELEMENT_TYPE_SPRITE,
-    FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE,
+    FSL_UI_ELEMENT_TYPE_PANEL,
     FSL_UI_ELEMENT_TYPE_LABEL,
     FSL_UI_ELEMENT_TYPE_BUTTON,
     FSL_UI_ELEMENT_TYPE_CUSTOM, /* custom drawables (e.g., debug visuals) */
@@ -174,12 +174,12 @@ struct fsl_ui_element_sprite
     fsl_texture *texture;
 }; /* fsl_ui_element_sprite */
 
-struct fsl_ui_element_panel_9_slice
+struct fsl_ui_element_panel
 {
     fsl_ui_element_header header;
     fsl_ui_quad_9_slice quad;
     fsl_texture *texture;
-}; /* fsl_ui_element_panel_9_slice */
+}; /* fsl_ui_element_panel */
 
 struct fsl_ui_element_button
 {
@@ -207,12 +207,12 @@ struct fsl_ui_element_custom
 
 /**
  *  @brief set element type of `element` so to process accordingly, first step
- *  in initializing a UI element before using.
+ *  in initializing a UI element.
  */
 FSLAPI void fsl_ui_element_type_set_func(fsl_ui_element *element, fsl_ui_element_type type);
 
 /**
- *  @brief set texture for `element` if element type supports it.
+ *  @brief set texture for `element`.
  */
 FSLAPI void fsl_ui_element_texture_set_func(fsl_ui_element *element, fsl_texture *texture);
 
@@ -288,13 +288,10 @@ FSLAPI void fsl_ui_element_alignment_set_func(fsl_ui_element *element,
 /**
  *  @brief set 9-slice corner slice diameter for `element`.
  *
- *  @param is_9_slice enable/disable 9-slice. (-- DEPRECATED IN v0.18.0-dev --)
- *
  *  @param slice_size corner slice diameter, middle slices will consume the rest
  *  of the area.
  */
-FSLAPI void fsl_ui_element_9_slice_set_func(fsl_ui_element *element,
-        b8 is_9_slice, i32 slice_size);
+FSLAPI void fsl_ui_element_corner_size_set_func(fsl_ui_element *element, i32 slice_size);
 
 /**
  *  @brief set tint/color for `element`, in HEX format.

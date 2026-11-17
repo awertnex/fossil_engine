@@ -15,15 +15,17 @@
  */
 
 /**
- *  @file super_debugger.c
+ *  @file fsl_super_debugger.c
  *
- *  @brief gui debugger.
+ *  @brief Super Debugger plug-in implementation, for 'Fossil Engnie'; flexible
+ *  GUI debugger.
  */
 
-#ifdef FSL_SUPER_DEBUGGER
+#if 0 /* TODO: make plug-in FSL Super Debugger */
+
 #include "include/raylib.h"
 
-#include "h/super_debugger.h"
+#include "fsl_super_debugger.h"
 
 #define SDB_ROW_HEIGHT  22
 #define SDB_BASE_SIZE   5
@@ -165,4 +167,5 @@ void draw_super_debugger()
             (debug_button_add.width*2),
             debug_rectangle.pos.y + (SDB_BASE_SIZE*2)}, &button_state_sub, 0);
 }
-#endif /* FSL_SUPER_DEBUGGER */
+
+#endif /* 0 */

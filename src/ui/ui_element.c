@@ -173,7 +173,7 @@ void fsl_ui_element_type_set_func(fsl_ui_element *element, fsl_ui_element_type t
             ui_element_transform_defaults_set_internal(element);
             break;
 
-        case FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE:
+        case FSL_UI_ELEMENT_TYPE_PANEL:
             ui_element_transform_defaults_set_internal(element);
             break;
 
@@ -211,8 +211,8 @@ void fsl_ui_element_texture_set_func(fsl_ui_element *element, fsl_texture *textu
             ((fsl_ui_element_sprite*)element)->texture = texture;
             break;
 
-        case FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE:
-            ((fsl_ui_element_panel_9_slice*)element)->texture = texture;
+        case FSL_UI_ELEMENT_TYPE_PANEL:
+            ((fsl_ui_element_panel*)element)->texture = texture;
             break;
 
         case FSL_UI_ELEMENT_TYPE_BUTTON:
@@ -287,11 +287,8 @@ void fsl_ui_element_alignment_set_func(fsl_ui_element *element,
     element->transform.align.y = align_y;
 }
 
-void fsl_ui_element_9_slice_set_func(fsl_ui_element *element,
-        b8 is_9_slice, i32 slice_size)
+void fsl_ui_element_corner_size_set_func(fsl_ui_element *element, i32 slice_size)
 {
-    (void)is_9_slice;
-
     if (!ui_element_is_valid_internal(element))
         return;
 
@@ -310,8 +307,8 @@ void fsl_ui_element_9_slice_set_func(fsl_ui_element *element,
 
     switch (element->type)
     {
-        case FSL_UI_ELEMENT_TYPE_PANEL_9_SLICE:
-            ((fsl_ui_element_panel_9_slice*)element)->quad.slice_size = slice_size;
+        case FSL_UI_ELEMENT_TYPE_PANEL:
+            ((fsl_ui_element_panel*)element)->quad.slice_size = slice_size;
             break;
 
         case FSL_UI_ELEMENT_TYPE_BUTTON:

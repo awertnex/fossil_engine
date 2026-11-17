@@ -19,10 +19,10 @@
  *
  *  @author Lily Awertnex
  *
- *  @brief Big Num Separator plug-in implementation, for 'Fossil Engine'.
+ *  @brief Big Num Separator plug-in header, for 'Fossil Engine'; separate
+ *  numbers with four or more decimal places with commas.
  *
- *  big number separator - v4 - Jul 2026: separate numbers with four or more
- *  decimal places with commas.
+ *  big number separator - v4 - Jul 2026.
  *
  *  this is a small utility I made in 2021 and called "big_num_separator"
  *  because I had no better name, and I made it just for fun.
